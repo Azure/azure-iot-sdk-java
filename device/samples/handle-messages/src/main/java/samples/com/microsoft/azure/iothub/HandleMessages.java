@@ -15,7 +15,7 @@ import java.util.Scanner;
 
 /**
  * Handles messages from an IoT Hub. Default protocol is to use
- * HTTPS transport.
+ * MQTT transport.
  */
 public class HandleMessages
 {
@@ -100,10 +100,11 @@ public class HandleMessages
 
     /**
      * Receives requests from an IoT Hub. Default protocol is to use
-     * HTTPS transport.
+     * MQTT transport.
      *
-     * @param args args[0] = IoT Hub connection string; args[1] = protocol (one
-     * of 'https', 'amqps', 'mqtt' or 'amqps_ws', optional).
+     * @param args 
+     * args[0] = IoT Hub connection string
+     * args[1] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      */
     public static void main(String[] args) throws IOException, URISyntaxException
     {
@@ -113,11 +114,11 @@ public class HandleMessages
         if (args.length <= 0 || 3 <= args.length)
         {
             System.out.format(
-                    "Expected 1 or 2 arguments but received:\n%d. "
-                            + "The program should be called with the: "
-                            + "following args: "
-                            + "[IoT Hub connection string] (https | amqps | mqtt | amqps_ws).\n",
-                    args.length);
+                    "Expected 1 or 2 arguments but received %d.\n"
+                     + "The program should be called with the following args: \n"
+                     + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
+                     + "2. (mqtt | https | amqps | amqps_ws)\n",
+                     args.length);
             return;
         }
 
@@ -125,7 +126,7 @@ public class HandleMessages
         IotHubClientProtocol protocol;
         if (args.length == 1)
         {
-            protocol = IotHubClientProtocol.HTTPS;
+            protocol = IotHubClientProtocol.MQTT;
         }
         else
         {
@@ -149,12 +150,11 @@ public class HandleMessages
             else
             {
                 System.out.format(
-                        "Expected argument 1 to be one of 'https', 'amqps', 'mqtt' or 'amqps_ws'"
-                                + "but received %s. The program should be "
-                                + "called with the: following args: "
-                                + "[IoT Hub connection string] (https | amqps | mqtt | amqps_ws)."
-                                + "\n",
-                        protocolStr);
+                      "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n"
+                            + "The program should be called with the following args: \n"
+                            + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
+                            + "2. (mqtt | https | amqps | amqps_ws)\n",
+                           protocolStr);
                 return;
             }
         }

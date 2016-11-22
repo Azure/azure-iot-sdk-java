@@ -42,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
     public void SendMessage() throws URISyntaxException, IOException
     {
         // Comment/uncomment from lines below to use HTTPS or MQTT protocol
-        IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
-//        IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+        // IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+        IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
         DeviceClient client = new DeviceClient(connString, protocol);
 
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         Button button = (Button) v;
 
         // Comment/uncomment from lines below to use HTTPS or MQTT protocol
-       // IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+        // IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
         IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
         DeviceClient client = new DeviceClient(connString, protocol);
