@@ -53,7 +53,7 @@ public class SendSerializedEvent {
                             throw new Exception("Invalid protocol: " + rawArguments[2]);
                         }
                     } else {
-                        protocol = IotHubClientProtocol.HTTPS;
+                        protocol = IotHubClientProtocol.MQTT;
                     }
 
                     if(rawArguments.length >= 3) {
@@ -92,16 +92,23 @@ public class SendSerializedEvent {
     }
 
     private static void printUsage(){
-        System.out.println("[Device connection string*] [https | amqps | mqtt | amqps_ws] [deviceId] [windSpeed]");
-        System.out.println("*String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n");
-    }
+        System.out.println(
+               "The program should be called with the following args: \n"
+                    + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
+                    + "2. [mqtt | https | amqps | amqps_ws]\n"
+                    + "3. [deviceId] \n"
+                    + "4. [windSpeed] \n");
+     }
 
     /**
      * Sends a number of messages to an IoT Hub. Default protocol is to
-     * use HTTPS transport.
+     * use MQTT transport.
      *
-     * @param args args[0] = IoT Hub connection string; args[1] = protocol (one of 'https', 'amqps', 'mqtt' or 'amqps_ws', * optional);
-     * args[2] = temperature (integer; default = 65); args[3] = humidity (integer; default = 72).
+     * @param args 
+     * args[0] = IoT Hub connection string
+     * args[1] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
+     * args[2] = temperature (integer; default = 65)
+     * args[3] = humidity (integer; default = 72)
      */
     public static void main(String[] args)
             throws IOException, URISyntaxException {

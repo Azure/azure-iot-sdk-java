@@ -25,29 +25,30 @@ public class SendEvent
     }
 
     /**
-     * Sends a number of messages to an IoT Hub. Default protocol is to
-     * use HTTPS transport.
+     * Sends a number of messages to an IoT Hub. Default protocol is to 
+     * use MQTT transport.
      *
-     * @param args args[0] = IoT Hub connection string; args[1] = number of
-     * requests to send; args[2] = protocol (one of 'https' or 'amqps' or 'mqtt' or 'amqps_ws',
-     * optional); args[3] = path to certificate to enable one-way authentication over ssl for amqps
-     * (optional, default shall be used if unspecified).
+     * @param args 
+     * args[0] = IoT Hub connection string
+     * args[1] = number of requests to send
+     * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
+     * args[3] = path to certificate to enable one-way authentication over ssl for amqps (optional, default shall be used if unspecified).
      */
     public static void main(String[] args)
             throws IOException, URISyntaxException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
-
+ 
         if (args.length <= 1 || args.length >= 5)
         {
             System.out.format(
-                    "Expected 2 or 3 arguments but received:\n%d. The program "
-                            + "should be called with the: "
-                            + "following args: \n"
-                            + "[Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                            + "[number of requests to send] (https | amqps | mqtt | amqps_ws).\n"
-                            + "path to certificate to enable one-way authentication over ssl for amqps. \n",
+                    "Expected 2 or 3 arguments but received: %d.\n"
+                            + "The program should be called with the following args: \n"
+                            + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
+                            + "2. [number of requests to send]\n"
+                            + "3. (mqtt | https | amqps | amqps_ws)\n"
+                            + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
                     args.length);
             return;
         }
@@ -69,7 +70,7 @@ public class SendEvent
         IotHubClientProtocol protocol;
         if (args.length == 2)
         {
-            protocol = IotHubClientProtocol.HTTPS;
+            protocol = IotHubClientProtocol.MQTT;
         }
         else
         {
@@ -93,14 +94,13 @@ public class SendEvent
             else
             {
                 System.out.format(
-                        "Expected argument 2 to be one of 'https', 'amqps' or 'mqtt'or 'amqps_ws'"
-                                + "but received %s. The program should be "
-                                + "called with the: following args:\n"
-                                + "[Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                                + "[number of requests to send]\n"
-                                + "(https | amqps | mqtt | amqps_ws).\n"
-                                + "\n",
-                        protocolStr);
+                        "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n"
+                            + "The program should be called with the following args: \n"
+                            + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
+                            + "2. [number of requests to send]\n"
+                            + "3. (mqtt | https | amqps | amqps_ws)\n"
+                            + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
+                         protocolStr);
                 return;
             }
 
