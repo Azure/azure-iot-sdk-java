@@ -7,9 +7,9 @@ set build-root=%~dp0..
 rem // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
 
-REM -- Java Device Client --
-cd %build-root%\device
-call mvn verify -DskipITs=false
+REM -- Websocket Transport Layer --
+cd %build-root%\websocket-transport-layer
+call mvn verify
 if errorlevel 1 goto :eof
 cd %build-root%
 
@@ -19,8 +19,8 @@ call mvn verify -DskipITs=false
 if errorlevel 1 goto :eof
 cd %build-root%
 
-REM -- Websocket Transport Layer --
-cd %build-root%\websocket-transport-layer
-call mvn verify
+REM -- Java Device Client --
+cd %build-root%\device
+call mvn verify -DskipITs=false
 if errorlevel 1 goto :eof
 cd %build-root%
