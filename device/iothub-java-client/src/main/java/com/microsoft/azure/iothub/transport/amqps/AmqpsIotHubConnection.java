@@ -19,17 +19,7 @@ import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
-import org.apache.qpid.proton.engine.BaseHandler;
-import org.apache.qpid.proton.engine.Connection;
-import org.apache.qpid.proton.engine.Delivery;
-import org.apache.qpid.proton.engine.Event;
-import org.apache.qpid.proton.engine.Link;
-import org.apache.qpid.proton.engine.Receiver;
-import org.apache.qpid.proton.engine.Sasl;
-import org.apache.qpid.proton.engine.Sender;
-import org.apache.qpid.proton.engine.Session;
-import org.apache.qpid.proton.engine.SslDomain;
-import org.apache.qpid.proton.engine.Transport;
+import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.FlowController;
@@ -48,15 +38,13 @@ import java.nio.BufferOverflowException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
 
 
 /**
@@ -178,6 +166,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         try
         {
             reactor = Proton.reactor(this);
+
         } catch (IOException e)
         {
             throw new IOException("Could not create Proton reactor");
@@ -484,7 +473,16 @@ public final class AmqpsIotHubConnection extends BaseHandler
     public void onReactorInit(Event event)
     {
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_033: [The event handler shall set the current handler to handle the connection events.]
-        event.getReactor().connection(this);
+        if(this.useWebSockets)
+        {
+            event.getReactor().connectionToHost(this.config.getIotHubHostname(), amqpWebSocketPort, this);
+
+        }
+        else
+        {
+            event.getReactor().connectionToHost(this.config.getIotHubHostname(), amqpPort, this);
+        }
+
     }
 
     @Override
@@ -718,6 +716,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         if (domain.getTrustedCaDb() != null)
         {
            domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
+
         }
         else
         {

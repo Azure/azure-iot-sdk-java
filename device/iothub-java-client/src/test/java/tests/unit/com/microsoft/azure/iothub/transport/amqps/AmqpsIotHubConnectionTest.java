@@ -917,7 +917,8 @@ public class AmqpsIotHubConnectionTest {
             {
                 mockEvent.getReactor();
                 result = mockReactor;
-                mockReactor.connection((Handler) any);
+               // mockReactor.connection((Handler) any);
+                mockReactor.connectionToHost(anyString, anyInt, (Handler) any);
             }
         };
 
@@ -930,7 +931,8 @@ public class AmqpsIotHubConnectionTest {
             {
                 mockEvent.getReactor();
                 times = 1;
-                mockReactor.connection(connection);
+                //mockReactor.connection(connection);
+                mockReactor.connectionToHost(anyString, anyInt, (Handler) connection);
                 times = 1;
             }
         };
