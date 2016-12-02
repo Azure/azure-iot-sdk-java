@@ -12,7 +12,7 @@
     <parent>
         <groupId>com.microsoft.azure.iothub-java-client</groupId>
         <artifactId>iothub-java-client-with-samples</artifactId>
-        <version>1.0.15</version>
+        <version>1.0.16</version>
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,7 +28,7 @@
         <dependency>
             <groupId>com.microsoft.azure.iothub-java-client</groupId>
             <artifactId>websocket-transport-layer</artifactId>
-            <version>0.1.0</version>
+            <version>0.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>com.microsoft.azure.iothub-java-client</groupId>
             <artifactId>iothub-java-service-client</artifactId>
-            <version>1.0.10</version>
+            <version>1.0.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>
