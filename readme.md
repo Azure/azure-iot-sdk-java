@@ -14,7 +14,9 @@ The Microsoft Azure IoT device SDKs contain code that facilitate building device
 Devices and data sources in an IoT solution can range from a simple network-connected sensor to a powerful, standalone computing device. Devices may have limited processing capability, memory, communication bandwidth, and communication protocol support. The IoT device SDKs enable you to implement client applications for a wide variety of devices.
 
 
-The API reference documentation is [here](http://azure.github.io/azure-iot-sdks).
+The API reference documentation is here:
+- [Device SDK](https://azure.github.io/azure-iot-sdk-java/device/).
+- [Service SDK](https://azure.github.io/azure-iot-sdk-java/service/).
 
 ### OS platforms and hardware compatibility
 
