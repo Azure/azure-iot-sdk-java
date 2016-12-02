@@ -45,6 +45,8 @@ public class WebSocketUpgradeTest
         String webSocketPath = "path1/path2";
         int webSocketPort = 1234567890;
         String webSocketProtocol = "subprotocol_name";
+        String queryKey = "?iothub-no-client-cert=";
+        String queryValue = "true";
         Map<String, String> additionalHeaders = new HashMap<String, String>();
         additionalHeaders.put("header1", "content1");
         additionalHeaders.put("header2", "content2");
@@ -74,7 +76,7 @@ public class WebSocketUpgradeTest
             lineCount++;
 
             String line = scanner.nextLine();
-            if (line.equals("GET https://" + hostName + "/" + webSocketPath + " HTTP/1.1"))
+            if (line.equals("GET https://" + hostName + "/" + webSocketPath + queryKey + queryValue + " HTTP/1.1"))
             {
                 isStatusLineOk = true;
                 continue;
@@ -159,6 +161,8 @@ public class WebSocketUpgradeTest
         String webSocketPath = "path1/path2";
         int webSocketPort = 1234567890;
         String webSocketProtocol = "subprotocol_name";
+        String queryKey = "?iothub-no-client-cert=";
+        String queryValue = "true";
 
         WebSocketUpgrade webSocketUpgrade = new WebSocketUpgrade(hostName, webSocketPath, webSocketPort, webSocketProtocol, null);
 
@@ -181,7 +185,7 @@ public class WebSocketUpgradeTest
             lineCount++;
 
             String line = scanner.nextLine();
-            if (line.equals("GET https://" + hostName + "/" + webSocketPath + " HTTP/1.1"))
+            if (line.equals("GET https://" + hostName + "/" + webSocketPath + queryKey + queryValue + " HTTP/1.1"))
             {
                 isStatusLineOk = true;
                 continue;
@@ -247,6 +251,8 @@ public class WebSocketUpgradeTest
         String webSocketPath = "/path1/path2";
         int webSocketPort = 1234567890;
         String webSocketProtocol = "subprotocol_name";
+        String queryKey = "?iothub-no-client-cert=";
+        String queryValue = "true";
 
         WebSocketUpgrade webSocketUpgrade = new WebSocketUpgrade(hostName, webSocketPath, webSocketPort, webSocketProtocol, null);
 
@@ -269,7 +275,7 @@ public class WebSocketUpgradeTest
             lineCount++;
 
             String line = scanner.nextLine();
-            if (line.equals("GET https://" + hostName + webSocketPath + " HTTP/1.1"))
+            if (line.equals("GET https://" + hostName + webSocketPath + queryKey + queryValue + " HTTP/1.1"))
             {
                 isStatusLineOk = true;
                 continue;
@@ -335,6 +341,8 @@ public class WebSocketUpgradeTest
         String webSocketPath = "path1/path2";
         int webSocketPort = 1234567890;
         String webSocketProtocol = "subprotocol_name";
+        String queryKey = "?iothub-no-client-cert=";
+        String queryValue = "true";
         Map<String, String> additionalHeaders = new HashMap<String, String>();
         additionalHeaders.put("header1", "content1");
         additionalHeaders.put("header2", "content2");
@@ -362,7 +370,7 @@ public class WebSocketUpgradeTest
             lineCount++;
 
             String line = scanner.nextLine();
-            if (line.equals("GET https://" + hostName + "/" + webSocketPath + " HTTP/1.1"))
+            if (line.equals("GET https://" + hostName + "/" + webSocketPath + queryKey +  queryValue + " HTTP/1.1"))
             {
                 isStatusLineOk = true;
                 continue;

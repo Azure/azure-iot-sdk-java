@@ -53,7 +53,7 @@ public class WebSocketImplTest
     private String _webSocketProtocol = "subprotocol_name";
     private Map<String, String> _additionalHeaders = new HashMap<String, String>();
 
-    private int _lengthOfUpgradeRequest = 284;
+    private int _lengthOfUpgradeRequest = 311;
 
     private void init()
     {

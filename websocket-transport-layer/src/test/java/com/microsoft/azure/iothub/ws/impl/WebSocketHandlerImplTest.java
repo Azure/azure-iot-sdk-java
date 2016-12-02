@@ -42,6 +42,8 @@ public class WebSocketHandlerImplTest
         String hostName = "host_XXX";
         String webSocketPath = "path1/path2";
         int webSocketPort = 1234567890;
+        String queryKey = "?iothub-no-client-cert=";
+        String queryValue = "true";
         String webSocketProtocol = "subprotocol_name";
         Map<String, String> additionalHeaders = new HashMap<String, String>();
         additionalHeaders.put("header1", "content1");
@@ -72,7 +74,7 @@ public class WebSocketHandlerImplTest
             lineCount++;
 
             String line = scanner.nextLine();
-            if (line.equals("GET https://" + hostName + "/" + webSocketPath + " HTTP/1.1"))
+            if (line.equals("GET https://" + hostName + "/" + webSocketPath + queryKey + queryValue + " HTTP/1.1"))
             {
                 isStatusLineOk = true;
                 continue;

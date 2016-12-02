@@ -25,6 +25,7 @@ public class WebSocketUpgrade
     private String _protocol = "";
     private String _webSocketKey = "";
     private Map<String, String> _additionalHeaders = null;
+    private boolean _certAvailability = false;
 
     public WebSocketUpgrade(String hostName, String webSocketPath, int webSocketPort, String webSocketProtocol, Map<String, String> additionalHeaders)
     {
@@ -107,6 +108,12 @@ public class WebSocketUpgrade
     }
 
     /**
+     * Set protocol value in protocol header
+     *
+     */
+    public void setClientCertAvailable(){ _certAvailability = true; }
+
+    /**
      * Utility function to create random, Base64 encoded key
      */
     private String createWebSocketKey()
@@ -136,8 +143,9 @@ public class WebSocketUpgrade
         this._webSocketKey = createWebSocketKey();
 
         String _endOfLine = "\r\n";
-        StringBuilder stringBuilder =
-                new StringBuilder().append("GET https://").append(this._host).append(this._path).append(" HTTP/1.1").append(_endOfLine)
+        StringBuilder stringBuilder = new StringBuilder().append("GET https://").append(this._host).append(this._path)
+                        .append("?").append("iothub-no-client-cert=").append(!this._certAvailability)
+                        .append(" HTTP/1.1").append(_endOfLine)
                         .append("Connection: Upgrade,Keep-Alive").append(_endOfLine)
                         .append("Upgrade: websocket").append(_endOfLine)
                         .append("Sec-WebSocket-Version: 13").append(_endOfLine)
