@@ -7,18 +7,18 @@ build_root=$(cd "$(dirname "$0")/.." && pwd)
 # -- Java Websocket Transport Layer --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/websocket-transport-layer
-mvn verify
+mvn install
 [ $? -eq 0 ] || exit $?
 
 # -- Java Service Client --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/service
-mvn verify -DskipITs=false
+mvn install -DskipITs=false
 [ $? -eq 0 ] || exit $?
 
 # -- Java Device Client --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/device
-mvn verify -DskipITs=false
+mvn install -DskipITs=false
 [ $? -eq 0 ] || exit $?
 
