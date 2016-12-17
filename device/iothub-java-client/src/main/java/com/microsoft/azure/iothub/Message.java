@@ -208,9 +208,9 @@ public class Message
             }
         }
 
-        // Codes_SRS_MESSAGE_11_034: [If no value associated with the property name is found, the function shall throw an IllegalArgumentException.]
+        // Codes_SRS_MESSAGE_11_034: [If no value associated with the property name is found, the function shall return null.]
         if (messageProperty == null) {
-            throw new IllegalArgumentException("Message does not contain a property with name '" + name + "'.");
+            return null;
         }
 
         // Codes_SRS_MESSAGE_11_032: [The function shall return the value associated with the message property name, where the name can be either the HTTPS or AMQPS property name.]

@@ -169,8 +169,8 @@ public class MessageTest
         msg.setProperty(name, invalidValue);
     }
 
-    // Tests_SRS_MESSAGE_11_034: [If no value associated with the property name is found, the function shall throw an IllegalArgumentException.]
-    @Test(expected = IllegalArgumentException.class)
+    // Tests_SRS_MESSAGE_11_034: [If no value associated with the property name is found, the function shall return null.]
+    @Test
     public void getPropertyRejectsNonexistentProperty(
             @Mocked final MessageProperty mockProperty)
     {
@@ -178,7 +178,9 @@ public class MessageTest
         final String name = "test-name";
 
         Message msg = new Message(body);
-        msg.getProperty(name);
+        String testValue= msg.getProperty(name);
+		String expectedValue = null; // expected is null since test-name property doesn't exist
+        assertThat(testValue, is(expectedValue));
     }
 
     // Tests_SRS_MESSAGE_11_033: [The function shall return a copy of the message properties.]
