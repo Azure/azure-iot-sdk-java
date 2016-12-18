@@ -281,10 +281,12 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             AmqpsMessage receivedMessage = this.receivedMessages.remove();
             Message message = protonMessageToIoTHubMessage(receivedMessage);
 
-			// set  messageId from messageId property if it exists
+			// set  messageId from messageId property if it exists. Fix for GitHub issue #990
             if (message.getProperty("messageId") !=null)
-              message.setMessageId(message.getProperty("messageId"));
-            
+			{
+			  message.setMessageId(message.getProperty("messageId"));
+			}
+                    
 
             // Codes_SRS_AMQPSTRANSPORT_15_026: [The function shall invoke the callback on the message.]
             IotHubMessageResult result = callback.execute(message, this.config.getMessageContext());
