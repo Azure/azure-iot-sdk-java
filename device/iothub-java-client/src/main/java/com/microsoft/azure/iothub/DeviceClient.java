@@ -82,7 +82,8 @@ public final class DeviceClient implements Closeable
 
     protected DeviceClientConfig config;
     protected IotHubTransport transport;
-
+	protected CustomLogger logger;
+	
     protected ScheduledExecutorService taskScheduler;
     protected IotHubClientState state;
     protected long RECEIVE_PERIOD_MILLIS;
@@ -169,6 +170,10 @@ public final class DeviceClient implements Closeable
         {
             return;
         }
+		
+		logger = new CustomLogger();
+        this.logger.LogInfo("Connection has been opened");
+		this.logger.LogError("Connection has been opened");
 
         // Codes_SRS_DEVICECLIENT_11_035: [The function shall open the transport to communicate with an IoT Hub.]
         // Codes_SRS_DEVICECLIENT_11_036: [If an error occurs in opening the transport, the function shall throw an IOException.]
