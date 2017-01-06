@@ -41,6 +41,6 @@ repositories {
 
 dependencies {
     // Remote binary dependency
-    compile 'com.microsoft.azure.iothub-java-client:iothub-java-device-client:1.0.7'
+    compile 'com.microsoft.azure.iothub-java-client:iothub-java-device-client:1.0.16' 
 
 }
