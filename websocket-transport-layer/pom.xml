@@ -9,7 +9,7 @@
         </developer>
     </developers>
 
-    <groupId>com.microsoft.azure.iothub-java-client</groupId>
+    <groupId>com.microsoft.azure.sdk.iot.deps</groupId>
     <artifactId>websocket-transport-layer</artifactId>
     <version>0.1.1</version>
     <packaging>jar</packaging>

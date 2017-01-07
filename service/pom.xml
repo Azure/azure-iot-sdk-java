@@ -1,9 +1,9 @@
 <!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.iot.service.sdk</groupId>
-    <artifactId>iothub-service-sdk-with-samples</artifactId>
+    <groupId>com.microsoft.azure.sdk.iot</groupId>
+    <artifactId>iot-service-client-parent</artifactId>
     <version>1.0.11</version>
-    <name>IoT Hub Java Service SDK With Samples</name>
+    <name>IoT Hub Java Service SDK Parent</name>
     <packaging>pom</packaging>
     <developers>
         <developer>
@@ -12,8 +12,8 @@
         </developer>
     </developers>
     <modules>
-        <module>iothub-service-sdk</module>
-        <module>samples</module>
+        <module>iot-service-client</module>
+        <module>iot-service-samples</module>
     </modules>
     <build>
         <plugins>
