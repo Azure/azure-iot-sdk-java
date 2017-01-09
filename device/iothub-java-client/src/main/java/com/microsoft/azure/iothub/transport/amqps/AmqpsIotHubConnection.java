@@ -12,6 +12,7 @@ import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.transport.State;
 import com.microsoft.azure.iothub.transport.TransportUtils;
 import com.microsoft.azure.iothub.ws.impl.WebSocketImpl;
+import com.microsoft.azure.iothub.CustomLogger;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
@@ -96,6 +97,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     private Boolean reconnectCall = false;
     private int currentReconnectionAttempt = 1;
+	
+	protected CustomLogger logger;
 
     /**
      * Constructor to set up connection parameters using the {@link DeviceClientConfig}.
@@ -152,7 +155,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // endpoint private member variables using the send/receiveEndpointFormat constants and device id.]
         this.sendEndpoint = String.format(sendEndpointFormat, deviceId);
         this.receiveEndpoint = String.format(receiveEndpointFormat, deviceId);
-
+		this.logger = new CustomLogger();
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_004: [The constructor shall initialize a new Handshaker
         // (Proton) object to handle communication handshake.]
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_005: [The constructor shall initialize a new FlowController
@@ -188,7 +191,9 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_007: [If the AMQPS connection is already open, the function shall do nothing.]
         if(this.state == State.CLOSED)
         {
-            try
+            logger.LogInfo("Opening the connection...");
+			
+			try
             {
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
                 openAsync();
@@ -226,8 +231,9 @@ public final class AmqpsIotHubConnection extends BaseHandler
     public void close() throws IOException
     {
 
-        closeAsync();
-
+        logger.LogInfo("Closing the connection...");
+		closeAsync();
+		
         try
         {
             synchronized (closeLock)
@@ -254,6 +260,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 // (Re-)Cancel if current thread also interrupted
                 this.executorService.shutdownNow();
             }
+			logger.LogInfo("Connection has been closed successfully");
         }
     }
 
@@ -263,6 +270,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // specified in config to be used for the communication with IoTHub.]
         this.sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
                 this.config.getTokenValidSecs() + 1L).toString();
+				
+		logger.LogInfo("SAS Token is created successfully");
 
         if (this.reactor == null)
         {
@@ -299,6 +308,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_014: [The function shall stop the Proton reactor.]
 
         this.reactor.stop();
+		
+		logger.LogInfo("Proton reactor stopped");
     }
 
     /**
@@ -307,7 +318,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      * @return An {@link Integer} representing the hash of the message, or -1 if the connection is closed.
      */
     public Integer sendMessage(Message message)
-    {
+    {	
         Integer deliveryHash;
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_015: [If the state of the connection is CLOSED or there is not enough
@@ -643,7 +654,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
     public void onTransportError(Event event)
     {
         this.state = State.CLOSED;
-
+		
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
         startReconnect();
     }
@@ -674,6 +685,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             currentReconnectionAttempt = 0;
 
         System.out.println("Lost connection to the server. Reconnection attempt " + currentReconnectionAttempt++ + "...");
+		logger.LogInfo("Lost connection to the server. Reconnection attempt %s ", currentReconnectionAttempt);
 
         try
         {
