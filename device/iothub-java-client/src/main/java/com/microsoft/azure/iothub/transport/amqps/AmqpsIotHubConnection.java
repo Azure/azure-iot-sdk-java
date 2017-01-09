@@ -172,8 +172,11 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
         } catch (IOException e)
         {
-            throw new IOException("Could not create Proton reactor");
+            logger.LogError(e);
+			throw new IOException("Could not create Proton reactor");
         }
+		
+		logger.LogInfo("AmqpsIotHubConnection object is created successfully using port %s", useWebSockets ? amqpWebSocketPort : amqpPort);
     }
 
     /**
@@ -191,7 +194,6 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_007: [If the AMQPS connection is already open, the function shall do nothing.]
         if(this.state == State.CLOSED)
         {
-            logger.LogInfo("Opening the connection...");
 			
 			try
             {
@@ -202,6 +204,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             {
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger
                 // the reactor, the function shall close the connection and throw an IOException.]
+				logger.LogError(e);
                 this.close();
                 throw new IOException("Error opening Amqp connection: ", e);
             }
@@ -216,7 +219,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 }
             } catch (InterruptedException e)
             {
-                throw new IOException("Waited too long for the connection to open.");
+                logger.LogError(e);
+				throw new IOException("Waited too long for the connection to open.");
             }
         }
     }
@@ -230,10 +234,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      */
     public void close() throws IOException
     {
-
-        logger.LogInfo("Closing the connection...");
 		closeAsync();
-		
         try
         {
             synchronized (closeLock)
@@ -242,10 +243,12 @@ public final class AmqpsIotHubConnection extends BaseHandler
             }
         } catch (InterruptedException e)
         {
-            throw new IOException("Waited too long for the connection to close.");
+            logger.LogError(e);
+			throw new IOException("Waited too long for the connection to close.");
         }
 
         if (this.executorService != null) {
+			logger.LogInfo("Shutdown of executor service has started");
             this.executorService.shutdown();
             try {
                 // Wait a while for existing tasks to terminate
@@ -258,9 +261,10 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 }
             } catch (InterruptedException ie) {
                 // (Re-)Cancel if current thread also interrupted
+				logger.LogError(ie);
                 this.executorService.shutdownNow();
             }
-			logger.LogInfo("Connection has been closed successfully");
+			logger.LogInfo("Shutdown of executor service completed");
         }
     }
 
@@ -286,6 +290,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
         IotHubReactor iotHubReactor = new IotHubReactor(reactor);
         ReactorRunner reactorRunner = new ReactorRunner(iotHubReactor);
         executorService.submit(reactorRunner);
+		
+		logger.LogInfo("Reactor is assigned to executor service");
     }
 
     private void closeAsync()
@@ -343,7 +349,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 }
                 catch (BufferOverflowException e)
                 {
-                    msgData = new byte[msgData.length * 2];
+                    logger.LogError(e);
+					msgData = new byte[msgData.length * 2];
                 }
             }
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_017: [The function shall set the delivery tag for the sender.]
@@ -610,7 +617,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_042 [The event handler shall attempt to startReconnect to the IoTHub.]
         if (event.getLink().getName().equals(sendTag))
         {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
+            logger.LogInfo("Starting to reconnect to IotHub from onLinkRemoteClose");
+			// Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
             startReconnect();
         }
     }
@@ -655,6 +663,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
     {
         this.state = State.CLOSED;
 		
+		logger.LogInfo("Starting to reconnect to IotHub from onTransportError");
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
         startReconnect();
     }

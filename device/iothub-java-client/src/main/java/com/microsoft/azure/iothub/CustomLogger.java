@@ -21,4 +21,12 @@ public class CustomLogger {
 			logger.error(String.format(message, params));
 		}
 	}
+	
+	public void LogError(Throwable exception)
+	{
+		if(logger.isEnabledFor(Level.ERROR))
+		{
+			logger.error(exception);
+		}
+	}
 }
