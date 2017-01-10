@@ -521,7 +521,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 openAsync();
             } catch (IOException e)
             {
-                e.printStackTrace();
+                logger.LogError(e);
+				e.printStackTrace();
             }
         }
     }
