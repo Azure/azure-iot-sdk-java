@@ -4,7 +4,12 @@ import org.apache.log4j.*;
 
 public class CustomLogger {
 	
-	private static final Logger  logger = Logger.getLogger(CustomLogger.class);
+	private Logger logger;  
+	
+	public CustomLogger(Class<?> clazz)
+	{
+		logger = Logger.getLogger(clazz);
+	}
 	
 	public void LogInfo(String message, Object...params)
 	{
