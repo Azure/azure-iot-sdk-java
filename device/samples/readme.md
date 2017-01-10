@@ -46,10 +46,10 @@ Prepare your platform following the instructions [here][devbox-setup] to install
 
 ### More details on command line arguments
 Samples use the following command line arguments:
-1. [Device connection string] - `HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>`
-1. [Number of requests to send]: For example, **5** 
-1. [`https | amqps | mqtt | amqps_ws`]: For example, amqps_ws (AMQP over WebSocket)
-1. [Path to certificate to enable 1-way authentication]: For example, `certs\ms.der` **optional argument**
+* [Device connection string] - `HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>`
+* [Number of requests to send]: For example, **5** 
+* [`https | amqps | mqtt | amqps_ws`]: For example, amqps_ws (AMQP over WebSocket)
+* [Path to certificate to enable 1-way authentication]: For example, `certs\ms.der` **optional argument**
 
 Path to certificate is an **optional** argument and would be needed in case you want to point it to the local copy of the Server side certificate. Please note that this option is used by client for validating Root CA sent by Azure IoT Hub Server as part of TLS handshake. It is for 1-way TLS authentication and is **not** for specifying client side certificate (2-way TLS authentication).
 
