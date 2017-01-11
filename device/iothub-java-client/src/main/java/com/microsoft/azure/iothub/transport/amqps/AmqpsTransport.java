@@ -255,7 +255,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             IotHubStatusCode status = packet.getStatus();
             IotHubEventCallback callback = packet.getCallback();
             Object context = packet.getContext();
-			logger.LogInfo("Invoking the callback from the callback queue,, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
+			logger.LogInfo("Invoking the callback from the callback queue, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
             callback.execute(status, context);
         }
     }
