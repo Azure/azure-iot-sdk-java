@@ -61,7 +61,7 @@ public String getProperty(String name);
 
 **SRS_MESSAGE_11_032: [**The function shall return the value associated with the message property name, where the name can be either the HTTPS or AMQPS property name.**]**
 
-**SRS_MESSAGE_11_034: [**If no value associated with the property name is found, the function shall throw an IllegalArgumentException.**]**
+**SRS_MESSAGE_11_034: [**If no value associated with the property name is found, the function shall return null.**]**
 
 
 ### getProperties
