@@ -1,21 +1,26 @@
 # Microsoft Azure IoT service SDK for Java
 
-The Microsoft Azure IoT Service SDK for Java facilitates building applications to connect to Azure IoT Hub.
+The Microsoft Azure IoT Service SDK for Java facilitates building back-end applications interacting with Azure IoT Hub.
 
 ## Features
 
  * Manage devices on Azure IoT Hub. Provide APIs for CRUD operations.
- * Send messages to, and receive feedbacks from Azure IoT Hub.
- 
-## Application development guides
+ * Send messages to devices, and receive feedbacks from Azure IoT Hub.
+
+## How to use the Azure IoT Service SDK for Java
+
 For more information on how to use this library refer to the documents below:
 - [Setup your development environment][devbox-setup]
-- [Setup IoT Hub](../../doc/setup_iothub.md)
-- [Provision devices](../../doc/manage_iot_hub.md)
-- [Test IoT Hub device connectivity](../../doc/manage_iot_hub.md)
-- [Run the Java sample][run-java-sample]
-- [Java API reference](http://azure.github.io/azure-iot-sdks/java/service/api_reference/index.html)
+- [Run the samples][run-java-sample]
+- [How to build an end-to-end sample IoTHub Java sample from scratch on Windows][how-to-build-a-java-app-from-scratch]
+- [Java API reference][java-api-reference]
 
+
+## Application development guides
+- [Setup your development environment][devbox-setup]
+- [Run the samples][run-java-sample]
+- [How to build an end-to-end sample IoTHub Java sample from scratch on Windows][how-to-build-a-java-app-from-scratch]
+- [Java API reference][java-api-reference]
 
 ## Folder structure of repository
 
@@ -33,6 +38,7 @@ This folder contains the service SDK library for Java.
 
 This folder contains various Java samples that illustrate how to use the service SDK library.
 
-[devbox-setup]: ../../doc/get_started/java-devbox-setup-service.md
-[run-java-sample]: ../../doc/get_started/java-run-service-sample.md
-
+[devbox-setup]: ../doc/java-devbox-setup.md
+[run-java-sample]: ./samples/
+[how-to-build-a-java-app-from-scratch]: https://azure.microsoft.com/documentation/articles/iot-hub-java-java-getstarted/
+[java-api-reference]: http://azure.github.io/azure-iot-sdks/java/service/api_reference/index.html
