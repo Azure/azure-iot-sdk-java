@@ -12,6 +12,7 @@ import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.transport.State;
 import com.microsoft.azure.iothub.transport.TransportUtils;
 import com.microsoft.azure.iothub.ws.impl.WebSocketImpl;
+import com.microsoft.azure.iothub.CustomLogger;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
@@ -96,6 +97,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     private Boolean reconnectCall = false;
     private int currentReconnectionAttempt = 1;
+    protected CustomLogger logger;
 
     /**
      * Constructor to set up connection parameters using the {@link DeviceClientConfig}.
@@ -152,7 +154,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // endpoint private member variables using the send/receiveEndpointFormat constants and device id.]
         this.sendEndpoint = String.format(sendEndpointFormat, deviceId);
         this.receiveEndpoint = String.format(receiveEndpointFormat, deviceId);
-
+        this.logger = new CustomLogger(AmqpsIotHubConnection.class);
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_004: [The constructor shall initialize a new Handshaker
         // (Proton) object to handle communication handshake.]
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_005: [The constructor shall initialize a new FlowController
@@ -169,8 +171,11 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
         } catch (IOException e)
         {
+            logger.LogError(e);
             throw new IOException("Could not create Proton reactor");
         }
+		
+        logger.LogInfo("AmqpsIotHubConnection object is created successfully using port %s in %s method ", useWebSockets ? amqpWebSocketPort : amqpPort, getMethodName());
     }
 
     /**
@@ -197,6 +202,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             {
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger
                 // the reactor, the function shall close the connection and throw an IOException.]
+                logger.LogError(e);
                 this.close();
                 throw new IOException("Error opening Amqp connection: ", e);
             }
@@ -211,6 +217,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 }
             } catch (InterruptedException e)
             {
+                logger.LogError(e);
                 throw new IOException("Waited too long for the connection to open.");
             }
         }
@@ -225,9 +232,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      */
     public void close() throws IOException
     {
-
         closeAsync();
-
         try
         {
             synchronized (closeLock)
@@ -236,10 +241,12 @@ public final class AmqpsIotHubConnection extends BaseHandler
             }
         } catch (InterruptedException e)
         {
+            logger.LogError(e);
             throw new IOException("Waited too long for the connection to close.");
         }
 
         if (this.executorService != null) {
+            logger.LogInfo("Shutdown of executor service has started, method name is %s ", getMethodName());
             this.executorService.shutdown();
             try {
                 // Wait a while for existing tasks to terminate
@@ -252,8 +259,10 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 }
             } catch (InterruptedException ie) {
                 // (Re-)Cancel if current thread also interrupted
+                logger.LogError(ie);
                 this.executorService.shutdownNow();
             }
+            logger.LogInfo("Shutdown of executor service completed, method name is %s ", getMethodName());
         }
     }
 
@@ -263,6 +272,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // specified in config to be used for the communication with IoTHub.]
         this.sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
                 this.config.getTokenValidSecs() + 1L).toString();
+
+        logger.LogInfo("SAS Token is created successfully, method name is %s ", getMethodName());
 
         if (this.reactor == null)
         {
@@ -277,6 +288,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         IotHubReactor iotHubReactor = new IotHubReactor(reactor);
         ReactorRunner reactorRunner = new ReactorRunner(iotHubReactor);
         executorService.submit(reactorRunner);
+        logger.LogInfo("Reactor is assigned to executor service, method name is %s ", getMethodName());
     }
 
     private void closeAsync()
@@ -299,6 +311,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_014: [The function shall stop the Proton reactor.]
 
         this.reactor.stop();
+
+        logger.LogInfo("Proton reactor has been stopped, method name is %s ", getMethodName());
     }
 
     /**
@@ -332,6 +346,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 }
                 catch (BufferOverflowException e)
                 {
+                    logger.LogError(e);
                     msgData = new byte[msgData.length * 2];
                 }
             }
@@ -503,6 +518,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 openAsync();
             } catch (IOException e)
             {
+                logger.LogError(e);
                 e.printStackTrace();
             }
         }
@@ -599,6 +615,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_042 [The event handler shall attempt to startReconnect to the IoTHub.]
         if (event.getLink().getName().equals(sendTag))
         {
+            logger.LogInfo("Starting to reconnect to IotHub, method name is %s ", getMethodName());
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
             startReconnect();
         }
@@ -644,6 +661,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
     {
         this.state = State.CLOSED;
 
+        logger.LogInfo("Starting to reconnect to IotHub, method name is %s ", getMethodName());
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
         startReconnect();
     }
@@ -674,6 +692,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             currentReconnectionAttempt = 0;
 
         System.out.println("Lost connection to the server. Reconnection attempt " + currentReconnectionAttempt++ + "...");
+        logger.LogInfo("Lost connection to the server. Reconnection attempt %s, method name is %s ", currentReconnectionAttempt, getMethodName());
 
         try
         {
@@ -842,6 +861,10 @@ public final class AmqpsIotHubConnection extends BaseHandler
         return derPath + ".pem" ;
     }
 
+    private String getMethodName()
+    {
+        return Thread.currentThread().getStackTrace()[2].getMethodName();
+    }
     /**
      * Class which runs the reactor.
      */
