@@ -130,7 +130,9 @@ public class SendMessagesIT
                     {
                         break;
                     }
+                    waitDuration = waitDuration + 100;
                 }
+
 
                 if (!messageSent.getResult())
                 {
