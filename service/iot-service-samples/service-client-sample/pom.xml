@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.samples.iot-service-samples</groupId>
     <artifactId>ServiceClientSample</artifactId>
-    <version>1.0.11</version>
+    <version>1.0.12</version>
     <name>Service Client Sample</name>
     <developers>
         <developer>
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-service-client</artifactId>
-            <version>1.0.11</version>
+            <version>1.0.12</version>
             <type>jar</type>
         </dependency>
     </dependencies>
