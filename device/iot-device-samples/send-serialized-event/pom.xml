@@ -34,7 +34,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.SendSerializedEvent</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.device.SendSerializedEvent</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -27,7 +27,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.SendEvent</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.device.SendEvent</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
