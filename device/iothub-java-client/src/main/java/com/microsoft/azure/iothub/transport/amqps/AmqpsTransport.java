@@ -485,5 +485,6 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
 	
 	private String getMethodName()
 	{
+		return Thread.currentThread().getStackTrace()[2].getMethodName();
 	}
 }

@@ -866,6 +866,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
 	
 	private String getMethodName()
 	{
+		return Thread.currentThread().getStackTrace()[2].getMethodName();
 	}
     /**
      * Class which runs the reactor.
