@@ -176,7 +176,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
 			throw new IOException("Could not create Proton reactor");
         }
 		
-		logger.LogInfo("AmqpsIotHubConnection object is created successfully using port %s in %s method ", useWebSockets ? amqpWebSocketPort : amqpPort, Thread.currentThread().getStackTrace()[1].getMethodName());
+		logger.LogInfo("AmqpsIotHubConnection object is created successfully using port %s in %s method ", useWebSockets ? amqpWebSocketPort : amqpPort, getMethodName());
     }
 
     /**
@@ -248,7 +248,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         }
 
         if (this.executorService != null) {
-			logger.LogInfo("Shutdown of executor service has started, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
+			logger.LogInfo("Shutdown of executor service has started, method name is %s ", getMethodName());
             this.executorService.shutdown();
             try {
                 // Wait a while for existing tasks to terminate
@@ -264,7 +264,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
 				logger.LogError(ie);
                 this.executorService.shutdownNow();
             }
-			logger.LogInfo("Shutdown of executor service completed, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
+			logger.LogInfo("Shutdown of executor service completed, method name is %s ", getMethodName());
         }
     }
 
@@ -275,7 +275,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         this.sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
                 this.config.getTokenValidSecs() + 1L).toString();
 				
-		logger.LogInfo("SAS Token is created successfully, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
+		logger.LogInfo("SAS Token is created successfully, method name is %s ", getMethodName());
 
         if (this.reactor == null)
         {
@@ -291,7 +291,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         ReactorRunner reactorRunner = new ReactorRunner(iotHubReactor);
         executorService.submit(reactorRunner);
 		
-		logger.LogInfo("Reactor is assigned to executor service, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
+		logger.LogInfo("Reactor is assigned to executor service, method name is %s ", getMethodName());
     }
 
     private void closeAsync()
@@ -315,7 +315,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
         this.reactor.stop();
 		
-		logger.LogInfo("Proton reactor has been stopped, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
+		logger.LogInfo("Proton reactor has been stopped, method name is %s ", getMethodName());
     }
 
     /**
@@ -618,7 +618,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_042 [The event handler shall attempt to startReconnect to the IoTHub.]
         if (event.getLink().getName().equals(sendTag))
         {
-            logger.LogInfo("Starting to reconnect to IotHub, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
+            logger.LogInfo("Starting to reconnect to IotHub, method name is %s ", getMethodName());
 			// Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
             startReconnect();
         }
@@ -664,7 +664,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
     {
         this.state = State.CLOSED;
 		
-		logger.LogInfo("Starting to reconnect to IotHub, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
+		logger.LogInfo("Starting to reconnect to IotHub, method name is %s ", getMethodName());
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
         startReconnect();
     }
@@ -695,7 +695,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             currentReconnectionAttempt = 0;
 
         System.out.println("Lost connection to the server. Reconnection attempt " + currentReconnectionAttempt++ + "...");
-		logger.LogInfo("Lost connection to the server. Reconnection attempt %s, method name is %s ", currentReconnectionAttempt, Thread.currentThread().getStackTrace()[1].getMethodName());
+		logger.LogInfo("Lost connection to the server. Reconnection attempt %s, method name is %s ", currentReconnectionAttempt, getMethodName());
 
         try
         {
@@ -863,7 +863,10 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
         return derPath + ".pem" ;
     }
-
+	
+	private String getMethodName()
+	{
+	}
     /**
      * Class which runs the reactor.
      */
