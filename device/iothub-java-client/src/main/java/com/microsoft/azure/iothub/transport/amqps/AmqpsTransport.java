@@ -60,7 +60,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
 
     private final Boolean useWebSockets;
 	
-	private CustomLogger logger;
+    private CustomLogger logger;
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -78,7 +78,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
 
         // Codes_SRS_AMQPSTRANSPORT_15_002: [The constructor shall set the transport state to CLOSED.]
         this.state = State.CLOSED;
-		this.logger = new CustomLogger(AmqpsTransport.class);
+        this.logger = new CustomLogger(AmqpsTransport.class);
     }
 
     /**
@@ -94,7 +94,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         {
             return;
         }
-		logger.LogInfo("Opening the connection..., method name is %s ", getMethodName());
+        logger.LogInfo("Opening the connection..., method name is %s ", getMethodName());
         // Codes_SRS_AMQPSTRANSPORT_15_004: [The function shall open an AMQPS connection with the IoT Hub given in the configuration.]
         this.connection = new AmqpsIotHubConnection(this.config, this.useWebSockets);
         try
@@ -111,7 +111,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
 
         // Codes_SRS_AMQPSTRANSPORT_15_006: [If the connection was opened successfully, the transport state shall be set to OPEN.]
         this.state = State.OPEN;
-		logger.LogInfo("Connection has been opened, method name is %s ", getMethodName());
+        logger.LogInfo("Connection has been opened, method name is %s ", getMethodName());
     }
 
     /**
@@ -126,7 +126,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_15_007: [If the AMQPS connection is closed, the function shall do nothing.]
         if (this.state == State.CLOSED)
         {
-			logger.LogInfo("The connection is already in closed state, method name is %s ", getMethodName());
+            logger.LogInfo("The connection is already in closed state, method name is %s ", getMethodName());
             return;
         }
 
@@ -136,7 +136,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
 
         // Codes_SRS_AMQPSTRANSPORT_15_009: [The function shall set the transport state to CLOSED.]
         this.state = State.CLOSED;
-		logger.LogInfo("Connection has been closed, method name is %s ", getMethodName());
+        logger.LogInfo("Connection has been closed, method name is %s ", getMethodName());
     }
 
     /**
@@ -154,7 +154,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         if (this.state == State.CLOSED)
         {
             logger.LogError("Cannot add a message when the AMQPS transport is closed, method name is %s ", getMethodName());
-			throw new IllegalStateException("Cannot add a message when the AMQPS transport is closed.");
+            throw new IllegalStateException("Cannot add a message when the AMQPS transport is closed.");
         }
 
         // Codes_SRS_AMQPSTRANSPORT_15_011: [The function shall add a packet containing the message, callback, and callback context to the queue of messages waiting to be sent.]
@@ -179,7 +179,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         if (this.state == State.CLOSED)
         {
             logger.LogError("Cannot send messages when the AMQPS transport is closed, method name is %s ", getMethodName());
-			throw new IllegalStateException("Cannot send messages when the AMQPS transport is closed.");
+            throw new IllegalStateException("Cannot send messages when the AMQPS transport is closed.");
         }
 
         // Codes_SRS_AMQPSTRANSPORT_15_013: [If there are no messages in the waiting list, the function shall return.]
@@ -244,7 +244,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         if (this.state == State.CLOSED)
         {
             logger.LogError("Cannot invoke callbacks when AMQPS transport is closed, method name is %s ", getMethodName());
-			throw new IllegalStateException("Cannot invoke callbacks when AMQPS transport is closed.");
+            throw new IllegalStateException("Cannot invoke callbacks when AMQPS transport is closed.");
         }
 
         // Codes_SRS_AMQPSTRANSPORT_15_020: [The function shall invoke all the callbacks from the callback queue.]
@@ -255,7 +255,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             IotHubStatusCode status = packet.getStatus();
             IotHubEventCallback callback = packet.getCallback();
             Object context = packet.getContext();
-			logger.LogInfo("Invoking the callback from the callback queue, method name is %s ", getMethodName());
+            logger.LogInfo("Invoking the callback from the callback queue, method name is %s ", getMethodName());
             callback.execute(status, context);
         }
     }
@@ -276,7 +276,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         if (this.state == State.CLOSED)
         {
             logger.LogError("Cannot handle messages when AMQPS transport is closed, method name is %s ", getMethodName());
-			throw new IllegalStateException("Cannot handle messages when AMQPS transport is closed.");
+            throw new IllegalStateException("Cannot handle messages when AMQPS transport is closed.");
         }
 
         MessageCallback callback = this.config.getMessageCallback();
@@ -325,7 +325,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             if (deliveryState)
             {
                 logger.LogInfo("Message to IoTHub has been delivered, method name is %s ", getMethodName());
-				// Codes_SRS_AMQPSTRANSPORT_15_030: [If the message was successfully delivered,
+                // Codes_SRS_AMQPSTRANSPORT_15_030: [If the message was successfully delivered,
                 // its callback is added to the list of callbacks to be executed.]
                 IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.OK_EMPTY, packet.getCallback(), packet.getContext());
                 this.callbackList.add(callbackPacket);
@@ -343,7 +343,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     public void connectionLost()
     {
         logger.LogInfo("The messages in progress are buffered to be sent again due to a connection loss, method name is %s ", getMethodName());
-		// Codes_SRS_AMQPSTRANSPORT_15_032: [The messages in progress are buffered to be sent again.]
+        // Codes_SRS_AMQPSTRANSPORT_15_032: [The messages in progress are buffered to be sent again.]
         for (Map.Entry<Integer, IotHubOutboundPacket> entry : inProgressMessages.entrySet())
         {
             this.waitingMessages.add(entry.getValue());
@@ -483,8 +483,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         return outgoingMessage;
     }
 	
-	private String getMethodName()
-	{
-		return Thread.currentThread().getStackTrace()[2].getMethodName();
-	}
+    private String getMethodName()
+    {
+        return Thread.currentThread().getStackTrace()[2].getMethodName();
+    }
 }

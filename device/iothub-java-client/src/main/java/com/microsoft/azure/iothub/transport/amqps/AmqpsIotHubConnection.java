@@ -98,7 +98,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
     private Boolean reconnectCall = false;
     private int currentReconnectionAttempt = 1;
 	
-	protected CustomLogger logger;
+    protected CustomLogger logger;
 
     /**
      * Constructor to set up connection parameters using the {@link DeviceClientConfig}.
@@ -155,7 +155,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // endpoint private member variables using the send/receiveEndpointFormat constants and device id.]
         this.sendEndpoint = String.format(sendEndpointFormat, deviceId);
         this.receiveEndpoint = String.format(receiveEndpointFormat, deviceId);
-		this.logger = new CustomLogger(AmqpsIotHubConnection.class);
+        this.logger = new CustomLogger(AmqpsIotHubConnection.class);
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_004: [The constructor shall initialize a new Handshaker
         // (Proton) object to handle communication handshake.]
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_005: [The constructor shall initialize a new FlowController
@@ -173,10 +173,10 @@ public final class AmqpsIotHubConnection extends BaseHandler
         } catch (IOException e)
         {
             logger.LogError(e);
-			throw new IOException("Could not create Proton reactor");
+            throw new IOException("Could not create Proton reactor");
         }
 		
-		logger.LogInfo("AmqpsIotHubConnection object is created successfully using port %s in %s method ", useWebSockets ? amqpWebSocketPort : amqpPort, getMethodName());
+        logger.LogInfo("AmqpsIotHubConnection object is created successfully using port %s in %s method ", useWebSockets ? amqpWebSocketPort : amqpPort, getMethodName());
     }
 
     /**
@@ -193,9 +193,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
     {
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_007: [If the AMQPS connection is already open, the function shall do nothing.]
         if(this.state == State.CLOSED)
-        {
-			
-			try
+        {		
+            try
             {
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
                 openAsync();
@@ -204,7 +203,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             {
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger
                 // the reactor, the function shall close the connection and throw an IOException.]
-				logger.LogError(e);
+                logger.LogError(e);
                 this.close();
                 throw new IOException("Error opening Amqp connection: ", e);
             }
@@ -220,7 +219,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             } catch (InterruptedException e)
             {
                 logger.LogError(e);
-				throw new IOException("Waited too long for the connection to open.");
+                throw new IOException("Waited too long for the connection to open.");
             }
         }
     }
@@ -244,11 +243,11 @@ public final class AmqpsIotHubConnection extends BaseHandler
         } catch (InterruptedException e)
         {
             logger.LogError(e);
-			throw new IOException("Waited too long for the connection to close.");
+            throw new IOException("Waited too long for the connection to close.");
         }
 
         if (this.executorService != null) {
-			logger.LogInfo("Shutdown of executor service has started, method name is %s ", getMethodName());
+            logger.LogInfo("Shutdown of executor service has started, method name is %s ", getMethodName());
             this.executorService.shutdown();
             try {
                 // Wait a while for existing tasks to terminate
@@ -261,10 +260,10 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 }
             } catch (InterruptedException ie) {
                 // (Re-)Cancel if current thread also interrupted
-				logger.LogError(ie);
+                logger.LogError(ie);
                 this.executorService.shutdownNow();
             }
-			logger.LogInfo("Shutdown of executor service completed, method name is %s ", getMethodName());
+            logger.LogInfo("Shutdown of executor service completed, method name is %s ", getMethodName());
         }
     }
 
@@ -275,7 +274,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         this.sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
                 this.config.getTokenValidSecs() + 1L).toString();
 				
-		logger.LogInfo("SAS Token is created successfully, method name is %s ", getMethodName());
+        logger.LogInfo("SAS Token is created successfully, method name is %s ", getMethodName());
 
         if (this.reactor == null)
         {
@@ -291,7 +290,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         ReactorRunner reactorRunner = new ReactorRunner(iotHubReactor);
         executorService.submit(reactorRunner);
 		
-		logger.LogInfo("Reactor is assigned to executor service, method name is %s ", getMethodName());
+        logger.LogInfo("Reactor is assigned to executor service, method name is %s ", getMethodName());
     }
 
     private void closeAsync()
@@ -315,7 +314,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
         this.reactor.stop();
 		
-		logger.LogInfo("Proton reactor has been stopped, method name is %s ", getMethodName());
+        logger.LogInfo("Proton reactor has been stopped, method name is %s ", getMethodName());
     }
 
     /**
@@ -350,7 +349,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 catch (BufferOverflowException e)
                 {
                     logger.LogError(e);
-					msgData = new byte[msgData.length * 2];
+                    msgData = new byte[msgData.length * 2];
                 }
             }
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_017: [The function shall set the delivery tag for the sender.]
@@ -522,7 +521,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             } catch (IOException e)
             {
                 logger.LogError(e);
-				e.printStackTrace();
+                e.printStackTrace();
             }
         }
     }
@@ -619,7 +618,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         if (event.getLink().getName().equals(sendTag))
         {
             logger.LogInfo("Starting to reconnect to IotHub, method name is %s ", getMethodName());
-			// Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
             startReconnect();
         }
     }
@@ -664,7 +663,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
     {
         this.state = State.CLOSED;
 		
-		logger.LogInfo("Starting to reconnect to IotHub, method name is %s ", getMethodName());
+        logger.LogInfo("Starting to reconnect to IotHub, method name is %s ", getMethodName());
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
         startReconnect();
     }
@@ -695,7 +694,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             currentReconnectionAttempt = 0;
 
         System.out.println("Lost connection to the server. Reconnection attempt " + currentReconnectionAttempt++ + "...");
-		logger.LogInfo("Lost connection to the server. Reconnection attempt %s, method name is %s ", currentReconnectionAttempt, getMethodName());
+        logger.LogInfo("Lost connection to the server. Reconnection attempt %s, method name is %s ", currentReconnectionAttempt, getMethodName());
 
         try
         {
@@ -864,10 +863,10 @@ public final class AmqpsIotHubConnection extends BaseHandler
         return derPath + ".pem" ;
     }
 	
-	private String getMethodName()
-	{
-		return Thread.currentThread().getStackTrace()[2].getMethodName();
-	}
+    private String getMethodName()
+    {
+        return Thread.currentThread().getStackTrace()[2].getMethodName();
+    }
     /**
      * Class which runs the reactor.
      */
