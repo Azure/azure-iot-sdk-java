@@ -97,7 +97,6 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     private Boolean reconnectCall = false;
     private int currentReconnectionAttempt = 1;
-	
     protected CustomLogger logger;
 
     /**
@@ -193,7 +192,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
     {
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_007: [If the AMQPS connection is already open, the function shall do nothing.]
         if(this.state == State.CLOSED)
-        {		
+        {
             try
             {
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
@@ -233,7 +232,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      */
     public void close() throws IOException
     {
-		closeAsync();
+        closeAsync();
         try
         {
             synchronized (closeLock)
@@ -273,7 +272,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // specified in config to be used for the communication with IoTHub.]
         this.sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
                 this.config.getTokenValidSecs() + 1L).toString();
-				
+
         logger.LogInfo("SAS Token is created successfully, method name is %s ", getMethodName());
 
         if (this.reactor == null)
@@ -289,7 +288,6 @@ public final class AmqpsIotHubConnection extends BaseHandler
         IotHubReactor iotHubReactor = new IotHubReactor(reactor);
         ReactorRunner reactorRunner = new ReactorRunner(iotHubReactor);
         executorService.submit(reactorRunner);
-		
         logger.LogInfo("Reactor is assigned to executor service, method name is %s ", getMethodName());
     }
 
@@ -313,7 +311,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_014: [The function shall stop the Proton reactor.]
 
         this.reactor.stop();
-		
+
         logger.LogInfo("Proton reactor has been stopped, method name is %s ", getMethodName());
     }
 
@@ -323,7 +321,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      * @return An {@link Integer} representing the hash of the message, or -1 if the connection is closed.
      */
     public Integer sendMessage(Message message)
-    {	
+    {
         Integer deliveryHash;
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_015: [If the state of the connection is CLOSED or there is not enough
@@ -662,7 +660,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
     public void onTransportError(Event event)
     {
         this.state = State.CLOSED;
-		
+
         logger.LogInfo("Starting to reconnect to IotHub, method name is %s ", getMethodName());
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
         startReconnect();
@@ -862,7 +860,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
         return derPath + ".pem" ;
     }
-	
+
     private String getMethodName()
     {
         return Thread.currentThread().getStackTrace()[2].getMethodName();
