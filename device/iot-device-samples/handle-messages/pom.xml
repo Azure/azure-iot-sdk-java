@@ -27,7 +27,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.HandleMessages</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.device.HandleMessages</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
