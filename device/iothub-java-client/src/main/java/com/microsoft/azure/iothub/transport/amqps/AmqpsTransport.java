@@ -255,7 +255,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             IotHubStatusCode status = packet.getStatus();
             IotHubEventCallback callback = packet.getCallback();
             Object context = packet.getContext();
-			logger.LogInfo("Invoking the callback from the callback queue");
+			logger.LogInfo("Invoking the callback from the callback queue,, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
             callback.execute(status, context);
         }
     }
@@ -324,7 +324,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             IotHubOutboundPacket packet = inProgressMessages.remove(messageHash);
             if (deliveryState)
             {
-                logger.LogInfo("Message to IoTHub has been delivered");
+                logger.LogInfo("Message to IoTHub has been delivered, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
 				// Codes_SRS_AMQPSTRANSPORT_15_030: [If the message was successfully delivered,
                 // its callback is added to the list of callbacks to be executed.]
                 IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.OK_EMPTY, packet.getCallback(), packet.getContext());
@@ -342,7 +342,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
      */
     public void connectionLost()
     {
-        logger.LogInfo("The messages in progress are buffered to be sent again due to a connection loss");
+        logger.LogInfo("The messages in progress are buffered to be sent again due to a connection loss, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
 		// Codes_SRS_AMQPSTRANSPORT_15_032: [The messages in progress are buffered to be sent again.]
         for (Map.Entry<Integer, IotHubOutboundPacket> entry : inProgressMessages.entrySet())
         {

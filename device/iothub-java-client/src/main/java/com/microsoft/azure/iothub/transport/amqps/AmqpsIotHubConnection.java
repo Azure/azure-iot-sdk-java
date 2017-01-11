@@ -315,7 +315,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
         this.reactor.stop();
 		
-		logger.LogInfo("Proton reactor stopped, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
+		logger.LogInfo("Proton reactor has been stopped, method name is %s ", Thread.currentThread().getStackTrace()[1].getMethodName());
     }
 
     /**
