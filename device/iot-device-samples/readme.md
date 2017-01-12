@@ -56,7 +56,7 @@ Path to certificate is an **optional** argument and would be needed in case you 
 ## How to run the Android sample
 1. Download and install [Android Studio][android-studio]
 1. Load and build the sample located in device\samples\android-sample in Android Studio (you will need to clone or copy the repository)
-1. Sample has dependency on the remote library `iothub-java-device-client`. It is currently set to use the latest version of the library. If you want to choose a different version, please update `device\samples\android-sample\app\build.gradle` file to point to the version you want to use. For list of available versions search [Maven Repository][maven-repository]
+1. Sample has dependency on the remote library `iot-device-client`. It is currently set to use the latest version of the library. If you want to choose a different version, please update `device\iot-device-samples\android-sample\app\build.gradle` file to point to the version you want to use. For list of available versions search [Maven Repository][maven-repository]
 
 
 [devbox-setup]: ../../doc/java-devbox-setup.md
