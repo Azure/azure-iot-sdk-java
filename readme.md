@@ -24,14 +24,14 @@ The API reference documentation for the service SDK is [here][java-api-reference
 
 ## Samples
 Whithin the repository, you can find various types of simple samples that can help you get started.
-* [Device SDK Samples](./device/samples/)
-* [Service SDK Samples](./service/samples)
+* [Device SDK Samples](./device/iot-device-samples/)
+* [Service SDK Samples](./service/iot-service-samples)
 
 ## Contribution, feedback and issues
 If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](CONTRIBUTING.md).
 
 ## Support
-If you are having issues using one of the packages or using the Azure IoT Hub service that go beyond simple bug fixes or help requests that would be dealt within the [issues section](https://github.com/Azure/azure-iot-sdks/issues) of this project, the Microsoft Customer Support team will try and help out on a best effort basis.
+If you are having issues using one of the packages or using the Azure IoT Hub service that go beyond simple bug fixes or help requests that would be dealt within the [issues section](https://github.com/Azure/azure-iot-sdk-java/issues) of this project, the Microsoft Customer Support team will try and help out on a best effort basis.
 To engage Microsoft support, you can create a support ticket directly from the [Azure portal](https://ms.portal.azure.com/#blade/Microsoft_Azure_Support/HelpAndSupportBlade).
 Escalated support requests for Azure IoT Hub SDKs development questions will only be available Monday thru Friday during normal coverage hours of 6 a.m. to 6 p.m. PST.
 Here is what you can expect Microsoft Support to be able to help with:
@@ -53,5 +53,5 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 [device-code]: ./doc/java-devbox-setup.md#installiotsource
 [service-code]: ./doc/java-devbox-setup.md#installiotsource
 [device-android]: ./doc/java-devbox-setup.md#installiotandroid
-[java-api-reference-device]: http://azure.github.io/azure-iot-sdks/java/device/api_reference/index.html
-[java-api-reference-service]: http://azure.github.io/azure-iot-sdks/java/service/api_reference/index.html
+[java-api-reference-device]: https://azure.github.io/azure-iot-sdk-java/device/
+[java-api-reference-service]: https://azure.github.io/azure-iot-sdk-java/service/

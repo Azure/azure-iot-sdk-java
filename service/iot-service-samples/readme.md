@@ -27,7 +27,7 @@ You need to first clone the repository or download the sample project folder on 
 1. Preparing the Device Manager Sample application:
    1. Navigate to the main sample file for Device Manager
    It can be found at:
-   {IoT Java SDK root}\service\samples\device-manager-sample\src\main\java\samples\com\microsoft\azure\iot\service\sdk\SampleUtils.java
+   {IoT Java SDK root}\service\iot-service-samples\device-manager-sample\src\main\java\samples\com\microsoft\azure\sdk\iot\service\sdk\SampleUtils.java
    2. Locate the following code in the file:
 	```java
 	public static final String iotHubConnectionString = "[sample iot hub connection string goes here]";
@@ -47,7 +47,7 @@ You need to first clone the repository or download the sample project folder on 
     
 2. Building the Device Manager Sample application:
 
-   To build the Device Manager Sample application using Maven, at a command prompt navigate to the **\java\service\samples\device-manager-sample** folder. Then execute the following command and check for build errors:
+   To build the Device Manager Sample application using Maven, at a command prompt navigate to the **service\iot-service-samples\device-manager-sample** folder. Then execute the following command and check for build errors:
    ```
    mvn clean package
    ```
@@ -56,7 +56,7 @@ You need to first clone the repository or download the sample project folder on 
 
    To run the Device Manager Sample application using Maven, execute the following command.
    ```
-   mvn exec:java -Dexec.mainClass="samples.com.microsoft.azure.iot.service.sdk.DeviceManagerSample"
+   mvn exec:java -Dexec.mainClass="samples.com.microsoft.azure.sdk.iot.service.sdk.DeviceManagerSample"
    ```
 
    You can verify the result of your operation by using [Device Explorer or iothub-explorer tool][lnk-manage-iot-hub].
@@ -66,7 +66,7 @@ You need to first clone the repository or download the sample project folder on 
 1. Preparing the Service Client Sample application:
    1. Navigate to the main sample file for Service Client.
 	  It can be found at: 
-	  {IoT SDK root}\service\samples\service-client-sample\src\main\java\samples\com\microsoft\azure\iot\service\sdk\ServiceClientSample.java
+	  {IoT SDK root}\service\iot-service-samples\service-client-sample\src\main\java\samples\com\microsoft\azure\sdk\iot\service\sdk\ServiceClientSample.java
    2. Locate the following code in the file:
    ```java
    private static final String connectionString = "[Connection string goes here]";
@@ -82,7 +82,7 @@ You need to first clone the repository or download the sample project folder on 
     
 2. Building the Service Client Sample application:
 
-    To build the Service Client Sample application using Maven, at a command prompt navigate to the **\service\samples\service-client-sample** folder. Then execute the following command and check for build errors:
+    To build the Service Client Sample application using Maven, at a command prompt navigate to the **\service\iot-service-samples\service-client-sample** folder. Then execute the following command and check for build errors:
     
     ```
     mvn clean package
@@ -93,7 +93,7 @@ You need to first clone the repository or download the sample project folder on 
 	To run the Service Client Sample application using Maven, execute the following command.
     
     ```
-    mvn exec:java -Dexec.mainClass="samples.com.microsoft.azure.iot.service.sdk.ServiceClientSample"
+    mvn exec:java -Dexec.mainClass="samples.com.microsoft.azure.sdk.iot.service.sdk.ServiceClientSample"
     ```
 
 	You can verify the result of your operation by using [Device Explorer or iothub-explorer tool][lnk-manage-iot-hub].

@@ -99,24 +99,24 @@ There are two ways to get the .jar libraries for the Azure IoT device and servic
 _This is the recommended method of including the Azure IoT SDKs in your project, however this method will only work if your project is a Maven project and if you have gone through the setup described above_
 
 #### for the Device SDK
-* Navigate to http://search.maven.org, search for **com.microsoft.azure.iothub-java-client** and take not of the latest version number (or the version number of whichever version of the sdk you desire to use).
+* Navigate to http://search.maven.org, search for **com.microsoft.azure.sdk.iot** and take not of the latest version number (or the version number of whichever version of the sdk you desire to use).
 * In your main pom.xml file, add the Azure IoT Device SDK as a dependency using your desired version as follows:
 ```xml
 	<dependency>
-		<groupId>com.microsoft.azure.iothub-java-client</groupId>
-		<artifactId>iothub-java-client</artifactId>
-		<version>1.0.0</version>
+		<groupId>com.microsoft.azure.sdk.iot</groupId>
+		<artifactId>iot-device-client</artifactId>
+		<version>1.0.17</version>
 		<!--This is the current version number as of the writing of this document. Yours may be different.-->
 	</dependency>
 ```
 #### for the Service SDK
-* Navigate to http://search.maven.org, search for **com.microsoft.azure.iothub-java-client** and take note of the latest version number of the service client (or the version number of whichever version of the sdk you desire to use).
+* Navigate to http://search.maven.org, search for **com.microsoft.azure.sdk.iot** and take note of the latest version number of the service client (or the version number of whichever version of the sdk you desire to use).
 * In your main pom.xml file, add the Azure IoT Service SDK as a dependency using your desired version as follows:
 ```xml
 	<dependency>
-		<groupId>com.microsoft.azure.iothub-java-client</groupId>
-		<artifactId>iothub-java-service-client</artifactId>
-		<version>1.0.2</version>
+		<groupId>com.microsoft.azure.sdk.iot</groupId>
+		<artifactId>iot-service-client</artifactId>
+		<version>1.0.12</version>
 		<!--This is the current version number as of the writing of this document. Yours may be different.-->
 	</dependency>
 ```
@@ -136,7 +136,7 @@ Open a command prompt and use the following commands:
 ```
 The compiled JAR file with all dependencies bundled in can then be found at:
 ```
-{IoT SDK for Java root}/device/iothub-java-client/target/iothub-java-client-{version}-with-deps.jar
+{IoT SDK for Java root}/device/iot-device-client/target/iot-device-client-{version}-with-deps.jar
 ```
 When you're ready to use the Java device SDK in your own project, include this JAR file in your project.
 
@@ -148,7 +148,7 @@ Open a command prompt and use the following commands:
 ```
 The compiled JAR file with all dependencies bundled in can then be found at:
 ```
-{IoT SDK for Java root}/service/iothub-service-sdk/target/iothub-service-sdk-{version}-with-deps.jar
+{IoT SDK for Java root}/service/iot-service-client/target/iot-service-client-{version}-with-deps.jar
 ```
 When you're ready to use the Java service SDK in your own project, include this JAR file in your project.
 
@@ -156,16 +156,16 @@ When you're ready to use the Java service SDK in your own project, include this 
 ## Building for Android Device
 - Download and install [Android Studio][android-studio]
 - Load and build **sample** located at java\device\samples\android-sample
-- Sample has dependence on remote library `iothub-java-device-client`. It is currently set to use the latest version of the library. If you want to choose a different version, please update `device\samples\android-sample\app\build.gradle` file to point to the version you want to use. For list of available versions search [Maven Repository][maven-repository]
+- Sample has dependence on remote library `iot-device-client`. It is currently set to use the latest version of the library. If you want to choose a different version, please update `device\samples\android-sample\app\build.gradle` file to point to the version you want to use. For list of available versions search [Maven Repository][maven-repository]
 
 <a name="samplecode"></a>
 ## Sample applications
 
 This repository contains various [simple sample applications][device-samples] that illustrate how to use the Microsoft Azure IoT device SDK for Java.
 
-[device-samples]: ../device/samples/
+[device-samples]: ../device/iot-device-samples/
 [android-studio]: https://developer.android.com/studio/index.html
 [certify-iot-device-android]:https://github.com/Azure/azure-iot-sdks/blob/master/doc/iotcertification/iot_certification_android_java/iot_certification_android_java.md
-[maven-repository]:http://search.maven.org/#search%7Cga%7C1%7Ciothub-java-device-client
+[maven-repository]:http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.microsoft.azure.sdk.iot%22
 
 
