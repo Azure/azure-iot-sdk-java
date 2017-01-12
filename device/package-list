@@ -1,7 +1,7 @@
-com.microsoft.azure.iothub
-com.microsoft.azure.iothub.auth
-com.microsoft.azure.iothub.net
-com.microsoft.azure.iothub.transport
-com.microsoft.azure.iothub.transport.amqps
-com.microsoft.azure.iothub.transport.https
-com.microsoft.azure.iothub.transport.mqtt
+com.microsoft.azure.sdk.iot.device
+com.microsoft.azure.sdk.iot.device.auth
+com.microsoft.azure.sdk.iot.device.net
+com.microsoft.azure.sdk.iot.device.transport
+com.microsoft.azure.sdk.iot.device.transport.amqps
+com.microsoft.azure.sdk.iot.device.transport.https
+com.microsoft.azure.sdk.iot.device.transport.mqtt
