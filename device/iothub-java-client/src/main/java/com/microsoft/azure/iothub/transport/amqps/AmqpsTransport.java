@@ -295,7 +295,6 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         {
             AmqpsMessage receivedMessage = this.receivedMessages.remove();
 
-            logger.LogInfo("Message with hashcode %s is received from IotHub on %s", receivedMessage.hashCode(), new Date());
             Message message = protonMessageToIoTHubMessage(receivedMessage);
             // Codes_SRS_AMQPSTRANSPORT_15_026: [The function shall invoke the callback on the message.]
             IotHubMessageResult result = callback.execute(message, this.config.getMessageContext());
