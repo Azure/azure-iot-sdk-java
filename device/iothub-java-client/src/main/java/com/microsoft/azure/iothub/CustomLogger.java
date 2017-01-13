@@ -19,6 +19,38 @@ public class CustomLogger {
         }
     }
 
+	public void LogDebug(String message, Object...params)
+    {
+        if(logger.isEnabledFor(Level.DEBUG))
+        {
+            logger.debug(String.format(message, params));
+        }
+    }
+
+	public void LogTrace(String message, Object...params)
+    {
+        if(logger.isEnabledFor(Level.TRACE))
+        {
+            logger.trace(String.format(message, params));
+        }
+    }
+	
+	public void LogWarn(String message, Object...params)
+    {
+        if(logger.isEnabledFor(Level.WARN))
+        {
+            logger.warn(String.format(message, params));
+        }
+    }
+	
+	public void LogFatal(String message, Object...params)
+    {
+        if(logger.isEnabledFor(Level.FATAL))
+        {
+            logger.fatal(String.format(message, params));
+        }
+    }
+
     public void LogError(String message, Object...params)
     {
         if(logger.isEnabledFor(Level.ERROR))
