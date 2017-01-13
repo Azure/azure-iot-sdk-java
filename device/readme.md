@@ -17,22 +17,22 @@ For more information on how to use this library refer to the documents below:
 - [Setup your development environment][devbox-setup]
 - [Run the samples][run-java-sample]
 - [How to build an end-to-end sample IoTHub Java sample from scratch on Windows][how-to-build-a-java-app-from-scratch]
-- [Java API reference][java-api-reference]
+- [Java Device API reference][java-api-reference]
 
 
 ## Folder structure of repository
 
 All of the Java specific resources are located in the **java** folder.
 
-### /iothub-java-client
+### /iot-device-client
 
 This folder contains the client library for Java.
 
-### /samples
+### /iot-device-samples
 
 This folder contains various Java samples that illustrate how to use the client library.
 
 [devbox-setup]: ../doc/java-devbox-setup.md
-[run-java-sample]: ./samples/
+[run-java-sample]: ./iot-device-samples/
 [how-to-build-a-java-app-from-scratch]: https://azure.microsoft.com/documentation/articles/iot-hub-java-java-getstarted/
-[java-api-reference]: http://azure.github.io/azure-iot-sdks/java/device/api_reference/index.html
+[java-api-reference]: https://azure.github.io/azure-iot-sdk-java/device/

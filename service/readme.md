@@ -13,7 +13,7 @@ For more information on how to use this library refer to the documents below:
 - [Setup your development environment][devbox-setup]
 - [Run the samples][run-java-sample]
 - [How to build an end-to-end sample IoTHub Java sample from scratch on Windows][how-to-build-a-java-app-from-scratch]
-- [Java API reference][java-api-reference]
+- [Java Service API reference][java-api-reference]
 
 
 ## Application development guides
@@ -30,15 +30,15 @@ All of the Java Service SDK specific resources are located in the **java/service
 
 This folder contains setup and getting started documents for Java.
 
-### /iothub-service-sdk
+### /iot-service-client
 
 This folder contains the service SDK library for Java.
 
-### /samples
+### /iot-service-samples
 
 This folder contains various Java samples that illustrate how to use the service SDK library.
 
 [devbox-setup]: ../doc/java-devbox-setup.md
-[run-java-sample]: ./samples/
+[run-java-sample]: ./iot-service-samples/
 [how-to-build-a-java-app-from-scratch]: https://azure.microsoft.com/documentation/articles/iot-hub-java-java-getstarted/
-[java-api-reference]: http://azure.github.io/azure-iot-sdks/java/service/api_reference/index.html
+[java-api-reference]: https://azure.github.io/azure-iot-sdk-java/service/
