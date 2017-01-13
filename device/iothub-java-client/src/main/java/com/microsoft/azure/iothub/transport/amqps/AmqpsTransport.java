@@ -59,9 +59,9 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     private final DeviceClientConfig config;
 
     private final Boolean useWebSockets;
-    private static final int CALLING_METHOD_NAME_DEPTH = 2;
-    private CustomLogger logger;
 
+    private CustomLogger logger;
+    private static final int CALLING_METHOD_NAME_DEPTH = 2;
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
      * object.
@@ -328,6 +328,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             IotHubOutboundPacket packet = inProgressMessages.remove(messageHash);
             if (deliveryState)
             {
+                logger.LogInfo("Message with messageid %s has been delivered to IoTHub, method name is %s ", packet.getMessage().getMessageId(), getMethodName());
                 // Codes_SRS_AMQPSTRANSPORT_15_030: [If the message was successfully delivered,
                 // its callback is added to the list of callbacks to be executed.]
                 IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.OK_EMPTY, packet.getCallback(), packet.getContext());
