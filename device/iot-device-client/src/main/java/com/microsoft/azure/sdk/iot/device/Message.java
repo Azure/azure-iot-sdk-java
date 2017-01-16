@@ -116,7 +116,8 @@ public class Message
      * Stream that will provide the bytes for the body of the
      */
     private ByteArrayInputStream bodyStream;
-
+    private CustomLogger logger;
+    private static final int CALLING_METHOD_NAME_DEPTH = 2;
 
     // ----- Constructors -----
 
@@ -273,6 +274,7 @@ public class Message
         this.feedbackStatusCode = FeedbackStatusCodeEnum.none;
         this.ack = FeedbackStatusCodeEnum.none;
         this.properties = new ArrayList<MessageProperty>();
+        logger = this.logger = new CustomLogger(this.getClass());
     }
 
     /**
@@ -315,6 +317,7 @@ public class Message
             long currentTime = System.currentTimeMillis();
             if (currentTime > expiryTime)
             {
+                logger.LogWarn("The message with messageid %s expired on %s, method name is %s ", this.getMessageId(), new Date(), getMethodName());
                 messageExpired = true;
             }
             else
@@ -370,5 +373,11 @@ public class Message
     {
         long currentTime = System.currentTimeMillis();
         this.expiryTime = currentTime + timeOut;
+        logger.LogInfo("The message with messageid %s has expiry time as %s, method name is %s ", this.getMessageId(), new Date(this.expiryTime), getMethodName());
+    }
+
+    private String getMethodName()
+    {
+        return Thread.currentThread().getStackTrace()[CALLING_METHOD_NAME_DEPTH].getMethodName();
     }
 }
