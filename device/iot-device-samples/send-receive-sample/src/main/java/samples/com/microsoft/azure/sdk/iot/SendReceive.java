@@ -7,7 +7,7 @@ import com.microsoft.azure.sdk.iot.device.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Handles messages from an IoT Hub. Default protocol is to use
@@ -107,6 +107,133 @@ public class SendReceive
         }
     }
 
+    private static final Set<String> KEY_SET;
+
+    static {
+        KEY_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+                "HostName=MokaFeatherM0Suite.azure-devices.net;DeviceId=JavaDevice1;SharedAccessKey=2tRTqmjechvTyFe9SzP4qRGXzkZLSyjwdpXdJaWdWGY=",
+                "HostName=MokaFeatherM0Suite.azure-devices.net;DeviceId=JavaDevice2;SharedAccessKey=nLjD7ziGAy8RDrmZrXHsUITWHvRIkOI0ogiNnpHMveI=",
+                "HostName=MokaFeatherM0Suite.azure-devices.net;DeviceId=JavaDevice3;SharedAccessKey=tzoCq4sEU6zoNmGWZ01t/8kSgY5MYfQttkqikbYY0lE=",
+                "HostName=MokaFeatherM0Suite.azure-devices.net;DeviceId=JavaDevice4;SharedAccessKey=gkRTfe0FU1laPEJfC4+IjPrGiXbQ1n4Ga0mzchwgshM=",
+                "HostName=MokaFeatherM0Suite.azure-devices.net;DeviceId=JavaDevice5;SharedAccessKey=pphgSkq0wAj0m0IT0rYUbkS5dPRVGwMqugRhsJQidK4="
+        )));
+    }
+
+    protected static class TestDevice implements Runnable
+    {
+        private DeviceClient client;
+        private String deviceid;
+        private String connString;
+        private IotHubClientProtocol protocol;
+        private String pathToCertificate;
+        private int numRequests;
+        private int numKeys;
+
+        @Override
+        public void run()
+        {
+            for (int i = 0; i < 100; i++) {
+
+                try {
+                    this.OpenConnection();
+                } catch (Exception e) {
+                    System.out.println("Open throws " + e);
+                }
+
+                this.SendAndRecieve_n();
+
+                try {
+                    this.CloseConnection();
+                } catch (Exception e) {
+                    System.out.println("close throws " + e);
+                }
+            }
+        }
+
+        public TestDevice(String connString, IotHubClientProtocol protocol, String pathToCertificate, int numRequests, int numKeys)
+        {
+            this.connString = connString;
+            this.protocol = protocol;
+            this.pathToCertificate = pathToCertificate;
+            this.numRequests = numRequests;
+            this.numKeys = numKeys;
+            deviceid = connString.split(";")[1];
+        }
+
+        private void OpenConnection() throws URISyntaxException, IOException
+        {
+            System.out.println();
+            System.out.println("--------------------------------------------------------------------------------------------------------------------------------");
+            System.out.println("START TEST FOR: " + deviceid);
+            System.out.format("Using communication protocol %s.\n", protocol.name());
+            System.out.format("Using path to certificate %s.\n", pathToCertificate);
+
+            client = new DeviceClient(connString, protocol);
+
+            if (pathToCertificate != null) {
+                client.setOption("SetCertificatePath", pathToCertificate);
+            }
+
+            System.out.println("Successfully created an IoT Hub client.");
+
+            if (protocol == IotHubClientProtocol.MQTT) {
+                MessageCallbackMqtt callback = new MessageCallbackMqtt();
+                Counter counter = new Counter(0);
+                client.setMessageCallback(callback, counter);
+            } else {
+                MessageCallback callback = new MessageCallback();
+                Counter counter = new Counter(0);
+                client.setMessageCallback(callback, counter);
+            }
+
+            System.out.println("Successfully set message callback.");
+
+            // Set your token expiry time limit here
+            long time = 2400;
+            client.setOption("SetSASTokenExpiryTime", time);
+
+            client.open();
+
+            System.out.println("Opened connection to IoT Hub.");
+
+            System.out.println("Beginning to receive messages...");
+
+            System.out.println("Sending the following event messages: ");
+
+            System.out.println("Updated token expiry time to " + time);
+
+        }
+
+        public void SendAndRecieve_n() {
+            for (int i = 0; i < numRequests; ++i) {
+                String msgStr = "Event Message " + Integer.toString(i) + " to " + deviceid;
+                try {
+                    Message msg = new Message(msgStr);
+                    msg.setProperty("messageCount", Integer.toString(i));
+                    for (int j = 0; j < numKeys; j++) {
+                        msg.setProperty("key"+j, "value"+j);
+                    }
+                    msg.setExpiryTime(5000);
+                    System.out.println(msgStr);
+                    EventCallback eventCallback = new EventCallback();
+                    client.sendEventAsync(msg, eventCallback, i);
+                } catch (Exception e) {
+                }
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public void CloseConnection() throws IOException
+        {
+            client.close();
+            System.out.println("CLOSE CONNECTION.");
+        }
+    }
+
     /**
      * Receives requests from an IoT Hub. Default protocol is to use
      * use MQTT transport.
@@ -117,7 +244,6 @@ public class SendReceive
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      * args[3] = path to certificate to enable one-way authentication over ssl for amqps (optional, default shall be used if unspecified).
      */
-  
     public static void main(String[] args)
             throws IOException, URISyntaxException
     {
@@ -199,77 +325,15 @@ public class SendReceive
         }
 
         System.out.println("Successfully read input parameters.");
-        System.out.format("Using communication protocol %s.\n",
-                protocol.name());
 
-        DeviceClient client = new DeviceClient(connString, protocol);
-        if (pathToCertificate != null)
+        Thread thread = new Thread(new TestDevice(connString, protocol, pathToCertificate, 10, 1000));
+        thread.start();
+
+        for(String connectionString : KEY_SET)
         {
-            client.setOption("SetCertificatePath", pathToCertificate);
+            thread = new Thread(new TestDevice(connectionString, protocol, pathToCertificate, 10, 1000));
+            thread.start();
         }
-
-        System.out.println("Successfully created an IoT Hub client.");
-
-        if (protocol == IotHubClientProtocol.MQTT)
-        {
-            MessageCallbackMqtt callback = new MessageCallbackMqtt();
-            Counter counter = new Counter(0);
-            client.setMessageCallback(callback, counter);
-        }
-        else
-        {
-            MessageCallback callback = new MessageCallback();
-            Counter counter = new Counter(0);
-            client.setMessageCallback(callback, counter);
-        }
-
-        System.out.println("Successfully set message callback.");
-
-        // Set your token expiry time limit here
-        long time = 2400;
-        client.setOption("SetSASTokenExpiryTime", time);
-
-        client.open();
-
-        System.out.println("Opened connection to IoT Hub.");
-
-        System.out.println("Beginning to receive messages...");
-
-        System.out.println("Sending the following event messages: ");
-
-        System.out.println("Updated token expiry time to " + time);
-
-        for (int i = 0; i < numRequests; ++i)
-        {
-            String msgStr = "Event Message " + Integer.toString(i);
-            try
-            {
-                Message msg = new Message(msgStr);
-                msg.setProperty("messageCount", Integer.toString(i));
-                msg.setProperty("key1", "value1");
-                msg.setProperty("key2", "value2");
-                msg.setExpiryTime(5000);
-                System.out.println(msgStr);
-                EventCallback eventCallback = new EventCallback();
-                client.sendEventAsync(msg, eventCallback, i);
-            } catch (Exception e)
-            {
-            }
-            try
-            {
-                Thread.sleep(200);
-            } catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        System.out.println("Press any key to exit...");
-
-        Scanner scanner = new Scanner(System.in);
-        scanner.nextLine();
-
-        client.close();
 
         System.out.println("Shutting down...");
     }

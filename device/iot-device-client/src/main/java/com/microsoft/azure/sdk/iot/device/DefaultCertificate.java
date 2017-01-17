@@ -6,7 +6,8 @@ package com.microsoft.azure.sdk.iot.device;
 import java.io.*;
 
 public class DefaultCertificate {
-    private final String certPath = "cert.crt";
+    private final String DefaultCertPath = "cert.crt";
+    private String certPath;
     private final String cert =
                     /* Baltimore */
                     "-----BEGIN CERTIFICATE-----\r\n" +
@@ -32,7 +33,12 @@ public class DefaultCertificate {
                     "-----END CERTIFICATE-----\r\n";
     public DefaultCertificate()
     {
+        certPath = DefaultCertPath;
+    }
 
+    public DefaultCertificate(String deviceid)
+    {
+        certPath = deviceid + "." + DefaultCertPath;
     }
 
     public String getDefaultCertificate() {
