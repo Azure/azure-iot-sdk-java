@@ -5,6 +5,7 @@ import org.apache.log4j.*;
 public class CustomLogger {
 
     private Logger logger;
+    private static final int CALLING_METHOD_NAME_DEPTH = 2;
 
     public CustomLogger(Class<?> clazz)
     {
@@ -65,5 +66,10 @@ public class CustomLogger {
         {
             logger.error(exception);
         }
+    }
+	
+	public String getMethodName()
+    {
+        return Thread.currentThread().getStackTrace()[CALLING_METHOD_NAME_DEPTH].getMethodName();
     }
 }
