@@ -68,7 +68,7 @@ public class CustomLogger {
         }
     }
 	
-	public String getMethodName()
+    public String getMethodName()
     {
         return Thread.currentThread().getStackTrace()[CALLING_METHOD_NAME_DEPTH].getMethodName();
     }
