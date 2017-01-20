@@ -2,14 +2,14 @@
 
 ## Overview
 
-An MQTT connection between a device and an IoT Hub. The connection implements the Eclipse Paho MqttCallback interface and overrides the connectionLost and messageArrived events.
+An MQTT connection between a device and an IoT Hub. The connection talks to various messaging clients to exchange messages between mqtt lower layers and upper layers of the SDK.
 
 ## References
 
 ## Exposed API
 
 ```java
-public final class MqttIotHubConnection implements MqttCallback
+public final class MqttIotHubConnection
 {
     public MqttIotHubConnection(DeviceClientConfig config);
 
@@ -18,8 +18,6 @@ public final class MqttIotHubConnection implements MqttCallback
     public IotHubStatusCode sendEvent(Message msg) throws IllegalStateException;
     public Message receiveMessage() throws IllegalStateException;
 
-    public void connectionLost(Throwable throwable);
-    public void messageArrived(String topic, MqttMessage mqttMessage);
 }
 ```
 
@@ -31,8 +29,6 @@ public MqttIotHubConnection(DeviceClientConfig config)
 ```
 
 **SRS_MQTTIOTHUBCONNECTION_15_001: [**The constructor shall save the configuration.**]**
-
-**SRS_MQTTIOTHUBCONNECTION_15_002: [**The constructor shall create the publish and subscribe topic for the specified device id.**]**
 
 **SRS_MQTTIOTHUBCONNECTION_15_003: [**The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.**]**
 
@@ -86,28 +82,6 @@ public IotHubStatusCode sendEvent(Message msg) throws IllegalStateException
 public Message receiveMessage() throws IllegalStateException;
 ```
 
-**SRS_MQTTIOTHUBCONNECTION_15_014: [**The function shall attempt to consume a message from the received messages queue.**]**
+**SRS_MQTTIOTHUBCONNECTION_15_014: [**The function shall attempt to consume a message from various messaging clients.**]**
 
 **SRS_MQTTIOTHUBCONNECTION_15_015: [**If the MQTT connection is closed, the function shall throw an IllegalStateException.**]**
-
-
-### connectionLost
-
-```java
-public void connectionLost(Throwable throwable);
-```
-
-**SRS_MQTTIOTHUBCONNECTION_15_016: [**The function shall attempt to reconnect to the IoTHub in a loop with exponential backoff until it succeeds**]**
-
-**SRS_MQTTIOTHUBCONNECTION_15_018: [**The maximum wait interval until a reconnect is attempted shall be 60 seconds.**]**
-
-
-### messageArrived
-
-```java
-public void messageArrived(String topic, MqttMessage mqttMessage);
-```
-
-**SRS_MQTTIOTHUBCONNECTION_15_019: [**A new message is created using the payload from the received MqttMessage**]**
-
-**SRS_MQTTIOTHUBCONNECTION_15_020: [**The newly created message is added to the received messages queue.**]**

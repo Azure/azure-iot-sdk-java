@@ -9,43 +9,35 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
-import org.eclipse.paho.client.mqttv3.*;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
 
-public class MqttIotHubConnection implements MqttCallback
+
+public class MqttIotHubConnection
 {
+     private static final int DEVICE_TWIN_DESIRED_PROPERTY  = 0 ;
+     private static final int DEVICE_TWIN_DESIRED_PROPERTY_UPDATE = 1;
+     private static final int DEVICE_TWIN_REPORTED_PROPERTY = 2;
+    private static final int DEVICE_TWIN_TOTAL_PROPERTY = 3;
+
     /** The MQTT connection lock. */
     protected final Object MQTT_CONNECTION_LOCK = new Object();
-
-    private MqttAsyncClient asyncClient;
 
     protected final DeviceClientConfig config;
     protected State state = State.CLOSED;
 
-    // paho mqtt only supports 10 messages in flight at the same time
-    private static final int maxInFlightCount = 10;
-
-    private Queue<Message> receivedMessagesQueue  = new LinkedBlockingQueue<>();
-
-    private String publishTopic;
-    private String subscribeTopic;
-    private MqttConnectOptions connectionOptions = new MqttConnectOptions();
     private String iotHubUserName;
-
-    //mqtt connection options
-    private static final int keepAliveInterval = 20;
-    private static final int mqttVersion = 4;
-    private static final boolean setCleanSession = false;
-    private static final int qos = 1;
+    private String iotHubUserPassword;
 
     //string constants
     private static String sslPrefix = "ssl://";
     private static String sslPortSuffix = ":8883";
+
+    //Messaging clients
+    private MqttMessaging deviceMessaging;
+    private MqttDeviceTwin [] deviceTwin;
+    private MqttDeviceMethods deviceMethods;
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -84,11 +76,9 @@ public class MqttIotHubConnection implements MqttCallback
 
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_001: [The constructor shall save the configuration.]
             this.config = config;
-
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_002: [The constructor shall create the publish and subscribe
-            // topic for the specified device id.]
-            this.publishTopic = "devices/" + this.config.getDeviceId() + "/messages/events/";
-            this.subscribeTopic = "devices/" + this.config.getDeviceId() + "/messages/devicebound/#";
+            this.deviceMessaging = null;
+            this.deviceMethods = null;
+            this.deviceTwin = null;
         }
     }
 
@@ -112,32 +102,34 @@ public class MqttIotHubConnection implements MqttCallback
 
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_004: [The function shall establish an MQTT connection
             // with an IoT Hub using the provided host name, user name, device ID, and sas token.]
-            try
-            {
+            try {
                 IotHubSasToken sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000l +
                         this.config.getTokenValidSecs() + 1l);
-
-
-                this.asyncClient = new MqttAsyncClient(sslPrefix + this.config.getIotHubHostname() + sslPortSuffix,
-                        this.config.getDeviceId(), new MemoryPersistence());
-                asyncClient.setCallback(this);
+                this.iotHubUserPassword = sasToken.toString();
 
                 String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion, "UTF-8");
                 this.iotHubUserName = this.config.getIotHubHostname() + "/" + this.config.getDeviceId() + "/" + clientIdentifier;
 
-                this.updateConnectionOptions(this.iotHubUserName, sasToken.toString());
-                this.connect(connectionOptions);
 
-                this.subscribe();
+                this.deviceMessaging = new MqttMessaging(sslPrefix + this.config.getIotHubHostname() + sslPortSuffix,
+                        this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword);
+                this.deviceMethods = new MqttDeviceMethods();
+                this.deviceTwin = new MqttDeviceTwin[DEVICE_TWIN_TOTAL_PROPERTY];
+                this.deviceTwin[DEVICE_TWIN_DESIRED_PROPERTY] = new MqttDeviceTwinDesiredProperties();
+                this.deviceTwin[DEVICE_TWIN_DESIRED_PROPERTY_UPDATE] = new MqttDeviceTwinDesiredPropertiesUpdate();
+                this.deviceTwin[DEVICE_TWIN_REPORTED_PROPERTY] = new MqttDeviceTwinReportedProperties();
 
+                this.deviceMessaging.start();
                 this.state = State.OPEN;
             }
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_005: [If an MQTT connection is unable to be established
-            // for any reason, the function shall throw an IOException.]
-            catch (MqttException e)
+            catch (Exception e)
             {
-                throw new IOException("Error initializing MQTT connection:" + e.getMessage());
+                this.state = State.CLOSED;
+                // Codes_SRS_MQTTIOTHUBCONNECTION_15_005: [If an MQTT connection is unable to be established
+                // for any reason, the function shall throw an IOException.]
+                throw new IOException(e.getMessage(), e.getCause());
             }
+
         }
     }
 
@@ -146,7 +138,7 @@ public class MqttIotHubConnection implements MqttCallback
      * If the connection is already closed, the function shall do nothing.
      *
      */
-    public void close()
+    public void close() throws IOException
     {
         synchronized (MQTT_CONNECTION_LOCK)
         {
@@ -157,17 +149,25 @@ public class MqttIotHubConnection implements MqttCallback
             }
 
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [**The function shall close the MQTT connection.]
-            try
+
+            try {
+                this.deviceMethods = null;
+
+                for (MqttDeviceTwin dt : deviceTwin) {
+                    dt = null;
+                }
+                this.deviceTwin = null;
+
+                this.deviceMessaging.stop();
+                this.deviceMessaging = null;
+
+                this.state = State.CLOSED;
+            }
+            catch (Exception e)
             {
-                IMqttToken disconnectToken = this.asyncClient.disconnect();
-                disconnectToken.waitForCompletion();
-            } catch (MqttException e)
-            {
-                //do nothing, since connection is closed anyway.
+                this.state = State.CLOSED;
             }
 
-            this.state = State.CLOSED;
-            this.asyncClient = null;
         }
     }
 
@@ -200,23 +200,14 @@ public class MqttIotHubConnection implements MqttCallback
 
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_008: [The function shall send an event message
             // to the IoT Hub given in the configuration.]
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_009: [The function shall send the message payload.]
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_011: [If the message was successfully received by the service,
             // the function shall return status code OK_EMPTY.]
             IotHubStatusCode result = IotHubStatusCode.OK_EMPTY;
 
             try
             {
-                while (asyncClient.getPendingDeliveryTokens().length >= maxInFlightCount)
-                {
-                    Thread.sleep(10);
-                }
-
-                MqttMessage mqttMessage = new MqttMessage(message.getBytes());
-                mqttMessage.setQos(qos);
-
-                IMqttDeliveryToken publishToken = asyncClient.publish(publishTopic, mqttMessage);
-
+                // Codes_SRS_MQTTIOTHUBCONNECTION_15_009: [The function shall send the message payload.]
+                this.deviceMessaging.send(message);
             }
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_012: [If the message was not successfully
             // received by the service, the function shall return status code ERROR.]
@@ -236,7 +227,7 @@ public class MqttIotHubConnection implements MqttCallback
      *
      * @throws IllegalStateException if the connection state is currently closed.
      */
-    public Message receiveMessage() throws IllegalStateException
+    public Message receiveMessage() throws IllegalStateException, IOException
     {
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_015: [If the MQTT connection is closed,
         // the function shall throw an IllegalStateException.]
@@ -249,102 +240,10 @@ public class MqttIotHubConnection implements MqttCallback
         Message message = null;
 
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_014: [The function shall attempt to consume a message
-        // from the received messages queue.]
-
-        if (this.receivedMessagesQueue.size() > 0)
-        {
-            message = this.receivedMessagesQueue.remove();
-        }
+        // from various messaging clients.]
+        message = deviceMessaging.receive();
 
         return message;
     }
 
-    /**
-     * Event fired when the connection with the MQTT broker is lost.
-     * @param throwable Reason for losing the connection.
-     */
-    @Override
-    public void connectionLost(Throwable throwable)
-    {
-        synchronized (MQTT_CONNECTION_LOCK)
-        {
-            // The connection was closed by calling the close() method, meaning we don't want to re-establish it.
-            if (this.asyncClient == null)
-            {
-                return;
-            }
-
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_016: [The function shall attempt to reconnect to the IoTHub
-            // in a loop with an exponential backoff until it succeeds]
-            this.state = State.CLOSED;
-            int currentReconnectionAttempt = 0;
-            while (this.state == State.CLOSED)
-            {
-                try
-                {
-                    this.open();
-                } catch (IOException e)
-                {
-                    try
-                    {
-                        currentReconnectionAttempt++;
-
-                        // Codes_SRS_MQTTIOTHUBCONNECTION_15_018: [The maximum wait interval
-                        // until a reconnect is attempted shall be 60 seconds.]
-                        Thread.sleep(TransportUtils.generateSleepInterval(currentReconnectionAttempt));
-                    } catch (InterruptedException exception)
-                    {
-                        // do nothing, reconnection attempts will continue
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void messageArrived(String topic, MqttMessage mqttMessage)
-    {
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_019: [A new message is created using the payload
-        // from the received MqttMessage]
-        Message message = new Message(mqttMessage.getPayload());
-
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_020: [The newly created message is added to the received messages queue.]
-
-        this.receivedMessagesQueue.add(message);
-    }
-
-    @Override
-    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
-    {
-    }
-
-    private void connect(MqttConnectOptions connectionOptions) throws MqttException
-    {
-        if (!this.asyncClient.isConnected())
-        {
-            IMqttToken connectToken = this.asyncClient.connect(connectionOptions);
-            connectToken.waitForCompletion();
-        }
-    }
-
-    private void subscribe() throws MqttException
-    {
-        IMqttToken subToken = this.asyncClient.subscribe(this.subscribeTopic, qos);
-        subToken.waitForCompletion();
-    }
-
-    /**
-     * Generates the connection options for the mqtt broker connection.
-     *
-     * @param userName the user name for the mqtt broker connection.
-     * @param userPassword the user password for the mqtt broker connection.
-     */
-    private void updateConnectionOptions(String userName, String userPassword)
-    {
-        this.connectionOptions.setKeepAliveInterval(keepAliveInterval);
-        this.connectionOptions.setCleanSession(setCleanSession);
-        this.connectionOptions.setMqttVersion(mqttVersion);
-        this.connectionOptions.setUserName(userName);
-        this.connectionOptions.setPassword(userPassword.toCharArray());
-    }
 }

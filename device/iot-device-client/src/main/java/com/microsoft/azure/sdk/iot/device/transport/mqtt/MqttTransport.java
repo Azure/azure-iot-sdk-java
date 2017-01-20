@@ -10,7 +10,6 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -91,7 +90,7 @@ public final class MqttTransport implements IotHubTransport
      * called, the transport is no longer usable. If the transport is already
      * closed, the function shall do nothing.
      */
-    public void close()
+    public void close() throws IOException
     {
         // Codes_SRS_MQTTTRANSPORT_15_006: [If the MQTT connection is closed, the function shall do nothing.]
         if (this.state == State.CLOSED)
@@ -232,7 +231,7 @@ public final class MqttTransport implements IotHubTransport
      *
      * @throws IllegalStateException if the transport has not been opened or is closed.
      */
-    public void handleMessage() throws IllegalStateException
+    public void handleMessage() throws IllegalStateException, IOException
     {
         synchronized (handleMessageLock)
         {
