@@ -144,11 +144,11 @@ public class FeedbackBatchMessageTest
         // Arrange
         String jsonString =
                 "Data{[" +
-                        "{\"originalMessageId\":\"a1aaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\"description\":\"Success\",\"deviceGenerationId\":\"111111111111111111\",\"deviceId\":\"xxx-01\",\"enqueuedTimeUtc\":\"2015-10-10T23:35:19.9774002Z\"}," +
-                        "{\"originalMessageId\":\"a2aaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\"description\":\"Expired\",\"deviceGenerationId\":\"222222222222222222\",\"deviceId\":\"xxx-02\",\"enqueuedTimeUtc\":\"2015-10-11T23:35:19.9774002Z\"}," +
-                        "{\"originalMessageId\":\"a3aaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\"description\":\"Deliverycountexceeded\",\"deviceGenerationId\":\"333333333333333333\",\"deviceId\":\"xxx-03\",\"enqueuedTimeUtc\":\"2015-10-12T23:35:19.9774002Z\"}," +
-                        "{\"originalMessageId\":\"a3aaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\"description\":\"xyz\",\"deviceGenerationId\":\"444444444444444444\",\"deviceId\":\"xxx-04\",\"enqueuedTimeUtc\":\"2015-10-13T23:35:19.9774002Z\"}," +
-                        "{\"originalMessageId\":\"a4aaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\"description\":\"Rejected\",\"deviceGenerationId\":\"555555555555555555\",\"deviceId\":\"xxx-05\",\"enqueuedTimeUtc\":\"2015-10-14T23:35:19.9774002Z\"}" +
+                        "{\"originalMessageId\":\"a1aaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\"description\":\"Success\",\"statusCode\":\"Success\",\"deviceGenerationId\":\"111111111111111111\",\"deviceId\":\"xxx-01\",\"enqueuedTimeUtc\":\"2015-10-10T23:35:19.9774002Z\"}," +
+                        "{\"originalMessageId\":\"a2aaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\"description\":\"Expired\",\"statusCode\":\"Expired\",\"deviceGenerationId\":\"222222222222222222\",\"deviceId\":\"xxx-02\",\"enqueuedTimeUtc\":\"2015-10-11T23:35:19.9774002Z\"}," +
+                        "{\"originalMessageId\":\"a3aaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\"description\":\"Delivery Count Exceeded\",\"statusCode\":\"DeliveryCountExceeded\",\"deviceGenerationId\":\"333333333333333333\",\"deviceId\":\"xxx-03\",\"enqueuedTimeUtc\":\"2015-10-12T23:35:19.9774002Z\"}," +
+                        "{\"originalMessageId\":\"a3aaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\"description\":\"xyz\",\"statusCode\":\"xyz\",\"deviceGenerationId\":\"444444444444444444\",\"deviceId\":\"xxx-04\",\"enqueuedTimeUtc\":\"2015-10-13T23:35:19.9774002Z\"}," +
+                        "{\"originalMessageId\":\"a4aaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\"description\":\"Rejected\",\"statusCode\":\"Rejected\",\"deviceGenerationId\":\"555555555555555555\",\"deviceId\":\"xxx-05\",\"enqueuedTimeUtc\":\"2015-10-14T23:35:19.9774002Z\"}" +
                         "]}";
         // Act
         FeedbackBatch feedbackBatch = FeedbackBatchMessage.parse(jsonString);
@@ -173,7 +173,7 @@ public class FeedbackBatchMessageTest
         assertEquals(feedbackBatch.getRecords().get(2).getDeviceGenerationId(), "333333333333333333");
         assertEquals(feedbackBatch.getRecords().get(2).getEnqueuedTimeUtc().toString(), "2015-10-12T23:35:19.977400200Z");
         assertEquals(feedbackBatch.getRecords().get(2).getCorrelationId(), "");
-        assertEquals(feedbackBatch.getRecords().get(2).getDescription(), "Deliverycountexceeded");
+        assertEquals(feedbackBatch.getRecords().get(2).getDescription(), "Delivery Count Exceeded");
         assertEquals(feedbackBatch.getRecords().get(2).getStatusCode(), FeedbackStatusCode.deliveryCountExceeded);
 
         assertEquals(feedbackBatch.getRecords().get(3).getDeviceId(), "xxx-04");

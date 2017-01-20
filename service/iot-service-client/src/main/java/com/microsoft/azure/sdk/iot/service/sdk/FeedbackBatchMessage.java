@@ -61,16 +61,17 @@ public class FeedbackBatchMessage
 
                         String description = Tools.getValueFromJsonObject(jsonObject, "description");
                         feedbackRecord.setDescription(description);
-                        if (description.toLowerCase().equals("success"))
+						String statusCode = Tools.getValueFromJsonObject(jsonObject, "statusCode");
+                        if (statusCode.toLowerCase().equals("success"))
                         {
                             feedbackRecord.setStatusCode(FeedbackStatusCode.success);
-                        } else if (description.toLowerCase().equals("expired"))
+                        } else if (statusCode.toLowerCase().equals("expired"))
                         {
                             feedbackRecord.setStatusCode(FeedbackStatusCode.expired);
-                        } else if (description.toLowerCase().equals("deliverycountexceeded"))
+                        } else if (statusCode.toLowerCase().equals("deliverycountexceeded"))
                         {
                             feedbackRecord.setStatusCode(FeedbackStatusCode.deliveryCountExceeded);
-                        } else if (description.toLowerCase().equals("rejected"))
+                        } else if (statusCode.toLowerCase().equals("rejected"))
                         {
                             feedbackRecord.setStatusCode(FeedbackStatusCode.rejected);
                         }
