@@ -509,6 +509,7 @@ public final class DeviceClient implements Closeable
                         setOption_SetMinimumPollingInterval(value);
 
                     } else {
+                        logger.LogError("optionName is unknown = %s for %s, method name is %s ", optionName, this.transport.getClass(), logger.getMethodName());
                         // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option
                         // handled by the client, then it shall throw IllegalArgumentException.]
                         throw new IllegalArgumentException("optionName is unknown = " + optionName
@@ -526,6 +527,7 @@ public final class DeviceClient implements Closeable
                         setOption_SetCertificatePath(value);
 
                     } else {
+                        logger.LogError("optionName is unknown = %s for %s, method name is %s ", optionName, this.transport.getClass(), logger.getMethodName());
                         // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the
                         // client, then it shall throw IllegalArgumentException.]
                         throw new IllegalArgumentException("optionName is unknown = " + optionName +
@@ -542,6 +544,7 @@ public final class DeviceClient implements Closeable
                         setOption_SetSASTokenExpiryTime(value);
 
                     } else {
+                        logger.LogError("optionName is unknown = %s for %s, method name is %s ", optionName, this.transport.getClass(), logger.getMethodName());
                         // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the
                         // client, then it shall throw IllegalArgumentException.]
                         throw new IllegalArgumentException("optionName is unknown = " + optionName +
