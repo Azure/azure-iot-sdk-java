@@ -354,6 +354,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             byte[] tag = String.valueOf(this. nextTag++).getBytes();
             Delivery dlv = sender.delivery(tag);
 
+            logger.LogInfo("Attempting to send the message using the sender link, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_018: [The function shall attempt to send the message using the sender link.]
             sender.send(msgData, 0, length);
 
@@ -362,7 +363,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_020: [The function shall set the delivery hash to the value returned by the sender link.]
             deliveryHash = dlv.hashCode();
-            
+            logger.LogInfo("Delivery hash returned by the sender link %s, method name is %s ", deliveryHash, logger.getMethodName());
         }
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_021: [The function shall return the delivery hash.]
