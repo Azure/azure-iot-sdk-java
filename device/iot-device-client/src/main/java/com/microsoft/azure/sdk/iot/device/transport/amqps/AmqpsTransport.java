@@ -281,7 +281,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             throw new IllegalStateException("Cannot handle messages when AMQPS transport is closed.");
         }
         
-		logger.LogInfo("Get the callback function for the received message, method name is %s ", logger.getMethodName());
+        logger.LogInfo("Get the callback function for the received message, method name is %s ", logger.getMethodName());
         MessageCallback callback = this.config.getMessageCallback();
 
         // Codes_SRS_AMQPSTRANSPORT_15_025: [If no callback is defined, the list of received messages is cleared.]

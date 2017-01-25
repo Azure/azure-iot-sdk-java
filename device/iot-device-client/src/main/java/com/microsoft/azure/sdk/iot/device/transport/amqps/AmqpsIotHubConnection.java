@@ -358,7 +358,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_018: [The function shall attempt to send the message using the sender link.]
             sender.send(msgData, 0, length);
             
-			logger.LogInfo("Advancing the sender link, method name is %s ", logger.getMethodName());
+            logger.LogInfo("Advancing the sender link, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_019: [The function shall advance the sender link.]
             sender.advance();
 
