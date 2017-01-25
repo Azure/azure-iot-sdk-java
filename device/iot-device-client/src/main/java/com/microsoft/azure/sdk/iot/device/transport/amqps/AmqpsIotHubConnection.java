@@ -357,7 +357,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
             logger.LogInfo("Attempting to send the message using the sender link, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_018: [The function shall attempt to send the message using the sender link.]
             sender.send(msgData, 0, length);
-
+            
+			logger.LogInfo("Advancing the sender link, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_019: [The function shall advance the sender link.]
             sender.advance();
 
@@ -385,6 +386,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         {
             try
             {
+                logger.LogInfo("Acknowledgement for received message is %s, method name is %s ", result.name(), logger.getMethodName());
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_023: [If the message result is COMPLETE, ABANDON, or REJECT,
                 // the function shall acknowledge the last message with acknowledgement type COMPLETE, ABANDON, or REJECT respectively.]
                 switch (result)
@@ -400,6 +402,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
                         break;
                     default:
                         // should never happen.
+                        logger.LogError("Invalid IoT Hub message result (%s), method name is %s ", result.name(), logger.getMethodName());
                         throw new IllegalStateException("Invalid IoT Hub message result.");
                 }
 
@@ -546,23 +549,26 @@ public final class AmqpsIotHubConnection extends BaseHandler
         logger.LogDebug("Entered in method %s", logger.getMethodName());
         if(event.getLink().getName().equals(receiveTag))
         {
+            logger.LogInfo("Reading the receiver link, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_034: [If this link is the Receiver link, the event handler shall get the Receiver and Delivery (Proton) objects from the event.]
             Receiver receiveLink = (Receiver) event.getLink();
             Delivery delivery = receiveLink.current();
             if (delivery.isReadable() && !delivery.isPartial()) {
+                logger.LogInfo("Reading the received buffer, method name is %s ", logger.getMethodName());
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_035: [The event handler shall read the received buffer.]
                 int size = delivery.pending();
                 byte[] buffer = new byte[size];
                 int read = receiveLink.recv(buffer, 0, buffer.length);
                 receiveLink.advance();
-
+                logger.LogInfo("Reading the received buffer completed, method name is %s ", logger.getMethodName());
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_036: [The event handler shall create an AmqpsMessage object from the decoded buffer.]
                 AmqpsMessage msg = new AmqpsMessage();
 
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_037: [The event handler shall set the AmqpsMessage Deliver (Proton) object.]
                 msg.setDelivery(delivery);
+                logger.LogInfo("Decoding the received message , method name is %s ", logger.getMethodName());
                 msg.decode(buffer, 0, read);
-
+                logger.LogInfo("Decoding the received message completed , method name is %s ", logger.getMethodName());
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_049: [All the listeners shall be notified that a message was received from the server.]
                 this.messageReceivedFromServer(msg);
             }
@@ -572,12 +578,15 @@ public final class AmqpsIotHubConnection extends BaseHandler
             //Sender specific section for dispositions it receives
             if(event.getType() == Event.Type.DELIVERY)
             {
+                logger.LogInfo("Reading the delivery event in Sender link, method name is %s ", logger.getMethodName());
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_038: [If this link is the Sender link and the event type is DELIVERY, the event handler shall get the Delivery (Proton) object from the event.]
                 Delivery d = event.getDelivery();
                 DeliveryState remoteState = d.getRemoteState();
 
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_039: [The event handler shall note the remote delivery state and use it and the Delivery (Proton) hash code to inform the AmqpsIotHubConnection of the message receipt.]
                 boolean state = remoteState.equals(Accepted.getInstance());
+                logger.LogInfo("Is state of remote Delivery COMPLETE ? %s, method name is %s ", state, logger.getMethodName());
+                logger.LogInfo("Inform listener that a message has been sent to IoT Hub along with remote state, method name is %s ", logger.getMethodName());
                 //let any listener know that the message was received by the server
                 for(ServerListener listener : listeners)
                 {
@@ -598,6 +607,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         logger.LogDebug("Entered in method %s", logger.getMethodName());
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_040: [The event handler shall save the remaining link credit.]
         this.linkCredit = event.getLink().getCredit();
+		logger.LogDebug("The link credit value is %s, method name is %s", this.linkCredit, logger.getMethodName());
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
@@ -733,6 +743,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      */
     private void messageReceivedFromServer(AmqpsMessage msg)
     {
+        logger.LogInfo("All the listeners are informed that a message has been received, method name is %s ", logger.getMethodName());
         for(ServerListener listener : listeners)
         {
             listener.messageReceived(msg);
