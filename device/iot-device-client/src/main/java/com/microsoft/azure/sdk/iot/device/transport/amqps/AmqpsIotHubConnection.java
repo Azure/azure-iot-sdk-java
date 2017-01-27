@@ -337,11 +337,13 @@ public final class AmqpsIotHubConnection extends BaseHandler
             byte[] msgData = new byte[1024];
             int length;
 
+            logger.LogInfo("Started encoding of message - entering in while loop, method name is %s ", logger.getMethodName());
             while (true)
             {
                 try
                 {
                     length = message.encode(msgData, 0, msgData.length);
+                    logger.LogInfo("Completed encoding of message, length is %s - breaking the while loop to come out, method name is %s ", length, logger.getMethodName());
                     break;
                 }
                 catch (BufferOverflowException e)
