@@ -86,6 +86,7 @@ public final class DeviceClient implements Closeable
     protected ScheduledExecutorService taskScheduler;
     protected IotHubClientState state;
     protected long RECEIVE_PERIOD_MILLIS;
+    protected CustomLogger logger;
 
     /**
      * Constructor that takes a connection string as an argument.
@@ -153,6 +154,8 @@ public final class DeviceClient implements Closeable
         }
 
         initIotHubClient(hostname, deviceId, sharedAccessKey, sharedAccessToken, protocol);
+        this.logger = new CustomLogger(this.getClass());
+        logger.LogInfo("DeviceClient object is created successfully, method name is %s ", logger.getMethodName());
     }
 
     /**
@@ -251,6 +254,7 @@ public final class DeviceClient implements Closeable
             throw new IllegalArgumentException("Cannot send message 'null'.");
         }
 
+        logger.LogInfo("Message with messageid %s along with callback and callbackcontext is added to the queue, method name is %s ", message.getMessageId(), logger.getMethodName());
         // Codes_SRS_DEVICECLIENT_11_006: [The function shall add the message, with its associated callback and callback context, to the transport.]
         transport.addMessage(message, callback, callbackContext);
     }
@@ -376,6 +380,7 @@ public final class DeviceClient implements Closeable
 
     private void setOption_SetMinimumPollingInterval(Object value)
     {
+        logger.LogInfo("Setting MinimumPollingInterval as %s milliseconds, method name is %s ", value, logger.getMethodName());
         if (!value.equals(null)) {
             if (this.state != IotHubClientState.CLOSED) {
                 throw new IllegalStateException("setOption " + SET_MINIMUM_POLLING_INTERVAL +
@@ -396,6 +401,7 @@ public final class DeviceClient implements Closeable
 
     private void setOption_SetCertificatePath(Object value)
     {
+        logger.LogInfo("Setting CertificatePath as %s, method name is %s ", value, logger.getMethodName());
         if (this.state != IotHubClientState.CLOSED) {
             throw new IllegalStateException("setOption " + SET_CERTIFICATE_PATH +
                     "only works when the transport is closed");
@@ -410,6 +416,7 @@ public final class DeviceClient implements Closeable
 
     private void setOption_SetSASTokenExpiryTime(Object value)
     {
+        logger.LogInfo("Setting SASTokenExpiryTime as %s seconds, method name is %s ", value, logger.getMethodName());
         if (!value.equals(null)) {
             //**Codes_SRS_DEVICECLIENT_25_009: [**"SetSASTokenExpiryTime" should have value type long**.]**
             long validTimeInSeconds;
@@ -502,6 +509,7 @@ public final class DeviceClient implements Closeable
                         setOption_SetMinimumPollingInterval(value);
 
                     } else {
+                        logger.LogError("optionName is unknown = %s for %s, method name is %s ", optionName, this.transport.getClass(), logger.getMethodName());
                         // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option
                         // handled by the client, then it shall throw IllegalArgumentException.]
                         throw new IllegalArgumentException("optionName is unknown = " + optionName
@@ -519,6 +527,7 @@ public final class DeviceClient implements Closeable
                         setOption_SetCertificatePath(value);
 
                     } else {
+                        logger.LogError("optionName is unknown = %s for %s, method name is %s ", optionName, this.transport.getClass(), logger.getMethodName());
                         // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the
                         // client, then it shall throw IllegalArgumentException.]
                         throw new IllegalArgumentException("optionName is unknown = " + optionName +
@@ -535,6 +544,7 @@ public final class DeviceClient implements Closeable
                         setOption_SetSASTokenExpiryTime(value);
 
                     } else {
+                        logger.LogError("optionName is unknown = %s for %s, method name is %s ", optionName, this.transport.getClass(), logger.getMethodName());
                         // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the
                         // client, then it shall throw IllegalArgumentException.]
                         throw new IllegalArgumentException("optionName is unknown = " + optionName +

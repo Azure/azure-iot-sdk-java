@@ -248,6 +248,7 @@ public class Message
             this.properties.remove(messageProperty);
         }
 
+        logger.LogInfo("Setting message property with name=%s and value=%s, method name is %s ", name, value, logger.getMethodName());
         this.properties.add(new MessageProperty(name, value));
     }
 
@@ -372,6 +373,6 @@ public class Message
     {
         long currentTime = System.currentTimeMillis();
         this.expiryTime = currentTime + timeOut;
-        logger.LogInfo("The message with messageid %s has expiry time as %s, method name is %s ", this.getMessageId(), new Date(this.expiryTime), logger.getMethodName());
+        logger.LogInfo("The message with messageid %s has expiry time as %s milliseconds and the message will expire on %s, method name is %s ", this.getMessageId(), timeOut, new Date(this.expiryTime), logger.getMethodName());
     }
 }

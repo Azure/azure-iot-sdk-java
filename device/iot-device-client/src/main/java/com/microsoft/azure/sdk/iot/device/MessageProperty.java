@@ -41,7 +41,7 @@ public final class MessageProperty {
     protected final String name;
     /** The property value. */
     protected final String value;
-
+    protected CustomLogger logger;
     /**
      * Constructor.
      *
@@ -54,29 +54,35 @@ public final class MessageProperty {
      * A message property name cannot be one of the reserved property names.
      */
     public MessageProperty(String name, String value) {
+        this.logger = new CustomLogger(this.getClass());
         if (name == null) {
+            logger.LogError("Property argument 'name' cannot be null, method name is %s ", logger.getMethodName());
             throw new IllegalArgumentException("Property argument 'name' cannot be null.");
         }
 
         if (value == null) {
+            logger.LogError("Property argument 'value' cannot be null, method name is %s ", logger.getMethodName());
             throw new IllegalArgumentException("Property argument 'value' cannot be null.");
         }
 
         // Codes_SRS_MESSAGEPROPERTY_11_002: [If the name contains a character that is not in US-ASCII printable characters or is one of: ()<>@,;:\"/[]?={} (space) (horizontal tab), the function shall throw an IllegalArgumentException.]
         if (!usesValidChars(name)) {
-            String errMsg = String.format("%s is not a valid IoT Hub message property name.\n", name);
+            logger.LogError("%s is not a valid IoT Hub message property name, method name is %s ", name, logger.getMethodName());
+			String errMsg = String.format("%s is not a valid IoT Hub message property name.\n", name);
             throw new IllegalArgumentException(errMsg);
         }
 
         // Codes_SRS_MESSAGEPROPERTY_11_008: [If the name is a reserved property name, the function shall throw an IllegalArgumentException.]
         if (RESERVED_PROPERTY_NAMES.contains(name)) {
-            String errMsg = String.format("%s is a reserved IoT Hub message property name.\n", name);
+            logger.LogError("%s is a reserved IoT Hub message property name, method name is %s ", name, logger.getMethodName());
+			String errMsg = String.format("%s is a reserved IoT Hub message property name.\n", name);
             throw new IllegalArgumentException(errMsg);
         }
 
         // Codes_SRS_MESSAGEPROPERTY_11_003: [If the value contains a character that is not in US-ASCII printable characters or is one of: ()<>@,;:\"/[]?={} (space) (horizontal tab), the function shall throw an IllegalArgumentException.]
         if (!usesValidChars(value))
         {
+            logger.LogError("%s is a reserved IoT Hub message property name, method name is %s ", name, logger.getMethodName());
             String errMsg = String.format("%s is not a valid IoT Hub message property value.\n", value);
             throw new IllegalArgumentException(errMsg);
         }

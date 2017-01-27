@@ -40,6 +40,7 @@ public final class DeviceClientConfig
     /** The context to be passed in to the message callback. */
     protected Object messageContext;
 
+    protected CustomLogger logger;
     /**
      * Constructor.
      *
@@ -79,7 +80,8 @@ public final class DeviceClientConfig
         this.deviceKey = deviceKey;
         // Codes_SRS_DEVICECLIENTCONFIG_25_017: [**The constructor shall save sharedAccessToken.**] **
         this.sharedAccessToken = sharedAccessToken;
-
+        this.logger = new CustomLogger(this.getClass());
+        logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ", this.iotHubName, this.deviceId, logger.getMethodName());
     }
 
     /**
