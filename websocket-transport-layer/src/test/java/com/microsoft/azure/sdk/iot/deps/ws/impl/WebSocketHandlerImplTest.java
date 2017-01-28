@@ -18,10 +18,10 @@
  * under the License.
  *
 */
-package com.microsoft.azure.sdk.iot.ws.impl;
+package com.microsoft.azure.sdk.iot.deps.ws.impl;
 
-import com.microsoft.azure.sdk.iot.ws.WebSocketHandler;
-import com.microsoft.azure.sdk.iot.ws.WebSocketHeader;
+import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler;
+import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHeader;
 import org.junit.Test;
 
 import javax.xml.bind.DatatypeConverter;
