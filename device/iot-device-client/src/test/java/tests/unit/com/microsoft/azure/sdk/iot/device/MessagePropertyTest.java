@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 package tests.unit.com.microsoft.azure.sdk.iot.device;
@@ -40,13 +40,24 @@ public class MessagePropertyTest
 
         final String expectedValue = value;
         assertThat(testValue, is(expectedValue));
+
+		// Do test for / character in properties value which is supported
+        final String newName = "topic";
+        final String newValue = "/news/sports";
+
+        MessageProperty newProperty = new MessageProperty(newName, newValue);
+        String newTestValue = newProperty.getValue();
+
+        final String newExpectedValue = newValue;
+        assertThat(newTestValue, is(newExpectedValue));
+
     }
 
-    // Tests_SRS_MESSAGEPROPERTY_11_002: [If the name contains a character that is not in US-ASCII printable characters or is one of: ()<>@,;:\"/[]?={} (space) (horizontal tab), the function shall throw an IllegalArgumentException.]
+    // Tests_SRS_MESSAGEPROPERTY_11_002: [If the name contains a character that is not in US-ASCII the function shall throw an IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
     public void constructorRejectsInvalidPropertyName()
     {
-        final String invalidName = "test-,name";
+        final String invalidName = "Price in £"; 
         final String value = "test-value";
 
         new MessageProperty(invalidName, value);
@@ -62,7 +73,7 @@ public class MessagePropertyTest
         new MessageProperty(invalidName, value);
     }
 
-    // Tests_SRS_MESSAGEPROPERTY_11_003: [If the value contains a character that is not in US-ASCII printable characters or is one of: ()<>@,;:\"/[]?={} (space) (horizontal tab), the function shall throw an IllegalArgumentException.]
+    // Tests_SRS_MESSAGEPROPERTY_11_003: [If the value contains a character that is not in US-ASCII, the function shall throw an IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
     public void constructorRejectsInvalidPropertyValue()
     {
@@ -100,7 +111,7 @@ public class MessagePropertyTest
         assertThat(testHasName, is(expectedHasName));
     }
 
-    // Tests_SRS_MESSAGEPROPERTY_11_007: [The function shall return true if and only if the name and value only use characters in: US-ASCII printable characters, excluding ()<>@,;:\"/[]?={} (space) (horizontal tab), and the name is not a reserved property name.]
+    // Tests_SRS_MESSAGEPROPERTY_11_007: [The function shall return true if and only if the name and value only use characters in: US-ASCII and the name is not a reserved property name.]
     @Test
     public void isValidAppPropertyReturnsTrueForValidAppProperty()
     {
@@ -114,12 +125,12 @@ public class MessagePropertyTest
         assertThat(testIsValidAppProperty, is(expectedIsValidAppProperty));
     }
 
-    // Tests_SRS_MESSAGEPROPERTY_11_007: [The function shall return true if and only if the name and value only use characters in: US-ASCII printable characters, excluding ()<>@,;:\"/[]?={} (space) (horizontal tab), and the name is not a reserved property name.]
+    // Tests_SRS_MESSAGEPROPERTY_11_007: [The function shall return true if and only if the name and value only use characters in: US-ASCII and the name is not a reserved property name.]
     @Test
     public void isValidAppPropertyReturnsFalseForInvalidAppProperty()
     {
         final String name = "test-name";
-        final String illegalValue = "@test-value";
+        final String illegalValue = "परीक्षण"; // Unicode is not supported in property value
 
         boolean testIsValidAppProperty =
                 MessageProperty.isValidAppProperty(name, illegalValue);
@@ -128,7 +139,7 @@ public class MessagePropertyTest
         assertThat(testIsValidAppProperty, is(expectedIsValidAppProperty));
     }
 
-    // Tests_SRS_MESSAGEPROPERTY_11_007: [The function shall return true if and only if the name and value only use characters in: US-ASCII printable characters, excluding ()<>@,;:\"/[]?={} (space) (horizontal tab), and the name is not a reserved property name.]
+    // Tests_SRS_MESSAGEPROPERTY_11_007: [The function shall return true if and only if the name and value only use characters in: US-ASCII and the name is not a reserved property name.]
     @Test
     public void isValidAppPropertyReturnsFalseForReservedProperty()
     {

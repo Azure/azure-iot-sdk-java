@@ -49,8 +49,7 @@ public final class MessageProperty {
      * @param value The IoT Hub message property value.
      *
      * @throws IllegalArgumentException if the name and value constitute an
-     * invalid IoT Hub message property. A message property can only contain
-     * US-ASCII printable chars, with some exceptions as specified in RFC 2047.
+     * invalid IoT Hub message property. A message property can only contain US-ASCII. 
      * A message property name cannot be one of the reserved property names.
      */
     public MessageProperty(String name, String value) {
@@ -65,7 +64,7 @@ public final class MessageProperty {
             throw new IllegalArgumentException("Property argument 'value' cannot be null.");
         }
 
-        // Codes_SRS_MESSAGEPROPERTY_11_002: [If the name contains a character that is not in US-ASCII printable characters or is one of: ()<>@,;:\"/[]?={} (space) (horizontal tab), the function shall throw an IllegalArgumentException.]
+        // Codes_SRS_MESSAGEPROPERTY_11_002: [If the name contains a character that is not in US-ASCII, the function shall throw an IllegalArgumentException.]
         if (!usesValidChars(name)) {
             logger.LogError("%s is not a valid IoT Hub message property name, method name is %s ", name, logger.getMethodName());
 			String errMsg = String.format("%s is not a valid IoT Hub message property name.\n", name);
@@ -79,7 +78,7 @@ public final class MessageProperty {
             throw new IllegalArgumentException(errMsg);
         }
 
-        // Codes_SRS_MESSAGEPROPERTY_11_003: [If the value contains a character that is not in US-ASCII printable characters or is one of: ()<>@,;:\"/[]?={} (space) (horizontal tab), the function shall throw an IllegalArgumentException.]
+        // Codes_SRS_MESSAGEPROPERTY_11_003: [If the value contains a character that is not in US-ASCII, the function shall throw an IllegalArgumentException.]
         if (!usesValidChars(value))
         {
             logger.LogError("%s is a reserved IoT Hub message property name, method name is %s ", name, logger.getMethodName());
@@ -132,9 +131,7 @@ public final class MessageProperty {
 
     /**
      * Returns whether the property is a valid application property. The
-     * property is valid if it is not one of the reserved properties, only uses
-     * US-ASCII printable chars, and does not contain: <code>()&lt;&gt;@,;:\"/[]?={}</code> (space)
-     * (horizontal tab).
+     * property is valid if it is not one of the reserved properties, only uses US-ASCII 
      *
      * @param name the property name.
      * @param value the property value.
@@ -144,7 +141,7 @@ public final class MessageProperty {
     public static boolean isValidAppProperty(String name, String value) {
         boolean propertyIsValid = false;
 
-        // Codes_SRS_MESSAGEPROPERTY_11_007: [The function shall return true if and only if the name and value only use characters in: US-ASCII printable characters, excluding ()<>@,;:\"/[]?={} (space) (horizontal tab), and the name is not a reserved property name.]
+        // Codes_SRS_MESSAGEPROPERTY_11_007: [The function shall return true if and only if the name and value only use characters in: US-ASCII "/[]?={} (space) (horizontal tab), and the name is not a reserved property name.]
         if (!RESERVED_PROPERTY_NAMES.contains(name)
                 && usesValidChars(name)
                 && usesValidChars(value)) {
@@ -155,20 +152,16 @@ public final class MessageProperty {
     }
 
     /**
-     * Returns true if the string only uses US-ASCII printable chars and does
-     * not contain: <code>()&lt;&gt;@,;:\"/[]?={}</code> (space) (horizontal tab)
+     * Returns true if the string only uses US-ASCII 
      *
      * @param s the string.
      *
-     * @return whether the string only uses US-ASCII printable chars and does
-     * not contain: <code>()&lt;&gt;@,;:\"/[]?={}</code> (space) (horizontal tab)
+     * @return whether the string only uses US-ASCII 
      */
     protected static boolean usesValidChars(String s) {
         boolean isValid = false;
 
-        if (s.matches("[\\p{Print}]+")
-                && s.matches(
-                "[^()<>@,;:\\\\\"/\\[\\]\\?=\\{\\}\u0040\u0011]+"))
+        if (s.matches("\\p{ASCII}*"))
         {
             isValid = true;
         }

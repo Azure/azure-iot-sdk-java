@@ -31,9 +31,9 @@ public MessageProperty(String name, String value);
 
 **SRS_MESSAGEPROPERTY_11_001: [**The constructor shall save the property name and value.**]**
 
-**SRS_MESSAGEPROPERTY_11_002: [**If the name contains a character that is not in US-ASCII printable characters or is one of: ()<>@,;:\"/[]?={} (space) (horizontal tab), the function shall throw an IllegalArgumentException.**]**
+**SRS_MESSAGEPROPERTY_11_002: [**If the name contains a character that is not in US-ASCII shall throw an IllegalArgumentException.**]**
 
-**SRS_MESSAGEPROPERTY_11_003: [**If the value contains a character that is not in US-ASCII printable characters or is one of: ()<>@,;:\"/[]?={} (space) (horizontal tab), the function shall throw an IllegalArgumentException.**]**
+**SRS_MESSAGEPROPERTY_11_003: [**If the value contains a character that is not in US-ASCII shall throw an IllegalArgumentException.**]**
 
 **SRS_MESSAGEPROPERTY_11_008: [**If the name is a reserved property name, the function shall throw an IllegalArgumentException.**]**
 
@@ -72,4 +72,4 @@ public boolean hasName(String name);
 public static boolean isValidAppProperty(String name, String  value);
 ```
 
-**SRS_MESSAGEPROPERTY_11_007: [**The function shall return true if and only if the name and value only use characters in: US-ASCII printable characters, excluding ()<>@,;:\"/[]?={} (space) (horizontal tab), and the name is not a reserved property name.**]**
+**SRS_MESSAGEPROPERTY_11_007: [**The function shall return true if and only if the name and value only use characters in: US-ASCII characters and the name is not a reserved property name.**]**
