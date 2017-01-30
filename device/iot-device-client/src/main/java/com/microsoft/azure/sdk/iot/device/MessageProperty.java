@@ -141,7 +141,7 @@ public final class MessageProperty {
     public static boolean isValidAppProperty(String name, String value) {
         boolean propertyIsValid = false;
 
-        // Codes_SRS_MESSAGEPROPERTY_11_007: [The function shall return true if and only if the name and value only use characters in: US-ASCII "/[]?={} (space) (horizontal tab), and the name is not a reserved property name.]
+        // Codes_SRS_MESSAGEPROPERTY_11_007: [The function shall return true if and only if the name and value only use characters in US-ASCII and the name is not a reserved property name.]
         if (!RESERVED_PROPERTY_NAMES.contains(name)
                 && usesValidChars(name)
                 && usesValidChars(value)) {

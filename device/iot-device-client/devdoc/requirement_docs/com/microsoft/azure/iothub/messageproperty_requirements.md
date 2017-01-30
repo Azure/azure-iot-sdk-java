@@ -31,9 +31,9 @@ public MessageProperty(String name, String value);
 
 **SRS_MESSAGEPROPERTY_11_001: [**The constructor shall save the property name and value.**]**
 
-**SRS_MESSAGEPROPERTY_11_002: [**If the name contains a character that is not in US-ASCII shall throw an IllegalArgumentException.**]**
+**SRS_MESSAGEPROPERTY_11_002: [**If the name contains a character that is not in US-ASCII, the function shall throw an IllegalArgumentException.**]**
 
-**SRS_MESSAGEPROPERTY_11_003: [**If the value contains a character that is not in US-ASCII shall throw an IllegalArgumentException.**]**
+**SRS_MESSAGEPROPERTY_11_003: [**If the value contains a character that is not in US-ASCII, the function shall throw an IllegalArgumentException.**]**
 
 **SRS_MESSAGEPROPERTY_11_008: [**If the name is a reserved property name, the function shall throw an IllegalArgumentException.**]**
 
