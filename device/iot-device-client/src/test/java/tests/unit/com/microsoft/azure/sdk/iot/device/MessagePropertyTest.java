@@ -59,7 +59,7 @@ public class MessagePropertyTest
     @Test
     public void constructorSavesPropertyValueTab()
     {
-        final String name = "topic";
+        final String name = "names";
         final String value = "First Name"+"\t"+"\t"+"Last Name";
         
         MessageProperty property = new MessageProperty(name, value);
@@ -146,7 +146,7 @@ public class MessagePropertyTest
     public void isValidAppPropertyReturnsFalseForInvalidAppProperty()
     {
         final String name = "test-name";
-        final String illegalValue = "परीक्षण"; // Unicode is not supported in property value
+        final String illegalValue = "परीक्षण"; // Unicode is not supported in MessageProperty value
 
         boolean testIsValidAppProperty =
                 MessageProperty.isValidAppProperty(name, illegalValue);
