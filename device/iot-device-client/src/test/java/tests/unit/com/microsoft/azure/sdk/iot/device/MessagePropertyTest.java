@@ -40,17 +40,33 @@ public class MessagePropertyTest
 
         final String expectedValue = value;
         assertThat(testValue, is(expectedValue));
+		
+    }
 
-		// Do test for / character in properties value which is supported
-        final String newName = "topic";
-        final String newValue = "/news/sports";
+	 @Test
+    public void constructorSavesPropertyValueSlash()
+    {
+        final String name = "topic";
+        final String value = "/news/sports";
 
-        MessageProperty newProperty = new MessageProperty(newName, newValue);
-        String newTestValue = newProperty.getValue();
+        MessageProperty property = new MessageProperty(name, value);
+        String testValue = property.getValue();
 
-        final String newExpectedValue = newValue;
-        assertThat(newTestValue, is(newExpectedValue));
+        final String expectedValue = value;
+        assertThat(testValue, is(expectedValue));
+    }
+    
+    @Test
+    public void constructorSavesPropertyValueTab()
+    {
+        final String name = "topic";
+        final String value = "First Name"+"\t"+"\t"+"Last Name";
+        
+        MessageProperty property = new MessageProperty(name, value);
+        String testValue = property.getValue();
 
+        final String expectedValue = value;
+        assertThat(testValue, is(expectedValue));
     }
 
     // Tests_SRS_MESSAGEPROPERTY_11_002: [If the name contains a character that is not in US-ASCII the function shall throw an IllegalArgumentException.]
