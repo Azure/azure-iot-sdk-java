@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.sdk.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
-import com.microsoft.azure.sdk.iot.ws.impl.WebSocketImpl;
+import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Source;

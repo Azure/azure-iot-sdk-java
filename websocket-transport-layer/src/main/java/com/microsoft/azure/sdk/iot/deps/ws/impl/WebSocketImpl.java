@@ -2,18 +2,16 @@
  * Copyright (c) Microsoft. All rights reserved.
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
-package com.microsoft.azure.sdk.iot.ws.impl;
+package com.microsoft.azure.sdk.iot.deps.ws.impl;
 
-import com.microsoft.azure.sdk.iot.ws.WebSocket;
-import com.microsoft.azure.sdk.iot.ws.WebSocketHandler;
-import com.microsoft.azure.sdk.iot.ws.WebSocketHeader;
+import com.microsoft.azure.sdk.iot.deps.ws.WebSocket;
+import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler;
+import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHeader;
 import org.apache.qpid.proton.engine.Transport;
 import org.apache.qpid.proton.engine.TransportException;
 import org.apache.qpid.proton.engine.impl.*;
 
-import static com.microsoft.azure.sdk.iot.ws.WebSocket.WebSocketFrameReadState.*;
-import static com.microsoft.azure.sdk.iot.ws.WebSocket.WebSocketState.*;
-import static com.microsoft.azure.sdk.iot.ws.WebSocketHandler.WebSocketMessageType.*;
+import static com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler.WebSocketMessageType.*;
 import static org.apache.qpid.proton.engine.impl.ByteBufferUtils.*;
 
 import java.nio.ByteBuffer;
@@ -35,7 +33,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
     private int _webSocketHeaderSize = 0;
 
     private WebSocketHandler _webSocketHandler;
-    private WebSocketState _state = PN_WS_NOT_STARTED;
+    private WebSocketState _state = WebSocketState.PN_WS_NOT_STARTED;
 
     private String _host = "";
     private String _path = "";
@@ -49,7 +47,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
     private long _lastLength;
     private long _bytesRead = 0;
     private int _dataStart = 0;
-    private WebSocketFrameReadState _frameReadState = INIT_READ;
+    private WebSocketFrameReadState _frameReadState = WebSocketFrameReadState.INIT_READ;
 
     public WebSocketImpl()
     {
@@ -263,7 +261,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
                 case WEB_SOCKET_MESSAGE_TYPE_CLOSE:
                     _wsInputBuffer.flip();
                     _pingBuffer.put(_wsInputBuffer);
-                    _state = PN_WS_CONNECTED_CLOSING;
+                    _state = WebSocketState.PN_WS_CONNECTED_CLOSING;
 
                     _wsInputBuffer.compact();
                     _wsInputBuffer.flip();
@@ -272,7 +270,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
                 case WEB_SOCKET_MESSAGE_TYPE_PING:
                     _wsInputBuffer.flip();
                     _pingBuffer.put(_wsInputBuffer);
-                    _state = PN_WS_CONNECTED_PONG;
+                    _state = WebSocketState.PN_WS_CONNECTED_PONG;
 
                     _wsInputBuffer.compact();
                     _wsInputBuffer.flip();
@@ -311,8 +309,8 @@ public class WebSocketImpl implements WebSocket, TransportLayer
                                     //Determine how much to grab from the input buffer and only take that
                                     readInputBuffer();
 
-                                    _frameReadState = _temp.position() < 2 ? CHUNK_READ : HEADER_READ;
-                                    _readComplete = _frameReadState == CHUNK_READ;
+                                    _frameReadState = _temp.position() < 2 ? WebSocketFrameReadState.CHUNK_READ : WebSocketFrameReadState.HEADER_READ;
+                                    _readComplete = _frameReadState == WebSocketFrameReadState.CHUNK_READ;
                                     break;
 
                                 //State 2: Chunk_Read
@@ -320,8 +318,8 @@ public class WebSocketImpl implements WebSocket, TransportLayer
                                     //Determine how much to grab from the input buffer and only take that
                                     readInputBuffer();
 
-                                    _frameReadState = _temp.position() < 2 ? _frameReadState : HEADER_READ;
-                                    _readComplete = _frameReadState == CHUNK_READ;
+                                    _frameReadState = _temp.position() < 2 ? _frameReadState : WebSocketFrameReadState.HEADER_READ;
+                                    _readComplete = _frameReadState == WebSocketFrameReadState.CHUNK_READ;
                                     break;
 
                                 //State 3: Header_Read
@@ -334,10 +332,10 @@ public class WebSocketImpl implements WebSocket, TransportLayer
                                     _lastType = unwrapResult.getType();
                                     _lastLength = unwrapResult.getLength();
 
-                                    _frameReadState = _lastType == WEB_SOCKET_MESSAGE_TYPE_HEADER_CHUNK ? CHUNK_READ : CONTINUED_FRAME_READ;
-                                    _readComplete = _frameReadState == CHUNK_READ || _temp.position() == _temp.limit();
+                                    _frameReadState = _lastType == WEB_SOCKET_MESSAGE_TYPE_HEADER_CHUNK ? WebSocketFrameReadState.CHUNK_READ : WebSocketFrameReadState.CONTINUED_FRAME_READ;
+                                    _readComplete = _frameReadState == WebSocketFrameReadState.CHUNK_READ || _temp.position() == _temp.limit();
 
-                                    if(_frameReadState == CONTINUED_FRAME_READ)
+                                    if(_frameReadState == WebSocketFrameReadState.CONTINUED_FRAME_READ)
                                     {
                                         _temp.compact();
                                     }
@@ -376,7 +374,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
                                     //Send whatever we have
                                     sendToUnderlyingInput();
 
-                                    _frameReadState = _bytesRead == _lastLength ? INIT_READ : CONTINUED_FRAME_READ;
+                                    _frameReadState = _bytesRead == _lastLength ? WebSocketFrameReadState.INIT_READ : WebSocketFrameReadState.CONTINUED_FRAME_READ;
                                     _readComplete = _temp.remaining() == 0;
                                     _temp.compact();
                                     break;
@@ -508,7 +506,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
 
                             if (_head_closed)
                             {
-                                _state = PN_WS_FAILED;
+                                _state = WebSocketState.PN_WS_FAILED;
                                 return Transport.END_OF_STREAM;
                             }
                             else
@@ -524,7 +522,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
 
                         if (_head_closed && (_outputBuffer.position() == 0))
                         {
-                            _state = PN_WS_FAILED;
+                            _state = WebSocketState.PN_WS_FAILED;
                             return Transport.END_OF_STREAM;
                         }
                         else
@@ -552,7 +550,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
 
                         if (_head_closed)
                         {
-                            _state = PN_WS_FAILED;
+                            _state = WebSocketState.PN_WS_FAILED;
                             return Transport.END_OF_STREAM;
                         }
                         else
@@ -560,7 +558,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
                             return _outputBuffer.position();
                         }
                     case PN_WS_CONNECTED_CLOSING:
-                        _state = PN_WS_CLOSED;
+                        _state = WebSocketState.PN_WS_CLOSED;
 
                         writeClose();
 
@@ -568,7 +566,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
 
                         if (_head_closed)
                         {
-                            _state = PN_WS_FAILED;
+                            _state = WebSocketState.PN_WS_FAILED;
                             return Transport.END_OF_STREAM;
                         }
                         else

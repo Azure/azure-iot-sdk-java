@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.sdk.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.ws.impl.WebSocketImpl;
+import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;

@@ -17,7 +17,7 @@
  * under the License.
  *
  */
-package com.microsoft.azure.sdk.iot.ws.impl;
+package com.microsoft.azure.sdk.iot.deps.ws.impl;
 
 import org.junit.Test;
 

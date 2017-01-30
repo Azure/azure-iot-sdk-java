@@ -2,9 +2,9 @@
  * Copyright (c) Microsoft. All rights reserved.
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
-package com.microsoft.azure.sdk.iot.ws.impl;
+package com.microsoft.azure.sdk.iot.deps.ws.impl;
 
-import com.microsoft.azure.sdk.iot.ws.WebSocketHeader;
+import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHeader;
 import org.apache.qpid.proton.engine.impl.HandshakeSniffingTransportWrapper;
 import org.apache.qpid.proton.engine.impl.TransportWrapper;
 

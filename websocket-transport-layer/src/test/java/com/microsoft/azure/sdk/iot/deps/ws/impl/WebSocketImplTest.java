@@ -18,16 +18,17 @@
  * under the License.
  *
 */
-package com.microsoft.azure.sdk.iot.ws.impl;
+package com.microsoft.azure.sdk.iot.deps.ws.impl;
 
-import com.microsoft.azure.sdk.iot.ws.WebSocket;
-import com.microsoft.azure.sdk.iot.ws.WebSocketHandler;
-import com.microsoft.azure.sdk.iot.ws.WebSocketHeader;
+import com.microsoft.azure.sdk.iot.deps.ws.WebSocket;
+import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler;
+import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHeader;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.ByteBufferUtils;
 import org.apache.qpid.proton.engine.impl.TransportInput;
 import org.apache.qpid.proton.engine.impl.TransportOutput;
 import org.apache.qpid.proton.engine.impl.TransportWrapper;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -39,8 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import static com.microsoft.azure.sdk.iot.ws.WebSocketHeader.FINBIT_MASK;
-import static com.microsoft.azure.sdk.iot.ws.WebSocketHeader.OPCODE_MASK;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -107,7 +106,7 @@ public class WebSocketImplTest
 
         webSocketImpl.configure(_hostName, _webSocketPath, _webSocketPort, _webSocketProtocol, _additionalHeaders, webSocketHandler);
 
-        assertEquals(webSocketHandler, webSocketImpl.getWebSocketHandler());
+        Assert.assertEquals(webSocketHandler, webSocketImpl.getWebSocketHandler());
         assertTrue(webSocketImpl.getEnabled());
     }
 
@@ -1034,8 +1033,8 @@ public class WebSocketImplTest
         Random random = new SecureRandom();
         random.nextBytes(data);
 
-        byte finbit = (byte) (FINBIT_MASK & 0xFF);
-        byte opcode = (byte) OPCODE_MASK & 0x2;
+        byte finbit = (byte) (WebSocketHeader.FINBIT_MASK & 0xFF);
+        byte opcode = (byte) WebSocketHeader.OPCODE_MASK & 0x2;
         byte firstbyte = (byte) (finbit | opcode);
         byte secondbyte = (byte) (size-2);
 
@@ -1221,8 +1220,8 @@ public class WebSocketImplTest
 
         byte[] message = new byte[chunkSize];
 
-        byte finbit = (byte) (FINBIT_MASK & 0xFF);
-        byte opcode = (byte) OPCODE_MASK & 0x2;
+        byte finbit = (byte) (WebSocketHeader.FINBIT_MASK & 0xFF);
+        byte opcode = (byte) WebSocketHeader.OPCODE_MASK & 0x2;
         byte firstbyte = (byte) (finbit | opcode);
         byte secondbyte = (byte) payloadLength;
 
