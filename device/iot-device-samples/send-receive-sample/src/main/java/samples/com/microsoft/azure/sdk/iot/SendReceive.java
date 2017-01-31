@@ -254,6 +254,7 @@ public class SendReceive
                 client.sendEventAsync(msg, eventCallback, i);
             } catch (Exception e)
             {
+				e.printStackTrace(); // Trace the exception
             }
             try
             {
