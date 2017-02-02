@@ -19,8 +19,8 @@ public class CustomLoggerTest
     @Test
     public void contructorCreatesLogger()
 	{
-		CustomLogger logger = new CustomLogger(this.getClass());
-		assertThat(logger, notNullValue());
+        CustomLogger logger = new CustomLogger(this.getClass());
+        assertThat(logger, notNullValue());
 	}
 	
 	// Tests_SRS_CUSTOMERLOGGER_25_002: [The function shall log message for all levels.]

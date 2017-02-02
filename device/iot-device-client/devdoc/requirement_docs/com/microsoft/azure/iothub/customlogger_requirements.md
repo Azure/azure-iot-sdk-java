@@ -21,8 +21,8 @@ public final class CustomLogger
     public void LogWarn(String message, Object...params);
     public void LogFatal(String message, Object...params);
     public void LogError(String message, Object...params);
-	public void LogError(Throwable exception);
-	public String getMethodName();
+    public void LogError(Throwable exception);
+    public String getMethodName();
 }
 ```
 
