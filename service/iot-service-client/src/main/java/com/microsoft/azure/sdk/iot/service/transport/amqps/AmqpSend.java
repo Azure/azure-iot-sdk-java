@@ -104,6 +104,8 @@ public class AmqpSend extends BaseHandler
      */
     public void send(String deviceId, Message message) throws IOException
     {
+      synchronized(this)
+      {
         if  (amqpSendHandler != null)
         {
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_006: [The function shall create a binary message with the given content]
@@ -120,6 +122,7 @@ public class AmqpSend extends BaseHandler
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_009: [The function shall throw IOException if the send handler object is not initialized]
             throw new IOException("send handler is not initialized. call open before send");
         }
+      }
 
     }
 
