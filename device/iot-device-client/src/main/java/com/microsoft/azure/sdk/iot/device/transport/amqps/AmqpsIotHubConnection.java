@@ -355,12 +355,13 @@ public final class AmqpsIotHubConnection extends BaseHandler
             }
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_017: [The function shall set the delivery tag for the sender.]
             byte[] tag = String.valueOf(this. nextTag++).getBytes();
-            Delivery dlv = sender.delivery(tag);
-
+	    Delivery dlv = sender.delivery(tag);
+	    try
+	    {
             logger.LogInfo("Attempting to send the message using the sender link, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_018: [The function shall attempt to send the message using the sender link.]
             sender.send(msgData, 0, length);
-            
+
             logger.LogInfo("Advancing the sender link, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_019: [The function shall advance the sender link.]
             sender.advance();
@@ -369,6 +370,14 @@ public final class AmqpsIotHubConnection extends BaseHandler
             deliveryHash = dlv.hashCode();
             logger.LogInfo("Delivery hash returned by the sender link %s, method name is %s ", deliveryHash, logger.getMethodName());
         }
+        catch (Exception e)
+        {
+            // If proton failed sending, release dlv object. Otherwise release it when received a disposition frame from proton.
+            sender.advance();
+            dlv.free();
+            deliveryHash = -1;
+	    }
+	}
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_021: [The function shall return the delivery hash.]
         return deliveryHash;
@@ -595,6 +604,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 {
                     listener.messageSent(d.hashCode(), state);
                 }
+		        // release the delivery object which created in sendMessage().
+		        d.free();
             }
         }
         logger.LogDebug("Exited from method %s", logger.getMethodName());
