@@ -355,9 +355,9 @@ public final class AmqpsIotHubConnection extends BaseHandler
             }
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_017: [The function shall set the delivery tag for the sender.]
             byte[] tag = String.valueOf(this. nextTag++).getBytes();
+	    Delivery dlv = sender.delivery(tag);
 	    try
 	    {
-		Delivery dlv = sender.delivery(tag);
 
 		logger.LogInfo("Attempting to send the message using the sender link, method name is %s ", logger.getMethodName());
 		// Codes_SRS_AMQPSIOTHUBCONNECTION_15_018: [The function shall attempt to send the message using the sender link.]
