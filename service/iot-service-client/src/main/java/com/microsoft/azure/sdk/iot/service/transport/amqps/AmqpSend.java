@@ -112,6 +112,14 @@ public class AmqpSend extends BaseHandler
             this.reactor = Proton.reactor(this);
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_008: [The function shall start the Proton reactor object]
             this.reactor.run();
+            try
+            {
+              this.reactor.run();
+            }
+            catch (Exception e)
+            {
+              System.err.println("Error "+ e.getMessage());
+            } 
             this.reactor.free();
 
         }
