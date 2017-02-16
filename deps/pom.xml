@@ -1,0 +1,26 @@
+<!-- Copyright (c) Microsoft. All rights reserved. -->
+<!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.microsoft.azure.sdk.iot</groupId>
+    <artifactId>iot-deps-parent</artifactId>
+    <version>1.0.0</version>
+    <name>IoT SDK Dependencies</name>
+
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot</groupId>
+        <artifactId>iot-sdk-java</artifactId>
+        <version>1.0.0</version>
+    </parent>
+    <developers>
+        <developer>
+            <id>microsoft</id>
+            <name>Microsoft</name>
+        </developer>
+    </developers>
+    <modules>
+        <module>websocket-transport-layer</module>
+        <module>serializer</module>
+    </modules>
+    <packaging>pom</packaging>
+</project>
