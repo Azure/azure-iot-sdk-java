@@ -16,8 +16,6 @@ public final class Mqtt implements MqttCallback
 
     abstract String parseTopic() throws IOException;
     abstract byte[] parsePayload(String topic) throws IOException;
-    abstract void onReconnect() throws IOException;
-    abstract void onReconnectComplete(boolean status) throws IOException;
 
     private class MqttConnectionInfo
     {
@@ -213,26 +211,3 @@ abstract byte[] parsePayload(String topic) throws IOException;
 **SRS_Mqtt_25_039: [**If the topic is non-null and received messagesqueue could not locate the payload then this method shall throw IOException**]**
 
 **SRS_Mqtt_25_040: [**If receiveMessage queue is null then this method shall throw IOException.**]**
-
-
-### onReconnect
-
-```java
-abstract void onReconnect() throws IOException;
-```
-
-**SRS_Mqtt_25_041: [**This abstract method shall be implemeted by the concrete classes.**]**
-
-**SRS_Mqtt_25_042: [**This abstract method shall put the entire operation of the concrete classes on hold by waiting on the lock.**]**
-
-
-### onReconnectComplete
-
-```java
-abstract void onReconnectComplete(boolean status) throws IOException;
-```
-
-**SRS_Mqtt_25_043: [**This abstract method shall be implemeted by the concrete classes.**]**
-
-**SRS_Mqtt_25_044: [**This abstract method shall release the entire operation of the concrete classes put on hold by notifying the users of the lock.**]**
-

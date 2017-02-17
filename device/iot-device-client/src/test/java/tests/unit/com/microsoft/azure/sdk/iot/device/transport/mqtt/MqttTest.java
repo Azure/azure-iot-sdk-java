@@ -72,18 +72,6 @@ public class MqttTest {
                 {
                     return new byte[0];
                 }
-
-                @Override
-                void onReconnect() throws IOException
-                {
-
-                }
-
-                @Override
-                void onReconnectComplete(boolean status) throws IOException
-                {
-
-                }
             };
 
             return mockMqtt;
@@ -109,17 +97,6 @@ public class MqttTest {
                     return new byte[0];
                 }
 
-                @Override
-                void onReconnect() throws IOException
-                {
-
-                }
-
-                @Override
-                void onReconnectComplete(boolean status) throws IOException
-                {
-
-                }
             };
 
             return mockMqtt;
@@ -422,18 +399,6 @@ public class MqttTest {
                 byte[] parsePayload(String topic) throws IOException
                 {
                     return new byte[0];
-                }
-
-                @Override
-                void onReconnect() throws IOException
-                {
-
-                }
-
-                @Override
-                void onReconnectComplete(boolean status) throws IOException
-                {
-
                 }
             };
         }
@@ -1154,18 +1119,6 @@ public class MqttTest {
             {
                 return payload;
             }
-
-            @Override
-            void onReconnect() throws IOException
-            {
-
-            }
-
-            @Override
-            void onReconnectComplete(boolean status) throws IOException
-            {
-
-            }
         };
 
         try
@@ -1224,17 +1177,6 @@ public class MqttTest {
                 return payload;
             }
 
-            @Override
-            void onReconnect() throws IOException
-            {
-
-            }
-
-            @Override
-            void onReconnectComplete(boolean status) throws IOException
-            {
-
-            }
         };
 
         try
@@ -1288,17 +1230,6 @@ public class MqttTest {
                 return null;
             }
 
-            @Override
-            void onReconnect() throws IOException
-            {
-
-            }
-
-            @Override
-            void onReconnectComplete(boolean status) throws IOException
-            {
-
-            }
         };
         //act
         try
@@ -1331,17 +1262,6 @@ public class MqttTest {
                 return null;
             }
 
-            @Override
-            void onReconnect() throws IOException
-            {
-
-            }
-
-            @Override
-            void onReconnectComplete(boolean status) throws IOException
-            {
-
-            }
         };
 
         //act
