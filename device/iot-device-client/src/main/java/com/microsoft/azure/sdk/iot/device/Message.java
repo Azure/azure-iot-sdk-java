@@ -102,6 +102,11 @@ public class Message
     /// </summary>
     private String feedbackDeviceGenerationId;
 
+    /// <summary>
+    /// [Optional] Used to specify the type of message exchanged between Iot Hub and Device
+    /// </summary>
+    private MessageType messageType;
+
     /**
      * User-defined properties.
      */
@@ -374,5 +379,23 @@ public class Message
         long currentTime = System.currentTimeMillis();
         this.expiryTime = currentTime + timeOut;
         logger.LogInfo("The message with messageid %s has expiry time as %s milliseconds and the message will expire on %s, method name is %s ", this.getMessageId(), timeOut, new Date(this.expiryTime), logger.getMethodName());
+    }
+
+    /**
+     * Getter for the Message type
+     * @return the Message type value
+     */
+    public MessageType getMessageType()
+    {
+        return this.messageType;
+    }
+
+    /**
+     * Setter for the Message type
+     * @param type The enum containing the the Message type value
+     */
+    public void setMessageType(MessageType type)
+    {
+        this.messageType = type;
     }
 }

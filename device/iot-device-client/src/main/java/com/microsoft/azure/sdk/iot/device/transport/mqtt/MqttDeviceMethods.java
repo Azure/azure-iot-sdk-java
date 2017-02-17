@@ -10,30 +10,15 @@ import java.io.IOException;
 public class MqttDeviceMethods extends Mqtt{
 
     @Override
-    String parseTopic()  {
-        return null;
-    }
-
-    @Override
-    byte[] parsePayload(String topic) {
-        return null;
-    }
-
-    @Override
-    public Message receive() {
-        return null;
-    }
-
-
-    @Override
-    public void onReconnect() throws IOException
+    String parseTopic() throws IOException
     {
-        System.out.println("On reconnect in Device Methods");
+        return null;
     }
 
     @Override
-    void onReconnectComplete(boolean status) throws IOException {
-
+    byte[] parsePayload(String topic) throws IOException
+    {
+        return null;
     }
 
     public MqttDeviceMethods() throws IOException

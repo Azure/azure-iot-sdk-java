@@ -1,0 +1,16 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+package com.microsoft.azure.sdk.iot.device.DeviceTwin;
+
+public enum DeviceTwinOperations
+{
+    DEVICE_TWIN_OPERATION_GET_REQUEST,
+    DEVICE_TWIN_OPERATION_GET_RESPONSE,
+    DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_REQUEST,
+    DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_RESPONSE,
+    DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST,
+    DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE,
+    DEVICE_TWIN_OPERATION_UNKNOWN
+
+}
