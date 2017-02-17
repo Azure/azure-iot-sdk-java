@@ -229,44 +229,6 @@ public class MqttMessagingTest {
     }
 
     /*
-    **Tests_SRS_MqttMessaging_25_016: [**This onReconnect method shall put the entire operation of the MqttMessaging class on hold by waiting on the lock.**]**
-     */
-    @Test
-    public void OnReconnectStopsOperation(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password);
-        testMqttMessaging.onReconnect();
-        Semaphore actualSemaphore = Deencapsulation.getField(testMqttMessaging, "MESSAGING_SEMAPHORE");
-        assertTrue(actualSemaphore.availablePermits() == 0);
-    }
-
-    /*
-    **Tests_SRS_MqttMessaging_25_018: [**If the status is true, onReconnectComplete method shall release all the operation of the MqttMessaging class put on hold by notifying the users of the lock.**]**
-     */
-    @Test
-    public void onReconnectCompleteRestoresAllOperations(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password);
-        testMqttMessaging.onReconnect();
-        testMqttMessaging.onReconnectComplete(true);
-        Semaphore actualSemaphore = Deencapsulation.getField(testMqttMessaging, "MESSAGING_SEMAPHORE");
-        assertTrue(actualSemaphore.availablePermits() == 1);
-    }
-
-    /*
-    **Tests_SRS_MqttMessaging_25_019: [**If the status is false, onReconnectComplete method shall throw IOException**]**
-     */
-    @Test (expected = IOException.class)
-    public void onReconnectCompleteThrowsExceptionIfReconnectWasNotComplete(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password);
-        testMqttMessaging.onReconnect();
-        testMqttMessaging.onReconnectComplete(false);
-        Semaphore actualSemaphore = Deencapsulation.getField(testMqttMessaging, "MESSAGING_SEMAPHORE");
-        assertTrue(actualSemaphore.availablePermits() == 1);
-    }
-
-    /*
     **Tests_SRS_MqttMessaging_25_005: [**parseTopic shall look for the subscribe topic prefix from received message queue.**]**
      */
     @Test

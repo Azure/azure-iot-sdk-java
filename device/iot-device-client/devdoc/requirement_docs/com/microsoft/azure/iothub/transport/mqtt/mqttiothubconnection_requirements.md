@@ -49,12 +49,13 @@ public void open() throws IOException, IllegalArgumentException;
 ### close
 
 ```java
-public void close();
+public void close() throws IOException;
 ```
 
 **SRS_MQTTIOTHUBCONNECTION_15_006: [**The function shall close the MQTT connection.**]**
 
 **SRS_MQTTIOTHUBCONNECTION_15_007: [**If the MQTT connection is closed, the function shall do nothing.**]**
+
 
 
 ### sendEvent
@@ -79,9 +80,11 @@ public IotHubStatusCode sendEvent(Message msg) throws IllegalStateException
 ### receiveMessage
 
 ```java
-public Message receiveMessage() throws IllegalStateException;
+public Message receiveMessage() throws IllegalStateException, IOException;
 ```
 
 **SRS_MQTTIOTHUBCONNECTION_15_014: [**The function shall attempt to consume a message from various messaging clients.**]**
 
 **SRS_MQTTIOTHUBCONNECTION_15_015: [**If the MQTT connection is closed, the function shall throw an IllegalStateException.**]**
+
+**SRS_MQTTIOTHUBCONNECTION_25_016: [**If any of the messaging clients fail to receive, the function shall throw an IOException.**]**

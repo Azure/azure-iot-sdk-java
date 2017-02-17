@@ -32,6 +32,7 @@ public class MqttIotHubConnectionTest
     final String hubName = "test.iothub";
     final String deviceId = "test-deviceId";
     final String deviceKey = "test-devicekey?&test";
+    final String API_VERSION = "api-version=2016-11-14";
     final String resourceUri = "test-resource-uri";
     final int qos = 1;
     final String publishTopic = "devices/test-deviceId/messages/events/";
@@ -246,7 +247,7 @@ public class MqttIotHubConnectionTest
         final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
 
         String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion, "UTF-8");
-        assertEquals(iotHubHostName + "/" + deviceId + "/" + clientIdentifier, actualIotHubUserName);
+        assertEquals(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "/" + clientIdentifier, actualIotHubUserName);
 
         String expectedSasToken = mockToken.toString();
         String actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
@@ -261,11 +262,12 @@ public class MqttIotHubConnectionTest
         {
             {
                 new MqttDeviceMethods();
-                new MqttDeviceTwinDesiredProperties();
-                new MqttDeviceTwinDesiredPropertiesUpdate();
-                new MqttDeviceTwinReportedProperties();
+                times = 1;
                 new MqttMessaging(sslPrefix + iotHubHostName + sslPortSuffix, deviceId, anyString, anyString);
                 mockDeviceMessaging.start();
+                times = 1;
+                new MqttDeviceTwin();
+                times = 1;
             }
         };
     }
@@ -568,6 +570,8 @@ public class MqttIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
+                mockDeviceTwin.receive();
+                result = null;
                 mockDeviceMessaging.receive();
                 result = new Message(expectedMessageBody);
             }

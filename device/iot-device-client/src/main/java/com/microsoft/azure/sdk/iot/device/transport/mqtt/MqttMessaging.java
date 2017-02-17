@@ -9,9 +9,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 
-public class MqttMessaging extends Mqtt {
-    private final int MAX_PERMITS = 1;
-    private final Semaphore MESSAGING_SEMAPHORE = new Semaphore(MAX_PERMITS);
+public class MqttMessaging extends Mqtt
+{
     private String subscribeTopic;
     private String publishTopic;
     private String parseTopic;
@@ -104,52 +103,6 @@ public class MqttMessaging extends Mqtt {
 
         return null;
 
-
-    }
-
-    @Override
-    public void onReconnect() throws IOException
-    {
-        try
-        {
-            /*
-            **Codes_SRS_MqttMessaging_25_020: [**onReconnect method shall be implemeted by MqttMessaging class.**]**
-
-            **Codes_SRS_MqttMessaging_25_020: [**This onReconnect method shall put the entire operation of the MqttMessaging class on hold by waiting on the lock.**]**
-             */
-            System.out.println("Pausing Device Messaging during reconnect");
-            MESSAGING_SEMAPHORE.acquire();
-        }
-        catch (InterruptedException e)
-        {
-            // Do nothing and log
-        }
-
-    }
-
-    @Override
-    void onReconnectComplete(boolean status) throws IOException {
-
-        if (status)
-        {
-            /*
-
-            **Codes_SRS_MqttMessaging_25_017: [**This onReconnectComplete method shall be implemeted by MqttMessaging class.**]**
-
-            **Codes_SRS_MqttMessaging_25_018: [**If the status is true, onReconnectComplete method shall release all the operation of the MqttMessaging class put on hold by notifying the users of the lock.**]**
-            * */
-            System.out.println("Continue device Messaging after reconnect");
-            MESSAGING_SEMAPHORE.release();
-        }
-        else
-        {
-            /*
-            **Codes_SRS_MqttMessaging_25_019: [**If the status is false, onReconnectComplete method shall throw IOException**]**
-             */
-            MESSAGING_SEMAPHORE.release();
-            throw new IOException("Could not reconnect to IotHub");
-        }
-
     }
 
     public MqttMessaging(String serverURI, String deviceId, String userName, String password) throws IOException
@@ -172,42 +125,25 @@ public class MqttMessaging extends Mqtt {
 
     public void start() throws IOException
     {
-        try
-        {
-            /*
-            **Codes_SRS_MqttMessaging_25_020: [**start method shall be call connect to establish a connection to IOT Hub with the given configuration.**]**
+        /*
+        **Codes_SRS_MqttMessaging_25_020: [**start method shall be call connect to establish a connection to IOT Hub with the given configuration.**]**
 
-            **Codes_SRS_MqttMessaging_25_021: [**start method shall subscribe to messaging subscribe topic once connected.**]**
-             */
-            MESSAGING_SEMAPHORE.acquire();
-            this.connect();
-            this.subscribe(subscribeTopic);
-        }
-        catch (InterruptedException e)
-        {
+        **Codes_SRS_MqttMessaging_25_021: [**start method shall subscribe to messaging subscribe topic once connected.**]**
+         */
 
-        }
-        finally
-        {
-            MESSAGING_SEMAPHORE.release();
-        }
-
+        this.connect();
+        this.subscribe(subscribeTopic);
     }
 
     public void stop() throws IOException
     {
-
        try
        {
            /*
            **Codes_SRS_MqttMessaging_25_022: [**stop method shall be call disconnect to tear down a connection to IOT Hub with the given configuration.**]**
             */
-           MESSAGING_SEMAPHORE.acquire();
-           this.disconnect();
-       }
-       catch (InterruptedException e)
-       {
 
+           this.disconnect();
        }
        finally
        {
@@ -216,7 +152,6 @@ public class MqttMessaging extends Mqtt {
             base class on exit from this class.
             */
            this.restartBaseMqtt();
-           MESSAGING_SEMAPHORE.release();
        }
 
 
@@ -224,33 +159,19 @@ public class MqttMessaging extends Mqtt {
 
     public void send(Message message) throws IOException
     {
-        try
+        if (message == null || message.getBytes() == null)
         {
-            MESSAGING_SEMAPHORE.acquire();
-            {
-                if (message == null || message.getBytes() == null)
-                {
-                    /*
-                    **Codes_SRS_MqttMessaging_25_025: [**send method shall throw an exception if the message is null.**]**
-                     */
-                    throw new IOException("Message cannot be null");
-                }
-
-                /*
-                **Codes_SRS_MqttMessaging_25_024: [**send method shall publish a message to the IOT Hub on the publish topic by calling method publish().**]**
-                 */
-                this.publish(this.publishTopic, message.getBytes());
-
-            }
-
+            /*
+            **Codes_SRS_MqttMessaging_25_025: [**send method shall throw an exception if the message is null.**]**
+             */
+            throw new IOException("Message cannot be null");
         }
-        catch (InterruptedException e)
-        {
 
-        }
-        finally
-        {
-            MESSAGING_SEMAPHORE.release();
-        }
+        /*
+        **Codes_SRS_MqttMessaging_25_024: [**send method shall publish a message to the IOT Hub on the publish topic by calling method publish().**]**
+         */
+        this.publish(this.publishTopic, message.getBytes());
+
     }
+
 }

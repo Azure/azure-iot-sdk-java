@@ -4,8 +4,10 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
@@ -16,11 +18,6 @@ import java.net.URLEncoder;
 
 public class MqttIotHubConnection
 {
-     private static final int DEVICE_TWIN_DESIRED_PROPERTY  = 0 ;
-     private static final int DEVICE_TWIN_DESIRED_PROPERTY_UPDATE = 1;
-     private static final int DEVICE_TWIN_REPORTED_PROPERTY = 2;
-    private static final int DEVICE_TWIN_TOTAL_PROPERTY = 3;
-
     /** The MQTT connection lock. */
     protected final Object MQTT_CONNECTION_LOCK = new Object();
 
@@ -33,10 +30,11 @@ public class MqttIotHubConnection
     //string constants
     private static String sslPrefix = "ssl://";
     private static String sslPortSuffix = ":8883";
+    private static String TWIN_API_VERSION = "api-version=2016-11-14";
 
     //Messaging clients
     private MqttMessaging deviceMessaging;
-    private MqttDeviceTwin [] deviceTwin;
+    private MqttDeviceTwin deviceTwin;
     private MqttDeviceMethods deviceMethods;
 
     /**
@@ -108,16 +106,13 @@ public class MqttIotHubConnection
                 this.iotHubUserPassword = sasToken.toString();
 
                 String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion, "UTF-8");
-                this.iotHubUserName = this.config.getIotHubHostname() + "/" + this.config.getDeviceId() + "/" + clientIdentifier;
+                this.iotHubUserName = this.config.getIotHubHostname() + "/" + this.config.getDeviceId() + "/" + TWIN_API_VERSION + "/" + clientIdentifier;
 
 
                 this.deviceMessaging = new MqttMessaging(sslPrefix + this.config.getIotHubHostname() + sslPortSuffix,
                         this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword);
                 this.deviceMethods = new MqttDeviceMethods();
-                this.deviceTwin = new MqttDeviceTwin[DEVICE_TWIN_TOTAL_PROPERTY];
-                this.deviceTwin[DEVICE_TWIN_DESIRED_PROPERTY] = new MqttDeviceTwinDesiredProperties();
-                this.deviceTwin[DEVICE_TWIN_DESIRED_PROPERTY_UPDATE] = new MqttDeviceTwinDesiredPropertiesUpdate();
-                this.deviceTwin[DEVICE_TWIN_REPORTED_PROPERTY] = new MqttDeviceTwinReportedProperties();
+                this.deviceTwin = new MqttDeviceTwin();
 
                 this.deviceMessaging.start();
                 this.state = State.OPEN;
@@ -127,6 +122,14 @@ public class MqttIotHubConnection
                 this.state = State.CLOSED;
                 // Codes_SRS_MQTTIOTHUBCONNECTION_15_005: [If an MQTT connection is unable to be established
                 // for any reason, the function shall throw an IOException.]
+                if (this.deviceTwin != null )
+                {
+                    this.deviceTwin.stop();
+                }
+                if (this.deviceMessaging != null)
+                {
+                    this.deviceMessaging.stop();
+                }
                 throw new IOException(e.getMessage(), e.getCause());
             }
 
@@ -138,7 +141,7 @@ public class MqttIotHubConnection
      * If the connection is already closed, the function shall do nothing.
      *
      */
-    public void close() throws IOException
+    public void close()
     {
         synchronized (MQTT_CONNECTION_LOCK)
         {
@@ -150,12 +153,11 @@ public class MqttIotHubConnection
 
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [**The function shall close the MQTT connection.]
 
-            try {
+            try
+            {
                 this.deviceMethods = null;
 
-                for (MqttDeviceTwin dt : deviceTwin) {
-                    dt = null;
-                }
+                this.deviceTwin.stop();
                 this.deviceTwin = null;
 
                 this.deviceMessaging.stop();
@@ -186,7 +188,7 @@ public class MqttIotHubConnection
         {
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_010: [If the message is null or empty,
             // the function shall return status code BAD_FORMAT.]
-            if (message == null || message.getBytes() == null || message.getBytes().length == 0)
+            if (message == null || message.getBytes() == null || (message.getMessageType() != MessageType.DeviceTwin && message.getBytes().length == 0))
             {
                 return IotHubStatusCode.BAD_FORMAT;
             }
@@ -207,7 +209,15 @@ public class MqttIotHubConnection
             try
             {
                 // Codes_SRS_MQTTIOTHUBCONNECTION_15_009: [The function shall send the message payload.]
-                this.deviceMessaging.send(message);
+                if (message.getMessageType() == MessageType.DeviceTwin)
+                {
+                    this.deviceTwin.start();
+                    this.deviceTwin.send((DeviceTwinMessage) message);
+                }
+                else
+                {
+                    this.deviceMessaging.send(message);
+                }
             }
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_012: [If the message was not successfully
             // received by the service, the function shall return status code ERROR.]
@@ -226,6 +236,7 @@ public class MqttIotHubConnection
      * @return the message received, or null if none exists.
      *
      * @throws IllegalStateException if the connection state is currently closed.
+     * @throws IOException if receiving on any of messaging clients fail.
      */
     public Message receiveMessage() throws IllegalStateException, IOException
     {
@@ -241,7 +252,15 @@ public class MqttIotHubConnection
 
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_014: [The function shall attempt to consume a message
         // from various messaging clients.]
-        message = deviceMessaging.receive();
+
+        /*
+        **Codes_SRS_MQTTIOTHUBCONNECTION_25_016: [**If any of the messaging clients fail to receive, the function shall throw an IOException.**]**
+         */
+        message = deviceTwin.receive();
+        if (message == null)
+        {
+            message = deviceMessaging.receive();
+        }
 
         return message;
     }
