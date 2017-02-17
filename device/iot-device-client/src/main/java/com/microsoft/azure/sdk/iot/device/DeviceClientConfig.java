@@ -34,6 +34,13 @@ public final class DeviceClientConfig
     protected String pathToCertificate;
 
     /**
+     * The callback to be invoked if a message of Device Twin type received.
+     */
+    protected MessageCallback deviceTwinMessageCallback;
+    /** The context to be passed in to the device twin type message callback. */
+    protected Object deviceTwinMessageContext;
+
+    /**
      * The callback to be invoked if a message is received.
      */
     protected MessageCallback messageCallback;
@@ -222,6 +229,49 @@ public final class DeviceClientConfig
         // Codes_SRS_DEVICECLIENTCONFIG_11_011: [The function shall return the current message context.]
         return this.messageContext;
     }
+
+    /**
+     * Setter for the device twin message callback.
+     *
+     */
+    public void setDeviceTwinMessageCallback(MessageCallback callback)
+    {
+        // To do  Codes_SRS_DEVICECLIENTCONFIG_11_010: [The function shall return the current message callback.]
+        this.deviceTwinMessageCallback = callback;
+    }
+
+    /**
+     * Getter for the context to be passed in to the device twin message callback.
+     *
+     */
+    public void setDeviceTwinMessageContext(Object context)
+    {
+        // To do Codes_SRS_DEVICECLIENTCONFIG_11_011: [The function shall return the current message context.]
+        this.deviceTwinMessageContext = context;
+    }
+
+    /**
+     * Getter for the device twin message callback.
+     *
+     * @return the message callback.
+     */
+    public MessageCallback getDeviceTwinMessageCallback()
+    {
+        // To do  Codes_SRS_DEVICECLIENTCONFIG_11_010: [The function shall return the current message callback.]
+        return this.deviceTwinMessageCallback;
+    }
+
+    /**
+     * Getter for the context to be passed in to the device twin message callback.
+     *
+     * @return the message context.
+     */
+    public Object getDeviceTwinMessageContext()
+    {
+        // To do Codes_SRS_DEVICECLIENTCONFIG_11_011: [The function shall return the current message context.]
+        return this.deviceTwinMessageContext;
+    }
+
 
     /**
      * Getter for the timeout, in seconds, for the lock that the client has on a
