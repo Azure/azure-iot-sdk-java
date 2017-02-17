@@ -136,10 +136,10 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
-			             mockLogger.isEnabledFor(Level.WARN);
-			             result = true;
-			         }
-		      };
+                mockLogger.isEnabledFor(Level.WARN);
+                result = true;
+			}
+		};
 
         new CustomLogger(this.getClass()).LogWarn(message);	
 
@@ -187,7 +187,7 @@ public class CustomLoggerTest
         {
             {
                 mockLogger.isEnabledFor(Level.ERROR);
-			    result = true;
+                result = true;
             }
         };
 
