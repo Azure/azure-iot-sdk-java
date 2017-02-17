@@ -21,6 +21,7 @@
 		<module>send-serialized-event</module>
         <module>handle-messages</module>
         <module>send-receive-sample</module>
+        <module>device-twin-sample</module>
     </modules>
     <dependencies>
         <dependency>
