@@ -138,8 +138,8 @@ public class CustomLoggerTest
             {
                 mockLogger.isEnabledFor(Level.WARN);
                 result = true;
-			}
-		};
+            }
+        };
 
         new CustomLogger(this.getClass()).LogWarn(message);	
 
