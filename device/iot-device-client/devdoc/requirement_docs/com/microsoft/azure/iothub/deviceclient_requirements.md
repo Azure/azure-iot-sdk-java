@@ -22,9 +22,12 @@ public final class DeviceClient
     public void open() throws IOException;
     public void close() throws IOException;
 
-    public void sendEventAsync(Message msg, IotHubEventCallback callback, Object callbackContext);
-    
+    public void sendEventAsync(Message msg, IotHubEventCallback callback, Object callbackContext);    
     public DeviceClient setMessageCallback(IotHubMessageCallback callback, Object context);
+    
+    public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object    deviceTwinStatusCallbackContext, PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext) throws IOException;
+    public void subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange) throws IOException;
+    public void sendReportedProperties(Set<Property> reportedProperties) throws IOException;    
 }
 ```
 
@@ -116,6 +119,49 @@ public DeviceClient setMessageCallback(IotHubMessageCallback callback, Object co
 **SRS_DEVICECLIENT_11_012: [**The function shall set the message callback, with its associated context.**]**
 
 **SRS_DEVICECLIENT_11_032: [**If the callback is null but the context is non-null, the function shall throw an IllegalArgumentException.**]**
+
+
+### startDeviceTwin
+
+```java
+public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object    deviceTwinStatusCallbackContext, PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext) throws IOException;
+```
+
+**SRS_DEVICECLIENT_25_011: [**The function shall create a new instance of class Device Twin and request all twin properties by calling getDeviceTwin**]**
+
+**SRS_DEVICECLIENT_25_012: [**If the deviceTwinStatusCallback or genericPropertyCallBack is null, the function shall throw an IllegalArgumentException.**]**
+
+**SRS_DEVICECLIENT_25_013: [**If the client has not been open, the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_25_014: [**If this method is called twice on the same instance of the client then this method shall throw UnsupportedOperationException.**]**
+
+
+### subscribeToDesiredProperties
+
+```java
+public void subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange) throws IOException;
+```
+
+**SRS_DEVICECLIENT_25_015: [**If the client has not started twin before calling this method, the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_25_016: [**If the client has not been open, the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_25_017: [**This method shall subscribe to desired properties by calling subscribeDesiredPropertiesNotification on the twin object.**]**
+
+
+### sendReportedProperties
+
+```java
+public void sendReportedProperties(Set<Property> reportedProperties) throws IOException;
+```
+
+**SRS_DEVICECLIENT_25_018: [**If the client has not started twin before calling this method, the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_25_019: [**If the client has not been open, the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_25_020: [**If reportedProperties is null or empty, the function shall throw an IllegalArgumentException.**]**
+
+**SRS_DEVICECLIENT_25_021: [**This method shall send to reported properties by calling updateReportedProperties on the twin object.**]**
 
 
 ### setOption

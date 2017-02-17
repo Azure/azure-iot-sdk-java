@@ -5,6 +5,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTransport;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransport;
 
@@ -18,8 +19,10 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -705,6 +708,457 @@ public class DeviceClientTest
         client.setMessageCallback(null, context);
     }
 
+    /*
+    **Tests_SRS_DEVICECLIENT_25_011: [**The function shall create a new instance of class Device Twin and request all twin properties by calling getDeviceTwin**]**
+     */
+    @Test
+    public void startDeviceTwinSucceeds(@Mocked final DeviceTwin mockedDeviceTwin,
+                                        @Mocked final IotHubEventCallback mockedStatusCB,
+                                        @Mocked final PropertyCallBack mockedPropertyCB,
+                                        @Mocked final AmqpsTransport mockTransport) throws IOException, URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+
+        //act
+        client.startDeviceTwin(mockedStatusCB, null, mockedPropertyCB, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.getDeviceTwin();
+                times = 1;
+            }
+        };
+    }
+
+    /*
+    **Tests_SRS_DEVICECLIENT_25_012: [**If the deviceTwinStatusCallback or genericPropertyCallBack is null, the function shall throw an InvalidParameterException.**]**
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void startDeviceTwinThrowsIfStatusCBisNull(@Mocked final DeviceTwin mockedDeviceTwin,
+                                                      @Mocked final IotHubEventCallback mockedStatusCB,
+                                                      @Mocked final PropertyCallBack mockedPropertyCB,
+                                                      @Mocked final AmqpsTransport mockTransport) throws IOException, URISyntaxException
+
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+
+        //act
+        client.startDeviceTwin(null, null, mockedPropertyCB, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.getDeviceTwin();
+                times = 0;
+            }
+        };
+
+    }
+
+    /*
+    **Tests_SRS_DEVICECLIENT_25_012: [**If the deviceTwinStatusCallback or genericPropertyCallBack is null, the function shall throw an InvalidParameterException.**]**
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void startDeviceTwinThrowsIfPropCBisNull(@Mocked final DeviceTwin mockedDeviceTwin,
+                                                      @Mocked final IotHubEventCallback mockedStatusCB,
+                                                      @Mocked final PropertyCallBack mockedPropertyCB,
+                                                      @Mocked final AmqpsTransport mockTransport) throws IOException, URISyntaxException
+
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+
+        //act
+        client.startDeviceTwin(mockedStatusCB, null, null, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.getDeviceTwin();
+                times = 0;
+            }
+        };
+
+    }
+
+    /*
+    **Tests_SRS_DEVICECLIENT_25_014: [**If this method is called twice on the same instance of the client then this method shall throw UnsupportedOperationException.**]**
+     */
+    @Test (expected = UnsupportedOperationException.class)
+    public void startDeviceTwinThrowsIfCalledTwice(@Mocked final DeviceTwin mockedDeviceTwin,
+                                                   @Mocked final IotHubEventCallback mockedStatusCB,
+                                                   @Mocked final PropertyCallBack mockedPropertyCB,
+                                                   @Mocked final AmqpsTransport mockTransport) throws IOException, URISyntaxException
+
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+
+        //act
+        client.startDeviceTwin(mockedStatusCB, null, mockedPropertyCB, null);
+        client.startDeviceTwin(mockedStatusCB, null, mockedPropertyCB, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.getDeviceTwin();
+                times = 1;
+            }
+        };
+    }
+
+    /*
+    **Tests_SRS_DEVICECLIENT_25_013: [**If the client has not been open, the function shall throw an IOException.**]**
+     */
+    @Test (expected = IOException.class)
+    public void startDeviceTwinThrowsIfCalledWhenClientNotOpen(@Mocked final DeviceTwin mockedDeviceTwin,
+                                                               @Mocked final IotHubEventCallback mockedStatusCB,
+                                                               @Mocked final PropertyCallBack mockedPropertyCB,
+                                                               @Mocked final AmqpsTransport mockTransport) throws IOException, URISyntaxException
+
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        //act
+        client.startDeviceTwin(mockedStatusCB, null, mockedPropertyCB, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.getDeviceTwin();
+                times = 0;
+            }
+        };
+
+    }
+    /*
+    **Tests_SRS_DEVICECLIENT_25_017: [**This method shall subscribe to desired properties by calling subscribeDesiredPropertiesNotification on the twin object.**]**
+     */
+    @Test
+    public void subscribeToDPSucceeds(@Mocked final DeviceTwin mockedDeviceTwin,
+                                      @Mocked final IotHubEventCallback mockedStatusCB,
+                                      @Mocked final PropertyCallBack mockedPropertyCB,
+                                      @Mocked final AmqpsTransport mockTransport,
+                                      @Mocked final Map<Property, Pair<PropertyCallBack<String, Object>, Object>> mockMap) throws IOException, URISyntaxException
+
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        client.open();
+        client.startDeviceTwin(mockedStatusCB, null, mockedPropertyCB, null);
+
+        //act
+        client.subscribeToDesiredProperties(mockMap);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.subscribeDesiredPropertiesNotification(mockMap);
+                times = 1;
+            }
+        };
+
+    }
+
+    @Test
+    public void subscribeToDPWorksWhenMapIsNull(@Mocked final DeviceTwin mockedDeviceTwin,
+                                      @Mocked final IotHubEventCallback mockedStatusCB,
+                                      @Mocked final PropertyCallBack mockedPropertyCB,
+                                      @Mocked final AmqpsTransport mockTransport) throws IOException, URISyntaxException
+
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        client.open();
+        client.startDeviceTwin(mockedStatusCB, null, mockedPropertyCB, null);
+
+        //act
+        client.subscribeToDesiredProperties(null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.subscribeDesiredPropertiesNotification((Map)any);
+                times = 1;
+            }
+        };
+
+    }
+
+    @Test
+    public void subscribeToDPSucceedsEvenWhenUserCBIsNull(@Mocked final DeviceTwin mockedDeviceTwin,
+                                                      @Mocked final IotHubEventCallback mockedStatusCB,
+                                                      @Mocked final PropertyCallBack mockedPropertyCB,
+                                                      @Mocked final AmqpsTransport mockTransport) throws IOException, URISyntaxException
+    {
+        //arrange
+        final Device mockDevice = new Device()
+        {
+            @Override
+            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            {
+
+            }
+        };
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        client.open();
+        client.startDeviceTwin(mockedStatusCB, null, mockedPropertyCB, null);
+        mockDevice.setDesiredPropertyCallback(new Property("Desired", null), null, null);
+
+        //act
+        client.subscribeToDesiredProperties(mockDevice.getDesiredProp());
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.subscribeDesiredPropertiesNotification((Map)any);
+                times = 1;
+            }
+        };
+    }
+
+    /*
+    **Tests_SRS_DEVICECLIENT_25_016: [**If the client has not been open, the function shall throw an IOException.**]**
+     */
+    @Test (expected = IOException.class)
+    public void subscribeToDPThrowsIfCalledWhenClientNotOpen(@Mocked final DeviceTwin mockedDeviceTwin,
+                                                             @Mocked final IotHubEventCallback mockedStatusCB,
+                                                             @Mocked final PropertyCallBack mockedPropertyCB,
+                                                             @Mocked final AmqpsTransport mockTransport,
+                                                             @Mocked final Map<Property, Pair<PropertyCallBack<String, Object>, Object>> mockMap) throws IOException, URISyntaxException
+
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        client.startDeviceTwin(mockedStatusCB, null, mockedPropertyCB, null);
+
+        //act
+        client.subscribeToDesiredProperties(mockMap);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.subscribeDesiredPropertiesNotification(mockMap);
+                times = 1;
+            }
+        };
+
+    }
+    /*
+    **Tests_SRS_DEVICECLIENT_25_015: [**If the client has not started twin before calling this method, the function shall throw an IOException.**]**
+     */
+    @Test (expected = IOException.class)
+    public void subscribeToDPThrowsIfCalledBeforeStartingTwin(@Mocked final DeviceTwin mockedDeviceTwin,
+                                                              @Mocked final IotHubEventCallback mockedStatusCB,
+                                                              @Mocked final PropertyCallBack mockedPropertyCB,
+                                                              @Mocked final AmqpsTransport mockTransport,
+                                                              @Mocked final Map<Property, Pair<PropertyCallBack<String, Object>, Object>> mockMap) throws IOException, URISyntaxException
+
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        //act
+
+        client.subscribeToDesiredProperties(mockMap);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.subscribeDesiredPropertiesNotification(mockMap);
+                times = 1;
+            }
+        };
+
+    }
+    /*
+    **Tests_SRS_DEVICECLIENT_25_021: [**This method shall send to reported properties by calling updateReportedProperties on the twin object.**]**
+     */
+    @Test
+    public void sendRPSucceeds(@Mocked final DeviceTwin mockedDeviceTwin,
+                               @Mocked final IotHubEventCallback mockedStatusCB,
+                               @Mocked final PropertyCallBack mockedPropertyCB,
+                               @Mocked final AmqpsTransport mockTransport,
+                               @Mocked final Set<Property> mockSet) throws IOException, URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        client.open();
+        client.startDeviceTwin(mockedStatusCB, null, mockedPropertyCB, null);
+
+        //act
+        client.sendReportedProperties(mockSet);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.updateReportedProperties(mockSet);
+                times = 1;
+            }
+        };
+    }
+
+    /*
+    **Tests_SRS_DEVICECLIENT_25_018: [**If the client has not started twin before calling this method, the function shall throw an IOException.**]**
+     */
+    @Test (expected = IOException.class)
+    public void sendRPThrowsIfCalledBeforeStartingTwin(@Mocked final DeviceTwin mockedDeviceTwin,
+                                                       @Mocked final IotHubEventCallback mockedStatusCB,
+                                                       @Mocked final PropertyCallBack mockedPropertyCB,
+                                                       @Mocked final AmqpsTransport mockTransport,
+                                                       @Mocked final Set<Property> mockSet) throws IOException, URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        client.open();
+
+        //act
+        client.sendReportedProperties(mockSet);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.updateReportedProperties(mockSet);
+                times = 1;
+            }
+        };
+    }
+
+    /*
+    **Tests_SRS_DEVICECLIENT_25_019: [**If the client has not been open, the function shall throw an IOException.**]**
+     */
+    @Test (expected = IOException.class)
+    public void sendRPThrowsIfCalledWhenClientNotOpen(@Mocked final DeviceTwin mockedDeviceTwin,
+                                                      @Mocked final IotHubEventCallback mockedStatusCB,
+                                                      @Mocked final PropertyCallBack mockedPropertyCB,
+                                                      @Mocked final AmqpsTransport mockTransport,
+                                                      @Mocked final Set<Property> mockSet) throws IOException, URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        //act
+        client.sendReportedProperties(mockSet);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.updateReportedProperties(mockSet);
+                times = 1;
+            }
+        };
+    }
+
+    /*
+    **Tests_SRS_DEVICECLIENT_25_020: [**If reportedProperties is null or empty, the function shall throw an InvalidParameterException.**]**
+     */
+    @Test (expected =  IllegalArgumentException.class)
+    public void sendRPThrowsIfCalledWhenRPNullOrEmpty(@Mocked final DeviceTwin mockedDeviceTwin,
+                                                      @Mocked final IotHubEventCallback mockedStatusCB,
+                                                      @Mocked final PropertyCallBack mockedPropertyCB,
+                                                      @Mocked final AmqpsTransport mockTransport) throws IOException, URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+        client.startDeviceTwin(mockedStatusCB, null, mockedPropertyCB, null);
+
+        //act
+        client.sendReportedProperties(null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.updateReportedProperties((Set)any);
+                times = 1;
+            }
+        };
+    }
+
     // Tests_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the client, then it shall throw IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
     public void setOptionWithnullOptionNameThrows(
@@ -712,6 +1166,7 @@ public class DeviceClientTest
             @Mocked final AmqpsTransport mockTransport)
             throws IOException, URISyntaxException
     {
+
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
                 + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
