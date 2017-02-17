@@ -83,7 +83,7 @@ public void LogWarn(String message, Object...params);
 
 **SRS_CUSTOMLOGGER_25_011: [**The function shall record the message and arguments.**]**
 
-**SRS_CUSTOMLOGGER_25_012: [**If TRACE level is not enabled, message will not be recorded.**]**
+**SRS_CUSTOMLOGGER_25_012: [**If WARN level is not enabled, message will not be recorded.**]**
 
 **SRS_CUSTOMLOGGER_25_013: [**The function shall format the message before recording.**]**
 
@@ -96,7 +96,7 @@ public void LogFatal(String message, Object...params);
 
 **SRS_CUSTOMLOGGER_25_014: [**The function shall record the message and arguments.**]**
 
-**SRS_CUSTOMLOGGER_25_015: [**If TRACE level is not enabled, message will not be recorded.**]**
+**SRS_CUSTOMLOGGER_25_015: [**If FATAL level is not enabled, message will not be recorded.**]**
 
 **SRS_CUSTOMLOGGER_25_016: [**The function shall format the message before recording.**]**
 
