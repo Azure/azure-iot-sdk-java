@@ -129,6 +129,8 @@ public void stop() throws IOException;
 
 **SRS_MqttMessaging_25_024: [**send method shall publish a message to the IOT Hub on the publish topic by calling method publish().**]**
 
+**SRS_MqttMessaging_25_026: [**send method shall append the message properties to publishTopic before publishing.**]**
+
 **SRS_MqttMessaging_25_025: [**send method shall throw an exception if the message is null.**]**
 
 
