@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.MessageProperty;
 
 import java.io.IOException;
 import java.util.Map;
@@ -167,10 +168,34 @@ public class MqttMessaging extends Mqtt
             throw new IOException("Message cannot be null");
         }
 
+        MessageProperty[] messageProperties = message.getProperties();
+        String messagePublishTopic;
+        if(messageProperties.length > 0)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(this.publishTopic);
+            boolean needAmpersand = false;
+            for(MessageProperty property : message.getProperties())
+            {
+                if(needAmpersand)
+                {
+                    stringBuilder.append('&');
+                }
+                stringBuilder.append(property.getName());
+                stringBuilder.append('=');
+                stringBuilder.append(property.getValue());
+                needAmpersand = true;
+            }
+            messagePublishTopic = stringBuilder.toString();
+        }
+        else
+        {
+            messagePublishTopic = this.publishTopic;
+        }
         /*
         **Codes_SRS_MqttMessaging_25_024: [**send method shall publish a message to the IOT Hub on the publish topic by calling method publish().**]**
          */
-        this.publish(this.publishTopic, message.getBytes());
+        this.publish(messagePublishTopic, message.getBytes());
 
     }
 
