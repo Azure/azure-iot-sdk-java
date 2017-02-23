@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.Message;
 
+import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import mockit.*;
 
 import org.junit.Test;
@@ -435,7 +436,6 @@ public class MqttMessagingTest {
             }
         };
 
-
     }
 
     @Test (expected =  IOException.class)
@@ -492,5 +492,45 @@ public class MqttMessagingTest {
 
     }
 
+    /*
+     **Tests_SRS_MqttMessaging_25_026: [**send method shall publish a message to the IOT Hub on the publish topic with message property bag by calling method publish().**]**
+     */
+    @Test
+    public void sendShallMessageWithPropertiesToLowerLayer(@Mocked final Mqtt mockMqtt) throws IOException
+    {
+        final byte[] messageBody = {0x61, 0x62, 0x63};
+        final String propertyName = "key";
+        final String propertyValue = "value";
+        final MessageProperty[] messageProperties = new MessageProperty[]
+                {
+                        new MessageProperty(propertyName, propertyValue)
+                };
+        new NonStrictExpectations()
+        {
+            {
+                mockMessage.getBytes();
+                result = messageBody;
+                mockMessage.getProperties();
+                result = messageProperties;
+                mockMqtt.publish(anyString, messageBody);
+            }
+        };
+
+        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password);
+        testMqttMessaging.send(mockMessage);
+        final String publishTopicWithProperties = String.format(
+                "devices/%s/messages/events/%s=%s", clientId, propertyName, propertyValue);
+
+        new Verifications()
+        {
+            {
+                mockMessage.getBytes();
+                times = 2;
+                mockMessage.getProperties();
+                mockMqtt.publish(publishTopicWithProperties, messageBody);
+                times = 1;
+            }
+        };
+    }
 
 }
