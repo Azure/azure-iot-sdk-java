@@ -58,8 +58,13 @@ Path to certificate is an **optional** argument and would be needed in case you 
 1. Load and build the sample located in device\samples\android-sample in Android Studio (you will need to clone or copy the repository)
 1. Sample has dependency on the remote library `iot-device-client`. It is currently set to use the latest version of the library. If you want to choose a different version, please update `device\iot-device-samples\android-sample\app\build.gradle` file to point to the version you want to use. For list of available versions search [Maven Repository][maven-repository]
 
+## Logging 
+Java client SDK uses Apache [Log4j][log4j-logging] Java logging framework. To enable **logging** in the Azure IoT Java client SDK via your application, you can set [log4j.properties][log4j-properties] to the appropriate values of your choice in your application.
+As an example, look at log4j.properties file located at iot-device-samples\send-receive-sample\src\main\resources. This log4j.properties file can be set to enable logging while using send-receive-sample.
 
 [devbox-setup]: ../../doc/java-devbox-setup.md
 [lnk-setup-iot-hub]: https://aka.ms/howtocreateazureiothub
 [lnk-manage-iot-hub]: https://aka.ms/manageiothub
 [android-studio]: https://developer.android.com/studio/index.html
+[log4j-logging]: https://logging.apache.org/log4j/1.2/index.html
+[log4j-properties]: https://logging.apache.org/log4j/1.2/manual.html
