@@ -1,4 +1,5 @@
 com.microsoft.azure.sdk.iot.device
+com.microsoft.azure.sdk.iot.device.DeviceTwin
 com.microsoft.azure.sdk.iot.device.auth
 com.microsoft.azure.sdk.iot.device.net
 com.microsoft.azure.sdk.iot.device.transport
