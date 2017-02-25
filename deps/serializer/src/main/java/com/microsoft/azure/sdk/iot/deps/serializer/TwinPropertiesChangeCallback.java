@@ -11,7 +11,7 @@ import java.util.Map;
  * An interface for an IoT Hub Device Twin callback.
  *
  * Developers are expected to create an implementation of this interface,
- * and the transport will call {@link TwinPropertiesChangeCallback#execute(Map<String , Object>)}
+ * and the transport will call {@link TwinPropertiesChangeCallback}
  * upon receiving a property changes from an IoT Hub Device Twin.
  */
 public interface TwinPropertiesChangeCallback
