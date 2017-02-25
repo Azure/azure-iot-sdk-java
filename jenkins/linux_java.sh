@@ -6,7 +6,7 @@ build_root=$(cd "$(dirname "$0")/.." && pwd)
 
 # -- Java Websocket Transport Layer --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-cd $build_root/websocket-transport-layer
+cd $build_root/deps
 mvn install
 [ $? -eq 0 ] || exit $?
 

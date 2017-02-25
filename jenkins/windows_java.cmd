@@ -8,7 +8,7 @@ rem // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM -- Websocket Transport Layer --
-cd %build-root%\websocket-transport-layer
+cd %build-root%\deps
 call mvn install
 if errorlevel 1 goto :eof
 cd %build-root%
