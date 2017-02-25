@@ -6,6 +6,7 @@
     <groupId>com.microsoft.azure.sdk.iot.deps</groupId>
     <artifactId>iot-deps-serializer</artifactId>
     <version>0.0.1</version>
+    <description>A serializer to be used with IotHub communication</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
