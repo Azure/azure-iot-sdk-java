@@ -23,10 +23,10 @@ public class CustomLoggerTest
 
     // Tests_SRS_CUSTOMERLOGGER_25_002: [The function shall log message for all levels.]
     @Test
-    public void allLevelMessageLogging()
+    public void testMethodSignature()
     {
         CustomLogger logger = new CustomLogger(this.getClass());
-        mockLogger();
+        
         String message = "This is INFO message";
         logger.LogInfo(message, logger.getMethodName());
         message = "This is DEBUG message";
@@ -214,40 +214,6 @@ public class CustomLoggerTest
             {
                 mockLogger.error(any);
                 times = 1; 
-            }
-        };
-    }
-
-    // Tests_SRS_CUSTOMERLOGGER_25_002: [The function shall mock CustomLogger for unit testing.]
-    private void mockLogger() {
-        new MockUp<CustomLogger>() {
-            @Mock
-            public void LogInfo(String msg, Object... params) {
-                assertThat("This is INFO message", is(equalTo(msg)));
-            }
-            @Mock
-            public void LogDebug(String msg, Object... params) {
-                assertThat("This is DEBUG message", is(equalTo(msg)));
-            }
-            @Mock
-            public void LogTrace(String msg, Object... params) {
-                assertThat("This is TRACE message", is(equalTo(msg)));
-            }
-            @Mock
-            public void LogWarn(String msg, Object... params) {
-                assertThat("This is WARN message", is(equalTo(msg)));
-            }
-            @Mock
-            public void LogFatal(String msg, Object... params) {
-                assertThat("This is FATAL message", is(equalTo(msg)));
-            }
-            @Mock
-            public void LogError(String msg, Object... params) {
-                assertThat("This is CUSTOM ERROR message", is(equalTo(msg)));
-            }
-            @Mock
-            public void LogError(Throwable exception) {
-                assertThat("This is ERROR message", is(equalTo(exception.getMessage())));
             }
         };
     }
