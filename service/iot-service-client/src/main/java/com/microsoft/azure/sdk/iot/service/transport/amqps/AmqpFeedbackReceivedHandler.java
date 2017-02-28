@@ -14,9 +14,10 @@ import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
-import org.apache.qpid.proton.engine.impl.TransportLayer;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
+import org.apache.qpid.proton.amqp.messaging.Accepted;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -115,12 +116,16 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_006: [The event handler shall create a Message (Proton) object from the decoded buffer]
             org.apache.qpid.proton.message.Message msg = Proton.message();
             msg.decode(buffer, 0, read);
-
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_007: [The event handler shall close the Session and Connection (Proton)]
+          
+            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_007: [The event handler shall settle the Delivery with the Accepted outcome]
+            delivery.disposition(Accepted.getInstance());
+            delivery.settle();
+          
+            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_008: [The event handler shall close the Session and Connection (Proton)]
             recv.getSession().close();
             recv.getSession().getConnection().close();
 
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_008: [The event handler shall call the FeedbackReceived callback if it has been initialized]
+            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall call the FeedbackReceived callback if it has been initialized]
             if (amqpFeedbackReceivedEvent != null)
             {
                 amqpFeedbackReceivedEvent.onFeedbackReceived(msg.getBody().toString());

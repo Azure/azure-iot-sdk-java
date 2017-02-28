@@ -41,9 +41,11 @@ public void onDelivery (Event event);
 
 **SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_006: [** The event handler shall create a Message (Proton) object from the decoded buffer **]**
 
-**SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_007: [** The event handler shall close the Session and Connection (Proton) **]**
+**SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_007: [** The event handler shall settle the Delivery with the Accepted outcome **]**
 
-**SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_008: [** The event handler shall call the FeedbackReceived callback if it has been initialized **]**
+**SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_008: [** The event handler shall close the Session and Connection (Proton) **]**
+
+**SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [** The event handler shall call the FeedbackReceived callback if it has been initialized **]**
 
 ### onConnectionBound
 

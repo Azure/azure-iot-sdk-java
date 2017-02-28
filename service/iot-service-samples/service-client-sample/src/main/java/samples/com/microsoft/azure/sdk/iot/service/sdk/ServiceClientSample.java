@@ -8,12 +8,15 @@ package samples.com.microsoft.azure.sdk.iot.service.sdk;
 import com.microsoft.azure.sdk.iot.service.sdk.*;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Service client example for:
@@ -26,11 +29,13 @@ public class ServiceClientSample
     private static final String deviceId = "[Device name goes here]";
     /** Choose iotHubServiceClientProtocol */
     private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
-//    private static final IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
+//  private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS_WS;
 
     private static ServiceClient serviceClient = null;
     private static FeedbackReceiver feedbackReceiver = null;
-
+    
+    private static final int MAXCOMMANDSTOSEND = 2; // maximum commands to send in a loop
+ 
     /**
      * @param args
      * @throws IOException
@@ -74,6 +79,20 @@ public class ServiceClientSample
         CompletableFuture<FeedbackBatch> future = feedbackReceiver.receiveAsync();
         FeedbackBatch feedbackBatch = future.get();
         System.out.println("********* Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc().toString());
+        
+        
+        // Sending back to back commands
+        try{
+            sendBacktoBackCommandsAndReadFromTheFeedbackReceiver();
+        }
+        catch(UnsupportedEncodingException e)
+        {
+           System.out.println("Exception:" + e);
+        } catch (InterruptedException e) {
+            System.out.println("Exception:" + e);
+        } catch (ExecutionException e) {
+            System.out.println("Exception:" + e);
+        }
 
         closeFeedbackReceiver();
         closeServiceClient();
@@ -123,4 +142,47 @@ public class ServiceClientSample
         feedbackReceiver = null;
         System.out.println("********* Successfully closed FeedbackReceiver.");
     }
+    
+     protected static void sendBacktoBackCommandsAndReadFromTheFeedbackReceiver() throws ExecutionException, InterruptedException, UnsupportedEncodingException
+    {
+        List<CompletableFuture<Void>> futureList = new ArrayList<CompletableFuture<Void>>();
+        Map<String, String> propertiesToSend = new HashMap<String, String>();
+        String commandMessage = "Cloud to Device Message: "; 
+        
+        System.out.println("+ sendBacktoBackCommandsAndReadFromTheFeedbackReceiver: Enter, Send count is : " + MAXCOMMANDSTOSEND);
+        
+        for (int i = 0; i < MAXCOMMANDSTOSEND ; i++){
+        Message messageToSend = new Message(commandMessage + Integer.toString(i)) ;
+        messageToSend.setDeliveryAcknowledgement(DeliveryAcknowledgement.Full);
+        
+        // Setting standard properties
+        messageToSend.setMessageId(java.util.UUID.randomUUID().toString());
+        System.out.println("Message id set: " + messageToSend.getMessageId());
+           
+        // Setting user properties
+        propertiesToSend.clear();
+        propertiesToSend.put("key_"+ Integer.toString(i), "value_"+ Integer.toString(i));
+        messageToSend.setProperties(propertiesToSend);
+      
+        // send the message
+        CompletableFuture<Void> future =  serviceClient.sendAsync(deviceId, messageToSend);
+        futureList.add(future);
+      }
+      
+      System.out.println("Waiting for all CompletableFutures to be completed...");
+      CompletableFuture.allOf(futureList.toArray(new CompletableFuture[futureList.size()])).join(); // Wait for all futures to be completed
+      System.out.println("All CompletableFutures completed !");
+  
+      System.out.println("Waiting for the feedback...");
+      CompletableFuture<FeedbackBatch> future = feedbackReceiver.receiveAsync();
+      FeedbackBatch feedbackBatch = future.get();
+        
+      System.out.println("Record count: " + feedbackBatch.getRecords().size());
+                
+      for (int i=0; i < feedbackBatch.getRecords().size(); i++)
+        System.out.println("Messsage id get: " + feedbackBatch.getRecords().get(i).getOriginalMessageId());
+      
+      System.out.println("- sendBacktoBackCommandsAndReadFromTheFeedbackReceiver: Exit");
+    }
+   
 }
