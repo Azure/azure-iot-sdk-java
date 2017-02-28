@@ -37,12 +37,18 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     private static final String URL_SEPARATOR_2 = "&";
     private static final String URL_HTTPS = "https:" + URL_SEPARATOR_0 + URL_SEPARATOR_0;
     private static final String URL_PATH_DEVICES = "devices";
-    private static final String URL_API_VERSION = "api-version=2016-02-03";
+    private static final String URL_API_VERSION = "api-version=2016-11-14";
     private static final String URL_MAX_COUNT = "top=";
     private static final String URL_PATH_DEVICESTATISTICS = "statistics";
     private static final String USER_SEPARATOR = "@";
     private static final String USER_SAS = "sas.";
     private static final String USER_ROOT = "root.";
+
+    // twin
+    private static final String URL_PATH_TWIN = "twins";
+    private static final String URL_PATH_PROPERTIES = "properties";
+    private static final String URL_PATH_DESIRED = "desired";
+    private static final String URL_PATH_TAGS = "tags";
 
     protected IotHubConnectionString() {}
 
@@ -65,11 +71,105 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     }
 
     /**
+     * Create url for requesting device twin
+     *
+     * @param deviceId The name of the device
+     * @return The Url in the following format: "https:hostname/twins/deviceId?api-version=201X-XX-XX"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     * @throws IllegalArgumentException This exception is thrown if device id is null or empty
+     */
+    public URL getUrlTwin(String deviceId) throws MalformedURLException, IllegalArgumentException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_010: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
+        if (Tools.isNullOrEmpty(deviceId))
+        {
+            throw new IllegalArgumentException("device name cannot be empty or null");
+        }
+
+        //Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_011: [** The function shall create a URL object from the given deviceId using the following format: https:hostname/twins/deviceId?api-version=201X-XX-XX **]**
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_TWIN);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(deviceId);
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
+    }
+
+    /**
+     * Create url for requesting device twin tags
+     *
+     * @param deviceId The name of the device
+     * @return The Url in the following format: "https:hostname/twins/deviceId/tags?api-version=201X-XX-XX"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     * @throws IllegalArgumentException This exception is thrown if device id is null or empty
+     */
+    public URL getUrlTwinTags(String deviceId) throws MalformedURLException, IllegalArgumentException
+    {
+        //Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_012: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
+        if (Tools.isNullOrEmpty(deviceId))
+        {
+            throw new IllegalArgumentException("device name cannot be empty or null");
+        }
+
+        //Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_013: [** The function shall create a URL object from the given deviceId using the following format: https:hostname/twins/deviceId/tags?api-version=201X-XX-XX **]**
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_TWIN);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(deviceId);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_TAGS);
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
+    }
+
+    /**
+     * Create url for requesting device twin desired properties
+     *
+     * @param deviceId The name of the device
+     * @return The Url in the following format: "https:hostname/twins/deviceId/properties/desired?api-version=201X-XX-XX"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     * @throws IllegalArgumentException This exception is thrown if device id is null or empty
+     */
+    public URL getUrlTwinDesired(String deviceId) throws MalformedURLException, IllegalArgumentException
+    {
+        //Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_014: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
+        if (Tools.isNullOrEmpty(deviceId))
+        {
+            throw new IllegalArgumentException("device name cannot be empty or null");
+        }
+
+        //Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_015: [** The function shall create a URL object from the given deviceId using the following format: https:hostname/twins/deviceId/properties/desired?api-version=201X-XX-XX **]**
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_TWIN);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(deviceId);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_PROPERTIES);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_DESIRED);
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
+    }
+
+    /**
      * Create url for requesting device data
      *
      * @param deviceId The name of the device
      * @return The device Url in the following format: "https:hostname/devices/deviceId?api-version=201X-XX-XX"
      * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     * @throws IllegalArgumentException This exception is thrown if device id is null or empty
      */
     public URL getUrlDevice(String deviceId) throws MalformedURLException, IllegalArgumentException
     {
@@ -100,6 +200,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
      * @param maxCount The number of requested devices
      * @return URL string to get the device list from IotHub
      * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     * @throws IllegalArgumentException This exception is thrown if maxCount is null or empty
      */
     public URL getUrlDeviceList(Integer maxCount) throws MalformedURLException, IllegalArgumentException
     {

@@ -17,6 +17,9 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     public URL getUrlDevice(String deviceId);
     public URL getUrlDeviceList(Integer maxCount);
     public URL getDeviceStatistics();
+    public URL getUrlTwin(String deviceId) throws MalformedURLException, IllegalArgumentException;
+    public URL getUrlTwinTags(String deviceId) throws MalformedURLException, IllegalArgumentException;
+    public URL getUrlTwinDesired(String deviceId) throws MalformedURLException, IllegalArgumentException;
     public String toString();
 }
 ```
@@ -73,3 +76,30 @@ public URL getUrlImportExportJob(String jobId) throws MalformedURLException
 protected String toString();
 ```
 **SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_007: [** The function shall serialize the object to a string using the following format: HostName=HOSTNAME.b.c.d;SharedAccessKeyName=ACCESSKEYNAME;SharedAccessKey=1234567890abcdefghijklmnopqrstvwxyz=;SharedAccessSignature= **]**
+
+### getUrlTwin
+
+```java
+public URL getUrlTwin(String deviceId) throws MalformedURLException, IllegalArgumentException;
+```
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_010: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
+
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_011: [** The function shall create a URL object from the given deviceId using the following format: https:hostname/twins/deviceId?api-version=201X-XX-XX **]**
+
+### getUrlTwinTags
+
+```java
+public URL getUrlTwinTags(String deviceId) throws MalformedURLException, IllegalArgumentException;
+```
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_012: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
+
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_013: [** The function shall create a URL object from the given deviceId using the following format: https:hostname/twins/deviceId/tags?api-version=201X-XX-XX **]**
+
+### getUrlTwinDesired
+
+```java
+public URL getUrlTwinDesired(String deviceId) throws MalformedURLException, IllegalArgumentException;
+```
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_014: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
+
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_015: [** The function shall create a URL object from the given deviceId using the following format: https:hostname/twins/deviceId/properties/desired?api-version=201X-XX-XX **]**
