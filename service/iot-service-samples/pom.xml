@@ -19,6 +19,7 @@
     <modules>
         <module>device-manager-sample</module>
         <module>service-client-sample</module>
+        <module>device-twin-sample</module>
     </modules>
     <dependencies>
         <dependency>
