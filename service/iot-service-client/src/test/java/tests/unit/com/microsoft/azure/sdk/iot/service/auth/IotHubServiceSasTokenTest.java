@@ -5,8 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.auth;
 
-import com.microsoft.azure.sdk.iot.service.sdk.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.sdk.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import org.apache.commons.codec.binary.Base64;

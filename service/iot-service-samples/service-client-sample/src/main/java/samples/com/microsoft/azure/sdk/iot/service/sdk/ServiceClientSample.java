@@ -3,9 +3,9 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package samples.com.microsoft.azure.sdk.iot.service.sdk;
+package samples.com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.service.sdk.*;
+import com.microsoft.azure.sdk.iot.service.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

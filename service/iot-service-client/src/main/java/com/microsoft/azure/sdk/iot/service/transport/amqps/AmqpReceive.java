@@ -5,10 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.service.sdk.*;
-import com.microsoft.azure.sdk.iot.service.sdk.FeedbackBatch;
-import com.microsoft.azure.sdk.iot.service.sdk.FeedbackBatchMessage;
-import com.microsoft.azure.sdk.iot.service.sdk.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.FeedbackBatch;
+import com.microsoft.azure.sdk.iot.service.FeedbackBatchMessage;
+import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.Event;

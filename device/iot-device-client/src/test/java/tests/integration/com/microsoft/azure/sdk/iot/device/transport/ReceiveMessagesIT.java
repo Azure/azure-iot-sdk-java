@@ -3,11 +3,12 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.device.transport;
 
+import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.sdk.Device;
-import com.microsoft.azure.sdk.iot.service.sdk.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.sdk.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.sdk.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.device.*;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.device.DeviceConnectionString;
@@ -94,7 +95,7 @@ public class ReceiveMessagesIT
             client.setMessageCallback(callback, messageReceived);
 
             String messageString = "Java service e2e test message to be received over Https protocol";
-            com.microsoft.azure.sdk.iot.service.sdk.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.sdk.Message(messageString);
+            com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(messageString);
             serviceMessage.setProperties(messageProperties);
             String deviceId = deviceHttps.getDeviceId();
             serviceClient.send(deviceId, serviceMessage);
@@ -146,7 +147,7 @@ public class ReceiveMessagesIT
             client.setMessageCallback(callback, messageReceived);
 
             String messageString = "Java service e2e test message to be received over Amqps protocol";
-            com.microsoft.azure.sdk.iot.service.sdk.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.sdk.Message(messageString);
+            com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(messageString);
             serviceMessage.setProperties(messageProperties);
             String deviceId = deviceAmqps.getDeviceId();
             serviceClient.send(deviceId, serviceMessage);
@@ -194,7 +195,7 @@ public class ReceiveMessagesIT
             client.setMessageCallback(callback, messageReceived);
 
             String messageString = "Java service e2e test message to be received over Mqtt protocol";
-            com.microsoft.azure.sdk.iot.service.sdk.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.sdk.Message(messageString);
+            com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(messageString);
             String deviceId = deviceMqtt.getDeviceId();
             serviceClient.send(deviceId, serviceMessage);
 

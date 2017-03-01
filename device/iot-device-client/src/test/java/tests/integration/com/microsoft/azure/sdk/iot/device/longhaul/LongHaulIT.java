@@ -3,8 +3,11 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.device.longhaul;
 
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.sdk.*;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.Message;
 import org.junit.*;
@@ -322,7 +325,7 @@ public class LongHaulIT
                 client.setMessageCallback(callback, messageReceived);
 
                 String messageString = "Java service e2e test message to be received over Https protocol";
-                com.microsoft.azure.sdk.iot.service.sdk.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.sdk.Message(messageString);
+                com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(messageString);
                 serviceMessage.setProperties(messageProperties);
                 String deviceId = deviceReceiveHttps.getDeviceId();
                 serviceClient.send(deviceId, serviceMessage);
@@ -381,7 +384,7 @@ public class LongHaulIT
                 client.setMessageCallback(callback, messageReceived);
 
                 String messageString = "Java service e2e test message to be received over Amqps protocol";
-                com.microsoft.azure.sdk.iot.service.sdk.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.sdk.Message(messageString);
+                com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(messageString);
                 serviceMessage.setProperties(messageProperties);
                 String deviceId = deviceReceiveAmqps.getDeviceId();
                 serviceClient.send(deviceId, serviceMessage);
@@ -422,7 +425,8 @@ public class LongHaulIT
         {
             System.out.println("Started Mqtt receive long haul test...");
 
-            ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
+            ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString,
+                    IotHubServiceClientProtocol.AMQPS);
             serviceClient.open();
 
             DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceReceiveMqtt), IotHubClientProtocol.MQTT);
@@ -440,7 +444,7 @@ public class LongHaulIT
                 client.setMessageCallback(callback, messageReceived);
 
                 String messageString = "Java service e2e test message to be received over Mqtt protocol";
-                com.microsoft.azure.sdk.iot.service.sdk.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.sdk.Message(messageString);
+                com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(messageString);
                 String deviceId = deviceReceiveMqtt.getDeviceId();
                 serviceClient.send(deviceId, serviceMessage);
 

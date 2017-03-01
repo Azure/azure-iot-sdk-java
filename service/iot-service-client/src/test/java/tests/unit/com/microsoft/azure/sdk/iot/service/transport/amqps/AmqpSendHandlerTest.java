@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.service.sdk.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import mockit.Expectations;
 import mockit.Mocked;
@@ -199,7 +199,7 @@ public class AmqpSendHandlerTest
         String toProperty = "/devices/deviceId/messages/devicebound";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
-        com.microsoft.azure.sdk.iot.service.sdk.Message iotMessage = new com.microsoft.azure.sdk.iot.service.sdk.Message(content);
+        com.microsoft.azure.sdk.iot.service.Message iotMessage = new com.microsoft.azure.sdk.iot.service.Message(content);
         Map<String, String> userDefinedProperties = new HashMap<>(5);
         userDefinedProperties.put("key1", "value1");
         userDefinedProperties.put("key2", "value2");
@@ -380,7 +380,7 @@ public class AmqpSendHandlerTest
         String hostAddr = hostName + ":5671";
         String deviceId = "deviceId";
         String content = "abcdefghijklmnopqrst";
-        com.microsoft.azure.sdk.iot.service.sdk.Message iotMessage = new com.microsoft.azure.sdk.iot.service.sdk.Message(content);
+        com.microsoft.azure.sdk.iot.service.Message iotMessage = new com.microsoft.azure.sdk.iot.service.Message(content);
         String endpoint = "/messages/devicebound";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         createProtonObjects();
@@ -419,7 +419,7 @@ public class AmqpSendHandlerTest
         String hostAddr = hostName + ":5671";
         String deviceId = "deviceId";
         String content = "abcdefghijklmnopqrst";
-        com.microsoft.azure.sdk.iot.service.sdk.Message iotMessage = new com.microsoft.azure.sdk.iot.service.sdk.Message(content);
+        com.microsoft.azure.sdk.iot.service.Message iotMessage = new com.microsoft.azure.sdk.iot.service.Message(content);
         String endpoint = "/messages/devicebound";
         exceptionCount = 0;
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;

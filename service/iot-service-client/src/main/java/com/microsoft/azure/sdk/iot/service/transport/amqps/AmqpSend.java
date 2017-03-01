@@ -5,9 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.service.sdk.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.sdk.Message;
-import com.microsoft.azure.sdk.iot.service.sdk.Tools;
+import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.Message;
+import com.microsoft.azure.sdk.iot.service.Tools;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.Event;

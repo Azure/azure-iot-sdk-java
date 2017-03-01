@@ -28,7 +28,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.service.sdk.DeviceTwinSample</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.service.DeviceTwinSample</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

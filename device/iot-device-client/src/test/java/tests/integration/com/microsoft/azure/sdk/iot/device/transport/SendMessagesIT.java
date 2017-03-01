@@ -4,8 +4,8 @@
 package tests.integration.com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.sdk.Device;
-import com.microsoft.azure.sdk.iot.service.sdk.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.device.*;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.device.DeviceConnectionString;

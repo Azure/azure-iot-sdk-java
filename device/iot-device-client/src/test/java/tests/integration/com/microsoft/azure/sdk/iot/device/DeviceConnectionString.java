@@ -3,8 +3,8 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.device;
 
-//import com.microsoft.azure.sdk.iot.service.sdk.Device;
-import com.microsoft.azure.sdk.iot.service.sdk.Device;
+//import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.Device;
 
 public class DeviceConnectionString
 {
