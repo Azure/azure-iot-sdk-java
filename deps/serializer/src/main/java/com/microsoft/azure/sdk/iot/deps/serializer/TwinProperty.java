@@ -5,21 +5,15 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.google.gson.*;
 import com.google.gson.internal.LinkedTreeMap;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * INNER TWIN CLASS
  *
- * TwinProperty is a representation of the device twin property database.
+ * TwinProperty is a representation of the device twin property collection.
  * It can represent `Desired` property as well `Reported` property.
  *
  */
@@ -234,7 +228,7 @@ public class TwinProperty
     {
         /* Codes_SRS_TWIN_21_017: [The toJsonElement shall return a JsonElement with information in the Twin using json format.] */
         Gson gson = new GsonBuilder().create();
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> diffMap = new HashMap<>();
         Map<String, TwinMetadata> metadata = new HashMap<>();
 
         synchronized (lock)
@@ -244,7 +238,7 @@ public class TwinProperty
                 /* Codes_SRS_TWIN_21_018: [The toJsonElement shall not include null fields.] */
                 if(entry.getValue().value != null)
                 {
-                    map.put(entry.getKey(), entry.getValue().value);
+                    diffMap.put(entry.getKey(), entry.getValue().value);
                     metadata.put(entry.getKey(), entry.getValue().metadata);
                 }
             }
@@ -252,19 +246,19 @@ public class TwinProperty
 
         if(reportMetadata)
         {
-            map.put(METADATA_TAG, metadata);
+            diffMap.put(METADATA_TAG, metadata);
         }
 
         if(version != null)
         {
-            map.put(VERSION_TAG, version);
+            diffMap.put(VERSION_TAG, version);
         }
 
-        return gson.toJsonTree(map);
+        return gson.toJsonTree(diffMap);
     }
 
     protected void update(LinkedTreeMap<String, Object> jsonTree,
-                       TwinPropertiesChangeCallback onCallback) throws IllegalArgumentException
+                       TwinChangedCallback onCallback) throws IllegalArgumentException
     {
         Map<String, Object> diffField = new HashMap<>();
         Map<String, Object> diffMetadata = new HashMap<>();
@@ -305,24 +299,24 @@ public class TwinProperty
 
         /* Codes_SRS_TWIN_21_046: [If OnDesiredCallback was not provided, the updateTwin shall not do anything with the list of updated desired properties.] */
         /* Codes_SRS_TWIN_21_047: [If OnReportedCallback was not provided, the updateTwin shall not do anything with the list of updated reported properties.] */
-        /* Codes_SRS_TWIN_21_069: [If there is no change in the Desired property, the updateTwin shall not change the reported database and not call the OnReportedCallback.] */
-        /* Codes_SRS_TWIN_21_070: [If there is no change in the Reported property, the updateTwin shall not change the reported database and not call the OnReportedCallback.] */
+        /* Codes_SRS_TWIN_21_069: [If there is no change in the Desired property, the updateTwin shall not change the reported collection and not call the OnReportedCallback.] */
+        /* Codes_SRS_TWIN_21_070: [If there is no change in the Reported property, the updateTwin shall not change the reported collection and not call the OnReportedCallback.] */
         /* Codes_SRS_TWIN_21_032: [If the OnDesiredCallback is set as null, the updateDesiredProperty shall discard the map with the changed pairs.] */
-        /* Codes_SRS_TWIN_21_033: [If there is no change in the Desired property, the updateDesiredProperty shall not change the database and not call the OnDesiredCallback.] */
+        /* Codes_SRS_TWIN_21_033: [If there is no change in the Desired property, the updateDesiredProperty shall not change the collection and not call the OnDesiredCallback.] */
         /* Codes_SRS_TWIN_21_037: [If the OnReportedCallback is set as null, the updateReportedProperty shall discard the map with the changed pairs.] */
-        /* Codes_SRS_TWIN_21_038: [If there is no change in the Reported property, the updateReportedProperty shall not change the database and not call the OnReportedCallback.] */
+        /* Codes_SRS_TWIN_21_038: [If there is no change in the Reported property, the updateReportedProperty shall not change the collection and not call the OnReportedCallback.] */
         /* Codes_SRS_TWIN_21_093: [If the provided json is not valid, the updateReportedProperty shall throws IllegalArgumentException.] */
         if((diffField.size() != 0) &&(onCallback != null))
         {
             /* Codes_SRS_TWIN_21_044: [If OnDesiredCallback was provided, the updateTwin shall create a new map with a copy of all pars key values updated by the json in the Desired property, and OnDesiredCallback passing this map as parameter.] */
             /* Codes_SRS_TWIN_21_045: [If OnReportedCallback was provided, the updateTwin shall create a new map with a copy of all pars key values updated by the json in the Reported property, and OnReportedCallback passing this map as parameter.] */
-            /* Codes_SRS_TWIN_21_031: [The updateDesiredProperty shall send the map with all changed pairs to the upper layer calling onDesiredCallback (TwinPropertiesChangeCallback).] */
-            /* Codes_SRS_TWIN_21_036: [The updateReportedProperty shall send the map with all changed pairs to the upper layer calling onReportedCallback (TwinPropertiesChangeCallback).] */
+            /* Codes_SRS_TWIN_21_031: [The updateDesiredProperty shall send the map with all changed pairs to the upper layer calling onDesiredCallback (TwinChangedCallback).] */
+            /* Codes_SRS_TWIN_21_036: [The updateReportedProperty shall send the map with all changed pairs to the upper layer calling onReportedCallback (TwinChangedCallback).] */
             onCallback.execute(diffField);
         }
     }
 
-    protected void update(String json, TwinPropertiesChangeCallback onCallback) throws IllegalArgumentException
+    protected void update(String json, TwinChangedCallback onCallback) throws IllegalArgumentException
     {
         LinkedTreeMap<String, Object> newValues;
         try

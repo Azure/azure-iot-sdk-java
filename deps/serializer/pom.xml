@@ -3,12 +3,25 @@
 <project>
 
     <modelVersion>4.0.0</modelVersion>
+    <name>Serializers</name>
+    <description>A serializer to be used with IotHub communication</description>
+    <developers>
+        <developer>
+            <id>microsoft</id>
+            <name>Microsoft</name>
+        </developer>
+    </developers>
+
     <groupId>com.microsoft.azure.sdk.iot.deps</groupId>
     <artifactId>iot-deps-serializer</artifactId>
     <version>0.0.1</version>
-    <description>A serializer to be used with IotHub communication</description>
+    <packaging>jar</packaging>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <skipITs>true</skipITs>
+        <junit-version>4.12</junit-version>
+        <mockito-version>1.10.19</mockito-version>
     </properties>
     <dependencies>
         <dependency>
@@ -34,11 +47,6 @@
             <artifactId>hamcrest-all</artifactId>
             <version>1.3</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>
