@@ -4,7 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.Twin;
-import com.microsoft.azure.sdk.iot.deps.serializer.TwinPropertiesChangeCallback;
+import com.microsoft.azure.sdk.iot.deps.serializer.TwinChangedCallback;
 import com.microsoft.azure.sdk.iot.device.*;
 import mockit.*;
 import org.junit.Test;
@@ -119,14 +119,14 @@ public class DeviceTwinTest
         new StrictExpectations()
         {
             {
-                new Twin(withAny(new TwinPropertiesChangeCallback()
+                new Twin(withAny(new TwinChangedCallback()
                 {
                     @Override
                     public void execute(Map<String, Object> map)
                     {
 
                     }
-                }), withAny(new TwinPropertiesChangeCallback()
+                }), withAny(new TwinChangedCallback()
                 {
                     @Override
                     public void execute(Map<String, Object> map)
@@ -428,14 +428,14 @@ public class DeviceTwinTest
         new NonStrictExpectations()
         {
             {
-                new Twin(withAny(new TwinPropertiesChangeCallback()
+                new Twin(withAny(new TwinChangedCallback()
                 {
                     @Override
                     public void execute(Map<String, Object> map)
                     {
 
                     }
-                }), withAny(new TwinPropertiesChangeCallback()
+                }), withAny(new TwinChangedCallback()
                 {
                     @Override
                     public void execute(Map<String, Object> map)
@@ -486,14 +486,14 @@ public class DeviceTwinTest
         new NonStrictExpectations()
         {
             {
-                new Twin(withAny(new TwinPropertiesChangeCallback()
+                new Twin(withAny(new TwinChangedCallback()
                 {
                     @Override
                     public void execute(Map<String, Object> map)
                     {
 
                     }
-                }), withAny(new TwinPropertiesChangeCallback()
+                }), withAny(new TwinChangedCallback()
                 {
                     @Override
                     public void execute(Map<String, Object> map)
@@ -614,14 +614,14 @@ public class DeviceTwinTest
         new NonStrictExpectations()
         {
             {
-                new Twin(withAny(new TwinPropertiesChangeCallback()
+                new Twin(withAny(new TwinChangedCallback()
                 {
                     @Override
                     public void execute(Map<String, Object> map)
                     {
 
                     }
-                }), withAny(new TwinPropertiesChangeCallback()
+                }), withAny(new TwinChangedCallback()
                 {
                     @Override
                     public void execute(Map<String, Object> map)
@@ -667,14 +667,14 @@ public class DeviceTwinTest
         new NonStrictExpectations()
         {
             {
-                new Twin(withAny(new TwinPropertiesChangeCallback()
+                new Twin(withAny(new TwinChangedCallback()
                 {
                     @Override
                     public void execute(Map<String, Object> map)
                     {
 
                     }
-                }), withAny(new TwinPropertiesChangeCallback()
+                }), withAny(new TwinChangedCallback()
                 {
                     @Override
                     public void execute(Map<String, Object> map)
@@ -798,7 +798,7 @@ public class DeviceTwinTest
         desiredMap.put(new Property("DesiredProp1", "DesiredValue1"), new Pair<>(mockedDesiredCB, null));
         testTwin.subscribeDesiredPropertiesNotification(desiredMap);
 
-        TwinPropertiesChangeCallback onDesiredChange = Deencapsulation.newInnerInstance("OnDesiredPropertyChange", testTwin);
+        TwinChangedCallback onDesiredChange = Deencapsulation.newInnerInstance("OnDesiredPropertyChanged", testTwin);
         final HashMap<String, Object> desiredPropertyMap = new HashMap<>();
         desiredPropertyMap.put("DesiredProp2", "DesiredValue2");
 
@@ -831,7 +831,7 @@ public class DeviceTwinTest
         desiredMap.put(new Property("DesiredProp1", "DesiredValue1"), new Pair<>(mockedDesiredCB, null));
         testTwin.subscribeDesiredPropertiesNotification(desiredMap);
 
-        TwinPropertiesChangeCallback onDesiredChange = Deencapsulation.newInnerInstance("OnDesiredPropertyChange", testTwin);
+        TwinChangedCallback onDesiredChange = Deencapsulation.newInnerInstance("OnDesiredPropertyChanged", testTwin);
         final HashMap<String, Object> desiredPropertyMap = new HashMap<>();
         desiredPropertyMap.put("DesiredProp1", "DesiredValue1");
 
@@ -865,7 +865,7 @@ public class DeviceTwinTest
         desiredMap.put(new Property("DesiredProp1", "DesiredValue1"), new Pair<>((PropertyCallBack<String, Object>) null, null));
         testTwin.subscribeDesiredPropertiesNotification(desiredMap);
 
-        TwinPropertiesChangeCallback onDesiredChange = Deencapsulation.newInnerInstance("OnDesiredPropertyChange", testTwin);
+        TwinChangedCallback onDesiredChange = Deencapsulation.newInnerInstance("OnDesiredPropertyChanged", testTwin);
         final HashMap<String, Object> desiredPropertyMap = new HashMap<>();
         desiredPropertyMap.put("DesiredProp1", "DesiredValue1");
 
@@ -890,7 +890,7 @@ public class DeviceTwinTest
     {
         DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
-        TwinPropertiesChangeCallback onDesiredChange = Deencapsulation.newInnerInstance("OnDesiredPropertyChange", testTwin);
+        TwinChangedCallback onDesiredChange = Deencapsulation.newInnerInstance("OnDesiredPropertyChanged", testTwin);
         final HashMap<String, Object> desiredPropertyMap = new HashMap<>();
         desiredPropertyMap.put("DesiredProp1", "DesiredValue1");
 

@@ -5,9 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.service.sdk.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.sdk.Message;
-import com.microsoft.azure.sdk.iot.service.sdk.Tools;
+import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.Message;
+import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import org.apache.qpid.proton.Proton;
@@ -16,7 +16,6 @@ import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
-import org.apache.qpid.proton.engine.impl.TransportLayer;
 import org.apache.qpid.proton.messenger.impl.Address;
 import org.apache.qpid.proton.reactor.Handshaker;
 

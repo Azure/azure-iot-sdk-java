@@ -63,8 +63,22 @@ public class HttpConnection
         // Coses_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_002: [The constructor shall throw an IOException if the connection was unable to be opened.]
         this.connection = (HttpsURLConnection) url.openConnection();
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_003: [The constructor shall set the HTTPS method to the given method.]
+
+        if (method == HttpMethod.PATCH)
+        {
+            this.setUnsupportedMethod(method);
+            method = HttpMethod.POST;
+        }
         this.connection.setRequestMethod(method.name());
         this.body = new byte[0];
+    }
+
+    private void setUnsupportedMethod(HttpMethod method)
+    {
+        if (method == HttpMethod.PATCH)
+        {
+            this.setRequestHeader("X-HTTP-Method-Override", "PATCH");
+        }
     }
 
     /**

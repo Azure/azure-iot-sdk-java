@@ -44,7 +44,7 @@ public class DeviceTwin
     /*
         Callback invoked by serializer when desired property changes
     */
-    private final class OnDesiredPropertyChange implements TwinPropertiesChangeCallback
+    private final class OnDesiredPropertyChanged implements TwinChangedCallback
     {
         /*
         Codes_SRS_DEVICETWIN_25_021: [**On deserialization of desired properties, OnDesiredPropertyChange callback is triggered by the serializer**]**
@@ -101,7 +101,7 @@ public class DeviceTwin
     /*
         Callback invoked by serializer when reported property changes
      */
-    private final class OnReportedPropertyChange implements TwinPropertiesChangeCallback
+    private final class OnReportedPropertyChanged implements TwinChangedCallback
     {
         @Override
         public void execute(Map<String, Object> hashMap)
@@ -260,7 +260,7 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_020: [**OnDesiredPropertyChange callback is registered with the serializer to be triggered when desired property changes.**]**
          */
-        this.twinObject = new Twin(new OnDesiredPropertyChange(), new OnReportedPropertyChange());
+        this.twinObject = new Twin(new OnDesiredPropertyChanged(), new OnReportedPropertyChanged());
     }
 
 

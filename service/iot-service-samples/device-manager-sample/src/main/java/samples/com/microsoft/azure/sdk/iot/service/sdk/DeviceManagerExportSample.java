@@ -3,10 +3,10 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package samples.com.microsoft.azure.sdk.iot.service.sdk;
+package samples.com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.service.sdk.JobProperties;
-import com.microsoft.azure.sdk.iot.service.sdk.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.JobProperties;
+import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
@@ -24,13 +24,15 @@ public class DeviceManagerExportSample
     {
         System.out.println("Starting export sample...");
 
-        CloudStorageAccount storageAccount = CloudStorageAccount.parse(SampleUtils.storageConnectionString);
+        CloudStorageAccount storageAccount = CloudStorageAccount.parse(samples.com.microsoft.azure.sdk.iot.service
+                .SampleUtils.storageConnectionString);
         CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
         CloudBlobContainer container = blobClient.getContainerReference(DeviceManagerExportSample.sampleContainerName);
         container.createIfNotExists();
-        String containerSasUri = SampleUtils.getContainerSasUri(container);
+        String containerSasUri = samples.com.microsoft.azure.sdk.iot.service.SampleUtils.getContainerSasUri(container);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(samples.com.microsoft.azure.sdk
+                .iot.service.SampleUtils.iotHubConnectionString);
         JobProperties exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
 
         while(true)
@@ -48,10 +50,11 @@ public class DeviceManagerExportSample
             if (blobItem instanceof CloudBlob)
             {
                 CloudBlob blob = (CloudBlob) blobItem;
-                blob.download(new FileOutputStream(SampleUtils.exportFileLocation + blob.getName()));
+                blob.download(new FileOutputStream(samples.com.microsoft.azure.sdk.iot.service.SampleUtils.exportFileLocation + blob.getName()));
             }
         }
 
-        System.out.println("Export job completed. Results are in " + SampleUtils.exportFileLocation);
+        System.out.println("Export job completed. Results are in " + samples.com.microsoft.azure.sdk.iot.service
+                .SampleUtils.exportFileLocation);
     }
 }

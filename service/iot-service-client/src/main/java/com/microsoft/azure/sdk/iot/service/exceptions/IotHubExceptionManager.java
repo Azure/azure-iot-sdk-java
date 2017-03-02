@@ -5,8 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.service.*;
-import com.microsoft.azure.sdk.iot.service.sdk.Tools;
+import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 
 import javax.json.Json;

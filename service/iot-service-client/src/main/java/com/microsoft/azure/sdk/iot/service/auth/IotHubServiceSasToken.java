@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.auth;
 
-import com.microsoft.azure.sdk.iot.service.sdk.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Mac;

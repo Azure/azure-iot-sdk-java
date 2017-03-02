@@ -3,11 +3,11 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package samples.com.microsoft.azure.sdk.iot.service.sdk;
+package samples.com.microsoft.azure.sdk.iot.service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.microsoft.azure.sdk.iot.service.sdk.*;
+import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.*;
 
@@ -28,11 +28,12 @@ public class DeviceManagerImportSample
         System.out.println("Starting import sample...");
 
         // Creating Azure storage container and getting its URI
-        CloudStorageAccount storageAccount = CloudStorageAccount.parse(SampleUtils.storageConnectionString);
+        CloudStorageAccount storageAccount = CloudStorageAccount.parse(samples.com.microsoft.azure.sdk.iot.service
+                .SampleUtils.storageConnectionString);
         CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
         CloudBlobContainer container = blobClient.getContainerReference(DeviceManagerImportSample.importContainerName);
         container.createIfNotExists();
-        String containerSasUri = SampleUtils.getContainerSasUri(container);
+        String containerSasUri = samples.com.microsoft.azure.sdk.iot.service.SampleUtils.getContainerSasUri(container);
 
         // Creating the list of devices to be submitted for import
         StringBuilder devicesToImport = new StringBuilder();
@@ -66,7 +67,8 @@ public class DeviceManagerImportSample
         importBlob.upload(stream, blobToImport.length);
 
         // Starting the import job
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(samples.com.microsoft.azure.sdk
+                .iot.service.SampleUtils.iotHubConnectionString);
         JobProperties importJob = registryManager.importDevices(containerSasUri, containerSasUri);
 
         // Waiting for the import job to complete
