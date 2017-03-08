@@ -133,6 +133,8 @@ public void stop() throws IOException;
 
 **SRS_MqttMessaging_25_025: [**send method shall throw an exception if the message is null.**]**
 
+**SRS_MqttMessaging_21_027: [**send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.**]**
+
 
     
     
