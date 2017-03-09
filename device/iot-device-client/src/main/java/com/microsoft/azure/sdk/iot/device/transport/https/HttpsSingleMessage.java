@@ -15,6 +15,7 @@ public final class HttpsSingleMessage implements HttpsMessage
 {
     public static final String HTTPS_SINGLE_MESSAGE_CONTENT_TYPE =
             "binary/octet-stream";
+    private static final String SYSTEM_PROPERTY_MESSAGE_ID = "messageid";
 
     protected byte[] body;
     protected boolean base64Encoded;
@@ -30,21 +31,35 @@ public final class HttpsSingleMessage implements HttpsMessage
      */
     public static HttpsSingleMessage parseHttpsMessage(Message message) {
         HttpsSingleMessage httpsMsg = new HttpsSingleMessage();
+        int systemPropertyLength = 0;
 
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_001: [The parsed HttpsSingleMessage shall have a copy of the original message body as its body.]
         byte[] msgBody = message.getBytes();
         httpsMsg.body = Arrays.copyOf(msgBody, msgBody.length);
 
+        // Codes_SRS_HTTPSSINGLEMESSAGE_21_014: [If the message contains messageId, the parsed HttpsSingleMessage shall add the property 'iothub-messageid' with the messageId value.]
+        if(message.getMessageId() != null)
+        {
+            systemPropertyLength ++;
+        }
+
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_003: [The parsed HttpsSingleMessage shall add the prefix 'iothub-app-' to each of the message properties.]
         MessageProperty[] msgProperties = message.getProperties();
-        httpsMsg.properties = new MessageProperty[msgProperties.length];
-        for (int i = 0; i < msgProperties.length; ++i)
+        httpsMsg.properties = new MessageProperty[msgProperties.length + systemPropertyLength];
+        int countProperty;
+        for (countProperty = 0; countProperty < msgProperties.length; ++countProperty)
         {
-            MessageProperty property = msgProperties[i];
+            MessageProperty property = msgProperties[countProperty];
 
-            httpsMsg.properties[i] = new MessageProperty(
+            httpsMsg.properties[countProperty] = new MessageProperty(
                     HTTPS_APP_PROPERTY_PREFIX + property.getName(),
                     property.getValue());
+        }
+        if(message.getMessageId() != null)
+        {
+            httpsMsg.properties[countProperty++] = new MessageProperty(
+                    HTTPS_SYSTEM_PROPERTY_PREFIX + SYSTEM_PROPERTY_MESSAGE_ID,
+                    message.getMessageId());
         }
 
         return httpsMsg;

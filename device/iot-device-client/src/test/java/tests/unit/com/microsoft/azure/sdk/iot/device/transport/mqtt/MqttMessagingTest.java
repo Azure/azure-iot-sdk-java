@@ -533,4 +533,50 @@ public class MqttMessagingTest {
         };
     }
 
+    /*
+     **Tests_SRS_MqttMessaging_21_027: [**send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.**]**
+     */
+    @Test
+    public void sendShallMessageWithPropsAndMessageIdToLowerLayer(@Mocked final Mqtt mockMqtt) throws IOException
+    {
+        final byte[] messageBody = {0x61, 0x62, 0x63};
+        final String propertyName = "key";
+        final String propertyValue = "value";
+        final MessageProperty[] messageProperties = new MessageProperty[]
+                {
+                        new MessageProperty(propertyName, propertyValue)
+                };
+        final String messageidValue = "test-message-id";
+        new NonStrictExpectations()
+        {
+            {
+                mockMessage.getBytes();
+                result = messageBody;
+                mockMessage.getProperties();
+                result = messageProperties;
+                mockMessage.getMessageId();
+                result = messageidValue;
+                mockMqtt.publish(anyString, messageBody);
+            }
+        };
+
+        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password);
+        testMqttMessaging.send(mockMessage);
+        final String publishTopicWithProperties = String.format(
+                "devices/%s/messages/events/%s=%s&$.mid=%s", clientId, propertyName, propertyValue,messageidValue);
+
+        new Verifications()
+        {
+            {
+                mockMessage.getBytes();
+                times = 2;
+                mockMessage.getProperties();
+                mockMqtt.publish(publishTopicWithProperties, messageBody);
+                times = 1;
+                mockMessage.getMessageId();
+                times = 2;
+            }
+        };
+    }
+
 }

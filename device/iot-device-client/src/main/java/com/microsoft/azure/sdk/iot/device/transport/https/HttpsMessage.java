@@ -15,6 +15,9 @@ public interface HttpsMessage
     /** The prefix to be added to an HTTPS application-defined property. */
     String HTTPS_APP_PROPERTY_PREFIX = "iothub-app-";
 
+    /** The prefix to be added to an HTTPS system-defined property. */
+    String HTTPS_SYSTEM_PROPERTY_PREFIX = "iothub-";
+
     /**
      * Gets the message body.
      * @return Returns the message body.

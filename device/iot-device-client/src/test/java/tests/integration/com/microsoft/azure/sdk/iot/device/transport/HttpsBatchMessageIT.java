@@ -28,11 +28,13 @@ public class HttpsBatchMessageIT
     {
         String msgBytes0 = "abc";
         Message msg0 = new Message(msgBytes0);
+        String messageid0 = msg0.getMessageId();
         msg0.setProperty("prop-0", "value-0");
         HttpsSingleMessage httpsMsg0 = HttpsSingleMessage.parseHttpsMessage(msg0);
 
         byte[] msgBytes1 = { 48, 49, 50 };
         Message msg1 = new Message(msgBytes1);
+        String messageid1 = msg1.getMessageId();
         msg1.setProperty("prop-1", "value-1");
         HttpsSingleMessage httpsMsg1 = HttpsSingleMessage.parseHttpsMessage(msg1);
         HttpsBatchMessage batch = new HttpsBatchMessage();
@@ -45,10 +47,14 @@ public class HttpsBatchMessageIT
         String expectedBatchBody = "["
                 + "{\"body\":\"abc\","
                 + "\"base64Encoded\":false,"
-                + "\"properties\":{\"iothub-app-prop-0\":\"value-0\"}},"
+                + "\"properties\":{"
+                +   "\"iothub-app-prop-0\":\"value-0\","
+                +   "\"iothub-messageid\":\"" + messageid0 + "\"}},"
                 + "{\"body\":\"012\","
                 + "\"base64Encoded\":false,"
-                + "\"properties\":{\"iothub-app-prop-1\":\"value-1\"}}"
+                + "\"properties\":{"
+                +   "\"iothub-app-prop-1\":\"value-1\","
+                +   "\"iothub-messageid\":\"" + messageid1 + "\"}}"
                 + "]";
 
 

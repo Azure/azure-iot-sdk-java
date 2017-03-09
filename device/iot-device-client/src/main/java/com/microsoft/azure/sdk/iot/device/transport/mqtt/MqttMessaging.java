@@ -16,6 +16,10 @@ public class MqttMessaging extends Mqtt
     private String publishTopic;
     private String parseTopic;
 
+    private static final char PROPERTY_SEPARATOR = '&';
+    private static final char PAIR_SEPARATOR = '=';
+    private static final String DEVICE_ID_TAG = "$.mid";
+
     @Override
     String parseTopic() throws IOException
     {
@@ -179,15 +183,25 @@ public class MqttMessaging extends Mqtt
             {
                 if(needAmpersand)
                 {
-                    stringBuilder.append('&');
+                    stringBuilder.append(PROPERTY_SEPARATOR);
                 }
                 /*
                 **Codes_SRS_MqttMessaging_25_026: [**send method shall append the message properties to publishTopic before publishing.**]**
                  */
                 stringBuilder.append(property.getName());
-                stringBuilder.append('=');
+                stringBuilder.append(PAIR_SEPARATOR);
                 stringBuilder.append(property.getValue());
                 needAmpersand = true;
+            }
+            /*
+             **Tests_SRS_MqttMessaging_21_027: [**send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.**]**
+             */
+            if(message.getMessageId() != null)
+            {
+                stringBuilder.append(PROPERTY_SEPARATOR);
+                stringBuilder.append(DEVICE_ID_TAG);
+                stringBuilder.append(PAIR_SEPARATOR);
+                stringBuilder.append(message.getMessageId());
             }
             messagePublishTopic = stringBuilder.toString();
         }
