@@ -38,6 +38,8 @@ public static HttpsSingleMessage parseHttpsMessage(Message msg);
 
 **SRS_HTTPSSINGLEMESSAGE_11_003: [**The parsed HttpsSingleMessage shall add the prefix 'iothub-app-' to each of the message properties.**]**
 
+**SRS_HTTPSSINGLEMESSAGE_21_014: [**If the message contains messageId, the parsed HttpsSingleMessage shall add the property 'iothub-messageid' with the messageId value.**]**
+
 
 ### parseHttpsMessage
 

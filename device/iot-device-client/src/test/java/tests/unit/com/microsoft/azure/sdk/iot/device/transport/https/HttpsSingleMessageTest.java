@@ -128,6 +128,48 @@ public class HttpsSingleMessageTest
         assertThat(testBody, is(not(expectedBody)));
     }
 
+    // Tests_SRS_HTTPSSINGLEMESSAGE_21_014: [If the message contains messageId, the parsed HttpsSingleMessage shall add the property 'iothub-messageid' with the messageId value.]
+    @Test
+    public void parseHttpsMessageFromMessageWithMessageId(
+            @Mocked final Message mockMsg,
+            @Mocked final MessageProperty mockProperty)
+    {
+        final byte[] body = { 0x61, 0x62, 0x63 };
+        final MessageProperty[] properties = { mockProperty };
+        final String messageidName = "messageid";
+        final String messageidValue = "test_messageid-value";
+        final String propertyName = "test-property-name";
+        final String propertyValue = "test-property-value";
+        new NonStrictExpectations()
+        {
+            {
+                mockMsg.getBytes();
+                result = body;
+                mockMsg.getProperties();
+                result = properties;
+                mockMsg.getMessageId();
+                result = messageidValue;
+                mockProperty.getName();
+                result = propertyName;
+                mockProperty.getValue();
+                result = propertyValue;
+            }
+        };
+
+        HttpsSingleMessage.parseHttpsMessage(mockMsg);
+
+        final String expectedPrefix = "iothub-";
+        final String expectedMessageIdName = expectedPrefix + messageidName;
+        final String expectedMessageIdValue = messageidValue;
+        new Verifications()
+        {
+            {
+                new MessageProperty(expectedMessageIdName,
+                        expectedMessageIdValue);
+            }
+        };
+    }
+
     // Tests_SRS_HTTPSSINGLEMESSAGE_11_005: [The parsed HttpsSingleMessage shall not be Base64-encoded.]
     @Test
     public void parseHttpsMessageFromResponseDoesNotBase64EncodeBody(
