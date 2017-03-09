@@ -18,6 +18,8 @@ public class AmqpSendHandler
     public void onLinkInit(Event event);
     public void onLinkFlow(Event event);
     public void onTransportError(Event event);
+    public void onDelivery(Event event);
+    public void sendComplete() throws IotHubException;
 }
 ```
 
@@ -101,4 +103,33 @@ public void onLinkFlow(Event event);
 
 **SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_021: [** The event handler shall send the encoded bytes **]**
 
-**SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_022: [** The event handler shall close the Sender, Session and Connection **]**
+
+### onDelivery
+
+```java
+public void onDelivery(Event event);
+```
+**SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_023: [** The event handler shall get the Delivery from the event only if the event type is DELIVERY **]**
+
+**SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_024: [** The event handler shall get the Delivery remote state from the delivery **]**
+
+**SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_025: [** The event handler shall verify the Amqp response and add the response to a queue. **]**
+
+**SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_026: [** The event handler shall settle the delivery. **]**
+
+**SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_027: [** The event handler shall get the Sender (Proton) object from the event **]**
+
+**SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_028: [** The event handler shall close the Sender, Session and Connection **]**
+
+### sendComplete
+
+```java
+public void sendComplete() throws IotHubException;
+```
+**SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_029: [** The event handler shall check the status queue to get the response for the sent message **]**
+
+**SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_030: [** The event handler shall remove the response from the queue **]**
+
+**SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [** The event handler shall get the exception from the response and throw is it is not null **]**
+
+

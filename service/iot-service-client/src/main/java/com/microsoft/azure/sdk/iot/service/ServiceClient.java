@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
 
 import java.io.IOException;
@@ -114,7 +115,7 @@ public class ServiceClient
      * @param message The message for the device
      * @throws IOException This exception is thrown if the AmqpSender object is not initialized
      */
-    public void send(String deviceId, Message message) throws IOException
+    public void send(String deviceId, Message message) throws IOException, IotHubException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_012: [The function shall throw IOException if the member AMQP sender object has not been initialized]
         if (this.amqpMessageSender == null)
@@ -185,7 +186,7 @@ public class ServiceClient
         {
             send(deviceId, message);
             future.complete(null);
-        } catch (IOException e)
+        } catch (Exception e)
         {
             future.completeExceptionally(e);
         }

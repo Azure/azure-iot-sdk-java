@@ -7,6 +7,8 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.Verifications;
@@ -15,9 +17,9 @@ import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
-import org.apache.qpid.proton.amqp.transport.ErrorCondition;
-import org.apache.qpid.proton.amqp.transport.ReceiverSettleMode;
-import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
+import org.apache.qpid.proton.amqp.messaging.Properties;
+import org.apache.qpid.proton.amqp.messaging.Target;
+import org.apache.qpid.proton.amqp.transport.*;
 import org.apache.qpid.proton.amqp.transport.Source;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
@@ -33,10 +35,8 @@ import org.junit.runner.RunWith;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.BufferOverflowException;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.Assert.assertEquals;
 
@@ -67,6 +67,8 @@ public class AmqpSendHandlerTest
     @Mocked Link link;
     @Mocked Target target;
     @Mocked Delivery delivery;
+    @Mocked Disposition disposition;
+    @Mocked AmqpResponseVerification responseVerification;
 
     // Test_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall copy all input parameters to private member variables for event processing]
     // Test_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_002: [The constructor shall concatenate the host name with the port]
@@ -394,10 +396,6 @@ public class AmqpSendHandlerTest
                 link.getCredit();
                 byte[] buffer = new byte[1024];
                 message.encode(buffer, 0, 1024);
-                sender.close();
-                session = sender.getSession();
-                connection = session.getConnection();
-                connection.close();
             }
         };
         // Act
@@ -425,17 +423,124 @@ public class AmqpSendHandlerTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         createProtonObjects();
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        Queue<Message> testMessagesToBeSent = new LinkedBlockingQueue<>();
+        testMessagesToBeSent.add(messageWithException);
+        Deencapsulation.setField(amqpSendHandler,"messagesToBeSent", testMessagesToBeSent );
         // Assert
         new Expectations()
         {
             {
-                amqpSendHandler.protonMessage = messageWithException;
                 link = event.getLink();
                 link.getCredit();
             }
         };
         // Act
         amqpSendHandler.onLinkFlow(event);
+    }
+
+    /*
+    Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_023: [** The event handler shall get the Delivery from the event only if the event type is DELIVERY **]**
+
+    Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_024: [** The event handler shall get the Delivery remote state from the delivery **]**
+
+    Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_025: [** The event handler shall verify the Amqp response and add the response to a queue. **]**
+
+    Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_026: [** The event handler shall settle the delivery. **]**
+
+    Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_027: [** The event handler shall get the Sender (Proton) object from the event **]**
+
+    Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_028: [** The event handler shall close the Sender, Session and Connection **]**
+     */
+    @Test
+    public void onDelivery_flow_ok(final @Mocked Event mockedEvent,
+                                   final @Mocked DeliveryState mockedDeliveryState,
+                                   final @Mocked Delivery mockedDelivery) throws UnsupportedEncodingException
+    {
+        // Arrange
+        String hostName = "aaa";
+        String userName = "bbb";
+        String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
+
+        // Assert
+        new Expectations()
+        {
+            {
+                mockedEvent.getType();
+                result = Event.Type.DELIVERY;
+                mockedEvent.getDelivery();
+                result = mockedDelivery;
+                mockedDelivery.getRemoteState();
+                result = mockedDeliveryState;
+                sender.close();
+                session = sender.getSession();
+                connection = session.getConnection();
+                connection.close();
+            }
+        };
+        // Act
+        amqpSendHandler.onDelivery(mockedEvent);
+    }
+
+    /*
+    Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_029: [** The event handler shall check the status queue to get the response for the sent message **]**
+
+    Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_030: [** The event handler shall remove the response from the queue **]**
+
+    Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [** The event handler shall get the exception from the response and throw is it is not null **]**
+     */
+    @Test
+    public void sendComplete_flow_OK(final @Mocked AmqpResponseVerification mockedVerification) throws IotHubException
+    {
+        // Arrange
+        String hostName = "aaa";
+        String userName = "bbb";
+        String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        Queue<AmqpResponseVerification> testsendStatusQueue = new LinkedBlockingQueue<>();
+        testsendStatusQueue.add(mockedVerification);
+        Deencapsulation.setField(amqpSendHandler,"sendStatusQueue", testsendStatusQueue );
+
+        // Assert
+        new Expectations()
+        {
+            {
+                mockedVerification.getException();
+                result = null;
+            }
+        };
+        // Act
+        amqpSendHandler.sendComplete();
+    }
+
+    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [** The event handler shall get the exception from the response and throw is it is not null **]**
+    @Test (expected = IotHubException.class)
+    public void sendComplete_throws_exception_if_found(final @Mocked AmqpResponseVerification mockedVerification,
+                                                       final @Mocked IotHubException mockedIotHubException) throws IotHubException
+    {
+        // Arrange
+        String hostName = "aaa";
+        String userName = "bbb";
+        String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        Queue<AmqpResponseVerification> testsendStatusQueue = new LinkedBlockingQueue<>();
+        testsendStatusQueue.add(mockedVerification);
+        Deencapsulation.setField(amqpSendHandler,"sendStatusQueue", testsendStatusQueue );
+
+        // Assert
+        new Expectations()
+        {
+            {
+                mockedVerification.getException();
+                result = mockedIotHubException;
+            }
+        };
+        // Act
+        amqpSendHandler.sendComplete();
+
     }
 
     private void createProtonObjects()

@@ -110,4 +110,5 @@ public class IotHubExceptionManager
         }
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_010: [The function shall return without exception if the response status equal or less than 300]
     }
+
 }

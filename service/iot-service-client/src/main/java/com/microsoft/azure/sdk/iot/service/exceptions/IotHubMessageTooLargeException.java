@@ -6,16 +6,16 @@
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
 /**
- * Create iot hub not found exception
+ * Create iot hub Message too large exception
  */
-public class IotHubNotFoundException extends IotHubException
+public class IotHubMessageTooLargeException extends IotHubException
 {
-    public IotHubNotFoundException()
+    public IotHubMessageTooLargeException()
     {
-        super("IoT Hub not found!");
+        super("Message too large");
     }
 
-    public IotHubNotFoundException(String message)
+    public IotHubMessageTooLargeException(String message)
     {
         super(message);
     }

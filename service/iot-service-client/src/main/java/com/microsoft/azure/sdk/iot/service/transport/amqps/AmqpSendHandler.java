@@ -6,22 +6,25 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.Tools;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
+import org.apache.qpid.proton.amqp.messaging.Properties;
+import org.apache.qpid.proton.amqp.transport.DeliveryState;
+
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.messenger.impl.Address;
 import org.apache.qpid.proton.reactor.Handshaker;
 
 import java.nio.BufferOverflowException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Instance of the QPID-Proton-J BaseHandler class to override
@@ -39,11 +42,12 @@ public class AmqpSendHandler extends BaseHandler
     public static final String DEVICE_PATH_FORMAT = "/devices/%s/messages/devicebound";
     public static final String WEBSOCKET_PATH = "/$iothub/websocket";
     public static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
+    private Queue<AmqpResponseVerification> sendStatusQueue = new LinkedBlockingQueue<>();
+    private Queue<org.apache.qpid.proton.message.Message> messagesToBeSent = new LinkedBlockingQueue<>();
 
     protected final String hostName;
     protected final String userName;
     protected final String sasToken;
-    protected org.apache.qpid.proton.message.Message protonMessage;
     private int nextTag = 0;
 
     protected final IotHubServiceClientProtocol iotHubServiceClientProtocol;
@@ -108,10 +112,10 @@ public class AmqpSendHandler extends BaseHandler
      * @param deviceId The device name string
      * @param message The message to be sent
      */
-    public void createProtonMessage(String deviceId, Message message)
+    public void createProtonMessage(String deviceId, com.microsoft.azure.sdk.iot.service.Message message)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_005: [The function shall create a new Message (Proton) object]
-        this.protonMessage = Proton.message();
+        org.apache.qpid.proton.message.Message protonMessage = Proton.message();
 
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_006: [The function shall set
         // the standard properties on the Proton Message object]
@@ -124,7 +128,7 @@ public class AmqpSendHandler extends BaseHandler
         {
             properties.setUserId(new Binary(message.getUserId().getBytes()));
         }
-        this.protonMessage.setProperties(properties);
+        protonMessage.setProperties(properties);
 
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_023: [The function shall set
         // the application properties on the Proton Message object]
@@ -136,7 +140,7 @@ public class AmqpSendHandler extends BaseHandler
                 applicationPropertiesMap.put(entry.getKey(), entry.getValue());
             }
             ApplicationProperties applicationProperties = new ApplicationProperties(applicationPropertiesMap);
-            this.protonMessage.setApplicationProperties(applicationProperties);
+            protonMessage.setApplicationProperties(applicationProperties);
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_007: [The function shall create a Binary (Proton) object from the content string]
@@ -144,7 +148,8 @@ public class AmqpSendHandler extends BaseHandler
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_008: [The function shall create a data Section (Proton) object from the Binary]
         Section section = new Data(binary);
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_009: [The function shall set the Message body to the created data section]
-        this.protonMessage.setBody(section);
+        protonMessage.setBody(section);
+        messagesToBeSent.add(protonMessage);
     }
 
     /**
@@ -248,35 +253,80 @@ public class AmqpSendHandler extends BaseHandler
     @Override
     public void onLinkFlow(Event event)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_018: [The event handler shall get the Sender (Proton) object from the link]
-        Sender snd = (Sender)event.getLink();
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_019: [The event handler shall encode the message and copy to the byte buffer]
-        if (snd.getCredit() > 0)
+        if (!messagesToBeSent.isEmpty())
         {
-            byte[] msgData = new byte[1024];
-            int length;
-            while(true)
+            org.apache.qpid.proton.message.Message protonMessage = messagesToBeSent.remove();
+            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_018: [The event handler shall get the Sender (Proton) object from the link]
+            Sender snd = (Sender)event.getLink();
+            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_019: [The event handler shall encode the message and copy to the byte buffer]
+            if (snd.getCredit() > 0)
             {
-                try
+                byte[] msgData = new byte[1024];
+                int length;
+                while (true)
                 {
-                    length = this.protonMessage.encode(msgData, 0, msgData.length);
-                    break;
-                } catch(BufferOverflowException e)
-                {
-                    msgData = new byte[msgData.length * 2];
+                    try
+                    {
+                        length = protonMessage.encode(msgData, 0, msgData.length);
+                        break;
+                    } catch (BufferOverflowException e)
+                    {
+                        msgData = new byte[msgData.length * 2];
+                    }
                 }
+                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_020: [The event handler shall set the delivery tag on the Sender (Proton) object]
+                byte[] tag = String.valueOf(nextTag++).getBytes();
+                Delivery dlv = snd.delivery(tag);
+                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_021: [The event handler shall send the encoded bytes]
+                snd.send(msgData, 0, length);
+
+                snd.advance();
             }
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_020: [The event handler shall set the delivery tag on the Sender (Proton) object]
-            byte[] tag = String.valueOf(nextTag++).getBytes();
-            Delivery dlv = snd.delivery(tag);
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_021: [The event handler shall send the encoded bytes]
-            snd.send(msgData, 0, length);
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_022: [The event handler shall close the Sender, Session and Connection]
-            dlv.settle();
-            snd.advance();
+        }
+    }
+
+    @Override
+    public void onDelivery(Event event)
+    {
+        //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_023: [ The event handler shall get the Delivery from the event only if the event type is DELIVERY **]**
+        if(event.getType() == Event.Type.DELIVERY)
+        {
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_038: [If this link is the Sender link and the event type is DELIVERY, the event handler shall get the Delivery (Proton) object from the event.]
+            Delivery d = event.getDelivery();
+
+            //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_024: [ The event handler shall get the Delivery remote state from the delivery **]**
+            DeliveryState remoteState = d.getRemoteState();
+
+            //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_025: [ The event handler shall verify the Amqp response and add the response to a queue. **]**
+            sendStatusQueue.add(new AmqpResponseVerification(remoteState));
+
+            //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_026: [ The event handler shall settle the delivery. **]**
+            d.settle();
+
+            //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_027: [ The event handler shall get the Sender (Proton) object from the event **]**
+            Sender snd = event.getSender();
+
+            //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_028: [ The event handler shall close the Sender, Session and Connection **]**
             snd.close();
             snd.getSession().close();
             snd.getSession().getConnection().close();
         }
+
     }
+
+    public void sendComplete() throws IotHubException
+    {
+        //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_029: [ The event handler shall check the status queue to get the response for the sent message **]**
+        if (!sendStatusQueue.isEmpty())
+        {
+            //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_030: [ The event handler shall remove the response from the queue **]**
+            AmqpResponseVerification verifier = sendStatusQueue.remove();
+            if (verifier.getException() != null)
+            {
+                //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [ The event handler shall get the exception from the response and throw is it is not null **]**
+                throw verifier.getException();
+            }
+        }
+    }
+
 }

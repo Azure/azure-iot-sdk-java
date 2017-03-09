@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.Tools;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.Event;
@@ -102,26 +103,21 @@ public class AmqpSend extends BaseHandler
      * @param message The message to be sent
      * @throws IOException This exception is thrown if the AmqpSend object is not initialized
      */
-    public void send(String deviceId, Message message) throws IOException
+    public void send(String deviceId, Message message) throws IOException, IotHubException
     {
       synchronized(this)
       {
         if  (amqpSendHandler != null)
         {
-            try
-            {
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_006: [The function shall create a binary message with the given content]
-                    amqpSendHandler.createProtonMessage(deviceId, message);
-                    // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_007: [The function shall initialize the Proton reactor object]
-                    this.reactor = Proton.reactor(this);
-                    // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_008: [The function shall start the Proton reactor object]
-                    this.reactor.run();
-                    this.reactor.free();
-            }
-            catch (Exception e)
-            {
-                throw new IOException("Error "+ e.getMessage());
-            }
+            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_006: [The function shall create a binary message with the given content]
+            amqpSendHandler.createProtonMessage(deviceId, message);
+            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_007: [The function shall initialize the Proton reactor object]
+            this.reactor = Proton.reactor(this);
+            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_008: [The function shall start the Proton reactor object]
+            this.reactor.run();
+            this.reactor.free();
+            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_25_010: [** The function shall call sendComplete to identify the status of sent message and throws exception if thrown by sendComplete **]**
+            amqpSendHandler.sendComplete();
         }
         else
         {
@@ -131,6 +127,5 @@ public class AmqpSend extends BaseHandler
       }
 
     }
-
 
 }

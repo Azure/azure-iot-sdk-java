@@ -61,3 +61,5 @@ public void send(String deviceId, String content);
 **SRS_SERVICE_SDK_JAVA_AMQPSEND_12_008: [** The function shall start the Proton reactor object **]**
 
 **SRS_SERVICE_SDK_JAVA_AMQPSEND_12_009: [** The function shall throw IOException if the send handler object is not initialized **]**
+
+**SRS_SERVICE_SDK_JAVA_AMQPSEND_25_010: [** The function shall call sendComplete to identify the status of sent message and throws exception if thrown by sendComplete **]**

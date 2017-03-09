@@ -6,6 +6,8 @@
 package samples.com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubDeviceMaximumQueueDepthExceededException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -36,7 +38,7 @@ public class ServiceClientSample
     private static ServiceClient serviceClient = null;
     private static FeedbackReceiver feedbackReceiver = null;
     
-    private static final int MAX_COMMANDS_TO_SEND = 2; // maximum commands to send in a loop
+    private static final int MAX_COMMANDS_TO_SEND = 6; // maximum commands to send in a loop
  
     /**
      * @param args
@@ -75,18 +77,25 @@ public class ServiceClientSample
         messageToSend.setProperties(propertiesToSend);
 
         CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, messageToSend);
-        completableFuture.get();
+        try
+        {
+            completableFuture.get();
+        }
+        catch (ExecutionException e)
+        {
+            System.out.println("Exception : " + e.getCause());
+            return;
+        }
 
         System.out.println("********* Waiting for feedback...");
         CompletableFuture<FeedbackBatch> future = feedbackReceiver.receiveAsync();
         FeedbackBatch feedbackBatch = future.get();
-        
+
         if (feedbackBatch != null)
         {
-        System.out.println("********* Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc().toString());
+            System.out.println("********* Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc().toString());
         }
-        
-        
+
         // Sending multiple commands
         try
         {
@@ -153,49 +162,66 @@ public class ServiceClientSample
     }
     
      protected static void sendMultipleCommandsAndReadFromTheFeedbackReceiver() throws ExecutionException, InterruptedException, UnsupportedEncodingException
-    {
+     {
         List<CompletableFuture<Void>> futureList = new ArrayList<CompletableFuture<Void>>();
         Map<String, String> propertiesToSend = new HashMap<String, String>();
         String commandMessage = "Cloud to Device Message: "; 
         
         System.out.println("sendMultipleCommandsAndReadFromTheFeedbackReceiver: Send count is : " + MAX_COMMANDS_TO_SEND);
-        
-        for (int i = 0; i < MAX_COMMANDS_TO_SEND ; i++)
-        {
-        Message messageToSend = new Message(commandMessage + Integer.toString(i)) ;
-        messageToSend.setDeliveryAcknowledgement(DeliveryAcknowledgement.Full);
-        
-        // Setting standard properties
-        messageToSend.setMessageId(java.util.UUID.randomUUID().toString());
-        System.out.println("Message id set: " + messageToSend.getMessageId());
-           
-        // Setting user properties
-        propertiesToSend.clear();
-        propertiesToSend.put("key_"+ Integer.toString(i), "value_"+ Integer.toString(i));
-        messageToSend.setProperties(propertiesToSend);
-      
-        // send the message
-        CompletableFuture<Void> future =  serviceClient.sendAsync(deviceId, messageToSend);
-        futureList.add(future);
-      }
-      
-      System.out.println("Waiting for all sends to be completed...");
-      CompletableFuture.allOf(futureList.toArray(new CompletableFuture[futureList.size()])).join(); // Wait for all futures to be completed
-      System.out.println("All sends completed !");
-  
-      System.out.println("Waiting for the feedback...");
-      CompletableFuture<FeedbackBatch> future = feedbackReceiver.receiveAsync();
-      FeedbackBatch feedbackBatch = future.get();
-      
-     if (feedbackBatch != null) // check if any feedback was received
-     {
-      System.out.println("Record count: " + feedbackBatch.getRecords().size());
 
-      for (int i=0; i < feedbackBatch.getRecords().size(); i++)
-        System.out.println("Messsage id get: " + feedbackBatch.getRecords().get(i).getOriginalMessageId());
-     }
-      
-      
+        for (int i = 0; i < MAX_COMMANDS_TO_SEND; i++)
+        {
+            Message messageToSend = new Message(commandMessage + Integer.toString(i));
+            messageToSend.setDeliveryAcknowledgement(DeliveryAcknowledgement.Full);
+
+            // Setting standard properties
+            messageToSend.setMessageId(java.util.UUID.randomUUID().toString());
+            System.out.println("Message id set: " + messageToSend.getMessageId());
+
+            // Setting user properties
+            propertiesToSend.clear();
+            propertiesToSend.put("key_" + Integer.toString(i), "value_" + Integer.toString(i));
+            messageToSend.setProperties(propertiesToSend);
+
+            // send the message
+
+            CompletableFuture<Void> future = serviceClient.sendAsync(deviceId, messageToSend);
+            futureList.add(future);
+
+        }
+
+        System.out.println("Waiting for all sends to be completed...");
+        for (CompletableFuture<Void> future : futureList)
+        {
+            try
+            {
+                future.get();
+            }
+            catch (ExecutionException e)
+            {
+                if (e.getCause() instanceof  IotHubDeviceMaximumQueueDepthExceededException)
+                {
+                    System.out.println("Maximum queue depth reached");
+                }
+                else
+                {
+                    System.out.println("Exception : " + e.getMessage());
+                }
+            }
+        }
+        System.out.println("All sends completed !");
+
+        System.out.println("Waiting for the feedback...");
+        CompletableFuture<FeedbackBatch> future = feedbackReceiver.receiveAsync();
+        FeedbackBatch feedbackBatch = future.get();
+
+        if (feedbackBatch != null) // check if any feedback was received
+        {
+            System.out.println("Record count: " + feedbackBatch.getRecords().size());
+            for (int i=0; i < feedbackBatch.getRecords().size(); i++)
+            {
+                System.out.println("Messsage id get: " + feedbackBatch.getRecords().get(i).getOriginalMessageId());
+            }
+        }
     }
-   
 }

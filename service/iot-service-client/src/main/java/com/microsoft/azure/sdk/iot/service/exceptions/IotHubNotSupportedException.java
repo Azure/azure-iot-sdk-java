@@ -8,14 +8,14 @@ package com.microsoft.azure.sdk.iot.service.exceptions;
 /**
  * Create iot hub not found exception
  */
-public class IotHubNotFoundException extends IotHubException
+public class IotHubNotSupportedException extends IotHubException
 {
-    public IotHubNotFoundException()
+    public IotHubNotSupportedException()
     {
-        super("IoT Hub not found!");
+        super("Not supported");
     }
 
-    public IotHubNotFoundException(String message)
+    public IotHubNotSupportedException(String message)
     {
         super(message);
     }
