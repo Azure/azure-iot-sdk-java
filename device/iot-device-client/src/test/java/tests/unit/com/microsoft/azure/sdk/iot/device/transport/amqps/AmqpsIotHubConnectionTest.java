@@ -665,6 +665,51 @@ public class AmqpsIotHubConnectionTest {
         };
     }
 
+    @Test
+    public void sendMessageFreesDeliveryIfSendFails() throws IOException
+    {
+        baseExpectations();
+
+        new NonStrictExpectations()
+        {
+            {
+                mockProtonMessage.encode((byte[]) any, anyInt, anyInt);
+                mockSender.delivery((byte[]) any);
+                result = mockDelivery;
+                mockSender.send((byte[]) any, anyInt, anyInt);
+                result = new Exception();
+            }
+        };
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false);
+
+        Deencapsulation.setField(connection, "state", State.OPEN);
+        Deencapsulation.setField(connection, "linkCredit", 100);
+        Deencapsulation.setField(connection, "sender", mockSender);
+
+        Integer expectedDeliveryHash = -1;
+        Integer actualDeliveryHash = connection.sendMessage(mockProtonMessage);
+
+        assertEquals(expectedDeliveryHash, actualDeliveryHash);
+
+        new Verifications()
+        {
+            {
+                mockProtonMessage.encode((byte[]) any, anyInt, anyInt);
+                times = 1;
+                mockSender.delivery((byte[]) any);
+                times = 1;
+                mockSender.send((byte[]) any, anyInt, anyInt);
+                times = 1;
+                mockSender.advance();
+                times = 1;
+                mockDelivery.free();
+                times = 1;
+            }
+        };
+    }
+
+
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_022: [If the AMQPS Connection is closed, the function shall return false.]
     @Test
     public void sendMessageReturnsFalseIfConnectionIsClosed() throws IOException
@@ -1049,6 +1094,8 @@ public class AmqpsIotHubConnectionTest {
                 mockDelivery.getRemoteState();
                 times = 1;
                 mockServerListener.messageSent(mockDelivery.hashCode(), true);
+                times = 1;
+                mockDelivery.free();
                 times = 1;
             }
         };
