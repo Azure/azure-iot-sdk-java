@@ -27,6 +27,16 @@ public class Method
 }
 ```
 
+```java
+/**
+ * CONSTRUCTOR
+ * Create a Method instance with provided values.
+ */
+public Method();
+```
+**SRS_METHOD_21_029: [**The constructor shall create an instance of the method.**]**  
+**SRS_METHOD_21_030: [**The constructor shall initialize all data in the collection as null.**]**  
+
 ### Method
 ```java
 /**
@@ -60,10 +70,9 @@ public Method(Object payload);
 **SRS_METHOD_21_021: [**The constructor shall update the method collection using the provided information.**]**  
 
 
-### Method
+### fromJson
 ```java
 /**
- * CONSTRUCTOR
  * Create a Method instance with the provided information in the json.
  *
  * @param json - Json with the information to change the collection.
@@ -72,12 +81,12 @@ public Method(Object payload);
  *                  - Otherwise, it is only `payload`.
  * @throws IllegalArgumentException This exception is thrown if the one of the provided information do not fits the requirements.
  */
-public Method(String json) throws IllegalArgumentException
+public fromJson(String json) throws IllegalArgumentException
 ```
-**SRS_METHOD_21_006: [**The constructor shall create an instance of the method.**]**  
-**SRS_METHOD_21_007: [**The constructor shall parse the json and fill the status and payload.**]**  
-**SRS_METHOD_21_008: [**If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.**]**  
-**SRS_METHOD_21_009: [**If the json contains the `methodName` identification, the constructor shall parser the full method.**]**  
+**SRS_METHOD_21_006: [**The fromJson shall create an instance of the method.**]**  
+**SRS_METHOD_21_007: [**The fromJson shall parse the json and fill the status and payload.**]**  
+**SRS_METHOD_21_008: [**If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.**]**  
+**SRS_METHOD_21_009: [**If the json contains the `methodName` identification, the fromJson shall parser the full method.**]**  
 Ex:
 ```json
 {
@@ -90,7 +99,7 @@ Ex:
     }
 }
 ```
-**SRS_METHOD_21_010: [**If the json contains any payload without status identification, the constructor shall parser only the payload.**]**  
+**SRS_METHOD_21_010: [**If the json contains any payload without status identification, the fromJson shall parser only the payload.**]**  
 Ex:
 ```json
 {
@@ -98,7 +107,7 @@ Ex:
     "input2": "anotherInput"
 }
 ```
-**SRS_METHOD_21_011: [**If the json contains the `status` and `payload` identification, the constructor shall parser both status and payload.**]**  
+**SRS_METHOD_21_011: [**If the json contains the `status` and `payload` identification, the fromJson shall parser both status and payload.**]**  
 Ex:
 ```json
 {
@@ -161,7 +170,7 @@ Ex:
     }
 }
 ```
-**SRS_METHOD_21_027: [**If the method contains the status, the constructor shall parser both status and payload.**]**  
+**SRS_METHOD_21_027: [**If the method contains the status, the toJson shall parser both status and payload.**]**  
 Ex:
 ```json
 {
@@ -169,7 +178,7 @@ Ex:
     "payload": {"AnyValidPayload" : "" }
 }
 ```
-**SRS_METHOD_21_028: [**If the method do not contains name or status, the constructor shall parser only the payload.**]**  
+**SRS_METHOD_21_028: [**If the method do not contains name or status, the toJson shall parser only the payload.**]**  
 Ex:
 ```json
 {

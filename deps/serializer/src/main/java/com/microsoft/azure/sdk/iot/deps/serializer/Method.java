@@ -35,6 +35,19 @@ public class Method
     @SerializedName("payload")
     private Object payload;
 
+    /**
+     * CONSTRUCTOR
+     * Create a Method instance with provided values.
+     */
+    public Method()
+    {
+        /* Codes_SRS_METHOD_21_029: [The constructor shall create an instance of the method.] */
+        /* Codes_SRS_METHOD_21_030: [The constructor shall initialize all data in the collection as null.] */
+        this.name = null;
+        this.timeout = null;
+        this.status = null;
+        this.payload = null;
+    }
 
     /**
      * CONSTRUCTOR
@@ -47,8 +60,10 @@ public class Method
      */
     public Method(String name, Long timeout, Object payload) throws IllegalArgumentException
     {
-        /* Codes_SRS_METHOD_21_001: [The constructor shall create an instance of the method.] */  
-        /* Codes_SRS_METHOD_21_003: [All Strings are case sensitive.] */  
+        /* Codes_SRS_METHOD_21_001: [The constructor shall create an instance of the method.] */
+        this();
+
+        /* Codes_SRS_METHOD_21_003: [All Strings are case sensitive.] */
         /* Codes_SRS_METHOD_21_004: [If the `name` is null, empty, contains more than 128 chars, or illegal char (`$`, `.`, space), the constructor shall throw IllegalArgumentException.] */
         validateKey(name);
 
@@ -73,12 +88,13 @@ public class Method
     public Method(Object payload)
     {
         /* Codes_SRS_METHOD_21_020: [The constructor shall create an instance of the method.] */
+        this();
+
         /* Codes_SRS_METHOD_21_021: [The constructor shall update the method collection using the provided information.] */
         this.payload = payload;
     }
 
     /**
-     * CONSTRUCTOR
      * Create a Method instance with the provided information in the json.
      *
      * @param json - Json with the information to change the collection.
@@ -87,21 +103,21 @@ public class Method
      *                  - Otherwise, it is only `payload`.
      * @throws IllegalArgumentException This exception is thrown if the one of the provided information do not fits the requirements.
      */
-    public Method(String json) throws IllegalArgumentException
+    public void fromJson(String json) throws IllegalArgumentException
     {
-        /* Codes_SRS_METHOD_21_006: [The constructor shall create an instance of the method.] */
+        /* Codes_SRS_METHOD_21_006: [The fromJson shall create an instance of the method.] */
         
         if((json == null) || json.isEmpty())
         {
-            /* Codes_SRS_METHOD_21_008: [If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
+            /* Codes_SRS_METHOD_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
             throw new IllegalArgumentException("Invalid json");
         }
         Gson gson = new GsonBuilder().create();
 
-        /* Codes_SRS_METHOD_21_007: [The constructor shall parse the json and fill the status and payload.] */
+        /* Codes_SRS_METHOD_21_007: [The fromJson shall parse the json and fill the status and payload.] */
         try
         {
-            /* Codes_SRS_METHOD_21_009: [If the json contains the `methodName` identification, the constructor shall parser the full method.]
+            /* Codes_SRS_METHOD_21_009: [If the json contains the `methodName` identification, the fromJson shall parser the full method.]
              *  Ex:
              *  {
              *      "methodName": "reboot",
@@ -113,7 +129,7 @@ public class Method
              *      }
              *  }
              */
-            /** Codes_SRS_METHOD_21_011: [If the json contains the `status` and `payload` identification, the constructor shall parser both status and payload.]
+            /** Codes_SRS_METHOD_21_011: [If the json contains the `status` and `payload` identification, the fromJson shall parser both status and payload.]
              *  Ex:
              *  {
              *      "status": 201,
@@ -136,7 +152,7 @@ public class Method
             try
             {
                 /**
-                 * Codes_SRS_METHOD_21_010: [If the json contains any payload without status identification, the constructor shall parser only the payload.]
+                 * Codes_SRS_METHOD_21_010: [If the json contains any payload without status identification, the fromJson shall parser only the payload.]
                  *  Ex:
                  *  {
                  *      "input1": "someInput",
@@ -147,14 +163,14 @@ public class Method
             }
             catch (Exception malformed)
             {
-                /* Codes_SRS_METHOD_21_008: [If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
+                /* Codes_SRS_METHOD_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
                 throw new IllegalArgumentException("Malformed json:" + malformed);
             }
         }
 
         if((this.name != null) && ((this.status != null) || this.name.isEmpty()))
         {
-            /* Codes_SRS_METHOD_21_008: [If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
+            /* Codes_SRS_METHOD_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
             throw new IllegalArgumentException("Name and Status reported in the same json");
         }
     }
@@ -215,7 +231,7 @@ public class Method
         
         if(name == null)
         {
-            /** Codes_SRS_METHOD_21_027: [If the method contains the status, the constructor shall parser both status and payload.
+            /** Codes_SRS_METHOD_21_027: [If the method contains the status, the toJson shall parser both status and payload.
              *  Ex:
              *  {
              *      "status": 201,
@@ -225,7 +241,7 @@ public class Method
             if(status == null)
             {
                 /**
-                 * Codes_SRS_METHOD_21_028: [If the method do not contains name or status, the constructor shall parser only the payload.]
+                 * Codes_SRS_METHOD_21_028: [If the method do not contains name or status, the toJson shall parser only the payload.]
                  *  Ex:
                  *  {
                  *      "input1": "someInput",
