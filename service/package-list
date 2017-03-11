@@ -1,6 +1,6 @@
+com.microsoft.azure.sdk.iot.service
 com.microsoft.azure.sdk.iot.service.auth
 com.microsoft.azure.sdk.iot.service.exceptions
-com.microsoft.azure.sdk.iot.service.sdk
 com.microsoft.azure.sdk.iot.service.transport
 com.microsoft.azure.sdk.iot.service.transport.amqps
 com.microsoft.azure.sdk.iot.service.transport.http
