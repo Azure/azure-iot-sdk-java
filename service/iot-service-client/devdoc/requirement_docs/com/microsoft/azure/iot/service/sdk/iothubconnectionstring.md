@@ -103,3 +103,12 @@ public URL getUrlTwinDesired(String deviceId) throws MalformedURLException, Ille
 **SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_014: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
 
 **SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_015: [** The function shall create a URL object from the given deviceId using the following format: https:hostname/twins/deviceId/properties/desired?api-version=201X-XX-XX **]**
+
+### getUrlMethod
+
+```java
+public URL getUrlMethod(String deviceId) throws MalformedURLException, IllegalArgumentException;
+```
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_016: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
+
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_017: [** The function shall create a URL object from the given deviceId using the following format: https:hostname/twins/deviceId/methods/ **]**
