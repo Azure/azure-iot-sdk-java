@@ -12,6 +12,10 @@ public class IotHubTooManyDevicesException extends IotHubException
 {
     public IotHubTooManyDevicesException()
     {
-        super("Too many devices!");
+        this(null);
+    }
+    public IotHubTooManyDevicesException(String message)
+    {
+        super("Too many devices!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
     }
 }

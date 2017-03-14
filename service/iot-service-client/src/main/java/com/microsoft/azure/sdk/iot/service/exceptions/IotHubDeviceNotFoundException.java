@@ -12,11 +12,11 @@ public class IotHubDeviceNotFoundException extends IotHubException
 {
     public IotHubDeviceNotFoundException()
     {
-        super("device not found!");
+        this(null);
     }
 
     public IotHubDeviceNotFoundException(String message)
     {
-        super(message);
+        super("Device not found!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
     }
 }

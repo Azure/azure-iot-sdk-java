@@ -12,11 +12,11 @@ public class IotHubInvalidOperationException extends IotHubException
 {
     public IotHubInvalidOperationException()
     {
-        super("Invalid operation!");
+        this(null);
     }
 
     public IotHubInvalidOperationException(String message)
     {
-        super(message);
+        super("Invalid operation!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
     }
 }

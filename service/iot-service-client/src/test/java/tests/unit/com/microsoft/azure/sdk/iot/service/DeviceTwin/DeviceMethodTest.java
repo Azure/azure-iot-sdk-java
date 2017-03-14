@@ -1,19 +1,20 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package tests.unit.com.microsoft.azure.sdk.iot.service.DeviceMethod;
+package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.Method;
-import com.microsoft.azure.sdk.iot.service.DeviceMethod.DeviceMethod;
+import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.exceptions.*;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import mockit.*;
-import mockit.integration.junit4.JMockit;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.net.URL;
@@ -22,17 +23,14 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Unit tests for Device Method
  */
-@RunWith(JMockit.class)
 public class DeviceMethodTest
 {
-
-    @Mocked
-    Method method;
-
     @Mocked
     IotHubConnectionString iotHubConnectionString;
 
@@ -45,18 +43,18 @@ public class DeviceMethodTest
             ";SharedAccessKey=" + STANDARD_SHAREDACCESSKEY;
     private static final String STANDARD_DEVICEID = "validDeviceId";
     private static final String STANDARD_METHODNAME = "validMethodName";
-    private static final Long STANDARD_TIMEOUT = TimeUnit.SECONDS.toSeconds(20);
-    private static final Long ILLEGAL_NEGATIVE_TIMEOUT = TimeUnit.SECONDS.toSeconds(-20);
-    private final Integer DEFAULT_HTTP_TIMEOUT_MS = 24000;
-    private static final Map<String, Object> STANDARD_PAYLOAD = new HashMap<String, Object>()
+    private static final Long STANDARD_TIMEOUT_SECONDS = TimeUnit.SECONDS.toSeconds(20);
+    private static final Map<String, Object> STANDARD_PAYLOAD_MAP = new HashMap<String, Object>()
     {{
         put("myPar1", "myVal1");
         put("myPar2", "myVal2");
     }};
+    private static final String STANDARD_PAYLOAD_STR = "testPayload";
     private static final String STANDARD_JSON =
             "{" +
                 "\"methodName\":\"" + STANDARD_METHODNAME + "\"," +
-                "\"responseTimeoutInSeconds\":" + STANDARD_TIMEOUT.toString() + "," +
+                "\"responseTimeoutInSeconds\":" + STANDARD_TIMEOUT_SECONDS.toString() + "," +
+                "\"connectTimeoutInSeconds\":" + STANDARD_TIMEOUT_SECONDS.toString() + "," +
                 "\"payload\":" +
                 "{" +
                     "\"myPar1\": \"myVal1\"," +
@@ -68,14 +66,29 @@ public class DeviceMethodTest
     {
         String deviceId;
         String methodName;
-        Long timeout;
+        Long responseTimeoutInSeconds;
+        Long connectTimeoutInSeconds;
         Object payload;
     }
 
     private static final TestMethod[] illegalParameter = new TestMethod[]
             {
-                    new TestMethod() {{ deviceId = null; methodName = STANDARD_METHODNAME; timeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
-                    new TestMethod() {{ deviceId = ""; methodName = STANDARD_METHODNAME; timeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
+                    new TestMethod()
+                    {{
+                        deviceId = null;
+                        methodName = STANDARD_METHODNAME;
+                        responseTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
+                        connectTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
+                        payload = STANDARD_PAYLOAD_MAP;
+                    }},
+                    new TestMethod()
+                    {{
+                        deviceId = "";
+                        methodName = STANDARD_METHODNAME;
+                        responseTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
+                        connectTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
+                        payload = STANDARD_PAYLOAD_MAP;
+                    }},
             };
 
 
@@ -150,8 +163,13 @@ public class DeviceMethodTest
         {
             try
             {
-                testMethod.invoke(testCase.deviceId, testCase.methodName, testCase.timeout, testCase.payload);
-                System.out.print("Negative case> DeviceId=" + testCase.deviceId + " MethodName=" + testCase.methodName + " timeout=" + testCase.timeout + " payload=" + testCase.payload + "\r\n");
+                testMethod.invoke(testCase.deviceId, testCase.methodName, testCase.responseTimeoutInSeconds, testCase.connectTimeoutInSeconds, testCase.payload);
+                System.out.print(
+                        "Negative case> DeviceId=" + testCase.deviceId +
+                        " MethodName=" + testCase.methodName +
+                        " responseTimeoutInSeconds=" + testCase.responseTimeoutInSeconds +
+                        " connectTimeoutInSeconds=" + testCase.connectTimeoutInSeconds +
+                        " payload=" + testCase.payload + "\r\n");
                 assert true;
             }
             catch (IllegalArgumentException expected)
@@ -161,31 +179,33 @@ public class DeviceMethodTest
         }
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_018: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
     /* Tests_SRS_DEVICEMETHOD_21_005: [The invoke shall throw IllegalArgumentException if the provided methodName is null, empty, or not valid.] */
-    /* Tests_SRS_DEVICEMETHOD_21_006: [The invoke shall throw IllegalArgumentException if the provided timeout is negative.] */
+    /* Tests_SRS_DEVICEMETHOD_21_006: [The invoke shall throw IllegalArgumentException if the provided responseTimeoutInSeconds is negative.] */
+    /* Tests_SRS_DEVICEMETHOD_21_007: [The invoke shall throw IllegalArgumentException if the provided connectTimeoutInSeconds is negative.] */
+    /* Tests_SRS_DEVICEMETHOD_21_014: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
     @Test (expected = IllegalArgumentException.class)
     public void invoke_throwOnCreateMethod_failed() throws Exception
     {
         //arrange
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
-
         new MockUp<Method>()
         {
-            @Mock void $init(String name, Long timeout, Object payload)
+            @Mock void $init(String name, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IllegalArgumentException
             {
                 throw new IllegalArgumentException();
             }
         };
 
+        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+
         //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT, STANDARD_PAYLOAD);
+        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
 
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_018: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
+    /* Tests_SRS_DEVICEMETHOD_21_011: [The invoke shall add a HTTP body with Json created by the `serializer.Method`.] */
     @Test (expected = IllegalArgumentException.class)
-    public void invoke_throwOnToJson_failed()
+    public void invoke_throwOnToJson_failed(
+            @Mocked final Method method)
             throws Exception
     {
         //arrange
@@ -200,12 +220,34 @@ public class DeviceMethodTest
         };
 
         //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT, STANDARD_PAYLOAD);
+        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_018: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
+    /* Tests_SRS_DEVICEMETHOD_21_012: [If `Method` return a null Json, the invoke shall throw IllegalArgumentException.] */
+    @Test (expected = IllegalArgumentException.class)
+    public void invoke_throwOnNullJson_failed(
+            @Mocked final Method method)
+            throws Exception
+    {
+        //arrange
+        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+
+        new NonStrictExpectations()
+        {
+            {
+                method.toJson();
+                result = null;
+            }
+        };
+
+        //act
+        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
+    }
+
+    /* Tests_SRS_DEVICEMETHOD_21_008: [The invoke shall build the Method URL `{iot hub}/twins/{device id}/methods/` by calling getUrlMethod.] */
     @Test (expected = IllegalArgumentException.class)
     public void invoke_throwOnGetUrlMethod_failed(
+            @Mocked final Method method,
             @Mocked final IotHubConnectionStringBuilder mockedConnectionStringBuilder)
             throws Exception
     {
@@ -222,17 +264,20 @@ public class DeviceMethodTest
         };
 
         //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT, STANDARD_PAYLOAD);
+        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_018: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
-    @Test (expected = IOException.class)
-    public void invoke_throwOnCreateHttpRequest_failed(
+    /* Tests_SRS_DEVICEMETHOD_21_009: [The invoke shall send the created request and get the response using the HttpRequester.] */
+    /* Tests_SRS_DEVICEMETHOD_21_010: [The invoke shall create a new HttpRequest with http method as `POST`.] */
+    @Test (expected = IotHubException.class)
+    public void invoke_throwOnHttpRequester_failed(
+            @Mocked final Method method,
             @Mocked final IotHubConnectionStringBuilder mockedConnectionStringBuilder)
             throws Exception
     {
         //arrange
         DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+
         new NonStrictExpectations()
         {
             {
@@ -242,21 +287,29 @@ public class DeviceMethodTest
                 result = STANDARD_URL;
             }
         };
-        new MockUp<HttpRequest>()
+        new MockUp<DeviceOperations>()
         {
-            @Mock void $init(URL url, HttpMethod method, byte[] body) throws IOException
+            @Mock HttpResponse request(
+                    IotHubConnectionString iotHubConnectionString,
+                    URL url,
+                    HttpMethod method,
+                    byte[] payload,
+                    String requestId)
+                    throws IOException, IotHubException, IllegalArgumentException
             {
-                throw new IOException();
+                throw new IotHubException();
             }
         };
 
         //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT, STANDARD_PAYLOAD);
+        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_018: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
+    /* Tests_SRS_DEVICEMETHOD_21_013: [The invoke shall deserialize the payload using the `serializer.Method`.] */
     @Test (expected = IllegalArgumentException.class)
-    public void invoke_throwOnCreateIotHubServiceSasToken_failed(
+    public void invoke_throwOnCreateMethodResponse_failed(
+            @Mocked final DeviceOperations request,
+            @Mocked final IotHubServiceSasToken iotHubServiceSasToken,
             @Mocked final IotHubConnectionStringBuilder mockedConnectionStringBuilder)
             throws Exception
     {
@@ -265,108 +318,79 @@ public class DeviceMethodTest
         new NonStrictExpectations()
         {
             {
-                method.toJson();
-                result = STANDARD_JSON;
                 iotHubConnectionString.getUrlMethod(STANDARD_DEVICEID);
                 result = STANDARD_URL;
             }
         };
-
-        new MockUp<IotHubServiceSasToken>()
+        new MockUp<Method>()
         {
-            @Mock void $init(IotHubConnectionString iotHubConnectionString)
+            @Mock void $init(String name, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IllegalArgumentException
+            {
+            }
+
+            @Mock void $init()
+            {
+            }
+
+            @Mock String toJson()
+            {
+                return STANDARD_JSON;
+            }
+
+            @Mock void fromJson(String json)
             {
                 throw new IllegalArgumentException();
             }
         };
 
         //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT, STANDARD_PAYLOAD);
+        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_018: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void invoke_throwOnSetReadTimeoutMillis_failed(
-            @Mocked final HttpRequest request,
+    /* Tests_SRS_DEVICEMETHOD_21_015: [If the HttpStatus represents success, the invoke shall return the status and payload using the `MethodResult` class.] */
+    @Test
+    public void invoke_succeed(
+            @Mocked final Method method,
+            @Mocked final DeviceOperations request,
+            @Mocked final IotHubServiceSasToken iotHubServiceSasToken,
             @Mocked final IotHubConnectionStringBuilder mockedConnectionStringBuilder)
             throws Exception
     {
         //arrange
         DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
         new NonStrictExpectations()
+        {
+            {
+                iotHubConnectionString.getUrlMethod(STANDARD_DEVICEID);
+                result = STANDARD_URL;
+                method.toJson();
+                result = STANDARD_JSON;
+                method.getPayload();
+                result = STANDARD_PAYLOAD_STR;
+                method.getStatus();
+                result = 123;
+            }
+        };
+
+        //act
+        MethodResult result = testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
+
+        //assert
+        assertThat(result.getStatus(), is(123));
+        assertThat(result.getPayload().toString(), is(STANDARD_PAYLOAD_STR));
+        new Verifications()
         {
             {
                 method.toJson();
-                result = STANDARD_JSON;
+                times = 1;
                 iotHubConnectionString.getUrlMethod(STANDARD_DEVICEID);
-                result = STANDARD_URL;
+                times = 1;
+                method.getPayload();
+                times = 1;
+                method.getStatus();
+                times = 1;
             }
         };
-        new NonStrictExpectations()
-        {
-            {
-                request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
-                result = new IllegalArgumentException();
-            }
-        };
-
-        //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT, STANDARD_PAYLOAD);
     }
-
-    /* Tests_SRS_DEVICEMETHOD_21_018: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void invoke_throwOnSetHeaderField_failed(
-            @Mocked final HttpRequest request,
-            @Mocked final IotHubConnectionStringBuilder mockedConnectionStringBuilder)
-            throws Exception
-    {
-        //arrange
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
-        new NonStrictExpectations()
-        {
-            {
-                request.setHeaderField("", "");
-                result = new IllegalArgumentException();
-            }
-        };
-
-        //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT, STANDARD_PAYLOAD);
-    }
-
-    /* Tests_SRS_DEVICEMETHOD_21_018: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
-    @Test (expected = IOException.class)
-    public void invoke_throwOnSend_failed(
-            @Mocked final HttpRequest request,
-            @Mocked final IotHubConnectionStringBuilder mockedConnectionStringBuilder)
-            throws Exception
-    {
-        //arrange
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
-        new NonStrictExpectations()
-        {
-            {
-                request.send();
-                result = new IOException();
-            }
-        };
-
-        //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT, STANDARD_PAYLOAD);
-    }
-
-
-    /* Tests_SRS_DEVICEMETHOD_21_007: [The invoke shall build the Method URL `{iot hub}/twins/{device id}/methods/`.] */
-    /* Tests_SRS_DEVICEMETHOD_21_008: [The invoke shall create a new SASToken with the ServiceConnect rights.] */
-    /* Tests_SRS_DEVICEMETHOD_21_009: [The invoke shall create a new HttpRequest with http method as `POST`.] */
-    /* Tests_SRS_DEVICEMETHOD_21_010: [The invoke shall add to the HTTP header an default timeout in milliseconds.] */
-    /* Tests_SRS_DEVICEMETHOD_21_011: [The invoke shall add to the HTTP header an `authorization` key with the SASToken.] */
-    /* Tests_SRS_DEVICEMETHOD_21_012: [The invoke shall add to the HTTP header a `request-id` key with a new unique string value for every request.] */
-    /* Tests_SRS_DEVICEMETHOD_21_013: [The invoke shall add a HTTP body with Json created by the `serializer.Method`.] */
-    /* Tests_SRS_DEVICEMETHOD_21_014: [The invoke shall send the created request and get the response.] */
-    /* Tests_SRS_DEVICEMETHOD_21_015: [The invoke shall deserialize the payload using the `serializer.Method`.] */
-    /* Tests_SRS_DEVICEMETHOD_21_016: [If the resulted status represents fail, the invoke shall throw proper Exception.] */
-    /* Tests_SRS_DEVICEMETHOD_21_017: [If the resulted status represents success, the invoke shall return the result payload.] */
 
 }

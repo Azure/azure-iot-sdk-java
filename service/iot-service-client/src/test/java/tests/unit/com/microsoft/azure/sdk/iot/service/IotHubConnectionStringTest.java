@@ -398,7 +398,7 @@ public class IotHubConnectionStringTest
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String deviceId = "testDevice";
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
-        String expected = "https://HOSTNAME.b.c.d/twins/testDevice/methods/";
+        String expected = "https://HOSTNAME.b.c.d/twins/testDevice/methods?api-version=2016-11-14";
 
         //act
         String actual = iotHubConnectionString.getUrlMethod(deviceId).toString();

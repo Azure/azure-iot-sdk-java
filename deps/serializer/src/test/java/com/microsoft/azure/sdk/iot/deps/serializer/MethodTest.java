@@ -23,25 +23,27 @@ import static org.junit.Assert.*;
 public class MethodTest
 {
     /**
-     * Test helper, will throw if one of the parameters (name, timeout, or payload) do not fits the ones in the `method`.
+     * Test helper, will throw if one of the parameters (name, responseTimeout, connectTimeout, or payload) do not fits the ones in the `method`.
      *
      * @param method is the actually method
      * @param expectedName is the expected name in the actually method
-     * @param expectedTimeout is the expected timeout in the actually method.
+     * @param expectedResponseTimeout is the expected responseTimeout in the actually method.
+     * @param expectedConnectTimeout is the expected connectTimeout in the actually method.
      * @param expectedPayload is a map with all expected parameters in the actually method.
      */
-    private static void assertMethod(Method method, String expectedName, Long expectedTimeout, Integer expectedStatus, Object expectedPayload)
+    private static void assertMethod(Method method, String expectedName, Long expectedResponseTimeout, Long expectedConnectTimeout, Integer expectedStatus, Object expectedPayload)
     {
         assertNotNull(method);
 
         String actualName = Deencapsulation.getField(method, "name");
-        Long actualTimeout = Deencapsulation.getField(method, "timeout");
+        Long actualResponseTimeout = Deencapsulation.getField(method, "responseTimeout");
+        Long actualConnectTimeout = Deencapsulation.getField(method, "connectTimeout");
         Integer actualStatus = Deencapsulation.getField(method, "status");
         Object actualPayload = Deencapsulation.getField(method, "payload");
 
         assertEquals(actualName, expectedName);
-        assertEquals(actualTimeout, expectedTimeout);
-        assertEquals(actualStatus, expectedStatus);
+        assertEquals(actualResponseTimeout, expectedResponseTimeout);
+        assertEquals(actualConnectTimeout, expectedConnectTimeout);
         if((expectedPayload instanceof Integer) && (actualPayload instanceof Double))
         {
             assertEquals(actualPayload, (double)(int)expectedPayload);
@@ -76,7 +78,8 @@ public class MethodTest
     private static class TestMethod
     {
         String name;
-        Long timeout;
+        Long responseTimeout;
+        Long connectTimeout;
         Object payload;
 
         String json;
@@ -91,10 +94,12 @@ public class MethodTest
                     {{
                         json =  "{" +
                                         "\"methodName\":\"" + STANDARD_NAME + "\"," +
-                                        "\"responseTimeoutInSeconds\": " + STANDARD_TIMEOUT.toString() +
+                                        "\"responseTimeoutInSeconds\": " + STANDARD_TIMEOUT.toString() + "," +
+                                        "\"connectTimeoutInSeconds\": " + STANDARD_TIMEOUT.toString() +
                                 "}";
                         name = STANDARD_NAME;
-                        timeout = STANDARD_TIMEOUT;
+                        responseTimeout = STANDARD_TIMEOUT;
+                        connectTimeout = STANDARD_TIMEOUT;
                         payload = null;
                     }},
                     new TestMethod()
@@ -108,7 +113,8 @@ public class MethodTest
                                         "}" +
                                 "}";
                         name = STANDARD_NAME;
-                        timeout = null;
+                        responseTimeout = null;
+                        connectTimeout = null;
                         payload = STANDARD_PAYLOAD;
                     }},
                     new TestMethod()
@@ -117,7 +123,8 @@ public class MethodTest
                                         "\"methodName\":\"" + STANDARD_NAME + "\"" +
                                 "}";
                         name = STANDARD_NAME;
-                        timeout = null;
+                        responseTimeout = null;
+                        connectTimeout = null;
                         payload = null;
                     }},
                     new TestMethod()
@@ -132,20 +139,38 @@ public class MethodTest
                                         "}" +
                                 "}";
                         name = STANDARD_NAME;
-                        timeout = STANDARD_TIMEOUT;
+                        responseTimeout = STANDARD_TIMEOUT;
+                        connectTimeout = null;
+                        payload = STANDARD_PAYLOAD;
+                    }},
+                    new TestMethod()
+                    {{
+                        json =  "{" +
+                                    "\"methodName\":\"" + STANDARD_NAME + "\"," +
+                                    "\"connectTimeoutInSeconds\":" + STANDARD_TIMEOUT.toString() + "," +
+                                    "\"payload\":" +
+                                    "{" +
+                                        "\"myPar1\": \"myVal1\"," +
+                                        "\"myPar2\": \"myVal2\"" +
+                                    "}" +
+                                "}";
+                        name = STANDARD_NAME;
+                        responseTimeout = null;
+                        connectTimeout = STANDARD_TIMEOUT;
                         payload = STANDARD_PAYLOAD;
                     }},
             };
     private static final TestMethod[] failedTestMethod = new TestMethod[]
             {
-                    new TestMethod() {{ name = null; timeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
-                    new TestMethod() {{ name = ""; timeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
-                    new TestMethod() {{ name = BIG_STRING_150CHARS; timeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
-                    new TestMethod() {{ name = ILLEGAL_STRING_DOT; timeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
-                    new TestMethod() {{ name = ILLEGAL_STRING_SPACE; timeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
-                    new TestMethod() {{ name = ILLEGAL_STRING_DOLLAR; timeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
-                    new TestMethod() {{ name = ILLEGAL_STRING_INJECTION; timeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
-                    new TestMethod() {{ name = STANDARD_NAME; timeout = ILLEGAL_NEGATIVE_TIMEOUT; payload = STANDARD_PAYLOAD; }},
+                    new TestMethod() {{ name = null; responseTimeout = STANDARD_TIMEOUT; connectTimeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
+                    new TestMethod() {{ name = ""; responseTimeout = STANDARD_TIMEOUT; connectTimeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
+                    new TestMethod() {{ name = BIG_STRING_150CHARS; responseTimeout = STANDARD_TIMEOUT; connectTimeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
+                    new TestMethod() {{ name = ILLEGAL_STRING_DOT; responseTimeout = STANDARD_TIMEOUT; connectTimeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
+                    new TestMethod() {{ name = ILLEGAL_STRING_SPACE; responseTimeout = STANDARD_TIMEOUT; connectTimeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
+                    new TestMethod() {{ name = ILLEGAL_STRING_DOLLAR; responseTimeout = STANDARD_TIMEOUT; connectTimeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
+                    new TestMethod() {{ name = ILLEGAL_STRING_INJECTION; responseTimeout = STANDARD_TIMEOUT; connectTimeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
+                    new TestMethod() {{ name = STANDARD_NAME; responseTimeout = ILLEGAL_NEGATIVE_TIMEOUT; connectTimeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
+                    new TestMethod() {{ name = STANDARD_NAME; responseTimeout = STANDARD_TIMEOUT; connectTimeout = ILLEGAL_NEGATIVE_TIMEOUT; payload = STANDARD_PAYLOAD; }},
             };
     private static final TestMethod[] successTestResult = new TestMethod[]
             {
@@ -222,7 +247,7 @@ public class MethodTest
         Method method = new Method();
 
         // Assert
-        assertMethod(method, null, null, null, null);
+        assertMethod(method, null, null, null, null, null);
     }
 
     /* Tests_SRS_METHOD_21_001: [The constructor shall create an instance of the method.] */
@@ -237,15 +262,16 @@ public class MethodTest
         {
 
             // Act
-            Method method = new Method(testCase.name, testCase.timeout, testCase.payload);
+            Method method = new Method(testCase.name, testCase.responseTimeout, testCase.connectTimeout, testCase.payload);
 
             // Assert
-            assertMethod(method, testCase.name, testCase.timeout, null, testCase.payload);
+            assertMethod(method, testCase.name, testCase.responseTimeout, testCase.connectTimeout, null, testCase.payload);
         }
     }
 
     /* Tests_SRS_METHOD_21_004: [If the `name` is null, empty, contains more than 128 chars, or illegal char (`$`, `.`, space), the constructor shall throw IllegalArgumentException.] */
-    /* Tests_SRS_METHOD_21_005: [If the timeout is a negative number, the constructor shall throw IllegalArgumentException.] */
+    /* Tests_SRS_METHOD_21_005: [If the responseTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
+    /* Tests_SRS_METHOD_21_033: [If the connectTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
     @Test
     public void Constructor_Method_failed()
     {
@@ -257,7 +283,7 @@ public class MethodTest
             // Act
             try
             {
-                Method method = new Method(testCase.name, testCase.timeout, testCase.payload);
+                Method method = new Method(testCase.name, testCase.responseTimeout, testCase.connectTimeout, testCase.payload);
                 assert true;
             }
             catch (IllegalArgumentException expected)
@@ -281,7 +307,7 @@ public class MethodTest
             Method method = new Method(testCase.payload);
 
             // Assert
-            assertMethod(method, null, null, null, testCase.payload);
+            assertMethod(method, null, null, null, null, testCase.payload);
             String json = method.toJson();
             Helpers.assertJson(testCase.json, json);
         }
@@ -310,7 +336,7 @@ public class MethodTest
             method.fromJson(testCase.json);
 
             // Assert
-            assertMethod(method, null, null, null, testCase.payload);
+            assertMethod(method, null, null, null, null, testCase.payload);
         }
     }
 
@@ -333,7 +359,7 @@ public class MethodTest
             method.fromJson(testCase.jsonResult);
 
             // Assert
-            assertMethod(method, null, null, testCase.status, testCase.payload);
+            assertMethod(method, null, null, null, testCase.status, testCase.payload);
         }
     }
 
@@ -342,6 +368,7 @@ public class MethodTest
      *  {
      *      "methodName": "reboot",
      *      "responseTimeoutInSeconds": 200,
+     *      "connectTimeoutInSeconds": 5,
      *      "payload":
      *      {
      *          "input1": "someInput",
@@ -361,7 +388,7 @@ public class MethodTest
             method.fromJson(testCase.json);
 
             // Assert
-            assertMethod(method, testCase.name, testCase.timeout, null, testCase.payload);
+            assertMethod(method, testCase.name, testCase.responseTimeout, testCase.connectTimeout, null, testCase.payload);
         }
     }
 
@@ -405,8 +432,10 @@ public class MethodTest
 
     /* Tests_SRS_METHOD_21_014: [The toJson shall create a String with the full information in the method collection using json format.] */
     /* Tests_SRS_METHOD_21_015: [The toJson shall include name as `methodName` in the json.] */
-    /* Tests_SRS_METHOD_21_016: [The toJson shall include timeout in seconds as `responseTimeoutInSeconds` in the json.] */
-    /* Tests_SRS_METHOD_21_017: [If the timeout is null, the toJson shall not include the `responseTimeoutInSeconds` in the json.] */
+    /* Tests_SRS_METHOD_21_016: [The toJson shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.] */
+    /* Tests_SRS_METHOD_21_017: [If the responseTimeout is null, the toJson shall not include the `responseTimeoutInSeconds` in the json.] */
+    /* Tests_SRS_METHOD_21_031: [The toJson shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.] */
+    /* Tests_SRS_METHOD_21_032: [If the connectTimeout is null, the toJson shall not include the `connectTimeoutInSeconds` in the json.] */
     /* Tests_SRS_METHOD_21_018: [The class toJson include payload as `payload` in the json.] */
     /* Tests_SRS_METHOD_21_019: [If the payload is null, the toJson shall not include `payload` for parameters in the json.] */
     /**
@@ -415,6 +444,7 @@ public class MethodTest
      *  {
      *      "methodName": "reboot",
      *      "responseTimeoutInSeconds": 200,
+     *      "connectTimeoutInSeconds": 5,
      *      "payload":
      *      {
      *          "input1": "someInput",
@@ -428,7 +458,7 @@ public class MethodTest
         for (TestMethod testCase:successTestMethod)
         {
             // Arrange
-            Method method = new Method(testCase.name, testCase.timeout, testCase.payload);
+            Method method = new Method(testCase.name, testCase.responseTimeout, testCase.connectTimeout, testCase.payload);
 
             // Act
             String json = method.toJson();

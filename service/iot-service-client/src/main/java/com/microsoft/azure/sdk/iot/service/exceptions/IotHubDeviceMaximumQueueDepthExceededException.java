@@ -12,11 +12,11 @@ public class IotHubDeviceMaximumQueueDepthExceededException extends IotHubExcept
 {
     public IotHubDeviceMaximumQueueDepthExceededException()
     {
-        super("Maximum queue depth exceeded");
+        this(null);
     }
 
     public IotHubDeviceMaximumQueueDepthExceededException(String message)
     {
-        super(message);
+        super("Maximum queue depth exceeded!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
     }
 }

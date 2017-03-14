@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
 import java.util.Map;
 
 /**
@@ -22,10 +21,15 @@ public class Method
     @SerializedName("methodName")
     private String name;
 
-    /* Codes_SRS_METHOD_21_016: [The toJson shall include timeout in seconds as `responseTimeoutInSeconds` in the json.] */
+    /* Codes_SRS_METHOD_21_016: [The toJson shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.] */
     @Expose(serialize = true, deserialize = false)
     @SerializedName("responseTimeoutInSeconds")
-    private Long timeout;
+    private Long responseTimeout;
+
+    /* Codes_SRS_METHOD_21_031: [The toJson shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.] */
+    @Expose(serialize = true, deserialize = false)
+    @SerializedName("connectTimeoutInSeconds")
+    private Long connectTimeout;
 
     @Expose(serialize = false, deserialize = true)
     @SerializedName("status")
@@ -44,7 +48,8 @@ public class Method
         /* Codes_SRS_METHOD_21_029: [The constructor shall create an instance of the method.] */
         /* Codes_SRS_METHOD_21_030: [The constructor shall initialize all data in the collection as null.] */
         this.name = null;
-        this.timeout = null;
+        this.responseTimeout = null;
+        this.connectTimeout = null;
         this.status = null;
         this.payload = null;
     }
@@ -54,11 +59,12 @@ public class Method
      * Create a Method instance with provided values.
      *
      * @param name - method name [required].
-     * @param timeout - maximum interval of time, in seconds, that the Direct Method will wait for answer.
+     * @param responseTimeout - maximum interval of time, in seconds, that the Direct Method will wait for answer.
+     * @param connectTimeout - maximum interval of time, in seconds, that the Direct Method will wait for the connection.
      * @param payload - Object that contains the payload defined by the user.
      * @throws IllegalArgumentException This exception is thrown if the one of the provided information do not fits the requirements.
      */
-    public Method(String name, Long timeout, Object payload) throws IllegalArgumentException
+    public Method(String name, Long responseTimeout, Long connectTimeout, Object payload) throws IllegalArgumentException
     {
         /* Codes_SRS_METHOD_21_001: [The constructor shall create an instance of the method.] */
         this();
@@ -67,15 +73,22 @@ public class Method
         /* Codes_SRS_METHOD_21_004: [If the `name` is null, empty, contains more than 128 chars, or illegal char (`$`, `.`, space), the constructor shall throw IllegalArgumentException.] */
         validateKey(name);
 
-        if(timeout != null)
+        if(responseTimeout != null)
         {
-            /* Codes_SRS_METHOD_21_005: [If the timeout is a negative number, the constructor shall throw IllegalArgumentException.] */
-            validateTimeout(timeout);
+            /* Codes_SRS_METHOD_21_005: [If the responseTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
+            validateTimeout(responseTimeout);
+        }
+
+        if(connectTimeout != null)
+        {
+            /* Codes_SRS_METHOD_21_033: [If the connectTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
+            validateTimeout(connectTimeout);
         }
 
         /* Codes_SRS_METHOD_21_002: [The constructor shall update the method collection using the provided information.] */
         this.name = name;
-        this.timeout = timeout;
+        this.responseTimeout = responseTimeout;
+        this.connectTimeout = connectTimeout;
         this.payload = payload;
     }
 
@@ -98,7 +111,7 @@ public class Method
      * Create a Method instance with the provided information in the json.
      *
      * @param json - Json with the information to change the collection.
-     *                  - If contains `methodName`, it is a full method including `methodName`, `responseTimeoutInSeconds`, and `payload`.
+     *                  - If contains `methodName`, it is a full method including `methodName`, `responseTimeoutInSeconds`, `connectTimeoutInSeconds`, and `payload`.
      *                  - If contains `status`, it is a response with `status` and `payload`.
      *                  - Otherwise, it is only `payload`.
      * @throws IllegalArgumentException This exception is thrown if the one of the provided information do not fits the requirements.
@@ -122,6 +135,7 @@ public class Method
              *  {
              *      "methodName": "reboot",
              *      "responseTimeoutInSeconds": 200,
+             *      "connectTimeoutInSeconds": 5,
              *      "payload":
              *      {
              *          "input1": "someInput",
@@ -142,7 +156,8 @@ public class Method
                 throw new Exception();
             }
             this.name = newMethod.name;
-            this.timeout = newMethod.timeout;
+            this.responseTimeout = newMethod.responseTimeout;
+            this.connectTimeout = newMethod.connectTimeout;
             this.status = newMethod.status;
             this.payload = newMethod.payload;
         }
@@ -209,8 +224,10 @@ public class Method
 
         /* Codes_SRS_METHOD_21_014: [The toJson shall create a String with the full information in the method collection using json format.] */
         /* Codes_SRS_METHOD_21_015: [The toJson shall include name as `methodName` in the json.] */
-        /* Codes_SRS_METHOD_21_016: [The toJson shall include timeout in seconds as `responseTimeoutInSeconds` in the json.] */
-        /* Codes_SRS_METHOD_21_017: [If the timeout is null, the toJson shall not include the `responseTimeoutInSeconds` in the json.] */
+        /* Codes_SRS_METHOD_21_016: [The toJson shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.] */
+        /* Codes_SRS_METHOD_21_017: [If the responseTimeout is null, the toJson shall not include the `responseTimeoutInSeconds` in the json.] */
+        /* Codes_SRS_METHOD_21_031: [The toJson shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.] */
+        /* Codes_SRS_METHOD_21_032: [If the connectTimeout is null, the toJson shall not include the `connectTimeoutInSeconds` in the json.] */
         /* Codes_SRS_METHOD_21_018: [The class toJson include payload as `payload` in the json.] */
         /* Codes_SRS_METHOD_21_019: [If the payload is null, the toJson shall not include `payload` for parameters in the json.] */
         /* Codes_SRS_METHOD_21_024: [The class toJson include status as `status` in the json.] */
@@ -221,6 +238,7 @@ public class Method
          *  {
          *      "methodName": "reboot",
          *      "responseTimeoutInSeconds": 200,
+         *      "connectTimeoutInSeconds": 5,
          *      "payload":
          *      {
          *          "input1": "someInput",
@@ -288,14 +306,15 @@ public class Method
     }
 
     /**
-     * Validation helper, make sure that the timeout value fits the requirements.
+     * Validation helper, make sure that timeout values fit the requirements.
      *
      * @param timeout is the timeout value in seconds.
      * @throws IllegalArgumentException This exception is thrown if the provided timeout value do not fits the requirements.
      */
     private void validateTimeout(Long timeout) throws IllegalArgumentException
     {
-        /* Codes_SRS_METHOD_21_005: [If the timeout is a negative number, the constructor shall throw IllegalArgumentException.] */
+        /* Codes_SRS_METHOD_21_005: [If the responseTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
+        /* Codes_SRS_METHOD_21_033: [If the connectTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
         if(timeout<0)
         {
             throw new IllegalArgumentException("Negative timeout");

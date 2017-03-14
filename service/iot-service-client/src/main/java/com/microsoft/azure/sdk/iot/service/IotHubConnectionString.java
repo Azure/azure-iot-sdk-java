@@ -72,6 +72,37 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     }
 
     /**
+     * Create url for requesting device method
+     *
+     * @param deviceId The name of the device
+     * @return The Url in the following format: "https:hostname/twins/deviceId/methods/"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     * @throws IllegalArgumentException This exception is thrown if device id is null or empty
+     */
+    public URL getUrlMethod(String deviceId) throws MalformedURLException, IllegalArgumentException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_016: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
+        if (Tools.isNullOrEmpty(deviceId))
+        {
+            throw new IllegalArgumentException("device name cannot be empty or null");
+        }
+
+        //Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_017: [** The function shall create a URL object from the given deviceId using the following format: https:hostname/twins/deviceId/methods/ **]**
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_TWIN);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(deviceId);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_METHODS);
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
+    }
+
+    /**
      * Create url for requesting device twin
      *
      * @param deviceId The name of the device
@@ -415,36 +446,6 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     protected void setSharedAccessSignature(String sharedAccessSignature)
     {
         this.sharedAccessSignature = sharedAccessSignature;
-    }
-
-    /**
-     * Create url for requesting device method
-     *
-     * @param deviceId The name of the device
-     * @return The Url in the following format: "https:hostname/twins/deviceId/methods/"
-     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
-     * @throws IllegalArgumentException This exception is thrown if device id is null or empty
-     */
-    public URL getUrlMethod(String deviceId) throws MalformedURLException, IllegalArgumentException
-    {
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_016: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
-        if (Tools.isNullOrEmpty(deviceId))
-        {
-            throw new IllegalArgumentException("device name cannot be empty or null");
-        }
-
-        //Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_017: [** The function shall create a URL object from the given deviceId using the following format: https:hostname/twins/deviceId/methods/ **]**
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_TWIN);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(deviceId);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_METHODS);
-        stringBuilder.append(URL_SEPARATOR_0);
-        return new URL(stringBuilder.toString());
     }
 
 }

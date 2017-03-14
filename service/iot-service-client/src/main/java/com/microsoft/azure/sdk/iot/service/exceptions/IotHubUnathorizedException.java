@@ -12,11 +12,11 @@ public class IotHubUnathorizedException extends IotHubException
 {
     public IotHubUnathorizedException()
     {
-        super("Unauthorized!");
+        this(null);
     }
 
     public IotHubUnathorizedException(String message)
     {
-        super(message);
+        super("Unauthorized!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
     }
 }
