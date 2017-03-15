@@ -3,6 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Sends batched messages and invokes callbacks on completed requests. Meant to
  * be used with an executor that continuously calls run().
@@ -10,54 +13,44 @@ package com.microsoft.azure.sdk.iot.device.transport;
 public final class IotHubSendTask implements Runnable
 {
     protected final IotHubTransport transport;
-    
-    /**
-     * If true, full stack trace will be written to console on exception thrown by transport message sending
-     */
-    private boolean verboseErrorMessaging = false;
 
+    /**
+     * Private logger for class
+     */
+    final Logger logger = LoggerFactory.getLogger(IotHubSendTask.class);
+    
     public IotHubSendTask(IotHubTransport transport)
     {
         // Codes_SRS_IOTHUBSENDTASK_11_001: [The constructor shall save the transport.]
         this.transport = transport;
         
-        if (this.transport == null)
-        	throw new IllegalArgumentException("Value for parameter 'transport' must not be null");
-    }
-    
-    public IotHubSendTask(IotHubTransport transport, boolean verboseErrMessaging)
-    {
-    	this(transport);
-    	
-    	this.verboseErrorMessaging = verboseErrMessaging;
+        if (transport == null)
+        	throw new IllegalArgumentException("Parameter 'transport' must not be null");
+        
+        logger.error("IotHubSendTask constructor called with null value for parameter transport");
     }
 
     public void run()
     {
-        try
+    	logger.trace("Now sending all queued messages to IoT Hub");
+
+    	try
         {
             // Codes_SRS_IOTHUBSENDTASK_11_002: [The function shall send all messages on the transport queue.]
             this.transport.sendMessages();
+            
+            logger.trace("Now invoking all queued callbacks");
             // Codes_SRS_IOTHUBSENDTASK_11_003: [The function shall invoke all callbacks on the transport's callback queue.]
             this.transport.invokeCallbacks();
+            
+            logger.trace("Successfully send all queued messages to IoT Hub");
         }
         // Codes_SRS_IOTHUBSENDTASK_11_005: [The function shall not crash because of an IOException thrown by the transport.]
         // Codes_SRS_IOTHUBSENDTASK_11_008: [The function shall not crash because of any error or exception thrown by the transport.]
-        // JMayrbaeurl 2017-03-10: Bad idea to catch any Throwable here!!!
         catch (Throwable e)
         {
-        	// JMayrbaeurl 2017-03-10: Should be replaced with real logging setup
-            System.out.println(e.toString() + ": " + e.getMessage());
-            
-            // Only output full stack trace on verbose Error messaging configuration
-            if (this.verboseErrorMessaging) 
-            {
-	            for (StackTraceElement el : e.getStackTrace())
-	            {
-	            	// JMayrbaeurl 2017-03-10: Should be replaced with real logging setup
-	                System.out.println(el);
-	            }
-            }
+        	logger.error(e.toString() + ": " + e.getMessage());
+        	logger.debug("Exception on sending queued messages to IoT Hub", e);
         }
     }
 }
