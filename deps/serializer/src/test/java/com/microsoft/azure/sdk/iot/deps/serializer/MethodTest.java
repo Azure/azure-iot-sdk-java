@@ -211,6 +211,20 @@ public class MethodTest
             };
 
 
+    /* Tests_SRS_METHOD_21_029: [The constructor shall create an instance of the method.] */
+    /* Tests_SRS_METHOD_21_030: [The constructor shall initialize all data in the collection as null.] */
+    @Test
+    public void Constructor_succeed()
+    {
+        // Arrange
+
+        // Act
+        Method method = new Method();
+
+        // Assert
+        assertMethod(method, null, null, null, null);
+    }
+
     /* Tests_SRS_METHOD_21_001: [The constructor shall create an instance of the method.] */
     /* Tests_SRS_METHOD_21_002: [The constructor shall update the method collection using the provided information.] */
     /* Tests_SRS_METHOD_21_003: [All Strings are case sensitive.] */
@@ -273,10 +287,10 @@ public class MethodTest
         }
     }
 
-    /* Tests_SRS_METHOD_21_006: [The constructor shall create an instance of the method.] */
-    /* Tests_SRS_METHOD_21_007: [The constructor shall parse the json and fill the status and payload.] */
+    /* Tests_SRS_METHOD_21_006: [The fromJson shall create an instance of the method.] */
+    /* Tests_SRS_METHOD_21_007: [The fromJson shall parse the json and fill the status and payload.] */
     /**
-     * Tests_SRS_METHOD_21_010: [If the json contains any payload without status identification, the constructor shall parser only the payload.]
+     * Tests_SRS_METHOD_21_010: [If the json contains any payload without status identification, the fromJson shall parser only the payload.]
      *  Ex:
      *  {
      *      "input1": "someInput",
@@ -284,22 +298,23 @@ public class MethodTest
      *  }
      */
     @Test
-    public void Constructor_json_payload_succeed()
+    public void fromJson_payload_succeed()
     {
-        // Arrange
 
         for (TestMethod testCase:successTestResult)
         {
+            // Arrange
+            Method method = new Method();
 
             // Act
-            Method method = new Method(testCase.json);
+            method.fromJson(testCase.json);
 
             // Assert
             assertMethod(method, null, null, null, testCase.payload);
         }
     }
 
-    /** Tests_SRS_METHOD_21_011: [If the json contains the `status` and `payload` identification, the constructor shall parser both status and payload.]
+    /** Tests_SRS_METHOD_21_011: [If the json contains the `status` and `payload` identification, the fromJson shall parser both status and payload.]
      *  Ex:
      *  {
      *      "status": 201,
@@ -307,22 +322,22 @@ public class MethodTest
      *  }
      */
     @Test
-    public void Constructor_json_result_succeed()
+    public void fromJson_result_succeed()
     {
         // Arrange
+        Method method = new Method();
 
         for (TestMethod testCase:successTestResult)
         {
-
             // Act
-            Method method = new Method(testCase.jsonResult);
+            method.fromJson(testCase.jsonResult);
 
             // Assert
             assertMethod(method, null, null, testCase.status, testCase.payload);
         }
     }
 
-    /* Tests_SRS_METHOD_21_009: [If the json contains the `methodName` identification, the constructor shall parser the full method.]
+    /* Tests_SRS_METHOD_21_009: [If the json contains the `methodName` identification, the fromJson shall parser the full method.]
      *  Ex:
      *  {
      *      "methodName": "reboot",
@@ -335,34 +350,34 @@ public class MethodTest
      *  }
      */
     @Test
-    public void Constructor_json_method_succeed()
+    public void fromJson_method_succeed()
     {
         // Arrange
+        Method method = new Method();
 
         for (TestMethod testCase:successTestMethod)
         {
-
             // Act
-            Method method = new Method(testCase.json);
+            method.fromJson(testCase.json);
 
             // Assert
             assertMethod(method, testCase.name, testCase.timeout, null, testCase.payload);
         }
     }
 
-    /* Tests_SRS_METHOD_21_008: [If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
+    /* Tests_SRS_METHOD_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
     @Test
-    public void Constructor_json_failed()
+    public void fromJson_failed()
     {
         // Arrange
+        Method method = new Method();
 
         for (TestMethod testCase:failedTestPayload)
         {
-
             // Act
             try
             {
-                Method method = new Method(testCase.json);
+                method.fromJson(testCase.json);
                 assert true;
             }
             catch (IllegalArgumentException expected)
@@ -379,7 +394,8 @@ public class MethodTest
     public void getResults_succeed()
     {
         // Arrange
-        Method method = new Method("{\"status\":201,\"payload\":{\"myPar1\":\"myVal1\",\"myPar2\":\"myVal2\"}}");
+        Method method = new Method();
+        method.fromJson("{\"status\":201,\"payload\":{\"myPar1\":\"myVal1\",\"myPar2\":\"myVal2\"}}");
 
         // Act
         // Assert
@@ -424,7 +440,7 @@ public class MethodTest
 
     /* Tests_SRS_METHOD_21_024: [The class toJson include status as `status` in the json.] */
     /* Tests_SRS_METHOD_21_025: [If the status is null, the toJson shall not include `status` for parameters in the json.] */
-    /** Tests_SRS_METHOD_21_027: [If the method contains the status, the constructor shall parser both status and payload.
+    /** Tests_SRS_METHOD_21_027: [If the method contains the status, the toJson shall parser both status and payload.
      *  Ex:
      *  {
      *      "status": 201,
@@ -434,10 +450,13 @@ public class MethodTest
     @Test
     public void toJson_result_succeed()
     {
+        // Arrange
+        Method method = new Method();
+
         for (TestMethod testCase:successTestResult)
         {
             // Arrange
-            Method method = new Method(testCase.jsonResult);
+            method.fromJson(testCase.jsonResult);
 
             // Act
             String json = method.toJson();
@@ -448,7 +467,7 @@ public class MethodTest
     }
 
     /**
-     * Tests_SRS_METHOD_21_028: [If the method do not contains name or status, the constructor shall parser only the payload.]
+     * Tests_SRS_METHOD_21_028: [If the method do not contains name or status, the toJson shall parser only the payload.]
      *  Ex:
      *  {
      *      "input1": "someInput",
