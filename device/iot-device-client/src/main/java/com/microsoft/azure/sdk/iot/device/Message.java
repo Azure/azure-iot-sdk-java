@@ -9,6 +9,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Message
 {
     // ----- Constants -----
@@ -121,7 +124,7 @@ public class Message
      * Stream that will provide the bytes for the body of the
      */
     private ByteArrayInputStream bodyStream;
-    private CustomLogger logger;
+    private final Logger logger = LoggerFactory.getLogger(Message.class);
 
     // ----- Constructors -----
 
@@ -253,7 +256,8 @@ public class Message
             this.properties.remove(messageProperty);
         }
 
-        logger.LogInfo("Setting message property with name=%s and value=%s, method name is %s ", name, value, logger.getMethodName());
+        logger.info("Setting message property with name={} and value={}, method name is {} ", 
+        		name, value, Thread.currentThread().getStackTrace()[2].getMethodName());
         this.properties.add(new MessageProperty(name, value));
     }
 
@@ -279,7 +283,6 @@ public class Message
         this.feedbackStatusCode = FeedbackStatusCodeEnum.none;
         this.ack = FeedbackStatusCodeEnum.none;
         this.properties = new ArrayList<MessageProperty>();
-        this.logger = new CustomLogger(this.getClass());
     }
 
     /**
@@ -322,7 +325,8 @@ public class Message
             long currentTime = System.currentTimeMillis();
             if (currentTime > expiryTime)
             {
-                logger.LogWarn("The message with messageid %s expired on %s, method name is %s ", this.getMessageId(), new Date(), logger.getMethodName());
+                logger.warn("The message with messageid {} expired on {}, method name is {} ", 
+                		this.getMessageId(), new Date(), Thread.currentThread().getStackTrace()[2].getMethodName());
                 messageExpired = true;
             }
             else
@@ -378,7 +382,8 @@ public class Message
     {
         long currentTime = System.currentTimeMillis();
         this.expiryTime = currentTime + timeOut;
-        logger.LogInfo("The message with messageid %s has expiry time as %s milliseconds and the message will expire on %s, method name is %s ", this.getMessageId(), timeOut, new Date(this.expiryTime), logger.getMethodName());
+        logger.info("The message with messageid {} has expiry time as {} milliseconds and the message will expire on {}, method name is {} ", 
+        		this.getMessageId(), timeOut, new Date(this.expiryTime), Thread.currentThread().getStackTrace()[2].getMethodName());
     }
 
     /**
