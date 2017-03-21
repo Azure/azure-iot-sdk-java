@@ -17,18 +17,6 @@
         <module>iot-device-client</module>
         <module>iot-device-samples</module>
     </modules>
-    <properties>
-    	<slf4j-version>1.7.24</slf4j-version>
-    </properties>
-    <dependencyManagement>
-    	<dependencies>
-    		<dependency>
-    			<groupId>org.slf4j</groupId>
-  				<artifactId>slf4j-api</artifactId>
-  				<version>${slf4j-version}</version>
-    		</dependency>
-    	</dependencies>
-    </dependencyManagement>
     <build>
         <plugins>
             <plugin>

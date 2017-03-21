@@ -3,8 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.microsoft.azure.sdk.iot.device.CustomLogger;
 
 /**
  * Sends batched messages and invokes callbacks on completed requests. Meant to
@@ -17,7 +16,7 @@ public final class IotHubSendTask implements Runnable
     /**
      * Private logger for class
      */
-    final Logger logger = LoggerFactory.getLogger(IotHubSendTask.class);
+    private final CustomLogger logger = new CustomLogger(this.getClass());
     
     public IotHubSendTask(IotHubTransport transport)
     {
@@ -27,30 +26,30 @@ public final class IotHubSendTask implements Runnable
         if (transport == null)
         	throw new IllegalArgumentException("Parameter 'transport' must not be null");
         
-        logger.error("IotHubSendTask constructor called with null value for parameter transport");
+        logger.LogError("IotHubSendTask constructor called with null value for parameter transport");
     }
 
     public void run()
     {
-    	logger.trace("Now sending all queued messages to IoT Hub");
+    	logger.LogTrace("Now sending all queued messages to IoT Hub");
 
     	try
         {
             // Codes_SRS_IOTHUBSENDTASK_11_002: [The function shall send all messages on the transport queue.]
             this.transport.sendMessages();
             
-            logger.trace("Now invoking all queued callbacks");
+            logger.LogTrace("Now invoking all queued callbacks");
             // Codes_SRS_IOTHUBSENDTASK_11_003: [The function shall invoke all callbacks on the transport's callback queue.]
             this.transport.invokeCallbacks();
             
-            logger.trace("Successfully send all queued messages to IoT Hub");
+            logger.LogTrace("Successfully send all queued messages to IoT Hub");
         }
         // Codes_SRS_IOTHUBSENDTASK_11_005: [The function shall not crash because of an IOException thrown by the transport.]
         // Codes_SRS_IOTHUBSENDTASK_11_008: [The function shall not crash because of any error or exception thrown by the transport.]
         catch (Throwable e)
         {
-        	logger.error(e.toString() + ": " + e.getMessage());
-        	logger.debug("Exception on sending queued messages to IoT Hub", e);
+        	logger.LogError(e.toString() + ": " + e.getMessage());
+        	logger.LogDebug("Exception on sending queued messages to IoT Hub", e);
         }
     }
 }
