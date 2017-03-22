@@ -6,6 +6,9 @@ package com.microsoft.azure.sdk.iot.device;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Configuration settings for an IoT Hub client. Validates all user-defined
  * settings.
@@ -47,7 +50,7 @@ public final class DeviceClientConfig
     /** The context to be passed in to the message callback. */
     protected Object messageContext;
 
-    protected CustomLogger logger;
+    protected final Logger logger = LoggerFactory.getLogger(DeviceClientConfig.class);
     /**
      * Constructor.
      *
@@ -87,8 +90,9 @@ public final class DeviceClientConfig
         this.deviceKey = deviceKey;
         // Codes_SRS_DEVICECLIENTCONFIG_25_017: [**The constructor shall save sharedAccessToken.**] **
         this.sharedAccessToken = sharedAccessToken;
-        this.logger = new CustomLogger(this.getClass());
-        logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ", this.iotHubName, this.deviceId, logger.getMethodName());
+        
+        logger.info("DeviceClientConfig object is created successfully with IotHubName={}, deviceID={} , method name is {} ", 
+        		this.iotHubName, this.deviceId, Thread.currentThread().getStackTrace()[2].getMethodName());
     }
 
     /**

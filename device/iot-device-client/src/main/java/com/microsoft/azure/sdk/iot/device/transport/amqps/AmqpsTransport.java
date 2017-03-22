@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import com.microsoft.azure.sdk.iot.device.transport.State;
-import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
@@ -17,6 +16,8 @@ import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.message.impl.MessageImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -59,7 +60,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
 
     private final Boolean useWebSockets;
 
-    private CustomLogger logger;
+    private final Logger logger = LoggerFactory.getLogger(AmqpsTransport.class);
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
      * object.
@@ -76,7 +77,6 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
 
         // Codes_SRS_AMQPSTRANSPORT_15_002: [The constructor shall set the transport state to CLOSED.]
         this.state = State.CLOSED;
-        this.logger = new CustomLogger(this.getClass());
     }
 
     /**
@@ -92,7 +92,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         {
             return;
         }
-        logger.LogInfo("Opening the connection..., method name is %s ", logger.getMethodName());
+        logger.info("Opening the connection..., method name is {} ", Thread.currentThread().getStackTrace()[2].getMethodName());
         // Codes_SRS_AMQPSTRANSPORT_15_004: [The function shall open an AMQPS connection with the IoT Hub given in the configuration.]
         this.connection = new AmqpsIotHubConnection(this.config, this.useWebSockets);
         try
@@ -104,13 +104,13 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         }
         catch (Exception e)
         {
-            logger.LogError(e);
+            logger.error("", e);
             throw new IOException(e);
         }
 
         // Codes_SRS_AMQPSTRANSPORT_15_006: [If the connection was opened successfully, the transport state shall be set to OPEN.]
         this.state = State.OPEN;
-        logger.LogInfo("Connection has been opened, method name is %s ", logger.getMethodName());
+        logger.info("Connection has been opened, method name is {} ", Thread.currentThread().getStackTrace()[2].getMethodName());
     }
 
     /**
@@ -125,17 +125,17 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_15_007: [If the AMQPS connection is closed, the function shall do nothing.]
         if (this.state == State.CLOSED)
         {
-            logger.LogInfo("The connection is already in closed state, method name is %s ", logger.getMethodName());
+            logger.info("The connection is already in closed state, method name is {} ", Thread.currentThread().getStackTrace()[2].getMethodName());
             return;
         }
 
-        logger.LogInfo("Starting to close the connection..., method name is %s ", logger.getMethodName());
+        logger.info("Starting to close the connection..., method name is {} ", Thread.currentThread().getStackTrace()[2].getMethodName());
         // Codes_SRS_AMQPSTRANSPORT_15_008: [The function shall close an AMQPS connection with the IoT Hub given in the configuration.]
         this.connection.close();
 
         // Codes_SRS_AMQPSTRANSPORT_15_009: [The function shall set the transport state to CLOSED.]
         this.state = State.CLOSED;
-        logger.LogInfo("Connection has been closed, method name is %s ", logger.getMethodName());
+        logger.info("Connection has been closed, method name is {} ", Thread.currentThread().getStackTrace()[2].getMethodName());
     }
 
     /**
@@ -152,7 +152,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_15_010: [If the AMQPS session is closed, the function shall throw an IllegalStateException.]
         if (this.state == State.CLOSED)
         {
-            logger.LogError("Cannot add a message when the AMQPS transport is closed, method name is %s ", logger.getMethodName());
+            logger.error("Cannot add a message when the AMQPS transport is closed, method name is {} ", 
+            		Thread.currentThread().getStackTrace()[2].getMethodName());
             throw new IllegalStateException("Cannot add a message when the AMQPS transport is closed.");
         }
 
@@ -177,7 +178,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_15_012: [If the AMQPS session is closed, the function shall throw an IllegalStateException.]
         if (this.state == State.CLOSED)
         {
-            logger.LogError("Cannot send messages when the AMQPS transport is closed, method name is %s ", logger.getMethodName());
+            logger.error("Cannot send messages when the AMQPS transport is closed, method name is {} ", 
+            		Thread.currentThread().getStackTrace()[2].getMethodName());
             throw new IllegalStateException("Cannot send messages when the AMQPS transport is closed.");
         }
 
@@ -192,7 +194,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_15_014: [The function shall attempt to send every message on its waiting list, one at a time.]
         while (!this.waitingMessages.isEmpty())
         {
-           logger.LogInfo("Get the message from waiting message queue to be sent to IoT Hub, method name is %s ", logger.getMethodName());
+           logger.info("Get the message from waiting message queue to be sent to IoT Hub, method name is {} ", 
+        		   Thread.currentThread().getStackTrace()[2].getMethodName());
            IotHubOutboundPacket packet = this.waitingMessages.remove();
 
             Message message = packet.getMessage();
@@ -204,13 +207,15 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                 // with the MESSAGE_EXPIRED status and add it to the callback list.]
                 if (message.isExpired())
                 {
-                    logger.LogInfo("Creating a callback for the expired message with MESSAGE_EXPIRED status, method name is %s ", logger.getMethodName());
+                    logger.info("Creating a callback for the expired message with MESSAGE_EXPIRED status, method name is {} ", 
+                    		Thread.currentThread().getStackTrace()[2].getMethodName());
                     IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_EXPIRED, packet.getCallback(), packet.getContext());
                     this.callbackList.add(callbackPacket);
                 }
                 else
                 {
-                    logger.LogInfo("Converting the IoT Hub message into AmqpsMessage, method name is %s ", logger.getMethodName());
+                    logger.info("Converting the IoT Hub message into AmqpsMessage, method name is {} ", 
+                    		Thread.currentThread().getStackTrace()[2].getMethodName());
                     // Codes_SRS_AMQPSTRANSPORT_15_036: [The function shall create a new Proton message from the IoTHub message.]
                     MessageImpl protonMessage = iotHubMessageToProtonMessage(message);
 
@@ -244,7 +249,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_15_019: [If the transport closed, the function shall throw an IllegalStateException.]
         if (this.state == State.CLOSED)
         {
-            logger.LogError("Cannot invoke callbacks when AMQPS transport is closed, method name is %s ", logger.getMethodName());
+            logger.error("Cannot invoke callbacks when AMQPS transport is closed, method name is {} ", 
+            		Thread.currentThread().getStackTrace()[2].getMethodName());
             throw new IllegalStateException("Cannot invoke callbacks when AMQPS transport is closed.");
         }
 
@@ -257,7 +263,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             IotHubEventCallback callback = packet.getCallback();
             Object context = packet.getContext();
             
-            logger.LogInfo("Invoking the callback function for sent message, IoT Hub responded to message with status %s, method name is %s ", status.name(), logger.getMethodName());
+            logger.info("Invoking the callback function for sent message, IoT Hub responded to message with status {}, method name is {} ", 
+            		status.name(), Thread.currentThread().getStackTrace()[2].getMethodName());
             callback.execute(status, context);
         }
     }
@@ -277,17 +284,20 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_15_021: [If the transport is closed, the function shall throw an IllegalStateException.]
         if (this.state == State.CLOSED)
         {
-            logger.LogError("Cannot handle messages when AMQPS transport is closed, method name is %s ", logger.getMethodName());
+            logger.error("Cannot handle messages when AMQPS transport is closed, method name is {} ", 
+            		Thread.currentThread().getStackTrace()[2].getMethodName());
             throw new IllegalStateException("Cannot handle messages when AMQPS transport is closed.");
         }
         
-        logger.LogInfo("Get the callback function for the received message, method name is %s ", logger.getMethodName());
+        logger.info("Get the callback function for the received message, method name is {} ", 
+        		Thread.currentThread().getStackTrace()[2].getMethodName());
         MessageCallback callback = this.config.getMessageCallback();
 
         // Codes_SRS_AMQPSTRANSPORT_15_025: [If no callback is defined, the list of received messages is cleared.]
         if (callback == null)
         {
-            logger.LogError("Callback is not defined therefore response to IoT Hub cannot be generated. All received messages will be removed from receive message queue, method name is %s ", logger.getMethodName());
+            logger.error("Callback is not defined therefore response to IoT Hub cannot be generated. All received messages will be removed from receive message queue, method name is {} ", 
+            		Thread.currentThread().getStackTrace()[2].getMethodName());
             this.receivedMessages.clear();
             return;
         }
@@ -296,9 +306,11 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_15_024: [If no message was received from IotHub, the function shall return.]
         if (this.receivedMessages.size() > 0)
         {
-            logger.LogInfo("Consuming a message received from IoT Hub using receive message queue, method name is %s ", logger.getMethodName());
+            logger.info("Consuming a message received from IoT Hub using receive message queue, method name is {} ", 
+            		Thread.currentThread().getStackTrace()[2].getMethodName());
             AmqpsMessage receivedMessage = this.receivedMessages.remove();
-            logger.LogInfo("Converting the AmqpsMessage to IoT Hub message, method name is %s ", logger.getMethodName());
+            logger.info("Converting the AmqpsMessage to IoT Hub message, method name is {} ", 
+            		Thread.currentThread().getStackTrace()[2].getMethodName());
             Message message = protonMessageToIoTHubMessage(receivedMessage);
 
 			// set  messageId from messageId property if it exists. Fix for GitHub issue #990
@@ -307,7 +319,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
 			  message.setMessageId(message.getProperty("messageId"));
 			}
                     
-            logger.LogInfo("Executing the callback function for received message, method name is %s ", logger.getMethodName());
+            logger.info("Executing the callback function for received message, method name is {} ", 
+            		Thread.currentThread().getStackTrace()[2].getMethodName());
             // Codes_SRS_AMQPSTRANSPORT_15_026: [The function shall invoke the callback on the message.]
             IotHubMessageResult result = callback.execute(message, this.config.getMessageContext());
 
@@ -316,7 +329,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             // Codes_SRS_AMQPSTRANSPORT_15_028: [If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.]
             if (!ackResult)
             {
-                logger.LogWarn("Callback did not return a response for IoT Hub. Message has been added in the queue to be processed again, method name is %s", logger.getMethodName());
+                logger.warn("Callback did not return a response for IoT Hub. Message has been added in the queue to be processed again, method name is {}", 
+                		Thread.currentThread().getStackTrace()[2].getMethodName());
                 receivedMessages.add(receivedMessage);
             }
         }
@@ -337,14 +351,16 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             IotHubOutboundPacket packet = inProgressMessages.remove(messageHash);
             if (deliveryState)
             {
-                logger.LogInfo("Message with messageid %s has been successfully delivered to IoTHub, adding a callback to callbacklist with IotHubStatusCode.OK_EMPTY, method name is %s ", packet.getMessage().getMessageId(), logger.getMethodName());
+                logger.info("Message with messageid {} has been successfully delivered to IoTHub, adding a callback to callbacklist with IotHubStatusCode.OK_EMPTY, method name is {} ", 
+                		packet.getMessage().getMessageId(), Thread.currentThread().getStackTrace()[2].getMethodName());
                 // Codes_SRS_AMQPSTRANSPORT_15_030: [If the message was successfully delivered,
                 // its callback is added to the list of callbacks to be executed.]
                 IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.OK_EMPTY, packet.getCallback(), packet.getContext());
                 this.callbackList.add(callbackPacket);
             } else
             {
-                logger.LogInfo("Message with messageid %s was not delivered to IoTHub, it is buffered to be sent again, method name is %s ", packet.getMessage().getMessageId(), logger.getMethodName());
+                logger.info("Message with messageid {} was not delivered to IoTHub, it is buffered to be sent again, method name is {} ", 
+                		packet.getMessage().getMessageId(), Thread.currentThread().getStackTrace()[2].getMethodName());
                 // Codes_SRS_AMQPSTRANSPORT_15_031: [If the message was not delivered successfully, it is buffered to be sent again.]
                 waitingMessages.add(packet);
             }
@@ -356,7 +372,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
      */
     public void connectionLost()
     {
-        logger.LogInfo("The messages in progress are buffered to be sent again due to a connection loss, method name is %s ", logger.getMethodName());
+        logger.info("The messages in progress are buffered to be sent again due to a connection loss, method name is {} ", 
+        		Thread.currentThread().getStackTrace()[2].getMethodName());
         // Codes_SRS_AMQPSTRANSPORT_15_032: [The messages in progress are buffered to be sent again.]
         for (Map.Entry<Integer, IotHubOutboundPacket> entry : inProgressMessages.entrySet())
         {
@@ -373,7 +390,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
      */
     public void messageReceived(AmqpsMessage message)
     {
-        logger.LogInfo("Message with hashcode %s is received from IotHub on %s, method name is %s ", message.hashCode(), new Date(), logger.getMethodName());
+        logger.info("Message with hashcode {} is received from IotHub on {}, method name is {} ", 
+        		message.hashCode(), new Date(), Thread.currentThread().getStackTrace()[2].getMethodName());
         // Codes_SRS_AMQPSTRANSPORT_15_034: [The message received is added to the list of messages to be processed.]
         this.receivedMessages.add(message);
     }
@@ -402,7 +420,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
      */
     private Message protonMessageToIoTHubMessage(MessageImpl protonMsg)
     {
-        logger.LogInfo("Started converting AmpqsMessage into IoT Hub message, method name is %s ", logger.getMethodName());
+        logger.info("Started converting AmpqsMessage into IoT Hub message, method name is {} ", 
+        		Thread.currentThread().getStackTrace()[2].getMethodName());
         Data d = (Data) protonMsg.getBody();
         Binary b = d.getValue();
         byte[] msgBody = new byte[b.getLength()];
@@ -410,7 +429,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         buffer.get(msgBody);
 
         Message msg = new Message(msgBody);
-        logger.LogInfo("Content of received message is %s, method name is %s ", new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), logger.getMethodName());
+        logger.info("Content of received message is %s, method name is {} ", 
+        		new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), Thread.currentThread().getStackTrace()[2].getMethodName());
         Properties properties = protonMsg.getProperties();
         //Call all of the getters for the Proton message Properties and set those properties
         //in the IoT Hub message properties if they exist.
@@ -434,12 +454,12 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                 }
                 catch (IllegalAccessException e)
                 {
-                    logger.LogError(e);
+                    logger.error("", e);
                     System.err.println("Attempted to access private or protected member of class during message conversion.");
                 }
                 catch (InvocationTargetException e)
                 {
-                   logger.LogError(e); 
+                   logger.error("", e); 
                    System.err.println("Exception thrown while attempting to get member variable. See: " + e.getMessage());
                 }
             }
@@ -458,7 +478,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                 }
             }
         }
-        logger.LogInfo("Completed the conversion of AmpqsMessage into IoT Hub message, method name is %s ", logger.getMethodName());
+        logger.info("Completed the conversion of AmpqsMessage into IoT Hub message, method name is {} ", 
+        		Thread.currentThread().getStackTrace()[2].getMethodName());
         return msg;
     }
 
@@ -469,9 +490,11 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
      */
     private MessageImpl iotHubMessageToProtonMessage(com.microsoft.azure.sdk.iot.device.Message message)
     {
-        logger.LogInfo("Started converting IoT Hub message into AmpqsMessage, method name is %s ", logger.getMethodName());
+        logger.info("Started converting IoT Hub message into AmpqsMessage, method name is {} ", 
+        		Thread.currentThread().getStackTrace()[2].getMethodName());
         MessageImpl outgoingMessage = (MessageImpl) Proton.message();
-        logger.LogInfo("Content of message is %s, method name is %s ", new String(message.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), logger.getMethodName());
+        logger.info("Content of message is {}, method name is {} ", 
+        		new String(message.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), Thread.currentThread().getStackTrace()[2].getMethodName());
         Properties properties = new Properties();
         if(message.getMessageId() != null)
         {
@@ -499,7 +522,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         Binary binary = new Binary(message.getBytes());
         Section section = new Data(binary);
         outgoingMessage.setBody(section);
-        logger.LogInfo("Started converting IoT Hub message into AmpqsMessage, method name is %s ", logger.getMethodName());
+        logger.info("Started converting IoT Hub message into AmpqsMessage, method name is {} ", 
+        		Thread.currentThread().getStackTrace()[2].getMethodName());
         return outgoingMessage;
     }
 }

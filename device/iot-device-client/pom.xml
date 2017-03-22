@@ -1,5 +1,6 @@
 <!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>iot-device-client</artifactId>
     <name>IoT Hub Java Device Client</name>
@@ -82,14 +83,43 @@
             <artifactId>commons-codec</artifactId>
             <version>1.10</version>
         </dependency>
+        <!-- Logging support -->
+        <dependency>
+   			<groupId>org.slf4j</groupId>
+ 			<artifactId>slf4j-api</artifactId>
+    	</dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
+            <scope>runtime</scope>
         </dependency>
-    </dependencies>
+    </dependencies>   
     <build>
         <plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>**/CustomLogger.java</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default-testCompile</id>
+						<phase>test-compile</phase>
+						<configuration>
+							<testExcludes>
+								<exclude>**/CustomLoggerTest.java</exclude>
+							</testExcludes>
+						</configuration>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -100,6 +130,9 @@
                     <argLine>
                         -javaagent:${settings.localRepository}/org/jmockit/jmockit/1.22/jmockit-1.22.jar
                     </argLine>
+                    <excludes>
+                    	<exclude>**/CustomerLoggerTest.java</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
