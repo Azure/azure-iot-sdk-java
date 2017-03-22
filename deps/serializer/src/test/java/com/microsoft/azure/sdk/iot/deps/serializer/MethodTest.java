@@ -6,7 +6,6 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,7 +13,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static junit.framework.TestCase.assertNotNull;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 /**
@@ -29,9 +27,17 @@ public class MethodTest
      * @param expectedName is the expected name in the actually method
      * @param expectedResponseTimeout is the expected responseTimeout in the actually method.
      * @param expectedConnectTimeout is the expected connectTimeout in the actually method.
-     * @param expectedPayload is a map with all expected parameters in the actually method.
+     * @param expectedPayload is an object with all expected parameters in the actually method.
+     * @param expectedOperation is the expected operation type.
      */
-    private static void assertMethod(Method method, String expectedName, Long expectedResponseTimeout, Long expectedConnectTimeout, Integer expectedStatus, Object expectedPayload)
+    private static void assertMethod(
+            Method method,
+            String expectedName,
+            Long expectedResponseTimeout,
+            Long expectedConnectTimeout,
+            Integer expectedStatus,
+            Object expectedPayload,
+            Method.Operation expectedOperation)
     {
         assertNotNull(method);
 
@@ -40,10 +46,13 @@ public class MethodTest
         Long actualConnectTimeout = Deencapsulation.getField(method, "connectTimeout");
         Integer actualStatus = Deencapsulation.getField(method, "status");
         Object actualPayload = Deencapsulation.getField(method, "payload");
+        Method.Operation actualOperation = Deencapsulation.getField(method, "operation");
 
         assertEquals(actualName, expectedName);
         assertEquals(actualResponseTimeout, expectedResponseTimeout);
         assertEquals(actualConnectTimeout, expectedConnectTimeout);
+        assertEquals(actualStatus, expectedStatus);
+        assertEquals(actualOperation, expectedOperation);
         if((expectedPayload instanceof Integer) && (actualPayload instanceof Double))
         {
             assertEquals(actualPayload, (double)(int)expectedPayload);
@@ -95,12 +104,39 @@ public class MethodTest
                         json =  "{" +
                                         "\"methodName\":\"" + STANDARD_NAME + "\"," +
                                         "\"responseTimeoutInSeconds\": " + STANDARD_TIMEOUT.toString() + "," +
-                                        "\"connectTimeoutInSeconds\": " + STANDARD_TIMEOUT.toString() +
+                                        "\"connectTimeoutInSeconds\": " + STANDARD_TIMEOUT.toString() + "," +
+                                        "\"payload\":null" +
                                 "}";
                         name = STANDARD_NAME;
                         responseTimeout = STANDARD_TIMEOUT;
                         connectTimeout = STANDARD_TIMEOUT;
                         payload = null;
+                    }},
+                    new TestMethod()
+                    {{
+                        json =  "{" +
+                                "\"methodName\":\"" + STANDARD_NAME + "\"," +
+                                "\"responseTimeoutInSeconds\": " + STANDARD_TIMEOUT.toString() + "," +
+                                "\"connectTimeoutInSeconds\": " + STANDARD_TIMEOUT.toString() + "," +
+                                "\"payload\":\"null\"" +
+                                "}";
+                        name = STANDARD_NAME;
+                        responseTimeout = STANDARD_TIMEOUT;
+                        connectTimeout = STANDARD_TIMEOUT;
+                        payload = "null";
+                    }},
+                    new TestMethod()
+                    {{
+                        json =  "{" +
+                                "\"methodName\":\"" + STANDARD_NAME + "\"," +
+                                "\"responseTimeoutInSeconds\": " + STANDARD_TIMEOUT.toString() + "," +
+                                "\"connectTimeoutInSeconds\": " + STANDARD_TIMEOUT.toString() + "," +
+                                "\"payload\":\"\"" +
+                                "}";
+                        name = STANDARD_NAME;
+                        responseTimeout = STANDARD_TIMEOUT;
+                        connectTimeout = STANDARD_TIMEOUT;
+                        payload = "";
                     }},
                     new TestMethod()
                     {{
@@ -120,7 +156,8 @@ public class MethodTest
                     new TestMethod()
                     {{
                         json =  "{" +
-                                        "\"methodName\":\"" + STANDARD_NAME + "\"" +
+                                        "\"methodName\":\"" + STANDARD_NAME + "\"," +
+                                        "\"payload\":null" +
                                 "}";
                         name = STANDARD_NAME;
                         responseTimeout = null;
@@ -160,6 +197,7 @@ public class MethodTest
                         payload = STANDARD_PAYLOAD;
                     }},
             };
+
     private static final TestMethod[] failedTestMethod = new TestMethod[]
             {
                     new TestMethod() {{ name = null; responseTimeout = STANDARD_TIMEOUT; connectTimeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
@@ -172,8 +210,30 @@ public class MethodTest
                     new TestMethod() {{ name = STANDARD_NAME; responseTimeout = ILLEGAL_NEGATIVE_TIMEOUT; connectTimeout = STANDARD_TIMEOUT; payload = STANDARD_PAYLOAD; }},
                     new TestMethod() {{ name = STANDARD_NAME; responseTimeout = STANDARD_TIMEOUT; connectTimeout = ILLEGAL_NEGATIVE_TIMEOUT; payload = STANDARD_PAYLOAD; }},
             };
+
     private static final TestMethod[] successTestResult = new TestMethod[]
             {
+                    new TestMethod()
+                    {{
+                        json = "null";
+                        jsonResult = "{\"status\":201,\"payload\":" + json + "}";
+                        status = 201;
+                        payload = null;
+                    }},
+                    new TestMethod()
+                    {{
+                        json = "\"null\"";
+                        jsonResult = "{\"status\":201,\"payload\":" + json + "}";
+                        status = 201;
+                        payload = "null";
+                    }},
+                    new TestMethod()
+                    {{
+                        json = "\"\"";
+                        jsonResult = "{\"status\":201,\"payload\":" + json + "}";
+                        status = 201;
+                        payload = "";
+                    }},
                     new TestMethod()
                     {{
                         json = "\"Hi, this is a payload\"";
@@ -197,7 +257,7 @@ public class MethodTest
                     }},
                     new TestMethod()
                     {{
-                        json = "[1, 2, 3]";
+                        json = "[1.0, 2.0, 3.0]";
                         jsonResult = "{\"status\":201,\"payload\":" + json + "}";
                         status = 201;
                         payload = new Double[]{1.0, 2.0, 3.0};
@@ -224,7 +284,19 @@ public class MethodTest
                             put("input2", true);
                         }};
                     }},
+                    new TestMethod()
+                    {{
+                        json="{\"input1\":100,\"input2\":true}";
+                        jsonResult = "{\"status\":null,\"payload\":" + json + "}";
+                        status = null;
+                        payload = new HashMap<String, Object>()
+                        {{
+                            put("input1", 100.0);
+                            put("input2", true);
+                        }};
+                    }},
             };
+
     private static final TestMethod[] failedTestPayload = new TestMethod[]
             {
                     new TestMethod() {{ json = null; }},
@@ -238,6 +310,7 @@ public class MethodTest
 
     /* Tests_SRS_METHOD_21_029: [The constructor shall create an instance of the method.] */
     /* Tests_SRS_METHOD_21_030: [The constructor shall initialize all data in the collection as null.] */
+    /* Tests_SRS_METHOD_21_022: [The constructor shall initialize the method operation as `none`.] */
     @Test
     public void Constructor_succeed()
     {
@@ -247,12 +320,13 @@ public class MethodTest
         Method method = new Method();
 
         // Assert
-        assertMethod(method, null, null, null, null, null);
+        assertMethod(method, null, null, null, null, null, Method.Operation.none);
     }
 
     /* Tests_SRS_METHOD_21_001: [The constructor shall create an instance of the method.] */
     /* Tests_SRS_METHOD_21_002: [The constructor shall update the method collection using the provided information.] */
     /* Tests_SRS_METHOD_21_003: [All Strings are case sensitive.] */
+    /* Tests_SRS_METHOD_21_023: [The constructor shall initialize the method operation as `invoke`.] */
     @Test
     public void Constructor_Method_succeed()
     {
@@ -265,7 +339,7 @@ public class MethodTest
             Method method = new Method(testCase.name, testCase.responseTimeout, testCase.connectTimeout, testCase.payload);
 
             // Assert
-            assertMethod(method, testCase.name, testCase.responseTimeout, testCase.connectTimeout, null, testCase.payload);
+            assertMethod(method, testCase.name, testCase.responseTimeout, testCase.connectTimeout, null, testCase.payload,Method.Operation.invoke);
         }
     }
 
@@ -296,6 +370,7 @@ public class MethodTest
 
     /* Tests_SRS_METHOD_21_020: [The constructor shall create an instance of the method.] */
     /* Tests_SRS_METHOD_21_021: [The constructor shall update the method collection using the provided information.] */
+    /* Tests_SRS_METHOD_21_034: [The constructor shall set the method operation as `payload`.] */
     @Test
     public void Constructor_map_Payload_success()
     {
@@ -307,16 +382,16 @@ public class MethodTest
             Method method = new Method(testCase.payload);
 
             // Assert
-            assertMethod(method, null, null, null, null, testCase.payload);
+            assertMethod(method, null, null, null, null, testCase.payload, Method.Operation.payload);
             String json = method.toJson();
             Helpers.assertJson(testCase.json, json);
         }
     }
 
-    /* Tests_SRS_METHOD_21_006: [The fromJson shall create an instance of the method.] */
-    /* Tests_SRS_METHOD_21_007: [The fromJson shall parse the json and fill the status and payload.] */
+    /* Tests_SRS_METHOD_21_006: [The fromJson shall parse the json and fill the method collection.] */
+    /* Tests_SRS_METHOD_21_007: [The json can contain values `null`, `"null"`, and `""`, which represents null, the string null, and empty string respectively.] */
     /**
-     * Tests_SRS_METHOD_21_010: [If the json contains any payload without status identification, the fromJson shall parser only the payload.]
+     * Tests_SRS_METHOD_21_010: [If the json contains any payload without `methodName` or `status` identification, the fromJson shall parse only the payload, and set the operation as `payload`]
      *  Ex:
      *  {
      *      "input1": "someInput",
@@ -336,11 +411,14 @@ public class MethodTest
             method.fromJson(testCase.json);
 
             // Assert
-            assertMethod(method, null, null, null, null, testCase.payload);
+            assertMethod(method, null, null, null, null, testCase.payload, Method.Operation.payload);
         }
     }
 
-    /** Tests_SRS_METHOD_21_011: [If the json contains the `status` and `payload` identification, the fromJson shall parser both status and payload.]
+    /* Tests_SRS_METHOD_21_006: [The fromJson shall parse the json and fill the method collection.] */
+    /* Tests_SRS_METHOD_21_007: [The json can contain values `null`, `"null"`, and `""`, which represents null, the string null, and empty string respectively.] */
+    /**
+     * Tests_SRS_METHOD_21_011: [If the json contains the `status` identification, the fromJson shall parse both status and payload, and set the operation as `response`.]
      *  Ex:
      *  {
      *      "status": 201,
@@ -348,7 +426,7 @@ public class MethodTest
      *  }
      */
     @Test
-    public void fromJson_result_succeed()
+    public void fromJson_response_succeed()
     {
         // Arrange
         Method method = new Method();
@@ -359,11 +437,14 @@ public class MethodTest
             method.fromJson(testCase.jsonResult);
 
             // Assert
-            assertMethod(method, null, null, null, testCase.status, testCase.payload);
+            assertMethod(method, null, null, null, testCase.status, testCase.payload, Method.Operation.response);
         }
     }
 
-    /* Tests_SRS_METHOD_21_009: [If the json contains the `methodName` identification, the fromJson shall parser the full method.]
+    /* Tests_SRS_METHOD_21_006: [The fromJson shall parse the json and fill the method collection.] */
+    /* Tests_SRS_METHOD_21_007: [The json can contain values `null`, `"null"`, and `""`, which represents null, the string null, and empty string respectively.] */
+    /**
+     * Tests_SRS_METHOD_21_009: [If the json contains the `methodName` identification, the fromJson shall parse the full method, and set the operation as `invoke`.]
      *  Ex:
      *  {
      *      "methodName": "reboot",
@@ -388,7 +469,7 @@ public class MethodTest
             method.fromJson(testCase.json);
 
             // Assert
-            assertMethod(method, testCase.name, testCase.responseTimeout, testCase.connectTimeout, null, testCase.payload);
+            assertMethod(method, testCase.name, testCase.responseTimeout, testCase.connectTimeout, null, testCase.payload, Method.Operation.invoke);
         }
     }
 
@@ -430,6 +511,17 @@ public class MethodTest
         assertEquals(method.getPayload(), STANDARD_PAYLOAD);
     }
 
+    /* Tests_SRS_METHOD_21_035: [If the operation is not `response`, the getStatus shall throws IllegalArgumentException.] */
+    @Test (expected = IllegalArgumentException.class)
+    public void getResults_failed()
+    {
+        // Arrange
+        Method method = new Method();
+
+        // Act
+        method.getStatus();
+    }
+
     /* Tests_SRS_METHOD_21_014: [The toJson shall create a String with the full information in the method collection using json format.] */
     /* Tests_SRS_METHOD_21_015: [The toJson shall include name as `methodName` in the json.] */
     /* Tests_SRS_METHOD_21_016: [The toJson shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.] */
@@ -437,9 +529,9 @@ public class MethodTest
     /* Tests_SRS_METHOD_21_031: [The toJson shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.] */
     /* Tests_SRS_METHOD_21_032: [If the connectTimeout is null, the toJson shall not include the `connectTimeoutInSeconds` in the json.] */
     /* Tests_SRS_METHOD_21_018: [The class toJson include payload as `payload` in the json.] */
-    /* Tests_SRS_METHOD_21_019: [If the payload is null, the toJson shall not include `payload` for parameters in the json.] */
+    /* Tests_SRS_METHOD_21_019: [If the payload is null, the toJson shall include `payload` with value `null`.] */
     /**
-     *  Tests_SRS_METHOD_21_026: [If the method contains a name, the toJson shall include the full method information in the json.]
+     *  Tests_SRS_METHOD_21_026: [If the method operation is `invoke`, the toJson shall include the full method information in the json.]
      *  Ex:
      *  {
      *      "methodName": "reboot",
@@ -469,8 +561,9 @@ public class MethodTest
     }
 
     /* Tests_SRS_METHOD_21_024: [The class toJson include status as `status` in the json.] */
-    /* Tests_SRS_METHOD_21_025: [If the status is null, the toJson shall not include `status` for parameters in the json.] */
-    /** Tests_SRS_METHOD_21_027: [If the method contains the status, the toJson shall parser both status and payload.
+    /* Tests_SRS_METHOD_21_025: [If the status is null, the toJson shall include `status` as `null`.] */
+    /**
+     * Tests_SRS_METHOD_21_027: [If the method operation is `response`, the toJson shall parse both status and payload.]
      *  Ex:
      *  {
      *      "status": 201,
@@ -478,7 +571,7 @@ public class MethodTest
      *  }
      */
     @Test
-    public void toJson_result_succeed()
+    public void toJson_response_succeed()
     {
         // Arrange
         Method method = new Method();
@@ -497,7 +590,7 @@ public class MethodTest
     }
 
     /**
-     * Tests_SRS_METHOD_21_028: [If the method do not contains name or status, the toJson shall parser only the payload.]
+     * Tests_SRS_METHOD_21_028: [If the method operation is `payload`, the toJson shall parse only the payload.]
      *  Ex:
      *  {
      *      "input1": "someInput",
@@ -519,4 +612,16 @@ public class MethodTest
             Helpers.assertJson(json, testCase.json);
         }
     }
+
+    /* Tests_SRS_METHOD_21_036: [If the method operation is `none`, the toJson shall throw IllegalArgumentException.] */
+    @Test (expected = IllegalArgumentException.class)
+    public void toJson_failed()
+    {
+        // Arrange
+        Method method = new Method();
+
+        // Act
+        method.toJson();
+    }
+
 }
