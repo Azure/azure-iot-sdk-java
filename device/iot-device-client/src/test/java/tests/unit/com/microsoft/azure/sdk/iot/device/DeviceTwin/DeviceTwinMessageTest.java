@@ -5,7 +5,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinOperations;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -31,12 +31,12 @@ public class DeviceTwinMessageTest
         String actualVersion = Deencapsulation.getField(msg, "version");
         String actualRequestId = Deencapsulation.getField(msg, "requestId");
         String actualStatus = Deencapsulation.getField(msg, "status");
-        DeviceTwinOperations operationType = Deencapsulation.getField(msg, "operationType");
+        DeviceOperations operationType = Deencapsulation.getField(msg, "operationType");
 
         assertNull(actualVersion);
         assertNull(actualRequestId);
         assertNull(actualStatus);
-        assertEquals(operationType, DeviceTwinOperations.DEVICE_TWIN_OPERATION_UNKNOWN);
+        assertEquals(operationType, DeviceOperations.DEVICE_OPERATION_UNKNOWN);
     }
 
     /*
@@ -60,13 +60,13 @@ public class DeviceTwinMessageTest
         String testVersion = msg.getVersion();
         String testRequestId = msg.getRequestId();
         String testStatus = msg.getStatus();
-        DeviceTwinOperations testOpType = msg.getDeviceTwinOperationType();
+        DeviceOperations testOpType = msg.getDeviceOperationType();
 
         //assert
         String actualVersion = Deencapsulation.getField(msg, "version");
         String actualRequestId = Deencapsulation.getField(msg, "requestId");
         String actualStatus = Deencapsulation.getField(msg, "status");
-        DeviceTwinOperations operationType = Deencapsulation.getField(msg, "operationType");
+        DeviceOperations operationType = Deencapsulation.getField(msg, "operationType");
 
         assertEquals(actualRequestId, testRequestId);
         assertEquals(actualStatus, testStatus);
@@ -192,15 +192,15 @@ public class DeviceTwinMessageTest
         DeviceTwinMessage msg = new DeviceTwinMessage(actualData);
 
         //act
-        msg.setDeviceTwinOperationType(DeviceTwinOperations.DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_RESPONSE);
+        msg.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
 
         //assert
-        assertEquals(msg.getDeviceTwinOperationType(), DeviceTwinOperations.DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_RESPONSE);
+        assertEquals(msg.getDeviceOperationType(), DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
 
     }
 
     /*
-    **Tests_SRS_DEVICETWINMESSAGE_25_010: [**The function shall return the operation type either set by the setter or the default (DEVICE_TWIN_OPERATION_UNKNOWN) if unset so far.**]**
+    **Tests_SRS_DEVICETWINMESSAGE_25_010: [**The function shall return the operation type either set by the setter or the default (DEVICE_OPERATION_UNKNOWN) if unset so far.**]**
      */
     @Test
     public void getTwinOpGets()
@@ -208,13 +208,13 @@ public class DeviceTwinMessageTest
         //arrange
         final byte[] actualData = {};
         DeviceTwinMessage msg = new DeviceTwinMessage(actualData);
-        msg.setDeviceTwinOperationType(DeviceTwinOperations.DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_RESPONSE);
+        msg.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
 
         //act
-        DeviceTwinOperations op = msg.getDeviceTwinOperationType();
+        DeviceOperations op = msg.getDeviceOperationType();
 
         //assert
-        assertEquals(op, DeviceTwinOperations.DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_RESPONSE);
+        assertEquals(op, DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
 
     }
 }

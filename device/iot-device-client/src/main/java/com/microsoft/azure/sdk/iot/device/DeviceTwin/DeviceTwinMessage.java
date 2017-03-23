@@ -6,14 +6,14 @@ package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinOperations.DEVICE_TWIN_OPERATION_UNKNOWN;
+import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
 
 public class DeviceTwinMessage extends Message
 {
     private String version;
     private String requestId;
     private String status;
-    private DeviceTwinOperations operationType;
+    private DeviceOperations operationType;
 
 
   public DeviceTwinMessage(byte[] data)
@@ -27,7 +27,7 @@ public class DeviceTwinMessage extends Message
       this.version = null;
       this.requestId = null;
       this.status = null;
-      this.operationType = DEVICE_TWIN_OPERATION_UNKNOWN;
+      this.operationType = DEVICE_OPERATION_UNKNOWN;
   }
 
     public void setVersion(String version)
@@ -78,7 +78,7 @@ public class DeviceTwinMessage extends Message
         return this.status;
     }
 
-    public void setDeviceTwinOperationType(DeviceTwinOperations type)
+    public void setDeviceOperationType(DeviceOperations type)
     {
         /*
         **Codes_SRS_DEVICETWINMESSAGE_25_009: [**The function shall save the device twin operation type.**]**
@@ -86,10 +86,10 @@ public class DeviceTwinMessage extends Message
         this.operationType = type;
     }
 
-    public DeviceTwinOperations getDeviceTwinOperationType()
+    public DeviceOperations getDeviceOperationType()
     {
         /*
-        **Codes_SRS_DEVICETWINMESSAGE_25_010: [**The function shall return the operation type either set by the setter or the default (DEVICE_TWIN_OPERATION_UNKNOWN) if unset so far.**]**
+        **Codes_SRS_DEVICETWINMESSAGE_25_010: [**The function shall return the operation type either set by the setter or the default (DEVICE_OPERATION_UNKNOWN) if unset so far.**]**
          */
         return this.operationType;
     }
