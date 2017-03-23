@@ -195,15 +195,31 @@ public class ServiceClient
     }
 
     /**
-     * Get FeedbackReceiver object
-     *
+     * Get FeedbackReceiver object.This API has been deprecated. Use new API without deviceId as an input parameter.
+     * @deprecated As of release 1.1.15, replaced by {@link #getFeedbackReceiver()}
      * @param deviceId The device identifier for the target device
      * @return The instance of the FeedbackReceiver
      */
-    public FeedbackReceiver getFeedbackReceiver(String deviceId)
+    @Deprecated public FeedbackReceiver getFeedbackReceiver(String deviceId)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_017: [The function shall create a FeedbackReceiver object and returns with it]
+        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_017: [The function shall create a FeedbackReceiver object and returns with it. This API is deprecated.]
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
         return feedbackReceiver;
     }
+    
+     /**
+     * Get FeedbackReceiver object.  
+     *
+     *
+     * @return The instance of the FeedbackReceiver
+     */
+    
+     public FeedbackReceiver getFeedbackReceiver()
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_018: [The function shall create a FeedbackReceiver object and returns with it. This API doesn't need deviceId as an input parameter]
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        return feedbackReceiver;
+    }
+    
+    
 }

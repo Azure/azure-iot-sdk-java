@@ -35,6 +35,14 @@ public FeedbackReceiver (String hostname, String username, String sasToken, Stri
 
 **SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [** The constructor shall create a new instance of AmqpReceive object **]**
 
+```java
+public FeedbackReceiver (String hostname, String username, String sasToken);
+```
+**SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [** The constructor shall throw IllegalArgumentException if any the input string is null or empty **]**
+
+**SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [** The constructor shall create a new instance of AmqpReceive object **]**
+
+
 ### open
 
 ```java

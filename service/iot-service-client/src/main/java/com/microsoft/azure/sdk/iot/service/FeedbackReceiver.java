@@ -27,13 +27,14 @@ public class FeedbackReceiver extends Receiver
     /**
      * Constructor to verify initialization parameters
      * Create instance of AmqpReceive
-     *
+     * @deprecated As of release 1.1.15, replaced by {@link #FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)}
      * @param hostName The iot hub host name
      * @param userName The iot hub user name
      * @param sasToken The iot hub SAS token for the given device
+     * @param iotHubServiceClientProtocol The iot hub protocol name
      * @param deviceId The device id
      */
-    public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, String deviceId)
+    public @Deprecated FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, String deviceId)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
         if (Tools.isNullOrEmpty(hostName))
@@ -52,12 +53,50 @@ public class FeedbackReceiver extends Receiver
         {
             throw new IllegalArgumentException("deviceId cannot be null or empty");
         }
+        
+               
+        
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_002: [The constructor shall store deviceId]
         this.deviceId = deviceId;
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [The constructor shall create a new instance of AmqpReceive object]
         this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
     }
 
+    /**
+     * Constructor to verify initialization parameters
+     * Create instance of AmqpReceive
+     *
+     * @param hostName The iot hub host name
+     * @param userName The iot hub user name
+     * @param sasToken The iot hub SAS token for the given device
+     * @param iotHubServiceClientProtocol
+     * 
+     */
+    public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+        if (Tools.isNullOrEmpty(userName))
+        {
+            throw new IllegalArgumentException("userName cannot be null or empty");
+        }
+        if (Tools.isNullOrEmpty(sasToken))
+        {
+            throw new IllegalArgumentException("sasToken cannot be null or empty");
+        }
+        
+        if (iotHubServiceClientProtocol  == null)
+        {
+            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
+        }
+                
+        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [The constructor shall create a new instance of AmqpReceive object]
+        this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
+    }
+        
     /**
      * Open AmqpReceive object
      *

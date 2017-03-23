@@ -56,9 +56,9 @@ public FeedbackBatch receive(String deviceId, long timeoutMs);
 
 **SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_006: [** The function shall start the Proton reactor object **]**
 
-**SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_007: [** The function shall acquire a semaphore for event handling with no timeout if the input timoutMs is equal to 0 **]**
+**SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_007: [** The function shall wait for specified timeout to check for any feedback message **]**
 
-**SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_008: [** The function shall acquire a semaphore for event handling with timeout if the input timoutMs is not equal to 0 **]**
+**SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_008: [** The function shall stop and free the Proton reactor object **]**
 
 **SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_009: [** The function shall throw IOException if the send handler object is not initialized **]**
 
@@ -69,4 +69,3 @@ public void onFeedbackReceived(String feedbackJson);
 ```
 **SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_010: [** The function shall parse the received Json string to FeedbackBath object **]**
 
-**SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_011: [** The function shall release the event handling semaphore **]**

@@ -52,6 +52,11 @@ public class AmqpSend extends BaseHandler
         {
             throw new IllegalArgumentException("sasToken can not be null or empty");
         }
+        
+        if (iotHubServiceClientProtocol == null)
+        {
+            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
+        }
 
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_002: [The constructor shall copy all input parameters to private member variables for event processing]
         this.hostName = hostName;

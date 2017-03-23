@@ -38,7 +38,8 @@ public class ServiceClientSample
     private static ServiceClient serviceClient = null;
     private static FeedbackReceiver feedbackReceiver = null;
     
-    private static final int MAX_COMMANDS_TO_SEND = 6; // maximum commands to send in a loop
+    private static final int MAX_COMMANDS_TO_SEND = 5; // maximum commands to send in a loop
+    private static final int FEEDBACK_RECEVIER_TIMEOUT_MILLISECS = 10000; // Timeout in ms
  
     /**
      * @param args
@@ -76,25 +77,59 @@ public class ServiceClientSample
         propertiesToSend.put("mycustomKey5", "mycustomValue5");
         messageToSend.setProperties(propertiesToSend);
 
-        CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, messageToSend);
         try
         {
-            completableFuture.get();
+           CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, messageToSend);
+           completableFuture.get();
+            
         }
+        
         catch (ExecutionException e)
         {
-            System.out.println("Exception : " + e.getCause());
-            return;
+            System.out.println("Exception : " + e.getMessage());
+            closeFeedbackReceiver();
+            closeServiceClient();
+            System.out.println("********* Shutting down ServiceClient sample...");
+            System.exit(0);
+            
         }
 
-        System.out.println("********* Waiting for feedback...");
-        CompletableFuture<FeedbackBatch> future = feedbackReceiver.receiveAsync();
-        FeedbackBatch feedbackBatch = future.get();
-
-        if (feedbackBatch != null)
+        try
         {
-            System.out.println("********* Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc().toString());
+            System.out.println("********* Waiting for feedback... Set wait timeout to " +  Integer.toString(FEEDBACK_RECEVIER_TIMEOUT_MILLISECS / 1000) +  " seconds");
+            CompletableFuture<FeedbackBatch> future = feedbackReceiver.receiveAsync(FEEDBACK_RECEVIER_TIMEOUT_MILLISECS); // Wait for FEEDBACK_RECEVIER_TIMEOUT_MILLISECS to check for any feedback
+            FeedbackBatch feedbackBatch = future.get();
+
+            if (feedbackBatch != null)
+            {
+                System.out.println("********* Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc().toString() + " Record size: " + feedbackBatch.getRecords().size());
+            
+                for (int i=0; i < feedbackBatch.getRecords().size(); i++)
+                {
+                   System.out.println("Device id : " + feedbackBatch.getRecords().get(i).getDeviceId() + " Status description: " + feedbackBatch.getRecords().get(i).getDescription());
+                }
+            }
+            else
+            {
+               System.out.println("No feedback received !"); 
+               closeFeedbackReceiver();
+               closeServiceClient();
+               System.out.println("********* Shutting down ServiceClient sample...");
+               System.exit(0);
+            }
+            
         }
+        
+        catch (ExecutionException e)
+        {
+           System.out.println("Exception : " + e.getMessage());
+           closeFeedbackReceiver();
+           closeServiceClient();
+           System.out.println("********* Shutting down ServiceClient sample...");
+           System.exit(0);
+            
+        }
+        
 
         // Sending multiple commands
         try
@@ -143,7 +178,7 @@ public class ServiceClientSample
     {
         if (serviceClient != null)
         {
-            feedbackReceiver = serviceClient.getFeedbackReceiver(deviceId);
+            feedbackReceiver = serviceClient.getFeedbackReceiver();
             if (feedbackReceiver != null)
             {
                 CompletableFuture<Void> future = feedbackReceiver.openAsync();
@@ -184,7 +219,6 @@ public class ServiceClientSample
             messageToSend.setProperties(propertiesToSend);
 
             // send the message
-
             CompletableFuture<Void> future = serviceClient.sendAsync(deviceId, messageToSend);
             futureList.add(future);
 
@@ -212,16 +246,21 @@ public class ServiceClientSample
         System.out.println("All sends completed !");
 
         System.out.println("Waiting for the feedback...");
-        CompletableFuture<FeedbackBatch> future = feedbackReceiver.receiveAsync();
-        FeedbackBatch feedbackBatch = future.get();
+        CompletableFuture<FeedbackBatch> future = feedbackReceiver.receiveAsync(); // Default timeout is 60 seconds. [DEFAULT_TIMEOUT_MS = 60000]
+        FeedbackBatch feedbackBatch = future.get(); 
 
         if (feedbackBatch != null) // check if any feedback was received
         {
-            System.out.println("Record count: " + feedbackBatch.getRecords().size());
+            System.out.println("********* Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc().toString() + " Record size: " + feedbackBatch.getRecords().size());
+            
             for (int i=0; i < feedbackBatch.getRecords().size(); i++)
-            {
-                System.out.println("Messsage id get: " + feedbackBatch.getRecords().get(i).getOriginalMessageId());
-            }
+            System.out.println("Messsage id get: " + feedbackBatch.getRecords().get(i).getOriginalMessageId() + " Device id : " + feedbackBatch.getRecords().get(i).getDeviceId() + " Status description: " + feedbackBatch.getRecords().get(i).getDescription());
+         
+        }
+        else
+        {
+            System.out.println("No feedback received");
+            
         }
     }
 }

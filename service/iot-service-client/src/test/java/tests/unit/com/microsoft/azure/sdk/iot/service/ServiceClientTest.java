@@ -452,4 +452,30 @@ public class ServiceClientTest
         // Assert
         assertNotEquals(null, feedbackReceiver);
     }
+    
+    // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_017: [The function shall create a FeedbackReceiver object and returns with it]
+    @Test
+    public void getFeedbackReceiver_good_case_without_deviceid() throws Exception
+    {
+        // Arrange
+        String iotHubName = "IOTHUBNAME";
+        String hostName = "HOSTNAME";
+        String sharedAccessKeyName = "ACCESSKEYNAME";
+        String policyName = "SharedAccessKey";
+        String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
+        String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        // Assert
+        new Expectations()
+        {
+            {
+                feedbackReceiver = new FeedbackReceiver(anyString, anyString, anyString, iotHubServiceClientProtocol);
+            }
+        };
+        // Act
+        FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver();
+        // Assert
+        assertNotEquals(null, feedbackReceiver);
+    }
 }

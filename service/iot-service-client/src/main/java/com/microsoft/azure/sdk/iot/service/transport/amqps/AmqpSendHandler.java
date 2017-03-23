@@ -75,7 +75,12 @@ public class AmqpSendHandler extends BaseHandler
         {
             throw new IllegalArgumentException("sasToken can not be null or empty");
         }
-
+        
+        if (iotHubServiceClientProtocol == null)
+        {
+            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
+        }
+     
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.webSocketHostName = hostName;
         if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
