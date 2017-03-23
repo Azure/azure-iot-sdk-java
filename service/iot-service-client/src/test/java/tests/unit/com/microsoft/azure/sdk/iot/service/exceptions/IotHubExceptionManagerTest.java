@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.is;
 
 @RunWith(JMockit.class)
 public class IotHubExceptionManagerTest
@@ -123,7 +125,23 @@ public class IotHubExceptionManagerTest
         // Act
         IotHubExceptionManager.httpResponseVerification(response);
     }
-    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_008: [The function shall throw IotHubServerBusyException if the Http response status equal 503]
+
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_008: [The function shall throw IotHubBadGatewayException if the Http response status equal 502]
+    // Assert
+    @Test (expected = IotHubBadGatewayException.class)
+    public void httpResponseVerification_502() throws IotHubException
+    {
+        // Arrange
+        final int status = 502;
+        final byte[] body = { 1 };
+        final Map<String, List<String>> headerFields = new HashMap<>();
+        final byte[] errorReason = { 2, 3, 4, 5 };
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
+        // Act
+        IotHubExceptionManager.httpResponseVerification(response);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_009: [The function shall throw IotHubServerBusyException if the Http response status equal 503]
     // Assert
     @Test (expected = IotHubServerBusyException.class)
     public void httpResponseVerification_503() throws IotHubException
@@ -138,7 +156,22 @@ public class IotHubExceptionManagerTest
         IotHubExceptionManager.httpResponseVerification(response);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_009: [The function shall throw IotHubException if the Http response status none of them above and greater than 300 copying the error Http reason to the exception]
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_010: [The function shall throw IotHubGatewayTimeoutException if the Http response status equal 504]
+    // Assert
+    @Test (expected = IotHubGatewayTimeoutException.class)
+    public void httpResponseVerification_504() throws IotHubException
+    {
+        // Arrange
+        final int status = 504;
+        final byte[] body = { 1 };
+        final Map<String, List<String>> headerFields = new HashMap<>();
+        final byte[] errorReason = { 2, 3, 4, 5 };
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
+        // Act
+        IotHubExceptionManager.httpResponseVerification(response);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_011: [The function shall throw IotHubException if the Http response status none of them above and greater than 300 copying the error Http reason to the exception]
     // Assert
     @Test (expected = IotHubException.class)
     public void httpResponseVerification_301_error_reason_ok() throws IotHubException
@@ -153,7 +186,7 @@ public class IotHubExceptionManagerTest
         IotHubExceptionManager.httpResponseVerification(response);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_009: [The function shall throw IotHubException if the Http response status none of them above and greater than 300 copying the error Http reason to the exception]
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_011: [The function shall throw IotHubException if the Http response status none of them above and greater than 300 copying the error Http reason to the exception]
     // Assert
     @Test (expected = IotHubException.class)
     public void httpResponseVerification_301_error_reason_invalid() throws IotHubException
@@ -168,7 +201,7 @@ public class IotHubExceptionManagerTest
         IotHubExceptionManager.httpResponseVerification(response);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_010: [The function shall return without exception if the response status equal or less than 300]
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_012: [The function shall return without exception if the response status equal or less than 300]
     @Test
     public void httpResponseVerification_300() throws IotHubException
     {
@@ -186,4 +219,106 @@ public class IotHubExceptionManagerTest
         assertNotEquals(null, iotHubException);
         assertNotEquals(null, iotHubExceptionManager);
     }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
+    // Assert
+    @Test
+    public void httpResponseVerification_301_withErrorReason() throws IotHubException
+    {
+        // Arrange
+        final int status = 301;
+        final byte[] body = { 1 };
+        final Map<String, List<String>> headerFields = new HashMap<>();
+        final byte[] errorReason = "{\"ExceptionMessage\":\"This is the error message\"}".getBytes();
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
+        // Act
+        try
+        {
+            IotHubExceptionManager.httpResponseVerification(response);
+            assert true;
+        }
+        catch (IotHubException expected)
+        {
+            // Expected throw.
+            assertThat(expected.getMessage(), is("This is the error message"));
+        }
+        IotHubException iotHubException = new IotHubException("error message");
+        IotHubExceptionManager iotHubExceptionManager = new IotHubExceptionManager();
+        // Assert
+        assertNotEquals(null, iotHubException);
+        assertNotEquals(null, iotHubExceptionManager);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
+    // Assert
+    @Test
+    public void httpResponseVerification_400_withErrorReason() throws IotHubException
+    {
+        // Arrange
+        final int status = 400;
+        final byte[] body = { 1 };
+        final Map<String, List<String>> headerFields = new HashMap<>();
+        final byte[] errorReason = "{\"ExceptionMessage\":\"This is the error message\"}".getBytes();
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
+        // Act
+        try
+        {
+            IotHubExceptionManager.httpResponseVerification(response);
+            assert true;
+        }
+        catch (IotHubBadFormatException expected)
+        {
+            // Expected throw.
+            assertThat(expected.getMessage(), is("Bad message format! This is the error message"));
+        }
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
+    // Assert
+    @Test
+    public void httpResponseVerification_400_withNULLErrorReason() throws IotHubException
+    {
+        // Arrange
+        final int status = 400;
+        final byte[] body = { 1 };
+        final Map<String, List<String>> headerFields = new HashMap<>();
+        final byte[] errorReason = "{\"ExceptionMessage\":null}".getBytes();
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
+        // Act
+        try
+        {
+            IotHubExceptionManager.httpResponseVerification(response);
+            assert true;
+        }
+        catch (IotHubBadFormatException expected)
+        {
+            // Expected throw.
+            assertThat(expected.getMessage(), is("Bad message format!"));
+        }
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
+    // Assert
+    @Test
+    public void httpResponseVerification_400_withEmptyErrorReason() throws IotHubException
+    {
+        // Arrange
+        final int status = 400;
+        final byte[] body = { 1 };
+        final Map<String, List<String>> headerFields = new HashMap<>();
+        final byte[] errorReason = "{\"ExceptionMessage\":}".getBytes();
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
+        // Act
+        try
+        {
+            IotHubExceptionManager.httpResponseVerification(response);
+            assert true;
+        }
+        catch (IotHubBadFormatException expected)
+        {
+            // Expected throw.
+            assertThat(expected.getMessage(), is("Bad message format!"));
+        }
+    }
+
 }

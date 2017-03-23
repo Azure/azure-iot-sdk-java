@@ -27,7 +27,9 @@ public final class DeviceClient
     
     public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object    deviceTwinStatusCallbackContext, PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext) throws IOException;
     public void subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange) throws IOException;
-    public void sendReportedProperties(Set<Property> reportedProperties) throws IOException;    
+    public void sendReportedProperties(Set<Property> reportedProperties) throws IOException;  
+
+    public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IOException  
 }
 ```
 
@@ -162,6 +164,22 @@ public void sendReportedProperties(Set<Property> reportedProperties) throws IOEx
 **SRS_DEVICECLIENT_25_020: [**If reportedProperties is null or empty, the function shall throw an IllegalArgumentException.**]**
 
 **SRS_DEVICECLIENT_25_021: [**This method shall send to reported properties by calling updateReportedProperties on the twin object.**]**
+
+
+
+### subscribeToDeviceMethod
+
+```java
+public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IOException;
+```
+
+**SRS_DEVICECLIENT_25_022: [**If the client has not been open, the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_25_023: [**If deviceMethodCallback or deviceMethodStatusCallback is null, the function shall throw an IllegalArgumentException.**]**
+
+**SRS_DEVICECLIENT_25_024: [**This method shall subscribe to device methods by calling subscribeToDeviceMethod on DeviceMethod object which it created.**]**
+
+**SRS_DEVICECLIENT_25_025: [**This method shall update the deviceMethodCallback if called again, but it shall not subscribe twice.**]**
 
 
 ### setOption

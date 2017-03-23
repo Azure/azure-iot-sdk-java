@@ -3,22 +3,23 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
+import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinOperations;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
 import java.util.regex.Pattern;
 
 public class MqttDeviceTwin extends Mqtt
 {
     private String subscribeTopic;
-    private Map<String, DeviceTwinOperations> requestMap = new HashMap<>();
+    private Map<String, DeviceOperations> requestMap = new HashMap<>();
     private boolean isStarted = false;
+    private CustomLogger logger = new CustomLogger(this.getClass());
 
     private final String BACKSLASH = "/";
     private final String AND = "&";
@@ -68,6 +69,7 @@ public class MqttDeviceTwin extends Mqtt
             **Codes_SRS_MQTTDEVICETWIN_25_019: [**start method shall subscribe to twin response topic ($iothub/twin/res/#) if connected and throw IoException otherwise.**]**
              */
             this.subscribe(subscribeTopic);
+            isStarted = true;
         }
     }
 
@@ -76,7 +78,16 @@ public class MqttDeviceTwin extends Mqtt
         /*
         **Codes_SRS_MQTTDEVICETWIN_25_020: [**stop method shall unsubscribe from twin response topic ($iothub/twin/res/#) and throw IoException otherwise.**]**
          */
-        this.unsubscribe(subscribeTopic);
+        if (isStarted)
+        {
+            this.unsubscribe(subscribeTopic);
+            isStarted = false;
+        }
+
+        if (!requestMap.isEmpty())
+        {
+            logger.LogInfo("Pending %d responses from IotHub yet unsubscribed %s", requestMap.size(), logger.getMethodName());
+        }
     }
 
     @Override
@@ -172,13 +183,13 @@ public class MqttDeviceTwin extends Mqtt
     private String buildTopic(final DeviceTwinMessage message) throws IOException
     {
         StringBuilder topic = new StringBuilder();
-        switch (message.getDeviceTwinOperationType())
+        switch (message.getDeviceOperationType())
         {
-            case DEVICE_TWIN_OPERATION_GET_REQUEST:
+            case DEVICE_OPERATION_TWIN_GET_REQUEST:
             {
                 //Building $iothub/twin/GET/?$rid={request id}
                 /*
-                **Codes_SRS_MQTTDEVICETWIN_25_024: [**send method shall build the get request topic of the format mentioned in spec ($iothub/twin/GET/?$rid={request id}) if the operation is of type DEVICE_TWIN_OPERATION_GET_REQUEST.**]**
+                **Codes_SRS_MQTTDEVICETWIN_25_024: [**send method shall build the get request topic of the format mentioned in spec ($iothub/twin/GET/?$rid={request id}) if the operation is of type DEVICE_OPERATION_TWIN_GET_REQUEST.**]**
                  */
                 topic.append(GET);
 
@@ -192,17 +203,17 @@ public class MqttDeviceTwin extends Mqtt
                 else
                 {
                     /*
-                    **Codes_SRS_MQTTDEVICETWIN_25_025: [**send method shall throw an exception if message contains a null or empty request id if the operation is of type DEVICE_TWIN_OPERATION_GET_REQUEST.**]**
+                    **Codes_SRS_MQTTDEVICETWIN_25_025: [**send method shall throw an exception if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_TWIN_GET_REQUEST.**]**
                      */
                     throw new IOException("Request Id is Mandatory");
                 }
                 break;
             }
-            case DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_REQUEST:
+            case DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST:
             {
                 // Building $iothub/twin/PATCH/properties/reported/?$rid={request id}&$version={base version}
                 /*
-                **Codes_SRS_MQTTDEVICETWIN_25_026: [**send method shall build the update reported properties request topic of the format mentioned in spec ($iothub/twin/PATCH/properties/reported/?$rid={request id}&$version={base version}) if the operation is of type DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_REQUEST.**]**
+                **Codes_SRS_MQTTDEVICETWIN_25_026: [**send method shall build the update reported properties request topic of the format mentioned in spec ($iothub/twin/PATCH/properties/reported/?$rid={request id}&$version={base version}) if the operation is of type DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST.**]**
                  */
                 topic.append(PATCH);
                 topic.append(BACKSLASH);
@@ -220,13 +231,13 @@ public class MqttDeviceTwin extends Mqtt
                 else
                 {
                     /*
-                    **Codes_SRS_MQTTDEVICETWIN_25_027: [**send method shall throw an exception if message contains a null or empty request id if the operation is of type DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_REQUEST.**]**
+                    **Codes_SRS_MQTTDEVICETWIN_25_027: [**send method shall throw an exception if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST.**]**
                      */
                     throw new IOException("Request Id is Mandatory");
                 }
                 String version = message.getVersion();
                 /*
-                **Codes_SRS_MQTTDEVICETWIN_25_028: [**send method shall not throw an exception if message contains a null or empty version if the operation is of type DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_REQUEST as version is optional**]**
+                **Codes_SRS_MQTTDEVICETWIN_25_028: [**send method shall not throw an exception if message contains a null or empty version if the operation is of type DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST as version is optional**]**
                  */
                 if (version != null)
                 {
@@ -236,11 +247,11 @@ public class MqttDeviceTwin extends Mqtt
                 }
                 break;
             }
-            case DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST:
+            case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST:
             {
                 // Building $iothub/twin/PATCH/properties/desired/?$version={new version}
                 /*
-                **Codes_SRS_MQTTDEVICETWIN_25_029: [**send method shall build the subscribe to desired properties request topic of the format mentioned in spec ($iothub/twin/PATCH/properties/desired/?$version={new version}) if the operation is of type DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.**]**
+                **Codes_SRS_MQTTDEVICETWIN_25_029: [**send method shall build the subscribe to desired properties request topic of the format mentioned in spec ($iothub/twin/PATCH/properties/desired/?$version={new version}) if the operation is of type DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.**]**
                  */
                 topic.append(PATCH);
                 topic.append(BACKSLASH);
@@ -262,9 +273,9 @@ public class MqttDeviceTwin extends Mqtt
             default:
             {
                 /*
-                **Codes_SRS_MQTTDEVICETWIN_25_023: [**send method shall throw an exception if the getDeviceTwinOperationType() returns DEVICE_TWIN_OPERATION_UNKNOWN.**]**
+                **Codes_SRS_MQTTDEVICETWIN_25_023: [**send method shall throw an exception if the getDeviceOperationType() returns DEVICE_OPERATION_UNKNOWN.**]**
                  */
-                throw new UnsupportedOperationException("Device Twin Operation is not supported - " + message.getDeviceTwinOperationType());
+                throw new UnsupportedOperationException("Device Twin Operation is not supported - " + message.getDeviceOperationType());
             }
         }
         return topic.toString();
@@ -280,6 +291,11 @@ public class MqttDeviceTwin extends Mqtt
             throw new IOException("Message cannot be null");
         }
 
+        if(!isStarted)
+        {
+            throw new IOException("Start device twin before using it");
+        }
+
         if (message.getMessageType() != MessageType.DeviceTwin)
         {
             /*
@@ -289,16 +305,16 @@ public class MqttDeviceTwin extends Mqtt
         }
 
         String publishTopic = buildTopic(message);
-        requestMap.put(message.getRequestId(), message.getDeviceTwinOperationType());
+        requestMap.put(message.getRequestId(), message.getDeviceOperationType());
 
         /*
         **Codes_SRS_MqttMessaging_25_024: [**send method shall publish a message to the IOT Hub on the publish topic by calling method publish().**]**
          */
-        if (message.getDeviceTwinOperationType() == DeviceTwinOperations.DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
+        if (message.getDeviceOperationType() == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
         {
             // Subscribe to "$iothub/twin/PATCH/properties/desired/#"
             /*
-            **Codes_SRS_MQTTDEVICETWIN_25_032: [**send method shall subscribe to desired properties by calling method subscribe() on topic "$iothub/twin/PATCH/properties/desired/#" specified in spec if the operation is DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.**]**
+            **Codes_SRS_MQTTDEVICETWIN_25_032: [**send method shall subscribe to desired properties by calling method subscribe() on topic "$iothub/twin/PATCH/properties/desired/#" specified in spec if the operation is DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.**]**
              */
             StringBuilder subscribeTopic = new StringBuilder();
             subscribeTopic.append(PATCH);
@@ -309,7 +325,7 @@ public class MqttDeviceTwin extends Mqtt
             subscribeTopic.append(BACKSLASH);
             subscribeTopic.append(POUND);
             /*
-            **Codes_SRS_MQTTDEVICETWIN_25_032: [**send method shall subscribe to desired properties by calling method subscribe() on topic "$iothub/twin/PATCH/properties/desired/#" specified in spec if the operation is DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.**]**
+            **Codes_SRS_MQTTDEVICETWIN_25_032: [**send method shall subscribe to desired properties by calling method subscribe() on topic "$iothub/twin/PATCH/properties/desired/#" specified in spec if the operation is DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.**]**
              */
             this.subscribe(subscribeTopic.toString());
         }
@@ -404,19 +420,19 @@ public class MqttDeviceTwin extends Mqtt
                 if (data != null && data.length > 0)
                 {
                     /*
-                    **Codes_SRS_MQTTDEVICETWIN_25_044: [**If the topic is of type response then this method shall set data and operation type as DEVICE_TWIN_OPERATION_GET_RESPONSE if data is not null**]**
+                    **Codes_SRS_MQTTDEVICETWIN_25_044: [**If the topic is of type response then this method shall set data and operation type as DEVICE_OPERATION_TWIN_GET_RESPONSE if data is not null**]**
                      */
                     messsage = new DeviceTwinMessage(data);
-                    messsage.setDeviceTwinOperationType(DeviceTwinOperations.DEVICE_TWIN_OPERATION_UNKNOWN);
+                    messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                 }
                 else
                 {
                     // Case for $iothub/twin/res/{status}/?$rid={request id}
                     /*
-                    **Tests_SRS_MQTTDEVICETWIN_25_045: [**If the topic is of type response then this method shall set empty data and operation type as DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_RESPONSE if data is null or empty**]**
+                    **Tests_SRS_MQTTDEVICETWIN_25_045: [**If the topic is of type response then this method shall set empty data and operation type as DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE if data is null or empty**]**
                      */
                     messsage = new DeviceTwinMessage(new byte[0]); // empty body
-                    messsage.setDeviceTwinOperationType(DeviceTwinOperations.DEVICE_TWIN_OPERATION_UNKNOWN);
+                    messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
 
                 }
 
@@ -445,14 +461,14 @@ public class MqttDeviceTwin extends Mqtt
                     {
                         switch (requestMap.remove(requestId))
                         {
-                            case DEVICE_TWIN_OPERATION_GET_REQUEST:
-                                messsage.setDeviceTwinOperationType(DeviceTwinOperations.DEVICE_TWIN_OPERATION_GET_RESPONSE);
+                            case DEVICE_OPERATION_TWIN_GET_REQUEST:
+                                messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_RESPONSE);
                                 break;
-                            case DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_REQUEST:
-                                messsage.setDeviceTwinOperationType(DeviceTwinOperations.DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_RESPONSE);
+                            case DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST:
+                                messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
                                 break;
                             default:
-                                messsage.setDeviceTwinOperationType(DeviceTwinOperations.DEVICE_TWIN_OPERATION_UNKNOWN);
+                                messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                         }
                     }
                     else
@@ -477,10 +493,10 @@ public class MqttDeviceTwin extends Mqtt
                     if (data != null)
                     {
                         /*
-                        **Codes_SRS_MQTTDEVICETWIN_25_046: [**If the topic is of type patch for desired properties then this method shall set the data and operation type as DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE if data is not null or empty**]**
+                        **Codes_SRS_MQTTDEVICETWIN_25_046: [**If the topic is of type patch for desired properties then this method shall set the data and operation type as DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE if data is not null or empty**]**
                          */
                         messsage = new DeviceTwinMessage(data);
-                        messsage.setDeviceTwinOperationType(DeviceTwinOperations.DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
+                        messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
                     }
                     else
                     {

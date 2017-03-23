@@ -22,6 +22,7 @@
         <module>handle-messages</module>
         <module>send-receive-sample</module>
         <module>device-twin-sample</module>
+        <module>device-method-sample</module>
     </modules>
     <dependencies>
         <dependency>

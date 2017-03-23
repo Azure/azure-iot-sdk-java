@@ -12,6 +12,10 @@ public class IotHubPreconditionFailedException extends IotHubException
 {
     public IotHubPreconditionFailedException()
     {
-        super("Precondition failed!");
+        this(null);
+    }
+    public IotHubPreconditionFailedException(String message)
+    {
+        super("Precondition failed!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
     }
 }

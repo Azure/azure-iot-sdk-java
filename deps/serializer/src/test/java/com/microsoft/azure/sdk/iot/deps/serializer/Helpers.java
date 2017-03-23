@@ -5,14 +5,10 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.internal.LinkedTreeMap;
-import mockit.Deencapsulation;
 
-import javax.xml.datatype.Duration;
+import java.util.ArrayList;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertNotNull;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 /**
@@ -37,12 +33,18 @@ public class Helpers
         }
         else
         {
+            assertEquals(expected.size(), actual.size());
+
             for (Map.Entry entry : expected.entrySet())
             {
                 k key = (k)entry.getKey();
                 v actualValue = actual.get(key);
                 v expectedValue = expected.get(key);
-                if(expectedValue instanceof Map)
+                if(expectedValue == null)
+                {
+                    assertNull(actualValue);
+                }
+                else if(expectedValue instanceof Map)
                 {
                     if(actualValue instanceof Map)
                     {
@@ -52,6 +54,10 @@ public class Helpers
                     {
                         assert true;
                     }
+                }
+                else if(expectedValue instanceof ArrayList)
+                {
+                    assertTrue("Map failed: " + actualValue + " != " + expectedValue, actualValue.toString().equals(expectedValue.toString()));
                 }
                 else
                 {
@@ -72,16 +78,23 @@ public class Helpers
     {
         Gson gson = new GsonBuilder().create();
 
-        Object actual = gson.fromJson(actualJson, Object.class);
-        Object expected = gson.fromJson(expectedJson, Object.class);
-
-        if(actual instanceof Map)
+        if(expectedJson == null)
         {
-            assertMap((Map<String, Object>) actual, (Map<String, Object>)expected);
+            assertNull(actualJson);
         }
         else
         {
-            assertEquals(actual, expected);
+            Object actual = gson.fromJson(actualJson, Object.class);
+            Object expected = gson.fromJson(expectedJson, Object.class);
+
+            if(actual instanceof Map)
+            {
+                assertMap((Map<String, Object>) actual, (Map<String, Object>)expected);
+            }
+            else
+            {
+                assertEquals(actual, expected);
+            }
         }
     }
 
