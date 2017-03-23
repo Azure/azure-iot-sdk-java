@@ -19,7 +19,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -1155,6 +1154,138 @@ public class DeviceClientTest
             {
                 mockedDeviceTwin.updateReportedProperties((Set)any);
                 times = 1;
+            }
+        };
+    }
+
+    /*
+    Tests_SRS_DEVICECLIENT_25_024: [**This method shall subscribe to device methods by calling subscribeToDeviceMethod on DeviceMethod object which it created.**]**
+     */
+    @Test
+    public void subscribeToDeviceMethodSucceeds(@Mocked final IotHubEventCallback mockedStatusCB,
+                                                @Mocked final DeviceMethodCallback mockedDeviceMethodCB,
+                                                @Mocked final MqttTransport mockTransport,
+                                                @Mocked final DeviceMethod mockedMethod) throws IOException, URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+
+        final DeviceClient client = new DeviceClient(connString, protocol);
+
+        client.open();
+
+        //act
+        client.subscribeToDeviceMethod(mockedDeviceMethodCB, null, mockedStatusCB, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, any);
+                times = 1;
+            }
+        };
+
+    }
+
+    /*
+    Tests_SRS_DEVICECLIENT_25_022: [**If the client has not been open, the function shall throw an IOException.**]**
+     */
+    @Test (expected = IOException.class)
+    public void subscribeToDeviceMethodThrowsIfClientNotOpen(@Mocked final IotHubEventCallback mockedStatusCB,
+                                                             @Mocked final DeviceMethodCallback mockedDeviceMethodCB,
+                                                             @Mocked final MqttTransport mockTransport,
+                                                             @Mocked final DeviceMethod mockedMethod) throws IOException, URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+
+        final DeviceClient client = new DeviceClient(connString, protocol);
+
+
+        //act
+        client.subscribeToDeviceMethod(mockedDeviceMethodCB, null, mockedStatusCB, null);
+
+        //assert
+    }
+
+    /*
+    Tests_SRS_DEVICECLIENT_25_023: [**If deviceMethodCallback or deviceMethodStatusCallback is null, the function shall throw an IllegalArgumentException.**]**
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void subscribeToDeviceMethodThrowsIfDeviceMethodCallbackNull(@Mocked final IotHubEventCallback mockedStatusCB,
+                                                                        @Mocked final DeviceMethodCallback mockedDeviceMethodCB,
+                                                                        @Mocked final MqttTransport mockTransport,
+                                                                        @Mocked final DeviceMethod mockedMethod) throws IOException, URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+
+        final DeviceClient client = new DeviceClient(connString, protocol);
+
+        client.open();
+
+        //act
+        client.subscribeToDeviceMethod(null, null, mockedStatusCB, null);
+
+        //assert
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void subscribeToDeviceMethodThrowsIfDeviceMethodStatusCallbackNull(@Mocked final IotHubEventCallback mockedStatusCB,
+                                                                              @Mocked final DeviceMethodCallback mockedDeviceMethodCB,
+                                                                              @Mocked final MqttTransport mockTransport,
+                                                                              @Mocked final DeviceMethod mockedMethod) throws IOException, URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+
+        final DeviceClient client = new DeviceClient(connString, protocol);
+
+        client.open();
+
+        //act
+        client.subscribeToDeviceMethod(mockedDeviceMethodCB, null, null, null);
+
+        //assert
+    }
+
+    /*
+    Tests_SRS_DEVICECLIENT_25_025: [**This method shall update the deviceMethodCallback if called again, but it shall not subscribe twice.**]**
+     */
+    @Test
+    public void subscribeToDeviceMethodWorksEvenWhenCalledTwice(@Mocked final IotHubEventCallback mockedStatusCB,
+                                                                @Mocked final DeviceMethodCallback mockedDeviceMethodCB,
+                                                                @Mocked final MqttTransport mockTransport,
+                                                                @Mocked final DeviceMethod mockedMethod) throws IOException, URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+
+        final DeviceClient client = new DeviceClient(connString, protocol);
+
+        client.open();
+        client.subscribeToDeviceMethod(mockedDeviceMethodCB, null, mockedStatusCB, null);
+
+        //act
+        client.subscribeToDeviceMethod(mockedDeviceMethodCB, null, mockedStatusCB, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, any);
+                times = 2;
             }
         };
     }

@@ -4,6 +4,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
@@ -205,6 +206,87 @@ public class DeviceClientConfigTest
         assertThat(testContext, is(expectedContext));
     }
 
+    /*
+    **Tests_SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceTwin message callback.**] **
+    **Tests_SRS_DEVICECLIENTCONFIG_25_024: [**The function shall set the DeviceTwin message context.**] **
+    **Tests_SRS_DEVICECLIENTCONFIG_25_025: [**The function shall return the current DeviceTwin message callback.**] **
+    **Tests_SRS_DEVICECLIENTCONFIG_25_026: [**The function shall return the current DeviceTwin message context.**] **
+     */
+    @Test
+    public void getAndSetDeviceTwinMessageCallbackAndContextsMatch(
+            @Mocked final MessageCallback mockCallback)
+            throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
+        Object context = new Object();
+        config.setDeviceTwinMessageCallback(mockCallback, context);
+        Object testContext = config.getDeviceTwinMessageContext();
+
+        final Object expectedContext = context;
+        assertThat(testContext, is(expectedContext));
+        assertEquals(config.getDeviceTwinMessageCallback(), mockCallback);
+    }
+
+    /*
+    **Tests_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DeviceMethod message context.**] **
+    **Tests_SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceTwin message callback.**] **
+    **Tests_SRS_DEVICECLIENTCONFIG_25_021: [**The function shall return the current DeviceMethod message callback.**] **
+    **Tests_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DeviceMethod message context.**] **
+     */
+    @Test
+    public void getAndSetDeviceMethodMessageCallbackAndContextsMatch(
+            @Mocked final MessageCallback mockCallback)
+            throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
+        Object context = new Object();
+        config.setDeviceMethodMessageCallback(mockCallback, context);
+        Object testContext = config.getDeviceMethodMessageContext();
+
+
+        final Object expectedContext = context;
+        assertThat(testContext, is(expectedContext));
+        assertEquals(config.getDeviceMethodMessageCallback(), mockCallback);
+    }
+
+    @Test
+    public void getAndSetDeviceMethodAndTwinMessageCallbackAndContextsMatch(
+            @Mocked final MessageCallback mockCallback)
+            throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
+        Object dMContext = new Object();
+        config.setDeviceMethodMessageCallback(mockCallback, dMContext);
+        Object testContextDM = config.getDeviceMethodMessageContext();
+
+        Object dTcontext = new Object();
+        config.setDeviceTwinMessageCallback(mockCallback, dTcontext);
+        Object testContextDT = config.getDeviceTwinMessageContext();
+
+        final Object expectedDTContext = dTcontext;
+        assertThat(testContextDT, is(expectedDTContext));
+        assertEquals(config.getDeviceTwinMessageCallback(), mockCallback);
+
+
+        final Object expectedDMContext = dMContext;
+        assertThat(testContextDM, is(expectedDMContext));
+        assertEquals(config.getDeviceMethodMessageCallback(), mockCallback);
+    }
     // Tests_SRS_DEVICECLIENTCONFIG_11_012: [The function shall return 240000ms.]
     @Test
     public void getReadTimeoutMillisReturnsConstant() throws URISyntaxException

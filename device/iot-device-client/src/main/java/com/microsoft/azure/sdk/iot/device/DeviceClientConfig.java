@@ -34,6 +34,13 @@ public final class DeviceClientConfig
     protected String pathToCertificate;
 
     /**
+     * The callback to be invoked if a message of Device Method type received.
+     */
+    protected MessageCallback deviceMethodCallback;
+    /** The context to be passed in to the device method type message callback. */
+    protected Object deviceMethodMessageContext;
+
+    /**
      * The callback to be invoked if a message of Device Twin type received.
      */
     protected MessageCallback deviceTwinMessageCallback;
@@ -231,44 +238,88 @@ public final class DeviceClientConfig
     }
 
     /**
-     * Setter for the device twin message callback.
+     * Setter for the device method message callback.
+     * @param callback Callback for device method messages.
      *
      */
-    public void setDeviceTwinMessageCallback(MessageCallback callback)
+    public void setDeviceMethodMessageCallback(MessageCallback callback, Object context)
     {
-        // To do  Codes_SRS_DEVICECLIENTCONFIG_11_010: [The function shall return the current message callback.]
-        this.deviceTwinMessageCallback = callback;
+        /*
+        Codes_SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceMethod message callback.**] **
+         */
+        this.deviceMethodCallback = callback;
+
+        /*
+        Codes_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DeviceMethod message context.**] **
+         */
+        this.deviceMethodMessageContext = context;
+    }
+
+    /**
+     * Getter for the device twin message callback.
+     *
+     * @return the device method message callback.
+     */
+    public MessageCallback getDeviceMethodMessageCallback()
+    {
+        /*
+        Codes_SRS_DEVICECLIENTCONFIG_25_021: [**The function shall return the current DeviceMethod message callback.**] **
+         */
+        return this.deviceMethodCallback;
     }
 
     /**
      * Getter for the context to be passed in to the device twin message callback.
      *
+     * @return the device method message context.
      */
-    public void setDeviceTwinMessageContext(Object context)
+    public Object getDeviceMethodMessageContext()
     {
-        // To do Codes_SRS_DEVICECLIENTCONFIG_11_011: [The function shall return the current message context.]
+        /*
+        Codes_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DeviceMethod message context.**] **
+         */
+        return this.deviceMethodMessageContext;
+    }
+
+    /**
+     * Setter for the device twin message callback.
+     * @param callback callback to be invoked for device twin messages.
+     */
+    public void setDeviceTwinMessageCallback(MessageCallback callback,Object context)
+    {
+        /*
+        Codes_SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceTwin message callback.**] **
+         */
+        this.deviceTwinMessageCallback = callback;
+        /*
+        Codes_SRS_DEVICECLIENTCONFIG_25_024: [**The function shall set the DeviceTwin message context.**] **
+         */
         this.deviceTwinMessageContext = context;
     }
 
     /**
      * Getter for the device twin message callback.
      *
-     * @return the message callback.
+     * @return the device twin message callback.
      */
     public MessageCallback getDeviceTwinMessageCallback()
     {
-        // To do  Codes_SRS_DEVICECLIENTCONFIG_11_010: [The function shall return the current message callback.]
+        /*
+        Codes_SRS_DEVICECLIENTCONFIG_25_025: [**The function shall return the current DeviceTwin message callback.**] **
+         */
         return this.deviceTwinMessageCallback;
     }
 
     /**
      * Getter for the context to be passed in to the device twin message callback.
      *
-     * @return the message context.
+     * @return the device twin message context.
      */
     public Object getDeviceTwinMessageContext()
     {
-        // To do Codes_SRS_DEVICECLIENTCONFIG_11_011: [The function shall return the current message context.]
+        /*
+        Codes_SRS_DEVICECLIENTCONFIG_25_026: [**The function shall return the current DeviceTwin message context.**] **
+         */
         return this.deviceTwinMessageContext;
     }
 

@@ -19,7 +19,6 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidParameterException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -87,7 +86,8 @@ public final class DeviceClient implements Closeable
     protected DeviceClientConfig config;
     protected IotHubTransport transport;
 
-    protected DeviceTwin deviceTwin;
+    private DeviceTwin deviceTwin;
+    private DeviceMethod deviceMethod;
 
     protected ScheduledExecutorService taskScheduler;
     protected IotHubClientState state;
@@ -416,6 +416,50 @@ public final class DeviceClient implements Closeable
         this.deviceTwin.updateReportedProperties(reportedProperties);
 
     }
+
+    /**
+     * Subscribes to device methods
+     *
+     * @param deviceMethodCallback Callback on which device methods shall be invoked. Cannot be {@code null}.
+     * @param deviceMethodCallbackContext Context for device method callback. Can be {@code null}.
+     * @param deviceMethodStatusCallback Callback for providing IotHub status for device methods. Cannot be {@code null}.
+     * @param deviceMethodStatusCallbackContext Context for device method status callback. Can be {@code null}.
+     *
+     * @throws IOException if called when client is not opened.
+     * @throws IllegalArgumentException if either callback are null.
+     */
+    public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IOException
+    {
+        if (this.state != IotHubClientState.OPEN)
+        {
+            /*
+            **Codes_SRS_DEVICECLIENT_25_022: [**If the client has not been open, the function shall throw an IOException.**]**
+             */
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        if (deviceMethodCallback == null || deviceMethodStatusCallback == null)
+        {
+            /*
+            **Codes_SRS_DEVICECLIENT_25_023: [**If deviceMethodCallback or deviceMethodStatusCallback is null, the function shall throw an IllegalArgumentException.**]**
+             */
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+
+        if (this.deviceMethod == null)
+        {
+            /*
+            **Codes_SRS_DEVICECLIENT_25_024: [**This method shall subscribe to device methods by calling subscribeToDeviceMethod on DeviceMethod object which it created.**]**
+             */
+            this.deviceMethod = new DeviceMethod(this, this.config, deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
+        }
+
+        /*
+        **Codes_SRS_DEVICECLIENT_25_025: [**This method shall not create a new instance of deviceMethod if called twice.**]**
+         */
+        this.deviceMethod.subscribeToDeviceMethod(deviceMethodCallback, deviceMethodCallbackContext);
+    }
+
 
     /**
      * Initializes an IoT Hub device client with the given parameters.
