@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device.transport.mqtt;
+package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.TopicParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -59,7 +60,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getStatus(3);
+        String status = Deencapsulation.invoke(testParser, "getStatus", 3);
 
         //assert
         assertNotNull(status);
@@ -77,7 +78,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getStatus(4);
+        String status = Deencapsulation.invoke(testParser, "getStatus", 4);
 
     }
 
@@ -91,7 +92,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getStatus(3);
+        String status = Deencapsulation.invoke(testParser, "getStatus", 3);
     }
 
     /*
@@ -105,7 +106,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getRequestId(3);
+        String status = Deencapsulation.invoke(testParser, "getRequestId", 3);
 
         //assert
         assertNotNull(status);
@@ -120,7 +121,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getRequestId(3);
+        String status = Deencapsulation.invoke(testParser, "getRequestId", 3);
 
         //assert
         assertNull(status);
@@ -134,7 +135,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getRequestId(3);
+        String status = Deencapsulation.invoke(testParser, "getRequestId", 3);
 
         //assert
         assertNotNull(status);
@@ -148,7 +149,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getRequestId(3);
+        String status = Deencapsulation.invoke(testParser, "getRequestId", 3);
 
         assertNull(status);
     }
@@ -163,7 +164,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getRequestId(3);
+        String status = Deencapsulation.invoke(testParser, "getRequestId", 3);
 
         //assert
         assertNull(status);
@@ -178,7 +179,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getRequestId(3);
+        String status = Deencapsulation.invoke(testParser, "getRequestId", 3);
 
         //assert
         assertNotNull(status);
@@ -194,7 +195,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getRequestId(3);
+        String status = Deencapsulation.invoke(testParser, "getRequestId", 3);
 
         //assert
         assertNotNull(status);
@@ -213,7 +214,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getRequestId(4);
+        String status = Deencapsulation.invoke(testParser, "getRequestId", 4);
 
     }
 
@@ -228,7 +229,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String version = testParser.getVersion(3);
+        String version = Deencapsulation.invoke(testParser, "getVersion", 3);
 
         //assert
         assertNotNull(version);
@@ -243,7 +244,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getVersion(3);
+        String status = Deencapsulation.invoke(testParser, "getVersion", 3);
 
         //assert
         assertNull(status);
@@ -257,7 +258,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getVersion(3);
+        String status = Deencapsulation.invoke(testParser, "getVersion", 3);
 
         //assert
         assertNotNull(status);
@@ -271,7 +272,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String status = testParser.getVersion(3);
+        String status = Deencapsulation.invoke(testParser, "getVersion", 3);
 
         assertNull(status);
     }
@@ -287,7 +288,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String version = testParser.getVersion(3);
+        String version = Deencapsulation.invoke(testParser, "getVersion", 3);
 
         //assert
         assertNull(version);
@@ -300,7 +301,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String version = testParser.getVersion(3);
+        String version = Deencapsulation.invoke(testParser, "getVersion", 3);
 
         //assert
         assertNotNull(version);
@@ -316,7 +317,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String version = testParser.getVersion(3);
+        String version = Deencapsulation.invoke(testParser, "getVersion", 3);
 
         //assert
         assertNotNull(version);
@@ -334,7 +335,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String version = testParser.getVersion(0);
+        String version = Deencapsulation.invoke(testParser, "getVersion", 0);
 
     }
 
@@ -351,7 +352,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String methodName = testParser.getMethodName(3);
+        String methodName = Deencapsulation.invoke(testParser, "getMethodName", 3);
 
         //assert
         assertNotNull(methodName);
@@ -371,7 +372,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String methodName = testParser.getMethodName(4);
+        String methodName = Deencapsulation.invoke(testParser, "getMethodName", 4);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -382,7 +383,7 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String methodName = testParser.getMethodName(3);
+        String methodName = Deencapsulation.invoke(testParser, "getMethodName", 3);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -393,6 +394,6 @@ public class TopicParserTest
         TopicParser testParser = new TopicParser(validString);
 
         //act
-        String methodName = testParser.getMethodName(3);
+        String methodName = Deencapsulation.invoke(testParser, "getMethodName", 3);
     }
 }

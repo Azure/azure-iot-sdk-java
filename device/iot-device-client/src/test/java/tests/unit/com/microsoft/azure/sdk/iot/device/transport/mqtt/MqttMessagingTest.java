@@ -2,11 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
-package com.microsoft.azure.sdk.iot.device.transport.mqtt;
+package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.Message;
 
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttMessaging;
 import mockit.*;
 
 import org.junit.Test;
@@ -89,8 +91,8 @@ public class MqttMessagingTest {
         new NonStrictExpectations()
         {
             {
-                mockMqtt.connect();
-                mockMqtt.subscribe(anyString);
+                Deencapsulation.invoke(mockMqtt, "connect");
+                Deencapsulation.invoke(mockMqtt, "subscribe", anyString);
             }
         };
 
@@ -100,11 +102,10 @@ public class MqttMessagingTest {
         new Verifications()
         {
             {
-                mockMqtt.connect();
+                Deencapsulation.invoke(mockMqtt, "connect");
                 times = 1;
-                mockMqtt.subscribe(anyString);
+                Deencapsulation.invoke(mockMqtt, "subscribe", anyString);
                 times = 1;
-
             }
         };
 
@@ -116,7 +117,7 @@ public class MqttMessagingTest {
         new StrictExpectations()
         {
             {
-                mockMqtt.connect();
+                Deencapsulation.invoke(mockMqtt, "connect");
                 result = mockIOException;
             }
         };
@@ -127,9 +128,9 @@ public class MqttMessagingTest {
         new Verifications()
         {
             {
-                mockMqtt.connect();
+                Deencapsulation.invoke(mockMqtt, "connect");
                 times = 1;
-                mockMqtt.subscribe(anyString);
+                Deencapsulation.invoke(mockMqtt, "subscribe", anyString);
                 times = 0;
 
             }
@@ -143,8 +144,8 @@ public class MqttMessagingTest {
         new StrictExpectations()
         {
             {
-                mockMqtt.connect();
-                mockMqtt.subscribe(anyString);
+                Deencapsulation.invoke(mockMqtt, "connect");
+                Deencapsulation.invoke(mockMqtt, "subscribe", anyString);
                 result = mockIOException;
             }
         };
@@ -155,9 +156,9 @@ public class MqttMessagingTest {
         new Verifications()
         {
             {
-                mockMqtt.connect();
+                Deencapsulation.invoke(mockMqtt, "connect");
                 times = 1;
-                mockMqtt.subscribe(anyString);
+                Deencapsulation.invoke(mockMqtt, "subscribe", anyString);
                 times = 1;
 
             }
@@ -176,7 +177,7 @@ public class MqttMessagingTest {
         new NonStrictExpectations()
         {
             {
-                mockMqtt.disconnect();
+                Deencapsulation.invoke(mockMqtt, "disconnect");
                 mockMqtt.restartBaseMqtt();
             }
         };
@@ -188,7 +189,7 @@ public class MqttMessagingTest {
         new Verifications()
         {
             {
-                mockMqtt.disconnect();
+                Deencapsulation.invoke(mockMqtt, "disconnect");
                 times = 1;
                 mockMqtt.restartBaseMqtt();
                 times = 1;
@@ -204,9 +205,9 @@ public class MqttMessagingTest {
         new StrictExpectations()
         {
             {
-                mockMqtt.connect();
-                mockMqtt.subscribe(anyString);
-                mockMqtt.disconnect();
+                Deencapsulation.invoke(mockMqtt, "connect");
+                Deencapsulation.invoke(mockMqtt, "subscribe", anyString);
+                Deencapsulation.invoke(mockMqtt, "disconnect");
                 result = mockIOException;
                 mockMqtt.restartBaseMqtt();
             }
@@ -219,7 +220,7 @@ public class MqttMessagingTest {
         new Verifications()
         {
             {
-                mockMqtt.disconnect();
+                Deencapsulation.invoke(mockMqtt, "disconnect");
                 times = 1;
                 mockMqtt.restartBaseMqtt();
                 times = 1;
@@ -242,7 +243,7 @@ public class MqttMessagingTest {
         testMap.put(insertTopic, "DataData".getBytes());
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
-        String retrieveTopic = testMqttMessaging.parseTopic();
+        String retrieveTopic = Deencapsulation.invoke(testMqttMessaging, "parseTopic");
 
         assertEquals(retrieveTopic.length(),insertTopic.length());
         for (int i = 0 ; i < retrieveTopic.length(); i++)
@@ -263,7 +264,7 @@ public class MqttMessagingTest {
 
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
-        String retrieveTopic = testMqttMessaging.parseTopic();
+        String retrieveTopic = Deencapsulation.invoke(testMqttMessaging, "parseTopic");
 
         assertNull(retrieveTopic);
     }
@@ -281,7 +282,7 @@ public class MqttMessagingTest {
         testMap.put(insertTopic, "DataData".getBytes());
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
-        String retrieveTopic = testMqttMessaging.parseTopic();
+        String retrieveTopic = Deencapsulation.invoke(testMqttMessaging, "parseTopic");
 
         assertNull(retrieveTopic);
 
@@ -301,7 +302,7 @@ public class MqttMessagingTest {
         testMap.put(insertTopic, insertMessage);
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
-        byte[] retrieveMessage = testMqttMessaging.parsePayload(insertTopic);
+        byte[] retrieveMessage = Deencapsulation.invoke(testMqttMessaging, "parsePayload", insertTopic);
 
         assertEquals(insertMessage.length, retrieveMessage.length);
         for (int i = 0 ; i < retrieveMessage.length; i++)
@@ -325,7 +326,7 @@ public class MqttMessagingTest {
         testMap.put(insertTopic, insertMessage);
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
-        byte[] retrieveMessage = testMqttMessaging.parsePayload(insertTopic);
+        byte[] retrieveMessage = Deencapsulation.invoke(testMqttMessaging, "parsePayload", insertTopic);
 
         assertTrue(testMap.isEmpty());
 
@@ -342,7 +343,7 @@ public class MqttMessagingTest {
 
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
-        byte[] retrieveMessage = testMqttMessaging.parsePayload(insertTopic);
+        byte[] retrieveMessage = Deencapsulation.invoke(testMqttMessaging, "parsePayload", insertTopic);
         assertNull(retrieveMessage);
 
     }
@@ -362,9 +363,8 @@ public class MqttMessagingTest {
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
 
-        byte[] retrieveMessage = testMqttMessaging.parsePayload(null);
+        byte[] retrieveMessage = Deencapsulation.invoke(testMqttMessaging, "parsePayload", String.class);
         assertNull(retrieveMessage);
-
     }
 
     /*
@@ -383,7 +383,7 @@ public class MqttMessagingTest {
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
 
-        byte[] retrieveMessage = testMqttMessaging.parsePayload(insertTopic_messaging);
+        byte[] retrieveMessage = Deencapsulation.invoke(testMqttMessaging, "parsePayload", insertTopic_messaging);
 
     }
 
@@ -401,7 +401,7 @@ public class MqttMessagingTest {
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
 
-        byte[] retrieveMessage = testMqttMessaging.parsePayload(insertTopic);
+        byte[] retrieveMessage = Deencapsulation.invoke(testMqttMessaging, "parsePayload", insertTopic);
 
     }
 
@@ -417,8 +417,7 @@ public class MqttMessagingTest {
             {
                 mockMessage.getBytes();
                 result = messageBody;
-                mockMqtt.publish(anyString, messageBody);
-
+                Deencapsulation.invoke(mockMqtt, "publish", anyString, messageBody);
             }
         };
 
@@ -430,7 +429,7 @@ public class MqttMessagingTest {
             {
                 mockMessage.getBytes();
                 times = 2;
-                mockMqtt.publish(anyString, messageBody);
+                Deencapsulation.invoke(mockMqtt, "publish", anyString, messageBody);
                 times = 1;
 
             }
@@ -447,7 +446,7 @@ public class MqttMessagingTest {
             {
                 mockMessage.getBytes();
                 result = messageBody;
-                mockMqtt.publish(anyString, messageBody);
+                Deencapsulation.invoke(mockMqtt, "publish", anyString, messageBody);
                 result = mockIOException;
 
             }
@@ -461,7 +460,7 @@ public class MqttMessagingTest {
             {
                 mockMessage.getBytes();
                 times = 1;
-                mockMqtt.publish(mockParseTopic, new byte[1]);
+                Deencapsulation.invoke(mockMqtt, "publish", mockParseTopic,  new byte[1]);
                 times = 1;
 
             }
@@ -484,7 +483,7 @@ public class MqttMessagingTest {
             {
                 mockMessage.getBytes();
                 times = 0;
-                mockMqtt.publish(mockParseTopic, new byte[1]);
+                Deencapsulation.invoke(mockMqtt, "publish", mockParseTopic,  new byte[1]);
                 times = 0;
 
             }
@@ -512,7 +511,7 @@ public class MqttMessagingTest {
                 result = messageBody;
                 mockMessage.getProperties();
                 result = messageProperties;
-                mockMqtt.publish(anyString, messageBody);
+                Deencapsulation.invoke(mockMqtt, "publish", anyString, messageBody);
             }
         };
 
@@ -527,7 +526,7 @@ public class MqttMessagingTest {
                 mockMessage.getBytes();
                 times = 2;
                 mockMessage.getProperties();
-                mockMqtt.publish(publishTopicWithProperties, messageBody);
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithProperties,  messageBody);
                 times = 1;
             }
         };
@@ -556,7 +555,7 @@ public class MqttMessagingTest {
                 result = messageProperties;
                 mockMessage.getMessageId();
                 result = messageidValue;
-                mockMqtt.publish(anyString, messageBody);
+                Deencapsulation.invoke(mockMqtt, "publish", anyString, messageBody);
             }
         };
 
@@ -571,7 +570,7 @@ public class MqttMessagingTest {
                 mockMessage.getBytes();
                 times = 2;
                 mockMessage.getProperties();
-                mockMqtt.publish(publishTopicWithProperties, messageBody);
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithProperties, messageBody);
                 times = 1;
                 mockMessage.getMessageId();
                 times = 2;

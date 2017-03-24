@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package samples.com.microsoft.azure.sdk.iot.device;
+package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
@@ -23,7 +23,7 @@ public class DeviceMethodSample
 
     private static int method_command(Object command)
     {
-        System.out.println("invoking" + command + " on this device");
+        System.out.println("invoking command on this device");
         // Insert code to invoke command here
         return METHOD_SUCCESS;
     }

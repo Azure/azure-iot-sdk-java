@@ -3,7 +3,7 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package samples.com.microsoft.azure.sdk.iot.service;
+package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.Device;
@@ -45,10 +45,9 @@ public class DeviceManagerSample
     
     private static void AddDevice() throws Exception
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(samples.com.microsoft.azure.sdk
-                .iot.service.SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
         
-        Device device = Device.createFromId(samples.com.microsoft.azure.sdk.iot.service.SampleUtils.deviceId, null, null);
+        Device device = Device.createFromId(SampleUtils.deviceId, null, null);
         try
         {
             device = registryManager.addDevice(device);
@@ -68,13 +67,12 @@ public class DeviceManagerSample
     
     private static void GetDevice() throws Exception
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(samples.com.microsoft.azure.sdk
-                .iot.service.SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
         
         Device returnDevice = null;
         try
         {
-            returnDevice = registryManager.getDevice(samples.com.microsoft.azure.sdk.iot.service.SampleUtils.deviceId);
+            returnDevice = registryManager.getDevice(SampleUtils.deviceId);
 
             System.out.println("Device: " + returnDevice.getDeviceId());
             System.out.println("Device primary key: " + returnDevice.getPrimaryKey());
@@ -96,10 +94,9 @@ public class DeviceManagerSample
         String primaryKey = "[New primary key goes here]";
         String secondaryKey = "[New secondary key goes here]";
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(samples.com.microsoft.azure.sdk
-                .iot.service.SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
         
-        Device device = Device.createFromId(samples.com.microsoft.azure.sdk.iot.service.SampleUtils.deviceId, null, null);
+        Device device = Device.createFromId(SampleUtils.deviceId, null, null);
         device.getSymmetricKey().setPrimaryKey(primaryKey);
         device.getSymmetricKey().setSecondaryKey(secondaryKey);
         try
@@ -122,13 +119,12 @@ public class DeviceManagerSample
     
     private static void RemoveDevice() throws Exception
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(samples.com.microsoft.azure.sdk
-                .iot.service.SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
         
         try
         {
-            registryManager.removeDevice(samples.com.microsoft.azure.sdk.iot.service.SampleUtils.deviceId);
-            System.out.println("Device removed: " + samples.com.microsoft.azure.sdk.iot.service.SampleUtils.deviceId);
+            registryManager.removeDevice(SampleUtils.deviceId);
+            System.out.println("Device removed: " + SampleUtils.deviceId);
         }
         catch (IotHubException iote)
         {

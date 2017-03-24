@@ -8,7 +8,7 @@ public class Pair<Type1, Type2>
     private Type1 key;
     private Type2 value;
 
-    Pair(Type1 t1, Type2 t2)
+    public Pair(Type1 t1, Type2 t2)
     {
         /*
         **Codes_SRS_Pair_25_001: [**The constructor shall save the key and value representing this Pair.**]**

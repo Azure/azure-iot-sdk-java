@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device.transport.mqtt;
+package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.MessageType;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttDeviceTwin;
 import mockit.*;
 import mockit.Deencapsulation;
 import mockit.Mocked;
@@ -69,7 +71,7 @@ public class MqttDeviceTwinTest
         new Verifications()
         {
             {
-                mockMqtt.subscribe(resTopic);
+                Deencapsulation.invoke(mockMqtt, "subscribe", resTopic);
                 times = 1;
 
             }
@@ -88,7 +90,7 @@ public class MqttDeviceTwinTest
             new StrictExpectations()
             {
                 {
-                    mockMqtt.subscribe(resTopic);
+                    Deencapsulation.invoke(mockMqtt, "subscribe", resTopic);
                     result = mockIOException;
                 }
             };
@@ -123,7 +125,7 @@ public class MqttDeviceTwinTest
         new Verifications()
         {
             {
-                mockMqtt.unsubscribe(resTopic);
+                Deencapsulation.invoke(mockMqtt, "unsubscribe", resTopic);
                 times = 1;
 
             }
@@ -141,7 +143,7 @@ public class MqttDeviceTwinTest
             new StrictExpectations()
             {
                 {
-                    mockMqtt.unsubscribe(resTopic);
+                    Deencapsulation.invoke(mockMqtt, "unsubscribe", resTopic);
                     result = mockIOException;
                 }
             };
@@ -174,7 +176,7 @@ public class MqttDeviceTwinTest
 
         //act
 
-        String parsedTopic = testTwin.parseTopic();
+        String parsedTopic = Deencapsulation.invoke(testTwin, "parseTopic") ;
 
        //assert
         assertNotNull(parsedTopic);
@@ -196,7 +198,7 @@ public class MqttDeviceTwinTest
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
         //act
-        String parsedTopic = testTwin.parseTopic();
+        String parsedTopic = Deencapsulation.invoke(testTwin, "parseTopic") ;
 
         //assert
         assertNull(parsedTopic);
@@ -214,7 +216,7 @@ public class MqttDeviceTwinTest
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
         //act
-        String parsedTopic = testTwin.parseTopic();
+        String parsedTopic = Deencapsulation.invoke(testTwin, "parseTopic") ;
 
         //assert
         assertNull(parsedTopic);
@@ -231,7 +233,7 @@ public class MqttDeviceTwinTest
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
         //act
-        String parsedTopic = testTwin.parseTopic();
+        String parsedTopic = Deencapsulation.invoke(testTwin, "parseTopic") ;
 
         //assert
         assertNull(parsedTopic);
@@ -247,7 +249,7 @@ public class MqttDeviceTwinTest
         MqttDeviceTwin testTwin = new MqttDeviceTwin();
 
         //act
-        byte[] parsedPayload = testTwin.parsePayload(null);
+        byte[] parsedPayload = Deencapsulation.invoke(testTwin, "parsePayload", String.class) ;
 
         //assert
         assertNull(parsedPayload);
@@ -266,7 +268,7 @@ public class MqttDeviceTwinTest
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
         //act
-        byte[] parsedPayload = testTwin.parsePayload(resTopic);
+        byte[] parsedPayload = Deencapsulation.invoke(testTwin, "parsePayload", resTopic) ;
 
         //assert
 
@@ -288,7 +290,7 @@ public class MqttDeviceTwinTest
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
         //act
-        byte[] parsedPayload = testTwin.parsePayload(notTwinTopic);
+        byte[] parsedPayload = Deencapsulation.invoke(testTwin, "parsePayload", notTwinTopic);
 
         //assert
 
@@ -309,7 +311,7 @@ public class MqttDeviceTwinTest
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
         //act
-        byte[] parsedPayload = testTwin.parsePayload(insertTopic);
+        byte[] parsedPayload = Deencapsulation.invoke(testTwin, "parsePayload", insertTopic);
 
         //assert
         assertNotNull(parsedPayload);
@@ -336,7 +338,7 @@ public class MqttDeviceTwinTest
         Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
 
         //act
-        byte[] parsedPayload = testTwin.parsePayload(insertTopic);
+        byte[] parsedPayload = Deencapsulation.invoke(testTwin, "parsePayload", insertTopic);
 
         //assert
         ConcurrentSkipListMap<String, byte[]> retrieveTestMap  = Deencapsulation.getField(mockMqtt, "allReceivedMessages");
@@ -378,7 +380,7 @@ public class MqttDeviceTwinTest
             {
                 mockMessage.getBytes();
                 times = 2;
-                mockMqtt.publish(expectedTopic, actualPayload);
+                Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, actualPayload);
                 times = 1;
 
             }
@@ -425,7 +427,7 @@ public class MqttDeviceTwinTest
                 {
                     mockMessage.getBytes();
                     times = 1;
-                    mockMqtt.publish(expectedTopic, actualPayload);
+                    Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, actualPayload);
                     times = 0;
 
                 }
@@ -470,7 +472,7 @@ public class MqttDeviceTwinTest
             {
                 mockMessage.getBytes();
                 times = 2;
-                mockMqtt.publish(expectedTopic, actualPayload);
+                Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, actualPayload);
                 times = 1;
 
             }
@@ -513,7 +515,7 @@ public class MqttDeviceTwinTest
                 {
                     mockMessage.getBytes();
                     times = 1;
-                    mockMqtt.publish(expectedTopic, actualPayload);
+                    Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, actualPayload);
                     times = 0;
 
                 }
@@ -556,9 +558,9 @@ public class MqttDeviceTwinTest
             {
                 mockMessage.getBytes();
                 times = 1;
-                mockMqtt.subscribe(expectedTopic);
+                Deencapsulation.invoke(mockMqtt, "subscribe", expectedTopic);
                 times = 1;
-                mockMqtt.publish(expectedTopic, actualPayload);
+                Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, actualPayload);
                 times = 0;
 
             }
@@ -601,9 +603,9 @@ public class MqttDeviceTwinTest
             {
                 mockMessage.getBytes();
                 times = 1;
-                mockMqtt.subscribe(expectedSubscribeTopic);
+                Deencapsulation.invoke(mockMqtt, "subscribe", expectedSubscribeTopic);
                 times = 1;
-                mockMqtt.publish(expectedTopic, actualPayload);
+                Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, actualPayload);
                 times = 0;
 
             }
@@ -633,7 +635,7 @@ public class MqttDeviceTwinTest
                 {
                     mockMessage.getBytes();
                     times = 0;
-                    mockMqtt.publish(expectedTopic, actualPayload);
+                    Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, actualPayload);
                     times = 0;
 
                 }
@@ -674,7 +676,7 @@ public class MqttDeviceTwinTest
                 {
                     mockMessage.getBytes();
                     times = 2;
-                    mockMqtt.publish(expectedTopic, actualPayload);
+                    Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, actualPayload);
                     times = 1;
 
                 }

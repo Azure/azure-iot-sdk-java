@@ -1,7 +1,7 @@
 <!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.sdk.iot.samples.iot-service-samples</groupId>
-    <artifactId>DeviceMethodSample</artifactId>
+    <groupId>com.microsoft.azure.sdk.iot.samples.service</groupId>
+    <artifactId>device-method-sample</artifactId>
     <version>1.1.15</version>
     <name>Device Method Sample</name>
     <developers>

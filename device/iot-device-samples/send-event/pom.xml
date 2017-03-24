@@ -1,6 +1,6 @@
 <!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.sdk.iot.samples.iot-device-samples</groupId>
+    <groupId>com.microsoft.azure.sdk.iot.samples.device</groupId>
     <artifactId>send-event</artifactId>
     <name>Send Event Sample</name>
     <developers>
@@ -27,7 +27,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.device.SendEvent</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.SendEvent</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

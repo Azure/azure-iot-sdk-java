@@ -3,7 +3,7 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package samples.com.microsoft.azure.sdk.iot.service;
+package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.JobProperties;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
@@ -24,15 +24,13 @@ public class DeviceManagerExportSample
     {
         System.out.println("Starting export sample...");
 
-        CloudStorageAccount storageAccount = CloudStorageAccount.parse(samples.com.microsoft.azure.sdk.iot.service
-                .SampleUtils.storageConnectionString);
+        CloudStorageAccount storageAccount = CloudStorageAccount.parse(SampleUtils.storageConnectionString);
         CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
         CloudBlobContainer container = blobClient.getContainerReference(DeviceManagerExportSample.sampleContainerName);
         container.createIfNotExists();
-        String containerSasUri = samples.com.microsoft.azure.sdk.iot.service.SampleUtils.getContainerSasUri(container);
+        String containerSasUri = SampleUtils.getContainerSasUri(container);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(samples.com.microsoft.azure.sdk
-                .iot.service.SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
         JobProperties exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
 
         while(true)
@@ -50,11 +48,10 @@ public class DeviceManagerExportSample
             if (blobItem instanceof CloudBlob)
             {
                 CloudBlob blob = (CloudBlob) blobItem;
-                blob.download(new FileOutputStream(samples.com.microsoft.azure.sdk.iot.service.SampleUtils.exportFileLocation + blob.getName()));
+                blob.download(new FileOutputStream(SampleUtils.exportFileLocation + blob.getName()));
             }
         }
 
-        System.out.println("Export job completed. Results are in " + samples.com.microsoft.azure.sdk.iot.service
-                .SampleUtils.exportFileLocation);
+        System.out.println("Export job completed. Results are in " + SampleUtils.exportFileLocation);
     }
 }

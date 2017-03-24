@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device.transport.mqtt;
+package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodMessage;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.Verifications;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttDeviceMethod;
+import mockit.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -70,11 +70,12 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                mockedMqtt.subscribe(anyString);
+                Deencapsulation.invoke(mockedMqtt, "subscribe", anyString);
                 times = 0;
             }
         };
     }
+
 
     @Test
     public void startSucceedsDoesNotCallsSubscribeIfStarted() throws IOException
@@ -89,7 +90,7 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                mockedMqtt.subscribe(anyString);
+                Deencapsulation.invoke(mockedMqtt, "subscribe", anyString);
                 maxTimes = 0;
             }
         };
@@ -109,10 +110,11 @@ public class MqttDeviceMethodTest
         testMethod.stop();
 
         //assert
+
         new Verifications()
         {
             {
-                mockedMqtt.unsubscribe(anyString);
+                Deencapsulation.invoke(mockedMqtt, "unsubscribe", anyString);
                 maxTimes = 1;
             }
         };
@@ -133,7 +135,7 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                mockedMqtt.unsubscribe(anyString);
+                Deencapsulation.invoke(mockedMqtt, "unsubscribe", anyString);
                 maxTimes = 1;
             }
         };
@@ -152,7 +154,7 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                mockedMqtt.unsubscribe(anyString);
+                Deencapsulation.invoke(mockedMqtt, "unsubscribe", anyString);
                 maxTimes = 0;
             }
         };
@@ -184,7 +186,7 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                mockedMqtt.subscribe(actualSubscribeTopic);
+                Deencapsulation.invoke(mockedMqtt, "subscribe", actualSubscribeTopic);
                 maxTimes = 1;
             }
         };
@@ -214,7 +216,7 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                mockedMqtt.publish(anyString, actualPayload);
+                Deencapsulation.invoke(mockedMqtt, "publish", anyString, actualPayload);
                 maxTimes = 1;
             }
         };
@@ -279,9 +281,9 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                mockedMqtt.publish(anyString, actualPayload);
+                Deencapsulation.invoke(mockedMqtt, "publish", anyString, actualPayload);
                 maxTimes = 0;
-                mockedMqtt.subscribe(anyString);
+                Deencapsulation.invoke(mockedMqtt, "subscribe", anyString);
                 maxTimes = 0;
             }
         };
