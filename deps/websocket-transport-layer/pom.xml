@@ -11,7 +11,7 @@
 
     <groupId>com.microsoft.azure.sdk.iot.deps</groupId>
     <artifactId>websocket-transport-layer</artifactId>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
     <packaging>jar</packaging>
 
     <properties>
