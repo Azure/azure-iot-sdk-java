@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package samples.com.microsoft.azure.sdk.iot.device;
+package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
@@ -11,7 +11,6 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Scanner;
-import java.util.UUID;
 
 /**
  * Device Twin Sample for an IoT Hub. Default protocol is to use
@@ -25,8 +24,10 @@ public class DeviceTwinSample
 
     private static final int MAX_EVENTS_TO_REPORT = 5;
 
-    protected static class DeviceTwinStatusCallBack implements IotHubEventCallback{
-        public void execute(IotHubStatusCode status, Object context){
+    protected static class DeviceTwinStatusCallBack implements IotHubEventCallback
+    {
+        public void execute(IotHubStatusCode status, Object context)
+        {
             System.out.println("IoT Hub responded to device twin operation with status " + status.name());
         }
     }

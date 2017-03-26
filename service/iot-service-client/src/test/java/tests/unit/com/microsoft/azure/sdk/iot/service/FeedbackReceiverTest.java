@@ -38,6 +38,21 @@ public class FeedbackReceiverTest
         // Act
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
     }
+    
+    // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void constructor_input_hostName_null_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = null;
+        String userName = "xxx";
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        // Act
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+    }
+
 
     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
     // Assert
@@ -53,6 +68,21 @@ public class FeedbackReceiverTest
         // Act
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
     }
+    
+    // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void constructor_input_userName_null_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = "xxx";
+        String userName = null;
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        // Act
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+    }
+
 
     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
     // Assert
@@ -68,6 +98,21 @@ public class FeedbackReceiverTest
         // Act
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
     }
+    
+     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void constructor_input_sasToken_null_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = null;
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        // Act
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+    }
+
 
     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
     // Assert
@@ -83,7 +128,22 @@ public class FeedbackReceiverTest
         // Act
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
     }
-
+    
+     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void constructor_input_protocol_null() throws Exception
+    {
+        // Arrange
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = null;
+        // Act
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+    }
+    
+  
     // Assert
     @Test (expected = IllegalArgumentException.class)
     public void constructor_input_hostName_empty() throws Exception
@@ -97,8 +157,21 @@ public class FeedbackReceiverTest
         // Act
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
     }
+    
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void constructor_input_hostName_empty_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = "";
+        String userName = "xxx";
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        // Act
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+    }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
+      // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
     // Assert
     @Test (expected = IllegalArgumentException.class)
     public void constructor_input_userName_empty() throws Exception
@@ -111,6 +184,22 @@ public class FeedbackReceiverTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
+    }
+
+
+    // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void constructor_input_userName_empty_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = "xxx";
+        String userName = "";
+        String sasToken = "xxx";
+        String deviceId = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        // Act
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
@@ -127,6 +216,21 @@ public class FeedbackReceiverTest
         // Act
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
     }
+    
+    // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void constructor_input_sasToken_empty_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = "";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        // Act
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+    }
+
 
     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
     // Assert
@@ -138,6 +242,7 @@ public class FeedbackReceiverTest
         String userName = "xxx";
         String sasToken = "xxx";
         String deviceId = "";
+        
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
@@ -166,6 +271,9 @@ public class FeedbackReceiverTest
         // Assert
         assertEquals(deviceId, Deencapsulation.getField(feedbackReceiver, "deviceId"));
     }
+    
+   
+  
 
     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_004: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
     // Assert
@@ -183,6 +291,24 @@ public class FeedbackReceiverTest
         // Act
         feedbackReceiver.open();
     }
+    
+     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_004: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
+    // Assert
+    @Test (expected = IOException.class)
+    public void open_receiver_null_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = "xxx";
+        String deviceId = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        Deencapsulation.setField(feedbackReceiver, "amqpReceive", null);
+        // Act
+        feedbackReceiver.open();
+    }
+
 
     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_005: [The function shall call open() on the member AMQPReceive object]
     @Test
@@ -205,6 +331,31 @@ public class FeedbackReceiverTest
         // Act
         feedbackReceiver.open();
     }
+    
+    
+    
+       // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_005: [The function shall call open() on the member AMQPReceive object]
+    @Test
+    public void open_call_receiver_open_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        // Assert
+        new Expectations()
+        {
+            {
+                amqpReceive.open();
+            }
+        };
+        // Act
+        feedbackReceiver.open();
+    }
+
+ 
 
     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_006: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
     // Assert
@@ -218,6 +369,22 @@ public class FeedbackReceiverTest
         String deviceId = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
+        Deencapsulation.setField(feedbackReceiver, "amqpReceive", null);
+        // Act
+        feedbackReceiver.close();
+    }
+    
+      // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_006: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
+    // Assert
+    @Test (expected = IOException.class)
+    public void close_receiver_null_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
         Deencapsulation.setField(feedbackReceiver, "amqpReceive", null);
         // Act
         feedbackReceiver.close();
@@ -244,10 +411,32 @@ public class FeedbackReceiverTest
         // Act
         feedbackReceiver.close();
     }
+    
+     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_007: [The function shall call close() on the member AMQPReceive object]
+    @Test
+    public void close_call_receiver_close_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        // Assert
+        new Expectations()
+        {
+            {
+                amqpReceive.close();
+            }
+        };
+        // Act
+        feedbackReceiver.close();
+    }
+
 
     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_008: [The function shall call receive(long timeoutMs) function with the default timeout]
     @Test
-    public void receive_call_receive_timout() throws Exception
+    public void receive_call_receive_timeout() throws Exception
     {
         // Arrange
         String hostName = "xxx";
@@ -266,8 +455,8 @@ public class FeedbackReceiverTest
         // Act
         feedbackReceiver.receive();
     }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_009: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
+    
+     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_009: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
     // Assert
     @Test (expected = IOException.class)
     public void receive_with_timeout_receiver_null() throws Exception
@@ -285,9 +474,49 @@ public class FeedbackReceiverTest
         feedbackReceiver.receive(timeoutMs);
     }
 
+    
+    // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_008: [The function shall call receive(long timeoutMs) function with the default timeout]
+    @Test
+    public void receive_call_receive_timeout_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        // Assert
+        new Expectations()
+        {
+            {
+                amqpReceive.receive(Deencapsulation.getField(feedbackReceiver, "DEFAULT_TIMEOUT_MS"));
+            }
+        };
+        // Act
+        feedbackReceiver.receive();
+    }
+
+
+    // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_009: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
+    // Assert
+    @Test (expected = IOException.class)
+    public void receive_with_timeout_receiver_null_without_deviceId() throws Exception
+    {
+        // Arrange
+        long timeoutMs = 1000;
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        Deencapsulation.setField(feedbackReceiver, "amqpReceive", null);
+        // Act
+        feedbackReceiver.receive(timeoutMs);
+    }
+
     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_010: [The function shall call receive() on the member AMQPReceive object and return with the result]
     @Test
-    public void receive_with_timout_call_receive_timout() throws Exception
+    public void receive_with_timout_call_receive_timeout() throws Exception
     {
         // Arrange
         long timeoutMs = 1000;
@@ -307,8 +536,30 @@ public class FeedbackReceiverTest
         // Act
         feedbackReceiver.receive(timeoutMs);
     }
+    
+      // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_010: [The function shall call receive() on the member AMQPReceive object and return with the result]
+    @Test
+    public void receive_with_timout_call_receive_timeout_without_deviceId() throws Exception
+    {
+        // Arrange
+        long timeoutMs = 1000;
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        // Assert
+        new Expectations()
+        {
+            {
+                amqpReceive.receive(timeoutMs);
+            }
+        };
+        // Act
+        feedbackReceiver.receive(timeoutMs);
+    }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_011: [The function shall create an async wrapper around the open() function call]
+      // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_011: [The function shall create an async wrapper around the open() function call]
     @Test
     public void open_async() throws Exception
     {
@@ -319,6 +570,30 @@ public class FeedbackReceiverTest
         String deviceId = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
+        // Assert
+        new Expectations()
+        {
+            {
+                amqpReceive.open();
+                feedbackReceiver.open();
+            }
+        };
+        // Act
+        CompletableFuture<Void> completableFuture = feedbackReceiver.openAsync();
+        completableFuture.get();
+    }
+
+
+    // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_011: [The function shall create an async wrapper around the open() function call]
+    @Test
+    public void open_async_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {
@@ -355,6 +630,30 @@ public class FeedbackReceiverTest
         CompletableFuture<Void> completableFuture = feedbackReceiver.closeAsync();
         completableFuture.get();
     }
+    
+      // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_012: [The function shall create an async wrapper around the close() function call]
+    @Test
+    public void close_async_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        // Assert
+        new Expectations()
+        {
+            {
+                amqpReceive.close();
+                feedbackReceiver.close();
+            }
+        };
+        // Act
+        CompletableFuture<Void> completableFuture = feedbackReceiver.closeAsync();
+        completableFuture.get();
+    }
+
 
     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_013: [The function shall create an async wrapper around the receive() function call]
     @Test
@@ -379,6 +678,30 @@ public class FeedbackReceiverTest
         CompletableFuture<FeedbackBatch> completableFuture = feedbackReceiver.receiveAsync();
         completableFuture.get();
     }
+    
+     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_013: [The function shall create an async wrapper around the receive() function call]
+    @Test
+    public void receive_async_without_deviceId() throws Exception
+    {
+        // Arrange
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        // Assert
+        new Expectations()
+        {
+            {
+                amqpReceive.receive(Deencapsulation.getField(feedbackReceiver, "DEFAULT_TIMEOUT_MS"));
+                feedbackReceiver.receive();
+            }
+        };
+        // Act
+        CompletableFuture<FeedbackBatch> completableFuture = feedbackReceiver.receiveAsync();
+        completableFuture.get();
+    }
+
 
     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_014: [The function shall create an async wrapper around the receive(long timeoutMs) function call]
     @Test
@@ -392,6 +715,30 @@ public class FeedbackReceiverTest
         String deviceId = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
+        // Assert
+        new Expectations()
+        {
+            {
+                amqpReceive.receive(timeoutMs);
+                feedbackReceiver.receive(anyLong);
+            }
+        };
+        // Act
+        CompletableFuture<FeedbackBatch> completableFuture = feedbackReceiver.receiveAsync(timeoutMs);
+        completableFuture.get();
+    }
+    
+    // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_014: [The function shall create an async wrapper around the receive(long timeoutMs) function call]
+    @Test
+    public void receive_with_timout_async_without_deviceId() throws Exception
+    {
+        // Arrange
+        long timeoutMs = 1000;
+        String hostName = "xxx";
+        String userName = "xxx";
+        String sasToken = "xxx";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {

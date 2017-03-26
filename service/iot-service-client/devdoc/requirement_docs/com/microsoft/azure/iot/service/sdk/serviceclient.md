@@ -100,6 +100,11 @@ public CompletableFuture sendAsync(String deviceId, String message);
 ### getFeedbackReceiver
 
 ```java
-public void getFeedbackReceiver(String deviceId);
+public FeedbackReceiver getFeedbackReceiver(String deviceId);
 ```
-**SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_017: [** The function shall create a FeedbackReceiver object and returns with it **]**
+**SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_017: [** The function shall create a FeedbackReceiver object and returns with it. This API is deprecated **]**
+
+```java
+public FeedbackReceiver getFeedbackReceiver();
+```
+**SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_018: [** The function shall create a FeedbackReceiver object and returns with it. This API doesn't need deviceId as an input parameter **]**

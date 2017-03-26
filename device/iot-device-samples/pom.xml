@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
     <artifactId>iot-device-samples</artifactId>
-    <name>IoT Hub Java Device Client Samples</name>
+    <name>IoT Hub Java Device SDK Samples</name>
     <packaging>pom</packaging>
     <developers>
         <developer>
@@ -14,7 +14,7 @@
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <artifactId>iot-device-client-parent</artifactId>
-        <version>1.0.21</version>
+        <version>1.1.22</version>
     </parent>
     <modules>
         <module>send-event</module>
@@ -22,12 +22,13 @@
         <module>handle-messages</module>
         <module>send-receive-sample</module>
         <module>device-twin-sample</module>
+        <module>device-method-sample</module>
     </modules>
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-device-client</artifactId>
-            <version>1.0.21</version>
+            <version>1.1.22</version>
         </dependency>
     </dependencies>
     <build>

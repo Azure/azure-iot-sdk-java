@@ -12,6 +12,10 @@ public class IotHubInternalServerErrorException extends IotHubException
 {
     public IotHubInternalServerErrorException()
     {
-        super("Internal server error!");
+        this(null);
+    }
+    public IotHubInternalServerErrorException(String message)
+    {
+        super("Internal server error!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
     }
 }

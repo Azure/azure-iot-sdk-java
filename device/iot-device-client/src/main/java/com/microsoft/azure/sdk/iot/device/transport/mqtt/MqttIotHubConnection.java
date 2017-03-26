@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodMessage;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
@@ -35,7 +36,7 @@ public class MqttIotHubConnection
     //Messaging clients
     private MqttMessaging deviceMessaging;
     private MqttDeviceTwin deviceTwin;
-    private MqttDeviceMethods deviceMethods;
+    private MqttDeviceMethod deviceMethod;
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -75,7 +76,7 @@ public class MqttIotHubConnection
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_001: [The constructor shall save the configuration.]
             this.config = config;
             this.deviceMessaging = null;
-            this.deviceMethods = null;
+            this.deviceMethod = null;
             this.deviceTwin = null;
         }
     }
@@ -111,7 +112,7 @@ public class MqttIotHubConnection
 
                 this.deviceMessaging = new MqttMessaging(sslPrefix + this.config.getIotHubHostname() + sslPortSuffix,
                         this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword);
-                this.deviceMethods = new MqttDeviceMethods();
+                this.deviceMethod = new MqttDeviceMethod();
                 this.deviceTwin = new MqttDeviceTwin();
 
                 this.deviceMessaging.start();
@@ -122,6 +123,10 @@ public class MqttIotHubConnection
                 this.state = State.CLOSED;
                 // Codes_SRS_MQTTIOTHUBCONNECTION_15_005: [If an MQTT connection is unable to be established
                 // for any reason, the function shall throw an IOException.]
+                if (this.deviceMethod != null)
+                {
+                    this.deviceMethod.stop();
+                }
                 if (this.deviceTwin != null )
                 {
                     this.deviceTwin.stop();
@@ -155,7 +160,8 @@ public class MqttIotHubConnection
 
             try
             {
-                this.deviceMethods = null;
+                this.deviceMethod.stop();
+                this.deviceMethod = null;
 
                 this.deviceTwin.stop();
                 this.deviceTwin = null;
@@ -188,7 +194,8 @@ public class MqttIotHubConnection
         {
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_010: [If the message is null or empty,
             // the function shall return status code BAD_FORMAT.]
-            if (message == null || message.getBytes() == null || (message.getMessageType() != MessageType.DeviceTwin && message.getBytes().length == 0))
+            if (message == null || message.getBytes() == null ||
+                    ((message.getMessageType() != MessageType.DeviceTwin && message.getMessageType() != MessageType.DeviceMethods) && message.getBytes().length == 0))
             {
                 return IotHubStatusCode.BAD_FORMAT;
             }
@@ -209,7 +216,12 @@ public class MqttIotHubConnection
             try
             {
                 // Codes_SRS_MQTTIOTHUBCONNECTION_15_009: [The function shall send the message payload.]
-                if (message.getMessageType() == MessageType.DeviceTwin)
+                if (message.getMessageType() == MessageType.DeviceMethods)
+                {
+                    this.deviceMethod.start();
+                    this.deviceMethod.send((DeviceMethodMessage) message);
+                }
+                else if (message.getMessageType() == MessageType.DeviceTwin)
                 {
                     this.deviceTwin.start();
                     this.deviceTwin.send((DeviceTwinMessage) message);
@@ -256,7 +268,11 @@ public class MqttIotHubConnection
         /*
         **Codes_SRS_MQTTIOTHUBCONNECTION_25_016: [**If any of the messaging clients fail to receive, the function shall throw an IOException.**]**
          */
-        message = deviceTwin.receive();
+        message = this.deviceMethod.receive();
+        if (message == null)
+        {
+            message = deviceTwin.receive();
+        }
         if (message == null)
         {
             message = deviceMessaging.receive();

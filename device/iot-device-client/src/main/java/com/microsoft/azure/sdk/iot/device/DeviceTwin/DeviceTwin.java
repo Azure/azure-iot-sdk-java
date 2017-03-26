@@ -128,8 +128,8 @@ public class DeviceTwin
             synchronized (DEVICE_TWIN_LOCK)
             {
                 /*
-                **Codes_SRS_DEVICETWIN_25_028: [**If the message is of type DeviceTwin and DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_RESPONSE and if the status is null then the user is notified on the status callback registered by the user as ERROR.**]**
-                **Codes_SRS_DEVICETWIN_25_031: [**If the message is of type DeviceTwin and DEVICE_TWIN_OPERATION_GET_RESPONSE and if the status is null then the user is notified on the status callback registered by the user as ERROR.**]**
+                **Codes_SRS_DEVICETWIN_25_028: [**If the message is of type DeviceTwin and DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE and if the status is null then the user is notified on the status callback registered by the user as ERROR.**]**
+                **Codes_SRS_DEVICETWIN_25_031: [**If the message is of type DeviceTwin and DEVICE_OPERATION_TWIN_GET_RESPONSE and if the status is null then the user is notified on the status callback registered by the user as ERROR.**]**
                  */
                 IotHubStatusCode iotHubStatus = IotHubStatusCode.ERROR;
                 if (message.getMessageType() != MessageType.DeviceTwin)
@@ -142,16 +142,16 @@ public class DeviceTwin
                 DeviceTwinMessage dtMessage = (DeviceTwinMessage) message;
                 String status = dtMessage.getStatus();
 
-                switch (dtMessage.getDeviceTwinOperationType())
+                switch (dtMessage.getDeviceOperationType())
                 {
-                    case DEVICE_TWIN_OPERATION_GET_RESPONSE:
+                    case DEVICE_OPERATION_TWIN_GET_RESPONSE:
                     {
                         if (status != null)
                         {
                             iotHubStatus = IotHubStatusCode.getIotHubStatusCode(Integer.parseInt(status));
                         }
                         /*
-                        **Codes_SRS_DEVICETWIN_25_029: [**If the message is of type DeviceTwin and DEVICE_TWIN_OPERATION_GET_RESPONSE then the user call with a valid status is triggered.**]**
+                        **Codes_SRS_DEVICETWIN_25_029: [**If the message is of type DeviceTwin and DEVICE_OPERATION_TWIN_GET_RESPONSE then the user call with a valid status is triggered.**]**
                          */
 
                         deviceTwinStatusCallback.execute(iotHubStatus, deviceTwinStatusCallbackContext);
@@ -159,29 +159,29 @@ public class DeviceTwin
                         if (iotHubStatus == IotHubStatusCode.OK)
                         {
                             /*
-                            **Codes_SRS_DEVICETWIN_25_030: [**If the message is of type DeviceTwin and DEVICE_TWIN_OPERATION_GET_RESPONSE then the payload is deserialized by calling updateTwin only if the status is ok.**]**
+                            **Codes_SRS_DEVICETWIN_25_030: [**If the message is of type DeviceTwin and DEVICE_OPERATION_TWIN_GET_RESPONSE then the payload is deserialized by calling updateTwin only if the status is ok.**]**
                              */
                             twinObject.updateTwin(new String(dtMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
                         }
                         break;
                     }
-                    case DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_RESPONSE:
+                    case DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE:
                     {
                         if (status != null)
                         {
                             iotHubStatus = IotHubStatusCode.getIotHubStatusCode(Integer.parseInt(status));
                         }
                         /*
-                        **Codes_SRS_DEVICETWIN_25_027: [**If the message is of type DeviceTwin and DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_RESPONSE then the user call with a valid status is triggered.**]**
+                        **Codes_SRS_DEVICETWIN_25_027: [**If the message is of type DeviceTwin and DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE then the user call with a valid status is triggered.**]**
                          */
                         deviceTwinStatusCallback.execute(iotHubStatus, deviceTwinStatusCallbackContext);
 
                         break;
                     }
-                    case DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE:
+                    case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE:
                     {
                         /*
-                        **Codes_SRS_DEVICETWIN_25_026: [**If the message is of type DeviceTwin and DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE then the payload is deserialized by calling updateDesiredProperty.**]**
+                        **Codes_SRS_DEVICETWIN_25_026: [**If the message is of type DeviceTwin and DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE then the payload is deserialized by calling updateDesiredProperty.**]**
                          */
                         isSubscribed = true;
                         twinObject.updateDesiredProperty(new String(dtMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
@@ -245,7 +245,7 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_002: [**The constructor shall save the device twin message callback by calling setDeviceTwinMessageCallback where any further messages for device twin shall be delivered.**]**
          */
-        this.config.setDeviceTwinMessageCallback(new deviceTwinResponseMessageCallback());
+        this.config.setDeviceTwinMessageCallback(new deviceTwinResponseMessageCallback(), null);
         this.requestId = 0;
 
         this.deviceTwinStatusCallback = deviceTwinCallback;
@@ -277,9 +277,9 @@ public class DeviceTwin
         getTwinRequestMessage.setRequestId(String.valueOf(requestId++));
 
         /*
-        **Codes_SRS_DEVICETWIN_25_006: [**This method shall set the message type as DEVICE_TWIN_OPERATION_GET_REQUEST by calling setDeviceTwinOperationType.**]**
+        **Codes_SRS_DEVICETWIN_25_006: [**This method shall set the message type as DEVICE_OPERATION_TWIN_GET_REQUEST by calling setDeviceOperationType.**]**
          */
-        getTwinRequestMessage.setDeviceTwinOperationType(DeviceTwinOperations.DEVICE_TWIN_OPERATION_GET_REQUEST);
+        getTwinRequestMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_REQUEST);
 
         /*
         **Codes_SRS_DEVICETWIN_25_008: [**This method shall send the message to the lower transport layers by calling sendEventAsync.**]**
@@ -332,9 +332,9 @@ public class DeviceTwin
         updateReportedPropertiesRequest.setRequestId(String.valueOf(requestId++));
 
         /*
-        **Codes_SRS_DEVICETWIN_25_013: [**This method shall set the message type as DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_REQUEST by calling setDeviceTwinOperationType.**]**
+        **Codes_SRS_DEVICETWIN_25_013: [**This method shall set the message type as DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST by calling setDeviceOperationType.**]**
          */
-        updateReportedPropertiesRequest.setDeviceTwinOperationType(DeviceTwinOperations.DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_REQUEST);
+        updateReportedPropertiesRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST);
 
         /*
         **Codes_SRS_DEVICETWIN_25_015: [**This method shall send the message to the lower transport layers by calling sendEventAsync.**]**
@@ -364,11 +364,11 @@ public class DeviceTwin
         if (!isSubscribed)
         {
             /*
-            **Codes_SRS_DEVICETWIN_25_018: [**If not already subscribed then this method shall create a device twin message with empty payload and set its type as DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.**]**
+            **Codes_SRS_DEVICETWIN_25_018: [**If not already subscribed then this method shall create a device twin message with empty payload and set its type as DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.**]**
              */
             DeviceTwinMessage desiredPropertiesNotificationRequest = new DeviceTwinMessage(new byte[0]);
 
-            desiredPropertiesNotificationRequest.setDeviceTwinOperationType(DeviceTwinOperations.DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST);
+            desiredPropertiesNotificationRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST);
 
             /*
             **Codes_SRS_DEVICETWIN_25_019: [**If not already subscribed then this method shall send the message using sendEventAsync.**]**

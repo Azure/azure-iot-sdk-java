@@ -66,20 +66,25 @@ abstract public class Device implements PropertyCallBack<String, Object>
         /*
         **Codes_SRS_DEVICE_25_009: [**The method shall remove all the reported and desired properties set by the user so far and mark existing collections as null to be garbage collected.**]**
          */
-        for (Iterator repProperty = reportedProp.iterator(); repProperty.hasNext();)
+        if (reportedProp != null)
         {
-            Property p = (Property) repProperty.next();
-            repProperty.remove();
+            for (Iterator repProperty = reportedProp.iterator(); repProperty.hasNext(); )
+            {
+                Property p = (Property) repProperty.next();
+                repProperty.remove();
+            }
         }
-
         reportedProp = null;
 
-        for (Iterator desiredProperty = desiredProp.entrySet().iterator(); desiredProperty.hasNext();)
+        if (desiredProp != null)
         {
-            Map.Entry<Property, Pair<PropertyCallBack<String, Object>, Object>> propertyPairEntry = (Map.Entry<Property, Pair<PropertyCallBack<String, Object>, Object>>) desiredProperty.next();
-            desiredProperty.remove();
-        }
+            for (Iterator desiredProperty = desiredProp.entrySet().iterator(); desiredProperty.hasNext(); )
+            {
+                Map.Entry<Property, Pair<PropertyCallBack<String, Object>, Object>> propertyPairEntry = (Map.Entry<Property, Pair<PropertyCallBack<String, Object>, Object>>) desiredProperty.next();
 
+                desiredProperty.remove();
+            }
+        }
         desiredProp = null;
     }
 

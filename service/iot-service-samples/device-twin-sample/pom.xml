@@ -1,8 +1,8 @@
 <!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.sdk.iot.samples.iot-service-samples</groupId>
-    <artifactId>DeviceTwinSample</artifactId>
-    <version>1.1.15</version>
+    <groupId>com.microsoft.azure.sdk.iot.samples.service</groupId>
+    <artifactId>device-twin-sample</artifactId>
+    <version>1.2.16</version>
     <name>Device Twin Sample</name>
     <developers>
         <developer>
@@ -13,7 +13,7 @@
     <parent>
         <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
         <artifactId>iot-service-samples</artifactId>
-        <version>1.1.15</version>
+        <version>1.2.16</version>
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,7 +28,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.service.DeviceTwinSample</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.DeviceTwinSample</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-service-client</artifactId>
-            <version>1.1.15</version>
+            <version>1.2.16</version>
             <type>jar</type>
         </dependency>
     </dependencies>

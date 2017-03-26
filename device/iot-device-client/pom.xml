@@ -14,7 +14,7 @@
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <artifactId>iot-device-client-parent</artifactId>
-        <version>1.0.21</version>
+        <version>1.1.22</version>
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.deps</groupId>
             <artifactId>iot-deps-serializer</artifactId>
-            <version>0.2.1</version>
+            <version>0.3.2</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-service-client</artifactId>
-            <version>1.1.15</version>
+            <version>1.2.16</version>
             <scope>test</scope>
         </dependency>
         <dependency>

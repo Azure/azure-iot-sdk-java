@@ -14,8 +14,6 @@ import org.apache.qpid.proton.engine.Event;
 import org.apache.qpid.proton.reactor.Reactor;
 
 import java.io.IOException;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Instance of the QPID-Proton-J BaseHandler class
@@ -30,8 +28,8 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
     private AmqpFeedbackReceivedHandler amqpReceiveHandler;
     private IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private Reactor reactor = null;
-    private Semaphore semaphore = new Semaphore(0);
     private FeedbackBatch feedbackBatch;
+    private static final int REACTOR_TIMEOUT = 3141; // reactor timeout in milliseconds
 
     /**
      * Constructor to set up connection parameters
@@ -86,7 +84,7 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
     /**
      * Synchronized call to receive feedback batch
      * Hide the event based receiving mechanism from the user API
-     * @param timeoutMs The timeout in milliseconds to wait for feedback
+     * @param timeoutMs The timeout in milliseconds to wait for the feedback
      * @return The received feedback batch
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
      * @throws InterruptedException This exception is thrown if the receive process has been interrupted
@@ -99,14 +97,24 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_005: [The function shall initialize the Proton reactor object]
             this.reactor = Proton.reactor(this);
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_006: [The function shall start the Proton reactor object]
-            this.reactor.run();
-            this.reactor.free();
-            if (timeoutMs == 0)
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_007: [The function shall acquire a semaphore for event handling with no timeout if the input timoutMs is equal to 0]
-                semaphore.acquire();
-            else
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_008: [The function shall acquire a semaphore for event handling with timeout if the input timoutMs is not equal to 0]
-                semaphore.tryAcquire(timeoutMs, TimeUnit.MILLISECONDS);
+            this.reactor.setTimeout(REACTOR_TIMEOUT);
+            this.reactor.start();
+            
+            // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_007: [The function shall wait for specified timeout to check for any feedback message]
+            long startTime = System.currentTimeMillis();
+            long endTime = startTime + timeoutMs;
+            
+            while(this.reactor.process())
+            {
+             if (System.currentTimeMillis() > endTime) break;
+            }
+            
+            // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_008: [The function shall stop and free the Proton reactor object]
+            this.reactor.stop();
+            this.reactor.process();
+            this.reactor.free();   
+            
+          
         }
         else
         {
@@ -126,9 +134,7 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_010: [The function shall parse the received Json string to FeedbackBath object]
         feedbackBatch = FeedbackBatchMessage.parse(feedbackJson);
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_011: [The function shall release the event handling semaphore]
-        semaphore.release();
-
+    
     }
 
 }

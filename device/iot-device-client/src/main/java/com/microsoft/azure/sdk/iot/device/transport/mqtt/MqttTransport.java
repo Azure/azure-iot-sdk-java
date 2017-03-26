@@ -248,7 +248,10 @@ public final class MqttTransport implements IotHubTransport
             MessageCallback deviceTwinMessageCallback = this.config.getDeviceTwinMessageCallback();
             Object deviceTwinContext = this.config.getDeviceTwinMessageContext();
 
-            if (callback == null && deviceTwinMessageCallback == null)
+            MessageCallback deviceMethodMessageCallback = this.config.getDeviceMethodMessageCallback();
+            Object deviceMethodContext = this.config.getDeviceMethodMessageContext();
+
+            if (callback == null && deviceTwinMessageCallback == null && deviceMethodMessageCallback == null)
             {
                 return;
             }
@@ -262,7 +265,14 @@ public final class MqttTransport implements IotHubTransport
                 // the function shall invoke the callback on the message.]
                 if (message != null)
                 {
-                    if (message.getMessageType() == MessageType.DeviceTwin)
+                    if (message.getMessageType() == MessageType.DeviceMethods)
+                    {
+                        if (deviceMethodMessageCallback != null)
+                        {
+                            deviceMethodMessageCallback.execute(message, deviceMethodContext);
+                        }
+                    }
+                    else if (message.getMessageType() == MessageType.DeviceTwin)
                     {
                         if (deviceTwinMessageCallback != null)
                         {

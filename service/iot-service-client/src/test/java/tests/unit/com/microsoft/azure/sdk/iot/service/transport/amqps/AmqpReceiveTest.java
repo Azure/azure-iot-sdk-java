@@ -20,8 +20,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -35,8 +33,7 @@ public class AmqpReceiveTest
     @Mocked Event event;
     @Mocked Connection connection;
     @Mocked Message message;
-    @Mocked Semaphore semaphore;
-
+    
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_001: [The constructor shall copy all input parameters to private member variables for event processing]
     @Test
     public void amqpReceive_init_ok()
@@ -87,7 +84,7 @@ public class AmqpReceiveTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_005: [The function shall initialize the Proton reactor object]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_006: [The function shall start the Proton reactor object]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_007: [The function shall acquire a semaphore for event handling with no timeout if the input timoutMs is equal to 0]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_008: [The function shall stop and free the Proton reactor object ]
     @Test
     public void receive_with_timout_zero_call_flow_ok() throws IOException, InterruptedException
     {
@@ -95,7 +92,6 @@ public class AmqpReceiveTest
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
-        String deviceId = "deviceId";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         int timeoutMs = 0;
         AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
@@ -105,8 +101,11 @@ public class AmqpReceiveTest
         {
             {
                 reactor = proton.reactor(amqpReceive);
-                reactor.run();
-                semaphore.acquire();
+                reactor.start();
+                reactor.stop();
+                reactor.process();
+                reactor.free();
+        
             }
         };
         // Act
@@ -115,7 +114,7 @@ public class AmqpReceiveTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_005: [The function shall initialize the Proton reactor object]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_006: [The function shall start the Proton reactor object]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_008: [The function shall acquire a semaphore for event handling with timeout if the input timoutMs is not equal to 0]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_008: [The function shall stop and free the Proton reactor object ]
     @Test
     public void receiveWithTimout_non_zero_call_ok() throws IOException, InterruptedException
     {
@@ -123,7 +122,6 @@ public class AmqpReceiveTest
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
-        String deviceId = "deviceId";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         int timeoutMs = 1;
         AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
@@ -133,8 +131,13 @@ public class AmqpReceiveTest
         {
             {
                 reactor = proton.reactor(amqpReceive);
-                reactor.run();
-                semaphore.tryAcquire(timeoutMs, TimeUnit.MILLISECONDS);
+                reactor.start();
+                reactor.stop();
+                reactor.process();
+                reactor.free();
+                
+                
+                
             }
         };
         // Act
@@ -150,7 +153,6 @@ public class AmqpReceiveTest
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
-        String deviceId = "deviceId";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         int timeoutMs = 1;
         AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
@@ -159,7 +161,6 @@ public class AmqpReceiveTest
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_010: [The function shall parse the received Json string to FeedbackBath object]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_011: [The function shall release the event handling semaphore]
     @Test
     public void onFeedbackReceived_call_flow_ok()
     {
@@ -175,7 +176,7 @@ public class AmqpReceiveTest
         {
             {
                 FeedbackBatchMessage.parse(jsonData);
-                semaphore.release();
+                
             }
         };
         // Act

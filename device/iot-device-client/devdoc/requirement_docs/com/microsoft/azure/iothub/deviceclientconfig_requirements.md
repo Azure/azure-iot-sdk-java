@@ -31,6 +31,15 @@ public final class DeviceClientConfig
     public MessageCallback getMessageCallback();
     public Object getMessageContext();
     public int getMessageLockTimeoutSecs();
+
+    public void setDeviceMethodMessageCallback(MessageCallback callback, Object context);
+    public MessageCallback getDeviceMethodMessageCallback();
+    public Object getDeviceMethodMessageContext();
+
+    public void setDeviceTwinMessageCallback(MessageCallback callback, Object context);
+    public MessageCallback getDeviceTwinMessageCallback();
+    public Object getDeviceTwinMessageContext();
+
 }
 ```
 
@@ -173,3 +182,61 @@ public int getMessageLockTimeoutSecs();
 ```
 
 ** SRS_DEVICECLIENTCONFIG_11_013: [**The function shall return 180s.**] **
+
+
+### setDeviceMethodMessageCallback
+
+```java
+public void setDeviceMethodMessageCallback(MessageCallback  callback, Object context);
+```
+
+** SRS_DEVICECLIENTCONFIG_25_019: [**The function shall set the DeviceMethod message callback.**] ** 
+
+
+** SRS_DEVICECLIENTCONFIG_25_020: [**The function shall set the DeviceMethod message context.**] **
+
+
+### getDeviceMethodMessageCallback
+
+```java
+public MessageCallback getDeviceMethodMessageCallback();
+```
+
+** SRS_DEVICECLIENTCONFIG_25_021: [**The function shall return the current DeviceMethod message callback.**] ** 
+
+
+### getDeviceMethodMessageContext
+
+```java
+public Object getDeviceMethodMessageContext();
+```
+
+** SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DeviceMethod message context.**] **
+
+### setDeviceTwinMessageCallback
+
+```java
+public void setDeviceTwinMessageCallback(MessageCallback  callback, Object context);
+```
+
+** SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceTwin message callback.**] ** 
+
+** SRS_DEVICECLIENTCONFIG_25_024: [**The function shall set the DeviceTwin message context.**] **
+
+
+### getDeviceTwinMessageCallback
+
+```java
+public MessageCallback getDeviceTwinMessageCallback();
+```
+
+** SRS_DEVICECLIENTCONFIG_25_025: [**The function shall return the current DeviceTwin message callback.**] ** 
+
+
+### getDeviceTwinMessageContext
+
+```java
+public Object getDeviceTwinMessageContext();
+```
+
+** SRS_DEVICECLIENTCONFIG_25_026: [**The function shall return the current DeviceTwin message context.**] **
