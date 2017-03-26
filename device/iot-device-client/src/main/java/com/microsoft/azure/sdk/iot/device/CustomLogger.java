@@ -31,6 +31,14 @@ public class CustomLogger {
         }
     }
 
+	public void LogDebug(String message, Throwable t, Object...params)
+    {
+        if(logger.isEnabledFor(Level.DEBUG))
+        {
+            logger.debug(String.format(message, params), t);
+        }
+    }
+	
 	public void LogTrace(String message, Object...params)
     {
         if(logger.isEnabledFor(Level.TRACE))
