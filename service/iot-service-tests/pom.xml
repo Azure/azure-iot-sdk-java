@@ -1,8 +1,8 @@
 <!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>iot-service-client</artifactId>
-    <name>Iot Hub Java Service SDK</name>
-    <description>The Microsoft Azure IoT Service SDK for Java</description>
+    <artifactId>iot-service-tests</artifactId>
+    <name>Iot Hub Java Service SDK Tests</name>
+    <description>Test suite for the Microsoft Azure IoT Service SDK for Java</description>
     <developers>
         <developer>
             <id>microsoft</id>
@@ -16,6 +16,7 @@
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <skipITs>true</skipITs>
     </properties>
     <dependencies>
         <dependency>
@@ -27,6 +28,11 @@
             <groupId>com.microsoft.azure.sdk.iot.deps</groupId>
             <artifactId>iot-deps-serializer</artifactId>
             <version>0.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-service-client</artifactId>
+            <version>1.2.16</version>
         </dependency>
         <dependency>
             <groupId>org.jmockit</groupId>
@@ -108,6 +114,7 @@
                 <configuration>
                     <forkCount>1</forkCount>
                     <reuseForks>true</reuseForks>
+                    <skipITs>${skipITs}</skipITs>
                 </configuration>
             </plugin>
             <plugin>

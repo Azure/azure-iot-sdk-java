@@ -17,7 +17,6 @@
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <skipITs>true</skipITs>
     </properties>
     <dependencies>
         <dependency>
@@ -72,12 +71,6 @@
             <version>2.8.0</version>
         </dependency>
         <dependency>
-            <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-service-client</artifactId>
-            <version>1.2.16</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.10</version>
@@ -117,7 +110,6 @@
                 <configuration>
                     <forkCount>1</forkCount>
                     <reuseForks>true</reuseForks>
-                    <skipITs>${skipITs}</skipITs>
                     <argLine>
                         -javaagent:${settings.localRepository}/org/jmockit/jmockit/1.22/jmockit-1.22.jar
                     </argLine>
