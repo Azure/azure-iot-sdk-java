@@ -208,3 +208,6 @@ java/service/doc/api_reference
 *.class
 target
 *.iml
+*.project
+*.classpath
+*.prefs

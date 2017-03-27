@@ -23,7 +23,7 @@ public class CustomLogger {
         }
     }
 
-	public void LogDebug(String message, Object...params)
+    public void LogDebug(String message, Object...params)
     {
         if(logger.isEnabledFor(Level.DEBUG))
         {
@@ -31,23 +31,31 @@ public class CustomLogger {
         }
     }
 
-	public void LogTrace(String message, Object...params)
+    public void LogDebug(String message, Throwable t, Object...params)
+    {
+        if(logger.isEnabledFor(Level.DEBUG))
+        {
+            logger.debug(String.format(message, params), t);
+        }
+    }
+
+    public void LogTrace(String message, Object...params)
     {
         if(logger.isEnabledFor(Level.TRACE))
         {
             logger.trace(String.format(message, params));
         }
     }
-	
-	public void LogWarn(String message, Object...params)
+
+    public void LogWarn(String message, Object...params)
     {
         if(logger.isEnabledFor(Level.WARN))
         {
             logger.warn(String.format(message, params));
         }
     }
-	
-	public void LogFatal(String message, Object...params)
+
+    public void LogFatal(String message, Object...params)
     {
         if(logger.isEnabledFor(Level.FATAL))
         {
@@ -70,7 +78,7 @@ public class CustomLogger {
             logger.error(exception);
         }
     }
-	
+
     public String getMethodName()
     {
         return Thread.currentThread().getStackTrace()[CALLING_METHOD_NAME_DEPTH].getMethodName();
