@@ -62,12 +62,12 @@ public class RegistryManagerIT
         blobClient = storageAccount.createCloudBlobClient();
 
         // Creating the export storage container and getting its URI
-        String exportContainerName = "exportcontainersample";
+        String exportContainerName = "exportcontainersample-" + uuid;
         exportContainer = blobClient.getContainerReference(exportContainerName);
         exportContainer.createIfNotExists();
 
         // Creating the import storage container and getting its URI
-        String importContainerName = "importcontainersample";
+        String importContainerName = "importcontainersample-" + uuid;
         importContainer = blobClient.getContainerReference(importContainerName);
         importContainer.createIfNotExists();
     }

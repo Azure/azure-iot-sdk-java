@@ -4,7 +4,7 @@
 
 build_root=$(cd "$(dirname "$0")/.." && pwd)
 
-# -- Java Websocket Transport Layer --
+# -- Java Dependencies --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/deps
 mvn install
@@ -13,12 +13,24 @@ mvn install
 # -- Java Service Client --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/service
+mvn install
+[ $? -eq 0 ] || exit $?
+
+# -- Java Service Client - integration tests --
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+cd $build_root/iot-service-tests
 mvn install -DskipITs=false
 [ $? -eq 0 ] || exit $?
 
 # -- Java Device Client --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/device
+mvn install
+[ $? -eq 0 ] || exit $?
+
+# -- Java Device Client -integration tests --
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+cd $build_root/iot-device-tests
 mvn install -DskipITs=false
 [ $? -eq 0 ] || exit $?
 
