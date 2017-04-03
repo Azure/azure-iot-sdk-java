@@ -99,7 +99,7 @@ There are two ways to get the .jar libraries for the Azure IoT device and servic
 _This is the recommended method of including the Azure IoT SDKs in your project, however this method will only work if your project is a Maven project and if you have gone through the setup described above_
 
 #### for the Device SDK
-* Navigate to http://search.maven.org, search for **com.microsoft.azure.sdk.iot** and take not of the latest version number (or the version number of whichever version of the sdk you desire to use).
+* Navigate to http://search.maven.org, search for **com.microsoft.azure.sdk.iot** and take note of the latest version number (or the version number of whichever version of the sdk you desire to use).
 * In your main pom.xml file, add the Azure IoT Device SDK as a dependency using your desired version as follows:
 ```xml
 	<dependency>
