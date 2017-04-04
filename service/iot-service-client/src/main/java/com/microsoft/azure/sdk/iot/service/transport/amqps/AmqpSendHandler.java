@@ -22,6 +22,7 @@ import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.messenger.impl.Address;
 import org.apache.qpid.proton.reactor.Handshaker;
 
+import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -53,6 +54,8 @@ public class AmqpSendHandler extends BaseHandler
     protected final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     protected final String webSocketHostName;
 
+    private boolean isConnected = false;
+    private boolean isConnectionError = false;
     /**
      * Constructor to set up connection parameters and initialize handshaker for transport
      *
@@ -100,6 +103,7 @@ public class AmqpSendHandler extends BaseHandler
         // Add a child handler that performs some default handshaking behaviour.
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_004: [The constructor shall initialize a new Handshaker (Proton) object to handle communication handshake]
         add(new Handshaker());
+        isConnected = false;
     }
 
     /**
@@ -234,6 +238,18 @@ public class AmqpSendHandler extends BaseHandler
         conn.open();
         ssn.open();
         snd.open();
+        isConnected = true;
+    }
+
+    /**
+     * Event handler for the transport error event. This triggers reconnection attempts until successful.
+     * @param event The Proton Event object.
+     */
+    @Override
+    public void onTransportError(Event event)
+    {
+        isConnected = false;
+        isConnectionError = true;
     }
 
     /**
@@ -315,13 +331,18 @@ public class AmqpSendHandler extends BaseHandler
             snd.close();
             snd.getSession().close();
             snd.getSession().getConnection().close();
+            isConnected = false;
         }
 
     }
 
-    public void sendComplete() throws IotHubException
+    public void sendComplete() throws IotHubException, IOException
     {
         //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_029: [ The event handler shall check the status queue to get the response for the sent message **]**
+        if (isConnectionError)
+        {
+            throw new IOException("Connection failed to be established");
+        }
         if (!sendStatusQueue.isEmpty())
         {
             //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_030: [ The event handler shall remove the response from the queue **]**

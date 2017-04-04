@@ -33,6 +33,7 @@ import org.apache.qpid.proton.reactor.Task;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.BufferOverflowException;
 import java.util.*;
@@ -506,7 +507,7 @@ public class AmqpSendHandlerTest
     Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [** The event handler shall get the exception from the response and throw is it is not null **]**
      */
     @Test
-    public void sendComplete_flow_OK(final @Mocked AmqpResponseVerification mockedVerification) throws IotHubException
+    public void sendComplete_flow_OK(final @Mocked AmqpResponseVerification mockedVerification) throws IotHubException, IOException
     {
         // Arrange
         String hostName = "aaa";
@@ -533,7 +534,7 @@ public class AmqpSendHandlerTest
     //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [** The event handler shall get the exception from the response and throw is it is not null **]**
     @Test (expected = IotHubException.class)
     public void sendComplete_throws_exception_if_found(final @Mocked AmqpResponseVerification mockedVerification,
-                                                       final @Mocked IotHubException mockedIotHubException) throws IotHubException
+                                                       final @Mocked IotHubException mockedIotHubException) throws IotHubException, IOException
     {
         // Arrange
         String hostName = "aaa";
@@ -553,6 +554,26 @@ public class AmqpSendHandlerTest
                 result = mockedIotHubException;
             }
         };
+        // Act
+        amqpSendHandler.sendComplete();
+
+    }
+
+
+    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [** The event handler shall get the exception from the response and throw is it is not null **]**
+    @Test (expected = IOException.class)
+    public void sendComplete_throws_Connection_exception_if_found(final @Mocked AmqpResponseVerification mockedVerification,
+                                                                  final @Mocked IotHubException mockedIotHubException,
+                                                                  final @Mocked Event mockedEvent) throws IotHubException, IOException
+    {
+        // Arrange
+        String hostName = "aaa";
+        String userName = "bbb";
+        String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        amqpSendHandler.onTransportError(mockedEvent);
+
         // Act
         amqpSendHandler.sendComplete();
 
