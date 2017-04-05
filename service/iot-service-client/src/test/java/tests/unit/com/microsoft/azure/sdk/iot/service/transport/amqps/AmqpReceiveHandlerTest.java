@@ -20,10 +20,10 @@ import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.amqp.transport.ReceiverSettleMode;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
+import org.apache.qpid.proton.codec.WritableBuffer;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
-import org.apache.qpid.proton.messenger.impl.Address;
 import org.apache.qpid.proton.reactor.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +45,6 @@ public class AmqpReceiveHandlerTest
     @Mocked Session session;
     @Mocked Transport transport;
     @Mocked TransportInternal transportInternal;
-    @Mocked Address address;
     @Mocked WebSocketImpl webSocket;
     @Mocked Sasl sasl;
     @Mocked SslDomain sslDomain;
@@ -278,6 +277,12 @@ public class AmqpReceiveHandlerTest
             { return 0; }
 
             @Override
+            public int recv(WritableBuffer writableBuffer)
+            {
+                return 0;
+            }
+
+            @Override
             public void drain(int i)
             { }
 
@@ -422,6 +427,42 @@ public class AmqpReceiveHandlerTest
             @Override
             public boolean detached()
             { return false; }
+
+            @Override
+            public void setOfferedCapabilities(Symbol[] symbols)
+            {
+
+            }
+
+            @Override
+            public Symbol[] getOfferedCapabilities()
+            {
+                return new Symbol[0];
+            }
+
+            @Override
+            public Symbol[] getRemoteOfferedCapabilities()
+            {
+                return new Symbol[0];
+            }
+
+            @Override
+            public void setDesiredCapabilities(Symbol[] symbols)
+            {
+
+            }
+
+            @Override
+            public Symbol[] getDesiredCapabilities()
+            {
+                return new Symbol[0];
+            }
+
+            @Override
+            public Symbol[] getRemoteDesiredCapabilities()
+            {
+                return new Symbol[0];
+            }
 
             @Override
             public EndpointState getLocalState()
@@ -576,6 +617,12 @@ public class AmqpReceiveHandlerTest
             @Override
             public int getMessageFormat()
             { return 0; }
+
+            @Override
+            public int available()
+            {
+                return 0;
+            }
 
             @Override
             public void disposition(DeliveryState deliveryState)

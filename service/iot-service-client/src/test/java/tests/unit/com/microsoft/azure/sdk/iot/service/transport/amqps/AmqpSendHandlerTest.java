@@ -21,11 +21,11 @@ import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.*;
 import org.apache.qpid.proton.amqp.transport.Source;
+import org.apache.qpid.proton.codec.ReadableBuffer;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.message.MessageError;
-import org.apache.qpid.proton.messenger.impl.Address;
 import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
 import org.apache.qpid.proton.reactor.Selectable;
@@ -59,7 +59,6 @@ public class AmqpSendHandlerTest
     @Mocked Transport transport;
     @Mocked TransportInternal transportInternal;
     @Mocked Connection connection;
-    @Mocked Address address;
     @Mocked WebSocketImpl webSocket;
     @Mocked Sasl sasl;
     @Mocked SslDomain sslDomain;
@@ -274,7 +273,6 @@ public class AmqpSendHandlerTest
                 connection = event.getConnection();
                 transport = connection.getTransport();
                 sasl.plain(anyString, anyString);
-                address = new Address(hostAddr);
                 sslDomain = Proton.sslDomain();
                 sslDomain.init(SslDomain.Mode.CLIENT);
                 sslDomain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
@@ -311,8 +309,6 @@ public class AmqpSendHandlerTest
                 webSocket.configure(anyString, anyString, 0, anyString, null, null);
                 transportInternal.addTransportLayer(webSocket);
                 sasl.plain(anyString, anyString);
-                new Address(hostAddr);
-                result = address;
                 Proton.sslDomain();
                 result = sslDomain;
                 sslDomain.init(SslDomain.Mode.CLIENT);
@@ -868,6 +864,12 @@ public class AmqpSendHandlerTest
             { return 0; }
 
             @Override
+            public int send(ReadableBuffer readableBuffer)
+            {
+                return 0;
+            }
+
+            @Override
             public void abort()
             { }
 
@@ -1004,6 +1006,42 @@ public class AmqpSendHandlerTest
             @Override
             public boolean detached()
             { return false; }
+
+            @Override
+            public void setOfferedCapabilities(Symbol[] symbols)
+            {
+
+            }
+
+            @Override
+            public Symbol[] getOfferedCapabilities()
+            {
+                return new Symbol[0];
+            }
+
+            @Override
+            public Symbol[] getRemoteOfferedCapabilities()
+            {
+                return new Symbol[0];
+            }
+
+            @Override
+            public void setDesiredCapabilities(Symbol[] symbols)
+            {
+
+            }
+
+            @Override
+            public Symbol[] getDesiredCapabilities()
+            {
+                return new Symbol[0];
+            }
+
+            @Override
+            public Symbol[] getRemoteDesiredCapabilities()
+            {
+                return new Symbol[0];
+            }
         };
 
         event = new Event()

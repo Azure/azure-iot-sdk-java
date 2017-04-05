@@ -19,7 +19,6 @@ import org.apache.qpid.proton.amqp.transport.DeliveryState;
 
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
-import org.apache.qpid.proton.messenger.impl.Address;
 import org.apache.qpid.proton.reactor.Handshaker;
 
 import java.io.IOException;
@@ -163,11 +162,10 @@ public class AmqpSendHandler extends BaseHandler
 
     /**
      * Create Proton SslDomain object from Address using the given Ssl mode
-     * @param address The proton address object
      * @param mode The proton enum value of requested Ssl mode
      * @return The created Ssl domain
      */
-    private SslDomain makeDomain(Address address, SslDomain.Mode mode)
+    private SslDomain makeDomain(SslDomain.Mode mode)
     {
         SslDomain domain = Proton.sslDomain();
         domain.init(mode);
@@ -196,9 +194,7 @@ public class AmqpSendHandler extends BaseHandler
             Sasl sasl = transport.sasl();
             sasl.plain(this.userName, this.sasToken);
 
-            Address address = new Address(this.hostName);
-
-            SslDomain domain = makeDomain(address, SslDomain.Mode.CLIENT);
+            SslDomain domain = makeDomain(SslDomain.Mode.CLIENT);
             domain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
             Ssl ssl = transport.ssl(domain);
         }
