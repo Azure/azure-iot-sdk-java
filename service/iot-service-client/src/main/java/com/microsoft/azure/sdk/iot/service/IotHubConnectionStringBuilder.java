@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
@@ -27,9 +28,9 @@ public class IotHubConnectionStringBuilder
      *
      * @param connectionString The serialized connection string
      * @return The IotHubConnectionString object
-     * @throws Exception This exception is thrown if the object creation failed
+     * @throws IOException This exception is thrown if the object creation failed
      */
-    public static IotHubConnectionString createConnectionString(String connectionString) throws Exception
+    public static IotHubConnectionString createConnectionString(String connectionString) throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_001: [The function shall throw IllegalArgumentException if the input string is empty or null]
         if (Tools.isNullOrEmpty(connectionString))
@@ -48,9 +49,9 @@ public class IotHubConnectionStringBuilder
      * @param hostName The hostName string
      * @param authenticationMethod The AuthenticationMethod object
      * @return The IotHubConnectionString object
-     * @throws Exception This exception is thrown if the object creation failed
+     * @throws IOException This exception is thrown if the object creation failed
      */
-    public static IotHubConnectionString createConnectionString(String hostName, AuthenticationMethod authenticationMethod) throws Exception
+    public static IotHubConnectionString createConnectionString(String hostName, AuthenticationMethod authenticationMethod) throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_003: [The function shall throw IllegalArgumentException if the input string is empty or null]
         if (Tools.isNullOrEmpty(hostName))
@@ -75,9 +76,9 @@ public class IotHubConnectionStringBuilder
      *
      * @param connectionString The connection string to deserialize
      * @param iotHubConnectionString The target object for deserialization
-     * @throws Exception This exception is thrown if the parsing failed
+     * @throws IOException This exception is thrown if the parsing failed
      */
-    protected static void parse(String connectionString, IotHubConnectionString iotHubConnectionString) throws Exception
+    protected static void parse(String connectionString, IotHubConnectionString iotHubConnectionString) throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_006: [The function shall throw IllegalArgumentException if the input string is empty or null]
         if (Tools.isNullOrEmpty(connectionString))

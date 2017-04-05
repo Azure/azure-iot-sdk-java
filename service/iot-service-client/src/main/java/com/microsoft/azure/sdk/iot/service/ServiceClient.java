@@ -33,9 +33,9 @@ public class ServiceClient
      *
      * @param connectionString The connection string for the IotHub
      * @return The created ServiceClient object
-     * @throws Exception This exception is thrown if the object creation failed
+     * @throws IOException This exception is thrown if the object creation failed
      */
-    public static ServiceClient createFromConnectionString(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol) throws Exception
+    public static ServiceClient createFromConnectionString(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol) throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_001: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
         if (Tools.isNullOrEmpty(connectionString))

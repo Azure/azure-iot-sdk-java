@@ -29,9 +29,9 @@ public class DeviceMethod
      *
      * @param connectionString is a Azure IoTHub connection string.
      * @return an instance of the DeviceMethod.
-     * @throws Exception This exception is thrown if the object creation failed
+     * @throws IOException This exception is thrown if the object creation failed
      */
-    public static DeviceMethod createFromConnectionString(String connectionString) throws Exception
+    public static DeviceMethod createFromConnectionString(String connectionString) throws IOException
     {
         if (connectionString == null || connectionString.length() == 0)
         {

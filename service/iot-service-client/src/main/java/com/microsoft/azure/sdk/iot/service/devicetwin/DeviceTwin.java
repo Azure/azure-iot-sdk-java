@@ -46,9 +46,9 @@ public class DeviceTwin
      *
      * @param connectionString The iot hub connection string
      * @return The instance of DeviceTwin
-     * @throws Exception This exception is thrown if the object creation failed
+     * @throws IOException This exception is thrown if the object creation failed
      */
-    public static DeviceTwin createFromConnectionString(String connectionString) throws Exception
+    public static DeviceTwin createFromConnectionString(String connectionString) throws IOException
     {
         if (connectionString == null || connectionString.length() == 0)
         {

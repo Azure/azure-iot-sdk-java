@@ -48,9 +48,9 @@ public class RegistryManager
      *
      * @param connectionString The iot hub connection string
      * @return The instance of RegistryManager
-     * @throws Exception This exception is thrown if the object creation failed
+     * @throws IOException This exception is thrown if the object creation failed
      */
-    public static RegistryManager createFromConnectionString(String connectionString) throws Exception
+    public static RegistryManager createFromConnectionString(String connectionString) throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
         if (Tools.isNullOrEmpty(connectionString))
