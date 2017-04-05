@@ -255,7 +255,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
                     this.executorService.shutdownNow(); // Cancel currently executing tasks
                     // Wait a while for tasks to respond to being cancelled
                     if (!this.executorService.awaitTermination(maxWaitTimeForTerminateExecutor, TimeUnit.SECONDS)){
-                        System.err.println("Pool did not terminate");
+                        logger.LogInfo("Pool did not terminate");
                     }
                 }
             } catch (InterruptedException ie) {

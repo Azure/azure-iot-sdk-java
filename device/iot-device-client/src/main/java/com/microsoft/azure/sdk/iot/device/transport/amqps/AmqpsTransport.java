@@ -434,13 +434,11 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                 }
                 catch (IllegalAccessException e)
                 {
-                    logger.LogError(e);
-                    System.err.println("Attempted to access private or protected member of class during message conversion.");
+                    logger.LogError("Attempted to access private or protected member of class during message conversion." + e.getMessage());
                 }
                 catch (InvocationTargetException e)
                 {
-                   logger.LogError(e); 
-                   System.err.println("Exception thrown while attempting to get member variable. See: " + e.getMessage());
+                   logger.LogError("Exception thrown while attempting to get member variable. See: " + e.getMessage());
                 }
             }
         }
