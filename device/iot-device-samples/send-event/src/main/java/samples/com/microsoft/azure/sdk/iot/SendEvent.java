@@ -138,13 +138,22 @@ public class SendEvent
         System.out.println("Sending the "
                 + "following event messages:");
 
+        String deviceId = "MyJavaDevice";
+        double temperature = 0.0;
+        double humidity = 0.0;
+
         for (int i = 0; i < numRequests; ++i)
         {
-            String msgStr = "Event Message " + Integer.toString(i);
+            temperature = 20 + Math.random() * 10;
+            humidity = 30 + Math.random() * 20;
+
+            String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\""+ humidity +"}";
             try
             {
                 Message msg = new Message(msgStr);
-                msg.setProperty("messageCount", Integer.toString(i));
+
+                msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
+                msg.setMessageId(java.util.UUID.randomUUID().toString());
                 msg.setExpiryTime(5000);
                 System.out.println(msgStr);
 

@@ -14,17 +14,24 @@ import java.net.URISyntaxException;
 
 /** Sends a number of event messages to an IoT Hub. */
 public class SendSerializedEvent {
+ private static final double MIN_TEMPERATURE = 20.0;
+    private static final double MIN_HUMIDITY = 60.0;
+
     private static class ParsedArguments {
         // Data
         private static final String DEFAULT_DEVICEID = "myFirstDevice";
-        private static final double DEFAULT_WINDSPEED = 10; // m/s
+        private static final int DEFAULT_NUMREQUESTS = 10; // m/s
+        private static final double MIN_TEMPERATURE = 20.0; // m/s
+        private static final double MIN_HUMIDITY = 60.0; // m/s
 
         public String[] rawArguments;
+        public int numRequests;
         public boolean parsedSuccessfully;
         public String connectionString;
         public IotHubClientProtocol protocol;
         public String deviceId;
-        public double windSpeed;
+        public double temperature;
+        public double humidity;
 
         // Constructors
         public ParsedArguments(String[] args) {
@@ -57,15 +64,9 @@ public class SendSerializedEvent {
                     }
 
                     if(rawArguments.length >= 3) {
-                        deviceId = rawArguments[2];
+                        numRequests = Integer.parseInt(rawArguments[2]);
                     } else {
-                        deviceId = DEFAULT_DEVICEID;
-                    }
-
-                    if(rawArguments.length >= 4) {
-                        windSpeed = Double.parseDouble(rawArguments[3]);
-                    } else {
-                        windSpeed = DEFAULT_WINDSPEED;
+                        numRequests = DEFAULT_NUMREQUESTS;
                     }
 
                     this.parsedSuccessfully = true;
@@ -95,9 +96,8 @@ public class SendSerializedEvent {
         System.out.println(
                "The program should be called with the following args: \n"
                     + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                    + "2. [mqtt | https | amqps | amqps_ws]\n"
-                    + "3. [deviceId] \n"
-                    + "4. [windSpeed] \n");
+                    + "2. (mqtt | https | amqps | amqps_ws)\n"
+                    + "3. [number of requests to send]");
      }
 
     /**
@@ -106,9 +106,8 @@ public class SendSerializedEvent {
      *
      * @param args 
      * args[0] = IoT Hub connection string
-     * args[1] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
-     * args[2] = temperature (integer; default = 65)
-     * args[3] = humidity (integer; default = 72)
+     * args[1] = number of requests to send
+     * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      */
     public static void main(String[] args)
             throws IOException, URISyntaxException {
@@ -136,19 +135,26 @@ public class SendSerializedEvent {
 
             ContosoAnemometer data = new ContosoAnemometer();
             data.deviceId = arguments.deviceId;
-            data.windSpeed = arguments.windSpeed;
 
-            String msgStr = data.serialize();
+            for (int i = 0; i < arguments.numRequests; i++) {
+                data.temperature = MIN_TEMPERATURE + Math.random() * 10;
+                data.humidity = MIN_HUMIDITY + Math.random() * 20;
+                data.messageId = i;
 
-            Message msg = new Message(msgStr);
-            msg.setExpiryTime(5000);
+                String msgStr = data.serialize();
 
-            Object lockobj = new Object();
-            EventCallback callback = new EventCallback();
-            client.sendEventAsync(msg, callback, lockobj);
+                Message msg = new Message(msgStr);
+                msg.setMessageId(java.util.UUID.randomUUID().toString());
+                msg.setProperty("temperatureAlert", (data.temperature > 28) ? "true" : "false"); 
+                msg.setExpiryTime(5000);
 
-            synchronized (lockobj) {
-                lockobj.wait();
+                Object lockobj = new Object();
+                EventCallback callback = new EventCallback();
+                client.sendEventAsync(msg, callback, lockobj);
+
+                synchronized (lockobj) {
+                    lockobj.wait();
+                }
             }
 
             client.close();

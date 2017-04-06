@@ -7,7 +7,9 @@ import com.google.gson.Gson;
 
 public class ContosoAnemometer {
     public String deviceId;
-    public double windSpeed;
+    public int messageId;
+    public double temperature;
+    public double humidity;
 
     public boolean TurnFanOn() {
         System.out.println("Turning fan on.");
