@@ -2504,6 +2504,68 @@ public class TwinTest {
         assertThat(innerMap.get("Key3").toString(), is("value3"));
     }
 
+
+    @Test
+    public void updateTwin_NonNullTags_succeed() throws IOException
+    {
+        // Arrange
+        Twin twin = new Twin();
+        twin.enableTags();
+        Map<String, Object> newValues = new HashMap<>();
+        newValues.put("key1", "value1");
+        newValues.put("key2", 1234);
+        newValues.put("key3", "value3");
+        twin.updateReportedProperty(newValues);
+        newValues.clear();
+        newValues.put("key7", true);
+        twin.updateDesiredProperty(newValues);
+        newValues.clear();
+        newValues.put("tag1", new HashMap<String, Object>(){{ put("Key1", "value1"); put("Key2", true); put("Key3", "value3"); }});
+        twin.updateTags(newValues);
+
+        Map<String, Object> newDesiredValues = new HashMap<>();
+        newDesiredValues.put("key1", "newValue1");
+        newDesiredValues.put("key3", "value30");
+        Map<String, Object> newReportedValues = new HashMap<>();
+        newReportedValues.put("key1", "value10");
+        newReportedValues.put("key2", 1234);
+        newReportedValues.put("key3", "VALUE3");
+
+        Map<String, Object> newTagsValues = new HashMap<>();
+        newTagsValues.put("key1", "newValue1");
+
+        // Act
+        String json = twin.updateTwin(newDesiredValues, newReportedValues, newTagsValues);
+
+        // Assert
+        assertThat(json, is(
+                "{\"tags\":{\"key1\":\"newValue1\"}," +
+                        "\"properties\":{" +
+                        "\"desired\":{\"key1\":\"newValue1\",\"key3\":\"value30\"}," +
+                        "\"reported\":{\"key1\":\"value10\",\"key3\":\"VALUE3\"}}}"));
+
+        Map<String, Object> result = twin.getReportedPropertyMap();
+        assertThat(result.size(), is(3));
+        assertThat(result.get("key1").toString(), is("value10"));
+        assertThat(Double.parseDouble(result.get("key2").toString()), is(1234.0));
+        assertThat(result.get("key3").toString(), is("VALUE3"));
+
+        result = twin.getDesiredPropertyMap();
+        assertThat(result.size(), is(3));
+        assertThat(result.get("key1").toString(), is("newValue1"));
+        assertThat(result.get("key3").toString(), is("value30"));
+        assertThat(result.get("key7").toString(), is("true"));
+
+        result = twin.getTagsMap();
+        assertThat(result.size(), is(2));
+        Map<String, Object> innerMap = (Map<String, Object>)result.get("tag1");
+        assertNotNull(innerMap);
+        assertThat(innerMap.size(), is(3));
+        assertThat(innerMap.get("Key1").toString(), is("value1"));
+        assertThat(innerMap.get("Key2").toString(), is("true"));
+        assertThat(innerMap.get("Key3").toString(), is("value3"));
+    }
+
     /* Tests_SRS_TWIN_21_118: [If one of the provided map is null, the updateTwin shall not change that part of the collection.] */
     @Test
     public void updateTwin_nullDesired_succeed() throws IOException

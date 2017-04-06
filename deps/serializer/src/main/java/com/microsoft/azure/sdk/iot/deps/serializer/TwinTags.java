@@ -140,7 +140,7 @@ public class TwinTags
     {
         Map<String, Object> diffMap = updateFromJson(tagsMap, tags);
 
-        if(diffMap != null)
+        if(diffMap != null && onTagsCallback != null)
         {
             onTagsCallback.execute(diffMap);
         }
