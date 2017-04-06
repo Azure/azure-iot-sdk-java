@@ -20,6 +20,9 @@ import java.util.Scanner;
 public class MainActivity extends AppCompatActivity {
 
     String connString = "[device connection string]";
+    String deviceId = "MyAndroidDevice";
+    double temperature;
+    double humidity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,11 +64,15 @@ public class MainActivity extends AppCompatActivity {
 
         for (int i = 0; i < 5; ++i)
         {
-            String msgStr = "Event Message " + Integer.toString(i);
+            temperature = 20.0 + Math.random() * 10;
+            humidity = 30.0 + Math.random() * 20;
+
+            String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\""+ humidity +"}";
             try
             {
                 Message msg = new Message(msgStr);
-                msg.setProperty("messageCount", Integer.toString(i));
+                msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
+                msg.setMessageId(java.util.UUID.randomUUID().toString());
                 System.out.println(msgStr);
                 EventCallback eventCallback = new EventCallback();
                 client.sendEventAsync(msg, eventCallback, i);

@@ -239,15 +239,20 @@ public class SendReceive
 
         System.out.println("Updated token expiry time to " + time);
 
+        String deviceId = "MyJavaDevice";
+        double temperature = 0.0;
+        double humidity = 0.0;
+
         for (int i = 0; i < numRequests; ++i)
         {
-            String msgStr = "Event Message " + Integer.toString(i);
+            temperature = 20 + Math.random() * 10;
+            humidity = 30 + Math.random() * 20;
+
+            String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\""+ humidity +"}";
             try
             {
                 Message msg = new Message(msgStr);
-                msg.setProperty("messageCount", Integer.toString(i));
-                msg.setProperty("key1", "value1");
-                msg.setProperty("key2", "value2");
+                msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 msg.setExpiryTime(5000);
                 System.out.println(msgStr);
