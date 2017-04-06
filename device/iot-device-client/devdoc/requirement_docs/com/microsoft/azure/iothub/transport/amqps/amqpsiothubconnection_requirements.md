@@ -142,6 +142,8 @@ public void onConnectionBound(Event event)
 
 **SRS_AMQPSIOTHUBCONNECTION_15_031: [**The event handler shall set the SASL_PLAIN authentication on the transport using the given user name and sas token.**]**
 
+**SRS_AMQPSIOTHUBCONNECTION_25_049: [**The event handler shall set the SSL Context to IOTHub SSL context containing valid certificates.**]**
+
 **SRS_AMQPSIOTHUBCONNECTION_15_032: [**The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport.**]**
 
 
@@ -172,7 +174,7 @@ public void onDelivery(Event event)
 
 **SRS_AMQPSIOTHUBCONNECTION_15_039: [**The event handler shall note the remote delivery state and use it and the Delivery (Proton) hash code to inform the AmqpsIotHubConnection of the message receipt.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_15_049: [**All the listeners shall be notified that a message was received from the server.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_050: [**All the listeners shall be notified that a message was received from the server.**]**
 
 
 ## onLinkFlow

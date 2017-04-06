@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
+import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 
@@ -110,7 +111,7 @@ public class MqttMessaging extends Mqtt
 
     }
 
-    public MqttMessaging(String serverURI, String deviceId, String userName, String password) throws IOException
+    public MqttMessaging(String serverURI, String deviceId, String userName, String password, IotHubSSLContext context) throws IOException
     {
         /*
         **Codes_SRS_MqttMessaging_25_001: [**The constructor shall throw InvalidParameter Exception if any of the parameters are null or empty .**]**
@@ -118,7 +119,7 @@ public class MqttMessaging extends Mqtt
         /*
         **Codes_SRS_MqttMessaging_25_002: [**The constructor shall use the configuration to instantiate super class and passing the parameters.**]**
          */
-        super(serverURI, deviceId, userName, password);
+        super(serverURI, deviceId, userName, password, context);
         /*
         **Codes_SRS_MqttMessaging_25_003: [**The constructor construct publishTopic and subscribeTopic from deviceId.**]**
          */

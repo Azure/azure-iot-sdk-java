@@ -7,6 +7,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.ObjectLock;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
@@ -119,7 +120,7 @@ public class AmqpsIotHubConnectionTest {
     protected SslDomain mockSslDomain;
 
     @Mocked
-    protected String mockCertPath;
+    protected IotHubSSLContext mockIotHubSSLContext;
 
     @Mocked
     protected WebSocketImpl mockWebSocket;
@@ -826,6 +827,7 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_030: [The event handler shall get the Transport (Proton) object from the event.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_031: [The event handler shall set the SASL_PLAIN authentication on the transport using the given user name and sas token.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_032: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_25_049: [The event handler shall set the SSL Context to IOTHub SSL context containing valid certificates.]
     @Test
     public void onConnectionBoundNoWebSockets() throws IOException
     {
@@ -841,23 +843,13 @@ public class AmqpsIotHubConnectionTest {
                 mockTransport.sasl();
                 result = mockSasl;
                 mockSasl.plain(anyString, anyString);
-                mockSslDomain.setTrustedCaDb(mockCertPath);
-                mockSslDomain.getTrustedCaDb();
-                result = mockCertPath;
+                mockSslDomain.setSslContext(mockIotHubSSLContext.getIotHubSSlContext());
                 mockSslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 mockTransport.ssl(mockSslDomain);
             }
         };
 
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false);
-
-        new MockUp<AmqpsIotHubConnection>() {
-            @Mock
-            String getPemFormat(String certPath)
-            {
-                return mockCertPath;
-            }
-        };
 
         connection.onConnectionBound(mockEvent);
 
@@ -872,7 +864,7 @@ public class AmqpsIotHubConnectionTest {
                 times = 1;
                 mockSasl.plain(anyString, anyString);
                 times = 1;
-                mockSslDomain.setTrustedCaDb(mockCertPath);
+                mockSslDomain.setSslContext(mockIotHubSSLContext.getIotHubSSlContext());
                 times = 1;
                 mockSslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 times = 1;
@@ -885,6 +877,7 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_030: [The event handler shall get the Transport (Proton) object from the event.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_031: [The event handler shall set the SASL_PLAIN authentication on the transport using the given user name and sas token.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_032: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_25_049: [The event handler shall set the SSL Context to IOTHub SSL context containing valid certificates.]
     @Test
     public void onConnectionBoundWebSockets() throws IOException
     {
@@ -904,23 +897,13 @@ public class AmqpsIotHubConnectionTest {
                 mockTransportInternal.sasl();
                 result = mockSasl;
                 mockSasl.plain(anyString, anyString);
-                mockSslDomain.setTrustedCaDb(mockCertPath);
-                mockSslDomain.getTrustedCaDb();
-                result = mockCertPath;
+                mockSslDomain.setSslContext(mockIotHubSSLContext.getIotHubSSlContext());
                 mockSslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 mockTransportInternal.ssl(mockSslDomain);
             }
         };
 
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false);
-
-        new MockUp<AmqpsIotHubConnection>() {
-            @Mock
-            String getPemFormat(String certPath)
-            {
-                return mockCertPath;
-            }
-        };
 
         Deencapsulation.setField(connection, "useWebSockets", true);
 
@@ -941,7 +924,7 @@ public class AmqpsIotHubConnectionTest {
                 times = 1;
                 mockSasl.plain(deviceId + "@sas." + hubName, anyString);
                 times = 1;
-                mockSslDomain.setTrustedCaDb(mockCertPath);
+                mockSslDomain.setSslContext(mockIotHubSSLContext.getIotHubSSlContext());
                 times = 1;
                 mockSslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 times = 1;
@@ -962,7 +945,6 @@ public class AmqpsIotHubConnectionTest {
             {
                 mockEvent.getReactor();
                 result = mockReactor;
-               // mockReactor.connection((Handler) any);
                 mockReactor.connectionToHost(anyString, anyInt, (Handler) any);
             }
         };
@@ -976,7 +958,6 @@ public class AmqpsIotHubConnectionTest {
             {
                 mockEvent.getReactor();
                 times = 1;
-                //mockReactor.connection(connection);
                 mockReactor.connectionToHost(anyString, anyInt, (Handler) connection);
                 times = 1;
             }

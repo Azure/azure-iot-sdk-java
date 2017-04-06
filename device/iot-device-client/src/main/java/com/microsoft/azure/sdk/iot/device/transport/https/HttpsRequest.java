@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
+import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 
 import java.io.IOException;
@@ -118,6 +119,18 @@ public class HttpsRequest
     {
         // Codes_SRS_HTTPSREQUEST_11_014: [The function shall set the read timeout for the request to the given value.]
         this.connection.setReadTimeoutMillis(timeout);
+        return this;
+    }
+
+    public HttpsRequest setSSLContext(IotHubSSLContext iotHubSSLContext)
+    {
+        if (iotHubSSLContext == null)
+        {
+            //Codes_SRS_HTTPSREQUEST_25_015: [The function shall throw IllegalArgumentException if parameter is null .]
+            throw new IllegalArgumentException("Context cannot be null");
+        }
+        //Codes_SRS_HTTPSREQUEST_25_016: [The function shall set the SSL context for the IotHub.]
+        this.connection.setSSLContext(iotHubSSLContext.getIotHubSSlContext());
         return this;
     }
 

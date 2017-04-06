@@ -12,13 +12,16 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransport;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttTransport;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.junit.Test;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -308,10 +311,225 @@ public class DeviceClientTest
         {
             {
                 expectedTransport.open();
+                times = 1;
             }
         };
     }
 
+    //Tests_SRS_DEVICECLIENT_25_054: [**The function shall create default IotHubSSL context if no certificate input was provided by user and save it by calling setIotHubSSLContext.**]**
+    @Test
+    public void openCreatesSSLContext(
+            @Mocked final ScheduledExecutorService mockScheduler,
+            @Mocked final AmqpsTransport mockTransport,
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubSendTask mockTask,
+            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+            throws URISyntaxException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    {
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(IotHubSSLContext.class);
+                result = mockIotHubSSLContext;
+
+            }
+        };
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+
+        final AmqpsTransport expectedTransport = mockTransport;
+        new Verifications()
+        {
+            {
+                mockConfig.setIotHubSSLContext(mockIotHubSSLContext);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENT_25_057: [**If an exception is thrown when creating a SSL context then Open shall throw IOException to the user indicating the failure**]**
+    @Test (expected = IOException.class)
+    public void openCreatesSSLContextThrowsIfDefaultCertFailed(
+            @Mocked final ScheduledExecutorService mockScheduler,
+            @Mocked final AmqpsTransport mockTransport,
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubSendTask mockTask,
+            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+            throws URISyntaxException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    {
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(IotHubSSLContext.class);
+                result = new CertificateException();
+            }
+        };
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+
+        final AmqpsTransport expectedTransport = mockTransport;
+        new Verifications()
+        {
+            {
+                mockConfig.setIotHubSSLContext(mockIotHubSSLContext);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENT_25_055: [**The function shall create IotHubSSL context with the certificate path if input was provided by user and save it by calling setIotHubSSLContext.**]**
+    @Test
+    public void openCreatesSSLContextWithCertificatePathProvided(
+            @Mocked final ScheduledExecutorService mockScheduler,
+            @Mocked final AmqpsTransport mockTransport,
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubSendTask mockTask,
+            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+            throws URISyntaxException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    {
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        final String pathToCert = "test/path";
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getPathToCertificate();
+                result = pathToCert;
+                Deencapsulation.newInstance(IotHubSSLContext.class, pathToCert, true);
+                result = mockIotHubSSLContext;
+            }
+        };
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+
+        new Verifications()
+        {
+            {
+                mockConfig.setIotHubSSLContext(mockIotHubSSLContext);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENT_25_057: [**If an exception is thrown when creating a SSL context then Open shall throw IOException to the user indicating the failure**]**
+    @Test (expected = IOException.class)
+    public void openCreatesSSLContextWithCertificatePathProvidedThrowsIfInvalidCertPath(
+            @Mocked final ScheduledExecutorService mockScheduler,
+            @Mocked final AmqpsTransport mockTransport,
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubSendTask mockTask,
+            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+            throws URISyntaxException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    {
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        final String pathToCert = "test/path";
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getPathToCertificate();
+                result = pathToCert;
+                Deencapsulation.newInstance(IotHubSSLContext.class, pathToCert, true);
+                result = new FileNotFoundException();
+            }
+        };
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+    }
+
+    //Tests_SRS_DEVICECLIENT_25_056: [**The function shall create IotHubSSL context with the certificate String if input was provided by user and save it by calling setIotHubSSLContext.**]**
+    @Test
+    public void openCreatesSSLContextWithCertificateProvided(
+            @Mocked final ScheduledExecutorService mockScheduler,
+            @Mocked final AmqpsTransport mockTransport,
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubSendTask mockTask,
+            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+            throws URISyntaxException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    {
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        final String userCert = "test/path";
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getUserCertificateString();
+                result = userCert;
+                Deencapsulation.newInstance(IotHubSSLContext.class, userCert, false);
+                result = mockIotHubSSLContext;
+            }
+        };
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+
+        new Verifications()
+        {
+            {
+                mockConfig.setIotHubSSLContext(mockIotHubSSLContext);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENT_25_057: [**If an exception is thrown when creating a SSL context then Open shall throw IOException to the user indicating the failure**]**
+    @Test (expected = IOException.class)
+    public void openCreatesSSLContextWithCertificateProvidedInvalidThrows(
+            @Mocked final ScheduledExecutorService mockScheduler,
+            @Mocked final AmqpsTransport mockTransport,
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubSendTask mockTask,
+            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+            throws URISyntaxException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    {
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        final String userCert = "test/path";
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getUserCertificateString();
+                result = userCert;
+                Deencapsulation.newInstance(IotHubSSLContext.class, userCert, false);
+                result = new IllegalArgumentException();
+            }
+        };
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+
+        new Verifications()
+        {
+            {
+                mockConfig.setIotHubSSLContext(mockIotHubSSLContext);
+                times = 1;
+            }
+        };
+    }
     // Tests_SRS_DEVICECLIENT_11_023: [The function shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.]
     @Test
     public void openStartsSendTask(

@@ -26,6 +26,7 @@ public class HttpsConnection
 
     public int getResponseStatus() throws IOException;
     public Map<String, List<String>> getResponseHeaders() throws IOException;
+    protected void setSSLContext(SSLContext sslContext) throws IllegalArgumentException;
 }
 ```
 
@@ -86,6 +87,16 @@ public void setReadTimeoutMillis(int timeout);
 
 **SRS_HTTPSCONNECTION_11_023: [**The function shall set the read timeout to the given value.**]**
 
+
+### setSSLContext
+
+```java
+protected void setSSLContext(SSLContext sslContext) throws IllegalArgumentException;
+```
+
+**SRS_HTTPSCONNECTION_25_024: [**The function shall set the the SSL context with the given value.**]**
+
+**SRS_HTTPSCONNECTION_25_025: [**The function shall throw IllegalArgumentException if the context is null value.**]**
 
 ### writeOutput
 

@@ -7,6 +7,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.MessageCallback;
 import mockit.Mocked;
 import org.junit.Test;
@@ -321,6 +322,7 @@ public class DeviceClientConfigTest
                 is(expectedMessageLockTimeoutSecs));
     }
 
+    //Tests_SRS_DEVICECLIENTCONFIG_25_027: [**The function shall return the value of the path to the certificate.**] **
     @Test
     public void getPathToCertificateGets() throws URISyntaxException
     {
@@ -328,13 +330,116 @@ public class DeviceClientConfigTest
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
         final String sharedAccessToken = null;
+        final String certPath = "/test/path/to/certificate";
 
         DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
 
-        String certPath = config.getPathToCertificate();
+        config.setPathToCert(certPath);
+
+        String testCertPath = config.getPathToCertificate();
 
         assertNotNull(certPath);
-        File certificate = new File(certPath);
-        assertTrue (certificate.exists());
+        assertEquals(testCertPath, certPath);
     }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_25_028: [**The function shall set the path to the certificate**] **
+    @Test
+    public void setPathToCertificateSets() throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+        final String certPath = "/test/path/to/certificate";
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
+
+        config.setPathToCert(certPath);
+
+        String testCertPath = config.getPathToCertificate();
+
+        assertNotNull(certPath);
+        assertEquals(testCertPath, certPath);
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_25_030: [**The function shall return the value of the user certificate string.**] **
+    @Test
+    public void getUserCertificateGets() throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+        final String cert = "ValidCertString";
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
+
+        config.setUserCertificateString(cert);
+
+        String testCert = config.getUserCertificateString();
+
+        assertNotNull(cert);
+        assertEquals(testCert, cert);
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_25_029: [**The function shall set user certificate String**] **
+    @Test
+    public void setUserCertificateSets() throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+        final String cert = "ValidCertString";
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
+
+        config.setUserCertificateString(cert);
+
+        String testCert = config.getUserCertificateString();
+
+        assertNotNull(cert);
+        assertEquals(testCert, cert);
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_25_032: [**The function shall return the IotHubSSLContext.**] **
+    @Test
+    public void getIotHubSSLContextGets(@Mocked final IotHubSSLContext mockedContext) throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+        final String cert = "ValidCertString";
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
+
+        config.setIotHubSSLContext(mockedContext);
+
+        IotHubSSLContext testContext = config.getIotHubSSLContext();
+
+        assertNotNull(testContext);
+        assertEquals(testContext, mockedContext);
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_25_031: [**The function shall set IotHub SSL Context**] **
+    @Test
+    public void setIotHubSSLContextSets(@Mocked final IotHubSSLContext mockedContext) throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+        final String cert = "ValidCertString";
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
+
+        config.setIotHubSSLContext(mockedContext);
+
+        IotHubSSLContext testContext = config.getIotHubSSLContext();
+
+        assertNotNull(testContext);
+        assertEquals(testContext, mockedContext);
+    }
+
 }

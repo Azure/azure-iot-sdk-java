@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 
+import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.Message;
 
 import mockit.*;
@@ -47,12 +48,15 @@ public class MqttTest {
     @Mocked
     protected MqttMessage mockMqttMessage;
 
+    @Mocked
+    IotHubSSLContext mockIotHubSSLContext;
+
     private Mqtt instantiateMqtt(boolean withParameters) throws IOException
     {
 
         if (withParameters)
         {
-            Mqtt mockMqtt = new Mqtt(serverUri, clientId, userName, password)
+            Mqtt mockMqtt = new Mqtt(serverUri, clientId, userName, password, mockIotHubSSLContext)
             {
 
                 @Mock
@@ -251,6 +255,8 @@ public class MqttTest {
                     times = 1;
                     mockMqttConnectionOptions.setPassword(password.toCharArray());
                     times = 1;
+                    mockMqttConnectionOptions.setSocketFactory(mockIotHubSSLContext.getIotHubSSlContext().getSocketFactory());
+                    times = 1;
                     new ConcurrentSkipListMap<>();
                     times = 1;
                     new Object();
@@ -380,7 +386,7 @@ public class MqttTest {
         try
         {
             //act
-            mockMqtt = new Mqtt(null, clientId, userName, password)
+            mockMqtt = new Mqtt(null, clientId, userName, password,  mockIotHubSSLContext)
             {
 
                 @Mock
@@ -1105,7 +1111,7 @@ public class MqttTest {
         final byte[] payload = {0x61, 0x62, 0x63};
         baseConstructorExpectations(true);
         baseConnectExpectation();
-        final Mqtt mockMqtt = new Mqtt(serverUri, clientId, userName, password)
+        final Mqtt mockMqtt = new Mqtt(serverUri, clientId, userName, password,  mockIotHubSSLContext)
         {
 
             @Mock
@@ -1162,7 +1168,7 @@ public class MqttTest {
         final byte[] payload = {0x61, 0x62, 0x63};
         baseConstructorExpectations(true);
         baseConnectExpectation();
-        final Mqtt mockMqtt = new Mqtt(serverUri, clientId, userName, password)
+        final Mqtt mockMqtt = new Mqtt(serverUri, clientId, userName, password,  mockIotHubSSLContext)
         {
 
             @Mock
@@ -1215,7 +1221,7 @@ public class MqttTest {
         //arrange
         final byte[] payload = {0x61, 0x62, 0x63};
         baseConstructorExpectations(true);
-        final Mqtt mockMqtt = new Mqtt(serverUri, clientId, userName, password)
+        final Mqtt mockMqtt = new Mqtt(serverUri, clientId, userName, password,  mockIotHubSSLContext)
         {
 
             @Mock
@@ -1353,7 +1359,7 @@ public class MqttTest {
                     mockMqttConnectionOptions.setMqttVersion(anyInt);
                     mockMqttConnectionOptions.setUserName(anyString);
                     mockMqttConnectionOptions.setPassword(password.toCharArray());
-
+                    mockMqttConnectionOptions.setSocketFactory(mockIotHubSSLContext.getIotHubSSlContext().getSocketFactory());
                     mockMqttAsyncClient.isConnected();
                     result = false;
                     mockMqttAsyncClient.isConnected();
@@ -1413,6 +1419,7 @@ public class MqttTest {
                     mockMqttConnectionOptions.setMqttVersion(anyInt);
                     mockMqttConnectionOptions.setUserName(anyString);
                     mockMqttConnectionOptions.setPassword(password.toCharArray());
+                    mockMqttConnectionOptions.setSocketFactory(mockIotHubSSLContext.getIotHubSSlContext().getSocketFactory());
 
                     mockMqttAsyncClient.isConnected();
                     result = false;

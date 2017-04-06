@@ -85,6 +85,8 @@ public class HttpsIotHubConnection
                             setHeaderField("iothub-to", eventUri.getPath()).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_009: [The function shall set the header field 'content-type' to be the message content type.]
                             setHeaderField("content-type", msg.getContentType());
+            //Codes_SRS_HTTPSIOTHUBCONNECTION_25_040: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
+            request.setSSLContext(this.config.getIotHubSSLContext());
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_012: [If the IoT Hub could not be reached, the function shall throw an IOException.]
             HttpsResponse response = request.send();
@@ -132,6 +134,8 @@ public class HttpsIotHubConnection
                             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_018: [The function shall set the header field 'iothub-messagelocktimeout' to be the configuration parameter messageLockTimeoutSecs.]
                                     setHeaderField("iothub-messagelocktimeout",
                                     Integer.toString(messageLockTimeoutSecs));
+            //Codes_SRS_HTTPSIOTHUBCONNECTION_25_041: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
+            request.setSSLContext(this.config.getIotHubSSLContext());
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_023: [If the IoT Hub could not be reached, the function shall throw an IOException.]
             HttpsResponse response = request.send();
@@ -245,6 +249,9 @@ public class HttpsIotHubConnection
                     setHeaderField("iothub-to", resultPath).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_035: [The function shall set the header field 'if-match' to be the e-tag saved when receiveMessage() was previously called.]
                             setHeaderField("if-match", this.messageEtag);
+
+            //Codes_SRS_HTTPSIOTHUBCONNECTION_25_042: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
+            request.setSSLContext(this.config.getIotHubSSLContext());
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_037: [If the IoT Hub could not be reached, the function shall throw an IOException.]
             HttpsResponse response = request.send();

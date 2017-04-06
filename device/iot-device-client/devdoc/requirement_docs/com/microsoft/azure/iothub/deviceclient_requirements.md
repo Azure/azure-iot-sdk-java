@@ -83,6 +83,13 @@ public void open();
 
 **SRS_DEVICECLIENT_11_036: [**If an error occurs in opening the transport, the function shall throw an IOException.**]**
 
+**SRS_DEVICECLIENT_25_054: [**The function shall create default IotHubSSL context if no certificate input was provided by user and save it by calling setIotHubSSLContext.**]**
+
+**SRS_DEVICECLIENT_25_055: [**The function shall create IotHubSSL context with the certificate path if input was provided by user and save it by calling setIotHubSSLContext.**]**
+
+**SRS_DEVICECLIENT_25_056: [**The function shall create IotHubSSL context with the certificate String if input was provided by user and save it by calling setIotHubSSLContext.**]**
+
+**SRS_DEVICECLIENT_25_057: [**If an exception is thrown when creating a SSL context then Open shall throw IOException to the user indicating the failure**]**
 
 ### close
 
@@ -179,7 +186,7 @@ public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, O
 
 **SRS_DEVICECLIENT_25_024: [**This method shall subscribe to device methods by calling subscribeToDeviceMethod on DeviceMethod object which it created.**]**
 
-**SRS_DEVICECLIENT_25_025: [**This method shall update the deviceMethodCallback if called again, but it shall not subscribe twice.**]**
+**SRS_DEVICECLIENT_25_025: [**This method shall not create a new instance of deviceMethod if called twice.**]**
 
 
 ### setOption

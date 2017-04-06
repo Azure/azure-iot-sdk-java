@@ -46,6 +46,8 @@ public IotHubStatusCode sendEvent(HttpsMessage msg) throws IOException;**
 
 **SRS_HTTPSIOTHUBCONNECTION_11_006: [**The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.**]**
 
+**SRS_HTTPSIOTHUBCONNECTION_25_040: [**The function shall set the IotHub SSL context by calling setSSLContext on the request.**]**
+
 **SRS_HTTPSIOTHUBCONNECTION_11_007: [**The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.**]**
 
 **SRS_HTTPSIOTHUBCONNECTION_11_008: [**The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/messages/events'.**]**
@@ -74,6 +76,8 @@ public Message receiveMessage() throws IOException;
 **SRS_HTTPSIOTHUBCONNECTION_11_017: [**The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/messages/devicebound'.**]**
 
 **SRS_HTTPSIOTHUBCONNECTION_11_018: [**The function shall set the header field 'iothub-messagelocktimeout' to be the configuration parameter messageLockTimeoutSecs.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_25_041: [**The function shall set the IotHub SSL context by calling setSSLContext on the request.**]**
 
 **SRS_HTTPSIOTHUBCONNECTION_11_019: [**If a response with IoT Hub status code OK is received, the function shall return the IoT Hub message included in the response.**]**
 
@@ -113,6 +117,8 @@ public void sendMessageResult(IotHubMessageResult result) throws IOException;
 **SRS_HTTPSIOTHUBCONNECTION_11_034: [**The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.**]**
 
 **SRS_HTTPSIOTHUBCONNECTION_11_035: [**The function shall set the header field 'if-match' to be the e-tag saved when receiveMessage() was previously called.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_25_042: [**The function shall set the IotHub SSL context by calling setSSLContext on the request.**]**
 
 **SRS_HTTPSIOTHUBCONNECTION_11_037: [**If the IoT Hub could not be reached, the function shall throw an IOException.**]**
 

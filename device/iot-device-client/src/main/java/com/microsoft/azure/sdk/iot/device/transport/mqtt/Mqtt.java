@@ -3,13 +3,14 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
+import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.io.IOException;
-import java.security.InvalidParameterException;
+import java.security.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 abstract public class Mqtt implements MqttCallback
@@ -45,7 +46,7 @@ abstract public class Mqtt implements MqttCallback
         private static final int maxInFlightCount = 10;
 
 
-        MqttConnectionInfo(String serverURI, String clientId, String userName, String password) throws IOException
+        MqttConnectionInfo(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext) throws IOException
         {
             try
             {
@@ -53,9 +54,15 @@ abstract public class Mqtt implements MqttCallback
                 mqttAsyncClient = new MqttAsyncClient(serverURI, clientId, new MemoryPersistence());
                 mqttAsyncClient.setCallback(Mqtt.this);
                 connectionOptions = new MqttConnectOptions();
-                this.updateConnectionOptions(userName, password);
+                this.updateConnectionOptions(userName, password, iotHubSSLContext);
             }
             catch (MqttException e)
+            {
+                mqttAsyncClient = null;
+                connectionOptions = null;
+                throw new IOException("Error initializing MQTT connection:" + e.getMessage());
+            }
+            catch (Exception e)
             {
                 mqttAsyncClient = null;
                 connectionOptions = null;
@@ -71,17 +78,19 @@ abstract public class Mqtt implements MqttCallback
          * @param userPassword the user password for the mqtt broker connection.
          */
 
-        private void updateConnectionOptions(String userName, String userPassword)
+        private void updateConnectionOptions(String userName, String userPassword, IotHubSSLContext iotHubSSLContext)
         {
             this.connectionOptions.setKeepAliveInterval(keepAliveInterval);
             this.connectionOptions.setCleanSession(setCleanSession);
             this.connectionOptions.setMqttVersion(mqttVersion);
             this.connectionOptions.setUserName(userName);
             this.connectionOptions.setPassword(userPassword.toCharArray());
+            this.connectionOptions.setSocketFactory(iotHubSSLContext.getIotHubSSlContext().getSocketFactory());
         }
+
     }
 
-    private void setMqttInfo(String serverURI, String clientId, String userName, String password) throws IOException
+    private void setMqttInfo(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext) throws IOException
     {
         /*
         **Codes_SRS_Mqtt_25_003: [**The constructor shall use the configuration to instantiate an instance of the inner class MqttConnectionInfo if not already created.**]**
@@ -91,7 +100,7 @@ abstract public class Mqtt implements MqttCallback
          */
         if (Mqtt.info == null)
         {
-            Mqtt.info = new MqttConnectionInfo(serverURI, clientId, userName, password);
+            Mqtt.info = new MqttConnectionInfo(serverURI, clientId, userName, password, iotHubSSLContext);
             Mqtt.allReceivedMessages = new ConcurrentSkipListMap<String, byte[]>();
             Mqtt.MQTT_LOCK = new Object();
         }
@@ -125,12 +134,12 @@ abstract public class Mqtt implements MqttCallback
      * @param userPassword the user password for the mqtt broker connection.
      */
 
-    public Mqtt(String serverURI, String clientId, String userName, String userPassword) throws IOException
+    public Mqtt(String serverURI, String clientId, String userName, String userPassword, IotHubSSLContext iotHubSSLContext) throws IOException
     {
         /*
          ** Codes_SRS_Mqtt_25_002: [**The constructor shall throw InvalidParameter Exception if any of the parameters are null or empty .**]**
          */
-        if (serverURI == null || clientId == null || userName == null || userPassword == null)
+        if (serverURI == null || clientId == null || userName == null || userPassword == null || iotHubSSLContext == null)
         {
             throw new InvalidParameterException();
         }
@@ -145,7 +154,7 @@ abstract public class Mqtt implements MqttCallback
             /*
             **Codes_SRS_Mqtt_25_003: [**The constructor shall use the configuration to instantiate an instance of the inner class MqttConnectionInfo if not already created.**]**
              */
-            setMqttInfo(serverURI, clientId, userName, userPassword);
+            setMqttInfo(serverURI, clientId, userName, userPassword, iotHubSSLContext);
         }
         catch (IOException e)
         {

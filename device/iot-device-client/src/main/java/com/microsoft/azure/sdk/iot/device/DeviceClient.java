@@ -179,6 +179,49 @@ public final class DeviceClient implements Closeable
             return;
         }
 
+        if (this.config.getPathToCertificate() == null && this.config.getUserCertificateString() == null)
+        {
+            try
+            {
+                //Codes_SRS_DEVICECLIENT_25_054: [**The function shall create default IotHubSSL context if no certificate input was provided by user and save it by calling setIotHubSSLContext.**]**
+                IotHubSSLContext iotHubSSLContext = new IotHubSSLContext();
+                this.config.setIotHubSSLContext(iotHubSSLContext);
+            }
+            catch (Exception e)
+            {
+                //Codes_SRS_DEVICECLIENT_25_057: [**If an exception is thrown when creating a SSL context then Open shall throw IOException to the user indicating the failure**]**
+                throw new IOException(e.getCause());
+            }
+        }
+        else if (this.config.getPathToCertificate() != null)
+        {
+            try
+            {
+                //Codes_SRS_DEVICECLIENT_25_055: [**The function shall create IotHubSSL context with the certificate path if input was provided by user and save it by calling setIotHubSSLContext.**]**
+                IotHubSSLContext iotHubSSLContext = new IotHubSSLContext(this.config.getPathToCertificate(), true);
+                this.config.setIotHubSSLContext(iotHubSSLContext);
+            }
+            catch (Exception e)
+            {
+                //Codes_SRS_DEVICECLIENT_25_057: [**If an exception is thrown when creating a SSL context then Open shall throw IOException to the user indicating the failure**]**
+                throw new IOException(e.getCause());
+            }
+        }
+        else if (this.config.getUserCertificateString() != null)
+        {
+            try
+            {
+                //Codes_SRS_DEVICECLIENT_25_056: [**The function shall create IotHubSSL context with the certificate String if input was provided by user and save it by calling setIotHubSSLContext.**]**
+                IotHubSSLContext iotHubSSLContext = new IotHubSSLContext(this.config.getUserCertificateString(), false);
+                this.config.setIotHubSSLContext(iotHubSSLContext);
+            }
+            catch (Exception e)
+            {
+                //Codes_SRS_DEVICECLIENT_25_057: [**If an exception is thrown when creating a SSL context then Open shall throw IOException to the user indicating the failure**]**
+                throw new IOException(e.getCause());
+            }
+        }
+
         // Codes_SRS_DEVICECLIENT_11_035: [The function shall open the transport to communicate with an IoT Hub.]
         // Codes_SRS_DEVICECLIENT_11_036: [If an error occurs in opening the transport, the function shall throw an IOException.]
         this.transport.open();

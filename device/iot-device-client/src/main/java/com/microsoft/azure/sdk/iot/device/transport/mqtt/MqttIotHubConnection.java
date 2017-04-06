@@ -111,7 +111,7 @@ public class MqttIotHubConnection
 
 
                 this.deviceMessaging = new MqttMessaging(sslPrefix + this.config.getIotHubHostname() + sslPortSuffix,
-                        this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword);
+                        this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword, this.config.getIotHubSSLContext());
                 this.deviceMethod = new MqttDeviceMethod();
                 this.deviceTwin = new MqttDeviceTwin();
 

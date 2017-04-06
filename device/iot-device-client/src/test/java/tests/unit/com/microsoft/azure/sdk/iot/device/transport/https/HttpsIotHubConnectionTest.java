@@ -3,14 +3,11 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.MessageProperty;
-import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
@@ -187,6 +184,31 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockRequest.setReadTimeoutMillis(expectedReadTimeoutMillis);
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_25_040: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
+    @Test
+    public void sendEventSetsIotHubSSLContext(@Mocked final IotHubEventUri mockUri,
+                                              @Mocked final IotHubSSLContext mockContext) throws IOException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getIotHubSSLContext();
+                result = mockContext;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.sendEvent(mockMsg);
+
+        new Verifications()
+        {
+            {
+                mockRequest.setSSLContext(mockContext);
+                times = 1;
             }
         };
     }
@@ -484,9 +506,34 @@ public class HttpsIotHubConnectionTest
         };
     }
 
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_25_041: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
+    @Test
+    public void receiveMessageSetsIotHubSSLContext(@Mocked final IotHubMessageUri mockUri,
+                                                   @Mocked final IotHubSSLContext mockContext) throws IOException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getIotHubSSLContext();
+                result = mockContext;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.receiveMessage();
+
+        new Verifications()
+        {
+            {
+                mockRequest.setSSLContext(mockContext);
+                times = 1;
+            }
+        };
+    }
+
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_019: [If a response with IoT Hub status code OK is received, the function shall return the IoT Hub message included in the response.]
     @Test
-    public void receiveMessageReturnsMessageBody(@Mocked final IotHubMessageUri mockUri) throws IOException
+    public void receiveMessageReturnsMessageBody(@Mocked final IotHubMessageUri mockUri, @Mocked final Message mockedMessage) throws IOException
     {
         final byte[] body = { 0x61, 0x62 };
         final String eTag = "test-etag";
@@ -505,15 +552,9 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.receiveMessage();
+        Message actualMessage = conn.receiveMessage();
 
-        final byte[] expectedBody = body;
-        new Verifications()
-        {
-            {
-                new Message(expectedBody);
-            }
-        };
+        assertEquals(actualMessage.getBytes(), mockedMessage.getBytes());
     }
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_020: [If a response with IoT Hub status code OK is received, the function shall save the response header field 'etag'.]
@@ -1058,6 +1099,45 @@ public class HttpsIotHubConnectionTest
             {
                 mockRequest.setHeaderField(withMatch("(?i)if-match"),
                         expectedEtag);
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_25_042: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
+    @Test
+    public void sendMessageResultSetsIotHubSSLContext(@Mocked final IotHubRejectUri mockUri,
+                                                      @Mocked final IotHubSSLContext mockedContext) throws IOException
+    {
+        final String eTag = "test-etag";
+        final int readTimeoutMillis = 23;
+        new NonStrictExpectations()
+        {
+            {
+                mockResponse.getStatus();
+                returns(200, 204);
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
+                IotHubStatusCode.getIotHubStatusCode(204);
+                result = IotHubStatusCode.OK_EMPTY;
+                mockResponse.getHeaderField(withMatch("(?i)etag"));
+                result = eTag;
+                mockConfig.getReadTimeoutMillis();
+                result = readTimeoutMillis;
+                mockConfig.getIotHubSSLContext();
+                result = mockedContext;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.receiveMessage();
+        conn.sendMessageResult(IotHubMessageResult.REJECT);
+
+
+        new Verifications()
+        {
+            {
+                mockRequest.setSSLContext(mockedContext);
+                times = 2;
             }
         };
     }

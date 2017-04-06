@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import javax.net.ssl.SSLContext;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -31,7 +32,11 @@ public final class DeviceClientConfig
     protected final String deviceId;
     protected final String deviceKey;
     protected final String sharedAccessToken;
-    protected String pathToCertificate;
+
+    /* Certificates related to IotHub */
+    private String userCertificateString;
+    private String pathToCertificate;
+    private IotHubSSLContext iotHubSSLContext;
 
     /**
      * The callback to be invoked if a message of Device Method type received.
@@ -99,18 +104,67 @@ public final class DeviceClientConfig
     }
 
     /**
+     * Setter for the IotHub SSL Context
+     * @param iotHubSSLContext IotHubSSLContext to be set
+     */
+    public void setIotHubSSLContext(IotHubSSLContext iotHubSSLContext)
+    {
+        //Codes_SRS_DEVICECLIENTCONFIG_25_031: [**The function shall set IotHub SSL Context**] **
+        this.iotHubSSLContext = iotHubSSLContext;
+    }
+
+    /**
+     * Getter for the IotHubSSLContext
+     * @return IotHubSSLContext for this IotHub
+     */
+    public IotHubSSLContext getIotHubSSLContext()
+    {
+        //Codes_SRS_DEVICECLIENTCONFIG_25_032: [**The function shall return the IotHubSSLContext.**] **
+        return iotHubSSLContext;
+    }
+
+    /**
      * Setter for the providing trusted certificate.
-     *
      * @param pathToCertificate path to the certificate for one way authentication.
      */
     public void setPathToCert(String pathToCertificate)
     {
+        //Codes_SRS_DEVICECLIENTCONFIG_25_028: [**The function shall set the path to the certificate**] **
         this.pathToCertificate = pathToCertificate;
     }
 
     /**
+     * Getter for the path to the certificate.
+     * @return the path to certificate.
+     */
+    public String getPathToCertificate()
+    {
+        //Codes_SRS_DEVICECLIENTCONFIG_25_027: [**The function shall return the value of the path to the certificate.**] **
+        return this.pathToCertificate;
+    }
+
+    /**
+     * Setter for the user trusted certificate
+     * @param userCertificateString valid user trusted certificate string
+     */
+    public void setUserCertificateString(String userCertificateString)
+    {
+        //Codes_SRS_DEVICECLIENTCONFIG_25_029: [**The function shall set user certificate String**] **
+        this.userCertificateString = userCertificateString;
+    }
+
+    /**
+     * Getter for the user trusted certificate
+     * @return user trusted certificate as string
+     */
+    public String getUserCertificateString()
+    {
+        //Codes_SRS_DEVICECLIENTCONFIG_25_030: [**The function shall return the value of the user certificate string.**] **
+        return userCertificateString;
+    }
+
+    /**
      * Setter for the message callback. Can be {@code null}.
-     *
      * @param callback the message callback. Can be {@code null}.
      * @param context the context to be passed in to the callback.
      */
@@ -124,7 +178,6 @@ public final class DeviceClientConfig
 
     /**
      * Getter for the IoT Hub hostname.
-     *
      * @return the IoT Hub hostname.
      */
     public String getIotHubHostname()
@@ -135,7 +188,6 @@ public final class DeviceClientConfig
 
     /**
      * Getter for the IoT Hub name.
-     *
      * @return the IoT Hub name.
      */
     public String getIotHubName()
@@ -336,19 +388,7 @@ public final class DeviceClientConfig
         return DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS;
     }
 
-    /**
-     * Getter for the path to the certificate.
-     *
-     * @return the path to certificate.
-     */
-    public String getPathToCertificate()
-    {
-        if (this.pathToCertificate  == null) {
-            DefaultCertificate cert = new DefaultCertificate();
-            this.pathToCertificate = cert.getDefaultCertificate();
-        }
-        return this.pathToCertificate;
-    }
+
 
     protected DeviceClientConfig()
     {
@@ -358,6 +398,7 @@ public final class DeviceClientConfig
         this.deviceKey = null;
         this.sharedAccessToken = null;
         this.pathToCertificate = null;
+        this.iotHubSSLContext = null;
     }
 
 }

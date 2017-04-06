@@ -17,6 +17,7 @@ public class HttpsRequest
 
     public HttpsRequest setHeaderField(String field, String value);
     public HttpsRequest setReadTimeoutMillis(int timeout);
+    public HttpsRequest setSSLContext(IotHubSSLContext iotHubSSLContext);
 }
 ```
 
@@ -67,3 +68,14 @@ public HttpsRequest setReadTimeoutMillis(int timeout);
 ```
 
 **SRS_HTTPSREQUEST_11_014: [**The function shall set the read timeout for the request to the given value.**]**
+
+
+### setSSLContext
+
+```java
+public HttpsRequest setSSLContext(IotHubSSLContext iotHubSSLContext);
+```
+
+**SRS_HTTPSREQUEST_25_015: [**The function shall throw IllegalArgumentException if parameter is null .**]**
+
+**SRS_HTTPSREQUEST_25_016: [**The function shall set the SSL context for the IotHub.**]**

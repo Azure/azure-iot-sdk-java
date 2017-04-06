@@ -12,7 +12,7 @@ parsePayload, onReconnect, and onReconnectComplete events.
 ```java
 public final class MqttMessaging extends Mqtt
 {
-    public MqttMessaging(String serverURI, String clientId, String userName, String password) throws IOException;
+    public MqttMessaging(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext) throws IOException;
         
     public Message receive() throws IOException;
     String parseTopic() throws IOException;
@@ -30,7 +30,7 @@ public final class MqttMessaging extends Mqtt
 ### MqttMessaging
 
 ```java
-public MqttMessaging(String serverURI, String clientId, String userName, String password);
+public MqttMessaging(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext);
 ```
 
 **SRS_MqttMessaging_25_001: [**The constructor shall throw InvalidParameter Exception if any of the parameters are null or empty .**]**

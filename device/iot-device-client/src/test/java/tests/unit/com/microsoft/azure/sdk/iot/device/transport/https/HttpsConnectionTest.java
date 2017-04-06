@@ -6,9 +6,11 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 
+import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 /** Unit tests for HttpsConnection. */
 public class HttpsConnectionTest
@@ -323,6 +326,61 @@ public class HttpsConnectionTest
         };
     }
 
+    //Tests_SRS_HTTPSCONNECTION_25_024: [**The function shall set the the SSL context with the given value.**]**
+    @Test
+    public void setSSLContextSetsContext(@Mocked final SSLContext mockedContext) throws IOException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        final String field = "test-field";
+        final String value = "test-value";
+        final int timeout = 1;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+            }
+        };
+        final HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+
+        Deencapsulation.invoke(conn, "setSSLContext", mockedContext);
+
+        new Verifications()
+        {
+            {
+                mockUrlConn.setSSLSocketFactory(mockedContext.getSocketFactory());
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSCONNECTION_25_025: [The function shall throw IllegalArgumentException if the context is null value.**]**
+    @Test (expected = IllegalArgumentException.class)
+    public void setSSLContextThrowsOnNullContext(@Mocked final SSLContext mockedContext) throws IOException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        final String field = "test-field";
+        final String value = "test-value";
+        final int timeout = 1;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+            }
+        };
+        final HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+
+        Deencapsulation.invoke(conn, "setSSLContext", SSLContext.class);
+    }
 
     // Tests_SRS_HTTPSCONNECTION_11_010: [The function shall throw an IllegalArgumentException if the request does not currently use method POST or PUT and the body is non-empty.]
     @Test(expected = IllegalArgumentException.class)

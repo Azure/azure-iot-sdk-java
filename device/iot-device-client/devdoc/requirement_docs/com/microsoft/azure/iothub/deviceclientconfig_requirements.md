@@ -26,6 +26,12 @@ public final class DeviceClientConfig
     public String getPathToCertificate();
     public void setPathToCert(String pathToCertificate);
 
+    public void setUserCertificateString(String userCertificateString);
+    public String getUserCertificateString();
+
+    public void setIotHubSSLContext(IotHubSSLContext iotHubSSLContext);
+    public IotHubSSLContext getIotHubSSLContext();
+
     public void setMessageCallback(MessageCallback callback, Object context);
 
     public MessageCallback getMessageCallback();
@@ -128,7 +134,7 @@ public setTokenValidSecs(long expiryTime);
 public String getPathToCertificate();
 ```
 
-** SRS_DEVICECLIENTCONFIG_11_014: [**The function shall return the value of the path to the certificate.**] **
+** SRS_DEVICECLIENTCONFIG_25_027: [**The function shall return the value of the path to the certificate.**] **
 
 ### setPathToCert
 
@@ -136,8 +142,39 @@ public String getPathToCertificate();
 public void setPathToCert(String pathToCertificate);
 ```
 
-** SRS_DEVICECLIENTCONFIG_25_015: [**The function shall set the path to the certificate**] **
+** SRS_DEVICECLIENTCONFIG_25_028: [**The function shall set the path to the certificate**] **
 
+### setUserCertificateString
+
+```java
+public void setUserCertificateString(String userCertificateString);
+```
+
+** SRS_DEVICECLIENTCONFIG_25_029: [**The function shall set user certificate String**] **
+
+### getUserCertificateString
+
+```java
+public String getUserCertificateString();
+```
+
+** SRS_DEVICECLIENTCONFIG_25_030: [**The function shall return the value of the user certificate string.**] **
+
+### setIotHubSSLContext
+
+```java
+public void setIotHubSSLContext(IotHubSSLContext iotHubSSLContext);
+```
+
+** SRS_DEVICECLIENTCONFIG_25_031: [**The function shall set IotHub SSL Context**] **
+
+### getIotHubSSLContext
+
+```java
+public IotHubSSLContext getIotHubSSLContext();
+```
+
+** SRS_DEVICECLIENTCONFIG_25_032: [**The function shall return the IotHubSSLContext.**] **
 
 ### setMessageCallback
 

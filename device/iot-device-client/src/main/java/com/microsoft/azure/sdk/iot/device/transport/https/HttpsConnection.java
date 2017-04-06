@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 /**
  * <p>
@@ -283,6 +284,17 @@ public class HttpsConnection
         }
 
         return byteArray;
+    }
+
+    protected void setSSLContext(SSLContext sslContext) throws IllegalArgumentException
+    {
+        if (sslContext == null)
+        {
+            //Codes_SRS_HTTPSCONNECTION_25_025: [The function shall throw IllegalArgumentException if the context is null value.**]**
+            throw new IllegalArgumentException("SSL context cannot be null");
+        }
+        //Codes_SRS_HTTPSCONNECTION_25_024: [**The function shall set the the SSL context with the given value.**]**
+        this.connection.setSSLSocketFactory(sslContext.getSocketFactory());
     }
 
     protected HttpsConnection()

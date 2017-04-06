@@ -11,7 +11,7 @@ An MQTT is an abtract class defining all the operations that can be performed ov
 ```java
 public final class Mqtt implements MqttCallback
 {
-    public Mqtt(String serverURI, String clientId, String userName, String password) throws IOException;
+    public Mqtt(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext) throws IOException;
     public Mqtt() throws IOException;
 
     abstract String parseTopic() throws IOException;
@@ -19,8 +19,8 @@ public final class Mqtt implements MqttCallback
 
     private class MqttConnectionInfo
     {
-        MqttConnectionInfo(String serverURI, String clientId, String userName, String password) throws IOException
-        private void updateConnectionOptions(String userName, String userPassword)
+        MqttConnectionInfo(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext) throws IOException
+        private void updateConnectionOptions(String userName, String userPassword, IotHubSSLContext iotHubSSLContext)
     }
 
     protected void connect() throws IOException
@@ -47,7 +47,7 @@ public Mqtt();
 ### Mqtt
 
 ```java
-public Mqtt(String serverURI, String clientId, String userName, String password);
+public Mqtt(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext);
 ```
 
 **SRS_Mqtt_25_002: [**The constructor shall throw InvalidParameter Exception if any of the parameters are null or empty .**]**

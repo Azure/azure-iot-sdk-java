@@ -6,6 +6,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 
+import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
@@ -623,5 +624,52 @@ public class HttpsRequestTest
                 mockConn.setReadTimeoutMillis(expectedReadTimeout);
             }
         };
+    }
+
+    //Tests_SRS_HTTPSREQUEST_25_016: [The function shall set the SSL context for the IotHub.]
+    @Test
+    public void setSSLContextSetsSSLContext(@Mocked final HttpsConnection mockConn,
+                                            @Mocked final IotHubSSLContext mockedContext) throws IOException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        final byte[] body = new byte[0];
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+            }
+        };
+
+        HttpsRequest request =
+                new HttpsRequest(mockUrl, httpsMethod, body);
+        request.setSSLContext(mockedContext);
+
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockConn, "setSSLContext", mockedContext.getIotHubSSlContext());
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSREQUEST_25_015: [**The function shall throw IllegalArgumentException if parameter is null .**]**
+    @Test (expected = IllegalArgumentException.class)
+    public void setSSLContextThrowsOnNull(@Mocked final HttpsConnection mockConn,
+                                            @Mocked final IotHubSSLContext mockedContext) throws IOException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        final byte[] body = new byte[0];
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+            }
+        };
+
+        HttpsRequest request =
+                new HttpsRequest(mockUrl, httpsMethod, body);
+        request.setSSLContext(null);
     }
 }
