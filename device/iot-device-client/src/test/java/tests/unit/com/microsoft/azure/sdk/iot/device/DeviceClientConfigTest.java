@@ -4,14 +4,14 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.MessageCallback;
 import mockit.Mocked;
 import org.junit.Test;
 
+import java.io.File;
 import java.net.URISyntaxException;
 
 /** Unit tests for IoTHubClientConfig. */
@@ -319,5 +319,22 @@ public class DeviceClientConfigTest
         final int expectedMessageLockTimeoutSecs = 180;
         assertThat(testMessageLockTimeoutSecs,
                 is(expectedMessageLockTimeoutSecs));
+    }
+
+    @Test
+    public void getPathToCertificateGets() throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
+
+        String certPath = config.getPathToCertificate();
+
+        assertNotNull(certPath);
+        File certificate = new File(certPath);
+        assertTrue (certificate.exists());
     }
 }

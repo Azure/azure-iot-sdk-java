@@ -344,7 +344,7 @@ public final class DeviceClientConfig
     public String getPathToCertificate()
     {
         if (this.pathToCertificate  == null) {
-            DefaultCertificate cert = new DefaultCertificate(deviceId);
+            DefaultCertificate cert = new DefaultCertificate();
             this.pathToCertificate = cert.getDefaultCertificate();
         }
         return this.pathToCertificate;
