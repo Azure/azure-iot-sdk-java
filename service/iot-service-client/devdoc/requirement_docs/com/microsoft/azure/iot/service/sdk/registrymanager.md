@@ -24,6 +24,7 @@ public class RegistryManager
     public CompletableFuture<Device> getDeviceAsync(String deviceId);
     public ArrayList<Device> getDevices(Integer maxCount);
     public CompletableFuture<ArrayList<Device>> getDevicesAsync(Integer maxCount);
+    public String getDeviceConnectionString(Device device);
     public Device updateDevice(Device device, Boolean forceUpdate);
     public Device updateDevice(Device device);
     public CompletableFuture<Device> updateDeviceAsync(Device device);
@@ -131,6 +132,14 @@ public CompletableFuture<ArrayList<Device>> getDevicesAsync(Integer maxCount);
 **SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_030: [** The function shall throw IllegalArgumentException if the input count number is less than 1 **]**
 
 **SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_031: [** The function shall create an async wrapper around the getDevices() function call, handle the return value or delegate exception **]**
+
+### getDeviceConnectionString
+```java
+public String getDeviceConnectionString(Device device);
+```
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_085: [** The function shall return a connectionString for the input device **]**
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_086: [** The function shall throw IllegalArgumentException if the input device is null, or if deviceId or primary key are empty or null **]**
 
 ### updateDevice
 

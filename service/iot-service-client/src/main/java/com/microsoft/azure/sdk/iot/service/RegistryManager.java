@@ -39,7 +39,7 @@ public class RegistryManager
             .registerTypeAdapter(Device.class, new DeviceDeserializer())
             .registerTypeAdapter(Device.class, new DeviceSerializer())
             .create();
-    private final Integer DEFAULT_HTTP_TIMOUT_MS = 24000;
+    private final Integer DEFAULT_HTTP_TIMEOUT_MS = 24000;
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
     private IotHubConnectionString iotHubConnectionString;
 
@@ -301,6 +301,34 @@ public class RegistryManager
     }
 
     /**
+     * Return the iothub device connection string for a provided device.
+     * @param device The device object to get the connectionString
+     * @return The iothub device connection string
+     */
+    public String getDeviceConnectionString(Device device)
+    {
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_086: [The function shall throw IllegalArgumentException if the input device is null, or if deviceId or primary key are empty or null]
+        if (device == null)
+        {
+            throw new IllegalArgumentException("device cannot be null");
+        }
+
+        if(Tools.isNullOrEmpty(device.getDeviceId()) || Tools.isNullOrEmpty(device.getPrimaryKey()))
+        {
+            throw new IllegalArgumentException("device is not valid");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_085: [The function shall return a connectionString for the input device]
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(String.format("HostName=%s;", iotHubConnectionString.getHostName()));
+        stringBuilder.append(String.format("DeviceId=%s;", device.getDeviceId()));
+        stringBuilder.append(String.format("SharedAccessKey=%s", device.getPrimaryKey()));
+        return stringBuilder.toString();
+    }
+
+
+    /**
      * Update device not forced
      *
      * @param device The device object containing updated data
@@ -448,7 +476,7 @@ public class RegistryManager
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_049: [The function shall create a new HttpRequest for removing the device from IotHub]
         HttpRequest request = new HttpRequest(url, HttpMethod.DELETE, new byte[0]);
-        request.setReadTimeoutMillis(DEFAULT_HTTP_TIMOUT_MS);
+        request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
         request.setHeaderField("authorization", sasToken);
         request.setHeaderField("If-Match", "*");
 
@@ -783,7 +811,7 @@ public class RegistryManager
     private HttpRequest CreateRequest(URL url, HttpMethod method, byte[] payload, String sasToken) throws IOException
     {
         HttpRequest request = new HttpRequest(url, method, payload);
-        request.setReadTimeoutMillis(DEFAULT_HTTP_TIMOUT_MS);
+        request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
         request.setHeaderField("authorization", sasToken);
         request.setHeaderField("Request-Id", "1001");
         request.setHeaderField("Accept", "application/json");

@@ -22,6 +22,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 @RunWith(JMockit.class)
@@ -353,6 +354,164 @@ public class RegistryManagerTest
         ArrayList<Device> devices = completableFuture.get();
 
         getDevicesVerifications(numberOfDevices, devices);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_085: [The function shall return a connectionString for the input device]
+    @Test
+    public void getDeviceConnectionString_return_ok() throws Exception
+    {
+        String deviceId = "somedevice";
+        String hostName = "aaa.bbb.ccc";
+        String validDeviceKey = "validKey==";
+        String expectedDeviceConnectionString = "HostName=" + hostName + ";DeviceId=" + deviceId + ";SharedAccessKey=" + validDeviceKey;
+        String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+
+        new NonStrictExpectations()
+        {
+            {
+                iotHubConnectionString.getHostName();
+                result=hostName;
+                device.getDeviceId();
+                result = deviceId;
+                device.getPrimaryKey();
+                result = validDeviceKey;
+            }
+        };
+
+        commonExpectations(connectionString, deviceId);
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        Device returnDevice = registryManager.getDevice(deviceId);
+        String returnDeviceConnectionString =  registryManager.getDeviceConnectionString(returnDevice);
+
+        assertEquals(expectedDeviceConnectionString, returnDeviceConnectionString);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_086: [The function shall throw IllegalArgumentException if the input device is null, or if deviceId or primary key are empty or null]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void getDeviceConnectionString_null_device_throw() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        registryManager.getDeviceConnectionString(null);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_086: [The function shall throw IllegalArgumentException if the input device is null, or if deviceId or primary key are empty or null]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void getDeviceConnectionString_null_deviceId_throw() throws Exception
+    {
+        String deviceId = "somedevice";
+        String hostName = "aaa.bbb.ccc";
+        String validDeviceKey = "validKey==";
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+
+        new NonStrictExpectations()
+        {
+            {
+                iotHubConnectionString.getHostName();
+                result=hostName;
+                device.getDeviceId();
+                result = null;
+                device.getPrimaryKey();
+                result = validDeviceKey;
+            }
+        };
+
+        commonExpectations(connectionString, deviceId);
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        Device returnDevice = registryManager.getDevice(deviceId);
+        registryManager.getDeviceConnectionString(returnDevice);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_086: [The function shall throw IllegalArgumentException if the input device is null, or if deviceId or primary key are empty or null]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void getDeviceConnectionString_empty_deviceId_throw() throws Exception
+    {
+        String deviceId = "somedevice";
+        String hostName = "aaa.bbb.ccc";
+        String validDeviceKey = "validKey==";
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+
+        new NonStrictExpectations()
+        {
+            {
+                iotHubConnectionString.getHostName();
+                result=hostName;
+                device.getDeviceId();
+                result = "";
+                device.getPrimaryKey();
+                result = validDeviceKey;
+            }
+        };
+
+        commonExpectations(connectionString, deviceId);
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        Device returnDevice = registryManager.getDevice(deviceId);
+        registryManager.getDeviceConnectionString(returnDevice);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_086: [The function shall throw IllegalArgumentException if the input device is null, or if deviceId or primary key are empty or null]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void getDeviceConnectionString_null_deviceKey_throw() throws Exception
+    {
+        String deviceId = "somedevice";
+        String hostName = "aaa.bbb.ccc";
+        String validDeviceKey = null;
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+
+        new NonStrictExpectations()
+        {
+            {
+                iotHubConnectionString.getHostName();
+                result=hostName;
+                device.getDeviceId();
+                result = deviceId;
+                device.getPrimaryKey();
+                result = validDeviceKey;
+            }
+        };
+
+        commonExpectations(connectionString, deviceId);
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        Device returnDevice = registryManager.getDevice(deviceId);
+        registryManager.getDeviceConnectionString(returnDevice);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_086: [The function shall throw IllegalArgumentException if the input device is null, or if deviceId or primary key are empty or null]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void getDeviceConnectionString_empty_deviceKey_throw() throws Exception
+    {
+        String deviceId = "somedevice";
+        String hostName = "aaa.bbb.ccc";
+        String validDeviceKey = "";
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+
+        new NonStrictExpectations()
+        {
+            {
+                iotHubConnectionString.getHostName();
+                result=hostName;
+                device.getDeviceId();
+                result = deviceId;
+                device.getPrimaryKey();
+                result = validDeviceKey;
+            }
+        };
+
+        commonExpectations(connectionString, deviceId);
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        Device returnDevice = registryManager.getDevice(deviceId);
+        registryManager.getDeviceConnectionString(returnDevice);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_031: [The function shall create an async wrapper around the getDevices() function call, handle the return value or delegate exception]

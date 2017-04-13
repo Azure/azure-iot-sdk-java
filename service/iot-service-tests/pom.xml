@@ -1,8 +1,8 @@
 <!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>iot-service-tests</artifactId>
-    <name>Iot Hub Java Service SDK Tests</name>
-    <description>Test suite for the Microsoft Azure IoT Service SDK for Java</description>
+    <name>Iot Hub Java Service SDK Integration Tests</name>
+    <description>Integration tests for the Microsoft Azure IoT Service SDK for Java</description>
     <developers>
         <developer>
             <id>microsoft</id>
@@ -35,6 +35,11 @@
             <artifactId>junit-dep</artifactId>
             <version>4.11</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-device-client</artifactId>
+            <version>1.1.23</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure</groupId>
