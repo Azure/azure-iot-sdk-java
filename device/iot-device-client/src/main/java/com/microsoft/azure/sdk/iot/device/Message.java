@@ -274,33 +274,12 @@ public class Message
      */
     private void initialize() {
         this.lockToken = UUID.randomUUID().toString();
-        this.messageId = generateId(127); // 1 in 2.03035346985252E-242 chances of collision. Might be safe enough...
-        this.correlationId = generateId(127);
+        this.messageId = UUID.randomUUID().toString();
+        this.correlationId = UUID.randomUUID().toString();
         this.feedbackStatusCode = FeedbackStatusCodeEnum.none;
         this.ack = FeedbackStatusCodeEnum.none;
         this.properties = new ArrayList<MessageProperty>();
         this.logger = new CustomLogger(this.getClass());
-    }
-
-    /**
-     * Generates a random ID string.
-     * @param length Length of the string to be generated.
-     * @return A string containing valid ID chars.
-     */
-    private String generateId(int length)
-    {
-        String validCharacters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-:.+%_#*?!(),=@;$'";
-
-        char[] charSequence = new char[length];
-
-        Random random = new Random();
-
-        for (int i = 0; i < length; i++)
-        {
-            charSequence[i] = validCharacters.charAt(random.nextInt(validCharacters.length()));
-        }
-
-        return new String(charSequence);
     }
 
     /**
