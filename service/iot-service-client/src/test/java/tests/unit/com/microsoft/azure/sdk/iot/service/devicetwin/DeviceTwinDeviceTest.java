@@ -3,9 +3,11 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service.devicetwin;
+package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.Twin;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -81,7 +83,7 @@ public class DeviceTwinDeviceTest
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
 
         //act
-        Twin testDeviceTwinObject = testDevice.getTwinObject();
+        Twin testDeviceTwinObject = Deencapsulation.invoke(testDevice, "getTwinObject" );
 
         //assert
         assertNotNull(testDeviceTwinObject);
@@ -95,8 +97,8 @@ public class DeviceTwinDeviceTest
         DeviceTwinDevice testDevice2 = new DeviceTwinDevice("testDevice2");
 
         //act
-        Twin testDeviceTwinObject1 = testDevice1.getTwinObject();
-        Twin testDeviceTwinObject2 = testDevice2.getTwinObject();
+        Twin testDeviceTwinObject1 = Deencapsulation.invoke(testDevice1, "getTwinObject" );
+        Twin testDeviceTwinObject2 = Deencapsulation.invoke(testDevice2, "getTwinObject" );
 
         //assert
         assertNotEquals(testDeviceTwinObject1, testDeviceTwinObject2);
@@ -315,7 +317,7 @@ public class DeviceTwinDeviceTest
         testRepProp.put("testRep", "repObject");
 
         //act
-        testDevice.setReportedProperties(testRepProp);
+        Deencapsulation.invoke(testDevice, "setReportedProperties", testRepProp);
 
         //assert
         Set<Pair> actualRepProp = testDevice.getReportedProperties();
@@ -374,10 +376,10 @@ public class DeviceTwinDeviceTest
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         Map<String, Object> testTags = new HashMap<>();
         testTags.put("testTag", "tagObject");
-        testDevice.setTags(testTags);
+        Deencapsulation.invoke(testDevice, "setTags", testTags);
 
         //act
-        Map<String, Object> actualTags = testDevice.getTagsMap();
+        Map<String, Object> actualTags = Deencapsulation.invoke(testDevice, "getTagsMap");
 
         //assert
         assertEquals(testTags.size(), actualTags.size());
@@ -401,10 +403,10 @@ public class DeviceTwinDeviceTest
         testTags.put("testTag", "tagObject");
 
         //act
-        testDevice.setTags(testTags);
+        Deencapsulation.invoke(testDevice, "setTags", testTags);
 
         //assert
-        Map<String, Object> actualTags = testDevice.getTagsMap();
+        Map<String, Object> actualTags = Deencapsulation.invoke(testDevice, "getTagsMap");
         assertEquals(testTags.size(), actualTags.size());
 
         for(Map.Entry<String, Object> test : actualTags.entrySet())
@@ -421,13 +423,13 @@ public class DeviceTwinDeviceTest
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         Map<String, Object> testTags = new HashMap<>();
         testTags.put("testTag", "tagObject");
-        testDevice.setTags(testTags);
+        Deencapsulation.invoke(testDevice, "setTags", testTags);
 
         //act
         testDevice.clearTags();
 
         //assert
-        Map<String, Object> actualTags = testDevice.getDesiredMap();
+        Map<String, Object> actualTags = Deencapsulation.invoke(testDevice, "getDesiredMap");
         assertNull(actualTags);
         Set<Pair> actualTagsSet = testDevice.getTags();
         assertTrue(actualTagsSet.size() == 0);
@@ -443,10 +445,10 @@ public class DeviceTwinDeviceTest
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         Map<String, Object> testRep = new HashMap<>();
         testRep.put("testRep", "repObject");
-        testDevice.setReportedProperties(testRep);
+        Deencapsulation.invoke(testDevice, "setReportedProperties", testRep);
 
         //act
-        Map<String, Object> actualTags = testDevice.getReportedMap();
+        Map<String, Object> actualTags = Deencapsulation.invoke(testDevice, "getReportedMap");
 
         //assert
         assertEquals(testRep.size(), actualTags.size());
@@ -470,10 +472,10 @@ public class DeviceTwinDeviceTest
         testRep.put("testRep", "repObject");
 
         //act
-        testDevice.setReportedProperties(testRep);
+        Deencapsulation.invoke(testDevice, "setReportedProperties", testRep);
 
         //assert
-        Map<String, Object> actualTags = testDevice.getReportedMap();
+        Map<String, Object> actualTags = Deencapsulation.invoke(testDevice, "getReportedMap");
 
         assertEquals(testRep.size(), actualTags.size());
 
@@ -494,10 +496,10 @@ public class DeviceTwinDeviceTest
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         Map<String, Object> testRep = new HashMap<>();
         testRep.put("testRep", "repObject");
-        testDevice.setDesiredProperties(testRep);
+        Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
 
         //act
-        Map<String, Object> actualTags = testDevice.getDesiredMap();
+        Map<String, Object> actualTags = Deencapsulation.invoke(testDevice, "getDesiredMap");
 
         //assert
         assertEquals(testRep.size(), actualTags.size());
@@ -521,10 +523,10 @@ public class DeviceTwinDeviceTest
         testRep.put("testRep", "repObject");
 
         //act
-        testDevice.setDesiredProperties(testRep);
+        Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
 
         //assert
-        Map<String, Object> actualTags = testDevice.getDesiredMap();
+        Map<String, Object> actualTags = Deencapsulation.invoke(testDevice, "getDesiredMap");
 
         assertEquals(testRep.size(), actualTags.size());
 
@@ -542,13 +544,13 @@ public class DeviceTwinDeviceTest
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         Map<String, Object> testRep = new HashMap<>();
         testRep.put("testRep", "repObject");
-        testDevice.setDesiredProperties(testRep);
+        Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
 
         //act
         testDevice.clearDesiredProperties();
 
         //assert
-        Map<String, Object> actualTags = testDevice.getDesiredMap();
+        Map<String, Object> actualTags = Deencapsulation.invoke(testDevice, "getDesiredMap");
 
         assertNull(actualTags);
         Set<Pair> actualTagsSet = testDevice.getDesiredProperties();
@@ -562,15 +564,15 @@ public class DeviceTwinDeviceTest
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         Map<String, Object> testRep = new HashMap<>();
         testRep.put("testKey", "testObject");
-        testDevice.setDesiredProperties(testRep);
-        testDevice.setTags(testRep);
+        Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
+        Deencapsulation.invoke(testDevice, "setTags", testRep);
 
         //act
         testDevice.clearTwin();
 
         //assert
-        Map<String, Object> actualTags = testDevice.getTagsMap();
-        Map<String, Object> actualDes = testDevice.getDesiredMap();
+        Map<String, Object> actualTags = Deencapsulation.invoke(testDevice, "getTagsMap");
+        Map<String, Object> actualDes = Deencapsulation.invoke(testDevice, "getDesiredMap");
 
         assertNull(actualTags);
         assertNull(actualDes);
@@ -706,7 +708,8 @@ public class DeviceTwinDeviceTest
         Map<String, Object> testRepProp = new HashMap<>();
         testRepProp.put("testRep1", "repObject1");
         testRepProp.put("testRep2", "repObject2");
-        testDevice.setReportedProperties(testRepProp);
+
+        Deencapsulation.invoke(testDevice, "setReportedProperties", testRepProp);
 
         //act
         String testDeviceString = testDevice.reportedPropertiesToString();

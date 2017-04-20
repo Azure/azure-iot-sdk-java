@@ -3,16 +3,19 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service.devicetwin;
+package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.Twin;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -132,11 +135,14 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        Map<String, Object> testMap = new HashMap<>();
         new NonStrictExpectations()
         {
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
+                Deencapsulation.invoke(mockedDevice, "getTwinObject");
+                result = mockedTwinObject;
             }
         };
 
@@ -157,11 +163,15 @@ public class DeviceTwinTest
                 times = 1;
                 mockedTwinObject.updateTwin(anyString);
                 times = 1;
-                mockedDevice.setTags((Map<String, Object>)any);
+                Deencapsulation.invoke(mockedDevice, "getTwinObject");
+                times = 4;
+                mockedTwinObject.getTagsMap();
                 times = 1;
-                mockedDevice.setDesiredProperties((Map<String, Object>)any);
+                Deencapsulation.invoke(mockedDevice, "setTags", testMap);
                 times = 1;
-                mockedDevice.setReportedProperties((Map<String, Object>)any);
+                Deencapsulation.invoke(mockedDevice, "setDesiredProperties", testMap);
+                times = 1;
+                Deencapsulation.invoke(mockedDevice, "setReportedProperties", testMap );
                 times = 1;
             }
         };
@@ -363,7 +373,7 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                mockedDevice.getTwinObject();
+                Deencapsulation.invoke(mockedDevice, "getTwinObject");
                 result = mockedTwinObject;
                 mockedTwinObject.resetDesiredProperty((Map<String, Object>)any);
                 result = null;
@@ -398,7 +408,7 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                mockedDevice.getTwinObject();
+                Deencapsulation.invoke(mockedDevice, "getTwinObject");
                 result = mockedTwinObject;
                 mockedTwinObject.resetDesiredProperty((Map<String, Object>)any);
                 result = "";
@@ -715,9 +725,9 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                mockedDevice.getDesiredMap();
+                Deencapsulation.invoke(mockedDevice, "getDesiredMap");
                 result = testMap;
-                mockedDevice.getTagsMap();
+                Deencapsulation.invoke(mockedDevice, "getTagsMap");
                 result = testMap;
                 mockedTwinObject.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
                 result = "SomeJsonString";
@@ -810,9 +820,9 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                mockedDevice.getDesiredMap();
+                Deencapsulation.invoke(mockedDevice, "getDesiredMap");
                 result = testMap;
-                mockedDevice.getTagsMap();
+                Deencapsulation.invoke(mockedDevice, "getTagsMap");
                 result = testMap;
             }
         };
@@ -835,9 +845,9 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                mockedDevice.getDesiredMap();
+                Deencapsulation.invoke(mockedDevice, "getDesiredMap");
                 result = testMap;
-                mockedDevice.getTagsMap();
+                Deencapsulation.invoke(mockedDevice, "getTagsMap");
                 result = null;
                 mockedTwinObject.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
                 result = "SomeJsonString";
@@ -879,9 +889,9 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                mockedDevice.getDesiredMap();
+                Deencapsulation.invoke(mockedDevice, "getDesiredMap");
                 result = null;
-                mockedDevice.getTagsMap();
+                Deencapsulation.invoke(mockedDevice, "getTagsMap");
                 result = testMap;
                 mockedTwinObject.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
                 result = "SomeJsonString";
@@ -925,11 +935,11 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                mockedDevice.getDesiredMap();
+                Deencapsulation.invoke(mockedDevice, "getDesiredMap");
                 result = testMap;
-                mockedDevice.getTagsMap();
+                Deencapsulation.invoke(mockedDevice, "getTagsMap");
                 result = testMap;
-                mockedDevice.getTwinObject();
+                Deencapsulation.invoke(mockedDevice, "getTwinObject");
                 result = mockedTwinObject;
                 mockedTwinObject.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
                 result = null;
@@ -966,11 +976,11 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                mockedDevice.getDesiredMap();
+                Deencapsulation.invoke(mockedDevice, "getDesiredMap");
                 result = testMap;
-                mockedDevice.getTagsMap();
+                Deencapsulation.invoke(mockedDevice, "getTagsMap");
                 result = testMap;
-                mockedDevice.getTwinObject();
+                Deencapsulation.invoke(mockedDevice, "getTwinObject");
                 result = mockedTwinObject;
                 mockedTwinObject.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
                 result = "";
@@ -1007,11 +1017,11 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                mockedDevice.getDesiredMap();
+                Deencapsulation.invoke(mockedDevice, "getDesiredMap");
                 result = testMap;
-                mockedDevice.getTagsMap();
+                Deencapsulation.invoke(mockedDevice, "getTagsMap");
                 result = testMap;
-                mockedDevice.getTwinObject();
+                Deencapsulation.invoke(mockedDevice, "getTwinObject");
                 result = mockedTwinObject;
                 mockedTwinObject.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
                 result = "SomeJsonString";
