@@ -75,9 +75,13 @@ public void updateTwin(DeviceTwinDevice device) throws IotHubException, IOExcept
 ```
 **SRS_DEVICETWIN_25_013: [** The function shall throw IllegalArgumentException if the input device is null or if deviceId is null or empty **]**
 
+**SRS_DEVICETWIN_25_045: [** The function shall throw IllegalArgumentException if the both desired and tags maps are either empty or null **]**
+
 **SRS_DEVICETWIN_25_014: [** The function shall build the URL for this operation by calling getUrlTwin **]**
 
 **SRS_DEVICETWIN_25_015: [** The function shall serialize the twin map by calling updateTwin Api on the twin object for the device provided by the user**]**
+
+**SRS_DEVICETWIN_25_046: [** The function shall throw IOException if updateTwin Api call returned an empty or null json**]**
 
 **SRS_DEVICETWIN_25_016: [** The function shall create a new SAS token **]**
 

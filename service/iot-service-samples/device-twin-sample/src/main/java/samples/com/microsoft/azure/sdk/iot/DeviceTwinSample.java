@@ -7,16 +7,21 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
 
 /** Manages device twin operations on IotHub */
 public class DeviceTwinSample
 {
-    public static final String iotHubConnectionString = "[IOT HUB Connection String]";
-    public static final String deviceId = "[Device ID]";
+    private static final String iotHubConnectionString = "[Connection string goes here]";
+    private static final String deviceId = "[Device name goes here]";
 
     /**
      * @param args
@@ -36,6 +41,24 @@ public class DeviceTwinSample
             System.out.println("Getting device twin");
             twinClient.getTwin(device);
             System.out.println(device);
+
+            //Update Twin Tags and Desired Properties
+            Set<Pair> tags = new HashSet<Pair>();
+            tags.add(new Pair("HomeID", UUID.randomUUID()));
+            device.setTags(tags);
+
+            Set<Pair> desProp = new HashSet<Pair>();
+            int temp = new Random().nextInt(100);
+            desProp.add(new Pair("temp", temp));
+            device.setDesiredProperties(desProp);
+
+            System.out.println("Updating device twin");
+            twinClient.updateTwin(device);
+
+            System.out.println("Getting device twin");
+            twinClient.getTwin(device);
+            System.out.println(device);
+
         }
         catch (IotHubException e)
         {
