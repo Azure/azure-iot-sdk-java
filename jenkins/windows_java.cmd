@@ -19,12 +19,6 @@ call mvn install
 if errorlevel 1 goto :eof
 cd %build-root%
 
-REM -- Java Service Client - integration tests --
-cd %build-root%\iot-service-tests
-call mvn install -DskipITs=false
-if errorlevel 1 goto :eof
-cd %build-root%
-
 REM -- Java Device Client --
 cd %build-root%\device
 call mvn install
@@ -33,6 +27,12 @@ cd %build-root%
 
 REM -- Java Device Client - integration tests --
 cd %build-root%\iot-device-tests
+call mvn install -DskipITs=false
+if errorlevel 1 goto :eof
+cd %build-root%
+
+REM -- Java Service Client - integration tests --
+cd %build-root%\iot-service-tests
 call mvn install -DskipITs=false
 if errorlevel 1 goto :eof
 cd %build-root%
