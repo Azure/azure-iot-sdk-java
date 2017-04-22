@@ -12,25 +12,30 @@ mvn install
 
 # -- Java Service Client --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-cd $build_root/service
+cd $build_root/service/iot-service-client
+mvn install
+[ $? -eq 0 ] || exit $?
+
+# -- Java Service Samples --
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+cd $build_root/service/iot-service-samples
 mvn install
 [ $? -eq 0 ] || exit $?
 
 # -- Java Device Client --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-cd $build_root/device
+cd $build_root/device/iot-device-client
 mvn install
 [ $? -eq 0 ] || exit $?
 
-# -- Java Device Client -integration tests --
+# -- Java Device Samples --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-cd $build_root/iot-device-tests
-mvn install -DskipITs=false
+cd $build_root/device/iot-device-samples
+mvn install
 [ $? -eq 0 ] || exit $?
 
-# -- Java Service Client - integration tests --
+# -- Java SDK --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-cd $build_root/iot-service-tests
+cd $build_root
 mvn install -DskipITs=false
 [ $? -eq 0 ] || exit $?
-
