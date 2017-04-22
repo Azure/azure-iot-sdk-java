@@ -1,4 +1,5 @@
-<!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
+<!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
+<project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
     <artifactId>iot-service-samples</artifactId>
@@ -11,11 +12,6 @@
             <name>Microsoft</name>
         </developer>
     </developers>
-    <parent>
-        <groupId>com.microsoft.azure.sdk.iot</groupId>
-        <artifactId>iot-service-client-parent</artifactId>
-        <version>1.2.18</version>
-    </parent>
     <modules>
         <module>device-manager-sample</module>
         <module>service-client-sample</module>
@@ -31,6 +27,15 @@
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>2.4</version>

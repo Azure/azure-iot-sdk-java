@@ -3,6 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
     <artifactId>iot-device-samples</artifactId>
+    <version>1.1.24</version>
     <name>IoT Hub Java Device SDK Samples</name>
     <packaging>pom</packaging>
     <developers>
@@ -11,11 +12,6 @@
             <name>Microsoft</name>
         </developer>
     </developers>
-    <parent>
-        <groupId>com.microsoft.azure.sdk.iot</groupId>
-        <artifactId>iot-device-client-parent</artifactId>
-        <version>1.1.24</version>
-    </parent>
     <modules>
         <module>send-event</module>
 		<module>send-serialized-event</module>
@@ -33,6 +29,15 @@
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>2.4</version>
