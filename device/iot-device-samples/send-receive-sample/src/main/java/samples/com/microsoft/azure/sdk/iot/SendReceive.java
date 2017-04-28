@@ -56,6 +56,10 @@ public class SendReceive
             System.out.println(
                     "Received message " + counter.toString()
                             + " with content: " + new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
+            for (MessageProperty messageProperty : msg.getProperties())
+            {
+                System.out.println(messageProperty.getName() + " : " + messageProperty.getValue());
+            }
 
             int switchVal = counter.get() % 3;
             IotHubMessageResult res;
@@ -96,6 +100,10 @@ public class SendReceive
             System.out.println(
                     "Received message " + counter.toString()
                             + " with content: " + new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
+            for (MessageProperty messageProperty : msg.getProperties())
+            {
+                System.out.println(messageProperty.getName() + " : " + messageProperty.getValue());
+            }
 
             counter.increment();
 
