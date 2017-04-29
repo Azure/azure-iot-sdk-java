@@ -220,6 +220,15 @@ public class ServiceClient
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
         return feedbackReceiver;
     }
-    
+
+    /**
+     * Get FileUploadNotificationReceiver object.
+     *
+     * @return The instance of the FileUploadNotificationReceiver
+     */
+    public FileUploadNotificationReceiver getFileUploadNotificationReceiver()
+    {
+        return new FileUploadNotificationReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+    }
     
 }

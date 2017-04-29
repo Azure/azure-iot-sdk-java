@@ -105,7 +105,7 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_004: [The event handler shall get the Link, Receiver and Delivery (Proton) objects from the event]
         Receiver recv = (Receiver)event.getLink();
         Delivery delivery = recv.current();
-        if (delivery.isReadable() && !delivery.isPartial())
+        if (delivery.isReadable() && !delivery.isPartial() && delivery.getLink().getName().equals(RECEIVE_TAG))
         {
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_005: [The event handler shall read the received buffer]            int size = delivery.pending();
             int size = delivery.pending();
@@ -194,11 +194,14 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_015: [The event handler shall create a new Target (Proton) object using the given endpoint address]
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_016: [The event handler shall get the Link (Proton) object and set its target to the created Target (Proton) object]
         Link link = event.getLink();
-        Target t = new Target();
-        t.setAddress(ENDPOINT);
-        Source source = new Source();
-        source.setAddress(ENDPOINT);
-        link.setTarget(t);
-        link.setSource(source);
+        if (event.getLink().getName().equals(RECEIVE_TAG))
+        {
+            Target t = new Target();
+            t.setAddress(ENDPOINT);
+            Source source = new Source();
+            source.setAddress(ENDPOINT);
+            link.setTarget(t);
+            link.setSource(source);
+        }
     }
 }

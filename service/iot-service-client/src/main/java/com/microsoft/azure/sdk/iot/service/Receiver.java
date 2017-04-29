@@ -17,6 +17,6 @@ public abstract class Receiver
     protected abstract CompletableFuture<Void> openAsync();
     protected abstract CompletableFuture<Void> closeAsync();
 
-    protected abstract CompletableFuture<FeedbackBatch> receiveAsync();
-    protected abstract CompletableFuture<FeedbackBatch> receiveAsync(long timeoutSeconds);
+    protected abstract CompletableFuture<?> receiveAsync();
+    protected abstract CompletableFuture<?> receiveAsync(long timeoutSeconds);
 }

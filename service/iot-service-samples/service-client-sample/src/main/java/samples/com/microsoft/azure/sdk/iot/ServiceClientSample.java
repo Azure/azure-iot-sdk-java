@@ -7,12 +7,10 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubDeviceMaximumQueueDepthExceededException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,7 +25,7 @@ import java.util.List;
  */
 public class ServiceClientSample
 {
-    
+
     private static final String connectionString = "[Connection string goes here]";
     private static final String deviceId = "[Device name goes here]";
     
@@ -37,9 +35,10 @@ public class ServiceClientSample
 
     private static ServiceClient serviceClient = null;
     private static FeedbackReceiver feedbackReceiver = null;
+    private static FileUploadNotificationReceiver fileUploadNotificationReceiver = null;
     
     private static final int MAX_COMMANDS_TO_SEND = 5; // maximum commands to send in a loop
-    private static final int FEEDBACK_RECEVIER_TIMEOUT_MILLISECS = 10000; // Timeout in ms
+    private static final int RECEIVER_TIMEOUT = 10000; // Timeout in ms
  
     /**
      * @param args
@@ -52,84 +51,7 @@ public class ServiceClientSample
 
         openServiceClient();
         openFeedbackReceiver();
-
-        String commandMessage = "Cloud to device message...";
-
-        System.out.println("********* Sending message to device...");
-
-        Message messageToSend = new Message(commandMessage);
-        messageToSend.setDeliveryAcknowledgement(DeliveryAcknowledgement.Full);
-
-        // Setting standard properties
-        messageToSend.setMessageId(java.util.UUID.randomUUID().toString());
-        Date now = new Date();
-        messageToSend.setExpiryTimeUtc(new Date(now.getTime() + 60 * 1000));
-        messageToSend.setCorrelationId(java.util.UUID.randomUUID().toString());
-        messageToSend.setUserId(java.util.UUID.randomUUID().toString());
-        messageToSend.clearCustomProperties();
-
-        // Setting user properties
-        Map<String, String> propertiesToSend = new HashMap<String, String>();
-        propertiesToSend.put("mycustomKey1", "mycustomValue1");
-        propertiesToSend.put("mycustomKey2", "mycustomValue2");
-        propertiesToSend.put("mycustomKey3", "mycustomValue3");
-        propertiesToSend.put("mycustomKey4", "mycustomValue4");
-        propertiesToSend.put("mycustomKey5", "mycustomValue5");
-        messageToSend.setProperties(propertiesToSend);
-
-        try
-        {
-           CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, messageToSend);
-           completableFuture.get();
-            
-        }
-        
-        catch (ExecutionException e)
-        {
-            System.out.println("Exception : " + e.getMessage());
-            closeFeedbackReceiver();
-            closeServiceClient();
-            System.out.println("********* Shutting down ServiceClient sample...");
-            System.exit(0);
-            
-        }
-
-        try
-        {
-            System.out.println("********* Waiting for feedback... Set wait timeout to " +  Integer.toString(FEEDBACK_RECEVIER_TIMEOUT_MILLISECS / 1000) +  " seconds");
-            CompletableFuture<FeedbackBatch> future = feedbackReceiver.receiveAsync(FEEDBACK_RECEVIER_TIMEOUT_MILLISECS); // Wait for FEEDBACK_RECEVIER_TIMEOUT_MILLISECS to check for any feedback
-            FeedbackBatch feedbackBatch = future.get();
-
-            if (feedbackBatch != null)
-            {
-                System.out.println("********* Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc().toString() + " Record size: " + feedbackBatch.getRecords().size());
-            
-                for (int i=0; i < feedbackBatch.getRecords().size(); i++)
-                {
-                   System.out.println("Device id : " + feedbackBatch.getRecords().get(i).getDeviceId() + " Status description: " + feedbackBatch.getRecords().get(i).getDescription());
-                }
-            }
-            else
-            {
-               System.out.println("No feedback received !"); 
-               closeFeedbackReceiver();
-               closeServiceClient();
-               System.out.println("********* Shutting down ServiceClient sample...");
-               System.exit(0);
-            }
-            
-        }
-        
-        catch (ExecutionException e)
-        {
-           System.out.println("Exception : " + e.getMessage());
-           closeFeedbackReceiver();
-           closeServiceClient();
-           System.out.println("********* Shutting down ServiceClient sample...");
-           System.exit(0);
-            
-        }
-        
+        openFileUploadNotificationReceiver();
 
         // Sending multiple commands
         try
@@ -147,6 +69,30 @@ public class ServiceClientSample
             System.out.println("Exception:" + e.getMessage());
         }
 
+        // Receive FileUploadNotification
+        CompletableFuture<FileUploadNotification> fileUploadNotificationCompletableFuture = fileUploadNotificationReceiver.receiveAsync(RECEIVER_TIMEOUT);
+        FileUploadNotification fileUploadNotification = fileUploadNotificationCompletableFuture.get();
+
+        if (fileUploadNotification != null)
+        {
+            System.out.println("File Upload notification received");
+            System.out.println("Device Id : " + fileUploadNotification.getDeviceId());
+            System.out.println("Blob Uri: " + fileUploadNotification.getBlobUri());
+            System.out.println("Blob Name: " + fileUploadNotification.getBlobName());
+            System.out.println("Last Updated : " + fileUploadNotification.getLastUpdatedTimeDate());
+            System.out.println("Blob Size (Bytes): " + fileUploadNotification.getBlobSizeInBytes());
+            System.out.println("Enqueued Time: " + fileUploadNotification.getEnqueuedTimeUtcDate());
+        }
+        else
+        {
+            System.out.println("No file upload notification received !");
+            closeFileUploadNotificationReceiver();
+            closeServiceClient();
+            System.out.println("********* Shutting down ServiceClient sample...");
+            System.exit(0);
+        }
+
+        closeFileUploadNotificationReceiver();
         closeFeedbackReceiver();
         closeServiceClient();
 
@@ -194,6 +140,29 @@ public class ServiceClientSample
         future.get();
         feedbackReceiver = null;
         System.out.println("********* Successfully closed FeedbackReceiver.");
+    }
+
+
+    protected static void openFileUploadNotificationReceiver() throws ExecutionException, InterruptedException
+    {
+        if (serviceClient != null)
+        {
+            fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
+            if (fileUploadNotificationReceiver != null)
+            {
+                CompletableFuture<Void> future = fileUploadNotificationReceiver.openAsync();
+                future.get();
+                System.out.println("********* Successfully opened fileUploadNotificationReceiver...");
+            }
+        }
+    }
+
+    protected static void closeFileUploadNotificationReceiver() throws ExecutionException, InterruptedException
+    {
+        CompletableFuture<Void> future = fileUploadNotificationReceiver.closeAsync();
+        future.get();
+        fileUploadNotificationReceiver = null;
+        System.out.println("********* Successfully closed fileUploadNotificationReceiver.");
     }
     
      protected static void sendMultipleCommandsAndReadFromTheFeedbackReceiver() throws ExecutionException, InterruptedException, UnsupportedEncodingException
@@ -251,16 +220,19 @@ public class ServiceClientSample
 
         if (feedbackBatch != null) // check if any feedback was received
         {
-            System.out.println("********* Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc().toString() + " Record size: " + feedbackBatch.getRecords().size());
+            System.out.println(" Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc());
+            System.out.println(" Record size: " + feedbackBatch.getRecords().size());
             
             for (int i=0; i < feedbackBatch.getRecords().size(); i++)
-            System.out.println("Messsage id get: " + feedbackBatch.getRecords().get(i).getOriginalMessageId() + " Device id : " + feedbackBatch.getRecords().get(i).getDeviceId() + " Status description: " + feedbackBatch.getRecords().get(i).getDescription());
-         
+            {
+                System.out.println(" Messsage id : " + feedbackBatch.getRecords().get(i).getOriginalMessageId());
+                System.out.println(" Device id : " + feedbackBatch.getRecords().get(i).getDeviceId());
+                System.out.println(" Status description : " + feedbackBatch.getRecords().get(i).getDescription());
+            }
         }
         else
         {
             System.out.println("No feedback received");
-            
         }
     }
 }
