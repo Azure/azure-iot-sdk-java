@@ -3,10 +3,12 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service.transport.amqps;
+package tests.unit.com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedEvent;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedHandler;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
@@ -31,6 +33,7 @@ import org.junit.runner.RunWith;
 import java.util.EnumSet;
 import java.util.Map;
 
+import static com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedHandler.RECEIVE_TAG;
 import static org.junit.Assert.assertEquals;
 
 /** Unit tests for AmqpFeedbackReceivedHandler */
@@ -115,6 +118,7 @@ public class AmqpReceiveHandlerTest
                 receiver.current();
                 delivery.isReadable();
                 delivery.isPartial();
+                delivery.getLink();
                 delivery.pending();
                 byte[] buffer = new byte[1024];
                 receiver.recv(buffer, 0, buffer.length);
@@ -248,6 +252,8 @@ public class AmqpReceiveHandlerTest
         {
             {
                 link = event.getLink();
+                link.getName();
+                result = RECEIVE_TAG;
                 target = new Target();
                 target.setAddress(endpoint);
                 source = new Source();
@@ -300,7 +306,7 @@ public class AmqpReceiveHandlerTest
 
             @Override
             public String getName()
-            { return null; }
+            { return RECEIVE_TAG; }
 
             @Override
             public Delivery delivery(byte[] bytes)
@@ -604,7 +610,7 @@ public class AmqpReceiveHandlerTest
 
             @Override
             public Link getLink()
-            { return null; }
+            { return receiver; }
 
             @Override
             public DeliveryState getLocalState()

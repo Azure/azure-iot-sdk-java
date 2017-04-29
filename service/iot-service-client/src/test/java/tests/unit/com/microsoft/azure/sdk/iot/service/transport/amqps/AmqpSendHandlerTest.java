@@ -3,11 +3,13 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service.transport.amqps;
+package tests.unit.com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpResponseVerification;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
@@ -89,10 +91,10 @@ public class AmqpSendHandlerTest
         };
         // Act
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
-        String _hostName = amqpSendHandler.hostName;
-        String _userName = amqpSendHandler.userName;
-        String _sasToken = amqpSendHandler.sasToken;
-        IotHubServiceClientProtocol _ioIotHubServiceClientProtocol = amqpSendHandler.iotHubServiceClientProtocol;
+        String _hostName = Deencapsulation.getField(amqpSendHandler, "hostName");
+        String _userName = Deencapsulation.getField(amqpSendHandler, "userName");
+        String _sasToken = Deencapsulation.getField(amqpSendHandler, "sasToken");
+        IotHubServiceClientProtocol _ioIotHubServiceClientProtocol = Deencapsulation.getField(amqpSendHandler, "iotHubServiceClientProtocol");
         // Assert
         assertEquals(hostName + ":5671", _hostName);
         assertEquals(userName, _userName);

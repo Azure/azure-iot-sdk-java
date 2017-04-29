@@ -3,10 +3,14 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service.transport.amqps;
+package tests.unit.com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Message;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler;
+import com.sun.corba.se.impl.orbutil.DenseIntMapImpl;
+import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
@@ -44,10 +48,10 @@ public class AmqpSendTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
         AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol);
-        String _hostName = amqpSend.hostName;
-        String _userName = amqpSend.userName;
-        String _sasToken = amqpSend.sasToken;
-        IotHubServiceClientProtocol _ioIotHubServiceClientProtocol = amqpSend.iotHubServiceClientProtocol;
+        String _hostName = Deencapsulation.getField(amqpSend, "hostName");
+        String _userName = Deencapsulation.getField(amqpSend, "userName");
+        String _sasToken = Deencapsulation.getField(amqpSend, "sasToken");
+        IotHubServiceClientProtocol _ioIotHubServiceClientProtocol = Deencapsulation.getField(amqpSend, "iotHubServiceClientProtocol");
         // Assert
         assertEquals(hostName, _hostName);
         assertEquals(userName, _userName);
@@ -66,10 +70,10 @@ public class AmqpSendTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
         // Act
         AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol);
-        String _hostName = amqpSend.hostName;
-        String _userName = amqpSend.userName;
-        String _sasToken = amqpSend.sasToken;
-        IotHubServiceClientProtocol _ioIotHubServiceClientProtocol = amqpSend.iotHubServiceClientProtocol;
+        String _hostName = Deencapsulation.getField(amqpSend, "hostName");
+        String _userName = Deencapsulation.getField(amqpSend, "userName");
+        String _sasToken = Deencapsulation.getField(amqpSend, "sasToken");
+        IotHubServiceClientProtocol _ioIotHubServiceClientProtocol = Deencapsulation.getField(amqpSend, "iotHubServiceClientProtocol");
         // Assert
         assertEquals(hostName, _hostName);
         assertEquals(userName, _userName);
@@ -194,7 +198,7 @@ public class AmqpSendTest
         {
             {
                 reactor = event.getReactor();
-                connection = reactor.connection(amqpSend.amqpSendHandler);
+                connection = reactor.connection(Deencapsulation.getField(amqpSend, "amqpSendHandler"));
             }
         };
         // Act
@@ -216,7 +220,7 @@ public class AmqpSendTest
         // Act
         amqpSend.close();
         // Assert
-        assertNull(amqpSend.amqpSendHandler);
+        assertNull(Deencapsulation.getField(amqpSend, "amqpSendHandler"));
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_006: [The event handler shall create a Proton message with the given content]
@@ -233,11 +237,14 @@ public class AmqpSendTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol);
         amqpSend.open();
+
+        AmqpSendHandler handler = Deencapsulation.getField(amqpSend, "amqpSendHandler");
         // Assert
         new Expectations()
         {
             {
-                amqpSend.amqpSendHandler.createProtonMessage(deviceId, message);
+                Deencapsulation.invoke(handler, "createProtonMessage"
+                        , deviceId, message);
             }
         };
         // Act

@@ -1,7 +1,8 @@
-package com.microsoft.azure.sdk.iot.service.transport.amqps;
+package tests.unit.com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.exceptions.*;
 
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpResponseVerification;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
