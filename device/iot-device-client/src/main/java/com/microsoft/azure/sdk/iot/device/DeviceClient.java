@@ -21,9 +21,13 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * <p>
@@ -67,6 +71,7 @@ public final class DeviceClient implements Closeable
     public static long RECEIVE_PERIOD_MILLIS_AMQPS = 10l;
     public static long RECEIVE_PERIOD_MILLIS_MQTT = 10l;
     public static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
+    public static long WAITFORMESSAGESTOBESENT_ONCLOSING = 30 * 1000;
 
     /** The hostname attribute name in a connection string. */
     public static final String HOSTNAME_ATTRIBUTE = "HostName=";
@@ -260,16 +265,55 @@ public final class DeviceClient implements Closeable
             return;
         }
 
+        this.waitForAllMessagesToBeSent();
         // Codes_SRS_DEVICECLIENT_11_010: [The function shall finish all ongoing tasks.]
         // Codes_SRS_DEVICECLIENT_11_011: [The function shall cancel all recurring tasks.]
-        while (!this.transport.isEmpty())
-        {
-
-        }
         this.taskScheduler.shutdown();
         // Codes_SRS_DEVICECLIENT_11_037: [The function shall close the transport.]
         this.transport.close();
         this.state = IotHubClientState.CLOSED;
+    }
+    
+    /**
+     * Wait at least WAITFORMESSAGESTOBESENT_ONCLOSING milliseconds to have all remaining 
+     * messages sent to IoT Hub. This doesn't make sure that really all messages will be sent, since 
+     * sending will be stopped after the configured time out. You'll have to check with IotHubTransport.isEmpty.
+     * But it will avoid endless loops in case of problems sending the messages (like lost connections).
+     * 
+     * @return true, if there are still messages that haven't been sent
+     */
+    private void waitForAllMessagesToBeSent() {
+    	
+    	logger.LogInfo("Now trying to send remaining messages. Waiting for %d milliseconds", WAITFORMESSAGESTOBESENT_ONCLOSING);
+    	
+    	final IotHubTransport messagestransport = this.transport;
+    	if (!messagestransport.isEmpty()) {
+	    	ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+	    	
+	    	Future<Boolean> hasSentAll = service.submit(new Callable<Boolean>() {
+				@Override
+				public Boolean call() throws Exception {
+					while (!messagestransport.isEmpty()) {}
+					return Boolean.TRUE;
+				}
+	    	});
+	    	
+			try {
+				hasSentAll.get(WAITFORMESSAGESTOBESENT_ONCLOSING, TimeUnit.MILLISECONDS);
+				logger.LogInfo("All remaining messages sent");
+			} catch (ExecutionException e) {
+				logger.LogError("Execution Exception on trying to send remaining messages. %s", e.getMessage());
+			} catch (TimeoutException e) {
+				logger.LogError("Timeout Exception on trying to send remaining messages. %s", e.getMessage());
+			} catch (InterruptedException e) {
+				logger.LogError("Interrupt Exception on trying to send remaining messages. %s", e.getMessage());
+				Thread.currentThread().interrupt();
+			} finally {
+				service.shutdownNow();
+			}
+    	} else {
+    		logger.LogInfo("No remaining messages to be sent found");
+    	}
     }
 
     /**
