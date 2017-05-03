@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
  */
 public final class AmqpsIotHubConnection extends BaseHandler
 {
-    private int maxWaitTimeForOpeningClosingConnection = 3*60*1000;
+    private int maxWaitTimeForOpeningClosingConnection = 1*60*1000; // 1 second timeout
     private int maxWaitTimeForTerminateExecutor = 30;
     protected State state;
 

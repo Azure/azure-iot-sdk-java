@@ -128,8 +128,38 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             logger.LogInfo("The connection is already in closed state, method name is %s ", logger.getMethodName());
             return;
         }
-
+        
+        // Codes_SRS_AMQPSTRANSPORT_99_036: [The method will remove all the messages which are in progress or waiting to be sent and add them to the callback list.]
+        while (!this.waitingMessages.isEmpty())
+        {
+           IotHubOutboundPacket packet = this.waitingMessages.remove();
+           Message message = packet.getMessage();
+            
+           // Codes_SRS_AMQPSTRANSPORT_15_015: [The function shall skip messages with null or empty body.]
+            if (message != null && message.getBytes().length > 0)
+            {
+                IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE, packet.getCallback(), packet.getContext());
+                this.callbackList.add(callbackPacket);
+                
+            }
+        }
+        
+        for (Map.Entry<Integer, IotHubOutboundPacket> entry : inProgressMessages.entrySet())
+        {
+            IotHubOutboundPacket packet = entry.getValue();
+            IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE, packet.getCallback(), packet.getContext());
+            this.callbackList.add(callbackPacket);
+           
+        }
+                    
+        // Codes_SRS_AMQPSTRANSPORT_99_037: [The method will invoke all the callbacks..]
+        invokeCallbacks(); 
+        
+        // Codes_SRS_AMQPSTRANSPORT_15_033: [The map of messages in progress is cleared.]
+        inProgressMessages.clear();
+                       
         logger.LogInfo("Starting to close the connection..., method name is %s ", logger.getMethodName());
+       
         // Codes_SRS_AMQPSTRANSPORT_15_008: [The function shall close an AMQPS connection with the IoT Hub given in the configuration.]
         this.connection.close();
 

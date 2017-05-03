@@ -17,13 +17,14 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransport;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import junit.framework.AssertionFailedError;
+import mockit.*;
 import mockit.MockUp;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import mockit.VerificationsInOrder;
 import org.junit.Test;
-
+import static org.junit.Assert.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -91,7 +92,51 @@ public class HttpsTransportTest
             }
         };
     }
+    
+    // Tests_SRS_HTTPSTRANSPORT_11_035: [The function shall mark the transport as being closed.]
+    // Tests_SRS_HTTPSTRANSPORT_99_036: [The method shall remove all the messages which are in progress or waiting to be sent and add them to the callback list.]
+    // Tests_SRS_HTTPSTRANSPORT_99_037: [The function shall mark the transport as being closed.]
+    
+    @Test
+    public void closeClosesHttpsConnectionAndRemovePendingMessages(@Mocked final Message mockMsg,
+                                                             @Mocked final IotHubEventCallback mockCallback,
+                                                             @Mocked final IotHubOutboundPacket mockedPacket) throws IOException, InterruptedException
+    {
+        final HttpsTransport transport = new HttpsTransport(mockConfig);
+        
+        new NonStrictExpectations()
+        {
+            {
+                mockedPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = "AnyData".getBytes();
+            }
+        };
+        
+        
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, null);
+        transport.close();
 
+
+        Queue<IotHubOutboundPacket> actualInProgressMessages = Deencapsulation.getField(transport, "inProgressList");
+        Queue<IotHubOutboundPacket> actualWaitingMessages = Deencapsulation.getField(transport, "waitingList");
+        
+        assertEquals(actualWaitingMessages.size(), 0);
+        assertEquals(actualInProgressMessages.size(), 0);        
+        
+        
+        new Verifications()
+        {
+            {
+                mockCallback.execute((IotHubStatusCode) any, any);
+                times = 1;
+            }
+        };
+        
+    }
+ 
     // Tests_SRS_HTTPSTRANSPORT_11_003: [The function shall add a packet containing the message, callback, and callback context to the transport queue.]
     @Test
     public <T extends Queue> void addMessageAddsToTransportQueue(

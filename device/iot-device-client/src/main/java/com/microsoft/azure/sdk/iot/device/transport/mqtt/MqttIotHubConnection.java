@@ -148,35 +148,33 @@ public class MqttIotHubConnection
      */
     public void close()
     {
-        synchronized (MQTT_CONNECTION_LOCK)
+        // Codes_SRS_MQTTIOTHUBCONNECTION_15_007: [If the MQTT session is closed, the function shall do nothing.]
+        if (this.state == State.CLOSED)
         {
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_007: [If the MQTT session is closed, the function shall do nothing.]
-            if (this.state == State.CLOSED)
-            {
-                return;
-            }
-
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [**The function shall close the MQTT connection.]
-
-            try
-            {
-                this.deviceMethod.stop();
-                this.deviceMethod = null;
-
-                this.deviceTwin.stop();
-                this.deviceTwin = null;
-
-                this.deviceMessaging.stop();
-                this.deviceMessaging = null;
-
-                this.state = State.CLOSED;
-            }
-            catch (Exception e)
-            {
-                this.state = State.CLOSED;
-            }
-
+            return;
         }
+
+        // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [**The function shall close the MQTT connection.]
+
+        try
+        {
+            this.deviceMethod.stop();
+            this.deviceMethod = null;
+
+            this.deviceTwin.stop();
+            this.deviceTwin = null;
+
+            this.deviceMessaging.stop();
+            this.deviceMessaging = null;
+
+            this.state = State.CLOSED;
+        }
+ 
+        catch (Exception e)
+        {
+            this.state = State.CLOSED;
+        }
+       
     }
 
     /**

@@ -11,7 +11,6 @@ import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTransport;
 import mockit.*;
-import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 import org.junit.Assert;
@@ -197,11 +196,59 @@ public class AmqpsTransportTest
         new Verifications()
         {
             {
+                
                 expectedConnection.close();
             }
         };
     }
+   
+    // Tests_SRS_AMQPSTRANSPORT_15_008: [The function shall close an AMQPS connection with the IoT Hub given in the configuration.]
+    // Tests_SRS_AMQPSTRANSPORT_99_036: [The method shall remove all the messages which are in progress or waiting to be sent and add them to the callback list.]
+    // Tests_SRS_AMQPSTRANSPORT_99_037: [The method shall invoke all the callbacks.]
+            
+   @Test
+    public void closeClosesAmqpsConnectionAndRemovePendingMessages(@Mocked final Message mockMsg,
+                                                             @Mocked final IotHubEventCallback mockCallback,
+                                                             @Mocked final IotHubOutboundPacket mockedPacket) throws IOException, InterruptedException
+    {
+        final AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        final AmqpsIotHubConnection expectedConnection = mockConnection;
+        
+        new NonStrictExpectations()
+        {
+            {
+                mockedPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = "AnyData".getBytes();
+            }
+        };
+        
+        
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, null);
+        transport.close();
 
+
+        Queue<IotHubOutboundPacket> actualWaitingMessages = Deencapsulation.getField(transport, "waitingMessages");
+        Map<Integer, IotHubOutboundPacket> actualInProgressMessages = Deencapsulation.getField(transport, "inProgressMessages");
+       
+        assertEquals(actualWaitingMessages.size(), 0);
+        assertEquals(actualInProgressMessages.size(), 0);        
+        
+        
+        new Verifications()
+        {
+            {
+                mockCallback.execute((IotHubStatusCode) any, any);
+                times = 1;
+                expectedConnection.close();
+                minTimes = 1;
+            }
+        };
+        
+    }
+   
     // Tests_SRS_AMQPSTRANSPORT_15_009: [The function shall set the transport state to CLOSED.]
     @Test
     public void closeSetsStateToClosed() throws IOException

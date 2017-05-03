@@ -260,12 +260,9 @@ public final class DeviceClient implements Closeable
             return;
         }
 
-        // Codes_SRS_DEVICECLIENT_11_010: [The function shall finish all ongoing tasks.]
-        // Codes_SRS_DEVICECLIENT_11_011: [The function shall cancel all recurring tasks.]
-        while (!this.transport.isEmpty())
-        {
-
-        }
+     // Codes_SRS_DEVICECLIENT_11_010: [The function shall finish all ongoing tasks.]
+     // Codes_SRS_DEVICECLIENT_11_011: [The function shall cancel all recurring tasks.]
+        
         this.taskScheduler.shutdown();
         // Codes_SRS_DEVICECLIENT_11_037: [The function shall close the transport.]
         this.transport.close();

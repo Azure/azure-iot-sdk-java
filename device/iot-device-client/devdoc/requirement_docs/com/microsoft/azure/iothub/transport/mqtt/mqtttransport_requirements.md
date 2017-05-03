@@ -57,9 +57,13 @@ public void open() throws IOException;
 public void close();
 ```
 
-**SRS_MQTTTRANSPORT_15_005: [**The function shall close the MQTT connection with the IoT Hub given in the configuration.**]**
-
 **SRS_MQTTTRANSPORT_15_006: [**If the MQTT connection is closed, the function shall do nothing.**] 
+
+**SRS_MQTTTRANSPORT_99_020: [**The method shall remove all the messages which are in progress or waiting to be sent and add them to the callback list.**]**
+
+**SRS_MQTTTTRANSPORT_99_021: [**The method shall invoke the callback list.**]*
+
+**SRS_MQTTTRANSPORT_15_005: [**The function shall close the MQTT connection with the IoT Hub given in the configuration.**]**
 
 
 ### addMessage

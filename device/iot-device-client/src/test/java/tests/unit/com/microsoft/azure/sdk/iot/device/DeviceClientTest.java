@@ -635,10 +635,9 @@ public class DeviceClientTest
         };
     }
 
-    // Tests_SRS_DEVICECLIENT_11_010: [The function shall finish all ongoing tasks.]
-    // Tests_SRS_DEVICECLIENT_11_011: [The function shall cancel all recurring tasks.]
+    
     @Test
-    public void closeWaitsForTasksToFinish(
+    public void closeWaitsForTaskShutdownToFinish(
             @Mocked final ScheduledExecutorService mockScheduler,
             @Mocked final HttpsTransport mockTransport,
             @Mocked final IotHubSendTask mockSendTask,
@@ -651,7 +650,7 @@ public class DeviceClientTest
         new NonStrictExpectations()
         {
             {
-                mockTransport.isEmpty();
+                mockScheduler.shutdown();
                 returns(false, false, true);
             }
         };
@@ -663,13 +662,11 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                mockTransport.isEmpty();
-                times = 3;
                 mockScheduler.shutdown();
             }
         };
     }
-
+    
     // Tests_SRS_DEVICECLIENT_11_037: [The function shall close the transport.]
     @Test
     public void closeClosesTransport(

@@ -7,20 +7,28 @@ import com.microsoft.azure.sdk.iot.device.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Scanner;
+import java.util.*;
 
 
 /** Sends a number of event messages to an IoT Hub. */
 public class SendEvent
 {
-    protected static class EventCallback
-            implements IotHubEventCallback
+    
+    private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
+    private  static List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+  
+    protected static class EventCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
-            Integer i = (Integer) context;
-            System.out.println("IoT Hub responded to message " + i.toString()
-                    + " with status " + status.name());
+            Message msg = (Message) context;
+            
+            System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
+            
+            if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
+            {
+                failedMessageListOnClose.add(msg.getMessageId());
+            }
         }
     }
 
@@ -116,8 +124,7 @@ public class SendEvent
 
 
         System.out.println("Successfully read input parameters.");
-        System.out.format("Using communication protocol %s.\n",
-                protocol.name());
+        System.out.format("Using communication protocol %s.\n", protocol.name());
 
         DeviceClient client = new DeviceClient(connString, protocol);
         if (pathToCertificate != null )
@@ -135,8 +142,7 @@ public class SendEvent
         client.open();
 
         System.out.println("Opened connection to IoT Hub.");
-        System.out.println("Sending the "
-                + "following event messages:");
+        System.out.println("Sending the following event messages:");
 
         String deviceId = "MyJavaDevice";
         double temperature = 0.0;
@@ -148,33 +154,47 @@ public class SendEvent
             humidity = 30 + Math.random() * 20;
 
             String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\""+ humidity +"}";
+            
             try
             {
                 Message msg = new Message(msgStr);
-
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
-                msg.setExpiryTime(5000);
+                msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
                 System.out.println(msgStr);
 
                 EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, i);
+                client.sendEventAsync(msg, callback, msg);
             }
+            
             catch (Exception e)
             {
+                 e.printStackTrace(); // Trace the exception 
             }
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            
+        }
+        
+        System.out.println("Wait for " + D2C_MESSAGE_TIMEOUT / 1000 + " second(s) for response from the IoT Hub...");
+        
+        // Wait for IoT Hub to respond.
+        try
+        {
+          Thread.sleep(D2C_MESSAGE_TIMEOUT);
+        }
+      
+        catch (InterruptedException e)
+        {
+          e.printStackTrace();
         }
 
-
-        Scanner scanner = new Scanner(System.in);
-        scanner.nextLine();
-
+        // close the connection        
+        System.out.println("Closing"); 
         client.close();
+        
+        if (!failedMessageListOnClose.isEmpty())
+        {
+            System.out.println("List of messages that were cancelled on close:" + failedMessageListOnClose.toString()); 
+        }
 
         System.out.println("Shutting down...");
 

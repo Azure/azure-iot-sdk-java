@@ -10,7 +10,6 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -99,6 +98,29 @@ public final class HttpsTransport implements IotHubTransport
      */
     public void close() throws IOException
     {
+        
+        // Codes_SRS_HTTPSTRANSPORT_99_036: [The method will remove all the messages which are in progress or waiting to be sent and add them to the callback list.]
+        while (!this.waitingList.isEmpty())
+        {
+           IotHubOutboundPacket packet = this.waitingList.remove();
+           
+           IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE, packet.getCallback(), packet.getContext());
+           this.callbackList.add(callbackPacket);
+         
+        }
+        
+        while (!this.inProgressList.isEmpty())
+        {
+           IotHubOutboundPacket packet = this.inProgressList.remove();
+           
+           IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE, packet.getCallback(), packet.getContext());
+           this.callbackList.add(callbackPacket);
+           
+        }
+       
+        // Codes_SRS_HTTPSTRANSPORT_99_037: [The method will invoke all the callbacks]
+        invokeCallbacks(); 
+        
         // the HTTPS connection does not contain state
         // that needs to be explicitly destroyed.
         // Codes_SRS_HTTPSTRANSPORT_11_035: [The function shall mark the transport as being closed.]

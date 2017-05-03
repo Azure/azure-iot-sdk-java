@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Queue;
 
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
@@ -134,7 +135,52 @@ public class MqttTransportTest {
             }
         };
     }
+    
+    // Tests_SRS_MQTTTRANSPORT_15_005: [The function shall close the MQTT connection with the IoT Hub given in the configuration.]
+    // Tests_SRS_MQTTTRANSPORT_99_020: [The method shall remove all the messages which are in progress or waiting to be sent and add them to the callback list.]
+    // Tests_SRS_MQTTTRANSPORT_99_021: [The method shall invoke the callback list]
+    
+   @Test
+    public void closeClosesMqttsConnectionAndRemovePendingMessages(@Mocked final Message mockMsg,
+                                                             @Mocked final IotHubEventCallback mockCallback,
+                                                             @Mocked final IotHubOutboundPacket mockedPacket) throws IOException, InterruptedException
+    {
+        final MqttTransport transport = new MqttTransport (mockConfig);
+        final MqttIotHubConnection expectedConnection = mockConnection;
+        
+        new NonStrictExpectations()
+        {
+            {
+                mockedPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = "AnyData".getBytes();
+            }
+        };
+        
+        
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, null);
+        transport.close();
 
+
+        Queue<IotHubOutboundPacket> actualWaitingMessages = Deencapsulation.getField(transport, "waitingList");
+        
+        assertEquals(actualWaitingMessages.size(), 0);
+        
+        
+        new Verifications()
+        {
+            {
+                mockCallback.execute((IotHubStatusCode) any, any);
+                times = 1;
+                expectedConnection.close();
+                minTimes = 1;
+            }
+        };
+        
+    }
+ 
     // Tests_SRS_MQTTTRANSPORT_15_001: [The constructor shall initialize an empty transport queue
     // for adding messages to be sent as a batch.]
     // Tests_SRS_MQTTTRANSPORT_15_007: [The function shall add a packet containing the message,

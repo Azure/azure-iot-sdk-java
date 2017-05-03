@@ -97,6 +97,19 @@ public final class MqttTransport implements IotHubTransport
         {
             return;
         }
+        
+        // Codes_SRS_MQTTTRANSPORT_99_020: [The method will remove all the messages which are in progress or waiting to be sent and add them to the callback list.]
+        while (!this.waitingList.isEmpty())
+        {
+           IotHubOutboundPacket packet = this.waitingList.remove();
+           
+           IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE, packet.getCallback(), packet.getContext());
+           this.callbackList.add(callbackPacket);
+           
+        }
+       
+        // Codes_SRS_MQTTTRANSPORT_99_021: [The method will invoke the callback list]
+        invokeCallbacks(); 
 
         // Codes_SRS_MQTTTRANSPORT_15_005: [The function shall close the MQTT connection
         // with the IoT Hub given in the configuration.]

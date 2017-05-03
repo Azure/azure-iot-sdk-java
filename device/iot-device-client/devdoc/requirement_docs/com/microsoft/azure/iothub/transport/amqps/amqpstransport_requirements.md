@@ -65,6 +65,10 @@ public void close() throws IOException;
 
 **SRS_AMQPSTRANSPORT_15_007: [**If the AMQPS connection is closed, the function shall do nothing.**]*
 
+**SRS_AMQPSTRANSPORT_99_036: [**The method shall remove all the messages which are in progress or waiting to be sent and add them to the callback list.**]*
+
+**SRS_AMQPSTRANSPORT_99_037: [**The method shall invoke all the callbacks.**]*
+
 **SRS_AMQPSTRANSPORT_15_008: [**The function shall close an AMQPS connection with the IoT Hub given in the configuration.**]**
 
 **SRS_AMQPSTRANSPORT_15_009: [**The function shall set the transport state to CLOSED.**]**

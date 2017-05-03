@@ -96,6 +96,7 @@ public void open();
 ```java
 public void close();
 ```
+**SRS_DEVICECLIENT_11_031: [**If the client is already closed, the function shall do nothing.**]**
 
 **SRS_DEVICECLIENT_11_010: [**The function shall finish all ongoing tasks.**]**
 
@@ -103,7 +104,6 @@ public void close();
 
 **SRS_DEVICECLIENT_11_037: [**The function shall close the transport.**]**
 
-**SRS_DEVICECLIENT_11_031: [**If the client is already closed, the function shall do nothing.**]**
 
 
 ### sendEventAsync

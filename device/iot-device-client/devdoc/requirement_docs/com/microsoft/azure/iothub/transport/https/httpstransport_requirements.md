@@ -57,6 +57,10 @@ public void open() throws IOException;
 public void close() throws IOException;
 ```
 
+**SRS_HTTPSTRANSPORT_99_036: [**The method shall remove all the messages which are in progress or waiting to be sent and add them to the callback list.**]*
+
+**SRS_HTTPSTRANSPORT_99_037: [**The method shall invoke all the callbacks.**]*
+
 **SRS_HTTPSTRANSPORT_11_035: [**The function shall mark the transport as being closed.**]**
 
 
