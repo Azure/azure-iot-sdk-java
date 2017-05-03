@@ -369,7 +369,7 @@ public final class DeviceClient implements Closeable
             /*
             **Codes_SRS_DEVICECLIENT_25_011: [**The function shall create a new instance of class Device Twin and request all twin properties by calling getDeviceTwin**]**
              */
-            deviceTwin = new DeviceTwin(this, this.config, deviceTwinStatusCallback, deviceTwinStatusCallbackContext,
+            deviceTwin = new DeviceTwin(this.transport, this.config, deviceTwinStatusCallback, deviceTwinStatusCallbackContext,
                                         genericPropertyCallBack, genericPropertyCallBackContext);
             deviceTwin.getDeviceTwin();
         }

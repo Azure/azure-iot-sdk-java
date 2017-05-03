@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.deps.serializer.*;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 
 import java.io.IOException;
 import java.util.*;
@@ -17,7 +18,7 @@ public class DeviceTwin
 {
     private int requestId;
     private Twin twinObject = null;
-    private DeviceClient deviceClient = null;
+    private IotHubTransport transport = null;
     private DeviceClientConfig config = null;
     private boolean isSubscribed = false;
 
@@ -215,13 +216,13 @@ public class DeviceTwin
         }
     }
 
-    public DeviceTwin(DeviceClient client, DeviceClientConfig config, IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext,
+    public DeviceTwin(IotHubTransport transport, DeviceClientConfig config, IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext,
                       PropertyCallBack genericPropertyCallback, Object genericPropertyCallbackContext) throws IOException
     {
         /*
         **Codes_SRS_DEVICETWIN_25_001: [**The constructor shall throw IllegalArgumentException Exception if any of the parameters i.e client, config, deviceTwinCallback, genericPropertyCallback are null. **]**
          */
-        if (client == null || config == null)
+        if (transport == null || config == null)
         {
             throw new IllegalArgumentException("Client or config cannot be null");
         }
@@ -239,7 +240,7 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_003: [**The constructor shall save all the parameters specified i.e client, config, deviceTwinCallback, genericPropertyCallback.**]**
          */
-        this.deviceClient = client;
+        this.transport = transport;
         this.config = config;
 
         /*
@@ -284,7 +285,7 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_008: [**This method shall send the message to the lower transport layers by calling sendEventAsync.**]**
          */
-        this.deviceClient.sendEventAsync(getTwinRequestMessage,new deviceTwinRequestMessageCallback(), null);
+        this.transport.addMessage(getTwinRequestMessage,new deviceTwinRequestMessageCallback(), null);
     }
 
     public void updateReportedProperties(Set<Property> reportedProperties) throws IOException
@@ -339,7 +340,7 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_015: [**This method shall send the message to the lower transport layers by calling sendEventAsync.**]**
          */
-        this.deviceClient.sendEventAsync(updateReportedPropertiesRequest, new deviceTwinRequestMessageCallback(), null);
+        this.transport.addMessage(updateReportedPropertiesRequest, new deviceTwinRequestMessageCallback(), null);
 
     }
 
@@ -373,7 +374,7 @@ public class DeviceTwin
             /*
             **Codes_SRS_DEVICETWIN_25_019: [**If not already subscribed then this method shall send the message using sendEventAsync.**]**
              */
-            this.deviceClient.sendEventAsync(desiredPropertiesNotificationRequest, new deviceTwinRequestMessageCallback(), null);
+            this.transport.addMessage(desiredPropertiesNotificationRequest, new deviceTwinRequestMessageCallback(), null);
         }
     }
 }
