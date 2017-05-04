@@ -240,30 +240,28 @@ abstract public class Mqtt implements MqttCallback
 
     protected void disconnect() throws IOException
     {
-        synchronized (Mqtt.MQTT_LOCK)
+        try
         {
-            try
+            /*
+            **Codes_SRS_Mqtt_25_010: [**If the MQTT connection is closed, the function shall do nothing.**]**
+            */
+            if (Mqtt.info.mqttAsyncClient.isConnected())
             {
                 /*
-                **Codes_SRS_Mqtt_25_010: [**If the MQTT connection is closed, the function shall do nothing.**]**
-                 */
-                if (Mqtt.info.mqttAsyncClient.isConnected())
-                {
-                    /*
-                    ** Codes_SRS_Mqtt_25_009: [**The function shall close the MQTT connection.**]**
-                     */
-                    IMqttToken disconnectToken = Mqtt.info.mqttAsyncClient.disconnect();
-                    disconnectToken.waitForCompletion();
-                }
+                ** Codes_SRS_Mqtt_25_009: [**The function shall close the MQTT connection.**]**
+                */
+                IMqttToken disconnectToken = Mqtt.info.mqttAsyncClient.disconnect();
+                disconnectToken.waitForCompletion();
+            }
                 Mqtt.info.mqttAsyncClient = null;
-            }
-            catch (MqttException e)
-            {
-                /*
-                ** SRS_Mqtt_25_011: [**If an MQTT connection is unable to be closed for any reason, the function shall throw an IOException.**]**
-                 */
-                throw new IOException("Unable to disconnect" + "because " + e.getMessage() );
-            }
+        }
+        
+        catch (MqttException e)
+        {
+            /*
+            ** SRS_Mqtt_25_011: [**If an MQTT connection is unable to be closed for any reason, the function shall throw an IOException.**]**
+            */
+            throw new IOException("Unable to disconnect" + "because " + e.getMessage() );
         }
     }
 
