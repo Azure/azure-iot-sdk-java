@@ -4,7 +4,7 @@
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-device-tests</artifactId>
     <name>IoT Hub Java Device SDK tests</name>
-    <version>1.1.25</version>
+    <version>1.1.26</version>
     <description>Test suite fot the Microsoft Azure IoT Device SDK for Java</description>
     <developers>
         <developer>
@@ -20,7 +20,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-device-client</artifactId>
-            <version>1.1.25</version>
+            <version>1.1.26</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
