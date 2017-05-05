@@ -5,7 +5,7 @@
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-device-client</artifactId>
     <name>IoT Hub Java Device Client</name>
-    <version>1.1.25</version>
+    <version>1.1.26</version>
     <description>The Microsoft Azure IoT Device SDK for Java</description>
     <developers>
         <developer>
