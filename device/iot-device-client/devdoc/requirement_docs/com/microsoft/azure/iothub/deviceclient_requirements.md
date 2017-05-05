@@ -20,7 +20,7 @@ public final class DeviceClient
     public DeviceClient(String iotHubHostname, String deviceId, String deviceKey, IotHubClientProtocol protocol) throws URISyntaxException;
 
     public void open() throws IOException;
-    public void close() throws IOException;
+    public void closeNow() throws IOException;
 
     public void sendEventAsync(Message msg, IotHubEventCallback callback, Object callbackContext);    
     public DeviceClient setMessageCallback(IotHubMessageCallback callback, Object context);
@@ -91,19 +91,18 @@ public void open();
 
 **SRS_DEVICECLIENT_25_057: [**If an exception is thrown when creating a SSL context then Open shall throw IOException to the user indicating the failure**]**
 
-### close
+### closeNow
 
 ```java
-public void close();
+public void closeNow();
 ```
-**SRS_DEVICECLIENT_11_031: [**If the client is already closed, the function shall do nothing.**]**
+**SRS_DEVICECLIENT_25_058: [**If the client is already closed, the function shall do nothing.**]**
 
-**SRS_DEVICECLIENT_11_010: [**The function shall finish all ongoing tasks.**]**
+**SRS_DEVICECLIENT_25_059: [**The function shall release any resources held by client**]**
 
-**SRS_DEVICECLIENT_11_011: [**The function shall cancel all recurring tasks.**]**
+**SRS_DEVICECLIENT_25_060: [**The function shall cancel all recurring tasks.**]**
 
-**SRS_DEVICECLIENT_11_037: [**The function shall close the transport.**]**
-
+**SRS_DEVICECLIENT_25_061: [**The function shall close the transport.**]**
 
 
 ### sendEventAsync

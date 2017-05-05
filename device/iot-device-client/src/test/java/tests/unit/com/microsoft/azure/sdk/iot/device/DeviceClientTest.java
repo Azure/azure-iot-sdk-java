@@ -635,7 +635,147 @@ public class DeviceClientTest
         };
     }
 
-    
+    /*
+    Tests_SRS_DEVICECLIENT_25_058: [If the client is already closed, the function shall do nothing.]
+
+    Tests_SRS_DEVICECLIENT_25_059: [The function shall release any resources held by client]
+
+    Tests_SRS_DEVICECLIENT_25_060: [The function shall cancel all recurring tasks.]
+
+    Tests_SRS_DEVICECLIENT_25_061: [The function shall close the transport.]
+    */
+    @Test
+    public void closeNowWaitsForTaskShutdownToFinish(
+            @Mocked final ScheduledExecutorService mockScheduler,
+            @Mocked final HttpsTransport mockTransport,
+            @Mocked final IotHubSendTask mockSendTask,
+            @Mocked final IotHubReceiveTask mockReceiveTask)
+            throws IOException, URISyntaxException
+    {
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+        new NonStrictExpectations()
+        {
+            {
+                mockScheduler.shutdown();
+                returns(false, false, true);
+            }
+        };
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+        client.closeNow();
+
+        new Verifications()
+        {
+            {
+                mockScheduler.shutdown();
+            }
+        };
+    }
+
+    // Tests_SRS_DEVICECLIENT_11_037: [The function shall close the transport.]
+    @Test
+    public void closeNowClosesTransport(
+            @Mocked final ScheduledExecutorService mockScheduler,
+            @Mocked final HttpsTransport mockTransport,
+            @Mocked final IotHubSendTask mockSendTask,
+            @Mocked final IotHubReceiveTask mockReceiveTask)
+            throws IOException, URISyntaxException
+    {
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+        new NonStrictExpectations()
+        {
+            {
+                mockTransport.isEmpty();
+                result = true;
+            }
+        };
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+        client.closeNow();
+
+        final HttpsTransport expectedTransport = mockTransport;
+        new Verifications()
+        {
+            {
+                expectedTransport.close();
+            }
+        };
+    }
+
+    // Tests_SRS_DEVICECLIENT_11_031: [If the client is already closed, the function shall do nothing.]
+    @Test
+    public void closeNowDoesNothingOnUnopenedClient(
+            @Mocked final ScheduledExecutorService mockScheduler,
+            @Mocked final AmqpsTransport mockTransport,
+            @Mocked final IotHubSendTask mockSendTask,
+            @Mocked final IotHubReceiveTask mockReceiveTask)
+            throws IOException, URISyntaxException
+    {
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        new NonStrictExpectations()
+        {
+            {
+                mockTransport.isEmpty();
+                result = true;
+            }
+        };
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.closeNow();
+
+        final AmqpsTransport expectedTransport = mockTransport;
+        new Verifications()
+        {
+            {
+                expectedTransport.close();
+                times = 0;
+            }
+        };
+    }
+
+    // Tests_SRS_DEVICECLIENT_11_031: [If the client is already closed, the function shall do nothing.]
+    @Test
+    public void closeNowDoesNothingOnClosedClient(
+            @Mocked final ScheduledExecutorService mockScheduler,
+            @Mocked final AmqpsTransport mockTransport,
+            @Mocked final IotHubSendTask mockSendTask,
+            @Mocked final IotHubReceiveTask mockReceiveTask)
+            throws IOException, URISyntaxException
+    {
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        new NonStrictExpectations()
+        {
+            {
+                mockTransport.isEmpty();
+                result = true;
+            }
+        };
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+        client.closeNow();
+        client.closeNow();
+
+        final AmqpsTransport expectedTransport = mockTransport;
+        new Verifications()
+        {
+            {
+                expectedTransport.close();
+                times = 1;
+            }
+        };
+    }
+
     @Test
     public void closeWaitsForTaskShutdownToFinish(
             @Mocked final ScheduledExecutorService mockScheduler,
@@ -652,6 +792,8 @@ public class DeviceClientTest
             {
                 mockScheduler.shutdown();
                 returns(false, false, true);
+                mockTransport.isEmpty();
+                result = true;
             }
         };
 

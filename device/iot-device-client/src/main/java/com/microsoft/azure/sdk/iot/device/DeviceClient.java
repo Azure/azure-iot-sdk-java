@@ -243,15 +243,16 @@ public final class DeviceClient implements Closeable
         this.state = IotHubClientState.OPEN;
     }
 
-
     /**
      * Completes all current outstanding requests and closes the IoT Hub client.
      * Must be called to terminate the background thread that is sending data to
      * IoT Hub. After {@code close()} is called, the IoT Hub client is no longer
      *  usable. If the client is already closed, the function shall do nothing.
+     *  @Deprecated : As of release 1.1.25 this call is replaced by {@code closeNow()}
      *
      * @throws IOException if the connection to an IoT Hub cannot be closed.
      */
+    @Deprecated
     public void close() throws IOException
     {
         // Codes_SRS_DEVICECLIENT_11_031: [If the client is already closed, the function shall do nothing.]
@@ -262,9 +263,41 @@ public final class DeviceClient implements Closeable
 
      // Codes_SRS_DEVICECLIENT_11_010: [The function shall finish all ongoing tasks.]
      // Codes_SRS_DEVICECLIENT_11_011: [The function shall cancel all recurring tasks.]
-        
+        while (!this.transport.isEmpty())
+        {
+
+        }
+
         this.taskScheduler.shutdown();
         // Codes_SRS_DEVICECLIENT_11_037: [The function shall close the transport.]
+        this.transport.close();
+        this.state = IotHubClientState.CLOSED;
+    }
+
+    /**
+     * Closes the IoT Hub client by releasing any resources held by client. When
+     * closeNow is called all the messages that were in transit or pending to be
+     * sent will be informed to the user in the callbacks and any existing
+     * connection to IotHub will be closed.
+     * Must be called to terminate the background thread that is sending data to
+     * IoT Hub. After {@code closeNow()} is called, the IoT Hub client is no longer
+     * usable. If the client is already closed, the function shall do nothing.
+     *
+     * @throws IOException if the connection to an IoT Hub cannot be closed.
+     */
+    public void closeNow() throws IOException
+    {
+        // Codes_SRS_DEVICECLIENT_25_058: [If the client is already closed, the function shall do nothing.]
+        if (this.state == IotHubClientState.CLOSED)
+        {
+            return;
+        }
+
+        // Codes_SRS_DEVICECLIENT_25_059: [The function shall release any resources held by client]
+        // Codes_SRS_DEVICECLIENT_25_060: [The function shall cancel all recurring tasks.]
+
+        this.taskScheduler.shutdown();
+        // Codes_SRS_DEVICECLIENT_25_061: [The function shall close the transport.]
         this.transport.close();
         this.state = IotHubClientState.CLOSED;
     }
