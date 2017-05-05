@@ -12,13 +12,14 @@ We monitor the Github issues section specifically for bugs found with our SDK, h
 
 # File a bug (code or documentation)
 That is definitely something we want to hear about. Please open an issue on github, we'll address it as fast as possible. Typically here's the information we're going to ask for to get started:
-- What SDK are you using (Node, C, C#, Python, Java?)
-- What version of the SDK?
+
+- What version of the SDK are you using?
 - Do you have a snippet of code that would help us reproduce the bug?
 - Do you have logs showing what's happening?
+- And please share all repro steps for your issue.
 
 Our SDK is entirely open-source and we do accept pull-requests if you feel like taking a stab at fixing the bug and maybe adding your name to our commit history :) Please mention
-any relevant issue number in the pull request description.
+any relevant issue number in the pull request description. Please see [Contribute code](#contribute-code) code below.
 
 # Contribute documentation
 For simple markdown files, we accept documentation pull requests submitted against the `master` branch, if it's about existing SDK features.
@@ -29,36 +30,27 @@ Pull-requests for code to be submitted against the `master` branch. We will revi
 
 Also, have you signed the [Contribution License Agreement](https://cla.microsoft.com/) ([CLA](https://cla.microsoft.com/))? A friendly bot will remind you about it when you submit your pull-request.
 
-If you feel like your contribution is going to be a major effort, you should probably give us a heads-up. We have a lot of items captured in our backlog and we release every two weeks, so before you spend the time, just check with us to make
-sure your plans and ours are in sync :) Just open an issue on github and tag it "enhancement" or "feature request"
+**If your contribution is going to be a major effort, you should give us a heads-up first. We have a lot of items captured in our backlog and we release every two weeks, so before you spend the time, just check with us to make sure your plans and ours are in sync :) Just open an issue on github and tag it as "contribution".**
 
-## Editing module requirements
-We use requirement documents to describe the expected behavior for each code modules. It works as a basis to understand what tests need to be written.
+## Editing class requirements
+We use requirement documents to describe the expected behavior for each class. It works as a basis to understand what tests need to be written.
 
-Each requirement has a unique tag that is re-used in the code comments to identify where it's implemented and where it's tested. To generate these unique identifiers, we used to use a Microsoft Word macro.
-We are progressively switching to Markdown though, for which we have no macro, therefore we have to be careful about numbering.
+Each requirement has a unique tag that is re-used in the code comments to identify where it's implemented and where it's tested.
 
-The following steps describe adding a new requirement in a Word document:
+Each unique tag is in the following form:
+SRS_<MODULE_NAME>_<DEVELOPER_ID>_<REQUIREMENT_ID>
 
-* Add the requirement text and select it
+When contributing to requirement docs, you can use `99` as a DEVELOPER_ID, and just increment the requirement ID to be unique.
 
-![](doc/media/add_requirement/add_requirement_step1.png)
-
-* Invoke the macro with the selected text
-
-![](doc/media/add_requirement/add_requirement_step2.png)
-
-* Select developer id 99
-
-![](doc/media/add_requirement/add_requirement_step3.png)
-
-* Done!
-
-![](doc/media/add_requirement/add_requirement_step4.png)
-
-When contributing to markdown requirement docs, you can also use `99` for a developer id, and just increment the last number of the requirement to be unique.
+For an example see the template in the [Adding new files](#adding-new-files)
 
 ## Adding new files
-If your contribution is not part of an already existed code, you must create a new requirement file and a new unit test project. Our team created a template to help you on it. For the requirements you can copy the [template_requirements.md](https://github.com/Azure/azure-c-shared-utility/blob/develop/devdoc/template_requirements.md) to the appropriate `devdoc` directory and change it to fits your needs.
+If your contribution is not part of an already existed code, you must create a new requirement file and a new unit test. Our team created a template to help you on it. 
 
-For the unit test, copy the directory [template_ut](https://github.com/Azure/azure-c-shared-utility/tree/develop/tests/template_ut) to the appropriate `tests` directory and change it to fits your needs. To include your new test suite in the `cmake`, add your new test suite in `test/CMakeLists.txt` with the command `add_subdirectory(template_ut)`.
+The template is located at [Template.java](https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/Template.java). For the requirements you can copy the [template_requirements.md](https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/template_requirements.md) to the appropriate `devdoc` directory and change it to fit your needs.
+For the unit test, the template is located at [TemplateTest.java](https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-client/src/test/java/tests/unit/com/microsoft/azure/sdk/iot/device). This test template explains how the [template](https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/Template.java) is tested.
+
+## Review Process
+We expect all guidelines to be met before accepting a pull request. As such, we will work with you to address issues we find by leaving comments in your code. Please understand that it may take a few iterations before the code is accepted as we maintain high standards on code quality. Once we feel comfortable with a contribution, we will validate the change and accept the pull request.
+
+Thank you for any contributions! Please let the team know if you have any questions or concerns about our contribution policy.
