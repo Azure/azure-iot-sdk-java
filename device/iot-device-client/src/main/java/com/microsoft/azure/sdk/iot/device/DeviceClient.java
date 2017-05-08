@@ -247,8 +247,8 @@ public final class DeviceClient implements Closeable
      * Completes all current outstanding requests and closes the IoT Hub client.
      * Must be called to terminate the background thread that is sending data to
      * IoT Hub. After {@code close()} is called, the IoT Hub client is no longer
-     *  usable. If the client is already closed, the function shall do nothing.
-     *  @Deprecated : As of release 1.1.25 this call is replaced by {@code closeNow()}
+     * usable. If the client is already closed, the function shall do nothing.
+     * @deprecated : As of release 1.1.25 this call is replaced by {@link #closeNow()}
      *
      * @throws IOException if the connection to an IoT Hub cannot be closed.
      */
