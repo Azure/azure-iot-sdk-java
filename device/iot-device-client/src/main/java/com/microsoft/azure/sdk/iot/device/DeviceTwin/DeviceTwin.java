@@ -16,7 +16,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.COMPLETE;
 public class DeviceTwin
 {
     private int requestId;
-    private Twin twinObject = null;
+    private TwinParser twinParser = null;
     private DeviceClient deviceClient = null;
     private DeviceClientConfig config = null;
     private boolean isSubscribed = false;
@@ -161,7 +161,7 @@ public class DeviceTwin
                             /*
                             **Codes_SRS_DEVICETWIN_25_030: [**If the message is of type DeviceTwin and DEVICE_OPERATION_TWIN_GET_RESPONSE then the payload is deserialized by calling updateTwin only if the status is ok.**]**
                              */
-                            twinObject.updateTwin(new String(dtMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
+                            twinParser.updateTwin(new String(dtMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
                         }
                         break;
                     }
@@ -184,7 +184,7 @@ public class DeviceTwin
                         **Codes_SRS_DEVICETWIN_25_026: [**If the message is of type DeviceTwin and DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE then the payload is deserialized by calling updateDesiredProperty.**]**
                          */
                         isSubscribed = true;
-                        twinObject.updateDesiredProperty(new String(dtMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
+                        twinParser.updateDesiredProperty(new String(dtMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
 
                         break;
                     }
@@ -260,7 +260,7 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_020: [**OnDesiredPropertyChange callback is registered with the serializer to be triggered when desired property changes.**]**
          */
-        this.twinObject = new Twin(new OnDesiredPropertyChanged(), new OnReportedPropertyChanged());
+        this.twinParser = new TwinParser(new OnDesiredPropertyChanged(), new OnReportedPropertyChanged());
     }
 
 
@@ -296,7 +296,7 @@ public class DeviceTwin
              */
             throw new IllegalArgumentException("Reported properties cannot be null");
         }
-        if (this.twinObject == null)
+        if (this.twinParser == null)
         {
             /*
             **Codes_SRS_DEVICETWIN_25_010: [**The method shall throw IOException if twin object has not yet been created is null.**]**
@@ -314,7 +314,7 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_011: [**The method shall send the property set to Twin Serializer for serilization by calling updateReportedProperty.**]**
          */
-        String serializedReportedProperties = this.twinObject.updateReportedProperty(reportedPropertiesMap);
+        String serializedReportedProperties = this.twinParser.updateReportedProperty(reportedPropertiesMap);
 
         if (serializedReportedProperties == null)
         {

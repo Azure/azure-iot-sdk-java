@@ -64,7 +64,7 @@ public void getTwin(DeviceTwinDevice device) throws IotHubException, IOException
 
 **SRS_DEVICETWIN_25_010: [** The function shall verify the response status and throw proper Exception **]**
 
-**SRS_DEVICETWIN_25_011: [** The function shall deserialize the payload by calling updateTwin Api on the twin object **]**
+**SRS_DEVICETWIN_25_011: [** The function shall deserialize the payload by calling updateTwin Api on the twinParser object **]**
 
 **SRS_DEVICETWIN_25_012: [** The function shall set tags, desired property map, reported property map on the user device **]**
 
@@ -79,7 +79,7 @@ public void updateTwin(DeviceTwinDevice device) throws IotHubException, IOExcept
 
 **SRS_DEVICETWIN_25_014: [** The function shall build the URL for this operation by calling getUrlTwin **]**
 
-**SRS_DEVICETWIN_25_015: [** The function shall serialize the twin map by calling updateTwin Api on the twin object for the device provided by the user**]**
+**SRS_DEVICETWIN_25_015: [** The function shall serialize the twin map by calling updateTwin Api on the twinParser object for the device provided by the user**]**
 
 **SRS_DEVICETWIN_25_046: [** The function shall throw IOException if updateTwin Api call returned an empty or null json**]**
 
@@ -109,7 +109,7 @@ public void updateDesiredProperties(DeviceTwinDevice device) throws IotHubExcept
 
 **SRS_DEVICETWIN_25_022: [** The function shall build the URL for this operation by calling getUrlTwinDesired **]**
 
-**SRS_DEVICETWIN_25_023: [** The function shall serialize the desired properties map by calling updateDesiredProperty Api on the twin object for the device provided by the user**]**
+**SRS_DEVICETWIN_25_023: [** The function shall serialize the desired properties map by calling updateDesiredProperty Api on the twinParser object for the device provided by the user**]**
 
 **SRS_DEVICETWIN_25_024: [** The function shall create a new SAS token **]**
 
@@ -138,7 +138,7 @@ public void replaceDesired(DeviceTwinDevice device) throws IotHubException, IOEx
 
 **SRS_DEVICETWIN_25_030: [** The function shall build the URL for this operation by calling getUrlTwinDesired **]**
 
-**SRS_DEVICETWIN_25_031: [** The function shall serialize the desired properties map by calling resetDesiredProperty Api on the twin object for the device provided by the user**]**
+**SRS_DEVICETWIN_25_031: [** The function shall serialize the desired properties map by calling resetDesiredProperty Api on the twinParser object for the device provided by the user**]**
 
 **SRS_DEVICETWIN_25_045: [** If resetDesiredProperty call returns null or empty string then this method shall throw IOException**]**
 
@@ -168,7 +168,7 @@ public void replaceTags(DeviceTwinDevice device) throws IotHubException, IOExcep
 
 **SRS_DEVICETWIN_25_038: [** The function shall build the URL for this operation by calling getUrlTwinTags **]**
 
-**SRS_DEVICETWIN_25_039: [** The function shall serialize the tags map by calling resetTags Api on the twin object for the device provided by the user**]**
+**SRS_DEVICETWIN_25_039: [** The function shall serialize the tags map by calling resetTags Api on the twinParser object for the device provided by the user**]**
 
 **SRS_DEVICETWIN_25_046: [** If resetTags call returns null or empty string then this method shall throw IOException**]**
 

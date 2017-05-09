@@ -91,14 +91,14 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_011: [** The function shall deserialize the payload by calling updateTwin Api on the twin object **]**
          */
-        device.getTwinObject().updateTwin(twin);
+        device.getTwinParser().updateTwin(twin);
 
         /*
         **Codes_SRS_DEVICETWIN_25_012: [** The function shall set tags, desired property map, reported property map on the user device **]**
          */
-        device.setTags(device.getTwinObject().getTagsMap());
-        device.setDesiredProperties(device.getTwinObject().getDesiredPropertyMap());
-        device.setReportedProperties(device.getTwinObject().getReportedPropertyMap());
+        device.setTags(device.getTwinParser().getTagsMap());
+        device.setDesiredProperties(device.getTwinParser().getDesiredPropertyMap());
+        device.setReportedProperties(device.getTwinParser().getReportedPropertyMap());
     }
 
     /**
@@ -135,7 +135,7 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_015: [** The function shall serialize the twin map by calling updateTwin Api on the twin object for the device provided by the user**]**
          */
-        String twinJson = device.getTwinObject().updateTwin(device.getDesiredMap(), null, device.getTagsMap());
+        String twinJson = device.getTwinParser().updateTwin(device.getDesiredMap(), null, device.getTagsMap());
 
         if (twinJson == null || twinJson.isEmpty())
         {
@@ -196,7 +196,7 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_023: [** The function shall serialize the desired properties map by calling updateDesiredProperty Api on the twin object for the device provided by the user**]**
          */
-        String desiredJson = device.getTwinObject().updateDesiredProperty(device.getDesiredMap());
+        String desiredJson = device.getTwinParser().updateDesiredProperty(device.getDesiredMap());
 
         if (desiredJson == null)
         {
@@ -259,7 +259,7 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_031: [** The function shall serialize the desired properties map by calling resetDesiredProperty Api on the twin object for the device provided by the user**]**
          */
-        String tags = device.getTwinObject().resetDesiredProperty(device.getDesiredMap());
+        String tags = device.getTwinParser().resetDesiredProperty(device.getDesiredMap());
 
         if (tags == null || tags.length() == 0)
         {
@@ -324,7 +324,7 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_039: [** The function shall serialize the tags map by calling resetTags Api on the twin object for the device provided by the user**]**
          */
-        String tags = device.getTwinObject().resetTags(device.getTagsMap());
+        String tags = device.getTwinParser().resetTags(device.getTagsMap());
 
         if (tags == null || tags.length() == 0)
         {

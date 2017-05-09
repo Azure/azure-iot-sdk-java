@@ -5,18 +5,14 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-
 /**
- * INNER TWIN CLASS
+ * INNER TWINPARSER CLASS
  *
  * Twin management representation
  *
  * This class is part of the Twin. It contains the Device identity management.
  */
-public class RegisterManager
+public class RegisterManagerParser
 {
     /**
      * Device name

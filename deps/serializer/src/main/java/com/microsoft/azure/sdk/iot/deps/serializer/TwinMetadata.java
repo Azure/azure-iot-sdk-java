@@ -10,9 +10,9 @@ import java.util.Date;
 import java.util.TimeZone;
 
 /**
- * INNER TWIN CLASS
+ * INNER TWINPARSER CLASS
  *
- * Twin metadata representation
+ * TwinParser metadata representation
  *
  */
 public class TwinMetadata

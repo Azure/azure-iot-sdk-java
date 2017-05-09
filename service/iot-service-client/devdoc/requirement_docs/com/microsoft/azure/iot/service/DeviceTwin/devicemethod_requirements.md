@@ -60,8 +60,8 @@ public MethodResult invoke(String deviceId, String methodName, Long responseTime
 **SRS_DEVICEMETHOD_21_008: [**The invoke shall build the Method URL `{iot hub}/twins/{device id}/methods/` by calling getUrlMethod.**]**  
 **SRS_DEVICEMETHOD_21_009: [**The invoke shall send the created request and get the response using the HttpRequester.**]**  
 **SRS_DEVICEMETHOD_21_010: [**The invoke shall create a new HttpRequest with http method as `POST`.**]**  
-**SRS_DEVICEMETHOD_21_011: [**The invoke shall add a HTTP body with Json created by the `serializer.Method`.**]**  
-**SRS_DEVICEMETHOD_21_012: [**If `Method` return a null Json, the invoke shall throw IllegalArgumentException.**]**    
-**SRS_DEVICEMETHOD_21_013: [**The invoke shall deserialize the payload using the `serializer.Method`.**]**  
+**SRS_DEVICEMETHOD_21_011: [**The invoke shall add a HTTP body with Json created by the `serializer.MethodParser`.**]**  
+**SRS_DEVICEMETHOD_21_012: [**If `MethodParser` return a null Json, the invoke shall throw IllegalArgumentException.**]**    
+**SRS_DEVICEMETHOD_21_013: [**The invoke shall deserialize the payload using the `serializer.MethodParser`.**]**  
 **SRS_DEVICEMETHOD_21_014: [**The invoke shall bypass the Exception if one of the functions called by invoke failed.**]**  
 **SRS_DEVICEMETHOD_21_015: [**If the HttpStatus represents success, the invoke shall return the status and payload using the `MethodResult` class.**]**  

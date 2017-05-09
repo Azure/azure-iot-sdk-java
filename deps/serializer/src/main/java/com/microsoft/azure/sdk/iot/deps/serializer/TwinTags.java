@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * INNER TWIN CLASS
+ * INNER TWINPARSER CLASS
  *
  * Twin tags representation
  */
@@ -40,7 +40,7 @@ public class TwinTags
     {
         JsonObject diffJson = new JsonObject();
 
-        /* Codes_SRS_TWIN_21_103: [The updateTags shall add all provided tags to the collection.] */
+        /* Codes_SRS_TWINPARSER_21_103: [The updateTags shall add all provided tags to the collection.] */
         for (Map.Entry<String,Object> entry : newMap.entrySet())
         {
             String key = entry.getKey();
@@ -119,7 +119,7 @@ public class TwinTags
 
     protected synchronized Map<String, Object> getMap()
     {
-        /* Codes_SRS_TWIN_21_052: [The getTagsMap shall return a map with all tags in the collection.] */
+        /* Codes_SRS_TWINPARSER_21_052: [The getTagsMap shall return a map with all tags in the collection.] */
         return this.tags;
     }
 
@@ -132,7 +132,7 @@ public class TwinTags
     protected JsonElement toJsonElement()
     {
         Gson gson = new GsonBuilder().create();
-        /* Codes_SRS_TWIN_21_017: [The toJsonElement shall return a JsonElement with information in the Twin using json format.] */
+        /* Codes_SRS_TWINPARSER_21_017: [The toJsonElement shall return a JsonElement with information in the TwinParser using json format.] */
         return gson.toJsonTree(tags);
     }
 

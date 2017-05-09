@@ -3,9 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
-import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
-import com.microsoft.azure.sdk.iot.deps.serializer.Method;
+import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -77,14 +75,14 @@ public class DeviceMethod
         /* Codes_SRS_DEVICEMETHOD_21_006: [The invoke shall throw IllegalArgumentException if the provided responseTimeoutInSeconds is negative.] */
         /* Codes_SRS_DEVICEMETHOD_21_007: [The invoke shall throw IllegalArgumentException if the provided connectTimeoutInSeconds is negative.] */
         /* Codes_SRS_DEVICEMETHOD_21_014: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
-        Method method = new Method(methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
+        MethodParser methodParser = new MethodParser(methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
 
-        /* Codes_SRS_DEVICEMETHOD_21_011: [The invoke shall add a HTTP body with Json created by the `serializer.Method`.] */
-        String json = method.toJson();
+        /* Codes_SRS_DEVICEMETHOD_21_011: [The invoke shall add a HTTP body with Json created by the `serializer.MethodParser`.] */
+        String json = methodParser.toJson();
         if(json == null)
         {
-            /* Codes_SRS_DEVICEMETHOD_21_012: [If `Method` return a null Json, the invoke shall throw IllegalArgumentException.] */
-            throw new IllegalArgumentException("Method return null Json");
+            /* Codes_SRS_DEVICEMETHOD_21_012: [If `MethodParser` return a null Json, the invoke shall throw IllegalArgumentException.] */
+            throw new IllegalArgumentException("MethodParser return null Json");
         }
 
         /* Codes_SRS_DEVICEMETHOD_21_008: [The invoke shall build the Method URL `{iot hub}/twins/{device id}/methods/` by calling getUrlMethod.] */
@@ -94,12 +92,12 @@ public class DeviceMethod
         /* Codes_SRS_DEVICEMETHOD_21_010: [The invoke shall create a new HttpRequest with http method as `POST`.] */
         HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.POST, json.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++));
 
-        /* Codes_SRS_DEVICEMETHOD_21_013: [The invoke shall deserialize the payload using the `serializer.Method`.] */
-        Method methodResponse = new Method();
-        methodResponse.fromJson(new String(response.getBody(), StandardCharsets.UTF_8));
+        /* Codes_SRS_DEVICEMETHOD_21_013: [The invoke shall deserialize the payload using the `serializer.MethodParser`.] */
+        MethodParser methodParserResponse = new MethodParser();
+        methodParserResponse.fromJson(new String(response.getBody(), StandardCharsets.UTF_8));
 
         /* Codes_SRS_DEVICEMETHOD_21_015: [If the HttpStatus represents success, the invoke shall return the status and payload using the `MethodResult` class.] */
-        return new MethodResult(methodResponse.getStatus(), methodResponse.getPayload());
+        return new MethodResult(methodParserResponse.getStatus(), methodParserResponse.getPayload());
     }
 
 }

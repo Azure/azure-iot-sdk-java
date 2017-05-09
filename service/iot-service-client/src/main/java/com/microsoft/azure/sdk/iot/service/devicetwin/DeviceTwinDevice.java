@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.Twin;
+import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,7 +21,7 @@ public class DeviceTwinDevice
     private Map<String, Object> tag = null;
     private Map<String, Object> reportedProperties = null;
     private Map<String, Object> desiredProperties = null;
-    private Twin twinObject = null;
+    private TwinParser twinParser = null;
 
     /**
      * Constructor to create instance for a device
@@ -42,8 +42,8 @@ public class DeviceTwinDevice
         **Codes_SRS_DEVICETWINDEVICE_25_003: [** The constructor shall create a new instance of twin object for this device and store the device id.**]**
          */
         this.deviceId = deviceId;
-        this.twinObject = new Twin();
-        this.twinObject.enableTags();
+        this.twinParser = new TwinParser();
+        this.twinParser.enableTags();
     }
 
     /**
@@ -247,12 +247,12 @@ public class DeviceTwinDevice
      *
      * @return  An object for twin serializer for this device
      */
-    protected Twin getTwinObject()
+    protected TwinParser getTwinParser()
     {
         /*
-        **Codes_SRS_DEVICETWINDEVICE_25_028: [** This method shall return the twinObject for this device**]**
+        **Codes_SRS_DEVICETWINDEVICE_25_028: [** This method shall return the twinParser for this device**]**
          */
-        return twinObject;
+        return twinParser;
     }
 
     /**

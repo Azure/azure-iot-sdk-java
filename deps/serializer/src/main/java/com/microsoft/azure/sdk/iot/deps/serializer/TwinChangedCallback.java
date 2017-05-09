@@ -6,7 +6,7 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 import java.util.Map;
 
 /**
- * INNER TWIN CLASS
+ * INNER TWINPARSER CLASS
  *
  * An interface for an IoT Hub Device Twin callback.
  *

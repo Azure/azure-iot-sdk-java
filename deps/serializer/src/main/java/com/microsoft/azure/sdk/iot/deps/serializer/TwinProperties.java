@@ -10,11 +10,11 @@ import com.google.gson.internal.LinkedTreeMap;
 import java.util.Map;
 
 /**
- * INNER TWIN CLASS
+ * INNER TWINPARSER CLASS
  *
- * Twin Properties representation
+ * TwinParser Properties representation
  *
- * This class is part of the Twin. It is necessary to generate the properties json.
+ * This class is part of the TwinParser. It is necessary to generate the properties json.
  */
 public class TwinProperties
 {
@@ -37,39 +37,39 @@ public class TwinProperties
 
     protected JsonElement updateDesired(Map<String, Object> property)
     {
-        /* Codes_SRS_TWIN_21_021: [The updateDesiredProperty shall add all provided properties to the Desired property.] */
+        /* Codes_SRS_TWINPARSER_21_021: [The updateDesiredProperty shall add all provided properties to the Desired property.] */
         return this.desired.update(property);
     }
 
     protected JsonElement updateReported(Map<String, Object> property)
     {
-        /* Codes_SRS_TWIN_21_025: [The updateReportedProperty shall add all provided properties to the Reported property.] */
+        /* Codes_SRS_TWINPARSER_21_025: [The updateReportedProperty shall add all provided properties to the Reported property.] */
         return this.reported.update(property);
     }
 
     protected JsonElement resetDesired(Map<String, Object> property)
     {
-        /* Codes_SRS_TWIN_21_120: [The resetDesiredProperty shall shall cleanup the desired collection and add all provided properties to the Desired property.] */
+        /* Codes_SRS_TWINPARSER_21_120: [The resetDesiredProperty shall shall cleanup the desired collection and add all provided properties to the Desired property.] */
         this.desired = new TwinProperty();
         return this.desired.update(property);
     }
 
     protected JsonElement resetReported(Map<String, Object> property)
     {
-        /* Codes_SRS_TWIN_21_130: [The resetReportedProperty shall cleanup the reported collection and add all provided properties to the Reported property.] */
+        /* Codes_SRS_TWINPARSER_21_130: [The resetReportedProperty shall cleanup the reported collection and add all provided properties to the Reported property.] */
         this.reported = new TwinProperty();
         return this.reported.update(property);
     }
 
     protected void clearDesired()
     {
-        /* Codes_SRS_TWIN_21_122: [If the provided `propertyMap` is null, the resetDesiredProperty shall cleanup the desired collection and return null.] */
+        /* Codes_SRS_TWINPARSER_21_122: [If the provided `propertyMap` is null, the resetDesiredProperty shall cleanup the desired collection and return null.] */
         this.desired = new TwinProperty();
     }
 
     protected void clearReported()
     {
-        /* Codes_SRS_TWIN_21_132: [If the provided `propertyMap` is null, the resetReportedProperty shall cleanup the reported collection and return null.] */
+        /* Codes_SRS_TWINPARSER_21_132: [If the provided `propertyMap` is null, the resetReportedProperty shall cleanup the reported collection and return null.] */
         this.reported = new TwinProperty();
     }
 
@@ -114,14 +114,14 @@ public class TwinProperties
 
     protected JsonElement toJsonElement()
     {
-        /* Codes_SRS_TWIN_21_017: [The toJsonElement shall return a JsonElement with information in the Twin using json format.] */
+        /* Codes_SRS_TWINPARSER_21_017: [The toJsonElement shall return a JsonElement with information in the TwinParser using json format.] */
         JsonObject propertiesJson = new JsonObject();
 
-        /* Codes_SRS_TWIN_21_087: [**The toJsonElement shall include the `desired` property in the json even if it has no content.] */
+        /* Codes_SRS_TWINPARSER_21_087: [**The toJsonElement shall include the `desired` property in the json even if it has no content.] */
         JsonElement desiredElement = this.desired.toJsonElement();
         propertiesJson.add(DESIRED_TAG, desiredElement);
 
-        /* Codes_SRS_TWIN_21_088: [**The toJsonElement shall include the `reported` property in the json even if it has no content.] */
+        /* Codes_SRS_TWINPARSER_21_088: [**The toJsonElement shall include the `reported` property in the json even if it has no content.] */
         JsonElement reportedElement = this.reported.toJsonElement();
         propertiesJson.add(REPORTED_TAG, reportedElement);
 

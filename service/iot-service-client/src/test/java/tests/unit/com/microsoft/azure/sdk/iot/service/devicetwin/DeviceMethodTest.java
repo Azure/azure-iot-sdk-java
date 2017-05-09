@@ -3,7 +3,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.Method;
+import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
@@ -187,7 +187,7 @@ public class DeviceMethodTest
     public void invoke_throwOnCreateMethod_failed() throws Exception
     {
         //arrange
-        new MockUp<Method>()
+        new MockUp<MethodParser>()
         {
             @Mock void $init(String name, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IllegalArgumentException
             {
@@ -202,10 +202,10 @@ public class DeviceMethodTest
 
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_011: [The invoke shall add a HTTP body with Json created by the `serializer.Method`.] */
+    /* Tests_SRS_DEVICEMETHOD_21_011: [The invoke shall add a HTTP body with Json created by the `serializer.MethodParser`.] */
     @Test (expected = IllegalArgumentException.class)
     public void invoke_throwOnToJson_failed(
-            @Mocked final Method method)
+            @Mocked final MethodParser methodParser)
             throws Exception
     {
         //arrange
@@ -214,7 +214,7 @@ public class DeviceMethodTest
         new NonStrictExpectations()
         {
             {
-                method.toJson();
+                methodParser.toJson();
                 result = new IllegalArgumentException();
             }
         };
@@ -223,10 +223,10 @@ public class DeviceMethodTest
         testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_012: [If `Method` return a null Json, the invoke shall throw IllegalArgumentException.] */
+    /* Tests_SRS_DEVICEMETHOD_21_012: [If `MethodParser` return a null Json, the invoke shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void invoke_throwOnNullJson_failed(
-            @Mocked final Method method)
+            @Mocked final MethodParser methodParser)
             throws Exception
     {
         //arrange
@@ -235,7 +235,7 @@ public class DeviceMethodTest
         new NonStrictExpectations()
         {
             {
-                method.toJson();
+                methodParser.toJson();
                 result = null;
             }
         };
@@ -247,7 +247,7 @@ public class DeviceMethodTest
     /* Tests_SRS_DEVICEMETHOD_21_008: [The invoke shall build the Method URL `{iot hub}/twins/{device id}/methods/` by calling getUrlMethod.] */
     @Test (expected = IllegalArgumentException.class)
     public void invoke_throwOnGetUrlMethod_failed(
-            @Mocked final Method method,
+            @Mocked final MethodParser methodParser,
             @Mocked final IotHubConnectionStringBuilder mockedConnectionStringBuilder)
             throws Exception
     {
@@ -256,7 +256,7 @@ public class DeviceMethodTest
         new NonStrictExpectations()
         {
             {
-                method.toJson();
+                methodParser.toJson();
                 result = STANDARD_JSON;
                 iotHubConnectionString.getUrlMethod(STANDARD_DEVICEID);
                 result = new IllegalArgumentException();
@@ -271,7 +271,7 @@ public class DeviceMethodTest
     /* Tests_SRS_DEVICEMETHOD_21_010: [The invoke shall create a new HttpRequest with http method as `POST`.] */
     @Test (expected = IotHubException.class)
     public void invoke_throwOnHttpRequester_failed(
-            @Mocked final Method method,
+            @Mocked final MethodParser methodParser,
             @Mocked final IotHubConnectionStringBuilder mockedConnectionStringBuilder)
             throws Exception
     {
@@ -281,7 +281,7 @@ public class DeviceMethodTest
         new NonStrictExpectations()
         {
             {
-                method.toJson();
+                methodParser.toJson();
                 result = STANDARD_JSON;
                 iotHubConnectionString.getUrlMethod(STANDARD_DEVICEID);
                 result = STANDARD_URL;
@@ -305,7 +305,7 @@ public class DeviceMethodTest
         testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_013: [The invoke shall deserialize the payload using the `serializer.Method`.] */
+    /* Tests_SRS_DEVICEMETHOD_21_013: [The invoke shall deserialize the payload using the `serializer.MethodParser`.] */
     @Test (expected = IllegalArgumentException.class)
     public void invoke_throwOnCreateMethodResponse_failed(
             @Mocked final DeviceOperations request,
@@ -322,7 +322,7 @@ public class DeviceMethodTest
                 result = STANDARD_URL;
             }
         };
-        new MockUp<Method>()
+        new MockUp<MethodParser>()
         {
             @Mock void $init(String name, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IllegalArgumentException
             {
@@ -350,7 +350,7 @@ public class DeviceMethodTest
     /* Tests_SRS_DEVICEMETHOD_21_015: [If the HttpStatus represents success, the invoke shall return the status and payload using the `MethodResult` class.] */
     @Test
     public void invoke_succeed(
-            @Mocked final Method method,
+            @Mocked final MethodParser methodParser,
             @Mocked final DeviceOperations request,
             @Mocked final IotHubServiceSasToken iotHubServiceSasToken,
             @Mocked final IotHubConnectionStringBuilder mockedConnectionStringBuilder)
@@ -363,11 +363,11 @@ public class DeviceMethodTest
             {
                 iotHubConnectionString.getUrlMethod(STANDARD_DEVICEID);
                 result = STANDARD_URL;
-                method.toJson();
+                methodParser.toJson();
                 result = STANDARD_JSON;
-                method.getPayload();
+                methodParser.getPayload();
                 result = STANDARD_PAYLOAD_STR;
-                method.getStatus();
+                methodParser.getStatus();
                 result = 123;
             }
         };
@@ -381,13 +381,13 @@ public class DeviceMethodTest
         new Verifications()
         {
             {
-                method.toJson();
+                methodParser.toJson();
                 times = 1;
                 iotHubConnectionString.getUrlMethod(STANDARD_DEVICEID);
                 times = 1;
-                method.getPayload();
+                methodParser.getPayload();
                 times = 1;
-                method.getStatus();
+                methodParser.getStatus();
                 times = 1;
             }
         };

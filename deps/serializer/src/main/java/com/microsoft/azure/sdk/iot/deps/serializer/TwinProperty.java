@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * INNER TWIN CLASS
+ * INNER TWINPARSER CLASS
  *
  * TwinProperty is a representation of the device twin property collection.
  * It can represent `Desired` property as well `Reported` property.
@@ -50,40 +50,40 @@ public class TwinProperty
 
     protected void enableMetadata()
     {
-        /* Codes_SRS_TWIN_21_020: [The enableMetadata shall enable report metadata in Json for the Desired and for the Reported Properties.] */
+        /* Codes_SRS_TWINPARSER_21_020: [The enableMetadata shall enable report metadata in Json for the Desired and for the Reported Properties.] */
         this.reportMetadata = true;
     }
 
     protected Boolean addProperty(String key, Object value, Integer propertyVersion) throws IllegalArgumentException
     {
-        /* Codes_SRS_TWIN_21_059: [The updateDesiredProperty shall only change properties in the map, keep the others as is.] */
-        /* Codes_SRS_TWIN_21_061: [All `key` and `value` in property shall be case sensitive.] */
-        /* Codes_SRS_TWIN_21_060: [The updateReportedProperty shall only change properties in the map, keep the others as is.] */
-        /* Codes_SRS_TWIN_21_062: [All `key` and `value` in property shall be case sensitive.] */
+        /* Codes_SRS_TWINPARSER_21_059: [The updateDesiredProperty shall only change properties in the map, keep the others as is.] */
+        /* Codes_SRS_TWINPARSER_21_061: [All `key` and `value` in property shall be case sensitive.] */
+        /* Codes_SRS_TWINPARSER_21_060: [The updateReportedProperty shall only change properties in the map, keep the others as is.] */
+        /* Codes_SRS_TWINPARSER_21_062: [All `key` and `value` in property shall be case sensitive.] */
         Boolean change = false;
 
         if(key == null)
         {
-            /* Codes_SRS_TWIN_21_073: [If any `key` is null, the updateDesiredProperty shall throw IllegalArgumentException.] */
-            /* Codes_SRS_TWIN_21_079: [If any `key` is null, the updateReportedProperty shall throw IllegalArgumentException.] */
+            /* Codes_SRS_TWINPARSER_21_073: [If any `key` is null, the updateDesiredProperty shall throw IllegalArgumentException.] */
+            /* Codes_SRS_TWINPARSER_21_079: [If any `key` is null, the updateReportedProperty shall throw IllegalArgumentException.] */
             throw new IllegalArgumentException("Property key shall not be null");
         }
         if(key.isEmpty())
         {
-            /* Codes_SRS_TWIN_21_074: [If any `key` is empty, the updateDesiredProperty shall throw IllegalArgumentException.] */
-            /* Codes_SRS_TWIN_21_080: [If any `key` is empty, the updateReportedProperty shall throw IllegalArgumentException.] */
+            /* Codes_SRS_TWINPARSER_21_074: [If any `key` is empty, the updateDesiredProperty shall throw IllegalArgumentException.] */
+            /* Codes_SRS_TWINPARSER_21_080: [If any `key` is empty, the updateReportedProperty shall throw IllegalArgumentException.] */
             throw new IllegalArgumentException("Property key shall not be empty");
         }
         if(key.length()>128)
         {
-            /* Codes_SRS_TWIN_21_075: [If any `key` is more than 128 characters long, the updateDesiredProperty shall throw IllegalArgumentException.] */
-            /* Codes_SRS_TWIN_21_081: [If any `key` is more than 128 characters long, the updateReportedProperty shall throw IllegalArgumentException.] */
+            /* Codes_SRS_TWINPARSER_21_075: [If any `key` is more than 128 characters long, the updateDesiredProperty shall throw IllegalArgumentException.] */
+            /* Codes_SRS_TWINPARSER_21_081: [If any `key` is more than 128 characters long, the updateReportedProperty shall throw IllegalArgumentException.] */
             throw new IllegalArgumentException("Property key is too big for json");
         }
         if(key.contains(".") || key.contains(" ") || key.contains("$") )
         {
-            /* Codes_SRS_TWIN_21_076: [If any `key` has an illegal character, the updateDesiredProperty shall throw IllegalArgumentException.] */
-            /* Codes_SRS_TWIN_21_082: [If any `key` has an illegal character, the updateReportedProperty shall throw IllegalArgumentException.] */
+            /* Codes_SRS_TWINPARSER_21_076: [If any `key` has an illegal character, the updateDesiredProperty shall throw IllegalArgumentException.] */
+            /* Codes_SRS_TWINPARSER_21_082: [If any `key` has an illegal character, the updateReportedProperty shall throw IllegalArgumentException.] */
             throw new IllegalArgumentException("Property key contains illegal character");
         }
 
@@ -92,8 +92,8 @@ public class TwinProperty
             change = true;
         }
 
-        /* Codes_SRS_TWIN_21_077: [If any `key` already exists, the updateDesiredProperty shall replace the existed value by the new one.] */
-        /* Codes_SRS_TWIN_21_083: [If any `key` already exists, the updateReportedProperty shall replace the existed value by the new one.] */
+        /* Codes_SRS_TWINPARSER_21_077: [If any `key` already exists, the updateDesiredProperty shall replace the existed value by the new one.] */
+        /* Codes_SRS_TWINPARSER_21_083: [If any `key` already exists, the updateReportedProperty shall replace the existed value by the new one.] */
         property.put(key, new Property(value, propertyVersion));
 
         return change;
@@ -114,8 +114,8 @@ public class TwinProperty
                     {
                         if (entry.getValue() != null)
                         {
-                            /* Codes_SRS_TWIN_21_078: [If any `value` is null, the updateDesiredProperty shall store it but do not report on Json.] */
-                            /* Codes_SRS_TWIN_21_084: [If any `value` is null, the updateReportedProperty shall store it but do not report on Json.] */
+                            /* Codes_SRS_TWINPARSER_21_078: [If any `value` is null, the updateDesiredProperty shall store it but do not report on Json.] */
+                            /* Codes_SRS_TWINPARSER_21_084: [If any `value` is null, the updateReportedProperty shall store it but do not report on Json.] */
                             updated.addProperty(entry.getKey(), entry.getValue(), null);
                         }
                     }
@@ -141,8 +141,8 @@ public class TwinProperty
 
     protected Integer getVersion()
     {
-        /* Codes_SRS_TWIN_21_048: [The getDesiredPropertyVersion shall return the desired property version.] */
-        /* Codes_SRS_TWIN_21_049: [The getReportedPropertyVersion shall return the reported property version.] */
+        /* Codes_SRS_TWINPARSER_21_048: [The getDesiredPropertyVersion shall return the desired property version.] */
+        /* Codes_SRS_TWINPARSER_21_049: [The getReportedPropertyVersion shall return the reported property version.] */
         return this.version;
     }
 
@@ -167,8 +167,8 @@ public class TwinProperty
 
     protected Map<String, Object> getPropertyMap()
     {
-        /* Codes_SRS_TWIN_21_050: [The getDesiredPropertyMap shall return a map with all desired property key value pairs.] */
-        /* Codes_SRS_TWIN_21_051: [The getReportedPropertyMap shall return a map with all reported property key value pairs.] */
+        /* Codes_SRS_TWINPARSER_21_050: [The getDesiredPropertyMap shall return a map with all desired property key value pairs.] */
+        /* Codes_SRS_TWINPARSER_21_051: [The getReportedPropertyMap shall return a map with all reported property key value pairs.] */
         Map<String, Object> propertyMap = null;
 
         synchronized (lock)
@@ -226,7 +226,7 @@ public class TwinProperty
 
     protected JsonElement toJsonElement()
     {
-        /* Codes_SRS_TWIN_21_017: [The toJsonElement shall return a JsonElement with information in the Twin using json format.] */
+        /* Codes_SRS_TWINPARSER_21_017: [The toJsonElement shall return a JsonElement with information in the TwinParser using json format.] */
         Gson gson = new GsonBuilder().create();
         Map<String, Object> diffMap = new HashMap<>();
         Map<String, TwinMetadata> metadata = new HashMap<>();
@@ -235,7 +235,7 @@ public class TwinProperty
         {
             for (Map.Entry<String, Property> entry : property.entrySet())
             {
-                /* Codes_SRS_TWIN_21_018: [The toJsonElement shall not include null fields.] */
+                /* Codes_SRS_TWINPARSER_21_018: [The toJsonElement shall not include null fields.] */
                 if(entry.getValue().value != null)
                 {
                     diffMap.put(entry.getKey(), entry.getValue().value);
@@ -265,19 +265,19 @@ public class TwinProperty
 
         try
         {
-            /* Codes_SRS_TWIN_21_039: [The updateTwin shall fill the fields the properties in the Twin class with the keys and values provided in the json string.] */
-            /* Codes_SRS_TWIN_21_029: [The updateDesiredProperty shall update the Desired property using the information provided in the json.] */
-            /* Codes_SRS_TWIN_21_034: [The updateReportedProperty shall update the Reported property using the information provided in the json.] */
+            /* Codes_SRS_TWINPARSER_21_039: [The updateTwin shall fill the fields the properties in the TwinParser class with the keys and values provided in the json string.] */
+            /* Codes_SRS_TWINPARSER_21_029: [The updateDesiredProperty shall update the Desired property using the information provided in the json.] */
+            /* Codes_SRS_TWINPARSER_21_034: [The updateReportedProperty shall update the Reported property using the information provided in the json.] */
             updateVersion(jsonTree);
-            /* Codes_SRS_TWIN_21_041: [The updateTwin shall create a list with all properties that was updated (new key or value) by the new json.] */
-            /* Codes_SRS_TWIN_21_030: [The updateDesiredProperty shall generate a map with all pairs key value that had its content changed.] */
-            /* Codes_SRS_TWIN_21_035: [The updateReportedProperty shall generate a map with all pairs key value that had its content changed.] */
+            /* Codes_SRS_TWINPARSER_21_041: [The updateTwin shall create a list with all properties that was updated (new key or value) by the new json.] */
+            /* Codes_SRS_TWINPARSER_21_030: [The updateDesiredProperty shall generate a map with all pairs key value that had its content changed.] */
+            /* Codes_SRS_TWINPARSER_21_035: [The updateReportedProperty shall generate a map with all pairs key value that had its content changed.] */
             diffField = updateFields(jsonTree);
             diffMetadata = updateMetadata(jsonTree);
         }
         catch (Exception e)
         {
-            /* Codes_SRS_TWIN_21_092: [If the provided json is not valid, the updateDesiredProperty shall throws IllegalArgumentException.] */
+            /* Codes_SRS_TWINPARSER_21_092: [If the provided json is not valid, the updateDesiredProperty shall throws IllegalArgumentException.] */
             throw new IllegalArgumentException("Malformed Json:" + e);
         }
 
@@ -297,21 +297,21 @@ public class TwinProperty
             }
         }
 
-        /* Codes_SRS_TWIN_21_046: [If OnDesiredCallback was not provided, the updateTwin shall not do anything with the list of updated desired properties.] */
-        /* Codes_SRS_TWIN_21_047: [If OnReportedCallback was not provided, the updateTwin shall not do anything with the list of updated reported properties.] */
-        /* Codes_SRS_TWIN_21_069: [If there is no change in the Desired property, the updateTwin shall not change the reported collection and not call the OnReportedCallback.] */
-        /* Codes_SRS_TWIN_21_070: [If there is no change in the Reported property, the updateTwin shall not change the reported collection and not call the OnReportedCallback.] */
-        /* Codes_SRS_TWIN_21_032: [If the OnDesiredCallback is set as null, the updateDesiredProperty shall discard the map with the changed pairs.] */
-        /* Codes_SRS_TWIN_21_033: [If there is no change in the Desired property, the updateDesiredProperty shall not change the collection and not call the OnDesiredCallback.] */
-        /* Codes_SRS_TWIN_21_037: [If the OnReportedCallback is set as null, the updateReportedProperty shall discard the map with the changed pairs.] */
-        /* Codes_SRS_TWIN_21_038: [If there is no change in the Reported property, the updateReportedProperty shall not change the collection and not call the OnReportedCallback.] */
-        /* Codes_SRS_TWIN_21_093: [If the provided json is not valid, the updateReportedProperty shall throws IllegalArgumentException.] */
+        /* Codes_SRS_TWINPARSER_21_046: [If OnDesiredCallback was not provided, the updateTwin shall not do anything with the list of updated desired properties.] */
+        /* Codes_SRS_TWINPARSER_21_047: [If OnReportedCallback was not provided, the updateTwin shall not do anything with the list of updated reported properties.] */
+        /* Codes_SRS_TWINPARSER_21_069: [If there is no change in the Desired property, the updateTwin shall not change the reported collection and not call the OnReportedCallback.] */
+        /* Codes_SRS_TWINPARSER_21_070: [If there is no change in the Reported property, the updateTwin shall not change the reported collection and not call the OnReportedCallback.] */
+        /* Codes_SRS_TWINPARSER_21_032: [If the OnDesiredCallback is set as null, the updateDesiredProperty shall discard the map with the changed pairs.] */
+        /* Codes_SRS_TWINPARSER_21_033: [If there is no change in the Desired property, the updateDesiredProperty shall not change the collection and not call the OnDesiredCallback.] */
+        /* Codes_SRS_TWINPARSER_21_037: [If the OnReportedCallback is set as null, the updateReportedProperty shall discard the map with the changed pairs.] */
+        /* Codes_SRS_TWINPARSER_21_038: [If there is no change in the Reported property, the updateReportedProperty shall not change the collection and not call the OnReportedCallback.] */
+        /* Codes_SRS_TWINPARSER_21_093: [If the provided json is not valid, the updateReportedProperty shall throws IllegalArgumentException.] */
         if((diffField.size() != 0) &&(onCallback != null))
         {
-            /* Codes_SRS_TWIN_21_044: [If OnDesiredCallback was provided, the updateTwin shall create a new map with a copy of all pars key values updated by the json in the Desired property, and OnDesiredCallback passing this map as parameter.] */
-            /* Codes_SRS_TWIN_21_045: [If OnReportedCallback was provided, the updateTwin shall create a new map with a copy of all pars key values updated by the json in the Reported property, and OnReportedCallback passing this map as parameter.] */
-            /* Codes_SRS_TWIN_21_031: [The updateDesiredProperty shall send the map with all changed pairs to the upper layer calling onDesiredCallback (TwinChangedCallback).] */
-            /* Codes_SRS_TWIN_21_036: [The updateReportedProperty shall send the map with all changed pairs to the upper layer calling onReportedCallback (TwinChangedCallback).] */
+            /* Codes_SRS_TWINPARSER_21_044: [If OnDesiredCallback was provided, the updateTwin shall create a new map with a copy of all pars key values updated by the json in the Desired property, and OnDesiredCallback passing this map as parameter.] */
+            /* Codes_SRS_TWINPARSER_21_045: [If OnReportedCallback was provided, the updateTwin shall create a new map with a copy of all pars key values updated by the json in the Reported property, and OnReportedCallback passing this map as parameter.] */
+            /* Codes_SRS_TWINPARSER_21_031: [The updateDesiredProperty shall send the map with all changed pairs to the upper layer calling onDesiredCallback (TwinChangedCallback).] */
+            /* Codes_SRS_TWINPARSER_21_036: [The updateReportedProperty shall send the map with all changed pairs to the upper layer calling onReportedCallback (TwinChangedCallback).] */
             onCallback.execute(diffField);
         }
     }
@@ -321,8 +321,8 @@ public class TwinProperty
         LinkedTreeMap<String, Object> newValues;
         try
         {
-            /* Codes_SRS_TWIN_21_095: [If the provided json have any duplicated `key`, the updateReportedProperty shall throws IllegalArgumentException.] */
-            /* Codes_SRS_TWIN_21_096: [If the provided json have any duplicated `key`, the updateDesiredProperty shall throws IllegalArgumentException.] */
+            /* Codes_SRS_TWINPARSER_21_095: [If the provided json have any duplicated `key`, the updateReportedProperty shall throws IllegalArgumentException.] */
+            /* Codes_SRS_TWINPARSER_21_096: [If the provided json have any duplicated `key`, the updateDesiredProperty shall throws IllegalArgumentException.] */
             Gson gson = new GsonBuilder().create();
             newValues = (LinkedTreeMap<String, Object>) gson.fromJson(json, LinkedTreeMap.class);
         }
@@ -400,12 +400,12 @@ public class TwinProperty
             {
                 synchronized (lock)
                 {
-                    /* Codes_SRS_TWIN_21_040: [The updateTwin shall not change fields that is not reported in the json string.] */
+                    /* Codes_SRS_TWINPARSER_21_040: [The updateTwin shall not change fields that is not reported in the json string.] */
                     if (property.containsKey(entry.getKey()))
                     {
                         if (entry.getValue() == null)
                         {
-                            /* Codes_SRS_TWIN_21_042: [If a valid key has a null value, the updateTwin shall delete this property.] */
+                            /* Codes_SRS_TWINPARSER_21_042: [If a valid key has a null value, the updateTwin shall delete this property.] */
                             property.remove(entry.getKey());
                             diff.put(entry.getKey(), null);
                         }

@@ -65,7 +65,7 @@ private final class deviceMethodResponseCallback implements MessageCallback
 
 **SRS_DEVICEMETHOD_25_015: [**User can provide null response message upon invoking the device method callback which will be serialized as is, before sending it to IotHub.**]**
 
-**SRS_DEVICEMETHOD_25_011: [**If the user callback is successful and user has successfully provided the response message and status, then this method shall build a device method message of type DEVICE_OPERATION_METHOD_SEND_RESPONSE, serialize the user data by invoking Method from serializer and save the user data as payload in the message before sending it to IotHub by calling sendEventAsync and thereby marking the result as complete**]**
+**SRS_DEVICEMETHOD_25_011: [**If the user callback is successful and user has successfully provided the response message and status, then this method shall build a device method message of type DEVICE_OPERATION_METHOD_SEND_RESPONSE, serialize the user data by invoking MethodParser from serializer and save the user data as payload in the message before sending it to IotHub by calling sendEventAsync and thereby marking the result as complete**]**
 
 **SRS_DEVICEMETHOD_25_012: [**The device method message sent to IotHub shall have the same request id as the invoking message.**]**
 

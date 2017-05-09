@@ -5,7 +5,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.Twin;
+import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import mockit.Deencapsulation;
@@ -83,10 +83,10 @@ public class DeviceTwinDeviceTest
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
 
         //act
-        Twin testDeviceTwinObject = Deencapsulation.invoke(testDevice, "getTwinObject" );
+        TwinParser testDeviceTwinParserObject = Deencapsulation.invoke(testDevice, "getTwinParser" );
 
         //assert
-        assertNotNull(testDeviceTwinObject);
+        assertNotNull(testDeviceTwinParserObject);
     }
 
     @Test
@@ -97,11 +97,11 @@ public class DeviceTwinDeviceTest
         DeviceTwinDevice testDevice2 = new DeviceTwinDevice("testDevice2");
 
         //act
-        Twin testDeviceTwinObject1 = Deencapsulation.invoke(testDevice1, "getTwinObject" );
-        Twin testDeviceTwinObject2 = Deencapsulation.invoke(testDevice2, "getTwinObject" );
+        TwinParser testDeviceTwinParserObject1 = Deencapsulation.invoke(testDevice1, "getTwinParser" );
+        TwinParser testDeviceTwinParserObject2 = Deencapsulation.invoke(testDevice2, "getTwinParser" );
 
         //assert
-        assertNotEquals(testDeviceTwinObject1, testDeviceTwinObject2);
+        assertNotEquals(testDeviceTwinParserObject1, testDeviceTwinParserObject2);
     }
 
     /*
