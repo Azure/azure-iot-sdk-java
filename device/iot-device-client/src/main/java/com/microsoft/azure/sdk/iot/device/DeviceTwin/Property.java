@@ -53,4 +53,10 @@ public class Property
          */
         this.property.setValue(newValue);
     }
+
+    @Override
+    public String toString()
+    {
+        return getKey() + " - " + getValue();
+    }
 }

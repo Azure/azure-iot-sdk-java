@@ -534,7 +534,7 @@ public class MqttDeviceTwin extends Mqtt
                 throw new UnsupportedOperationException();
 
             }
-
+            logger.LogInfo("Message received on DT " + messsage.getDeviceOperationType());
             return messsage;
         }
         else

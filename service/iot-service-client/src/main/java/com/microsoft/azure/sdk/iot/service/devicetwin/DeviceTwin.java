@@ -108,7 +108,7 @@ public class DeviceTwin
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public void updateTwin(DeviceTwinDevice device) throws IotHubException, IOException
+    public synchronized void updateTwin(DeviceTwinDevice device) throws IotHubException, IOException
     {
         if (device == null || device.getDeviceId() == null || device.getDeviceId().length() == 0)
         {

@@ -287,7 +287,7 @@ public class DeviceTwin
         this.deviceClient.sendEventAsync(getTwinRequestMessage,new deviceTwinRequestMessageCallback(), null);
     }
 
-    public void updateReportedProperties(Set<Property> reportedProperties) throws IOException
+    public synchronized void updateReportedProperties(Set<Property> reportedProperties) throws IOException
     {
         if (reportedProperties == null)
         {
