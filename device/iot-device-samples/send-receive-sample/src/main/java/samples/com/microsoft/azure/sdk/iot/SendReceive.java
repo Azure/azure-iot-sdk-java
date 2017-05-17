@@ -262,7 +262,7 @@ public class SendReceive
             temperature = 20 + Math.random() * 10;
             humidity = 30 + Math.random() * 20;
 
-            String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\""+ humidity +"}";
+            String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\":"+ humidity +"}";
             
             try
             {

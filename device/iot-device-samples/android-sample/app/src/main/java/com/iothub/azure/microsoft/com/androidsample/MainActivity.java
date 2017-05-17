@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             temperature = 20.0 + Math.random() * 10;
             humidity = 30.0 + Math.random() * 20;
 
-            String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\""+ humidity +"}";
+            String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\":"+ humidity +"}";
             try
             {
                 Message msg = new Message(msgStr);
