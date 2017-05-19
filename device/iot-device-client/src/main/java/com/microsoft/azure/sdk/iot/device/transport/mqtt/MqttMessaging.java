@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.MessageProperty;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
 
 public class MqttMessaging extends Mqtt
 {

@@ -9,7 +9,10 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadNotificationParser;
 import com.microsoft.azure.sdk.iot.service.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceive;
-import mockit.*;
+import mockit.Deencapsulation;
+import mockit.Expectations;
+import mockit.Mocked;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.engine.Connection;
@@ -23,7 +26,6 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /** Unit tests for AmqpFileUploadNotificationReceive */
 @RunWith(JMockit.class)

@@ -10,7 +10,10 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTransport;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransport;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttTransport;
-import mockit.*;
+import mockit.Deencapsulation;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
@@ -23,9 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for DeviceIO.

@@ -3,23 +3,21 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertTrue;
-
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.auth.Signature;
-
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /** Unit tests for IotHubSasToken. */
 public class IotHubSasTokenTest

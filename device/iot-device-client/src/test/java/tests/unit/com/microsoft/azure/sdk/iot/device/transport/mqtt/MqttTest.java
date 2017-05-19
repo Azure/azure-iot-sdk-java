@@ -3,14 +3,11 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-
 import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.Message;
-
 import mockit.*;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-
 import org.junit.Test;
 
 import java.io.IOException;

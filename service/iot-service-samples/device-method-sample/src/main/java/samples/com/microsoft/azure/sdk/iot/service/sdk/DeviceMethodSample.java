@@ -5,8 +5,8 @@
 
 package samples.com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;

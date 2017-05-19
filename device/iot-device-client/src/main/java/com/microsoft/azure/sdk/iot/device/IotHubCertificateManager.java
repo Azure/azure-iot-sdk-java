@@ -4,10 +4,10 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import java.io.*;
-import java.util.Collection;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.util.Collection;
 
 public class IotHubCertificateManager
 {

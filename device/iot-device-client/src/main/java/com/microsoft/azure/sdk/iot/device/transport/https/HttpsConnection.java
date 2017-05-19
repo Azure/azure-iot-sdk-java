@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ProtocolException;
@@ -11,9 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
 
 /**
  * <p>

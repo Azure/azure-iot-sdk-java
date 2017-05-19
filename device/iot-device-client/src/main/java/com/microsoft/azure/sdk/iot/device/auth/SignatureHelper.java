@@ -3,16 +3,16 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
+import org.apache.commons.codec.binary.Base64;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import org.apache.commons.codec.binary.Base64;
 
 /** Builds the authorization signature as a composition of functions. */
 public final class SignatureHelper

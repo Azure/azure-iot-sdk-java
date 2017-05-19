@@ -5,8 +5,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
+import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpResponseVerification;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler;

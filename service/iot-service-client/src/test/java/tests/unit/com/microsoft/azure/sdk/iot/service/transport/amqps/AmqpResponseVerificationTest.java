@@ -1,17 +1,16 @@
 package tests.unit.com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.exceptions.*;
-
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpResponseVerification;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
-
 import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.amqp.transport.AmqpError;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 public class AmqpResponseVerificationTest

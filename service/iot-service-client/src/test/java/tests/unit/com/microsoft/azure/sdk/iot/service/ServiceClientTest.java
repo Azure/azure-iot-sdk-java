@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
 import mockit.*;

@@ -5,9 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.ServiceAuthenticationWithSharedAccessPolicyToken;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;

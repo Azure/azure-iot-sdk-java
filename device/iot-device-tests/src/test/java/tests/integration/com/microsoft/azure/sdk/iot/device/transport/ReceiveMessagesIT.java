@@ -3,18 +3,19 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
-import com.microsoft.azure.sdk.iot.device.*;
-import org.junit.*;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import tests.integration.com.microsoft.azure.sdk.iot.device.DeviceConnectionString;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;

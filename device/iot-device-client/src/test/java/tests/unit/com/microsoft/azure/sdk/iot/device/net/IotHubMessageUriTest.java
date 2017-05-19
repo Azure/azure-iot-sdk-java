@@ -3,18 +3,17 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.net;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 import com.microsoft.azure.sdk.iot.device.net.IotHubMessageUri;
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
-
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for IotHubMessageUri. */
 public class IotHubMessageUriTest

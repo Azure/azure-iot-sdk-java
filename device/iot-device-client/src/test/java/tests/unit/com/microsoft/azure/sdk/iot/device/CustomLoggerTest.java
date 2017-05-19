@@ -3,12 +3,16 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.CustomLogger;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.junit.Test;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
-import com.microsoft.azure.sdk.iot.device.CustomLogger;
-import org.apache.log4j.*;
-import mockit.*;
-import org.junit.Test;
 
 /** Unit tests for CustomLogger. */
 public class CustomLoggerTest

@@ -7,7 +7,8 @@ import com.microsoft.azure.sdk.iot.device.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /** Sends a number of event messages to an IoT Hub. */

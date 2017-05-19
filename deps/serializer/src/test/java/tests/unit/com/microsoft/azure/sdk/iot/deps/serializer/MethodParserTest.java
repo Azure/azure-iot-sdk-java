@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for Method serializer

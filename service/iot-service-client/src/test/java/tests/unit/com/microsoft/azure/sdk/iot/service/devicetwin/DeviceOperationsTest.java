@@ -3,10 +3,10 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubBadFormatException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;

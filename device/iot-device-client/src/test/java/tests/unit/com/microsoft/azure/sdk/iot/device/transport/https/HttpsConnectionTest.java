@@ -3,19 +3,16 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
-import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
-
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.junit.Test;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -24,8 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for HttpsConnection. */
 public class HttpsConnectionTest

@@ -3,15 +3,10 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
-
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage;
-
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -19,6 +14,10 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for HttpsSingleMessage. */
 public class HttpsSingleMessageTest

@@ -4,10 +4,11 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-
-import mockit.*;
+import mockit.Deencapsulation;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOException;

@@ -3,9 +3,6 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
@@ -14,8 +11,10 @@ import mockit.Deencapsulation;
 import mockit.Mocked;
 import org.junit.Test;
 
-import java.io.File;
 import java.net.URISyntaxException;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
 
 /** Unit tests for IoTHubClientConfig. */
 public class DeviceClientConfigTest

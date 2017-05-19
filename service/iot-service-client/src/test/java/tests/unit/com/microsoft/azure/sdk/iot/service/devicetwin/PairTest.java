@@ -6,10 +6,8 @@
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
-import mockit.Deencapsulation;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 

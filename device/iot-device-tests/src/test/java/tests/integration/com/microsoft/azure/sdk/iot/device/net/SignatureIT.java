@@ -3,13 +3,11 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.device.net;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-
 import com.microsoft.azure.sdk.iot.device.auth.Signature;
 import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 
 /** Integration tests for Signature. */
 public class SignatureIT

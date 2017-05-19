@@ -5,8 +5,8 @@ package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.Message;
-import java.io.Closeable;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 /** An interface for an IoT Hub transport. */

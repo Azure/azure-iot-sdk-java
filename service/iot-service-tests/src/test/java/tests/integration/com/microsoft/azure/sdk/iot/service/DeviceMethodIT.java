@@ -5,28 +5,32 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Integration E2E test for Device Method on the service client.

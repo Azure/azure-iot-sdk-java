@@ -3,16 +3,15 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-
+import com.microsoft.azure.sdk.iot.device.auth.Signature;
 import com.microsoft.azure.sdk.iot.device.auth.SignatureHelper;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.VerificationsInOrder;
 import org.junit.Test;
 
-import com.microsoft.azure.sdk.iot.device.auth.Signature;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for Signature. */
 public class SignatureTest

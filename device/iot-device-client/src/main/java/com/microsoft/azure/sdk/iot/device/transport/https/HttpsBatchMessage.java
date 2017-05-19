@@ -3,13 +3,11 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
-import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 
+import javax.naming.SizeLimitExceededException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-
-import javax.naming.SizeLimitExceededException;
 
 /**
  * Builds a batched IoT Hub request body as a JSON array. The batched message

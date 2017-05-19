@@ -5,9 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.DeviceConnectionState;
-import com.microsoft.azure.sdk.iot.service.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import mockit.Expectations;
 import mockit.NonStrictExpectations;

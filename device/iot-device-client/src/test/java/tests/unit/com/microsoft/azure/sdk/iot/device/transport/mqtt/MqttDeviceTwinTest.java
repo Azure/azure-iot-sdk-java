@@ -3,17 +3,12 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
-
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttDeviceTwin;
 import mockit.*;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.StrictExpectations;
-import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -22,7 +17,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
-
 import static org.junit.Assert.*;
 
 // Unit Tests for MqttDeviceTwin

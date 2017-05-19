@@ -4,13 +4,13 @@
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
-import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.exceptions.*;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import mockit.*;
@@ -22,9 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for Device Method

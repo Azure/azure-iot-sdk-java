@@ -5,7 +5,9 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.FileUploadNotification;
+import com.microsoft.azure.sdk.iot.service.FileUploadNotificationReceiver;
+import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceive;
 import mockit.Deencapsulation;
 import mockit.Mocked;

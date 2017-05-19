@@ -10,7 +10,7 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.io.IOException;
-import java.security.*;
+import java.security.InvalidParameterException;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 abstract public class Mqtt implements MqttCallback

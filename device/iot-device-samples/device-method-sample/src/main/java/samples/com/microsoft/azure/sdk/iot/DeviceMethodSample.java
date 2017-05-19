@@ -3,8 +3,11 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

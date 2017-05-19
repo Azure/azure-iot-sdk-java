@@ -3,8 +3,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
-import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodMessage;
+import com.microsoft.azure.sdk.iot.device.MessageType;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

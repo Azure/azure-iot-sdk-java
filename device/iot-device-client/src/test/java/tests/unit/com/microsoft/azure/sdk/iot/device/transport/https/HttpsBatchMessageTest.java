@@ -3,24 +3,22 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertThat;
-
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsBatchMessage;
-
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import org.junit.Test;
 
+import javax.naming.SizeLimitExceededException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import javax.naming.SizeLimitExceededException;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for HttpsBatchMessage. */
 public class HttpsBatchMessageTest

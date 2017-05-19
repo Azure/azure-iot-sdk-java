@@ -10,7 +10,10 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.*;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttDeviceMethod;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttDeviceTwin;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttMessaging;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -20,9 +23,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URLEncoder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /** Unit tests for MqttIotHubConnection. */
 public class MqttIotHubConnectionTest

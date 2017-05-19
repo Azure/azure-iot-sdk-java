@@ -7,14 +7,12 @@ package com.microsoft.azure.sdk.iot.deps.ws.impl;
 import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler;
 import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHeader;
 
-import java.io.*;
-
+import java.io.ByteArrayOutputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-
 import java.security.SecureRandom;
-
-import java.util.*;
+import java.util.Map;
+import java.util.Random;
 
 public class WebSocketHandlerImpl implements WebSocketHandler
 {

@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler;
-import com.sun.corba.se.impl.orbutil.DenseIntMapImpl;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;

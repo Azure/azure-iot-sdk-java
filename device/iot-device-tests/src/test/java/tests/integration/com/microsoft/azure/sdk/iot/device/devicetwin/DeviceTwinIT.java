@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;

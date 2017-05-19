@@ -8,9 +8,9 @@ package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 /**

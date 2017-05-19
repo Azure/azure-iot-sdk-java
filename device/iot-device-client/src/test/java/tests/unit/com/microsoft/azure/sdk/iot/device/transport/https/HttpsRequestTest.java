@@ -3,18 +3,14 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-
 import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import mockit.*;
 import org.junit.Test;
-
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 
 import java.io.IOException;
 import java.net.URL;
@@ -22,6 +18,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for HttpsRequest. */
 public class HttpsRequestTest

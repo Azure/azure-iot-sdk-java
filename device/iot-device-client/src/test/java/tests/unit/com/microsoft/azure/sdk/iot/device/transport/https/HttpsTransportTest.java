@@ -3,35 +3,24 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-
 import com.microsoft.azure.sdk.iot.device.*;
-
-import com.microsoft.azure.sdk.iot.device.MessageCallback;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsBatchMessage;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMessage;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransport;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
+import com.microsoft.azure.sdk.iot.device.transport.https.*;
 import junit.framework.AssertionFailedError;
 import mockit.*;
-import mockit.MockUp;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
-import mockit.VerificationsInOrder;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import javax.naming.SizeLimitExceededException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 
-import javax.naming.SizeLimitExceededException;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for HttpsTransport. */
 public class HttpsTransportTest

@@ -3,14 +3,16 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.device.longhaul;
 
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.Message;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.experimental.ParallelComputer;
 import org.junit.runner.JUnitCore;
 import tests.integration.com.microsoft.azure.sdk.iot.device.DeviceConnectionString;

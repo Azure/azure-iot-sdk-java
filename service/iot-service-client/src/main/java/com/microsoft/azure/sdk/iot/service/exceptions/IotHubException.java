@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import java.lang.*;
-
 /**
  * Super class for IotHub exceptions
  */

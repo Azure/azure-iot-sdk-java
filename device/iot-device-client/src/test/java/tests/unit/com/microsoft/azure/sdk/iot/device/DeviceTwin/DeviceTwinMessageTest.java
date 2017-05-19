@@ -4,8 +4,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 import mockit.Deencapsulation;
 import org.junit.Test;
 

@@ -3,17 +3,14 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.net;
 
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
-
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for IotHubUri. */
 public class IotHubUriTest

@@ -4,17 +4,15 @@
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.MessageCallback;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 
+import javax.naming.SizeLimitExceededException;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
-
-import javax.naming.SizeLimitExceededException;
 
 /**
  * <p>

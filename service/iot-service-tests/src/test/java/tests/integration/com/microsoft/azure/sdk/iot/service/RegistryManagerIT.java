@@ -12,7 +12,10 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.*;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -3,12 +3,15 @@
 
 package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
-import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.TwinChangedCallback;
+import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
+import com.microsoft.azure.sdk.iot.device.*;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.ABANDON;

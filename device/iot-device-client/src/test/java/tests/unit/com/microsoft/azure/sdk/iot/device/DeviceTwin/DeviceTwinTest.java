@@ -3,8 +3,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.TwinChangedCallback;
+import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import mockit.*;

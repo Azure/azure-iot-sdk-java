@@ -3,24 +3,10 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
-
-import com.microsoft.azure.sdk.iot.device.net.IotHubAbandonUri;
-import com.microsoft.azure.sdk.iot.device.net.IotHubCompleteUri;
-import com.microsoft.azure.sdk.iot.device.net.IotHubMessageUri;
-import com.microsoft.azure.sdk.iot.device.net.IotHubRejectUri;
-import com.microsoft.azure.sdk.iot.device.net.IotHubEventUri;
-import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage;
+import com.microsoft.azure.sdk.iot.device.net.*;
+import com.microsoft.azure.sdk.iot.device.transport.https.*;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -28,7 +14,10 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLEncoder;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for HttpsIotHubConnection. */
 public class HttpsIotHubConnectionTest

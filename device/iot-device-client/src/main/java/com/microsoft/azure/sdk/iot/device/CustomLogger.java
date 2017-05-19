@@ -3,7 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 public class CustomLogger {
 

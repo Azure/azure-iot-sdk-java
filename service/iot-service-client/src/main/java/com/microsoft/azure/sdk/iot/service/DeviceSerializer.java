@@ -5,7 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 
 import java.lang.reflect.Type;

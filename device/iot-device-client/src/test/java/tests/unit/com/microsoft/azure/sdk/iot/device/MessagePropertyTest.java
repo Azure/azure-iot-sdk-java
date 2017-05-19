@@ -3,11 +3,11 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for MessageProperty. */
 public class MessagePropertyTest

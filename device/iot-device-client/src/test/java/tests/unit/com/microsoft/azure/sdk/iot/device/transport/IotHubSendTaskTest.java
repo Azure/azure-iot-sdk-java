@@ -3,8 +3,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTransport;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTransport;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;

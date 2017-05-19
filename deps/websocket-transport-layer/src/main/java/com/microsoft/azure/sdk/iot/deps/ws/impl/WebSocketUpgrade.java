@@ -6,12 +6,11 @@ package com.microsoft.azure.sdk.iot.deps.ws.impl;
 
 import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
-
 import java.security.InvalidParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import java.util.*;
+import java.util.Map;
+import java.util.Scanner;
 
 
 public class WebSocketUpgrade

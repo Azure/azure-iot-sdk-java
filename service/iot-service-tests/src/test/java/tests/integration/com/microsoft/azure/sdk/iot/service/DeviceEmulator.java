@@ -15,7 +15,6 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * Implement a fake device to the end to end test.

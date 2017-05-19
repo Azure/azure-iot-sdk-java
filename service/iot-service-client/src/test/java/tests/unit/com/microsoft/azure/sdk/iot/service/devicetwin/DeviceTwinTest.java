@@ -6,13 +6,13 @@
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import mockit.Deencapsulation;

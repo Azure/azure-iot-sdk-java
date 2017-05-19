@@ -3,12 +3,11 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import org.junit.Test;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-
-import org.junit.Test;
 
 /** Unit tests for IotHubStatusCode. */
 public class IotHubStatusCodeTest

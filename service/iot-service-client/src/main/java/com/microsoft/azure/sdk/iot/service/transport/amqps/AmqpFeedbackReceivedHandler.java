@@ -5,19 +5,18 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
+import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
-import org.apache.qpid.proton.amqp.messaging.Accepted;
-
 
 import java.util.HashMap;
 import java.util.Map;

@@ -5,9 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;

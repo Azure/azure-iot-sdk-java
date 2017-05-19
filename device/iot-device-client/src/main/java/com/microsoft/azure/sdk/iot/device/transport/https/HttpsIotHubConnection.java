@@ -6,7 +6,6 @@ package com.microsoft.azure.sdk.iot.device.transport.https;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.net.*;
-import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 
 import java.io.IOException;
 import java.net.URL;

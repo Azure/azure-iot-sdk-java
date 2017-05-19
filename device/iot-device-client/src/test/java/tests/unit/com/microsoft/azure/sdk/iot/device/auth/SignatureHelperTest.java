@@ -3,17 +3,14 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-
 import com.microsoft.azure.sdk.iot.device.auth.SignatureHelper;
-
 import org.junit.Test;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for SignatureHelper. */
 public class SignatureHelperTest

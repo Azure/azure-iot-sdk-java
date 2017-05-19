@@ -4,12 +4,10 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import com.microsoft.azure.sdk.iot.device.transport.State;
-import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
@@ -23,7 +21,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * <p>

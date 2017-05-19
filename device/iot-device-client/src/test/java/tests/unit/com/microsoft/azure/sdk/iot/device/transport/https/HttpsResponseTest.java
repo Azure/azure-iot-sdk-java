@@ -3,18 +3,17 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-
-import org.junit.Test;
-
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for HttpsResponse. */
 public class HttpsResponseTest

@@ -5,6 +5,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler;
+import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
@@ -16,9 +18,6 @@ import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IotHubReactor;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.ServerListener;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
-import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler;
-
 import mockit.*;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;

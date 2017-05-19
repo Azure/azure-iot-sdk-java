@@ -6,7 +6,6 @@ package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 
 abstract public class Device implements PropertyCallBack<String, Object>
 {

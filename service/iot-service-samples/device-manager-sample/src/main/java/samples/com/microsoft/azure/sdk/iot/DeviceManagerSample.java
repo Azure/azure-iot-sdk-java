@@ -5,9 +5,9 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

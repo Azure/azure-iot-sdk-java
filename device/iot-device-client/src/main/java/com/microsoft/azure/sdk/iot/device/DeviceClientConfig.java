@@ -3,10 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import javax.net.ssl.SSLContext;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 /**
  * Configuration settings for an IoT Hub client. Validates all user-defined
  * settings.

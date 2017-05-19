@@ -3,21 +3,20 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.everyItem;
-import static org.hamcrest.Matchers.isIn;
-
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
-
 import mockit.Mocked;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.isIn;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for IotHubCallbackPacket. */
 public class IotHubCallbackPacketTest

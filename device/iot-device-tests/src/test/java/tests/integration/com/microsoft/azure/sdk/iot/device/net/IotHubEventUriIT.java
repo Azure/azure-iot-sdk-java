@@ -3,13 +3,13 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.device.net;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 import com.microsoft.azure.sdk.iot.device.net.IotHubEventUri;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /** Integration tests for IotHubEventUri. */
 public class IotHubEventUriIT

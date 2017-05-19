@@ -5,7 +5,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.transport.http;
 
-import com.microsoft.azure.sdk.iot.service.transport.http.*;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpConnection;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;

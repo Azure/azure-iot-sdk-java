@@ -1,21 +1,13 @@
 package com.iothub.azure.microsoft.com.androidsample;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.MessageCallback;
+import com.microsoft.azure.sdk.iot.device.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity {
 

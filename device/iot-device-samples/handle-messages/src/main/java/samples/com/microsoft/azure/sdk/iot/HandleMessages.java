@@ -5,8 +5,8 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.device.Message;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

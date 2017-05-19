@@ -6,9 +6,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.DeviceTwin;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class PairTest
 {

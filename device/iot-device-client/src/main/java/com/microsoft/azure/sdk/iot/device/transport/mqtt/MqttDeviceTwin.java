@@ -4,8 +4,8 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.CustomLogger;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 

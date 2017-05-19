@@ -14,9 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
 
 @RunWith(JMockit.class)
 public class IotHubExceptionManagerTest

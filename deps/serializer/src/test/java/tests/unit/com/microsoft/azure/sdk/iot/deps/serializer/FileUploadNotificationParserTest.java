@@ -3,9 +3,9 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadNotificationParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
-import com.microsoft.azure.sdk.iot.deps.serializer.*;
 
 import java.util.Date;
 

@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.service.*;
 import mockit.Expectations;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;

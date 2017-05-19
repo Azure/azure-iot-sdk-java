@@ -11,12 +11,12 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubDeviceMaximumQueueDe
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Service client example for:

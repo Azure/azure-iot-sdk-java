@@ -3,18 +3,26 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.device.*;
-import org.junit.*;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import tests.integration.com.microsoft.azure.sdk.iot.device.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.device.EventCallback;
 import tests.integration.com.microsoft.azure.sdk.iot.device.Success;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 

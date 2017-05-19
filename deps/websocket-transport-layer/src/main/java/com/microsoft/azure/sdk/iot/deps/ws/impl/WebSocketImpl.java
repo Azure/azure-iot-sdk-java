@@ -11,12 +11,13 @@ import org.apache.qpid.proton.engine.Transport;
 import org.apache.qpid.proton.engine.TransportException;
 import org.apache.qpid.proton.engine.impl.*;
 
-import static com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler.WebSocketMessageType.*;
-import static org.apache.qpid.proton.engine.impl.ByteBufferUtils.*;
-
 import java.nio.ByteBuffer;
-
 import java.util.Map;
+
+import static com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler.WebSocketMessageType.WEB_SOCKET_MESSAGE_TYPE_HEADER_CHUNK;
+import static com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler.WebSocketMessageType.WEB_SOCKET_MESSAGE_TYPE_UNKNOWN;
+import static org.apache.qpid.proton.engine.impl.ByteBufferUtils.newWriteableBuffer;
+import static org.apache.qpid.proton.engine.impl.ByteBufferUtils.pourAll;
 
 public class WebSocketImpl implements WebSocket, TransportLayer
 {

@@ -5,25 +5,25 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
-import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
-
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.reactor.Handshaker;
 
 import java.io.IOException;
 import java.nio.BufferOverflowException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**

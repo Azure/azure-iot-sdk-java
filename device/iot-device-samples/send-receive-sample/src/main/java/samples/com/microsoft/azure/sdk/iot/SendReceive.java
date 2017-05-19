@@ -7,8 +7,9 @@ import com.microsoft.azure.sdk.iot.device.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
-import java.util.*;
 
 /**
  * Handles messages from an IoT Hub. Default protocol is to use

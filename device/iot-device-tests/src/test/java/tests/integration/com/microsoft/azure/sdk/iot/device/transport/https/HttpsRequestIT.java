@@ -3,18 +3,17 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.device.transport.https;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
-
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
-
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertThat;
 
 /** Integration tests for HttpsRequest. */
 public class HttpsRequestIT

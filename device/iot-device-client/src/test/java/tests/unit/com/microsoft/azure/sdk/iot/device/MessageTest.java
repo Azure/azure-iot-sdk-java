@@ -3,19 +3,18 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
-
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
-import mockit.Verifications;
 import org.junit.Test;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
 
 /** Unit tests for Message. */
 public class MessageTest

@@ -6,18 +6,15 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.Message;
-
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttMessaging;
 import mockit.*;
-
 import org.junit.Test;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.Semaphore;
 
 import static org.junit.Assert.*;
 
