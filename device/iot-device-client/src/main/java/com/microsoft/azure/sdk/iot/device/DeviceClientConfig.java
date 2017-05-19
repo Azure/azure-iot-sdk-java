@@ -27,11 +27,8 @@ public final class DeviceClientConfig
     /** The default value for messageLockTimeoutSecs. */
     public static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
 
-    protected final String iotHubHostname;
-    protected final String iotHubName;
-    protected final String deviceId;
-    protected final String deviceKey;
-    protected final String sharedAccessToken;
+    /* information in the connection string that unique identify the device */
+    protected final IotHubConnectionString iotHubConnectionString;
 
     /* Certificates related to IotHub */
     private String userCertificateString;
@@ -60,47 +57,32 @@ public final class DeviceClientConfig
     protected Object messageContext;
 
     protected CustomLogger logger;
+
     /**
-     * Constructor.
+     * Constructor
      *
-     * @param iotHubHostname the IoT Hub hostname.
-     * @param deviceId the device ID.
-     * @param deviceKey the device key.
-     * @param sharedAccessToken the shared access token.
-     *
-     *
-     * @throws URISyntaxException if the IoT Hub hostname does not conform to RFC 3986.
+     * @param iotHubConnectionString is the string with the hostname, deviceId, and
+     *                               deviceKey or token, which identify the device in
+     *                               the Azure IotHub.
      * @throws IllegalArgumentException if the IoT Hub hostname does not contain
      * a valid IoT Hub name as its prefix.
      */
-    public DeviceClientConfig(String iotHubHostname, String deviceId,
-                              String deviceKey, String sharedAccessToken) throws URISyntaxException
+    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString)
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_014: [If the IoT Hub hostname is
-        // not valid URI, the constructor shall throw a URISyntaxException.]
-        new URI(iotHubHostname);
-
-        // Codes_SRS_DEVICECLIENTCONFIG_11_015: [If the IoT Hub hostname does not contain a '.', the function shall throw an IllegalArgumentException.]
-        int iotHubNameEndIdx = iotHubHostname.indexOf(".");
-        if (iotHubNameEndIdx == -1)
+        // Codes_SRS_DEVICECLIENTCONFIG_21_034: [If the provided `iotHubConnectionString` is null,
+        // the constructor shall throw IllegalArgumentException.]
+        if(iotHubConnectionString == null)
         {
-            String errStr = String.format(
-                    "%s did not include a valid IoT Hub name as its prefix. "
-                            + "An IoT Hub hostname has the following format: "
-                            + "[iotHubName].[valid HTML chars]+",
-                    iotHubHostname);
-            throw new IllegalArgumentException(errStr);
+            throw new IllegalArgumentException("connection string is null");
         }
 
-        // Codes_SRS_DEVICECLIENTCONFIG_11_001: [The constructor shall save the IoT Hub hostname, device ID, and device key.]
-        this.iotHubHostname = iotHubHostname;
-        this.iotHubName = iotHubHostname.substring(0, iotHubNameEndIdx);
-        this.deviceId = deviceId;
-        this.deviceKey = deviceKey;
-        // Codes_SRS_DEVICECLIENTCONFIG_25_017: [**The constructor shall save sharedAccessToken.**] **
-        this.sharedAccessToken = sharedAccessToken;
+        // Codes_SRS_DEVICECLIENTCONFIG_21_033: [The constructor shall save the IoT Hub hostname, hubname,
+        // device ID, device key, and device token, provided in the `iotHubConnectionString`.]
+        this.iotHubConnectionString = iotHubConnectionString;
+
         this.logger = new CustomLogger(this.getClass());
-        logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ", this.iotHubName, this.deviceId, logger.getMethodName());
+        logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
+                this.iotHubConnectionString.getHostName(), this.iotHubConnectionString.getDeviceId(), logger.getMethodName());
     }
 
     /**
@@ -183,7 +165,7 @@ public final class DeviceClientConfig
     public String getIotHubHostname()
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
-        return this.iotHubHostname;
+        return this.iotHubConnectionString.getHostName();
     }
 
     /**
@@ -192,8 +174,8 @@ public final class DeviceClientConfig
      */
     public String getIotHubName()
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub name given in the constructor, where the IoT Hub name is embedded in the IoT Hub hostname as follows: [IoT Hub name].[valid HTML chars]+.]
-        return this.iotHubName;
+        // Codes_SRS_DEVICECLIENTCONFIG_11_007: [The function shall return the IoT Hub name given in the constructor, where the IoT Hub name is embedded in the IoT Hub hostname as follows: [IoT Hub name].[valid HTML chars]+.]
+        return this.iotHubConnectionString.getHubName();
     }
 
     /**
@@ -204,7 +186,7 @@ public final class DeviceClientConfig
     public String getDeviceId()
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_003: [The function shall return the device ID given in the constructor.]
-        return this.deviceId;
+        return this.iotHubConnectionString.getDeviceId();
     }
 
     /**
@@ -215,7 +197,7 @@ public final class DeviceClientConfig
     public String getDeviceKey()
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_004: [The function shall return the device key given in the constructor.]
-        return this.deviceKey;
+        return this.iotHubConnectionString.getSharedAccessKey();
     }
 
     /**
@@ -226,7 +208,7 @@ public final class DeviceClientConfig
     public String getSharedAccessToken()
     {
         // Codes_SRS_DEVICECLIENTCONFIG_25_018: [**The function shall return the SharedAccessToken given in the constructor.**] **
-        return this.sharedAccessToken;
+        return this.iotHubConnectionString.getSharedAccessToken();
     }
 
     /**
@@ -250,7 +232,7 @@ public final class DeviceClientConfig
      */
     public void setTokenValidSecs(long expiryTime)
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_25_016: [The function shall set the value of tokenValidSecs.]
+        // Codes_SRS_DEVICECLIENTCONFIG_25_008: [The function shall set the value of tokenValidSecs.]
         this.tokenValidSecs = expiryTime;
     }
 
@@ -392,11 +374,7 @@ public final class DeviceClientConfig
 
     protected DeviceClientConfig()
     {
-        this.iotHubHostname = null;
-        this.iotHubName = null;
-        this.deviceId = null;
-        this.deviceKey = null;
-        this.sharedAccessToken = null;
+        this.iotHubConnectionString = null;
         this.pathToCertificate = null;
         this.iotHubSSLContext = null;
     }

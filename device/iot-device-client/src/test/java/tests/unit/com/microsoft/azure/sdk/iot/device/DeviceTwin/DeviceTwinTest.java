@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
 public class DeviceTwinTest
 {
     @Mocked
-    DeviceClient mockedClient;
+    DeviceIO mockedDeviceIO;
 
     @Mocked
     DeviceClientConfig mockedConfig;
@@ -41,19 +41,19 @@ public class DeviceTwinTest
         //Arrange
 
         //Act
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
 
         //Assert
         TwinParser actualTwinParserObj = Deencapsulation.getField(testTwin, "twinParser");
-        DeviceClient actualClient = Deencapsulation.getField(testTwin, "deviceClient");
+        DeviceIO actualClient = Deencapsulation.getField(testTwin, "deviceIO");
         DeviceClientConfig actualConfig = Deencapsulation.getField(testTwin, "config");
         IotHubEventCallback actualStatucCB = Deencapsulation.getField(testTwin, "deviceTwinStatusCallback");
         PropertyCallBack actualPropCB = Deencapsulation.getField(testTwin, "deviceTwinGenericPropertyChangeCallback");
 
         assertEquals(actualPropCB, mockedGenericPropertyCB);
         assertEquals(actualStatucCB, mockedStatusCB);
-        assertEquals(actualClient, mockedClient);
+        assertEquals(actualClient, mockedDeviceIO);
         assertEquals(actualConfig, mockedConfig);
 
     }
@@ -72,7 +72,7 @@ public class DeviceTwinTest
     @Test (expected = IllegalArgumentException.class)
     public void contructorThrowsExceptionIfConfigIsNull() throws IOException
     {
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, null,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, null,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
 
     }
@@ -80,7 +80,7 @@ public class DeviceTwinTest
     @Test (expected = IllegalArgumentException.class)
     public void contructorThrowsExceptionIfTwinCBIsNull() throws IOException
     {
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 null, null, mockedGenericPropertyCB, null);
 
     }
@@ -88,7 +88,7 @@ public class DeviceTwinTest
     @Test (expected = IllegalArgumentException.class)
     public void contructorThrowsExceptionIfgenericPropCBIsNull() throws IOException
     {
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, null, null);
 
     }
@@ -99,7 +99,7 @@ public class DeviceTwinTest
     @Test
     public void contructorSetsDTMessageResponseCB() throws IOException
     {
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
 
         new Verifications()
@@ -140,7 +140,7 @@ public class DeviceTwinTest
         };
 
         //act
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
 
         TwinParser actualTwinParserObj = Deencapsulation.getField(testTwin, "twinParser");
@@ -157,7 +157,7 @@ public class DeviceTwinTest
     public void getDeviceTwinSucceeds(@Mocked final DeviceTwinMessage mockedDeviceTwinMessage) throws IOException
     {
         //arrange
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         final byte[] body = {};
 
@@ -180,7 +180,7 @@ public class DeviceTwinTest
                 times = 1;
                 mockedDeviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_REQUEST);
                 times = 1;
-                mockedClient.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
+                mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
                 times = 1;
             }
         };
@@ -193,7 +193,7 @@ public class DeviceTwinTest
     @Test
     public void getDeviceTwinSetsDeviceTwinOperation(@Mocked final DeviceTwinMessage mockedDeviceTwinMessage) throws IOException
     {
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         final byte[] body = {};
 
@@ -214,7 +214,7 @@ public class DeviceTwinTest
                 times = 1;
                 mockedDeviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_REQUEST);
                 times = 1;
-                mockedClient.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
+                mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
                 times = 1;
             }
         };
@@ -227,7 +227,7 @@ public class DeviceTwinTest
     @Test
     public void getDeviceTwinSetsEmptyPayload(@Mocked final DeviceTwinMessage mockedDeviceTwinMessage) throws IOException
     {
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         final byte[] body = {};
 
@@ -248,7 +248,7 @@ public class DeviceTwinTest
                 times = 1;
                 mockedDeviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_REQUEST);
                 times = 1;
-                mockedClient.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
+                mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
                 times = 1;
             }
         };
@@ -258,7 +258,7 @@ public class DeviceTwinTest
     @Test
     public void getDeviceTwinRequestCompleteTriggersStatusCB() throws IOException
     {
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
 
         IotHubEventCallback deviceTwinRequestMessageCallback = Deencapsulation.newInnerInstance("deviceTwinRequestMessageCallback", testTwin);
@@ -279,7 +279,7 @@ public class DeviceTwinTest
     {
         //arrange
         final byte[] body = {};
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
@@ -313,7 +313,7 @@ public class DeviceTwinTest
     {
         //arrange
         final byte[] body = {};
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
@@ -347,7 +347,7 @@ public class DeviceTwinTest
     {
         //arrange
         final byte[] body = {};
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
@@ -381,7 +381,7 @@ public class DeviceTwinTest
     {
         //arrange
         final byte[] body = {};
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
@@ -413,7 +413,7 @@ public class DeviceTwinTest
     @Test (expected = IllegalArgumentException.class)
     public void updateReportedPropThrowsExceptionPropIsNull() throws IOException
     {
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         testTwin.updateReportedProperties(null);
     }
@@ -451,7 +451,7 @@ public class DeviceTwinTest
                 result = mockedDeviceTwinMessage;
             }
         };
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         HashSet<Property> reportedProp = new HashSet<>();
 
@@ -466,7 +466,7 @@ public class DeviceTwinTest
                 times = 1;
                 mockedDeviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST);
                 times = 1;
-                mockedClient.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
+                mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
                 times = 1;
             }
         };
@@ -509,7 +509,7 @@ public class DeviceTwinTest
                 result = mockedDeviceTwinMessage;
             }
         };
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         HashSet<Property> reportedProp = new HashSet<>();
 
@@ -524,7 +524,7 @@ public class DeviceTwinTest
                 times = 1;
                 mockedDeviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST);
                 times = 1;
-                mockedClient.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
+                mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
                 times = 1;
             }
         };
@@ -538,7 +538,7 @@ public class DeviceTwinTest
     {
         //arrange
         final byte[] body = {};
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
@@ -574,7 +574,7 @@ public class DeviceTwinTest
     {
         //arrange
         final byte[] body = {};
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
@@ -635,7 +635,7 @@ public class DeviceTwinTest
                 result = mockedDeviceTwinMessage;
             }
         };
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         Map<Property, Pair<PropertyCallBack<String, Object>, Object>> desiredMap = new HashMap<>();
         desiredMap.put(new Property("DesiredProp", "DesiredValue"), new Pair<>(mockedDesiredCB, null));
@@ -654,7 +654,7 @@ public class DeviceTwinTest
             {
                 mockedDeviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST);
                 times = 1;
-                mockedClient.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
+                mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
                 times = 1;
             }
         };
@@ -688,7 +688,7 @@ public class DeviceTwinTest
                 result = mockedDeviceTwinMessage;
             }
         };
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         Map<Property, Pair<PropertyCallBack<String, Object>, Object>> desiredMap = new HashMap<>();
         desiredMap.put(new Property("DesiredProp1", "DesiredValue1"), new Pair<>(mockedDesiredCB, null));
@@ -713,7 +713,7 @@ public class DeviceTwinTest
             {
                 mockedDeviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST);
                 times = 1;
-                mockedClient.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
+                mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null);
                 times = 1;
             }
         };
@@ -725,7 +725,7 @@ public class DeviceTwinTest
     {
         //arrange
         final byte[] body = {};
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
@@ -761,7 +761,7 @@ public class DeviceTwinTest
     {
         //arrange
         final byte[] body = {};
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
@@ -793,7 +793,7 @@ public class DeviceTwinTest
     public void subscribeToDesiredCallsGenericCBOnDesiredChangeIfNoUserCBFound(@Mocked final PropertyCallBack<String, Object> mockedDesiredCB) throws IOException
     {
 
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         Map<Property, Pair<PropertyCallBack<String, Object>, Object>> desiredMap = new HashMap<>();
         desiredMap.put(new Property("DesiredProp1", "DesiredValue1"), new Pair<>(mockedDesiredCB, null));
@@ -826,7 +826,7 @@ public class DeviceTwinTest
     public void subscribeToDesiredCallsUserCBOnDesiredChangeIfUserCBFound(@Mocked final PropertyCallBack<String, Object> mockedDesiredCB) throws IOException
     {
 
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         Map<Property, Pair<PropertyCallBack<String, Object>, Object>> desiredMap = new HashMap<>();
         desiredMap.put(new Property("DesiredProp1", "DesiredValue1"), new Pair<>(mockedDesiredCB, null));
@@ -860,7 +860,7 @@ public class DeviceTwinTest
     public void desiredChangeResponseCallsGenericCBCBWithDesiredChangeIfNullCB(@Mocked TwinParser mockedTwinParserObject) throws IOException
     {
 
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         Map<Property, Pair<PropertyCallBack<String, Object>, Object>> desiredMap = new HashMap<>();
         desiredMap.put(new Property("DesiredProp1", "DesiredValue1"), new Pair<>((PropertyCallBack<String, Object>) null, null));
@@ -889,7 +889,7 @@ public class DeviceTwinTest
     @Test
     public void desiredChangeResponseCallsUserGenericCBWithDesiredChangeIfUnsubscribedYet(@Mocked TwinParser mockedTwinParserObject) throws IOException
     {
-        DeviceTwin testTwin = new DeviceTwin(mockedClient, mockedConfig,
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         TwinChangedCallback onDesiredChange = Deencapsulation.newInnerInstance("OnDesiredPropertyChanged", testTwin);
         final HashMap<String, Object> desiredPropertyMap = new HashMap<>();

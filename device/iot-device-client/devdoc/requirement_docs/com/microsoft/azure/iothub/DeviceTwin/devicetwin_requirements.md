@@ -11,7 +11,7 @@ Allows a single logical or physical device to connect to an IoT Hub.
 ```java
 public final class DeviceTwin
 {
-    public DeviceTwin(DeviceClient client, DeviceClientConfig config, IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext, PropertyCallBack genericPropertyCallback, Object genericPropertyCallbackContext) throws IOException;
+    public DeviceTwin(DeviceIO deviceIO, DeviceClientConfig config, IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext, PropertyCallBack genericPropertyCallback, Object genericPropertyCallbackContext) throws IOException;
 
     public void getDeviceTwin();
     public void updateReportedProperties(HashSet<Property> reportedProperties) throws IOException;   
@@ -23,14 +23,14 @@ public final class DeviceTwin
 ### DeviceTwin
 
 ```java
-public DeviceTwin(DeviceClient client, DeviceClientConfig config, IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext, PropertyCallBack genericPropertyCallback, Object genericPropertyCallbackContext) throws IOException;
+public DeviceTwin(DeviceIO deviceIO, DeviceClientConfig config, IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext, PropertyCallBack genericPropertyCallback, Object genericPropertyCallbackContext) throws IOException;
 ```
 
-**SRS_DEVICETWIN_25_001: [**The constructor shall throw IllegalArgument Exception if any of the parameters i.e client, config, deviceTwinCallback, genericPropertyCallback are null. **]**
+**SRS_DEVICETWIN_25_001: [**The constructor shall throw IllegalArgument Exception if any of the parameters i.e deviceIO, config, deviceTwinCallback, genericPropertyCallback are null. **]**
 
 **SRS_DEVICETWIN_25_002: [**The constructor shall save the device twin message callback, by calling setDeviceTwinMessageCallback, where any further messages for device twin shall be delivered.**]**
 
-**SRS_DEVICETWIN_25_003: [**The constructor shall save all the parameters specified i.e client, config, deviceTwinCallback, genericPropertyCallback.**]**
+**SRS_DEVICETWIN_25_003: [**The constructor shall save all the parameters specified i.e deviceIO, config, deviceTwinCallback, genericPropertyCallback.**]**
 
 **SRS_DEVICETWIN_25_004: [**The constructor shall create a new twin object which will hence forth be used as a storage for all the properties provided by user.**]**
 

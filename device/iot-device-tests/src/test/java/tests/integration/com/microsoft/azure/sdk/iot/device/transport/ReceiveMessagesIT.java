@@ -23,6 +23,9 @@ public class ReceiveMessagesIT
 {
     public static Map<String, String> messageProperties = new HashMap<>(3);
 
+    private final static String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
+    private final static Long ONE_SECOND_POLLING_INTERVAL = 1000L;
+
     private static String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
     private static RegistryManager registryManager;
@@ -83,9 +86,7 @@ public class ReceiveMessagesIT
     public void ReceiveMessagesOverHttpsIncludingProperties() throws Exception
     {
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceHttps), IotHubClientProtocol.HTTPS);
-        Field receivePeriod = client.getClass().getDeclaredField("RECEIVE_PERIOD_MILLIS");
-        receivePeriod.setAccessible(true);
-        receivePeriod.set(client, 1000);
+        client.setOption(SET_MINIMUM_POLLING_INTERVAL, ONE_SECOND_POLLING_INTERVAL);
         client.open();
 
         try
@@ -135,9 +136,6 @@ public class ReceiveMessagesIT
     public void ReceiveMessagesOverAmqpsIncludingProperties() throws Exception
     {
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqps), IotHubClientProtocol.AMQPS);
-        Field receivePeriod = client.getClass().getDeclaredField("RECEIVE_PERIOD_MILLIS");
-        receivePeriod.setAccessible(true);
-        receivePeriod.set(client, 1000);
         client.open();
 
         try
