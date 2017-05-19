@@ -142,7 +142,7 @@ public class SendMessagesIT
 
         public void CloseConnection() throws IOException
         {
-            client.close();
+            client.closeNow();
         }
     }
 
@@ -229,7 +229,7 @@ public class SendMessagesIT
             }
         }
 
-        client.close();
+        client.closeNow();
     }
 
     @Test
@@ -270,7 +270,7 @@ public class SendMessagesIT
             }
         }
 
-        client.close();
+        client.closeNow();
     }
 
     @Test
@@ -341,6 +341,6 @@ public class SendMessagesIT
             }
         }
 
-        client.close();
+        client.closeNow();
     }
 }

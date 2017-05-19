@@ -198,7 +198,7 @@ public class LongHaulIT
             System.out.println("Https send long haul test - messages sent successfully: " + messagesSentSuccessfully);
             System.out.println("Https send long haul test - messages failed: " + messagesFailed);
 
-            client.close();
+            client.closeNow();
         }
 
         @Test
@@ -247,7 +247,7 @@ public class LongHaulIT
             System.out.println("Amqps send long haul test - messages sent successfully: " + messagesSentSuccessfully);
             System.out.println("Amqps send long haul test - messages failed: " + messagesFailed);
 
-            client.close();
+            client.closeNow();
         }
 
         @Test
@@ -296,7 +296,7 @@ public class LongHaulIT
             System.out.println("Mqtt send long haul test - messages sent successfully: " + messagesSentSuccessfully);
             System.out.println("Mqtt send long haul test - messages failed: " + messagesFailed);
 
-            client.close();
+            client.closeNow();
         }
 
         @Test
@@ -357,7 +357,7 @@ public class LongHaulIT
             System.out.println("Https receive long haul test - messages failed: " + messagesFailed);
 
             Thread.sleep(200);
-            client.close();
+            client.closeNow();
             serviceClient.close();
         }
 
@@ -416,7 +416,7 @@ public class LongHaulIT
             System.out.println("Amqps receive long haul test - messages failed: " + messagesFailed);
 
             Thread.sleep(200);
-            client.close();
+            client.closeNow();
             serviceClient.close();
         }
 
@@ -475,7 +475,7 @@ public class LongHaulIT
             System.out.println("Mqtt receive long haul test - messages failed: " + messagesFailed);
 
             Thread.sleep(200);
-            client.close();
+            client.closeNow();
             serviceClient.close();
         }
 

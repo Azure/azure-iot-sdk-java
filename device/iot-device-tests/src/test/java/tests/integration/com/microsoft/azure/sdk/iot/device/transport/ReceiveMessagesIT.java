@@ -129,7 +129,7 @@ public class ReceiveMessagesIT
         }
 
         Thread.sleep(200);
-        client.close();
+        client.closeNow();
     }
 
     @Test
@@ -177,7 +177,7 @@ public class ReceiveMessagesIT
         }
 
         Thread.sleep(200);
-        client.close();
+        client.closeNow();
     }
 
     @Test
@@ -224,7 +224,7 @@ public class ReceiveMessagesIT
         }
 
         Thread.sleep(200);
-        client.close();
+        client.closeNow();
     }
 
     protected static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
