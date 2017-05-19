@@ -92,19 +92,19 @@ public final class DeviceClient implements Closeable
     public static final Charset CONNECTION_STRING_CHARSET = StandardCharsets.UTF_8;
 
 
-    protected final static String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
-    protected final static String SET_SEND_INTERVAL = "SetSendInterval";
-    protected final static String SET_CERTIFICATE_PATH = "SetCertificatePath";
-    protected final static String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
+    private static final String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
+    private static final String SET_SEND_INTERVAL = "SetSendInterval";
+    private static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
+    private static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
 
-    protected DeviceClientConfig config;
-    protected DeviceIO deviceIO;
+    private DeviceClientConfig config;
+    private DeviceIO deviceIO;
 
     private DeviceTwin deviceTwin;
     private DeviceMethod deviceMethod;
 
     protected long RECEIVE_PERIOD_MILLIS;
-    protected CustomLogger logger;
+    private CustomLogger logger;
 
     /**
      * Constructor that takes a connection string as an argument.
@@ -452,6 +452,7 @@ public final class DeviceClient implements Closeable
         this.deviceMethod.subscribeToDeviceMethod(deviceMethodCallback, deviceMethodCallbackContext);
     }
 
+    @SuppressWarnings("unused")
     protected DeviceClient()
     {
         this.config = null;

@@ -18,9 +18,9 @@ public class MqttDeviceMethod extends Mqtt
 {
     private String subscribeTopic;
     private String responseTopic;
-    private Map<String, DeviceOperations> requestMap = new HashMap<>();
+    private final Map<String, DeviceOperations> requestMap = new HashMap<>();
     private boolean isStarted = false;
-    private CustomLogger logger = new CustomLogger(this.getClass());
+    private final CustomLogger logger = new CustomLogger(this.getClass());
 
     private final String POUND = "#";
     private final String BACKSLASH = "/";
@@ -49,7 +49,7 @@ public class MqttDeviceMethod extends Mqtt
         this.responseTopic = RES;
     }
 
-    public void start() throws IOException
+    public void start()
     {
         if (!isStarted)
         {
@@ -229,16 +229,15 @@ public class MqttDeviceMethod extends Mqtt
                     throw new IOException("Sending a response for the method that was never invoked");
                 }
 
-                StringBuilder topic  = new StringBuilder(this.responseTopic);
-                topic.append(BACKSLASH);
-                topic.append(message.getStatus());
-                topic.append(BACKSLASH);
-                topic.append(REQ_ID);
-                topic.append(message.getRequestId());
+                String topic = this.responseTopic + BACKSLASH +
+                        message.getStatus() +
+                        BACKSLASH +
+                        REQ_ID +
+                        message.getRequestId();
                 /*
                 Codes_SRS_MqttDeviceMethod_25_022: [**send method shall build the publish topic of the format mentioned in spec ($iothub/methods/res/{status}/?$rid={request id}) and publish if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
                  */
-                this.publish(topic.toString(), message.getBytes());
+                this.publish(topic, message.getBytes());
                 break;
             }
             default:

@@ -251,7 +251,7 @@ public class MqttIotHubConnectionTest
 
         final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
 
-        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion, "UTF-8");
+        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION, "UTF-8");
         assertEquals(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "/" + clientIdentifier, actualIotHubUserName);
 
         String expectedSasToken = mockToken.toString();

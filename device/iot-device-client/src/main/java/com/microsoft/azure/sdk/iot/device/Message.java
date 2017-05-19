@@ -281,7 +281,7 @@ public class Message
         this.correlationId = UUID.randomUUID().toString();
         this.feedbackStatusCode = FeedbackStatusCodeEnum.none;
         this.ack = FeedbackStatusCodeEnum.none;
-        this.properties = new ArrayList<MessageProperty>();
+        this.properties = new ArrayList<>();
         this.logger = new CustomLogger(this.getClass());
     }
 

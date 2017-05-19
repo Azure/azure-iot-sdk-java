@@ -19,12 +19,12 @@ public final class DeviceClientConfig
     private long tokenValidSecs = 3600;
 
     /** The default value for readTimeoutMillis. */
-    public static final int DEFAULT_READ_TIMEOUT_MILLIS = 240000;
+    private static final int DEFAULT_READ_TIMEOUT_MILLIS = 240000;
     /** The default value for messageLockTimeoutSecs. */
-    public static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
+    private static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
 
     /* information in the connection string that unique identify the device */
-    protected final IotHubConnectionString iotHubConnectionString;
+    private final IotHubConnectionString iotHubConnectionString;
 
     /* Certificates related to IotHub */
     private String userCertificateString;
@@ -34,25 +34,25 @@ public final class DeviceClientConfig
     /**
      * The callback to be invoked if a message of Device Method type received.
      */
-    protected MessageCallback deviceMethodCallback;
+    private MessageCallback deviceMethodCallback;
     /** The context to be passed in to the device method type message callback. */
-    protected Object deviceMethodMessageContext;
+    private Object deviceMethodMessageContext;
 
     /**
      * The callback to be invoked if a message of Device Twin type received.
      */
-    protected MessageCallback deviceTwinMessageCallback;
+    private MessageCallback deviceTwinMessageCallback;
     /** The context to be passed in to the device twin type message callback. */
-    protected Object deviceTwinMessageContext;
+    private Object deviceTwinMessageContext;
 
     /**
      * The callback to be invoked if a message is received.
      */
-    protected MessageCallback messageCallback;
+    private MessageCallback messageCallback;
     /** The context to be passed in to the message callback. */
-    protected Object messageContext;
+    private Object messageContext;
 
-    protected CustomLogger logger;
+    private CustomLogger logger;
 
     /**
      * Constructor
@@ -371,8 +371,7 @@ public final class DeviceClientConfig
         return DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS;
     }
 
-
-
+    @SuppressWarnings("unused")
     protected DeviceClientConfig()
     {
         this.iotHubConnectionString = null;

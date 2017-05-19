@@ -31,14 +31,14 @@ import java.util.Map;
 public class HttpsConnection
 {
     /** The underlying HTTPS connection. */
-    protected final HttpsURLConnection connection;
+    private final HttpsURLConnection connection;
 
     /**
      * The body. {@link HttpsURLConnection} silently calls connect() when the output
      * stream is written to. We buffer the body and defer writing to the output
      * stream until {@link #connect()} is called.
      */
-    protected byte[] body;
+    private byte[] body;
 
     /**
      * Constructor. Opens a connection to the given URL.
@@ -56,7 +56,7 @@ public class HttpsConnection
         {
             String errMsg = String.format("Expected URL that uses protocol "
                             + "HTTPS but received one that uses "
-                            + "protocol '%s'.\n",
+                            + "protocol '%s'.%n",
                     protocol);
             throw new IllegalArgumentException(errMsg);
         }
@@ -245,9 +245,8 @@ public class HttpsConnection
      *
      * @return the response headers.
      *
-     * @throws IOException if no response was received.
      */
-    public Map<String, List<String>> getResponseHeaders() throws IOException
+    public Map<String, List<String>> getResponseHeaders()
     {
         // Codes_SRS_HTTPSCONNECTION_11_017: [The function shall return a mapping of header field names to the values associated with the header field name.]
         // Codes_SRS_HTTPSCONNECTION_11_018: [The function shall throw an IOException if no response was received.]
@@ -263,7 +262,7 @@ public class HttpsConnection
      *
      * @throws IOException if the input stream could not be read from.
      */
-    protected static byte[] readInputStream(InputStream stream)
+    private static byte[] readInputStream(InputStream stream)
             throws IOException
     {
         ArrayList<Byte> byteBuffer = new ArrayList<>();
@@ -285,7 +284,7 @@ public class HttpsConnection
         return byteArray;
     }
 
-    protected void setSSLContext(SSLContext sslContext) throws IllegalArgumentException
+    void setSSLContext(SSLContext sslContext) throws IllegalArgumentException
     {
         if (sslContext == null)
         {
@@ -296,6 +295,7 @@ public class HttpsConnection
         this.connection.setSSLSocketFactory(sslContext.getSocketFactory());
     }
 
+    @SuppressWarnings("unused")
     protected HttpsConnection()
     {
         this.connection = null;

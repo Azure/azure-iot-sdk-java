@@ -24,7 +24,7 @@ public class SignatureTest
     {
         final String resourceUri = "test-resource-uri";
         final String deviceKey = "test-device-key";
-        final long expiryTime = 101l;
+        final long expiryTime = 101L;
 
         new Signature(resourceUri, expiryTime, deviceKey);
 
@@ -48,7 +48,7 @@ public class SignatureTest
     {
         final String resourceUri = "test-resource-uri";
         final String deviceKey = "test-device-key";
-        final long expiryTime = 101l;
+        final long expiryTime = 101L;
 
         new Signature(resourceUri, expiryTime, deviceKey);
 
@@ -71,7 +71,7 @@ public class SignatureTest
     {
         final String resourceUri = "test-resource-uri";
         final String deviceKey = "test-device-key";
-        final long expiryTime = 101l;
+        final long expiryTime = 101L;
         final String sigStr = "test-signature";
         new Expectations()
         {

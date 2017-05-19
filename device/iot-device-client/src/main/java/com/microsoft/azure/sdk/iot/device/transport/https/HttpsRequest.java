@@ -17,7 +17,7 @@ import java.util.Map;
 public class HttpsRequest
 {
     /** The underlying HTTPS connection stream. */
-    protected final HttpsConnection connection;
+    private final HttpsConnection connection;
 
     /**
      * Constructor. Takes a URL as an argument and returns an HTTPS request that
@@ -40,7 +40,7 @@ public class HttpsRequest
         // Codes_SRS_HTTPSREQUEST_11_001: [The function shall open a connection with the given URL as the endpoint.]
         // Codes_SRS_HTTPSREQUEST_11_004: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
         this.connection = new HttpsConnection(url, method);
-        this.connection.setRequestHeader("User-Agent", TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion);
+        this.connection.setRequestHeader("User-Agent", TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION);
         // Codes_SRS_HTTPSREQUEST_11_002: [The function shall write the body to the connection.]
         this.connection.writeOutput(body);
     }
@@ -134,6 +134,7 @@ public class HttpsRequest
         return this;
     }
 
+    @SuppressWarnings("unused")
     protected HttpsRequest()
     {
         this.connection = null;

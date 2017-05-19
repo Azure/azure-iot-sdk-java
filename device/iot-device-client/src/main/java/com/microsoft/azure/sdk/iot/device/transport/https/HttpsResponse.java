@@ -14,10 +14,10 @@ import java.util.Map;
  */
 public class HttpsResponse
 {
-    protected final int status;
-    protected final byte[] body;
-    protected final byte[] errorReason;
-    protected final Map<String, String> headerFields;
+    private final int status;
+    private final byte[] body;
+    private final byte[] errorReason;
+    private final Map<String, String> headerFields;
 
     /**
      * Constructor.
@@ -93,7 +93,7 @@ public class HttpsResponse
         if (values == null)
         {
             String errMsg = String.format("Could not find a value "
-                    + "associated with the header field name '%s'.\n", field);
+                    + "associated with the header field name '%s'.%n", field);
 
             throw new IllegalArgumentException(errMsg);
         }
@@ -129,7 +129,7 @@ public class HttpsResponse
         return this.errorReason;
     }
 
-    protected static String canonicalizeFieldName(String field)
+    private static String canonicalizeFieldName(String field)
     {
         String canonicalizedField = field;
         if (canonicalizedField != null)
@@ -140,20 +140,20 @@ public class HttpsResponse
         return canonicalizedField;
     }
 
-    protected static String flattenValuesList(List<String> values)
+    private static String flattenValuesList(List<String> values)
     {
-        String valuesStr = "";
+        StringBuilder valuesStr = new StringBuilder();
         for (String value : values)
         {
-            valuesStr += value + ",";
+            valuesStr.append(value).append(",");
         }
         // remove the trailing comma.
-        valuesStr =
-                valuesStr.substring(0, Math.max(0, valuesStr.length() - 1));
+        valuesStr = new StringBuilder(valuesStr.substring(0, Math.max(0, valuesStr.length() - 1)));
 
-        return valuesStr;
+        return valuesStr.toString();
     }
 
+    @SuppressWarnings("unused")
     protected HttpsResponse()
     {
         this.status = 0;

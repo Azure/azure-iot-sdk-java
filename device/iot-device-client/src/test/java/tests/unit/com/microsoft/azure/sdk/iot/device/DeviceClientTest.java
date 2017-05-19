@@ -1360,7 +1360,7 @@ public class DeviceClientTest
             }
         };
         DeviceClient client = new DeviceClient(connString, protocol);
-        final long value = 3l;
+        final long value = 3L;
 
         // act
         client.setOption("SetMinimumPollingInterval", value);
@@ -1393,7 +1393,7 @@ public class DeviceClientTest
             }
         };
         DeviceClient client = new DeviceClient(connString, protocol);
-        final long value = 3l;
+        final long value = 3L;
 
         // act
         client.setOption("SetSendInterval", value);

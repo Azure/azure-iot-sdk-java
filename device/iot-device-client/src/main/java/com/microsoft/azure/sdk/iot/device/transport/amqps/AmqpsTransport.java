@@ -47,19 +47,18 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     private final Queue<IotHubOutboundPacket> waitingMessages = new LinkedBlockingDeque<>();
 
     /** Messages which are sent to the IoT Hub but did not receive ack yet. */
-    private Map<Integer, IotHubOutboundPacket> inProgressMessages = new ConcurrentHashMap<>();
+    private final Map<Integer, IotHubOutboundPacket> inProgressMessages = new ConcurrentHashMap<>();
 
     /** Messages received from the IoT Hub */
-    private Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
+    private final Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
 
     /** Messages whose callbacks that are waiting to be invoked. */
     private final Queue<IotHubCallbackPacket> callbackList = new LinkedBlockingDeque<>();
 
     private final DeviceClientConfig config;
-
     private final Boolean useWebSockets;
+    private final CustomLogger logger;
 
-    private CustomLogger logger;
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
      * object.

@@ -13,13 +13,13 @@ import java.util.Map;
 /** A single HTTPS message. */
 public final class HttpsSingleMessage implements HttpsMessage
 {
-    public static final String HTTPS_SINGLE_MESSAGE_CONTENT_TYPE =
+    private static final String HTTPS_SINGLE_MESSAGE_CONTENT_TYPE =
             "binary/octet-stream";
     private static final String SYSTEM_PROPERTY_MESSAGE_ID = "messageid";
 
-    protected byte[] body;
-    protected boolean base64Encoded;
-    protected MessageProperty[] properties;
+    private byte[] body;
+    private boolean base64Encoded;
+    private MessageProperty[] properties;
 
     /**
      * Returns the HTTPS message represented by the service-bound message.
@@ -196,16 +196,11 @@ public final class HttpsSingleMessage implements HttpsMessage
      *
      * @return whether the property is a valid HTTPS property.
      */
-    protected static boolean isValidHttpsAppProperty(String name, String value)
+    private static boolean isValidHttpsAppProperty(String name, String value)
     {
         String lowercaseName = name.toLowerCase();
-        if (MessageProperty.isValidAppProperty(name, value)
-                && lowercaseName.startsWith(HTTPS_APP_PROPERTY_PREFIX))
-        {
-            return true;
-        }
-
-        return false;
+        return (MessageProperty.isValidAppProperty(name, value)
+                && lowercaseName.startsWith(HTTPS_APP_PROPERTY_PREFIX));
     }
 
     /**
@@ -217,7 +212,7 @@ public final class HttpsSingleMessage implements HttpsMessage
      *
      * @return the property name with the prefix 'iothub-app' removed.
      */
-    protected static String httpsAppPropertyToAppProperty(
+    private static String httpsAppPropertyToAppProperty(
             String httpsAppProperty)
     {
         String canonicalizedProperty = httpsAppProperty.toLowerCase();
@@ -230,7 +225,7 @@ public final class HttpsSingleMessage implements HttpsMessage
         return canonicalizedProperty;
     }
 
-    protected HttpsSingleMessage()
+    private HttpsSingleMessage()
     {
     }
 }

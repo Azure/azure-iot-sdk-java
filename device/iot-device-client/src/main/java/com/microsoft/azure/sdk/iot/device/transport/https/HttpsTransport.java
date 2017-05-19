@@ -34,19 +34,19 @@ public final class HttpsTransport implements IotHubTransport
         OPEN, CLOSED
     }
 
-    protected HttpsTransportState state;
+    private HttpsTransportState state;
 
     /** The underlying HTTPS connection. */
-    protected HttpsIotHubConnection connection;
+    private HttpsIotHubConnection connection;
 
     /** Messages waiting to be sent to an IoT Hub. */
-    protected final Queue<IotHubOutboundPacket> waitingList;
+    private final Queue<IotHubOutboundPacket> waitingList;
     /** Messages that are waiting for a response from an IoT Hub. */
-    protected final Queue<IotHubOutboundPacket> inProgressList;
+    private final Queue<IotHubOutboundPacket> inProgressList;
     /** Messages whose callbacks that are waiting to be invoked. */
-    protected final Queue<IotHubCallbackPacket> callbackList;
+    private final Queue<IotHubCallbackPacket> callbackList;
 
-    protected final DeviceClientConfig config;
+    private final DeviceClientConfig config;
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -299,7 +299,7 @@ public final class HttpsTransport implements IotHubTransport
      * in-progress list, this indicates that the message is to be sent in the
      * un-batched message format.
      */
-    protected void moveWaitingListToInProgressList()
+    private void moveWaitingListToInProgressList()
     {
         HttpsBatchMessage batch = new HttpsBatchMessage();
         while (!this.waitingList.isEmpty())
@@ -338,7 +338,7 @@ public final class HttpsTransport implements IotHubTransport
      * exceed the service-bound message size limit of 255 kb.
      * @throws NoSuchElementException if {@code inProgressList} is empty.
      */
-    protected HttpsMessage inProgressListToMessage()
+    private HttpsMessage inProgressListToMessage()
             throws SizeLimitExceededException
     {
         HttpsMessage msg = null;
@@ -376,7 +376,7 @@ public final class HttpsTransport implements IotHubTransport
      *
      * @param status the status code returned by the IoT Hub.
      */
-    protected void moveInProgressListToCallbackList(IotHubStatusCode status)
+    private void moveInProgressListToCallbackList(IotHubStatusCode status)
     {
         while (!this.inProgressList.isEmpty())
         {

@@ -32,18 +32,18 @@ public final class MqttTransport implements IotHubTransport
     protected final Object sendMessagesLock = new Object();
     protected final Object handleMessageLock = new Object();
 
-    protected State state;
+    private State state;
 
     /** The MQTT connection.*/
-    protected MqttIotHubConnection mqttIotHubConnection;
+    private MqttIotHubConnection mqttIotHubConnection;
 
     /** Messages waiting to be sent. */
-    protected final Queue<IotHubOutboundPacket> waitingList;
+    private final Queue<IotHubOutboundPacket> waitingList;
 
     /** Messages whose callbacks that are waiting to be invoked. */
-    protected final Queue<IotHubCallbackPacket> callbackList;
+    private final Queue<IotHubCallbackPacket> callbackList;
 
-    protected final DeviceClientConfig config;
+    private final DeviceClientConfig config;
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -269,41 +269,34 @@ public final class MqttTransport implements IotHubTransport
                 return;
             }
 
-            try
+            // Codes_SRS_MQTTTRANSPORT_15_016: [The function shall attempt to consume a message from the IoT Hub.]
+            Message message = this.mqttIotHubConnection.receiveMessage();
+
+            // Codes_SRS_MQTTTRANSPORT_15_017: [If a message is found and a message callback is registered,
+            // the function shall invoke the callback on the message.]
+            if (message != null)
             {
-                // Codes_SRS_MQTTTRANSPORT_15_016: [The function shall attempt to consume a message from the IoT Hub.]
-                Message message = this.mqttIotHubConnection.receiveMessage();
-
-                // Codes_SRS_MQTTTRANSPORT_15_017: [If a message is found and a message callback is registered,
-                // the function shall invoke the callback on the message.]
-                if (message != null)
+                if (message.getMessageType() == MessageType.DeviceMethods)
                 {
-                    if (message.getMessageType() == MessageType.DeviceMethods)
+                    if (deviceMethodMessageCallback != null)
                     {
-                        if (deviceMethodMessageCallback != null)
-                        {
-                            deviceMethodMessageCallback.execute(message, deviceMethodContext);
-                        }
+                        deviceMethodMessageCallback.execute(message, deviceMethodContext);
                     }
-                    else if (message.getMessageType() == MessageType.DeviceTwin)
+                }
+                else if (message.getMessageType() == MessageType.DeviceTwin)
+                {
+                    if (deviceTwinMessageCallback != null)
                     {
-                        if (deviceTwinMessageCallback != null)
-                        {
-                            deviceTwinMessageCallback.execute(message, deviceTwinContext);
-                        }
-
+                        deviceTwinMessageCallback.execute(message, deviceTwinContext);
                     }
-                    else
+                }
+                else
+                {
+                    if (callback != null)
                     {
                         callback.execute(message, context);
-
                     }
-
-
                 }
-            } catch (IllegalStateException e)
-            {
-                throw e;
             }
         }
     }

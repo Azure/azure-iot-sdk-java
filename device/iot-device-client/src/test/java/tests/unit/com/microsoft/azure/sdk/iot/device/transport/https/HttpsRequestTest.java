@@ -210,7 +210,7 @@ public class HttpsRequestTest
         final String field1 = "test-field1";
         final String value1 = "test-value1";
         final String userAgent = "User-Agent";
-        final String userAgentValue = TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion;
+        final String userAgentValue = TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION;
         new MockUp<HttpsConnection>()
         {
             Map<String, String> testHeaderFields = new HashMap<>();

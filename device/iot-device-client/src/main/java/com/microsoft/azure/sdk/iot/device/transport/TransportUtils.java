@@ -5,10 +5,10 @@ package com.microsoft.azure.sdk.iot.device.transport;
 
 public class TransportUtils
 {
-    public static String javaDeviceClientIdentifier = "com.microsoft.azure.sdk.iot.iot-device-client/";
-    public static String clientVersion = "1.2.27";
+    public static final String JAVA_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.iot-device-client/";
+    public static final String CLIENT_VERSION = "1.2.27";
 
-    private static byte[] sleepIntervals = {1, 2, 4, 8, 16, 32, 60};
+    private static final byte[] SLEEP_INTERVALS = {1, 2, 4, 8, 16, 32, 60};
     /** Generates a reconnection time with an exponential backoff
      * and a maximum value of 60 seconds.
      *
@@ -19,11 +19,11 @@ public class TransportUtils
     {
         if (currentAttempt > 7)
         {
-            return sleepIntervals[6] * 1000;
+            return SLEEP_INTERVALS[6] * 1000;
         }
         else if (currentAttempt > 0)
         {
-            return sleepIntervals[currentAttempt - 1] * 1000;
+            return SLEEP_INTERVALS[currentAttempt - 1] * 1000;
         }
         else
         {

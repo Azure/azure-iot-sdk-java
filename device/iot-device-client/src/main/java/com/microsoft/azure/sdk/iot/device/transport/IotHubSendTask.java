@@ -11,7 +11,7 @@ import com.microsoft.azure.sdk.iot.device.CustomLogger;
  */
 public final class IotHubSendTask implements Runnable
 {
-    protected final IotHubTransport transport;
+    private final IotHubTransport transport;
 
     /**
      * Private logger for class

@@ -12,9 +12,9 @@ import com.microsoft.azure.sdk.iot.device.Message;
  */
 public final class IotHubOutboundPacket
 {
-    protected final Message message;
-    protected final IotHubEventCallback callback;
-    protected final Object callbackContext;
+    private final Message message;
+    private final IotHubEventCallback callback;
+    private final Object callbackContext;
 
     /**
      * Constructor.

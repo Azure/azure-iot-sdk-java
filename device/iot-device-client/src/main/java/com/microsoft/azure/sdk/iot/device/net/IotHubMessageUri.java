@@ -7,10 +7,10 @@ package com.microsoft.azure.sdk.iot.device.net;
 public final class IotHubMessageUri
 {
     /** The path to be appended to an IoT Hub URI. */
-    public static final String MESSAGE_PATH = "/messages/devicebound";
+    private static final String MESSAGE_PATH = "/messages/devicebound";
 
     /** The underlying IoT Hub URI. */
-    protected final IotHubUri uri;
+    private final IotHubUri uri;
 
     /**
      * Constructor. Returns a URI for a device to poll for messages from an
@@ -34,7 +34,7 @@ public final class IotHubMessageUri
     public String toString()
     {
         // Codes_SRS_IOTHUBMESSAGEURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03".]
-        return this.uri.toString();
+        return (this.uri != null ? this.uri.toString() : null);
     }
 
     /**
@@ -45,7 +45,7 @@ public final class IotHubMessageUri
     public String getHostname()
     {
         // Codes_SRS_IOTHUBMESSAGEURI_11_003: [The function shall return the hostname given in the constructor.]
-        return this.uri.getHostname();
+        return (this.uri != null ? this.uri.getHostname() : null);
     }
 
     /**
@@ -56,9 +56,10 @@ public final class IotHubMessageUri
     public String getPath()
     {
         // Codes_SRS_IOTHUBMESSAGEURI_11_004: [The function shall return a URI with the format '/devices/[deviceId]/messages/devicebound.]
-        return this.uri.getPath();
+        return (this.uri != null ? this.uri.getPath() : null);
     }
 
+    @SuppressWarnings("unused")
     protected IotHubMessageUri()
     {
         this.uri = null;

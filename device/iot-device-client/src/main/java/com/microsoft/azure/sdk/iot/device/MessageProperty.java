@@ -39,10 +39,10 @@ public final class MessageProperty {
     }
 
     /** The property name. */
-    protected final String name;
+    private final String name;
     /** The property value. */
-    protected final String value;
-    protected CustomLogger logger;
+    private final String value;
+    private CustomLogger logger;
     /**
      * Constructor.
      *
@@ -68,14 +68,14 @@ public final class MessageProperty {
         // Codes_SRS_MESSAGEPROPERTY_11_002: [If the name contains a character that is not in US-ASCII, the function shall throw an IllegalArgumentException.]
         if (!usesValidChars(name)) {
             logger.LogError("%s is not a valid IoT Hub message property name, method name is %s ", name, logger.getMethodName());
-			String errMsg = String.format("%s is not a valid IoT Hub message property name.\n", name);
+			String errMsg = String.format("%s is not a valid IoT Hub message property name. %n", name);
             throw new IllegalArgumentException(errMsg);
         }
 
         // Codes_SRS_MESSAGEPROPERTY_11_008: [If the name is a reserved property name, the function shall throw an IllegalArgumentException.]
         if (RESERVED_PROPERTY_NAMES.contains(name)) {
             logger.LogError("%s is a reserved IoT Hub message property name, method name is %s ", name, logger.getMethodName());
-			String errMsg = String.format("%s is a reserved IoT Hub message property name.\n", name);
+			String errMsg = String.format("%s is a reserved IoT Hub message property name.%n", name);
             throw new IllegalArgumentException(errMsg);
         }
 
@@ -83,7 +83,7 @@ public final class MessageProperty {
         if (!usesValidChars(value))
         {
             logger.LogError("%s is a reserved IoT Hub message property name, method name is %s ", name, logger.getMethodName());
-            String errMsg = String.format("%s is not a valid IoT Hub message property value.\n", value);
+            String errMsg = String.format("%s is not a valid IoT Hub message property value.%n", value);
             throw new IllegalArgumentException(errMsg);
         }
 
@@ -159,7 +159,7 @@ public final class MessageProperty {
      *
      * @return whether the string only uses US-ASCII 
      */
-    protected static boolean usesValidChars(String s) {
+    private static boolean usesValidChars(String s) {
         boolean isValid = false;
 
         if (s.matches("\\p{ASCII}*"))
@@ -170,6 +170,7 @@ public final class MessageProperty {
         return isValid;
     }
 
+    @SuppressWarnings("unused")
     protected MessageProperty() {
         this.name = null;
         this.value = null;

@@ -490,7 +490,7 @@ public class DeviceIOTest
                 times = 2;
                 mockConfig.getUserCertificateString();
                 result = userCert;
-                times = 3;
+                times = 2;
                 Deencapsulation.newInstance(IotHubSSLContext.class, userCert, false);
                 result = mockIotHubSSLContext;
                 times = 1;
@@ -525,7 +525,7 @@ public class DeviceIOTest
                 times = 2;
                 mockConfig.getUserCertificateString();
                 result = userCert;
-                times = 3;
+                times = 2;
                 Deencapsulation.newInstance(IotHubSSLContext.class, userCert, false);
                 result = new IllegalArgumentException();
                 times = 1;

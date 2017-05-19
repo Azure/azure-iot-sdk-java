@@ -13,11 +13,11 @@ public final class IotHubAbandonUri
      * The path to be appended to an IoT Hub URI. The %s will be replaced by the
      * message etag.
      */
-    public static final String ABANDON_PATH_FORMAT =
+    private static final String ABANDON_PATH_FORMAT =
             "/messages/devicebound/%s/abandon";
 
     /** The underlying IoT Hub URI. */
-    protected final IotHubUri uri;
+    private final IotHubUri uri;
 
     /**
      * Constructor. Returns a URI for a device to instruct an IoT Hub to mark a

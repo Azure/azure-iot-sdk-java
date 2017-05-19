@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
 public class Pair<Type1, Type2>
 {
-    private Type1 key;
+    private final Type1 key;
     private Type2 value;
 
     public Pair(Type1 t1, Type2 t2)

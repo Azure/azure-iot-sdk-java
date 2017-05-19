@@ -23,7 +23,7 @@ public class SignatureHelperTest
     public void rawSignatureHasCorrectFormat()
     {
         final String resourceUri = "test-resource-uri";
-        final long expiryTime = 101l;
+        final long expiryTime = 101L;
 
         byte[] testRawSig =
                 SignatureHelper.buildRawSignature(resourceUri, expiryTime);

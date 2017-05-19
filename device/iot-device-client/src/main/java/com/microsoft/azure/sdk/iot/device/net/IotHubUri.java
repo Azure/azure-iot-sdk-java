@@ -19,13 +19,13 @@ public final class IotHubUri
      * The device ID and specific IoT Hub method path will be interpolated into
      * the path.
      */
-    public static final String PATH_FORMAT = "/devices/%s%s";
+    private static final String PATH_FORMAT = "/devices/%s%s";
 
     /** The API version will be passed as a param in the URI. */
-    public static final String API_VERSION = "api-version=2016-02-03";
+    private static final String API_VERSION = "api-version=2016-02-03";
 
     /** The charset used when URL-encoding the IoT Hub name and device ID. */
-    public static final Charset IOTHUB_URL_ENCODING_CHARSET =
+    private static final Charset IOTHUB_URL_ENCODING_CHARSET =
             StandardCharsets.UTF_8;
 
     /**
@@ -33,9 +33,9 @@ public final class IotHubUri
      * common to all IoT Hub communication methods between the given device and
      * IoT Hub.
      */
-    protected String hostname;
-    protected String path;
-    protected String uri;
+    private String hostname;
+    private String path;
+    private String uri;
 
     /**
      * Constructor. Creates a URI to an IoT Hub method. The URI does not include
@@ -159,7 +159,7 @@ public final class IotHubUri
      *
      * @return a path with each subdirectory URL-encoded.
      */
-    protected static String urlEncodePath(String path)
+    private static String urlEncodePath(String path)
     {
         String[] pathSubDirs = path.split("/");
         StringBuilder urlEncodedPathBuilder = new StringBuilder();
@@ -193,8 +193,8 @@ public final class IotHubUri
      * @param name the query param name.
      * @param value the query param value.
      */
-    protected static void appendQueryParam(StringBuilder uriBuilder,
-            String name, String value)
+    private static void appendQueryParam(StringBuilder uriBuilder,
+                                         String name, String value)
     {
         try
         {
@@ -213,6 +213,7 @@ public final class IotHubUri
         }
     }
 
+    @SuppressWarnings("unused")
     protected IotHubUri()
     {
 

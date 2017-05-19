@@ -10,7 +10,7 @@ import org.apache.qpid.proton.reactor.Reactor;
 
 public class IotHubReactor
 {
-    Reactor reactor;
+    private final Reactor reactor;
 
     public IotHubReactor(Reactor reactor)
     {

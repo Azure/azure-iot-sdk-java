@@ -11,7 +11,7 @@ import java.util.Collection;
 
 public class IotHubCertificateManager
 {
-    private static final String defaultCert =
+    private static final String DEFAULT_CERT =
                     /*D-TRUST Root Class 3 CA 2 2009*/
                     "-----BEGIN CERTIFICATE-----\r\n" +
                     "MIIEMzCCAxugAwIBAgIDCYPzMA0GCSqGSIb3DQEBCwUAME0xCzAJBgNVBAYTAkRF\r\n" +
@@ -125,7 +125,7 @@ public class IotHubCertificateManager
     IotHubCertificateManager()
     {
         //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_001: [**The constructor shall set the valid certificate to be default certificate unless changed by user.**]**
-        this.validCert = defaultCert;
+        this.validCert = DEFAULT_CERT;
     }
 
     /**
@@ -192,9 +192,9 @@ public class IotHubCertificateManager
     /**
      * Setter for the valid certificate to be used to communicate with IotHub
      * @param cert valid certificate to be used to communicate with IotHub
-     * @throws IOException If the cert string provided was null or empty
+     * @throws IllegalArgumentException If the cert string provided was null or empty
      */
-    void setValidCert(String cert) throws IOException
+    void setValidCert(String cert) throws IllegalArgumentException
     {
         //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_009: [*If a user attempted to set the certificate and for somereason could not succeed then this method shall not use default certificate by setting valid certificate as null.**]**
         this.validCert = null;

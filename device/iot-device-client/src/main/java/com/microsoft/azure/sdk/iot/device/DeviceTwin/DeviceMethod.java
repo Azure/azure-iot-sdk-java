@@ -12,14 +12,14 @@ public final class DeviceMethod
     private Object deviceMethodCallbackContext;
     private IotHubEventCallback deviceMethodStatusCallback;
     private Object deviceMethodStatusCallbackContext;
-    private ObjectLock DEVICE_METHOD_LOCK = new ObjectLock();
+    private final ObjectLock DEVICE_METHOD_LOCK = new ObjectLock();
 
     private boolean isSubscribed = false;
 
     private DeviceIO deviceIO;
     private DeviceClientConfig config;
 
-    CustomLogger logger = new CustomLogger(this.getClass());
+    private final CustomLogger logger = new CustomLogger(this.getClass());
 
     private final class deviceMethodResponseCallback implements MessageCallback
     {

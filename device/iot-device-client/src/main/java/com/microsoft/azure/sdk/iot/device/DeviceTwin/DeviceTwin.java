@@ -25,7 +25,7 @@ public class DeviceTwin
     private DeviceClientConfig config = null;
     private boolean isSubscribed = false;
 
-    private Object DEVICE_TWIN_LOCK = new Object();
+    private final Object DEVICE_TWIN_LOCK = new Object();
 
     /*
         Callback to respond to user on all of its status
@@ -220,7 +220,7 @@ public class DeviceTwin
     }
 
     public DeviceTwin(DeviceIO client, DeviceClientConfig config, IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext,
-                      PropertyCallBack genericPropertyCallback, Object genericPropertyCallbackContext) throws IOException
+                      PropertyCallBack genericPropertyCallback, Object genericPropertyCallbackContext)
     {
         /*
         **Codes_SRS_DEVICETWIN_25_001: [**The constructor shall throw IllegalArgumentException Exception if any of the parameters i.e client, config, deviceTwinCallback, genericPropertyCallback are null. **]**

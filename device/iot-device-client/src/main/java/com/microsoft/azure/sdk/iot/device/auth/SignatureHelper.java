@@ -21,10 +21,10 @@ public final class SignatureHelper
      * The device ID will be the prefix. The expiry time, as a UNIX
      * timestamp, will be the suffix.
      */
-    public static final String RAW_SIGNATURE_FORMAT = "%s\n%s";
+    private static final String RAW_SIGNATURE_FORMAT = "%s\n%s";
 
     /** The charset used for the raw and hashed signature. */
-    public static final Charset SIGNATURE_CHARSET = StandardCharsets.UTF_8;
+    private static final Charset SIGNATURE_CHARSET = StandardCharsets.UTF_8;
 
     /**
      * Builds the raw signature.
@@ -131,7 +131,7 @@ public final class SignatureHelper
      */
     public static String encodeSignatureWebSafe(String sig)
     {
-        String strSig = "";
+        String strSig;
         try
         {
             // Codes_SRS_SIGNATUREHELPER_11_007: [The function shall replace web-unsafe characters in the signature with a '%' followed by two hexadecimal digits, where the hexadecimal digits are determined by the UTF-8 charset.]
@@ -147,6 +147,7 @@ public final class SignatureHelper
         return strSig;
     }
 
+    @SuppressWarnings("unused")
     protected SignatureHelper()
     {
     }

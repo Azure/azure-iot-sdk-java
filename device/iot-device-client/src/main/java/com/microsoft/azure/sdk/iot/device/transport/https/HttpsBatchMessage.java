@@ -16,24 +16,24 @@ import java.nio.charset.StandardCharsets;
 public final class HttpsBatchMessage implements HttpsMessage
 {
     // Note: this limit is defined by the IoT Hub.
-    public static final int SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES = 255 * 1024 - 1;
+    private static final int SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES = 255 * 1024 - 1;
 
     /**
      * The value for the "content-type" header field in a batched HTTPS
      * request.
      */
-    public static String HTTPS_BATCH_CONTENT_TYPE = "application/vnd.microsoft.iothub.json";
+    private static final String HTTPS_BATCH_CONTENT_TYPE = "application/vnd.microsoft.iothub.json";
 
     /**
      * The charset used to encode IoT Hub messages. The server will interpret
      * the JSON array using UTF-8 by default according to RFC4627.
      */
-    public static Charset BATCH_CHARSET = StandardCharsets.UTF_8;
+    private static final Charset BATCH_CHARSET = StandardCharsets.UTF_8;
 
     /** The current batched message body. */
-    protected String batchBody;
+    private String batchBody;
     /** The current number of messages in the batch. */
-    protected int numMsgs;
+    private int numMsgs;
 
     /** Constructor. Initializes the batch body as an empty JSON array. */
     public HttpsBatchMessage()
@@ -64,7 +64,7 @@ public final class HttpsBatchMessage implements HttpsMessage
         byte[] newBatchBodyBytes = newBatchBody.getBytes(BATCH_CHARSET);
 
         if (newBatchBodyBytes.length > SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES) {
-            String errMsg = String.format("Service-bound message size (%d bytes) cannot exceed %d bytes.\n",
+            String errMsg = String.format("Service-bound message size (%d bytes) cannot exceed %d bytes.%n",
                     newBatchBodyBytes.length, SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES);
             throw new SizeLimitExceededException(errMsg);
         }
@@ -126,12 +126,12 @@ public final class HttpsBatchMessage implements HttpsMessage
      *
      * @return the JSON string representation of the message.
      */
-    protected static String msgToJson(HttpsSingleMessage msg)
+    private static String msgToJson(HttpsSingleMessage msg)
     {
         StringBuilder jsonMsg = new StringBuilder("{");
         // Codes_SRS_HTTPSBATCHMESSAGE_11_003: [The JSON object shall have the field "body" set to the raw message.]
         jsonMsg.append("\"body\":");
-        jsonMsg.append("\"" + msg.getBodyAsString() + "\",");
+        jsonMsg.append("\"").append(msg.getBodyAsString()).append("\",");
         // Codes_SRS_HTTPSBATCHMESSAGE_11_004: [The JSON object shall have the field "base64Encoded" set to whether the raw message was Base64-encoded.]
         jsonMsg.append("\"base64Encoded\":");
         jsonMsg.append(Boolean.toString(msg.isBase64Encoded()));
@@ -146,14 +146,14 @@ public final class HttpsBatchMessage implements HttpsMessage
             for (int i = 0; i < numProperties - 1; ++i)
             {
                 MessageProperty property = properties[i];
-                jsonMsg.append("\"" + property.getName() + "\":");
-                jsonMsg.append("\"" + property.getValue() + "\",");
+                jsonMsg.append("\"").append(property.getName()).append("\":");
+                jsonMsg.append("\"").append(property.getValue()).append("\",");
             }
             if (numProperties > 0)
             {
                 MessageProperty property = properties[numProperties - 1];
-                jsonMsg.append("\"" + property.getName() + "\":");
-                jsonMsg.append("\"" + property.getValue() + "\"");
+                jsonMsg.append("\"").append(property.getName()).append("\":");
+                jsonMsg.append("\"").append(property.getValue()).append("\"");
             }
             jsonMsg.append("}");
         }
@@ -171,7 +171,7 @@ public final class HttpsBatchMessage implements HttpsMessage
      * @return the JSON string representation of the JSON array with the object
      * added.
      */
-    protected static String addJsonObjToArray(String jsonObj, String jsonArray)
+    private static String addJsonObjToArray(String jsonObj, String jsonArray)
     {
         if (jsonArray.equals("[]"))
         {

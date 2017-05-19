@@ -46,26 +46,26 @@ import java.util.concurrent.TimeUnit;
  */
 public final class AmqpsIotHubConnection extends BaseHandler
 {
-    private int maxWaitTimeForOpeningClosingConnection = 1*60*1000; // 1 second timeout
-    private int maxWaitTimeForTerminateExecutor = 30;
-    protected State state;
+    private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 1*60*1000; // 1 second timeout
+    private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
+    private State state;
 
-    private static final String sendTag = "sender";
-    private static final String receiveTag = "receiver";
+    private static final String SENDER_TAG = "sender";
+    private static final String RECEIVE_TAG = "receiver";
 
-    private static final String sendEndpointFormat = "/devices/%s/messages/events";
+    private static final String SEND_ENDPOINT_FORMAT = "/devices/%s/messages/events";
     private final String sendEndpoint;
-    private static final String receiveEndpointFormat = "/devices/%s/messages/devicebound";
+    private static final String RECEIVE_ENDPOINT_FORMAT = "/devices/%s/messages/devicebound";
     private final String receiveEndpoint;
 
     private int linkCredit = -1;
     /** The {@link Delivery} tag. */
     private long nextTag = 0;
-    private static final String versionIdentifierKey = "com.microsoft:client-version";
-    private static final String webSocketPath = "/$iothub/websocket";
-    private static final String webSocketSubProtocol = "AMQPWSB10";
-    private static final int amqpPort = 5671;
-    private static final int amqpWebSocketPort = 443;
+    private static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
+    private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
+    private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
+    private static final int AMQP_PORT = 5671;
+    private static final int AMQP_WEB_SOCKET_PORT = 443;
     private String sasToken;
 
     private Sender sender;
@@ -77,19 +77,19 @@ public final class AmqpsIotHubConnection extends BaseHandler
     private String userName;
 
     private final Boolean useWebSockets;
-    protected DeviceClientConfig config;
+    private DeviceClientConfig config;
 
-    private List<ServerListener> listeners = new ArrayList<>();
+    private final List<ServerListener> listeners = new ArrayList<>();
     private ExecutorService executorService;
 
-    private ObjectLock openLock = new ObjectLock();
-    private ObjectLock closeLock = new ObjectLock();
+    private final ObjectLock openLock = new ObjectLock();
+    private final ObjectLock closeLock = new ObjectLock();
 
     private Reactor reactor;
 
     private Boolean reconnectCall = false;
     private int currentReconnectionAttempt = 1;
-    protected CustomLogger logger;
+    private CustomLogger logger;
 
     /**
      * Constructor to set up connection parameters using the {@link DeviceClientConfig}.
@@ -136,17 +136,17 @@ public final class AmqpsIotHubConnection extends BaseHandler
         this.useWebSockets = useWebSockets;
         if (useWebSockets)
         {
-            this.hostName = String.format("%s:%d", this.config.getIotHubHostname(), amqpWebSocketPort);
+            this.hostName = String.format("%s:%d", this.config.getIotHubHostname(), AMQP_WEB_SOCKET_PORT);
         }
         else
         {
-            this.hostName = String.format("%s:%d", this.config.getIotHubHostname(), amqpPort);
+            this.hostName = String.format("%s:%d", this.config.getIotHubHostname(), AMQP_PORT);
         }
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_003: [The constructor shall initialize the sender and receiver
-        // endpoint private member variables using the send/receiveEndpointFormat constants and device id.]
-        this.sendEndpoint = String.format(sendEndpointFormat, deviceId);
-        this.receiveEndpoint = String.format(receiveEndpointFormat, deviceId);
+        // endpoint private member variables using the send/RECEIVE_ENDPOINT_FORMAT constants and device id.]
+        this.sendEndpoint = String.format(SEND_ENDPOINT_FORMAT, deviceId);
+        this.receiveEndpoint = String.format(RECEIVE_ENDPOINT_FORMAT, deviceId);
         this.logger = new CustomLogger(this.getClass());
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_004: [The constructor shall initialize a new Handshaker
         // (Proton) object to handle communication handshake.]
@@ -167,7 +167,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             logger.LogError(e);
             throw new IOException("Could not create Proton reactor");
         }
-        logger.LogInfo("AmqpsIotHubConnection object is created successfully using port %s in %s method ", useWebSockets ? amqpWebSocketPort : amqpPort, logger.getMethodName());
+        logger.LogInfo("AmqpsIotHubConnection object is created successfully using port %s in %s method ", useWebSockets ? AMQP_WEB_SOCKET_PORT : AMQP_PORT, logger.getMethodName());
     }
 
     /**
@@ -205,7 +205,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             {
                 synchronized (openLock)
                 {
-                    openLock.waitLock(maxWaitTimeForOpeningClosingConnection);
+                    openLock.waitLock(MAX_WAIT_TO_OPEN_CLOSE_CONNECTION);
                 }
             } catch (InterruptedException e)
             {
@@ -233,7 +233,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         {
             synchronized (closeLock)
             {
-                closeLock.waitLock(maxWaitTimeForOpeningClosingConnection);
+                closeLock.waitLock(MAX_WAIT_TO_OPEN_CLOSE_CONNECTION);
             }
         } catch (InterruptedException e)
         {
@@ -246,10 +246,10 @@ public final class AmqpsIotHubConnection extends BaseHandler
             this.executorService.shutdown();
             try {
                 // Wait a while for existing tasks to terminate
-                if (!this.executorService.awaitTermination(maxWaitTimeForTerminateExecutor, TimeUnit.SECONDS)) {
+                if (!this.executorService.awaitTermination(MAX_WAIT_TO_TERMINATE_EXECUTOR, TimeUnit.SECONDS)) {
                     this.executorService.shutdownNow(); // Cancel currently executing tasks
                     // Wait a while for tasks to respond to being cancelled
-                    if (!this.executorService.awaitTermination(maxWaitTimeForTerminateExecutor, TimeUnit.SECONDS)){
+                    if (!this.executorService.awaitTermination(MAX_WAIT_TO_TERMINATE_EXECUTOR, TimeUnit.SECONDS)){
                         logger.LogInfo("Pool did not terminate");
                     }
                 }
@@ -441,12 +441,12 @@ public final class AmqpsIotHubConnection extends BaseHandler
         this.session = this.connection.session();
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_027: [The event handler shall create a Receiver and Sender (Proton) links and set the protocol tag on them to a predefined constant.]
-        this.receiver = this.session.receiver(receiveTag);
-        this.sender = this.session.sender(sendTag);
+        this.receiver = this.session.receiver(RECEIVE_TAG);
+        this.sender = this.session.sender(SENDER_TAG);
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_028: [The Receiver and Sender links shall have the properties set to client version identifier.]
         Map<Symbol, Object> properties = new HashMap<>();
-        properties.put(Symbol.getSymbol(versionIdentifierKey), TransportUtils.javaDeviceClientIdentifier + TransportUtils.clientVersion);
+        properties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION);
         this.receiver.setProperties(properties);
         this.sender.setProperties(properties);
 
@@ -473,7 +473,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             if (this.useWebSockets)
             {
                 WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.hostName, webSocketPath, 0, webSocketSubProtocol, null, null);
+                webSocket.configure(this.hostName, WEB_SOCKET_PATH, 0, WEB_SOCKET_SUB_PROTOCOL, null, null);
                 ((TransportInternal)transport).addTransportLayer(webSocket);
             }
 
@@ -481,7 +481,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             Sasl sasl = transport.sasl();
             sasl.plain(this.userName, this.sasToken);
 
-            SslDomain domain = makeDomain(SslDomain.Mode.CLIENT);
+            SslDomain domain = makeDomain();
             transport.ssl(domain);
         }
         synchronized (openLock)
@@ -510,12 +510,12 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_033: [The event handler shall set the current handler to handle the connection events.]
         if(this.useWebSockets)
         {
-            event.getReactor().connectionToHost(this.config.getIotHubHostname(), amqpWebSocketPort, this);
+            event.getReactor().connectionToHost(this.config.getIotHubHostname(), AMQP_WEB_SOCKET_PORT, this);
 
         }
         else
         {
-            event.getReactor().connectionToHost(this.config.getIotHubHostname(), amqpPort, this);
+            event.getReactor().connectionToHost(this.config.getIotHubHostname(), AMQP_PORT, this);
         }
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
@@ -554,7 +554,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
     public void onDelivery(Event event)
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
-        if(event.getLink().getName().equals(receiveTag))
+        if(event.getLink().getName().equals(RECEIVE_TAG))
         {
             logger.LogInfo("Reading the receiver link, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_034: [If this link is the Receiver link, the event handler shall get the Receiver and Delivery (Proton) objects from the event.]
@@ -631,7 +631,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         logger.LogDebug("Entered in method %s", logger.getMethodName());
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_041: [The connection state shall be considered OPEN when the sender link is open remotely.]
         Link link = event.getLink();
-        if (link.getName().equals(sendTag))
+        if (link.getName().equals(SENDER_TAG))
         {
             this.state = State.OPEN;
         }
@@ -651,7 +651,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         this.state = State.CLOSED;
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_042 [The event handler shall attempt to startReconnect to the IoTHub.]
-        if (event.getLink().getName().equals(sendTag))
+        if (event.getLink().getName().equals(SENDER_TAG))
         {
             logger.LogInfo("Starting to reconnect to IotHub, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
@@ -669,7 +669,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
         Link link = event.getLink();
-        if(link.getName().equals(sendTag))
+        if(link.getName().equals(SENDER_TAG))
         {
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_043: [If the link is the Sender link, the event handler shall create a new Target (Proton) object using the sender endpoint address member variable.]
             Target t = new Target();
@@ -761,10 +761,9 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     /**
      * Create Proton SslDomain object from Address using the given Ssl mode
-     * @param mode Proton enum value of requested Ssl mode
      * @return the created Ssl domain
      */
-    private SslDomain makeDomain(SslDomain.Mode mode)
+    private SslDomain makeDomain()
     {
         SslDomain domain = Proton.sslDomain();
         /*
@@ -772,7 +771,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
          */
         domain.setSslContext(this.config.getIotHubSSLContext().getIotHubSSlContext());
         domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
-        domain.init(mode);
+        domain.init(SslDomain.Mode.CLIENT);
         return domain;
     }
 
@@ -781,7 +780,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      */
     private class ReactorRunner implements Callable
     {
-        private IotHubReactor iotHubReactor;
+        private final IotHubReactor iotHubReactor;
 
         ReactorRunner(IotHubReactor iotHubReactor)
         {

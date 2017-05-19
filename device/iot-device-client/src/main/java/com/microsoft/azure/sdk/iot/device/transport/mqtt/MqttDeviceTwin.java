@@ -17,9 +17,9 @@ import java.util.regex.Pattern;
 public class MqttDeviceTwin extends Mqtt
 {
     private String subscribeTopic;
-    private Map<String, DeviceOperations> requestMap = new HashMap<>();
+    private final Map<String, DeviceOperations> requestMap = new HashMap<>();
     private boolean isStarted = false;
-    private CustomLogger logger = new CustomLogger(this.getClass());
+    private final CustomLogger logger = new CustomLogger(this.getClass());
 
     private final String BACKSLASH = "/";
     private final String AND = "&";
@@ -316,18 +316,17 @@ public class MqttDeviceTwin extends Mqtt
             /*
             **Codes_SRS_MQTTDEVICETWIN_25_032: [**send method shall subscribe to desired properties by calling method subscribe() on topic "$iothub/twin/PATCH/properties/desired/#" specified in spec if the operation is DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.**]**
              */
-            StringBuilder subscribeTopic = new StringBuilder();
-            subscribeTopic.append(PATCH);
-            subscribeTopic.append(BACKSLASH);
-            subscribeTopic.append(PROPERTIES);
-            subscribeTopic.append(BACKSLASH);
-            subscribeTopic.append(DESIRED);
-            subscribeTopic.append(BACKSLASH);
-            subscribeTopic.append(POUND);
+            String subscribeTopic = PATCH +
+                    BACKSLASH +
+                    PROPERTIES +
+                    BACKSLASH +
+                    DESIRED +
+                    BACKSLASH +
+                    POUND;
             /*
             **Codes_SRS_MQTTDEVICETWIN_25_032: [**send method shall subscribe to desired properties by calling method subscribe() on topic "$iothub/twin/PATCH/properties/desired/#" specified in spec if the operation is DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.**]**
              */
-            this.subscribe(subscribeTopic.toString());
+            this.subscribe(subscribeTopic);
         }
         else
         {
@@ -340,7 +339,7 @@ public class MqttDeviceTwin extends Mqtt
 
     private String getStatus(String token) throws IOException
     {
-        String status = null;
+        String status;
 
         if (token != null && token.matches("\\d{3}")) // 3 digit number
         {
@@ -357,7 +356,7 @@ public class MqttDeviceTwin extends Mqtt
         return status;
     }
 
-    private String getRequestId(String token) throws IOException
+    private String getRequestId(String token)
     {
         String reqId = null;
 
@@ -377,7 +376,7 @@ public class MqttDeviceTwin extends Mqtt
         return reqId;
     }
 
-    private String getVersion(String token) throws IOException
+    private String getVersion(String token)
     {
         String version = null;
 
@@ -395,7 +394,7 @@ public class MqttDeviceTwin extends Mqtt
     @Override
     public Message receive() throws IOException
     {
-        DeviceTwinMessage messsage = null;
+        DeviceTwinMessage messsage;
         /*
         **Codes_SRS_MQTTDEVICETWIN_25_033: [**This method shall call parseTopic to parse the topic from the recevived Messages queue corresponding to the messaging client's operation.**]**
          */

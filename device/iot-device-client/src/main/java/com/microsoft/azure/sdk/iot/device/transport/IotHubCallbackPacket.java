@@ -12,9 +12,9 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
  */
 public final class IotHubCallbackPacket
 {
-    protected final IotHubStatusCode status;
-    protected final IotHubEventCallback callback;
-    protected final Object callbackContext;
+    private final IotHubStatusCode status;
+    private final IotHubEventCallback callback;
+    private final Object callbackContext;
 
     /**
      * Constructor.

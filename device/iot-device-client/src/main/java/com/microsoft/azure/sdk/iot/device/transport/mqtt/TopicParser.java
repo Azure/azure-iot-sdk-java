@@ -65,7 +65,7 @@ public class TopicParser
         return status;
     }
 
-    protected String getRequestId(int tokenIndexReqID) throws IOException
+    String getRequestId(int tokenIndexReqID)
     {
         String reqId = null;
 
@@ -105,7 +105,7 @@ public class TopicParser
         return reqId;
     }
 
-    protected String getVersion(int tokenIndexVersion) throws IOException
+    protected String getVersion(int tokenIndexVersion)
     {
         String version = null;
 
@@ -144,7 +144,7 @@ public class TopicParser
     }
 
 
-    protected String getMethodName(int tokenIndexMethod) throws IOException
+    String getMethodName(int tokenIndexMethod) throws IOException
     {
         String methodName = null;
 

@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 
 public class CustomLogger {
 
-    private Logger logger;
+    private final Logger logger;
     private static final int CALLING_METHOD_NAME_DEPTH = 2;
 
     public CustomLogger(Class<?> clazz)

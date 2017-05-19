@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.device.auth;
  */
 public final class Signature
 {
-    protected String sig;
+    private final String sig;
 
     /**
      * Constructs a {@code Signature} instance from the given resource URI,

@@ -27,7 +27,7 @@ public class IotHubSSLContext
      * @throws IOException If the certificate provided was null or invalid
      * @throws CertificateException As per https://docs.oracle.com/javase/7/docs/api/java/security/cert/CertificateException.html
      */
-    protected IotHubSSLContext() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    IotHubSSLContext() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
     {
         //Codes_SRS_IOTHUBSSLCONTEXT_25_001: [**The constructor shall create a default certificate to be used with IotHub.**]**
         IotHubCertificateManager defaultCert = new IotHubCertificateManager();
@@ -47,7 +47,7 @@ public class IotHubSSLContext
      * @throws IOException If the certificate provided was null or invalid
      * @throws CertificateException As per https://docs.oracle.com/javase/7/docs/api/java/security/cert/CertificateException.html
      */
-    protected IotHubSSLContext(String cert, boolean isPath) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    IotHubSSLContext(String cert, boolean isPath) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
     {
         if (cert == null)
         {

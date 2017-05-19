@@ -11,7 +11,6 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransport;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttTransport;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -69,15 +68,15 @@ public final class DeviceIO
     private long sendPeriodInMilliseconds;
     private long receivePeriodInMilliseconds;
 
-    protected CustomLogger logger;
-    protected IotHubTransport transport;
+    private CustomLogger logger;
+    private IotHubTransport transport;
     private DeviceClientConfig config;
     private IotHubSendTask sendTask = null;
     private IotHubReceiveTask receiveTask = null;
     private IotHubClientProtocol protocol = null;
 
-    protected ScheduledExecutorService taskScheduler;
-    protected IotHubClientState state;
+    private ScheduledExecutorService taskScheduler;
+    private IotHubClientState state;
 
     /**
      * Constructor that takes a connection string as an argument.
@@ -89,12 +88,9 @@ public final class DeviceIO
      *
      * @throws IllegalArgumentException if any of {@code config} or
      * {@code protocol} are {@code null}.
-     * @throws URISyntaxException if the IoT hub hostname does not conform to
-     * RFC 3986.
      */
     DeviceIO(DeviceClientConfig config, IotHubClientProtocol protocol,
                     long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
-            throws URISyntaxException
     {
         long defaultReceivePeriodInMilliseconds;
         /* Codes_SRS_DEVICE_IO_21_002: [If the `config` is null, the constructor shall throw an IllegalArgumentException.] */
@@ -188,7 +184,7 @@ public final class DeviceIO
                 throw new IOException(e.getCause());
             }
         }
-        else if (this.config.getUserCertificateString() != null)
+        else
         {
             try
             {
