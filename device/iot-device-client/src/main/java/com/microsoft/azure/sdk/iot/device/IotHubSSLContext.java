@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.UUID;
 
 public class IotHubSSLContext
 {
@@ -84,7 +85,7 @@ public class IotHubSSLContext
         keyStore.load(null);
         for (Certificate c : certificate.getCertificateCollection())
         {
-            keyStore.setCertificateEntry("trustedIotHubCert", c);
+            keyStore.setCertificateEntry("trustedIotHubCert-" + UUID.randomUUID(), c);
         }
         trustManagerFactory.init(keyStore);
         sslContext.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
