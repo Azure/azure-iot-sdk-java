@@ -5,7 +5,7 @@
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-device-client</artifactId>
     <name>IoT Hub Java Device Client</name>
-    <version>1.1.26</version>
+    <version>1.2.27</version>
     <description>The Microsoft Azure IoT Device SDK for Java</description>
     <developers>
         <developer>
@@ -31,7 +31,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.deps</groupId>
             <artifactId>iot-deps-serializer</artifactId>
-            <version>0.3.3</version>
+            <version>0.4.4</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.paho</groupId>

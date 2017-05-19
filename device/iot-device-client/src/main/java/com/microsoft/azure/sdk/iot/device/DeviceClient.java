@@ -35,7 +35,7 @@ import java.util.Set;
 public final class DeviceClient implements Closeable
 {
     /**
-     * @deprecated as of release 1.1.26 this value is deprecated and replaced by
+     * @deprecated as of release 1.2.27 this value is deprecated and replaced by
      * {@link #setOption(String, Object)} <b>SetSendInterval</b> to change it.
      *
      * The number of milliseconds the transport will wait between
@@ -45,7 +45,7 @@ public final class DeviceClient implements Closeable
     public static long SEND_PERIOD_MILLIS = 10L;
 
     /**
-     * @deprecated as of release 1.1.26 these value is deprecated and replaced by
+     * @deprecated as of release 1.2.27 these value is deprecated and replaced by
      * {@link #setOption(String, Object)} <b>SetMinimumPollingInterval</b> to change it.
      *
      * The number of milliseconds the transport will wait between
@@ -59,32 +59,32 @@ public final class DeviceClient implements Closeable
     public static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
     /**
-     * @deprecated as of release 1.1.26 this value is deprecated and will not be replaced.
+     * @deprecated as of release 1.2.27 this value is deprecated and will not be replaced.
      * The hostname attribute name in a connection string.
      */
     @Deprecated
     public static final String HOSTNAME_ATTRIBUTE = "HostName=";
     /**
-     * @deprecated as of release 1.1.26 this value is deprecated and will not be replaced.
+     * @deprecated as of release 1.2.27 this value is deprecated and will not be replaced.
      * The device ID attribute name in a connection string.
      */
     @Deprecated
     public static final String DEVICE_ID_ATTRIBUTE = "DeviceId=";
     /**
-     * @deprecated as of release 1.1.26 this value is deprecated and will not be replaced.
+     * @deprecated as of release 1.2.27 this value is deprecated and will not be replaced.
      * The shared access key attribute name in a connection string.
      */
     @Deprecated
     public static final String SHARED_ACCESS_KEY_ATTRIBUTE = "SharedAccessKey=";
     /**
-     * @deprecated as of release 1.1.26 this value is deprecated and will not be replaced.
+     * @deprecated as of release 1.2.27 this value is deprecated and will not be replaced.
      * The shared access signature attribute name in a connection string.
      */
     @Deprecated
     public static final String SHARED_ACCESS_TOKEN_ATTRIBUTE = "SharedAccessSignature=";
 
     /**
-     * @deprecated as of release 1.1.26 this value is deprecated and will not be replaced.
+     * @deprecated as of release 1.2.27 this value is deprecated and will not be replaced.
      * The charset used for URL-encoding the device ID in the connection
      * string.
      */
