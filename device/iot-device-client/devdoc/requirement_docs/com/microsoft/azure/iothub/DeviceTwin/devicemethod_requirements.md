@@ -11,7 +11,7 @@ DeviceMethod defines device method interaction between IotHub and user.
 ```java
 public final class DeviceMethod
 {
-    public DeviceMethod(DeviceClient client, DeviceClientConfig config, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IllegalArgumentException;
+    public DeviceMethod(DeviceIO deviceIO, DeviceClientConfig config, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IllegalArgumentException;
 
     public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext) throws IllegalArgumentException;    
 }
@@ -20,14 +20,14 @@ public final class DeviceMethod
 ### DeviceMethod
 
 ```java
-public DeviceMethod(DeviceClient client, DeviceClientConfig config, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IllegalArgumentException;
+public DeviceMethod(DeviceIO deviceIO, DeviceClientConfig config, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IllegalArgumentException;
 ```
 
-**SRS_DEVICEMETHOD_25_001: [**The constructor shall throw IllegalArgumentException if any of the parameters i.e client, config, deviceMethodStatusCallback are null. **]**
+**SRS_DEVICEMETHOD_25_001: [**The constructor shall throw IllegalArgumentException if any of the parameters i.e deviceIO, config, deviceMethodStatusCallback are null. **]**
 
 **SRS_DEVICEMETHOD_25_002: [**The constructor shall create a new instance of the deviceMethodResponseCallback, and set it as desired callback in config by calling setDeviceMethodMessageCallback, where any further messages for device method shall be delivered.**]**
 
-**SRS_DEVICEMETHOD_25_003: [**The constructor shall save all the parameters specified i.e client, config, deviceMethodStatusCallback, deviceMethodStatusCallbackContext.**]**
+**SRS_DEVICEMETHOD_25_003: [**The constructor shall save all the parameters specified i.e deviceIO, config, deviceMethodStatusCallback, deviceMethodStatusCallbackContext.**]**
 
 
 ### subscribeToDeviceMethod

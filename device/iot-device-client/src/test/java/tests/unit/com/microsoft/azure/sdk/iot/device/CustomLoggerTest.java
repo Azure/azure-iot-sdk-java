@@ -61,6 +61,8 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
+                Logger.getLogger((Class)any);
+                result = mockLogger;
                 mockLogger.isEnabledFor(Level.INFO);
                 result = true;
             }
@@ -86,6 +88,8 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
+                Logger.getLogger((Class)any);
+                result = mockLogger;
                 mockLogger.isEnabledFor(Level.DEBUG);
                 result = true;
             }
@@ -111,6 +115,8 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
+                Logger.getLogger((Class)any);
+                result = mockLogger;
                 mockLogger.isEnabledFor(Level.TRACE);
                 result = true;
             }
@@ -136,6 +142,8 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
+                Logger.getLogger((Class)any);
+                result = mockLogger;
                 mockLogger.isEnabledFor(Level.WARN);
                 result = true;
             }
@@ -161,6 +169,8 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
            {
+               Logger.getLogger((Class)any);
+               result = mockLogger;
                 mockLogger.isEnabledFor(Level.FATAL);
                 result = true;
             }
@@ -186,6 +196,8 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
+                Logger.getLogger((Class)any);
+                result = mockLogger;
                 mockLogger.isEnabledFor(Level.ERROR);
                 result = true;
             }
@@ -203,6 +215,8 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
+                Logger.getLogger((Class)any);
+                result = mockLogger;
                 mockLogger.isEnabledFor(Level.ERROR);
                 result = true;
             }

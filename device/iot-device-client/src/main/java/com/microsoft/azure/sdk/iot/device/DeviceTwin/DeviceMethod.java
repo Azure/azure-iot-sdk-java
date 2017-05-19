@@ -16,7 +16,7 @@ public final class DeviceMethod
 
     private boolean isSubscribed = false;
 
-    private DeviceClient client;
+    private DeviceIO deviceIO;
     private DeviceClientConfig config;
 
     CustomLogger logger = new CustomLogger(this.getClass());
@@ -83,7 +83,7 @@ public final class DeviceMethod
                                     responseMessage.setStatus(String.valueOf(responseData.getStatus()));
                                     responseMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SEND_RESPONSE);
 
-                                    client.sendEventAsync(responseMessage, new deviceMethodRequestMessageCallback(), null);
+                                    deviceIO.sendEventAsync(responseMessage, new deviceMethodRequestMessageCallback(), null);
                                     result = IotHubMessageResult.COMPLETE;
                                 }
                                 else
@@ -140,18 +140,18 @@ public final class DeviceMethod
      * between the user and IotHub.
      * @param deviceMethodStatusCallback Callback to provide status for device method state with IotHub. Cannot be {@code null}.
      * @param deviceMethodStatusCallbackContext Context to be passed when device method status is invoked. Can be {@code null}
-     * @param client  Device client object for this connection instance for the device. Cannot be {@code null}
-     * @param config  Device client configuration Cannot be {@code null}
-     * @throws  IllegalArgumentException This exception is thrown if either client or config or deviceMethodStatusCallback are null
+     * @param deviceIO  Device client  object for this connection instance for the device. Cannot be {@code null}
+     * @param config  Device client  configuration Cannot be {@code null}
+     * @throws  IllegalArgumentException This exception is thrown if either deviceIO or config or deviceMethodStatusCallback are null
      *
      */
-    public DeviceMethod(DeviceClient client, DeviceClientConfig config, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IllegalArgumentException
+    public DeviceMethod(DeviceIO deviceIO, DeviceClientConfig config, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IllegalArgumentException
     {
 
-        if (client == null || config == null)
+        if (deviceIO == null || config == null)
         {
             /*
-            **Codes_SRS_DEVICEMETHOD_25_001: [**The constructor shall throw IllegalArgument Exception if any of the parameters i.e client, config, deviceMethodStatusCallback are null. **]**
+            **Codes_SRS_DEVICEMETHOD_25_001: [**The constructor shall throw IllegalArgument Exception if any of the parameters i.e deviceIO, config, deviceMethodStatusCallback are null. **]**
              */
             throw new IllegalArgumentException("Client or config cannot be null");
         }
@@ -162,9 +162,9 @@ public final class DeviceMethod
         }
 
         /*
-        **Codes_SRS_DEVICEMETHOD_25_003: [**The constructor shall save all the parameters specified i.e client, config, deviceMethodStatusCallback, deviceMethodStatusCallbackContext.**]**
+        **Codes_SRS_DEVICEMETHOD_25_003: [**The constructor shall save all the parameters specified i.e deviceIO, config, deviceMethodStatusCallback, deviceMethodStatusCallbackContext.**]**
          */
-        this.client = client;
+        this.deviceIO = deviceIO;
         this.config = config;
         this.deviceMethodStatusCallback = deviceMethodStatusCallback;
         this.deviceMethodStatusCallbackContext = deviceMethodStatusCallbackContext;
@@ -204,7 +204,7 @@ public final class DeviceMethod
              */
             DeviceMethodMessage subscribeMessage = new DeviceMethodMessage(new byte[0]);
             subscribeMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
-            this.client.sendEventAsync(subscribeMessage, new deviceMethodRequestMessageCallback(), null);
+            this.deviceIO.sendEventAsync(subscribeMessage, new deviceMethodRequestMessageCallback(), null);
         }
 
     }

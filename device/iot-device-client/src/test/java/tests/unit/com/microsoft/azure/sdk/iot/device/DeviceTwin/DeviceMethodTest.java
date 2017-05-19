@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 public class DeviceMethodTest
 {
     @Mocked
-    DeviceClient mockedClient;
+    DeviceIO mockedDeviceIO;
 
     @Mocked
     DeviceClientConfig mockedConfig;
@@ -42,7 +42,7 @@ public class DeviceMethodTest
         //arrange
 
         //act
-        DeviceMethod testMethod = new DeviceMethod(mockedClient, mockedConfig, mockedStatusCB, null);
+        DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
 
         //assert
         new Verifications()
@@ -53,12 +53,12 @@ public class DeviceMethodTest
             }
         };
 
-        DeviceClient testClient = Deencapsulation.getField(testMethod, "client");
+        DeviceIO testClient = Deencapsulation.getField(testMethod, "deviceIO");
         DeviceClientConfig testConfig = Deencapsulation.getField(testMethod, "config");
         IotHubEventCallback testStatusCallback = Deencapsulation.getField(testMethod, "deviceMethodStatusCallback");
 
         assertNotNull(testClient);
-        assertEquals(testClient, mockedClient);
+        assertEquals(testClient, mockedDeviceIO);
         assertNotNull(testConfig);
         assertEquals(testConfig, mockedConfig);
         assertNotNull(testStatusCallback);
@@ -81,14 +81,14 @@ public class DeviceMethodTest
     public void constructorThrowsIfConfigNull() throws IllegalArgumentException
     {
         //act
-        DeviceMethod testMethod = new DeviceMethod(mockedClient, null, mockedStatusCB, null);
+        DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, null, mockedStatusCB, null);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsIfCallBackNull() throws IllegalArgumentException
     {
         //act
-        DeviceMethod testMethod = new DeviceMethod(mockedClient, mockedConfig, null, null);
+        DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, null, null);
 
     }
 
@@ -100,7 +100,7 @@ public class DeviceMethodTest
     public void subscribeToMethodsSucceeds(@Mocked final DeviceMethodMessage mockedMessage) throws IllegalArgumentException
     {
         //arrange
-        DeviceMethod testMethod = new DeviceMethod(mockedClient, mockedConfig, mockedStatusCB, null);
+        DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
 
         new NonStrictExpectations()
         {
@@ -119,7 +119,7 @@ public class DeviceMethodTest
             {
                 mockedMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
                 times = 1;
-                mockedClient.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
+                mockedDeviceIO.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
                 times = 1;
             }
         };
@@ -132,7 +132,7 @@ public class DeviceMethodTest
     public void subscribeToMethodsThrowsIfCallBackNull() throws IllegalArgumentException
     {
         //arrange
-        DeviceMethod testMethod = new DeviceMethod(mockedClient, mockedConfig, mockedStatusCB, null);
+        DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
 
         //act
         testMethod.subscribeToDeviceMethod(null, null);
@@ -143,7 +143,7 @@ public class DeviceMethodTest
     public void subscribeToMethodsDoesNotSubscribeIfAlreadySubscribed(@Mocked final DeviceMethodMessage mockedMessage) throws IllegalArgumentException
     {
         //arrange
-        DeviceMethod testMethod = new DeviceMethod(mockedClient, mockedConfig, mockedStatusCB, null);
+        DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
 
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
@@ -164,7 +164,7 @@ public class DeviceMethodTest
             {
                 mockedMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
                 maxTimes = 1;
-                mockedClient.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
+                mockedDeviceIO.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
                 maxTimes = 1;
             }
         };
@@ -179,11 +179,11 @@ public class DeviceMethodTest
     **Tests_SRS_DEVICEMETHOD_25_013: [**The device method message sent to IotHub shall have the status provided by the user as the message status.**]**
      */
     @Test
-    public void deviceMethodResponseCallbackSucceeds(final @Mocked DeviceClient mockedClient) throws IllegalArgumentException
+    public void deviceMethodResponseCallbackSucceeds(final @Mocked DeviceIO mockedDeviceIO) throws IllegalArgumentException
     {
         //arrange
 
-        DeviceMethod testMethod = new DeviceMethod(mockedClient, mockedConfig, mockedStatusCB, null);
+        DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes();
@@ -208,7 +208,7 @@ public class DeviceMethodTest
         new Verifications()
         {
             {
-                mockedClient.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
+                mockedDeviceIO.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
                 maxTimes = 1;
             }
         };
@@ -223,7 +223,7 @@ public class DeviceMethodTest
     public void deviceMethodResponseCallbackAbandonsOnIncorrectMessage() throws IllegalArgumentException
     {
         //arrange
-        DeviceMethod testMethod = new DeviceMethod(mockedClient, mockedConfig, mockedStatusCB, null);
+        DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes();
@@ -262,7 +262,7 @@ public class DeviceMethodTest
     public void deviceMethodResponseCallbackSendsResponseOnlyIfNonNull() throws IllegalArgumentException
     {
         //arrange
-        DeviceMethod testMethod = new DeviceMethod(mockedClient, mockedConfig, mockedStatusCB, null);
+        DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes();
@@ -303,7 +303,7 @@ public class DeviceMethodTest
     public void deviceMethodResponseCallbackSendsResponseMessageEvenIfNonNull() throws IllegalArgumentException
     {
         //arrange
-        DeviceMethod testMethod = new DeviceMethod(mockedClient, mockedConfig, mockedStatusCB, null);
+        DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes();
@@ -341,7 +341,7 @@ public class DeviceMethodTest
     public void deviceMethodResponseCallbackDoesNotHangOnUserCallBackHang() throws IllegalArgumentException
     {
         //arrange
-        DeviceMethod testMethod = new DeviceMethod(mockedClient, mockedConfig, mockedStatusCB, null);
+        DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes();
@@ -377,7 +377,7 @@ public class DeviceMethodTest
     public void deviceMethodRequestMessageCallbackExecutes() throws IllegalArgumentException
     {
         //arrange
-        DeviceMethod testMethod = new DeviceMethod(mockedClient, mockedConfig, mockedStatusCB, null);
+        DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
 
         IotHubEventCallback testDeviceMethodRequestMessageCallback = Deencapsulation.newInnerInstance("deviceMethodRequestMessageCallback", testMethod);
 

@@ -11,15 +11,10 @@ Allows a single logical or physical device to connect to an IoT Hub.
 ```java
 public final class DeviceClient
 {
-    public static long SEND_PERIOD_MILLIS = 10l;
-    public static long RECEIVE_PERIOD_MILLIS = 10l;
-    public static long RECEIVE_PERIOD_MILLIS_MQTT = 10l;
-    public static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
-
     public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException;
-    public DeviceClient(String iotHubHostname, String deviceId, String deviceKey, IotHubClientProtocol protocol) throws URISyntaxException;
 
     public void open() throws IOException;
+    public void close() throws IOException;
     public void closeNow() throws IOException;
 
     public void sendEventAsync(Message msg, IotHubEventCallback callback, Object callbackContext);    
@@ -40,82 +35,63 @@ public final class DeviceClient
 public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException;
 ```
 
-**SRS_DEVICECLIENT_11_042: [**The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', with keys and values separated by '='.**]**
+**SRS_DEVICECLIENT_21_001: [**The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.**]**  
 
-**SRS_DEVICECLIENT_11_043: [**The constructor shall save the IoT Hub hostname as the value of 'HostName' in the connection string.**]**
+**SRS_DEVICECLIENT_21_002: [**The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.**]**  
 
-**SRS_DEVICECLIENT_11_044: [**The constructor shall save the device ID as the UTF-8 URL-decoded value of 'DeviceId' in the connection string.**]**
+**SRS_DEVICECLIENT_21_003: [**The constructor shall save the connection configuration using the object DeviceClientConfig.**]**  
 
-**SRS_DEVICECLIENT_11_045: [**The constructor shall save the device key as the value of 'SharedAccessKey' in the connection string.**]**
+**SRS_DEVICECLIENT_21_004: [**If the connection string is null or empty, the function shall throw an IllegalArgumentException.**]**  
 
-**SRS_DEVICECLIENT_25_052: [**The constructor shall save the shared access token as the value of 'sharedAccessToken' in the connection string.**]**
-
-**SRS_DEVICECLIENT_11_046: [**The constructor shall initialize the IoT Hub transport that uses the protocol specified.**]**
-
-**SRS_DEVICECLIENT_11_047: [**If the connection string is null, the function shall throw an IllegalArgumentException.**]**
-
-**SRS_DEVICECLIENT_11_048: [**If no value for 'HostName' is found in the connection string, the function shall throw an IllegalArgumentException.**]**
-
-**SRS_DEVICECLIENT_11_049: [**If no value for 'DeviceId' is found in the connection string, the function shall throw an IllegalArgumentException.**]**
-
-**SRS_DEVICECLIENT_11_050: [**If no argument for 'SharedAccessKey' is found in the connection string, the function shall throw an IllegalArgumentException.**]**
-
-**SRS_DEVICECLIENT_25_053: [**If no argument for 'sharedAccessToken' and 'SharedAccessKey' is found in the connection string, the function shall throw an IllegalArgumentException.**]**
-
-**SRS_DEVICECLIENT_25_054: [**The constructor shall only accept either 'sharedAccessToken' or 'SharedAccessKey' from the connection string and throw an IllegalArgumentException if both are found**]**
-
-**SRS_DEVICECLIENT_11_051: [If protocol is null, the function shall throw an IllegalArgumentException.**]**
+**SRS_DEVICECLIENT_21_005: [**If protocol is null, the function shall throw an IllegalArgumentException.**]**  
 
 
 ### open
 
 ```java
-public void open();
+public void open() throws IOException;
 ```
 
-**SRS_DEVICECLIENT_11_035: [**The function shall open the transport to communicate with an IoT Hub.**]**
+**SRS_DEVICECLIENT_21_006: [**The open shall open the deviceIO connection.**]**  
 
-**SRS_DEVICECLIENT_11_023: [**The function shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.**]**
+**SRS_DEVICECLIENT_21_007: [**If the opening a connection via deviceIO is not successful, the open shall throw IOException.**]**  
 
-**SRS_DEVICECLIENT_11_024: [**The function shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.**]**
 
-**SRS_DEVICECLIENT_11_028: [**If the client is already open, the function shall do nothing.**]**
+### close
 
-**SRS_DEVICECLIENT_11_036: [**If an error occurs in opening the transport, the function shall throw an IOException.**]**
+```java
+public void close() throws IOException;
+```
 
-**SRS_DEVICECLIENT_25_054: [**The function shall create default IotHubSSL context if no certificate input was provided by user and save it by calling setIotHubSSLContext.**]**
+**SRS_DEVICECLIENT_11_040: [**The function shall finish all ongoing tasks.**]**  
 
-**SRS_DEVICECLIENT_25_055: [**The function shall create IotHubSSL context with the certificate path if input was provided by user and save it by calling setIotHubSSLContext.**]**
+**SRS_DEVICECLIENT_11_041: [**The function shall cancel all recurring tasks.**]**  
 
-**SRS_DEVICECLIENT_25_056: [**The function shall create IotHubSSL context with the certificate String if input was provided by user and save it by calling setIotHubSSLContext.**]**
+**SRS_DEVICECLIENT_21_042: [**The close shall close the deviceIO connection.**]**  
 
-**SRS_DEVICECLIENT_25_057: [**If an exception is thrown when creating a SSL context then Open shall throw IOException to the user indicating the failure**]**
+**SRS_DEVICECLIENT_21_043: [**If the closing a connection via deviceIO is not successful, the close shall throw IOException.**]**  
+
 
 ### closeNow
 
 ```java
 public void closeNow();
 ```
-**SRS_DEVICECLIENT_25_058: [**If the client is already closed, the function shall do nothing.**]**
 
-**SRS_DEVICECLIENT_25_059: [**The function shall release any resources held by client**]**
+**SRS_DEVICECLIENT_21_008: [**The close shall close the deviceIO connection.**]**  
 
-**SRS_DEVICECLIENT_25_060: [**The function shall cancel all recurring tasks.**]**
-
-**SRS_DEVICECLIENT_25_061: [**The function shall close the transport.**]**
+**SRS_DEVICECLIENT_21_009: [**If the closing a connection via deviceIO is not successful, the close shall throw IOException.**]**  
 
 
 ### sendEventAsync
 
 ```java
-public void sendEventAsync(Message msg, IotHubEventCallback callback, Object callbackContext);**
+public void sendEventAsync(Message msg, IotHubEventCallback callback, Object callbackContext);
 ```
 
-**SRS_DEVICECLIENT_11_006: [**The function shall add the message, with its associated callback and callback context, to the transport.**]**
+**SRS_DEVICECLIENT_21_010: [**The sendEventAsync shall asynchronously send the message using the deviceIO connection.**]**  
 
-**SRS_DEVICECLIENT_11_033: [**If the message given is null, the function shall throw an IllegalArgumentException.**]**
-
-**SRS_DEVICECLIENT_11_039: [**If the client is closed, the function shall throw an IllegalStateException.**]**
+**SRS_DEVICECLIENT_21_011: [**If starting to send via deviceIO is not successful, the sendEventAsync shall bypass the threw exception.**]**  
 
 
 ### setMessageCallback
@@ -124,68 +100,9 @@ public void sendEventAsync(Message msg, IotHubEventCallback callback, Object cal
 public DeviceClient setMessageCallback(IotHubMessageCallback callback, Object context);
 ```
 
-**SRS_DEVICECLIENT_11_012: [**The function shall set the message callback, with its associated context.**]**
+**SRS_DEVICECLIENT_11_013: [**The function shall set the message callback, with its associated context.**]**  
 
-**SRS_DEVICECLIENT_11_032: [**If the callback is null but the context is non-null, the function shall throw an IllegalArgumentException.**]**
-
-
-### startDeviceTwin
-
-```java
-public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object    deviceTwinStatusCallbackContext, PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext) throws IOException;
-```
-
-**SRS_DEVICECLIENT_25_011: [**The function shall create a new instance of class Device Twin and request all twin properties by calling getDeviceTwin**]**
-
-**SRS_DEVICECLIENT_25_012: [**If the deviceTwinStatusCallback or genericPropertyCallBack is null, the function shall throw an IllegalArgumentException.**]**
-
-**SRS_DEVICECLIENT_25_013: [**If the client has not been open, the function shall throw an IOException.**]**
-
-**SRS_DEVICECLIENT_25_014: [**If this method is called twice on the same instance of the client then this method shall throw UnsupportedOperationException.**]**
-
-
-### subscribeToDesiredProperties
-
-```java
-public void subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange) throws IOException;
-```
-
-**SRS_DEVICECLIENT_25_015: [**If the client has not started twin before calling this method, the function shall throw an IOException.**]**
-
-**SRS_DEVICECLIENT_25_016: [**If the client has not been open, the function shall throw an IOException.**]**
-
-**SRS_DEVICECLIENT_25_017: [**This method shall subscribe to desired properties by calling subscribeDesiredPropertiesNotification on the twin object.**]**
-
-
-### sendReportedProperties
-
-```java
-public void sendReportedProperties(Set<Property> reportedProperties) throws IOException;
-```
-
-**SRS_DEVICECLIENT_25_018: [**If the client has not started twin before calling this method, the function shall throw an IOException.**]**
-
-**SRS_DEVICECLIENT_25_019: [**If the client has not been open, the function shall throw an IOException.**]**
-
-**SRS_DEVICECLIENT_25_020: [**If reportedProperties is null or empty, the function shall throw an IllegalArgumentException.**]**
-
-**SRS_DEVICECLIENT_25_021: [**This method shall send to reported properties by calling updateReportedProperties on the twin object.**]**
-
-
-
-### subscribeToDeviceMethod
-
-```java
-public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IOException;
-```
-
-**SRS_DEVICECLIENT_25_022: [**If the client has not been open, the function shall throw an IOException.**]**
-
-**SRS_DEVICECLIENT_25_023: [**If deviceMethodCallback or deviceMethodStatusCallback is null, the function shall throw an IllegalArgumentException.**]**
-
-**SRS_DEVICECLIENT_25_024: [**This method shall subscribe to device methods by calling subscribeToDeviceMethod on DeviceMethod object which it created.**]**
-
-**SRS_DEVICECLIENT_25_025: [**This method shall not create a new instance of deviceMethod if called twice.**]**
+**SRS_DEVICECLIENT_11_014: [**If the callback is null but the context is non-null, the function shall throw an IllegalArgumentException.**]**  
 
 
 ### setOption
@@ -196,28 +113,89 @@ public setOption(String optionName, Object value)
 
 This method sets the option given by optionName to value.
 
-**SRS_DEVICECLIENT_02_001: [**If optionName is null or not an option handled by the client, then it shall throw IllegalArgumentException.**]**
+**SRS_DEVICECLIENT_02_015: [**If optionName is null or not an option handled by the client, then it shall throw IllegalArgumentException.**]**
 
 Options handled by the client:
 
-**SRS_DEVICECLIENT_02_002: [**"SetMinimumPollingInterval" - time in miliseconds between 2 consecutive polls.**]**
+**SRS_DEVICECLIENT_02_016: [**"SetMinimumPollingInterval" - time in milliseconds between 2 consecutive polls.**]**
 
-**SRS_DEVICECLIENT_02_003: [**Option "SetMinimumPollingInterval" is available only for HTTP.**]**
+**SRS_DEVICECLIENT_02_017: [**Option "SetMinimumPollingInterval" is available only for HTTP.**]**
 
-**SRS_DEVICECLIENT_02_004: [**"SetMinimumPollingInterval" needs to have value type long**.]**
+**SRS_DEVICECLIENT_02_018: [**"SetMinimumPollingInterval" needs to have value type long**.]**
 
-**SRS_DEVICECLIENT_25_005: [**"SetCertificatePath" - path to the certificate to verify peer .**]**
+**SRS_DEVICECLIENT_21_040: [**"SetSendInterval" - time in milliseconds between 2 consecutive message sends.**]**
 
-**SRS_DEVICECLIENT_25_006: [**"SetCertificatePath" is available only for AMQP.**]**
+**SRS_DEVICECLIENT_21_041: [**"SetSendInterval" needs to have value type long**.]**
 
-**SRS_DEVICECLIENT_25_007: [**"SetSASTokenExpiryTime" - Time in secs to specify SAS Token Expiry time .**]**
+**SRS_DEVICECLIENT_25_019: [**"SetCertificatePath" - path to the certificate to verify peer .**]**
 
-**SRS_DEVICECLIENT_25_009: [**"SetSASTokenExpiryTime" should have value type long**.]**
+**SRS_DEVICECLIENT_25_020: [**"SetCertificatePath" is available only for AMQP.**]**
 
-**SRS_DEVICECLIENT_25_008: [**"SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT.**]**
+**SRS_DEVICECLIENT_25_021: [**"SetSASTokenExpiryTime" - Time in secs to specify SAS Token Expiry time.**]**
 
-**SRS_DEVICECLIENT_25_010: [**"SetSASTokenExpiryTime" shall restart the transport
+**SRS_DEVICECLIENT_25_022: [**"SetSASTokenExpiryTime" should have value type long.**]**
+
+**SRS_DEVICECLIENT_25_023: [**"SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT.**]**
+
+**SRS_DEVICECLIENT_25_024: [**"SetSASTokenExpiryTime" shall restart the transport
                                     1. If the device currently uses device key and
                                     2. If transport is already open
                                after updating expiry time**.]**
+
+### startDeviceTwin
+
+```java
+public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object    deviceTwinStatusCallbackContext, PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext) throws IOException;
+```
+
+**SRS_DEVICECLIENT_25_025: [**The function shall create a new instance of class Device Twin and request all twin properties by calling getDeviceTwin**]**
+
+**SRS_DEVICECLIENT_25_026: [**If the deviceTwinStatusCallback or genericPropertyCallBack is null, the function shall throw an IllegalArgumentException.**]**
+
+**SRS_DEVICECLIENT_25_027: [**If the client has not been open, the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_25_028: [**If this method is called twice on the same instance of the client then this method shall throw UnsupportedOperationException.**]**
+
+
+### subscribeToDesiredProperties
+
+```java
+public void subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange) throws IOException;
+```
+
+**SRS_DEVICECLIENT_25_029: [**If the client has not started twin before calling this method, the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_25_030: [**If the client has not been open, the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_25_031: [**This method shall subscribe to desired properties by calling subscribeDesiredPropertiesNotification on the twin object.**]**
+
+
+### sendReportedProperties
+
+```java
+public void sendReportedProperties(Set<Property> reportedProperties) throws IOException;
+```
+
+**SRS_DEVICECLIENT_25_032: [**If the client has not started twin before calling this method, the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_25_033: [**If the client has not been open, the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_25_034: [**If reportedProperties is null or empty, the function shall throw an IllegalArgumentException.**]**
+
+**SRS_DEVICECLIENT_25_035: [**This method shall send to reported properties by calling updateReportedProperties on the twin object.**]**
+
+
+### subscribeToDeviceMethod
+
+```java
+public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IOException;
+```
+
+**SRS_DEVICECLIENT_25_036: [**If the client has not been open, the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_25_037: [**If deviceMethodCallback or deviceMethodStatusCallback is null, the function shall throw an IllegalArgumentException.**]**
+
+**SRS_DEVICECLIENT_25_038: [**This method shall subscribe to device methods by calling subscribeToDeviceMethod on DeviceMethod object which it created.**]**
+
+**SRS_DEVICECLIENT_25_039: [**This method shall not create a new instance of deviceMethod if called twice.**]**
 
