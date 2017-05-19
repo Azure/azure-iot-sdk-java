@@ -90,6 +90,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      *
      * @param config The {@link DeviceClientConfig} corresponding to the device associated with this {@link com.microsoft.azure.sdk.iot.device.DeviceClient}.
      * @param useWebSockets Whether the connection should use web sockets or not.
+     * @throws IOException if failed connecting to iothub.
      */
     public AmqpsIotHubConnection(DeviceClientConfig config, Boolean useWebSockets) throws IOException
     {
@@ -214,6 +215,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
      *     If the current connection is not closed, this function
      *     will set the current state to closed and invalidate all connection related variables.
      * </p>
+     *
+     * @throws IOException if it failed closing the iothub connection.
      */
     public void close() throws IOException
     {
@@ -374,6 +377,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      * @param message the message to be acknowledged.
      * @param result the message result (one of {@link IotHubMessageResult#COMPLETE},
      *               {@link IotHubMessageResult#ABANDON}, or {@link IotHubMessageResult#REJECT}).
+     * @return a boolean true if sent message was received with success, or false on fail.
      */
     public Boolean sendMessageResult(AmqpsMessage message, IotHubMessageResult result)
     {

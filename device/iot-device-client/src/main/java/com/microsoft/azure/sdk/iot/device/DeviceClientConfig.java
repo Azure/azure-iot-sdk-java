@@ -229,6 +229,8 @@ public final class DeviceClientConfig
      * Setter for the number of seconds a SAS token should be valid for. A
      * message that arrives at an IoT Hub in time of length greater than this
      * value will be rejected by the IoT Hub.
+     *
+     * @param expiryTime is the token valid time in seconds.
      */
     public void setTokenValidSecs(long expiryTime)
     {
@@ -273,8 +275,9 @@ public final class DeviceClientConfig
 
     /**
      * Setter for the device method message callback.
-     * @param callback Callback for device method messages.
      *
+     * @param callback Callback for device method messages.
+     * @param context is the context for the callback.
      */
     public void setDeviceMethodMessageCallback(MessageCallback callback, Object context)
     {
@@ -317,9 +320,11 @@ public final class DeviceClientConfig
 
     /**
      * Setter for the device twin message callback.
+     *
      * @param callback callback to be invoked for device twin messages.
+     * @param context is the context for the callback.
      */
-    public void setDeviceTwinMessageCallback(MessageCallback callback,Object context)
+    public void setDeviceTwinMessageCallback(MessageCallback callback, Object context)
     {
         /*
         Codes_SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceTwin message callback.**] **

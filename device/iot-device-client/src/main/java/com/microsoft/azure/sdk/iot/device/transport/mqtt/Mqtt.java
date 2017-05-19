@@ -111,8 +111,8 @@ abstract public class Mqtt implements MqttCallback
     /**
      * Constructor to instantiate mqtt broker connection.
      *
+     * @throws IOException if failed to set the mqtt information
      */
-
     public Mqtt() throws IOException
     {
         /*
@@ -132,8 +132,9 @@ abstract public class Mqtt implements MqttCallback
      * @param clientId the client Id associated with this mqtt broker connection.
      * @param userName the user name for the mqtt broker connection.
      * @param userPassword the user password for the mqtt broker connection.
+     * @param iotHubSSLContext the iothub SSL context
+     * @throws IOException if failed to set the mqtt information
      */
-
     public Mqtt(String serverURI, String clientId, String userName, String userPassword, IotHubSSLContext iotHubSSLContext) throws IOException
     {
         /*
@@ -194,8 +195,8 @@ abstract public class Mqtt implements MqttCallback
     /**
      * Method to connect to mqtt broker connection.
      *
+     * @throws IOException if failed to establish the mqtt connection.
      */
-
     protected void connect() throws IOException
     {
         synchronized (Mqtt.MQTT_LOCK)
@@ -236,8 +237,8 @@ abstract public class Mqtt implements MqttCallback
     /**
      * Method to disconnect to mqtt broker connection.
      *
+     * @throws IOException if failed to ends the mqtt connection.
      */
-
     protected void disconnect() throws IOException
     {
         try
@@ -270,6 +271,7 @@ abstract public class Mqtt implements MqttCallback
      *
      * @param publishTopic the topic to publish on mqtt broker connection.
      * @param payload   the payload to publish on publishTopic of mqtt broker connection.
+     * @throws IOException if failed to publish the mqtt topic.
      */
     protected void publish(String publishTopic, byte[] payload) throws IOException
     {
@@ -343,6 +345,7 @@ abstract public class Mqtt implements MqttCallback
      * Method to subscribe to mqtt broker connection.
      *
      * @param topic the topic to subscribe on mqtt broker connection.
+     * @throws IOException if failed to subscribe the mqtt topic.
      */
     protected void subscribe(String topic) throws IOException
     {
@@ -391,8 +394,8 @@ abstract public class Mqtt implements MqttCallback
      * Method to unsubscribe to mqtt broker connection.
      *
      * @param topic the topic to unsubscribe on mqtt broker connection.
+     * @throws IOException if failed to unsubscribe the mqtt topic.
      */
-
     protected void unsubscribe(String topic) throws IOException
     {
         synchronized (Mqtt.MQTT_LOCK)
@@ -437,6 +440,9 @@ abstract public class Mqtt implements MqttCallback
 
     /**
      * Method to receive messages on mqtt broker connection.
+     *
+     * @return a received message. It can be {@code null}
+     * @throws IOException if failed to receive mqtt message.
      */
     public Message receive() throws IOException
     {
