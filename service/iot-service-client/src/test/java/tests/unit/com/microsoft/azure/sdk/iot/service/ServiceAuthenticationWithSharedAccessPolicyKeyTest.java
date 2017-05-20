@@ -3,13 +3,19 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service;
+package tests.unit.com.microsoft.azure.sdk.iot.service;
 
-import mockit.integration.junit4.JMockit;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertEquals;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.ServiceAuthenticationWithSharedAccessPolicyKey;
+
+import mockit.Deencapsulation;
+import mockit.integration.junit4.JMockit;
 
 @RunWith(JMockit.class)
 public class ServiceAuthenticationWithSharedAccessPolicyKeyTest
@@ -23,8 +29,8 @@ public class ServiceAuthenticationWithSharedAccessPolicyKeyTest
         String newPolicyName = "XXX";
         String newPolicyKey = "YYY";
         ServiceAuthenticationWithSharedAccessPolicyKey auth = new ServiceAuthenticationWithSharedAccessPolicyKey(newPolicyName, newPolicyKey);
-        // Act
-        auth.populate(null);
+        // Act        
+        Deencapsulation.invoke(auth, "populate", IotHubConnectionString.class);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICEAUTHENTICATIONWITHSHAREDACCESSKEY_12_003: [The function shall save the policyName and policyKey to the target object]
@@ -45,14 +51,14 @@ public class ServiceAuthenticationWithSharedAccessPolicyKeyTest
         String newPolicyKey = "YYY";
         ServiceAuthenticationWithSharedAccessPolicyKey auth = new ServiceAuthenticationWithSharedAccessPolicyKey(newPolicyName, newPolicyKey);
         // Act
-        auth.populate(iotHubConnectionString);
+        Deencapsulation.invoke(auth, "populate", iotHubConnectionString);
         // Assert
         assertEquals(newPolicyName, iotHubConnectionString.getSharedAccessKeyName());
         assertEquals(newPolicyKey, iotHubConnectionString.getSharedAccessKey());
         assertEquals(null, iotHubConnectionString.getSharedAccessSignature());
         // Act
-        auth.setPolicyName(policyName);
-        auth.setKey(sharedAccessKey);
+        Deencapsulation.invoke(auth, "setPolicyName", policyName);
+        Deencapsulation.invoke(auth, "setKey", sharedAccessKey);
         // Assert
         assertEquals(policyName, auth.getPolicyName());
         assertEquals(sharedAccessKey, auth.getKey());

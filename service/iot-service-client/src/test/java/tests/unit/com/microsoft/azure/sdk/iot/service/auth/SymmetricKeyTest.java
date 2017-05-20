@@ -3,14 +3,17 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service.auth;
+package tests.unit.com.microsoft.azure.sdk.iot.service.auth;
 
-import mockit.Deencapsulation;
-import mockit.integration.junit4.JMockit;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertEquals;
+import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
+
+import mockit.Deencapsulation;
+import mockit.integration.junit4.JMockit;
 
 @RunWith(JMockit.class)
 public class SymmetricKeyTest

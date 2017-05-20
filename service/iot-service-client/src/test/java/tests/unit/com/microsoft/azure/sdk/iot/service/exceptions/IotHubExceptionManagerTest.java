@@ -3,20 +3,34 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service.exceptions;
+package tests.unit.com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
-import mockit.integration.junit4.JMockit;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubBadFormatException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubBadGatewayException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubInternalServerErrorException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubPreconditionFailedException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubServerBusyException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyDevicesException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyRequestsException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+
+import mockit.integration.junit4.JMockit;
 
 @RunWith(JMockit.class)
 public class IotHubExceptionManagerTest

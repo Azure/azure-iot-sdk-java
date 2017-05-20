@@ -3,21 +3,25 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service.auth;
+package tests.unit.com.microsoft.azure.sdk.iot.service.auth;
 
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import mockit.Deencapsulation;
-import mockit.Expectations;
-import org.apache.commons.codec.binary.Base64;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Base64;
+import org.junit.Test;
+
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+
+import mockit.Deencapsulation;
+import mockit.Expectations;
 
 /**
  *

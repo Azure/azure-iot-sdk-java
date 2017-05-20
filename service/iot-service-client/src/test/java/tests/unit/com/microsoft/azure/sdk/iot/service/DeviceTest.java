@@ -3,18 +3,25 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service;
-
-import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
-import mockit.Expectations;
-import mockit.NonStrictExpectations;
-import org.junit.Test;
-
-import javax.crypto.KeyGenerator;
-import java.security.NoSuchAlgorithmException;
+package tests.unit.com.microsoft.azure.sdk.iot.service;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.KeyGenerator;
+
+import org.junit.Test;
+
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.DeviceConnectionState;
+import com.microsoft.azure.sdk.iot.service.DeviceStatus;
+import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
+
+import mockit.Deencapsulation;
+import mockit.Expectations;
+import mockit.NonStrictExpectations;
 
 public class DeviceTest
 {
@@ -46,7 +53,7 @@ public class DeviceTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_002: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
     // Assert
-    @Test (expected = Exception.class)
+    @Test (expected = IllegalArgumentException.class)
     public void createFromId_input_null() throws NoSuchAlgorithmException
     {
         // Arrange
@@ -57,7 +64,7 @@ public class DeviceTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_002: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
     // Assert
-    @Test (expected = Exception.class)
+    @Test (expected = IllegalArgumentException.class)
     public void createFromId_input_empty() throws NoSuchAlgorithmException
     {
         // Arrange
@@ -75,7 +82,7 @@ public class DeviceTest
         new Expectations()
         {
             {
-                new Device(deviceId, null, null);
+                Deencapsulation.newInstance(Device.class, deviceId, DeviceStatus.class, SymmetricKey.class);
             }
         };
         // Act
@@ -86,24 +93,24 @@ public class DeviceTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_004: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
     // Assert
-    @Test (expected = Exception.class)
+    @Test (expected = IllegalArgumentException.class)
     public void constructor_string_null() throws NoSuchAlgorithmException
     {
         // Arrange
         String deviceId = null;
         // Act
-        Device device = new Device(deviceId, null, null);
+        Device device = Deencapsulation.newInstance(Device.class, deviceId, null, null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_004: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
     // Assert
-    @Test (expected = Exception.class)
+    @Test (expected = IllegalArgumentException.class)
     public void constructor_string_empty() throws NoSuchAlgorithmException
     {
         // Arrange
         String deviceId = "";
         // Act
-        Device device = new Device(deviceId, null, null);
+        Device device = Deencapsulation.newInstance(Device.class, deviceId, null, null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_005: [If the input symmetric key is empty, the constructor shall create
@@ -122,7 +129,7 @@ public class DeviceTest
             }
         };
         // Act
-        Device device = new Device(deviceId, null, null);
+        Device device = Deencapsulation.newInstance(Device.class, deviceId, DeviceStatus.class, SymmetricKey.class);
         // Assert
         assertNotEquals(device.getSymmetricKey(), null);
     }
@@ -138,7 +145,8 @@ public class DeviceTest
         DeviceStatus expectedDeviceStatus = DeviceStatus.Disabled;
         SymmetricKey expectedSymmetricKey = new SymmetricKey();
         // Act
-        Device device = new Device(deviceId, expectedDeviceStatus, expectedSymmetricKey);
+        Device device = Deencapsulation.newInstance(Device.class, deviceId, expectedDeviceStatus, expectedSymmetricKey); 
+        
         // Assert
         assertEquals(expectedDeviceStatus, device.getStatus());
         assertEquals(expectedSymmetricKey, device.getSymmetricKey());
@@ -152,7 +160,7 @@ public class DeviceTest
         String utcTimeDefault = "0001-01-01T00:00:00";
         String deviceId = "xxx-device";
         // Act
-        Device device = new Device(deviceId, null, null);
+        Device device = Deencapsulation.newInstance(Device.class, deviceId, DeviceStatus.class, SymmetricKey.class);
         // Assert
         assertNotEquals(null, device);
         assertNotEquals(device.getSymmetricKey(), null);

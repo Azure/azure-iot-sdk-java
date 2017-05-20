@@ -3,13 +3,19 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service;
+package tests.unit.com.microsoft.azure.sdk.iot.service;
 
-import mockit.integration.junit4.JMockit;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertEquals;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.ServiceAuthenticationWithSharedAccessPolicyToken;
+
+import mockit.Deencapsulation;
+import mockit.integration.junit4.JMockit;
 
 @RunWith(JMockit.class)
 public class ServiceAuthenticationWithSharedAccessPolicyTokenTest
@@ -51,8 +57,9 @@ public class ServiceAuthenticationWithSharedAccessPolicyTokenTest
         assertEquals(newPolicyToken, iotHubConnectionString.getSharedAccessSignature());
         assertEquals(null, iotHubConnectionString.getSharedAccessKey());
         // Act
-        auth.setPolicyName(policyName);
-        auth.setToken(sharedAccessKey);
+        Deencapsulation.invoke(auth, "setPolicyName", policyName);
+        Deencapsulation.invoke(auth, "setToken", sharedAccessKey);
+        
         // Assert
         assertEquals(policyName, auth.getPolicyName());
         assertEquals(sharedAccessKey, auth.getToken());

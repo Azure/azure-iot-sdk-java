@@ -3,18 +3,30 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service;
+package tests.unit.com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
-import mockit.*;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import org.junit.Test;
+
+import com.microsoft.azure.sdk.iot.service.FeedbackReceiver;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.Message;
+import com.microsoft.azure.sdk.iot.service.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
+
+import mockit.Deencapsulation;
+import mockit.Expectations;
+import mockit.Mock;
+import mockit.MockUp;
+import mockit.Mocked;
 
 public class ServiceClientTest
 {
@@ -66,7 +78,7 @@ public class ServiceClientTest
         {
             {
                 IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
-                new ServiceClient(iotHubConnectionString, iotHubServiceClientProtocol);
+                Deencapsulation.newInstance(ServiceClient.class, iotHubConnectionString, iotHubServiceClientProtocol);
             }
         };
         // Act
@@ -84,7 +96,7 @@ public class ServiceClientTest
         IotHubConnectionString iotHubConnectionString = null;
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        ServiceClient serviceClient = new ServiceClient(iotHubConnectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = Deencapsulation.newInstance(ServiceClient.class, iotHubConnectionString, iotHubServiceClientProtocol); 
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_005: [The constructor shall create a SAS token object using the IotHubConnectionString]
