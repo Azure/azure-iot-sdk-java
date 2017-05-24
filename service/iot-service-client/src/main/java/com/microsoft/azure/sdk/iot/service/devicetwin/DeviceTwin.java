@@ -85,7 +85,7 @@ public class DeviceTwin
          **Codes_SRS_DEVICETWIN_25_009: [** The function shall send the created request and get the response **]**
          **Codes_SRS_DEVICETWIN_25_010: [** The function shall verify the response status and throw proper Exception **]**
          */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.GET, new byte[0], String.valueOf(requestId++));
+        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.GET, new byte[0], String.valueOf(requestId++), 0);
         String twin = new String(response.getBody(), StandardCharsets.UTF_8);
 
         /*
@@ -163,7 +163,7 @@ public class DeviceTwin
 
         **Codes_SRS_DEVICETWIN_25_020: [** The function shall verify the response status and throw proper Exception **]**
          */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.PATCH, twinJson.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++));
+        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.PATCH, twinJson.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++),0);
     }
 
     /**

@@ -21,7 +21,9 @@ public class DeviceMethod
 {
     private IotHubConnectionString iotHubConnectionString = null;
     private Integer requestId = 0;
-
+    public static final int DEFAULT_RESPONSE_TIMEOUT = 30; // default response timeout is 30 seconds
+    public static final int DEFAULT_CONNECT_TIMEOUT = 0;
+    public static final int THOUSAND_MS = 1000;
     /**
      * Create a DeviceMethod instance from the information in the connection string.
      *
@@ -87,10 +89,33 @@ public class DeviceMethod
 
         /* Codes_SRS_DEVICEMETHOD_21_008: [The invoke shall build the Method URL `{iot hub}/twins/{device id}/methods/` by calling getUrlMethod.] */
         URL url = this.iotHubConnectionString.getUrlMethod(deviceId);
-
+       
+        long  responseTimeout, connectTimeout;
+        
+        if (responseTimeoutInSeconds == null)
+        {
+            responseTimeout  = DEFAULT_RESPONSE_TIMEOUT; // If timeout is not set, it defaults to 30 seconds
+        }
+        else
+        {
+            responseTimeout  = responseTimeoutInSeconds;
+        }
+        
+        if (connectTimeoutInSeconds == null)
+        {
+            connectTimeout  = DEFAULT_CONNECT_TIMEOUT;
+        }
+        else
+        {
+            connectTimeout  = connectTimeoutInSeconds;
+        }
+        
+        // Calculate total timeout in milliseconds
+        long timeoutInMs = (responseTimeout + connectTimeout) * THOUSAND_MS; 
+               
         /* Codes_SRS_DEVICEMETHOD_21_009: [The invoke shall send the created request and get the response using the HttpRequester.] */
         /* Codes_SRS_DEVICEMETHOD_21_010: [The invoke shall create a new HttpRequest with http method as `POST`.] */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.POST, json.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++));
+        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.POST, json.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++), timeoutInMs);
 
         /* Codes_SRS_DEVICEMETHOD_21_013: [The invoke shall deserialize the payload using the `serializer.MethodParser`.] */
         MethodParser methodParserResponse = new MethodParser();

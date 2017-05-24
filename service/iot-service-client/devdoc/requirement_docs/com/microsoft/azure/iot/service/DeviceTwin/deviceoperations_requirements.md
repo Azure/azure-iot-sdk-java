@@ -52,7 +52,7 @@ public static HttpResponse request(
 **SRS_DEVICE_OPERATIONS_21_006: [**The request shall create a new SASToken with the ServiceConnect rights.**]**  
 **SRS_DEVICE_OPERATIONS_21_007: [**If the SASToken is null or empty, the request shall throw IOException.**]**  
 **SRS_DEVICE_OPERATIONS_21_008: [**The request shall create a new HttpRequest with the provided `url`, http `method`, and `payload`.**]**  
-**SRS_DEVICE_OPERATIONS_21_009: [**The request shall add to the HTTP header an default timeout in milliseconds.**]**  
+**SRS_DEVICE_OPERATIONS_21_009: [**The request shall add to the HTTP header the sum of timeout and default timeout in milliseconds.**]**  
 **SRS_DEVICE_OPERATIONS_21_010: [**The request shall add to the HTTP header an `authorization` key with the SASToken.**]**    
 **SRS_DEVICE_OPERATIONS_21_011: [**The request shall add to the HTTP header a `Request-Id` key with a new unique string value for every request.**]**  
 **SRS_DEVICE_OPERATIONS_21_012: [**The request shall add to the HTTP header a `User-Agent` key with the client Id and service version.**]**  
@@ -61,3 +61,4 @@ public static HttpResponse request(
 **SRS_DEVICE_OPERATIONS_21_015: [**The request shall send the created request and get the response.**]**  
 **SRS_DEVICE_OPERATIONS_21_016: [**If the resulted HttpResponseStatus represents fail, the request shall throw proper Exception by calling httpResponseVerification.**]**  
 **SRS_DEVICE_OPERATIONS_21_017: [**If the resulted status represents success, the request shall return the http response.**]**  
+**SRS_DEVICE_OPERATIONS_99_018: [**The request shall throw IllegalArgumentException if the provided `timeoutInMs` plus DEFAULT_HTTP_TIMEOUT_MS exceed Integer.MAX_VALUE.**]**  

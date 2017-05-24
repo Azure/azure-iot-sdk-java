@@ -52,7 +52,7 @@ public class DeviceOperationsTest
     private static final String ACCEPT_CHARSET = "charset=utf-8";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final Integer DEFAULT_HTTP_TIMEOUT_MS = 24000;
-
+    
     private IotHubConnectionString IOT_HUB_CONNECTION_STRING;
     private String STANDARD_SASTOKEN_STRING;
 
@@ -76,7 +76,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
 
         //assert
     }
@@ -94,7 +95,8 @@ public class DeviceOperationsTest
                 null,
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
 
         //assert
     }
@@ -111,7 +113,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 null,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
 
         //assert
     }
@@ -128,7 +131,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 null,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
 
         //assert
     }
@@ -145,10 +149,31 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                null);
+                null,
+                0);
 
         //assert
     }
+    
+    /* Tests_SRS_DEVICE_OPERATIONS_99_018: [The request shall throw IllegalArgumentException if the provided `timeoutInMs` plus DEFAULT_HTTP_TIMEOUT_MS exceed Integer.MAX_VALUE.] */
+    @Test (expected = IllegalArgumentException.class)
+    public void request_TimeoutExceeds_failed() throws Exception
+    {
+        //arrange
+
+        //act
+        HttpResponse response = DeviceOperations.request(
+                IOT_HUB_CONNECTION_STRING,
+                new URL(STANDARD_URL),
+                HttpMethod.POST,
+                STANDARD_PAYLOAD,
+                STANDARD_REQUEST_ID,
+                Integer.MAX_VALUE);
+
+        //assert
+    }
+
+    
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_005: [The request shall throw IllegalArgumentException if the provided `requestId` is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
@@ -162,7 +187,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                "");
+                "",
+                0);
 
         //assert
     }
@@ -187,7 +213,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_007: [If the SASToken is null or empty, the request shall throw IOException.] */
@@ -209,7 +236,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_007: [If the SASToken is null or empty, the request shall throw IOException.] */
@@ -231,7 +259,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_008: [The request shall create a new HttpRequest with the provided `url`, http `method`, and `payload`.] */
@@ -260,10 +289,11 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                DEFAULT_HTTP_TIMEOUT_MS);
     }
 
-    /* Tests_SRS_DEVICE_OPERATIONS_21_009: [The request shall add to the HTTP header an default timeout in milliseconds.] */
+    /* Tests_SRS_DEVICE_OPERATIONS_21_009: [The request shall add to the HTTP header the sum of timeout and default timeout in milliseconds.] */
     @Test (expected = IllegalArgumentException.class)
     public void invoke_throwOnsetReadTimeoutMillis_failed(
             @Mocked IotHubServiceSasToken iotHubServiceSasToken,
@@ -287,7 +317,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_010: [The request shall add to the HTTP header an `authorization` key with the SASToken.] */
@@ -316,7 +347,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_011: [The request shall add to the HTTP header a `Request-Id` key with a new unique string value for every request.] */
@@ -347,7 +379,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_012: [The request shall add to the HTTP header a `User-Agent` key with the client Id and service version.] */
@@ -380,7 +413,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_013: [The request shall add to the HTTP header a `Accept` key with `application/json`.] */
@@ -415,7 +449,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_014: [The request shall add to the HTTP header a `Content-Type` key with `application/json; charset=utf-8`.] */
@@ -452,7 +487,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_015: [The request shall send the created request and get the response.] */
@@ -491,7 +527,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_016: [If the resulted HttpResponseStatus represents fail, the request shall throw proper Exception by calling httpResponseVerification.] */
@@ -538,7 +575,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_017: [If the resulted status represents success, the request shall return the http response.] */
@@ -584,7 +622,8 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID);
+                STANDARD_REQUEST_ID,
+                0);
 
         //assert
         assertEquals(response, sendResponse);
@@ -604,5 +643,75 @@ public class DeviceOperationsTest
             }
         };
     }
+    
+ /* Tests_SRS_DEVICE_OPERATIONS_21_017: [If the resulted status represents success, the request shall return the http response.] */
+    @Test
+    public void invoke_httprequesttimeout_succeed(
+            @Mocked IotHubServiceSasToken iotHubServiceSasToken,
+            @Mocked HttpRequest httpRequest)
+            throws Exception
+    {
+        //arrange
+        final long responseTimeout = 30000; // 30 seconds
+        final long connectTimeout = 5000;   // 5 seconds
+        
+        // Calculate total timeout in milliseconds
+        int timeoutInMs = (int)(responseTimeout + connectTimeout);
 
+        final int status = 200;
+        final byte[] body = { 1 };
+        final Map<String, List<String>> headerFields = new HashMap<>();
+        final byte[] errorReason = "succeed".getBytes();
+        HttpResponse sendResponse = new HttpResponse(status, body, headerFields, errorReason);
+
+        new NonStrictExpectations()
+        {
+            {
+                iotHubServiceSasToken.toString();
+                result = STANDARD_SASTOKEN_STRING;
+                httpRequest.setReadTimeoutMillis(timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS);
+                result = httpRequest;
+                httpRequest.setHeaderField(AUTHORIZATION, STANDARD_SASTOKEN_STRING);
+                result = httpRequest;
+                httpRequest.setHeaderField(REQUEST_ID, STANDARD_REQUEST_ID);
+                result = httpRequest;
+                httpRequest.setHeaderField(USER_AGENT, TransportUtils.getJavaServiceClientIdentifier() + TransportUtils.getServiceVersion());
+                result = httpRequest;
+                httpRequest.setHeaderField(ACCEPT, ACCEPT_VALUE);
+                result = httpRequest;
+                httpRequest.setHeaderField(CONTENT_TYPE, ACCEPT_VALUE + "; " + ACCEPT_CHARSET);
+                result = httpRequest;
+                httpRequest.send();
+                result = sendResponse;
+                IotHubExceptionManager.httpResponseVerification(sendResponse);
+            }
+        };
+
+        //act
+        HttpResponse response = DeviceOperations.request(
+                IOT_HUB_CONNECTION_STRING,
+                new URL(STANDARD_URL),
+                HttpMethod.POST,
+                STANDARD_PAYLOAD,
+                STANDARD_REQUEST_ID,
+                timeoutInMs);
+
+        //assert
+        assertEquals(response, sendResponse);
+        new Verifications()
+        {
+            {
+                iotHubServiceSasToken.toString();
+                times = 1;
+                httpRequest.setReadTimeoutMillis(timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS);
+                times = 1;
+                httpRequest.setHeaderField(anyString, anyString);
+                times = 5;
+                httpRequest.send();
+                times = 1;
+                IotHubExceptionManager.httpResponseVerification(sendResponse);
+                times = 1;
+            }
+        };
+    }
 }

@@ -40,6 +40,7 @@ public class DeviceOperations
      * @param method is the HTTP method (GET, POST, DELETE, PATCH, PUT).
      * @param payload is the array of bytes that contains the payload.
      * @param requestId is an unique number that identify the request.
+     * @param timeoutInMs is timeout in milliseconds.
      * @return the result of the request.
      * @throws IotHubException This exception is thrown if the response verification failed
      * @throws IOException This exception is thrown if the IO operation failed
@@ -49,7 +50,8 @@ public class DeviceOperations
             URL url, 
             HttpMethod method, 
             byte[] payload, 
-            String requestId) 
+            String requestId,
+            long timeoutInMs) 
             throws IOException, IotHubException, IllegalArgumentException
     {
         /* Codes_SRS_DEVICE_OPERATIONS_21_001: [The request shall throw IllegalArgumentException if the provided `iotHubConnectionString` is null.] */
@@ -81,6 +83,13 @@ public class DeviceOperations
         {
             throw new IllegalArgumentException("requestId is null or empty");
         }
+        
+        /* Codes_SRS_DEVICE_OPERATIONS_99_018: [The request shall throw IllegalArgumentException if the provided `timeoutInMs` exceed Integer.MAX_VALUE.] */
+        if((timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS) > Integer.MAX_VALUE) 
+        {
+            throw new IllegalArgumentException("HTTP Request timeout shouldn't not exceed " + Integer.MAX_VALUE + " milliseconds");
+        }
+
 
         /* Codes_SRS_DEVICE_OPERATIONS_21_006: [The request shall create a new SASToken with the ServiceConnect rights.] */
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
@@ -93,9 +102,9 @@ public class DeviceOperations
         /* Codes_SRS_DEVICE_OPERATIONS_21_008: [The request shall create a new HttpRequest with the provided `url`, http `method`, and `payload`.] */
         HttpRequest request = new HttpRequest(url, method, payload);
 
-        /* Codes_SRS_DEVICE_OPERATIONS_21_009: [The request shall add to the HTTP header an default timeout in milliseconds.] */
-        request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
-
+        /* Codes_SRS_DEVICE_OPERATIONS_21_009: [The request shall add to the HTTP header the sum of timeout and default timeout in milliseconds.] */
+        request.setReadTimeoutMillis((int)(timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS));
+        
         /* Codes_SRS_DEVICE_OPERATIONS_21_010: [The request shall add to the HTTP header an `authorization` key with the SASToken.] */
         request.setHeaderField(AUTHORIZATION, sasTokenString);
 

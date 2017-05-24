@@ -294,7 +294,8 @@ public class DeviceMethodTest
                     URL url,
                     HttpMethod method,
                     byte[] payload,
-                    String requestId)
+                    String requestId,
+                    long timeoutInMs)
                     throws IOException, IotHubException, IllegalArgumentException
             {
                 throw new IotHubException();

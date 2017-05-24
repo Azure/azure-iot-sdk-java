@@ -481,16 +481,6 @@ public class DeviceMethodIT
         MethodResult result = methodServiceClient.invoke(testDevice.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
     }
 
-    @Test (expected = SocketTimeoutException.class)
-    public void invokeMethod_connectionTimeout_failed() throws Exception
-    {
-        // Arrange
-        TestDevice testDevice = devices.get(0);
-
-        // Act
-        MethodResult result = methodServiceClient.invoke(testDevice.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, null, CONNECTION_TIMEOUT, "25000");
-    }
-
     @Test (expected = IotHubNotFoundException.class)
     public void invokeMethod_unknownDevice_failed() throws Exception
     {
