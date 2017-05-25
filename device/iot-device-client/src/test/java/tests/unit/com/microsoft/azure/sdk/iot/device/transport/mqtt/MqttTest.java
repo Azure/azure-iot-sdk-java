@@ -1,10 +1,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device.transport.mqtt;
+package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttDeviceTwin;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttMessaging;
 import mockit.*;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -50,12 +53,10 @@ public class MqttTest {
 
     private Mqtt instantiateMqtt(boolean withParameters) throws IOException
     {
-
         if (withParameters)
         {
-            Mqtt mockMqtt = new Mqtt(serverUri, clientId, userName, password, mockIotHubSSLContext)
+            new MockUp<MqttMessaging>()
             {
-
                 @Mock
                 void $clinit()
                 {
@@ -74,40 +75,36 @@ public class MqttTest {
                     return new byte[0];
                 }
             };
-
-            return mockMqtt;
-        } else {
-            Mqtt mockMqtt = new Mqtt()
+            return new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);
+        }
+        else
+        {
+            new MockUp<MqttDeviceTwin>()
             {
-
                 @Mock
                 void $clinit()
                 {
                     // Do nothing here (usually).
                 }
 
-                @Override
+                @Mock
                 String parseTopic() throws IOException
                 {
                     return mockParseTopic;
                 }
 
-                @Override
+                @Mock
                 byte[] parsePayload(String topic) throws IOException
                 {
                     return new byte[0];
                 }
-
             };
-
-            return mockMqtt;
-
+            return new MqttDeviceTwin();
         }
     }
 
     private void baseConstructorExpectations(boolean withParameter) throws MqttException
     {
-
         if (withParameter)
         {
             new NonStrictExpectations()
@@ -123,10 +120,9 @@ public class MqttTest {
                 }
             };
         }
-
     }
 
-    public void baseConnectExpectation() throws MqttException
+    private void baseConnectExpectation() throws MqttException
     {
         new NonStrictExpectations()
         {
@@ -139,10 +135,9 @@ public class MqttTest {
 
             }
         };
-
     }
 
-    public void baseDisconnectExpectations() throws MqttException
+    private void baseDisconnectExpectations() throws MqttException
     {
         new NonStrictExpectations()
         {
@@ -154,10 +149,9 @@ public class MqttTest {
                 mockMqttToken.waitForCompletion();
             }
         };
-
     }
 
-    public void basePublishExpectations() throws MqttException
+    private void basePublishExpectations() throws MqttException
     {
         final byte[] payload = {0x61, 0x62, 0x63};
         new NonStrictExpectations()
@@ -171,10 +165,9 @@ public class MqttTest {
                 result = mockMqttDeliveryToken;
             }
         };
-
     }
 
-    public void basePublishVerifications() throws MqttException
+    private void basePublishVerifications() throws MqttException
     {
         final byte[] payload = {0x61, 0x62, 0x63};
         new Verifications()
@@ -197,7 +190,7 @@ public class MqttTest {
         };
     }
 
-    public void baseDisconnectVerifications() throws MqttException
+    private void baseDisconnectVerifications() throws MqttException
     {
         new Verifications()
         {
@@ -213,7 +206,7 @@ public class MqttTest {
 
     }
 
-    public void baseConnectVerifications() throws MqttException
+    private void baseConnectVerifications() throws MqttException
     {
         new Verifications()
         {
@@ -227,12 +220,10 @@ public class MqttTest {
             }
 
         };
-
     }
 
     private void baseConstructorVerifications(boolean withParameter) throws MqttException
     {
-
         if (withParameter)
         {
             new Verifications()
@@ -275,13 +266,12 @@ public class MqttTest {
         }
     }
 
-    public void testCleanUp(Mqtt mockMqtt)
+    private void testCleanUp(Mqtt mockMqtt)
     {
         if (mockMqtt != null)
         {
             mockMqtt.restartBaseMqtt();
         }
-
     }
 
     /*
@@ -296,12 +286,12 @@ public class MqttTest {
 
         //act
         Mqtt mockMqtt1 = instantiateMqtt(true);
-        Mqtt.MqttConnectionInfo actualInfoInstance1 = Deencapsulation.getField(mockMqtt1, "info");
+        Object actualInfoInstance1 = Deencapsulation.getField(mockMqtt1, "info");
         ConcurrentSkipListMap<String, byte[]> actualMap1 = Deencapsulation.getField(mockMqtt1, "allReceivedMessages");
         Object actualLock1 = Deencapsulation.getField(mockMqtt1, "MQTT_LOCK");
 
         Mqtt mockMqtt2 = instantiateMqtt(false);
-        Mqtt.MqttConnectionInfo actualInfoInstance2 = Deencapsulation.getField(mockMqtt2, "info");
+        Object actualInfoInstance2 = Deencapsulation.getField(mockMqtt2, "info");
         ConcurrentSkipListMap<String, byte[]> actualMap2 = Deencapsulation.getField(mockMqtt2, "allReceivedMessages");
         Object actualLock2 = Deencapsulation.getField(mockMqtt2, "MQTT_LOCK");
 
@@ -330,16 +320,16 @@ public class MqttTest {
         Mqtt mockMqtt = instantiateMqtt(true);
 
         //assert
-        Mqtt.MqttConnectionInfo actualInfo = Deencapsulation.getField(mockMqtt, "info");
+        Object actualInfo = Deencapsulation.getField(mockMqtt, "info");
         assertNotNull(actualInfo);
-        assertNotNull(actualInfo.mqttAsyncClient);
+        MqttAsyncClient actualAsyncClient = Deencapsulation.getField(actualInfo, "mqttAsyncClient");
+        assertNotNull(actualAsyncClient);
         MqttConnectOptions actualConnectionOptions = Deencapsulation.getField(actualInfo, "connectionOptions");
         assertNotNull(actualConnectionOptions);
         ConcurrentSkipListMap<String, byte[]> actualMap = Deencapsulation.getField(mockMqtt, "allReceivedMessages");
         assertNotNull(actualMap);
         Object actualLock = Deencapsulation.getField(mockMqtt, "MQTT_LOCK");
         assertNotNull(actualLock);
-
 
         baseConstructorVerifications(true);
         mockMqtt.restartBaseMqtt();
@@ -383,27 +373,7 @@ public class MqttTest {
         try
         {
             //act
-            mockMqtt = new Mqtt(null, clientId, userName, password,  mockIotHubSSLContext)
-            {
-
-                @Mock
-                void $clinit()
-                {
-                    // Do nothing here (usually).
-                }
-
-                @Mock
-                String parseTopic() throws IOException
-                {
-                    return mockParseTopic;
-                }
-
-                @Mock
-                byte[] parsePayload(String topic) throws IOException
-                {
-                    return new byte[0];
-                }
-            };
+            mockMqtt = new MqttMessaging(null, clientId, userName, password,  mockIotHubSSLContext);
         }
         finally
         {
@@ -425,7 +395,7 @@ public class MqttTest {
         Mqtt mockMqtt = instantiateMqtt(false);
 
         //assert
-        Mqtt.MqttConnectionInfo actualInfoInstance = Deencapsulation.getField(mockMqtt, "info");
+        Object actualInfoInstance = Deencapsulation.getField(mockMqtt, "info");
         assertNull(actualInfoInstance);
         ConcurrentSkipListMap<String, byte[]> actualMap = Deencapsulation.getField(mockMqtt, "allReceivedMessages");
         assertNull(actualMap);
@@ -450,10 +420,10 @@ public class MqttTest {
         Mqtt mockMqtt1 = instantiateMqtt(true);
 
         //assert
-        Mqtt.MqttConnectionInfo actualInfoInstance1 = Deencapsulation.getField(mockMqtt1, "info");
+        Object actualInfoInstance1 = Deencapsulation.getField(mockMqtt1, "info");
         ConcurrentSkipListMap<String, byte[]> actualMap1 = Deencapsulation.getField(mockMqtt1, "allReceivedMessages");
         Mqtt mockMqtt2 = instantiateMqtt(false);
-        Mqtt.MqttConnectionInfo actualInfoInstance2 = Deencapsulation.getField(mockMqtt2, "info");
+        Object actualInfoInstance2 = Deencapsulation.getField(mockMqtt2, "info");
         ConcurrentSkipListMap<String, byte[]> actualMap2 = Deencapsulation.getField(mockMqtt2, "allReceivedMessages");
 
         Object actualLock1 = Deencapsulation.getField(mockMqtt1, "MQTT_LOCK");
@@ -473,7 +443,7 @@ public class MqttTest {
     /*
     **Tests_SRS_Mqtt_25_005: [**The function shall establish an MQTT connection with an IoT Hub using the provided host name, user name, device ID, and sas token.**]**
      */
-    @Test
+   @Test
     public void connectSuccess() throws IOException, MqttException
     {
         //arrange
@@ -482,7 +452,7 @@ public class MqttTest {
         Mqtt mockMqtt = instantiateMqtt(true);
 
         //act
-        mockMqtt.connect();
+        Deencapsulation.invoke(mockMqtt, "connect");
 
         //assert
         new Verifications()
@@ -515,11 +485,10 @@ public class MqttTest {
                 result = true;
             }
         };
-
         Mqtt mockMqtt = instantiateMqtt(true);
 
         //act
-        mockMqtt.connect();
+        Deencapsulation.invoke(mockMqtt, "connect");
 
         //assert
         new Verifications()
@@ -551,7 +520,7 @@ public class MqttTest {
             mockMqtt = instantiateMqtt(false);
 
             //act
-            mockMqtt.connect();
+            Deencapsulation.invoke(mockMqtt, "connect");
 
         }
         finally
@@ -572,7 +541,6 @@ public class MqttTest {
         try
         {
             baseConstructorExpectations(true);
-
             new NonStrictExpectations()
             {
                 {
@@ -585,7 +553,7 @@ public class MqttTest {
             mockMqtt = instantiateMqtt(true);
 
             //act
-            mockMqtt.connect();
+            Deencapsulation.invoke(mockMqtt, "connect");
 
             //assert
             baseConnectVerifications();
@@ -611,34 +579,31 @@ public class MqttTest {
             baseConnectExpectation();
             baseDisconnectExpectations();
             mockMqtt = instantiateMqtt(true);
-            mockMqtt.connect();
+            Deencapsulation.invoke(mockMqtt, "connect");
 
             //act
-            mockMqtt.disconnect();
+            Deencapsulation.invoke(mockMqtt, "disconnect");
 
             //assert
             new Verifications()
             {
                 {
-
                     mockMqttAsyncClient.isConnected();
                     times = 2;
                     mockMqttAsyncClient.disconnect();
                     times = 1;
                     mockMqttToken.waitForCompletion();
                     times = 1;
-
                 }
-
             };
 
-            Mqtt.MqttConnectionInfo actualInfoInstance = Deencapsulation.getField(mockMqtt, "info");
-            assertNull(actualInfoInstance.mqttAsyncClient);
+           Object actualInfoInstance = Deencapsulation.getField(mockMqtt, "info");
+           MqttAsyncClient actualMqttAsyncClient = Deencapsulation.getField(actualInfoInstance, "mqttAsyncClient");
+           assertNull(actualMqttAsyncClient);
         }
         finally
         {
             testCleanUp(mockMqtt);
-
         }
     }
 
@@ -660,10 +625,10 @@ public class MqttTest {
         };
 
         Mqtt mockMqtt = instantiateMqtt(true);
-        mockMqtt.connect();
+        Deencapsulation.invoke(mockMqtt, "connect");
 
         //act
-        mockMqtt.disconnect();
+        Deencapsulation.invoke(mockMqtt, "disconnect");
 
         //assert
         new Verifications()
@@ -674,9 +639,9 @@ public class MqttTest {
             }
         };
 
-        Mqtt.MqttConnectionInfo actualInfoInstance = Deencapsulation.getField(mockMqtt, "info");
-        assertNull(actualInfoInstance.mqttAsyncClient);
-
+        Object actualInfoInstance = Deencapsulation.getField(mockMqtt, "info");
+        MqttAsyncClient actualMqttAsyncClient = Deencapsulation.getField(actualInfoInstance, "mqttAsyncClient");
+        assertNull(actualMqttAsyncClient);
         testCleanUp(mockMqtt);
     }
 
@@ -693,10 +658,10 @@ public class MqttTest {
 
         final byte[] payload = {0x61, 0x62, 0x63};
         Mqtt mockMqtt = instantiateMqtt(true);
-        mockMqtt.connect();
+        Deencapsulation.invoke(mockMqtt, "connect");
 
         //act
-        mockMqtt.publish(mockParseTopic, payload);
+        Deencapsulation.invoke(mockMqtt, "publish", mockParseTopic, payload );
 
         //assert
         new Verifications()
@@ -724,27 +689,22 @@ public class MqttTest {
         {
             baseConstructorExpectations(true);
             final byte[] payload = {0x61, 0x62, 0x63};
-
             new NonStrictExpectations()
             {
                 {
                     mockMqttAsyncClient.isConnected();
                     result = false;
-
                 }
             };
-
             mockMqtt = instantiateMqtt(true);
 
             //act
-            mockMqtt.publish(mockParseTopic, payload);
-
+            Deencapsulation.invoke(mockMqtt, "publish", mockParseTopic, payload);
         }
         finally
         {
             testCleanUp(mockMqtt);
         }
-
     }
 
     /*
@@ -764,12 +724,11 @@ public class MqttTest {
         String mockParseTopic2 = mockParseTopic + 2;
         Mqtt mockMqtt1 = instantiateMqtt(true);
         Mqtt mockMqtt2 = instantiateMqtt(false);
-
-        mockMqtt2.connect();
+        Deencapsulation.invoke(mockMqtt2, "connect");
 
         //act
-        mockMqtt1.publish(mockParseTopic, payload);
-        mockMqtt2.publish(mockParseTopic2, payload);
+        Deencapsulation.invoke(mockMqtt1, "publish", mockParseTopic, payload);
+        Deencapsulation.invoke(mockMqtt2, "publish", mockParseTopic2, payload);
 
         //assert
         new Verifications()
@@ -782,7 +741,6 @@ public class MqttTest {
             }
         };
         testCleanUp(mockMqtt1);
-
     }
 
     /*
@@ -798,7 +756,6 @@ public class MqttTest {
 
             baseConstructorExpectations(true);
             final byte[] payload = {0x61, 0x62, 0x63};
-
             new NonStrictExpectations()
             {
                 {
@@ -810,12 +767,11 @@ public class MqttTest {
                     result = mockMqttException;
                 }
             };
-
             mockMqtt = instantiateMqtt(true);
-            mockMqtt.connect();
+            Deencapsulation.invoke(mockMqtt, "connect");
 
             //act
-            mockMqtt.publish(mockParseTopic, payload);
+            Deencapsulation.invoke(mockMqtt, "publish", mockParseTopic, payload);
 
             //assert
             new Verifications()
@@ -830,7 +786,6 @@ public class MqttTest {
         {
             testCleanUp(mockMqtt);
         }
-
     }
 
     /*
@@ -845,7 +800,6 @@ public class MqttTest {
         {
             baseConstructorExpectations(true);
             final byte[] payload = {0x61, 0x62, 0x63};
-
             new NonStrictExpectations()
             {
                 {
@@ -853,12 +807,11 @@ public class MqttTest {
                     result = true;
                 }
             };
-
             mockMqtt = instantiateMqtt(true);
-            mockMqtt.connect();
+            Deencapsulation.invoke(mockMqtt, "connect");
 
             //act
-            mockMqtt.publish(null, payload);
+            Deencapsulation.invoke(mockMqtt, "publish", String.class, payload);
 
             //assert
             new Verifications()
@@ -887,7 +840,6 @@ public class MqttTest {
         {
             baseConstructorExpectations(true);
             final byte[] payload = null;
-
             new NonStrictExpectations()
             {
                 {
@@ -895,12 +847,11 @@ public class MqttTest {
                     result = true;
                 }
             };
-
             mockMqtt = instantiateMqtt(true);
-            mockMqtt.connect();
+            Deencapsulation.invoke(mockMqtt, "connect");
 
             //act
-            mockMqtt.publish(mockParseTopic, payload);
+            Deencapsulation.invoke(mockMqtt, "publish", mockParseTopic, byte[].class);
 
             //assert
             new Verifications()
@@ -926,7 +877,6 @@ public class MqttTest {
         //arrange
         baseConstructorExpectations(true);
         baseConnectExpectation();
-
         new NonStrictExpectations()
         {
             {
@@ -936,12 +886,11 @@ public class MqttTest {
                 result = mockMqttToken;
             }
         };
-
         Mqtt mockMqtt = instantiateMqtt(true);
-        mockMqtt.connect();
+        Deencapsulation.invoke(mockMqtt, "connect");
 
         //act
-        mockMqtt.subscribe(mockParseTopic);
+        Deencapsulation.invoke(mockMqtt, "subscribe", mockParseTopic);
 
         //assert
         new Verifications()
@@ -953,7 +902,6 @@ public class MqttTest {
                 times = 1;
             }
         };
-
         testCleanUp(mockMqtt);
     }
 
@@ -968,7 +916,6 @@ public class MqttTest {
         try
         {
             baseConstructorExpectations(true);
-
             new NonStrictExpectations()
             {
                 {
@@ -980,7 +927,7 @@ public class MqttTest {
             mockMqtt = instantiateMqtt(true);
 
             //act
-            mockMqtt.subscribe(mockParseTopic);
+            Deencapsulation.invoke(mockMqtt, "subscribe", mockParseTopic);
 
             //assert
             new Verifications()
@@ -995,7 +942,6 @@ public class MqttTest {
         {
             testCleanUp(mockMqtt);
         }
-
     }
 
     @Test(expected = IOException.class)
@@ -1006,18 +952,15 @@ public class MqttTest {
         try
         {
             baseConstructorExpectations(false);
-
             mockMqtt = instantiateMqtt(false);
 
             //act
-            mockMqtt.subscribe(mockParseTopic);
-
+            Deencapsulation.invoke(mockMqtt, "subscribe", mockParseTopic);
         }
         finally
         {
             testCleanUp(mockMqtt);
         }
-
     }
 
     /*
@@ -1033,17 +976,15 @@ public class MqttTest {
             baseConstructorExpectations(true);
 
             mockMqtt = instantiateMqtt(true);
-            mockMqtt.connect();
+            Deencapsulation.invoke(mockMqtt, "connect");
 
             //act
-            mockMqtt.subscribe(null);
-
+            Deencapsulation.invoke(mockMqtt, "subscribe", String.class);
         }
         finally
         {
             testCleanUp(mockMqtt);
         }
-
     }
 
     /*
@@ -1071,10 +1012,10 @@ public class MqttTest {
             };
 
             mockMqtt = instantiateMqtt(true);
-            mockMqtt.connect();
+            Deencapsulation.invoke(mockMqtt, "connect");
 
             //act
-            mockMqtt.subscribe(mockParseTopic);
+            Deencapsulation.invoke(mockMqtt, "subscribe", mockParseTopic);
 
             new Verifications()
             {
@@ -1101,16 +1042,15 @@ public class MqttTest {
     /*
     Tests_SRS_Mqtt_25_024: [**This method shall construct new Message with the bytes obtained from parsePayload and return the message.**]**
      */
-    @Test
+   @Test
     public void receiveSuccess() throws IOException, MqttException
     {
         //arrange
         final byte[] payload = {0x61, 0x62, 0x63};
         baseConstructorExpectations(true);
         baseConnectExpectation();
-        final Mqtt mockMqtt = new Mqtt(serverUri, clientId, userName, password,  mockIotHubSSLContext)
+        new MockUp<MqttMessaging>()
         {
-
             @Mock
             String parseTopic() throws IOException
             {
@@ -1124,17 +1064,18 @@ public class MqttTest {
             }
         };
 
+        final Mqtt mockMqtt = new MqttMessaging(serverUri, clientId, userName, password,  mockIotHubSSLContext);
         try
         {
             new NonStrictExpectations()
             {
                 {
-                    mockMqttAsyncClient.isConnected();
-                    result = true;
+                   mockMqttAsyncClient.isConnected();
+                   result = true;
                 }
             };
 
-            mockMqtt.connect();
+            Deencapsulation.invoke(mockMqtt, "connect");
 
             //act
             Message receivedMessage = mockMqtt.receive();
@@ -1152,7 +1093,6 @@ public class MqttTest {
         {
             testCleanUp(mockMqtt);
         }
-
     }
 
     /*
@@ -1165,9 +1105,8 @@ public class MqttTest {
         final byte[] payload = {0x61, 0x62, 0x63};
         baseConstructorExpectations(true);
         baseConnectExpectation();
-        final Mqtt mockMqtt = new Mqtt(serverUri, clientId, userName, password,  mockIotHubSSLContext)
+        new MockUp<MqttMessaging>()
         {
-
             @Mock
             String parseTopic() throws IOException
             {
@@ -1181,10 +1120,9 @@ public class MqttTest {
             }
 
         };
-
+        final Mqtt mockMqtt = new MqttMessaging(serverUri, clientId, userName, password,  mockIotHubSSLContext);
         try
         {
-
             new NonStrictExpectations()
             {
                 {
@@ -1193,7 +1131,7 @@ public class MqttTest {
                 }
             };
 
-            mockMqtt.connect();
+            Deencapsulation.invoke(mockMqtt, "connect");
 
             //act
             Message receivedMessage = mockMqtt.receive();
@@ -1206,7 +1144,6 @@ public class MqttTest {
         {
             testCleanUp(mockMqtt);
         }
-
     }
 
     /*
@@ -1218,9 +1155,8 @@ public class MqttTest {
         //arrange
         final byte[] payload = {0x61, 0x62, 0x63};
         baseConstructorExpectations(true);
-        final Mqtt mockMqtt = new Mqtt(serverUri, clientId, userName, password,  mockIotHubSSLContext)
+        new MockUp<MqttMessaging>()
         {
-
             @Mock
             String parseTopic() throws IOException
             {
@@ -1232,13 +1168,15 @@ public class MqttTest {
             {
                 return null;
             }
-
         };
+
+        final Mqtt mockMqtt = new MqttMessaging(serverUri, clientId, userName, password,  mockIotHubSSLContext);
         //act
         try
         {
             Message receivedMessage = mockMqtt.receive();
-        } finally
+        }
+        finally
         {
             testCleanUp(mockMqtt);
         }
@@ -1250,9 +1188,8 @@ public class MqttTest {
         //arrange
         final byte[] payload = {0x61, 0x62, 0x63};
         baseConstructorExpectations(false);
-        final Mqtt mockMqtt = new Mqtt()
+        new MockUp<MqttMessaging>()
         {
-
             @Mock
             String parseTopic() throws IOException
             {
@@ -1264,8 +1201,10 @@ public class MqttTest {
             {
                 return null;
             }
-
         };
+
+        final Mqtt mockMqtt = new MqttMessaging(serverUri, clientId, userName, password,  mockIotHubSSLContext);
+        Deencapsulation.setField(mockMqtt, "info", null);
 
         //act
         try
@@ -1301,7 +1240,7 @@ public class MqttTest {
             };
 
             mockMqtt = instantiateMqtt(true);
-            mockMqtt.connect();
+            Deencapsulation.invoke(mockMqtt, "connect");
 
             //act
             mockMqtt.messageArrived(mockParseTopic, new MqttMessage(actualPayload));
@@ -1316,7 +1255,6 @@ public class MqttTest {
             {
                 assertEquals(actualPayload[i], receivedPayload[i]);
             }
-
         }
         finally
         {
@@ -1367,7 +1305,6 @@ public class MqttTest {
 
                     mockMqttAsyncClient.isConnected();
                     result = true;
-
                 }
             };
 
@@ -1386,7 +1323,6 @@ public class MqttTest {
         {
             testCleanUp(mockMqtt);
         }
-
     }
 
     /*
@@ -1455,7 +1391,5 @@ public class MqttTest {
         {
             testCleanUp(mockMqtt);
         }
-
     }
-
 }
