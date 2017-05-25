@@ -18,6 +18,7 @@ public final class HttpsTransport implements IotHubTransport
     public void close() throws IOException;
 
     public void addMessage(Message message, IotHubEventCallback callback, Object callbackContext);
+    public void addMessage(Message message, IotHubResponseCallback callback, Object callbackContext);
 
     public void sendMessages() throws IOException;
     public void invokeCallbacks();
@@ -73,6 +74,17 @@ public void addMessage(Message message, IotHubEventCallback callback, Object cal
 **SRS_HTTPSTRANSPORT_11_003: [**The function shall add a packet containing the message, callback, and callback context to the transport queue.**]**
 
 **SRS_HTTPSTRANSPORT_11_027: [**If the transport is closed, the function shall throw an IllegalStateException.**]**
+
+
+### addMessage
+
+```java
+public void addMessage(Message message, IotHubResponseCallback callback, Object callbackContext);
+```
+
+**SRS_HTTPSTRANSPORT_21_017: [**The function shall add a packet containing the message, callback, and callback context to the transport queue.**]**
+
+**SRS_HTTPSTRANSPORT_21_018: [**If the transport is closed, the function shall throw an IllegalStateException.**]**
 
 
 ### sendMessage

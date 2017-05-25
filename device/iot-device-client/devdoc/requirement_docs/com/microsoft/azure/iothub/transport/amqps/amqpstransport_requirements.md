@@ -17,6 +17,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     public void close() throws IOException;
 
     public void addMessage(Message message, IotHubEventCallback callback, Object callbackContext) throws IllegalStateException;
+    public void addMessage(Message message, IotHubResponseCallback callback, Object callbackContext) throws UnsupportedOperationException;
+    
     public void sendMessages() throws IOException, IllegalStateException;
     public synchronized void invokeCallbacks() throws IllegalStateException;
 
@@ -83,6 +85,15 @@ public void addMessage(Message msg, IotHubEventCallback callback, Object callbac
 **SRS_AMQPSTRANSPORT_15_010: [**If the AMQPS session is closed, the function shall throw an IllegalStateException.**]**
 
 **SRS_AMQPSTRANSPORT_15_011: [**The function shall add a packet containing the message, callback, and callback context to the queue of messages waiting to be sent.**]**
+
+
+### addMessage
+
+```java
+public void addMessage(Message msg, IotHubResponseCallback callback, Object callbackContext) throws UnsupportedOperationException;
+```
+
+**SRS_AMQPSTRANSPORT_21_040: [**The function shall throws `UnsupportedOperationException`.**]**
 
 
 ### sendMessages

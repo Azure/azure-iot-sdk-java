@@ -315,6 +315,22 @@ public class AmqpsTransportTest
         };
     }
 
+    // Tests_SRS_AMQPSTRANSPORT_21_040: [The function shall throws `UnsupportedOperationException`.]
+    @Test(expected = UnsupportedOperationException.class)
+    public void addMessageWithResponseNotSupportedThrows(
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubResponseCallback mockCallback)
+            throws IOException
+    {
+        // arrange
+        final Map<String, Object> context = new HashMap<>();
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+
+        // act
+        transport.addMessage(mockMsg, mockCallback, context);
+    }
+
     // Tests_SRS_AMQPSTRANSPORT_15_012: [If the AMQPS session is closed, the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void sendMessagesFailsIfTransportNeverOpened() throws IOException

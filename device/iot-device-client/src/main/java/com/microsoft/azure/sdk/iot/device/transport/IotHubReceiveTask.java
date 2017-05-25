@@ -20,14 +20,16 @@ public final class IotHubReceiveTask implements Runnable
     public IotHubReceiveTask(IotHubTransport transport)
     {
 
-
         if (transport == null)
+        {
+
+            logger.LogError("IotHubReceiveTask constructor called with null value for parameter transport");
             throw new IllegalArgumentException("Parameter 'transport' must not be null");
+        }
 
         // Codes_SRS_IOTHUBRECEIVETASK_11_001: [The constructor shall save the transport.]
         this.transport = transport;
 
-        logger.LogError("IotHubReceiveTask constructor called with null value for parameter transport");
     }
 
     public void run()

@@ -4,6 +4,8 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubResponseCallback;
+import com.microsoft.azure.sdk.iot.device.ResponseMessage;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 
 /**
@@ -13,7 +15,9 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 public final class IotHubCallbackPacket
 {
     private final IotHubStatusCode status;
-    private final IotHubEventCallback callback;
+    private final ResponseMessage responseMessage;
+    private final IotHubEventCallback eventCallback;
+    private final IotHubResponseCallback responseCallback;
     private final Object callbackContext;
 
     /**
@@ -29,8 +33,33 @@ public final class IotHubCallbackPacket
     {
         // Codes_SRS_IOTHUBCALLBACKPACKET_11_001: [The constructor shall save the status, callback, and callback context.]
         this.status = status;
-        this.callback = callback;
+        this.eventCallback = callback;
         this.callbackContext = callbackContext;
+
+        // Codes_SRS_IOTHUBCALLBACKPACKET_21_007: [The constructor shall set message and responseCallback as null.]
+        this.responseCallback = null;
+        this.responseMessage = null;
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param responseMessage the response from iothub with status and message.
+     * @param callback the callback to be invoked for the completed request.
+     * @param callbackContext the context to be passed in to the callback.
+     */
+    public IotHubCallbackPacket(ResponseMessage responseMessage,
+                                IotHubResponseCallback callback,
+                                Object callbackContext)
+    {
+        // Codes_SRS_IOTHUBCALLBACKPACKET_21_006: [The constructor shall save the responseMessage, responseCallback, and callback context.]
+        this.responseMessage = responseMessage;
+        this.responseCallback = callback;
+        this.callbackContext = callbackContext;
+
+        // Codes_SRS_IOTHUBCALLBACKPACKET_21_009: [The constructor shall set status and eventCallback as null.]
+        this.eventCallback = null;
+        this.status = null;
     }
 
     /**
@@ -45,14 +74,36 @@ public final class IotHubCallbackPacket
     }
 
     /**
-     * Getter for the callback to be invoked for the completed request.
+     * Getter for the response message.
      *
-     * @return the callback function.
+     * @return the message function.
+     */
+    public ResponseMessage getResponseMessage()
+    {
+        // Codes_SRS_IOTHUBCALLBACKPACKET_21_008: [The function shall return the response message given in the constructor.]
+        return responseMessage;
+    }
+
+    /**
+     * Getter for the eventCallback to be invoked for the completed request.
+     *
+     * @return the eventCallback function.
      */
     public IotHubEventCallback getCallback()
     {
-        // Codes_SRS_IOTHUBCALLBACKPACKET_11_003: [The function shall return the callback given in the constructor.]
-        return callback;
+        // Codes_SRS_IOTHUBCALLBACKPACKET_11_003: [The function shall return the eventCallback given in the constructor.]
+        return eventCallback;
+    }
+
+    /**
+     * Getter for the responseCallback to be invoked for the completed request.
+     *
+     * @return the responseCallback function.
+     */
+    public IotHubResponseCallback getResponseCallback()
+    {
+        // Codes_SRS_IOTHUBCALLBACKPACKET_21_005: [The getResponseCallback shall return the responseCallback given in the constructor.]
+        return responseCallback;
     }
 
     /**

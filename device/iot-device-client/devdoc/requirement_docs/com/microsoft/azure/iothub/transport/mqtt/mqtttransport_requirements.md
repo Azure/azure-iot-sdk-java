@@ -18,6 +18,7 @@ public final class MqttTransport implements IotHubTransport
     public void close();
 
     public void addMessage(Message message, IotHubEventCallback callback, Object callbackContext) throws IllegalStateException;
+    public void addMessage(Message message, IotHubResponseCallback callback, Object callbackContext) throws UnsupportedOperationException;
 
     public void sendMessages() throws IllegalStateException;
     public void invokeCallbacks() throws IllegalStateException;;
@@ -57,11 +58,11 @@ public void open() throws IOException;
 public void close();
 ```
 
-**SRS_MQTTTRANSPORT_15_006: [**If the MQTT connection is closed, the function shall do nothing.**] 
+**SRS_MQTTTRANSPORT_15_006: [**If the MQTT connection is closed, the function shall do nothing.**]** 
 
 **SRS_MQTTTRANSPORT_99_020: [**The method shall remove all the messages which are in progress or waiting to be sent and add them to the callback list.**]**
 
-**SRS_MQTTTTRANSPORT_99_021: [**The method shall invoke the callback list.**]*
+**SRS_MQTTTRANSPORT_99_021: [**The method shall invoke the callback list.**]**
 
 **SRS_MQTTTRANSPORT_15_005: [**The function shall close the MQTT connection with the IoT Hub given in the configuration.**]**
 
@@ -69,12 +70,21 @@ public void close();
 ### addMessage
 
 ```java
-public void addMessage(Message message, IotHubEventCallback callback, Object callbackContext) throws IllegalStateException;**
+public void addMessage(Message message, IotHubEventCallback callback, Object callbackContext) throws IllegalStateException;
 ```
 
 **SRS_MQTTTRANSPORT_15_007: [**The function shall add a packet containing the message, callback, and callback context to the transport queue.**]**
 
 **SRS_MQTTTRANSPORT_15_008: [**If the transport is closed, the function shall throw an IllegalStateException.**]**
+
+
+### addMessage
+
+```java
+public void addMessage(Message message, IotHubResponseCallback callback, Object callbackContext) throws UnsupportedOperationException;
+```
+
+**SRS_MQTTTRANSPORT_21_022: [**The function shall throws `UnsupportedOperationException`.**]**
 
 
 ### sendMessages

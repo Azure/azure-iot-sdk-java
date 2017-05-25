@@ -291,27 +291,33 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_010: [The function shall return the IoT Hub status code included in the response.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_010: [The function shall return a ResponseMessage with the status and payload.]
     @Test
-    public void sendEventReturnsCorrectStatusCode(@Mocked final IotHubEventUri mockUri) throws IOException
+    public void sendEventReturnsCorrectResponse(@Mocked final IotHubEventUri mockUri) throws IOException
     {
-        final int httpsStatus = 200;
-        final IotHubStatusCode status = IotHubStatusCode.OK;
+        final byte[] body = {'A', 'B', 'C', '\0'};
+        final int statusVal = 200;
+        final IotHubStatusCode status = IotHubStatusCode.getIotHubStatusCode(statusVal);
         new NonStrictExpectations()
         {
             {
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any);
+                result = mockRequest;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getBody();
+                result = body;
                 mockResponse.getStatus();
-                result = httpsStatus;
-                IotHubStatusCode.getIotHubStatusCode(httpsStatus);
-                result = status;
+                result = statusVal;
             }
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        IotHubStatusCode testStatus = conn.sendEvent(mockMsg);
 
-        final IotHubStatusCode expectedStatus = status;
-        assertThat(testStatus, is(expectedStatus));
+        ResponseMessage testResponse = conn.sendEvent(mockMsg);
+
+        assertThat(testResponse.getStatus(), is(status));
+        assertThat(testResponse.getBytes(), is(body));
     }
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_012: [If the IoT Hub could not be reached, the function shall throw an IOException.]

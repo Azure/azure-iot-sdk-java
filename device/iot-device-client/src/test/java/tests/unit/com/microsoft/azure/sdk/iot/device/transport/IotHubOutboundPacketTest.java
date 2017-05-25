@@ -3,7 +3,15 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.isIn;
+
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+
+import com.microsoft.azure.sdk.iot.device.IotHubResponseCallback;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import mockit.Mocked;
@@ -13,11 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.everyItem;
-import static org.hamcrest.Matchers.isIn;
-import static org.junit.Assert.assertThat;
-
 /** Unit tests for IotHubOutboundPacket. */
 public class IotHubOutboundPacketTest
 {
@@ -25,6 +28,8 @@ public class IotHubOutboundPacketTest
     Message mockMsg;
     @Mocked
     IotHubEventCallback mockCallback;
+    @Mocked
+    IotHubResponseCallback mockResponseCallback;
 
     // Tests_SRS_IOTHUBOUTBOUNDPACKET_11_001: [The constructor shall save the message, callback, and callback context.]
     // Tests_SRS_IOTHUBOUTBOUNDPACKET_11_002: [The function shall return the message given in the constructor.]
@@ -42,7 +47,8 @@ public class IotHubOutboundPacketTest
     }
 
     // Tests_SRS_IOTHUBOUTBOUNDPACKET_11_001: [The constructor shall save the message, callback, and callback context.]
-    // Tests_SRS_IOTHUBOUTBOUNDPACKET_11_003: [The function shall return the callback given in the constructor.]
+    // Tests_SRS_IOTHUBOUTBOUNDPACKET_11_003: [The function shall return the event callback given in the constructor.]
+    // Tests_SRS_IOTHUBOUTBOUNDPACKET_21_007: [The constructor shall set the response callback as null.]
     @Test
     public void getCallbackReturnsCallback()
     {
@@ -51,9 +57,29 @@ public class IotHubOutboundPacketTest
         IotHubOutboundPacket packet =
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
         IotHubEventCallback testCallback = packet.getCallback();
+        IotHubResponseCallback testResponseCallback = packet.getResponseCallback();
 
         final IotHubEventCallback expectedCallback = mockCallback;
         assertThat(testCallback, is(expectedCallback));
+        assertNull(testResponseCallback);
+    }
+
+    // Tests_SRS_IOTHUBOUTBOUNDPACKET_21_005: [The constructor shall save the message, callback, and callback context.]
+    // Tests_SRS_IOTHUBOUTBOUNDPACKET_11_006: [The function shall return the response callback given in the constructor.]
+    // Tests_SRS_IOTHUBOUTBOUNDPACKET_21_008: [The constructor shall set the event callback as null.]
+    @Test
+    public void getCallbackWithMessageReturnsCallback()
+    {
+        final Map<String, Object> context = new HashMap<>();
+
+        IotHubOutboundPacket packet =
+                new IotHubOutboundPacket(mockMsg, mockResponseCallback, context);
+        IotHubEventCallback testCallback = packet.getCallback();
+        IotHubResponseCallback testResponseCallback = packet.getResponseCallback();
+
+        final IotHubResponseCallback expectedCallback = mockResponseCallback;
+        assertThat(testResponseCallback, is(expectedCallback));
+        assertNull(testCallback);
     }
 
     // Tests_SRS_IOTHUBOUTBOUNDPACKET_11_001: [The constructor shall save the message, callback, and callback context.]
