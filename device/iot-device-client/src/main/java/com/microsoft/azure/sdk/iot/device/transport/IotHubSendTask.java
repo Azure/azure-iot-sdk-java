@@ -20,7 +20,8 @@ public final class IotHubSendTask implements Runnable
 
     public IotHubSendTask(IotHubTransport transport)
     {
-        if (transport == null) {
+        if (transport == null)
+        {
 
             logger.LogError("IotHubSendTask constructor called with null value for parameter transport");
             throw new IllegalArgumentException("Parameter 'transport' must not be null");
