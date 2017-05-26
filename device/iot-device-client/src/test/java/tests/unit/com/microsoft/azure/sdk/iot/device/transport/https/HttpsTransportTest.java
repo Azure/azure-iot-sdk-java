@@ -180,6 +180,60 @@ public class HttpsTransportTest
         transport.addMessage(mockMsg, mockCallback, context);
     }
 
+    // Tests_SRS_HTTPSTRANSPORT_21_017: [The function shall add a packet containing the message, callback, and callback context to the transport queue.]
+    @Test
+    public <T extends Queue> void addMessageWithResponseAddsToTransportQueue(
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubResponseCallback mockCallback,
+            @Mocked final IotHubOutboundPacket mockPacket) throws IOException
+    {
+        final Queue mockQueue = new MockUp<T>()
+        {
+
+        }.getMockInstance();
+        final Map<String, Object> context = new HashMap<>();
+
+        HttpsTransport transport = new HttpsTransport(mockConfig);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+
+        new VerificationsInOrder()
+        {
+            {
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                mockQueue.add(mockPacket);
+            }
+        };
+    }
+
+    // Tests_SRS_HTTPSTRANSPORT_21_018: [If the transport is closed, the function shall throw an IllegalStateException.]
+    @Test(expected = IllegalStateException.class)
+    public void addMessageWithResponseFailsIfTransportNeverOpened(
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubResponseCallback mockCallback,
+            @Mocked final IotHubOutboundPacket mockPacket) throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+
+        HttpsTransport transport = new HttpsTransport(mockConfig);
+        transport.addMessage(mockMsg, mockCallback, context);
+    }
+
+    // Tests_SRS_HTTPSTRANSPORT_21_018: [If the transport is closed, the function shall throw an IllegalStateException.]
+    @Test(expected = IllegalStateException.class)
+    public void addMessageWithResponseFailsIfTransportAlreadyClosed(
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubResponseCallback mockCallback,
+            @Mocked final IotHubOutboundPacket mockPacket) throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+
+        HttpsTransport transport = new HttpsTransport(mockConfig);
+        transport.open();
+        transport.close();
+        transport.addMessage(mockMsg, mockCallback, context);
+    }
+
     // Tests_SRS_HTTPSTRANSPORT_11_008: [The request shall be sent to the IoT Hub given in the configuration from the constructor.]
     @Test
     public void sendMessagesInitializesHttpsConnection(
@@ -254,7 +308,7 @@ public class HttpsTransportTest
             @Mocked final HttpsSingleMessage mockHttpsMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
-            @Mocked final IotHubStatusCode mockStatus)
+            @Mocked final ResponseMessage mockResponseMessage)
             throws URISyntaxException, IOException, SizeLimitExceededException
     {
         final Map<String, Object> context = new HashMap<>();
@@ -267,7 +321,7 @@ public class HttpsTransportTest
                 result = mockBatch;
                 mockConn.sendEvent((HttpsMessage) any);
                 result = new IOException();
-                result = mockStatus;
+                result = mockResponseMessage;
             }
         };
 
@@ -376,7 +430,7 @@ public class HttpsTransportTest
             @Mocked final HttpsSingleMessage mockHttpsMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
-            @Mocked final IotHubStatusCode mockStatus,
+            @Mocked final ResponseMessage mockResponseMessage,
             @Mocked final IotHubCallbackPacket mockCallbackPacket)
             throws URISyntaxException, IOException
     {
@@ -393,6 +447,8 @@ public class HttpsTransportTest
                 new HttpsBatchMessage();
                 result = mockBatch;
                 mockConn.sendEvent((HttpsMessage) any);
+                result = mockResponseMessage;
+                mockResponseMessage.getStatus();
                 result = iotHubStatus;
             }
         };
@@ -481,6 +537,61 @@ public class HttpsTransportTest
         {
             {
                 mockCallback.execute(expectedStatus, expectedContext);
+                times = 3;
+            }
+        };
+    }
+
+    // Tests_SRS_HTTPSTRANSPORT_11_007: [The function shall invoke all callbacks on the callback queue.]
+    @Test
+    public <T extends Queue> void invokeCallbacksInvokesAllEventCallbacksWithMessage(
+            @Mocked final Message mockMsg,
+            @Mocked final HttpsSingleMessage mockHttpsMsg,
+            @Mocked final IotHubResponseCallback mockResponseCallback,
+            @Mocked final HttpsBatchMessage mockBatch,
+            @Mocked final ResponseMessage mockResponseMessage,
+            @Mocked final IotHubCallbackPacket mockCallbackPacket)
+            throws URISyntaxException, IOException
+    {
+        final Queue mockQueue = new MockUp<T>()
+        {
+
+        }.getMockInstance();
+        final IotHubStatusCode iotHubStatus =
+                IotHubStatusCode.INTERNAL_SERVER_ERROR;
+        final Map<String, Object> context = new HashMap<>();
+        new NonStrictExpectations()
+        {
+            {
+                new HttpsIotHubConnection((DeviceClientConfig)any);
+                result = mockConn;
+                mockConn.sendEvent((HttpsMessage) any);
+                result = mockResponseMessage;
+                HttpsSingleMessage.parseHttpsMessage(mockMsg);
+                result = mockHttpsMsg;
+                new HttpsBatchMessage();
+                result = mockBatch;
+                mockCallbackPacket.getStatus();
+                result = iotHubStatus;
+                mockCallbackPacket.getContext();
+                result = context;
+            }
+        };
+
+        HttpsTransport transport = new HttpsTransport(mockConfig);
+        transport.open();
+        transport.addMessage(mockMsg, mockResponseCallback, context);
+        transport.addMessage(mockMsg, mockResponseCallback, context);
+        transport.addMessage(mockMsg, mockResponseCallback, context);
+        transport.sendMessages();
+        transport.invokeCallbacks();
+
+        final IotHubStatusCode expectedStatus = iotHubStatus;
+        final Map<String, Object> expectedContext = context;
+        new Verifications()
+        {
+            {
+                mockResponseCallback.execute(mockResponseMessage, expectedContext);
                 times = 3;
             }
         };

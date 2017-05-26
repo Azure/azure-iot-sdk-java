@@ -235,6 +235,25 @@ public class MqttTransportTest {
         transport.addMessage(mockMsg, mockCallback, context);
     }
 
+    // Tests_SRS_MQTTTRANSPORT_21_022: [The function shall throws `UnsupportedOperationException`.]
+    @Test (expected = UnsupportedOperationException.class)
+    public <T extends Queue> void addMessageWithResponseNotSupportedThrows(
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubResponseCallback mockCallback) throws IOException
+    {
+        // arrange
+        final Queue mockQueue = new MockUp<T>()
+        {
+        }.getMockInstance();
+        final Map<String, Object> context = new HashMap<>();
+
+        MqttTransport transport = new MqttTransport(mockConfig);
+        transport.open();
+
+        // act
+        transport.addMessage(mockMsg, mockCallback, context);
+    }
+
     // Tests_SRS_MQTTTRANSPORT_15_009: [The function shall attempt to send every message
     // on its waiting list, one at a time.]
     @Test

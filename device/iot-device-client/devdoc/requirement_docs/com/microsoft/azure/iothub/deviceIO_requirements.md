@@ -22,6 +22,10 @@ public final class DeviceIO
                                IotHubEventCallback callback,
                                Object callbackContext);
 
+    public void sendEventAsync(Message message,
+                               IotHubResponseCallback callback,
+                               Object callbackContext);
+
     public long getReceivePeriodInMilliseconds();
     public void setReceivePeriodInMilliseconds(long newIntervalInMilliseconds) throws IOException;
     public long getSendPeriodInMilliseconds();
@@ -83,6 +87,16 @@ public void sendEventAsync(Message message,
 **SRS_DEVICE_IO_21_022: [**The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.**]**  
 **SRS_DEVICE_IO_21_023: [**If the message given is null, the sendEventAsync shall throw an IllegalArgumentException.**]**  
 **SRS_DEVICE_IO_21_024: [**If the client is closed, the sendEventAsync shall throw an IllegalStateException.**]**  
+
+### sendEventAsync
+```java
+public void sendEventAsync(Message message,
+                           IotHubResponseCallback callback,
+                           Object callbackContext)
+```
+**SRS_DEVICE_IO_21_040: [**The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.**]**  
+**SRS_DEVICE_IO_21_041: [**If the message given is null, the sendEventAsync shall throw an IllegalArgumentException.**]**  
+**SRS_DEVICE_IO_21_042: [**If the client is closed, the sendEventAsync shall throw an IllegalStateException.**]**  
 
 ### getReceivePeriodInMilliseconds
 ```java

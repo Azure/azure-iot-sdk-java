@@ -286,6 +286,43 @@ public final class DeviceIO
     }
 
     /**
+     * Asynchronously sends an event message to the IoT Hub. Use IotHubResponseCallback if you
+     * need the message payload received as a response for a sent message, together with the
+     * status.
+     *
+     * @param message the message to be sent.
+     * @param callback the callback to be invoked when a response is received.
+     * Can be {@code null}.
+     * @param callbackContext a context to be passed to the callback. Can be
+     * {@code null} if no callback is provided.
+     *
+     * @throws IllegalArgumentException if the message provided is {@code null}.
+     * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     */
+    public void sendEventAsync(Message message,
+                               IotHubResponseCallback callback,
+                               Object callbackContext)
+    {
+        /* Codes_SRS_DEVICE_IO_21_042: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
+        if (this.state == IotHubClientState.CLOSED)
+        {
+            throw new IllegalStateException(
+                    "Cannot send event from "
+                            + "an IoT Hub client that is closed.");
+        }
+
+        /* Codes_SRS_DEVICE_IO_21_041: [If the message given is null, the sendEventAsync shall throw an IllegalArgumentException.] */
+        if (message == null)
+        {
+            throw new IllegalArgumentException("Cannot send message 'null'.");
+        }
+
+        logger.LogInfo("Message with messageid %s along with callback and callbackContext is added to the queue, method name is %s ", message.getMessageId(), logger.getMethodName());
+        /* Codes_SRS_DEVICE_IO_21_040: [The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.] */
+        transport.addMessage(message, callback, callbackContext);
+    }
+
+    /**
      * Getter for the receive period in milliseconds.
      *
      * @return a long with the number of milliseconds between receives.

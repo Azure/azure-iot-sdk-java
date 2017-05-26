@@ -191,6 +191,22 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     }
 
     /**
+     * Adds a message to the transport queue.
+     * !!! This functionality is not supported yet, please use `addMessage` with `IotHubEventCallback`!!!
+     *
+     * @param message the message to be sent.
+     * @param callback the callback to be invoked when a response for the message is received.
+     * @param callbackContext the context to be passed in when the callback is invoked.
+     *
+     * @throws UnsupportedOperationException always.
+     */
+    public void addMessage(Message message, IotHubResponseCallback callback, Object callbackContext) throws UnsupportedOperationException
+    {
+        // Codes_SRS_AMQPSTRANSPORT_21_040: [The function shall throws `UnsupportedOperationException`.]
+        throw new UnsupportedOperationException("AMQP do not support callback with message response");
+    }
+
+    /**
      * <p>
      * Sends all messages from the waiting list, one at a time. If a previous
      * send attempt had failed, the function will attempt to resend the messages
@@ -285,7 +301,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             IotHubStatusCode status = packet.getStatus();
             IotHubEventCallback callback = packet.getCallback();
             Object context = packet.getContext();
-            
+
             logger.LogInfo("Invoking the callback function for sent message, IoT Hub responded to message with status %s, method name is %s ", status.name(), logger.getMethodName());
             callback.execute(status, context);
         }

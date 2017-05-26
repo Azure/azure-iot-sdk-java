@@ -13,7 +13,7 @@ public class HttpsIotHubConnection
 {
     public HttpsIotHubConnection(DeviceClientConfig config);
 
-    public IotHubStatusCode sendEvent(HttpsMessage msg) throws IOException;
+    public ResponseMessage sendEvent(HttpsMessage msg) throws IOException;
 
     public Message receiveMessage() throws IOException;
     public void sendMessageResult(IotHubMessageResult result) throws IOException;
@@ -33,7 +33,7 @@ public HttpsIotHubConnection(DeviceClientConfig config);
 ### sendEvent
 
 ```Java
-public IotHubStatusCode sendEvent(HttpsMessage msg) throws IOException;**
+public ResponseMessage sendEvent(HttpsMessage msg) throws IOException;
 ```
 
 **SRS_HTTPSIOTHUBCONNECTION_11_002: [**The function shall send a request to the URL https://[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2016-02-03.**]**
@@ -48,13 +48,13 @@ public IotHubStatusCode sendEvent(HttpsMessage msg) throws IOException;**
 
 **SRS_HTTPSIOTHUBCONNECTION_25_040: [**The function shall set the IotHub SSL context by calling setSSLContext on the request.**]**
 
-**SRS_HTTPSIOTHUBCONNECTION_11_007: [**The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.**]**
+**SRS_HTTPSIOTHUBCONNECTION_11_007: [**The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.**]**  
 
 **SRS_HTTPSIOTHUBCONNECTION_11_008: [**The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/messages/events'.**]**
 
 **SRS_HTTPSIOTHUBCONNECTION_11_009: [**The function shall set the header field 'content-type' to be the message content type.**]**
 
-**SRS_HTTPSIOTHUBCONNECTION_11_010: [**The function shall return the IoT Hub status code included in the response.**]**
+**SRS_HTTPSIOTHUBCONNECTION_11_010: [**The function shall return a ResponseMessage with the status and payload.**]**
 
 **SRS_HTTPSIOTHUBCONNECTION_11_012: [**If the IoT Hub could not be reached, the function shall throw an IOException.**]**
 

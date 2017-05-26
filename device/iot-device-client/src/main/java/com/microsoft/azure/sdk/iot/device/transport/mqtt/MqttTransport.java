@@ -101,10 +101,10 @@ public final class MqttTransport implements IotHubTransport
         // Codes_SRS_MQTTTRANSPORT_99_020: [The method will remove all the messages which are in progress or waiting to be sent and add them to the callback list.]
         while (!this.waitingList.isEmpty())
         {
-           IotHubOutboundPacket packet = this.waitingList.remove();
-           
-           IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE, packet.getCallback(), packet.getContext());
-           this.callbackList.add(callbackPacket);
+            IotHubOutboundPacket packet = this.waitingList.remove();
+
+            IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE, packet.getCallback(), packet.getContext());
+            this.callbackList.add(callbackPacket);
            
         }
        
@@ -147,6 +147,27 @@ public final class MqttTransport implements IotHubTransport
             IotHubOutboundPacket packet = new IotHubOutboundPacket(message, callback, callbackContext);
             this.waitingList.add(packet);
         }
+    }
+
+    /**
+     * Adds a message to the transport queue.
+     * !!! This functionality is not supported yet, please use `addMessage` with `IotHubEventCallback`!!!
+     *
+     * @param message the message to be sent.
+     * @param callback the callback to be invoked when a response for the
+     * message is received.
+     * @param callbackContext the context to be passed in when the callback is
+     * invoked.
+     *
+     * @throws UnsupportedOperationException always.
+     */
+    public void addMessage(
+            Message message,
+            IotHubResponseCallback callback,
+            Object callbackContext) throws UnsupportedOperationException
+    {
+        // Codes_SRS_MQTTTRANSPORT_21_022: [The function shall throws `UnsupportedOperationException`.]
+        throw new UnsupportedOperationException("MQTT do not support callback with message response");
     }
 
     /**

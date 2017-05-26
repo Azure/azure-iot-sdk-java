@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubResponseCallback;
 import com.microsoft.azure.sdk.iot.device.Message;
 
 import java.io.Closeable;
@@ -42,6 +43,19 @@ public interface IotHubTransport extends Closeable
     void addMessage(Message message,
             IotHubEventCallback callback,
             Object callbackContext);
+
+    /**
+     * Adds a message to the transport queue.
+     *
+     * @param message the message to be sent.
+     * @param callback the callback to be invoked when a response for the
+     * message is received.
+     * @param callbackContext the context to be passed in when the callback is
+     * invoked.
+     */
+    void addMessage(Message message,
+                    IotHubResponseCallback callback,
+                    Object callbackContext);
 
     /**
      * Sends all messages on the transport queue. If a previous send attempt had

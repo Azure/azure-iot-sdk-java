@@ -48,11 +48,11 @@ public class HttpsIotHubConnection
      *
      * @param msg the event message.
      *
-     * @return the status code from sending the event message.
+     * @return the ResponseMessage including status code and payload from sending the event message.
      *
      * @throws IOException if the IoT Hub could not be reached.
      */
-    public IotHubStatusCode sendEvent(HttpsMessage msg) throws IOException
+    public ResponseMessage sendEvent(HttpsMessage msg) throws IOException
     {
         synchronized (HTTPS_CONNECTION_LOCK)
         {
@@ -90,9 +90,11 @@ public class HttpsIotHubConnection
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_012: [If the IoT Hub could not be reached, the function shall throw an IOException.]
             HttpsResponse response = request.send();
 
-            // Codes_SRS_HTTPSIOTHUBCONNECTION_11_010: [The function shall return the IoT Hub status code included in the response.]
-            return IotHubStatusCode.getIotHubStatusCode(
-                    response.getStatus());
+            // Codes_SRS_HTTPSIOTHUBCONNECTION_11_010: [The function shall return a ResponseMessage with the status and payload.]
+            IotHubStatusCode status = IotHubStatusCode.getIotHubStatusCode(response.getStatus());
+            byte[] body = response.getBody();
+
+            return new ResponseMessage(body, status);
         }
     }
 

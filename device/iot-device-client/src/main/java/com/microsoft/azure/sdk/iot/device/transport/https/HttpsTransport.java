@@ -100,20 +100,16 @@ public final class HttpsTransport implements IotHubTransport
         // Codes_SRS_HTTPSTRANSPORT_99_036: [The method will remove all the messages which are in progress or waiting to be sent and add them to the callback list.]
         while (!this.waitingList.isEmpty())
         {
-           IotHubOutboundPacket packet = this.waitingList.remove();
-           
-           IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE, packet.getCallback(), packet.getContext());
-           this.callbackList.add(callbackPacket);
-         
+            IotHubOutboundPacket packet = this.waitingList.remove();
+            ResponseMessage responseMessage = new ResponseMessage(new byte[]{}, IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE);
+            addOutboundPacketToCallbackList(packet, responseMessage);
         }
         
         while (!this.inProgressList.isEmpty())
         {
-           IotHubOutboundPacket packet = this.inProgressList.remove();
-           
-           IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE, packet.getCallback(), packet.getContext());
-           this.callbackList.add(callbackPacket);
-           
+            IotHubOutboundPacket packet = this.inProgressList.remove();
+            ResponseMessage responseMessage = new ResponseMessage(new byte[]{}, IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE);
+            addOutboundPacketToCallbackList(packet, responseMessage);
         }
        
         // Codes_SRS_HTTPSTRANSPORT_99_037: [The method will invoke all the callbacks]
@@ -147,6 +143,32 @@ public final class HttpsTransport implements IotHubTransport
         }
 
         // Codes_SRS_HTTPSTRANSPORT_11_003: [The function shall add a packet containing the message, callback, and callback context to the transport queue.]
+        IotHubOutboundPacket packet = new IotHubOutboundPacket(message, callback, callbackContext);
+        this.waitingList.add(packet);
+    }
+
+    /**
+     * Adds a message to the transport queue.
+     *
+     * @param message the message to be sent.
+     * @param callback the callback to be invoked when a response for the
+     * message is received.
+     * @param callbackContext the context to be passed in when the callback is
+     * invoked.
+     *
+     * @throws IllegalStateException if the transport has not been opened or is
+     * already closed.
+     */
+    public void addMessage(Message message,
+                           IotHubResponseCallback callback,
+                           Object callbackContext)
+    {
+        // Codes_SRS_HTTPSTRANSPORT_21_018: [If the transport is closed, the function shall throw an IllegalStateException.]
+        if (this.state == HttpsTransportState.CLOSED) {
+            throw new IllegalStateException("Cannot add a message to an HTTPS transport that is closed.");
+        }
+
+        // Codes_SRS_HTTPSTRANSPORT_21_017: [The function shall add a packet containing the message, callback, and callback context to the transport queue.]
         IotHubOutboundPacket packet = new IotHubOutboundPacket(message, callback, callbackContext);
         this.waitingList.add(packet);
     }
@@ -197,10 +219,10 @@ public final class HttpsTransport implements IotHubTransport
         // Codes_SRS_HTTPSTRANSPORT_11_005: [The function shall configure a valid HTTPS request and send it to the IoT Hub.]
         // Codes_SRS_HTTPSTRANSPORT_11_014: [If the send request fails while in progress, the function shall throw an IOException.]
         // Codes_SRS_HTTPSTRANSPORT_11_017: [If an invalid URI is generated from the configuration given in the constructor, the function shall throw a URISyntaxException.]
-        IotHubStatusCode status = this.connection.sendEvent(msg);
+        ResponseMessage responseMessage = this.connection.sendEvent(msg);
 
         // Codes_SRS_HTTPSTRANSPORT_11_006: [The function shall add a packet containing the callbacks, contexts, and response for all sent messages to the callback queue.]
-        this.moveInProgressListToCallbackList(status);
+        this.moveInProgressListToCallbackList(responseMessage);
     }
 
     /**
@@ -225,11 +247,19 @@ public final class HttpsTransport implements IotHubTransport
             // Codes_SRS_HTTPSTRANSPORT_11_016: [If an exception is thrown during the callback, the function shall drop the callback from the queue.]
             IotHubCallbackPacket packet = this.callbackList.remove();
 
-            IotHubStatusCode status = packet.getStatus();
-            IotHubEventCallback callback = packet.getCallback();
             Object context = packet.getContext();
 
-            callback.execute(status, context);
+            IotHubEventCallback eventCallback = packet.getCallback();
+            if(eventCallback != null)
+            {
+                eventCallback.execute(packet.getStatus(), context);
+            }
+
+            IotHubResponseCallback responseCallback = packet.getResponseCallback();
+            if(responseCallback != null)
+            {
+                responseCallback.execute(packet.getResponseMessage(), context);
+            }
         }
     }
 
@@ -374,24 +404,39 @@ public final class HttpsTransport implements IotHubTransport
      * Moves messages from the in progress list to the callback list, updating
      * the message packets with the status code from the response.
      *
-     * @param status the status code returned by the IoT Hub.
+     * @param responseMessage the result from the IoT Hub that includes the status and message.
      */
-    private void moveInProgressListToCallbackList(IotHubStatusCode status)
+    private void moveInProgressListToCallbackList(ResponseMessage responseMessage)
     {
         while (!this.inProgressList.isEmpty())
         {
             IotHubOutboundPacket packet = this.inProgressList.remove();
+            addOutboundPacketToCallbackList(packet, responseMessage);
+        }
+    }
 
-            IotHubEventCallback callback = packet.getCallback();
-            if (callback != null)
-            {
-                IotHubCallbackPacket callbackPacket =
-                        new IotHubCallbackPacket(status,
-                                packet.getCallback(),
-                                packet.getContext());
+    private void addOutboundPacketToCallbackList(IotHubOutboundPacket packet, ResponseMessage responseMessage)
+    {
+        IotHubEventCallback eventCallback = packet.getCallback();
+        if (eventCallback != null)
+        {
+            IotHubCallbackPacket callbackPacket =
+                    new IotHubCallbackPacket(responseMessage.getStatus(),
+                            eventCallback,
+                            packet.getContext());
 
-                this.callbackList.add(callbackPacket);
-            }
+            this.callbackList.add(callbackPacket);
+        }
+
+        IotHubResponseCallback responseCallback = packet.getResponseCallback();
+        if(responseCallback != null)
+        {
+            IotHubCallbackPacket callbackPacket =
+                    new IotHubCallbackPacket(responseMessage,
+                            responseCallback,
+                            packet.getContext());
+
+            this.callbackList.add(callbackPacket);
         }
     }
 }

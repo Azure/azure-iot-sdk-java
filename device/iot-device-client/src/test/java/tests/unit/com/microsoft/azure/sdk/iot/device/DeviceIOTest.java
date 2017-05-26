@@ -819,6 +819,84 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context);
     }
 
+    /* Tests_SRS_DEVICE_IO_21_040: [The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.] */
+    @Test
+    public void sendEventAsyncAddsMessageWithResponseToTransportSuccess(
+            @Mocked final IotHubSSLContext mockIotHubSSLContext,
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubResponseCallback mockCallback)
+            throws URISyntaxException, IOException
+    {
+        // arrange
+        final Map<String, Object> context = new HashMap<>();
+        final Object deviceIO = newDeviceIOAmqp();
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+
+        // act
+        Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context);
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockAmqpsTransport.addMessage(mockMsg, mockCallback, context);
+                times = 1;
+            }
+        };
+    }
+
+    /* Tests_SRS_DEVICE_IO_21_041: [If the message given is null, the sendEventAsync shall throw an IllegalArgumentException.] */
+    @Test (expected = IllegalArgumentException.class)
+    public void sendEventAsyncRejectsNullMessageWithResponseThrows(
+            @Mocked final IotHubSSLContext mockIotHubSSLContext,
+            @Mocked final IotHubResponseCallback mockCallback)
+            throws URISyntaxException, IOException
+    {
+        // arrange
+        final Map<String, Object> context = new HashMap<>();
+        final Object deviceIO = newDeviceIOAmqp();
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+
+        // act
+        Deencapsulation.invoke(deviceIO, "sendEventAsync",
+                new Class[] {Message.class, IotHubResponseCallback.class, Object.class},
+                null, mockCallback, context);
+    }
+
+    /* Tests_SRS_DEVICE_IO_21_042: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
+    @Test (expected = IllegalStateException.class)
+    public void sendEventAsyncWithResponseClientNotOpenedThrows(
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubResponseCallback mockCallback)
+            throws URISyntaxException, IOException
+    {
+        // arrange
+        final Map<String, Object> context = new HashMap<>();
+        final Object deviceIO = newDeviceIOAmqp();
+
+        // act
+        Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context);
+    }
+
+    /* Tests_SRS_DEVICE_IO_21_042: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
+    @Test (expected = IllegalStateException.class)
+    public void sendEventAsyncWithResponseClientAlreadyClosedThrows(
+            @Mocked final IotHubSSLContext mockIotHubSSLContext,
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubResponseCallback mockCallback)
+            throws URISyntaxException, IOException
+    {
+        // arrange
+        final Map<String, Object> context = new HashMap<>();
+        final Object deviceIO = newDeviceIOAmqp();
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        Deencapsulation.invoke(deviceIO, "close");
+        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+
+        // act
+        Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context);
+    }
+
     /* Tests_SRS_DEVICE_IO_21_025: [The getProtocol shall return the protocol for transport.] */
     @Test
     public void getTransportProtocolSuccess(
