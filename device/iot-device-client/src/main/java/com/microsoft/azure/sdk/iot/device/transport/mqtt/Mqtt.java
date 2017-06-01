@@ -291,6 +291,14 @@ abstract public class Mqtt implements MqttCallback
                     * And if there are pending tokens publish shall sleep until the number of pending tokens are less than 10 as per paho limitations**]**
                     */
                     Thread.sleep(10);
+
+                    if (!Mqtt.info.mqttAsyncClient.isConnected())
+                    {
+                    /*
+                    ** Codes_SRS_Mqtt_25_012: [**If the MQTT connection is closed, the function shall throw an IOException.**]**
+                     */
+                        throw new IOException("Cannot publish when mqtt client is disconnected");
+                    }
                 }
 
                 MqttMessage mqttMessage = (payload.length == 0) ? new MqttMessage() : new MqttMessage(payload);
