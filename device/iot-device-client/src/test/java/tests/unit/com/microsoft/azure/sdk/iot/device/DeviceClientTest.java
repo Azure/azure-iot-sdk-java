@@ -1735,4 +1735,30 @@ public class DeviceClientTest
             }
         };
     }
+
+    //SRS_DEVICECLIENT_99_001: [**The registerConnectionStateCallback shall register the callback with the Device IO.**]**
+    //SRS_DEVICECLIENT_99_002: [**The registerConnectionStateCallback shall register the callback even if the client is not open.**]**
+    @Test
+    public void registerConnectionStateCallback(@Mocked final IotHubConnectionStateCallback mockedStateCB) throws URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        final DeviceClient client = new DeviceClient(connString, protocol);
+        
+        //act
+        client.registerConnectionStateCallback(mockedStateCB);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockDeviceIO.registerConnectionStateCallback(mockedStateCB);
+                times = 1;
+            }
+        };
+
+    }
 }

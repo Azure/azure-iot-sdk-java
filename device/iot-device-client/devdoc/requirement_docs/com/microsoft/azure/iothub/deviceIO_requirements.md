@@ -34,6 +34,7 @@ public final class DeviceIO
     public IotHubClientProtocol getProtocol();
     public boolean isOpen();
     public boolean isEmpty();
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback);
 }
 ```
 
@@ -145,3 +146,10 @@ public boolean isOpen()
 public boolean isEmpty()
 ```
 **SRS_DEVICE_IO_21_039: [**The isEmpty shall return the transport queue state, true if the queue is empty, false if there is pending messages in the queue.**]**  
+
+### registerConnectionStateCallback
+```java
+public void registerConnectionStateCallback(IotHubConnectionStateCallback callback)
+```
+
+**SRS_DEVICE_IO_99_001: [**The registerConnectionStateCallback shall register the callback with the transport.**]**

@@ -25,6 +25,8 @@ public final class DeviceClient
     public void sendReportedProperties(Set<Property> reportedProperties) throws IOException;  
 
     public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IOException  
+    
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback);
 }
 ```
 
@@ -199,3 +201,10 @@ public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, O
 
 **SRS_DEVICECLIENT_25_039: [**This method shall not create a new instance of deviceMethod if called twice.**]**
 
+### registerConnectionStateCallback
+```java
+public void registerConnectionStateCallback(IotHubConnectionStateCallback callback);
+```
+
+**SRS_DEVICECLIENT_99_001: [**The registerConnectionStateCallback shall register the callback with the Device IO.**]**
+**SRS_DEVICECLIENT_99_002: [**The registerConnectionStateCallback shall register the callback even if the client is not open.**]**
