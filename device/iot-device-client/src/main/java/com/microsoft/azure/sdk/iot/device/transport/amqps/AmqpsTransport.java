@@ -55,6 +55,10 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     /** Messages whose callbacks that are waiting to be invoked. */
     private final Queue<IotHubCallbackPacket> callbackList = new LinkedBlockingDeque<>();
 
+    /** Connection state change callback */
+    private IotHubConnectionStateCallback stateCallback;
+    private Object stateCallbackContext;
+
     private final DeviceClientConfig config;
     private final Boolean useWebSockets;
     private final CustomLogger logger;
@@ -410,6 +414,25 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
 
         // Codes_SRS_AMQPSTRANSPORT_15_033: [The map of messages in progress is cleared.]
         inProgressMessages.clear();
+
+        // Notify the listener that the connection is down
+        // Codes_SRS_AMQPSTRANSPORT_99_001: [Registered connection state callback is notified that the connection has been lost.]
+        if (this.stateCallback != null) {
+            this.stateCallback.execute(IotHubConnectionState.CONNECTION_DROP, this.stateCallbackContext);
+        }
+    }
+
+    /**
+     * Need to alert all listeners that the connection has been established.
+     */
+    public void connectionEstablished()
+    {
+        logger.LogInfo("The connection to the IoT Hub has been established, method name is %s ", logger.getMethodName());
+        // Notify listener that the connection is up
+        // Codes_SRS_AMQPSTRANSPORT_99_002: [Registered connection state callback is notified that the connection has been established.]
+        if (this.stateCallback != null) {
+            this.stateCallback.execute(IotHubConnectionState.CONNECTION_SUCCESS, this.stateCallbackContext);
+        }
     }
 
     /**
@@ -436,6 +459,19 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // in progress list and callback list are all empty, and false otherwise.]
         return this.waitingMessages.isEmpty() && this.inProgressMessages.size() == 0 && this.callbackList.isEmpty();
 
+    }
+
+    /**
+     * Registers a callback to be executed whenever the amqps connection is lost or established.
+     * 
+     * @param callback the callback to be called.
+     * @param callbackContext a context to be passed to the callback. Can be
+     * {@code null} if no callback is provided.
+     */
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) {
+        // Codes_SRS_AMQPSTRANSPORT_99_003: [The registerConnectionStateCallback shall register the connection state callback.]
+        this.stateCallback = callback;
+        this.stateCallbackContext = callbackContext;
     }
 
     /**

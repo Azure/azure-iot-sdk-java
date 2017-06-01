@@ -343,4 +343,18 @@ public final class MqttTransport implements IotHubTransport
 
         return false;
     }
+
+    /**
+     * Registers a callback to be executed whenever the mqtt connection is lost or established.
+     * 
+     * @param callback the callback to be called.
+     * @param callbackContext a context to be passed to the callback. Can be
+     * {@code null} if no callback is provided.
+     */
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) {
+        //TODO: Add in registration logic if needed.  The transport would also need to be updated to
+        //      receive notifications from the MQTT Connection class when the connection is lost or
+        //      established.
+        throw new UnsupportedOperationException();
+    }
 }

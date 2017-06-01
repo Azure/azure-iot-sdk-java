@@ -193,7 +193,7 @@ public void onLinkRemoteOpen(Event event)
 ```
 
 **SRS_AMQPSIOTHUBCONNECTION_15_041 [**The connection state shall be considered OPEN when the sender link is open remotely.**]**
-
+**SRS_AMQPSIOTHUBCONNECTION_99_001 [**All server listeners shall be notified when that the connection has been established.**]**
 
 ## onLinkRemoteClose
 

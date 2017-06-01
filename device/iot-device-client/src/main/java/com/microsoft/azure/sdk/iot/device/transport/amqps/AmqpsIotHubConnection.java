@@ -634,6 +634,11 @@ public final class AmqpsIotHubConnection extends BaseHandler
         if (link.getName().equals(SENDER_TAG))
         {
             this.state = State.OPEN;
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_99_001: [All server listeners shall be notified when that the connection has been established.]
+            for(ServerListener listener : listeners)
+            {
+                listener.connectionEstablished();
+            }
         }
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
@@ -725,6 +730,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
     {
         reconnectCall = true;
 
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_99_002 [All server listeners shall be notified when that the connection has been lost.]
         for(ServerListener listener : listeners)
         {
             listener.connectionLost();
