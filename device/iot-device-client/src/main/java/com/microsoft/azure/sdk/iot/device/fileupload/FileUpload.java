@@ -105,9 +105,9 @@ public final class FileUpload
 
         /* Codes_SRS_FILEUPLOAD_21_006: [If the `inputStream` is null or not available, the uploadToBlobAsync shall throw IllegalArgumentException.] */
         /* Codes_SRS_FILEUPLOAD_21_011: [If the `inputStream` failed to do I/O, the uploadToBlobAsync shall throw IOException, threw by the InputStream class.] */
-        if((inputStream == null) || (inputStream.available() == 0))
+        if((inputStream == null))
         {
-            throw new IllegalArgumentException("inputStream is null or empty");
+            throw new IllegalArgumentException("inputStream is null");
         }
 
         /* Codes_SRS_FILEUPLOAD_21_007: [If the `streamLength` is negative, the uploadToBlobAsync shall throw IllegalArgumentException.] */

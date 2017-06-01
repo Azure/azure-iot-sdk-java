@@ -243,52 +243,6 @@ public class FileUploadTest
         fileUpload.uploadToBlobAsync(blobName, null, streamLength, mockIotHubEventCallback, context);
     }
 
-    /* Tests_SRS_FILEUPLOAD_21_006: [If the `inputStream` is null or not available, the uploadToBlobAsync shall throw IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void uploadToBlobAsyncInputStreamNotAvailableThrows() throws IOException
-    {
-        // arrange
-        final String blobName = "validBlobName";
-        final long streamLength = 100;
-        final Map<String, Object> context = new HashMap<>();
-
-        constructorExpectations();
-        new NonStrictExpectations()
-        {
-            {
-                mockInputStream.available();
-                result = 0;
-            }
-        };
-        FileUpload fileUpload = new FileUpload(mockConfig);
-
-        // act
-        fileUpload.uploadToBlobAsync(blobName, mockInputStream, streamLength, mockIotHubEventCallback, context);
-    }
-
-    /* Tests_SRS_FILEUPLOAD_21_011: [If the `inputStream` failed to do I/O, the uploadToBlobAsync shall throw IOException, threw by the InputStream class.] */
-    @Test (expected = IOException.class)
-    public void uploadToBlobAsyncInputStreamAvailableThrows() throws IOException
-    {
-        // arrange
-        final String blobName = "validBlobName";
-        final long streamLength = 100;
-        final Map<String, Object> context = new HashMap<>();
-
-        constructorExpectations();
-        new NonStrictExpectations()
-        {
-            {
-                mockInputStream.available();
-                result = new IOException();
-            }
-        };
-        FileUpload fileUpload = new FileUpload(mockConfig);
-
-        // act
-        fileUpload.uploadToBlobAsync(blobName, mockInputStream, streamLength, mockIotHubEventCallback, context);
-    }
-
     /* Tests_SRS_FILEUPLOAD_21_007: [If the `streamLength` is negative, the uploadToBlobAsync shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void uploadToBlobAsyncNegativeStreamLenghtThrows() throws IOException

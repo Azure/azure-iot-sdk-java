@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SendMessagesIT
 {
     //How much devices the multithreaded test will create in parallel.
-    private static final Integer MAX_DEVICE_PARALLEL = 10;
+    private static final Integer MAX_DEVICE_PARALLEL = 5;
 
     //Huw much sequential connections each device will open and close in the multithreaded test.
     private static final Integer NUM_CONNECTIONS_PER_DEVICE = 10;
