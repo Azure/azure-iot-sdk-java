@@ -1108,6 +1108,7 @@ public class AmqpsTransportTest
     }
 
     // Tests_SRS_AMQPSTRANSPORT_99_001: [All registered connection state callbacks are notified that the connection has been lost.]
+    // Tests_SRS_AMQPSTRANSPORT_99_003: [RegisterConnectionStateCallback shall register the connection state callback.]
     @Test
     public void connectionLostNotifyAllConnectionStateCallbacks() throws IOException
     {
@@ -1116,12 +1117,12 @@ public class AmqpsTransportTest
             {
                 new AmqpsIotHubConnection(mockConfig, false);
                 result = mockConnection;
-                mockConnectionStateCallback.connectionDown();
+                mockConnectionStateCallback.execute(IotHubConnectionState.CONNECTION_DROP, null);
             }
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
-        transport.registerConnectionStateCallback(mockConnectionStateCallback);
+        transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
         transport.open();
 
         transport.connectionLost();
@@ -1129,13 +1130,14 @@ public class AmqpsTransportTest
         new Verifications()
         {
             {
-                mockConnectionStateCallback.connectionDown();
+                mockConnectionStateCallback.execute(IotHubConnectionState.CONNECTION_DROP, null);
                 times = 1;
             }
         };
     }
 
     // Tests_SRS_AMQPSTRANSPORT_99_002: [All registered connection state callbacks are notified that the connection has been established.]
+    // Tests_SRS_AMQPSTRANSPORT_99_003: [RegisterConnectionStateCallback shall register the connection state callback.]
     @Test
     public void connectionEstablishedNotifyAllConnectionStateCallbacks() throws IOException
     {
@@ -1144,12 +1146,12 @@ public class AmqpsTransportTest
             {
                 new AmqpsIotHubConnection(mockConfig, false);
                 result = mockConnection;
-                mockConnectionStateCallback.connectionUp();
+                mockConnectionStateCallback.execute(IotHubConnectionState.CONNECTION_SUCCESS, null);
             }
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
-        transport.registerConnectionStateCallback(mockConnectionStateCallback);
+        transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
         transport.open();
 
         transport.connectionEstablished();
@@ -1157,7 +1159,7 @@ public class AmqpsTransportTest
         new Verifications()
         {
             {
-                mockConnectionStateCallback.connectionUp();
+                mockConnectionStateCallback.execute(IotHubConnectionState.CONNECTION_SUCCESS, null);
                 times = 1;
             }
         };
@@ -1245,17 +1247,5 @@ public class AmqpsTransportTest
         Boolean isEmpty = transport.isEmpty();
 
         Assert.assertFalse(isEmpty);
-    }
-
-    // Tests_SRS_AMQPSTRANSPORT_99_003: [The registerConnectionStateCallback shall register the connection state callback.]
-    @Test
-    public void registerConnectionStateCallback()
-    {
-        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
-        
-        transport.registerConnectionStateCallback(mockConnectionStateCallback);
-
-        Assert.assertTrue(transport.totalConnectionStateCallbacks() == 1);
-
     }
 }

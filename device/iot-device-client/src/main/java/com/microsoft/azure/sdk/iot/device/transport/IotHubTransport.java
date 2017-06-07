@@ -95,6 +95,8 @@ public interface IotHubTransport extends Closeable
      * Registers a callback to be executed whenever the connection to the IoT Hub is lost or established.
      * 
      * @param callback the callback to be called.
+     * @param callbackContext a context to be passed to the callback. Can be
+     * {@code null} if no callback is provided.
      */
-    void registerConnectionStateCallback(IotHubConnectionStateCallback callback);
+    void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
 }

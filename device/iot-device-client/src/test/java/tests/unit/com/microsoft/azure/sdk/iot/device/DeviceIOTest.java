@@ -1252,13 +1252,13 @@ public class DeviceIOTest
         final Object deviceIO = newDeviceIOAmqp();
         
         //act
-        Deencapsulation.invoke(deviceIO, "registerConnectionStateCallback", mockedStateCB);
+        Deencapsulation.invoke(deviceIO, "registerConnectionStateCallback", mockedStateCB, Object.class);
 
         //assert
         new Verifications()
         {
             {
-                mockAmqpsTransport.registerConnectionStateCallback(mockedStateCB);
+                mockAmqpsTransport.registerConnectionStateCallback(mockedStateCB, null);
                 times = 1;
             }
         };

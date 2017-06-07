@@ -34,7 +34,7 @@ public final class DeviceIO
     public IotHubClientProtocol getProtocol();
     public boolean isOpen();
     public boolean isEmpty();
-    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback);
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
 }
 ```
 
@@ -149,7 +149,7 @@ public boolean isEmpty()
 
 ### registerConnectionStateCallback
 ```java
-public void registerConnectionStateCallback(IotHubConnectionStateCallback callback)
+public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
 ```
 
 **SRS_DEVICE_IO_99_001: [**The registerConnectionStateCallback shall register the callback with the transport.**]**

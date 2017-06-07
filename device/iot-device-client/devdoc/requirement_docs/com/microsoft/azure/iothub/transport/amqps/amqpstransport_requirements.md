@@ -31,7 +31,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
 
     public boolean isEmpty();
 
-    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback);
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
 }
 ```
 
@@ -181,7 +181,7 @@ public synchronized void connectionLost()
 
 **SRS_AMQPSTRANSPORT_15_033: [**The map of messages in progress is cleared.**]**
 
-**SRS_AMQPSTRANSPORT_99_001: [**All registered connection state callbacks are notified that the connection has been lost.**]**
+**SRS_AMQPSTRANSPORT_99_001: [**Registered connection state callback is notified that the connection has been lost.**]**
 
 
 ### connectionEstablished
@@ -190,7 +190,7 @@ public synchronized void connectionLost()
 public synchronized void connectionEstablished();
 ```
 
-**SRS_AMQPSTRANSPORT_99_002: [**All registered connection state callbacks are notified that the connection has been established.**]**
+**SRS_AMQPSTRANSPORT_99_002: [**Registered connection state callback is notified that the connection has been established.**]**
 
 
 ### messageReceived
@@ -214,7 +214,7 @@ public boolean isEmpty();
 ### registerConnectionStateCallback
 
 ```java
-public void registerConnectionStateCallback(IotHubConnectionStateCallback callback)
+public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
 ```
 
 **SRS_AMQPSTRANSPORT_99_003: [**The registerConnectionStateCallback shall register the connection state callback.**]**

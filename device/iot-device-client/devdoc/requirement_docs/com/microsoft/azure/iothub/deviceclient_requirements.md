@@ -26,7 +26,7 @@ public final class DeviceClient
 
     public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IOException  
     
-    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback);
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
 }
 ```
 
@@ -203,8 +203,9 @@ public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, O
 
 ### registerConnectionStateCallback
 ```java
-public void registerConnectionStateCallback(IotHubConnectionStateCallback callback);
+public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
 ```
 
 **SRS_DEVICECLIENT_99_001: [**The registerConnectionStateCallback shall register the callback with the Device IO.**]**
 **SRS_DEVICECLIENT_99_002: [**The registerConnectionStateCallback shall register the callback even if the client is not open.**]**
+**SRS_DEVICECLIENT_99_003: [**If the callback is null the method shall throw an IllegalArgument exception.**]**

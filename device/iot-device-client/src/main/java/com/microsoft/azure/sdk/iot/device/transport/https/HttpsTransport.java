@@ -327,8 +327,10 @@ public final class HttpsTransport implements IotHubTransport
      * Registers a callback to be executed whenever the https connection is lost or established.
      * 
      * @param callback the callback to be called.
+     * @param callbackContext a context to be passed to the callback. Can be
+     * {@code null} if no callback is provided.
      */
-    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback) {
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) {
         //HTTPS is stateless so this should be a no-op
     }
 
