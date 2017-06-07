@@ -440,4 +440,15 @@ public final class DeviceIO
         return this.transport.isEmpty();
     }
 
+    /**
+     * Registers a callback with the configured transport to be executed whenever the connection to the device is lost or established.
+     * 
+     * @param callback the callback to be called.
+     * @param callbackContext a context to be passed to the callback. Can be
+     * {@code null} if no callback is provided.
+     */
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) {
+        /* Codes_SRS_DEVICE_IO_99_001: [The registerConnectionStateCallback shall register the callback with the transport.]*/
+        this.transport.registerConnectionStateCallback(callback, callbackContext);
+    }
 }

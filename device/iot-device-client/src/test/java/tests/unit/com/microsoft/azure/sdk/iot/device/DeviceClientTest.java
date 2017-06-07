@@ -1735,4 +1735,45 @@ public class DeviceClientTest
             }
         };
     }
+
+    //Tests_SRS_DEVICECLIENT_99_001: [The registerConnectionStateCallback shall register the callback with the Device IO.]
+    //Tests_SRS_DEVICECLIENT_99_002: [The registerConnectionStateCallback shall register the callback even if the client is not open.]
+    @Test
+    public void registerConnectionStateCallback(@Mocked final IotHubConnectionStateCallback mockedStateCB) throws URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        final DeviceClient client = new DeviceClient(connString, protocol);
+        
+        //act
+        client.registerConnectionStateCallback(mockedStateCB, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockDeviceIO.registerConnectionStateCallback(mockedStateCB, null);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENT_99_003: [If the callback is null the method shall throw an IllegalArgument exception.]
+    @Test (expected = IllegalArgumentException.class)
+    public void registerConnectionStateCallbackNullCallback()
+            throws IllegalArgumentException, URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        final DeviceClient client = new DeviceClient(connString, protocol);
+        
+        //act
+        client.registerConnectionStateCallback(null, null);
+    }
 }

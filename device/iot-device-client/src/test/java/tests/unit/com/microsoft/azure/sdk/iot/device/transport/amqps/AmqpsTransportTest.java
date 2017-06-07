@@ -52,6 +52,9 @@ public class AmqpsTransportTest
     @Mocked
     MessageCallback mockMessageCallback;
 
+    @Mocked
+    IotHubConnectionStateCallback mockConnectionStateCallback;
+
     // Tests_SRS_AMQPSTRANSPORT_15_001: [The constructor shall save the input parameters into instance variables.]
     @Test
     public void constructorSavesInputParameters()
@@ -1102,6 +1105,64 @@ public class AmqpsTransportTest
 
         Assert.assertTrue(inProgressMessages.size() == 0);
         Assert.assertTrue(waitingMessages.size() == 4);
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_99_001: [All registered connection state callbacks are notified that the connection has been lost.]
+    // Tests_SRS_AMQPSTRANSPORT_99_003: [RegisterConnectionStateCallback shall register the connection state callback.]
+    @Test
+    public void connectionLostNotifyAllConnectionStateCallbacks() throws IOException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                mockConnectionStateCallback.execute(IotHubConnectionState.CONNECTION_DROP, null);
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
+        transport.open();
+
+        transport.connectionLost();
+
+        new Verifications()
+        {
+            {
+                mockConnectionStateCallback.execute(IotHubConnectionState.CONNECTION_DROP, null);
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_99_002: [All registered connection state callbacks are notified that the connection has been established.]
+    // Tests_SRS_AMQPSTRANSPORT_99_003: [RegisterConnectionStateCallback shall register the connection state callback.]
+    @Test
+    public void connectionEstablishedNotifyAllConnectionStateCallbacks() throws IOException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                mockConnectionStateCallback.execute(IotHubConnectionState.CONNECTION_SUCCESS, null);
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
+        transport.open();
+
+        transport.connectionEstablished();
+
+        new Verifications()
+        {
+            {
+                mockConnectionStateCallback.execute(IotHubConnectionState.CONNECTION_SUCCESS, null);
+                times = 1;
+            }
+        };
     }
 
     // Tests_SRS_AMQPSTRANSPORT_15_034: [The message received is added to the list of messages to be processed.]
