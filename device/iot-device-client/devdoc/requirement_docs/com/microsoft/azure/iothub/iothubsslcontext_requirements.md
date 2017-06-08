@@ -15,6 +15,9 @@ public final class IotHubSSLContext
 
     protected IotHubSSLContext(String cert, boolean isPath) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException;
 
+    IotHubSSLContext(String pathToCertificate, String userCertificateString)
+            throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+
     public SSLContext getIotHubSSLContext();
 }
 ```
@@ -64,6 +67,21 @@ protected IotHubSSLContext(String cert, boolean isPath) throws NoSuchAlgorithmEx
 **SRS_IOTHUBSSLCONTEXT_25_015: [**The constructor shall initialize TrustManagerFactory with the above initialized keystore.**]**
 
 **SRS_IOTHUBSSLCONTEXT_25_016: [**The constructor shall initialize SSL context with the above initialized TrustManagerFactory and a new secure random.**]**
+
+
+### getIotHubSSLContext
+
+```java
+IotHubSSLContext(String pathToCertificate, String userCertificateString)
+        throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+```
+
+**SRS_IOTHUBSSLCONTEXT_21_018: [**If the pathToCertificate is not null, the constructor shall create a certificate to be used with IotHub with cert by calling setValidCertPath**]**
+
+**SRS_IOTHUBSSLCONTEXT_21_019: [**If the userCertificateString is not null, and pathToCertificate is null, the constructor shall create a certificate with 'cert' by calling setValidCert.**]**
+
+**SRS_IOTHUBSSLCONTEXT_21_020: [**If both userCertificateString, and pathToCertificate are null, the constructor shall create a default certificate.**]**
+
 
 ### getIotHubSSLContext
 

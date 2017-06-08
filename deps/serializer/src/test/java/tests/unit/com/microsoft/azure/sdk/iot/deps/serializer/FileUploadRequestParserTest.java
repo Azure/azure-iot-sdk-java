@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for File Upload Request serializer
+ * 100% methods, 100% lines covered
  */
 public class FileUploadRequestParserTest
 {

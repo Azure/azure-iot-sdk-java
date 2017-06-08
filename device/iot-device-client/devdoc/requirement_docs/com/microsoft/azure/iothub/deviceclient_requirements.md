@@ -25,6 +25,10 @@ public final class DeviceClient
     public void sendReportedProperties(Set<Property> reportedProperties) throws IOException;  
 
     public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IOException  
+
+    public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
+                                  IotHubEventCallback callback, Object callbackContext)
+            throws IllegalArgumentException, IllegalStateException, IOException;
 }
 ```
 
@@ -81,6 +85,8 @@ public void closeNow();
 **SRS_DEVICECLIENT_21_008: [**The close shall close the deviceIO connection.**]**  
 
 **SRS_DEVICECLIENT_21_009: [**If the closing a connection via deviceIO is not successful, the close shall throw IOException.**]**  
+
+**SRS_DEVICECLIENT_21_054: [**If the fileUpload is not null, the closeNow shall call closeNow on fileUpload.**]**  
 
 
 ### sendEventAsync
@@ -199,3 +205,31 @@ public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, O
 
 **SRS_DEVICECLIENT_25_039: [**This method shall not create a new instance of deviceMethod if called twice.**]**
 
+
+### uploadToBlobAsync
+
+```java
+public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
+                              IotHubEventCallback callback, Object callbackContext)
+        throws IllegalArgumentException, IllegalStateException, IOException;
+```
+
+**SRS_DEVICECLIENT_21_044: [**The uploadToBlobAsync shall asynchronously upload the stream in `inputStream` to the blob in `destinationBlobName`.**]**  
+
+**SRS_DEVICECLIENT_21_045: [**If the `callback` is null, the uploadToBlobAsync shall throw IllegalArgumentException.**]**  
+
+**SRS_DEVICECLIENT_21_046: [**If the `inputStream` is null, the uploadToBlobAsync shall throw IllegalArgumentException.**]**  
+
+**SRS_DEVICECLIENT_21_052: [**If the `streamLength` is negative, the uploadToBlobAsync shall throw IllegalArgumentException.**]**  
+
+**SRS_DEVICECLIENT_21_053: [**If the `config` do not have a valid IotHubSSLContext, the uploadToBlobAsync shall create and set one.**]**  
+
+**SRS_DEVICECLIENT_21_047: [**If the `destinationBlobName` is null, empty, or not valid, the uploadToBlobAsync shall throw IllegalArgumentException.**]**  
+
+**SRS_DEVICECLIENT_21_048: [**If there is no instance of the FileUpload, the uploadToBlobAsync shall create a new instance of the FileUpload.**]**  
+
+**SRS_DEVICECLIENT_21_049: [**If uploadToBlobAsync failed to create a new instance of the FileUpload, it shall bypass the exception.**]**  
+
+**SRS_DEVICECLIENT_21_050: [**The uploadToBlobAsync shall start the stream upload process, by calling uploadToBlobAsync on the FileUpload class.**]**  
+
+**SRS_DEVICECLIENT_21_051: [**If uploadToBlobAsync failed to start the upload using the FileUpload, it shall bypass the exception.**]**  
