@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -83,6 +85,10 @@ public class IotHubConnectionString
             else if (attr.startsWith(SHARED_ACCESS_TOKEN_ATTRIBUTE))
             {
                 this.sharedAccessToken = attr.substring(SHARED_ACCESS_TOKEN_ATTRIBUTE.length());
+                if (IotHubSasToken.isSasTokenExpired(this.sharedAccessToken))
+                {
+                    throw new SecurityException("Your SAS Token has expired");
+                }
             }
         }
 

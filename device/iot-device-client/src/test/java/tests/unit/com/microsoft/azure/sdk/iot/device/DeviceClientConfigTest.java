@@ -120,7 +120,7 @@ public class DeviceClientConfigTest
         final String iotHubHostname = "test.iothubhostname";
         final String deviceId = "test-deviceid";
         final String deviceKey = null;
-        final String sharedAccessToken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=1469813873";
+        final String sharedAccessToken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + Long.MAX_VALUE;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},
@@ -590,7 +590,7 @@ public class DeviceClientConfigTest
         final String iotHubname = "iotHubName";
         final String iotHubHostname = iotHubname + ".iothubhostname";
         final String deviceId = "test-deviceid";
-        final String sharedAccessToken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=1469813873";
+        final String sharedAccessToken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + Long.MAX_VALUE;;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class},
