@@ -35,8 +35,6 @@ public class TwinParserTest {
     private static final String ILLEGAL_STRING_DOT = "illegal.key";
     private static final String ILLEGAL_STRING_SPACE = "illegal key";
     private static final String ILLEGAL_STRING_DOLLAR = "illegal$key";
-    private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'";
-    private static final String TIMEZONE = "UTC";
 
     private enum myEnum
     {
@@ -71,49 +69,6 @@ public class TwinParserTest {
         {
             diff = tagsMap;
         }
-    }
-
-    private void assertDateWithError(String dt1Str, String dt2Str)
-    {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
-        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
-        Date dt1 = null;
-        Date dt2 = null;
-
-        try
-        {
-            dt1 = dateFormat.parse(dt1Str);
-            dt2 = dateFormat.parse(dt2Str);
-        }
-        catch (ParseException e)
-        {
-            assert(true);
-        }
-
-        long error = Math.abs(dt1.getTime()-dt2.getTime());
-
-        assertThat(error, lessThanOrEqualTo(100L));
-    }
-
-    private void assertNowWithError(String dt1Str)
-    {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
-        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
-        Date dt1 = null;
-        Date dt2 = new Date();
-
-        try
-        {
-            dt1 = dateFormat.parse(dt1Str);
-        }
-        catch (ParseException e)
-        {
-            assert(true);
-        }
-
-        long error = Math.abs(dt1.getTime()-dt2.getTime());
-
-        assertThat(error, lessThanOrEqualTo(100L));
     }
 
     /* Tests_SRS_TWINPARSER_21_001: [The constructor shall create an instance of the properties.] */
