@@ -50,7 +50,8 @@ public FileUploadNotification(String json) throws IllegalArgumentException
 **SRS_FILE_UPLOAD_NOTIFICATION_21_002: [**The constructor shall parse the provided json and initialize `correlationId`, `hostName`, `containerName`, `blobName`, and `sasToken` using the information in the json.**]**  
 **SRS_FILE_UPLOAD_NOTIFICATION_21_003: [**If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.**]**  
 **SRS_FILE_UPLOAD_NOTIFICATION_21_004: [**If the provided json do not contains a valid `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, `enqueuedTimeUtc`, and `blobSizeInBytes`, the constructor shall throws IllegalArgumentException.**]**  
-**SRS_FILE_UPLOAD_NOTIFICATION_21_005: [**If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, `enqueuedTimeUtc`, and `blobSizeInBytes`, the constructor shall throws IllegalArgumentException.**]**  
+**SRS_FILE_UPLOAD_NOTIFICATION_21_005: [**If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, and `enqueuedTimeUtc`, the constructor shall throws IllegalArgumentException.**]**  
+**SRS_FILE_UPLOAD_NOTIFICATION_21_012: [**If the provided json do not the keys `blobSizeInBytes`, the constructor shall assume the default value 0 for the blob size.**]**  
 
 ### getDeviceId
 ```java

@@ -10,7 +10,8 @@ A single HTTPS message.
 ```java
 public class HttpsSingleMessage implements HttpsMessage
 {
-    public static final String HTTPS_SINGLE_MESSAGE_CONTENT_TYPE = "binary/octet-stream";
+    private static final String HTTPS_SINGLE_MESSAGE_CONTENT_TYPE = "binary/octet-stream";
+    private static final String HTTPS_SINGLE_JSON_MESSAGE_CONTENT_TYPE = "application/json;charset=utf-8";
 
     public static HttpsSingleMessage parseHttpsMessage(Message message);
     public static HttpsSingleMessage parseHttpsMessage(HttpsResponse response);
@@ -34,11 +35,26 @@ public static HttpsSingleMessage parseHttpsMessage(Message msg);
 
 **SRS_HTTPSSINGLEMESSAGE_11_001: [**The parsed HttpsSingleMessage shall have a copy of the original message body as its body.**]**
 
-**SRS_HTTPSSINGLEMESSAGE_11_002: [**The parsed HttpsSingleMessage shall have the same base64Encoded value as that of the original message.**]**
+**SRS_HTTPSSINGLEMESSAGE_21_002: [**The parsed HttpsSingleMessage shall set the contentType as `binary/octet-stream`.**]**
 
 **SRS_HTTPSSINGLEMESSAGE_11_003: [**The parsed HttpsSingleMessage shall add the prefix 'iothub-app-' to each of the message properties.**]**
 
 **SRS_HTTPSSINGLEMESSAGE_21_014: [**If the message contains messageId, the parsed HttpsSingleMessage shall add the property 'iothub-messageid' with the messageId value.**]**
+
+
+### parseHttpsMessage
+
+```java
+public static HttpsSingleMessage parseHttpsMessage(Message msg);
+```
+
+**SRS_HTTPSSINGLEMESSAGE_21_016: [**The parsed HttpsSingleMessage shall have a copy of the original message body as its body.**]**
+
+**SRS_HTTPSSINGLEMESSAGE_21_017: [**The parsed HttpsSingleMessage shall set the contentType as `application/json;charset=utf-8`.**]**
+
+**SRS_HTTPSSINGLEMESSAGE_21_018: [**The parsed HttpsSingleMessage shall add the prefix 'iothub-app-' to each of the message properties.**]**
+
+**SRS_HTTPSSINGLEMESSAGE_21_019: [**If the message contains messageId, the parsed HttpsSingleMessage shall add the property 'iothub-messageid' with the messageId value.**]**
 
 
 ### parseHttpsMessage

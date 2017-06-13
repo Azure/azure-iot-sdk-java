@@ -16,6 +16,14 @@ import java.net.URL;
  */
 public class HttpsIotHubConnection
 {
+    private static final String HTTPS_HEAD_TAG = "https://";
+    private static final String HTTPS_PROPERTY_AUTHORIZATION_TAG = "authorization";
+    private static final String HTTPS_PROPERTY_IOTHUB_TO_TAG = "iothub-to";
+    private static final String HTTPS_PROPERTY_CONTENT_TYPE_TAG = "content-type";
+    private static final String HTTPS_PROPERTY_IOTHUB_MESSAGELOCKTIMEOUT_TAG = "iothub-messagelocktimeout";
+    private static final String HTTPS_PROPERTY_IF_MATCH_TAG = "if-match";
+    private static final String HTTPS_PROPERTY_ETAG_TAG = "etag";
+
     /** The HTTPS connection lock. */
     private static final Object HTTPS_CONNECTION_LOCK = new Object();
 
@@ -61,8 +69,8 @@ public class HttpsIotHubConnection
             int readTimeoutMillis = this.config.getReadTimeoutMillis();
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_002: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2016-02-03'.]
-            IotHubEventUri eventUri = new IotHubEventUri(iotHubHostname, deviceId);
-            URL eventUrl = new URL("https://" + eventUri.toString());
+            IotHubEventUri iotHubEventUri = new IotHubEventUri(iotHubHostname, deviceId);
+            URL eventUrl = new URL(HTTPS_HEAD_TAG + iotHubEventUri.toString());
             IotHubSasToken sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
                     this.config.getTokenValidSecs() + 1L);
 
@@ -79,11 +87,11 @@ public class HttpsIotHubConnection
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_006: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
             request.setReadTimeoutMillis(readTimeoutMillis).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_007: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
-                            setHeaderField("authorization", sasToken.toString()).
+                            setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG, sasToken.toString()).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_008: [The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/messages/events'.]
-                            setHeaderField("iothub-to", eventUri.getPath()).
+                            setHeaderField(HTTPS_PROPERTY_IOTHUB_TO_TAG, iotHubEventUri.getPath()).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_009: [The function shall set the header field 'content-type' to be the message content type.]
-                            setHeaderField("content-type", msg.getContentType());
+                            setHeaderField(HTTPS_PROPERTY_CONTENT_TYPE_TAG, msg.getContentType());
             //Codes_SRS_HTTPSIOTHUBCONNECTION_25_040: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
             request.setSSLContext(this.config.getIotHubSSLContext());
 
@@ -91,6 +99,63 @@ public class HttpsIotHubConnection
             HttpsResponse response = request.send();
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_010: [The function shall return a ResponseMessage with the status and payload.]
+            IotHubStatusCode status = IotHubStatusCode.getIotHubStatusCode(response.getStatus());
+            byte[] body = response.getBody();
+
+            return new ResponseMessage(body, status);
+        }
+    }
+
+    /**
+     * Sends an generic https message.
+     *
+     * @param httpsMessage the message to send.
+     * @param httpsMethod the https method (GET, POST, PUT, DELETE).
+     * @param httpsPath the path that will be added at the end of the URI with `/`.
+     *
+     * @return the ResponseMessage including status code and payload from sending message.
+     *
+     * @throws IOException if the IoT Hub could not be reached.
+     */
+    public ResponseMessage sendHttpsMessage(HttpsMessage httpsMessage, HttpsMethod httpsMethod, String httpsPath) throws IOException
+    {
+        synchronized (HTTPS_CONNECTION_LOCK)
+        {
+            String iotHubHostname = this.config.getIotHubHostname();
+            String deviceId = this.config.getDeviceId();
+            int readTimeoutMillis = this.config.getReadTimeoutMillis();
+
+            // Codes_SRS_HTTPSIOTHUBCONNECTION_21_041: [The function shall send a request to the URL https://[iotHubHostname]/devices/[deviceId]/[path]?api-version=2016-02-03.]
+            IotHubUri iotHubUri = new IotHubUri(iotHubHostname, deviceId, httpsPath);
+            URL messageUrl = new URL(HTTPS_HEAD_TAG + iotHubUri.toString());
+            IotHubSasToken sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
+                    this.config.getTokenValidSecs() + 1L);
+
+            // Codes_SRS_HTTPSIOTHUBCONNECTION_21_042: [The function shall send a `httpsMethod` request.]
+            // Codes_SRS_HTTPSIOTHUBCONNECTION_21_043: [The function shall set the request body to the message body.]
+            HttpsRequest request = new HttpsRequest(messageUrl, httpsMethod, httpsMessage.getBody());
+
+            // Codes_SRS_HTTPSIOTHUBCONNECTION_21_044: [The function shall write each message property as a request header.]
+            for (MessageProperty property : httpsMessage.getProperties())
+            {
+                request.setHeaderField(property.getName(),
+                        property.getValue());
+            }
+            // Codes_SRS_HTTPSIOTHUBCONNECTION_21_045: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
+            request.setReadTimeoutMillis(readTimeoutMillis).
+                    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_047: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
+                            setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG, sasToken.toString()).
+                    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_048: [The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/[path]'.]
+                            setHeaderField(HTTPS_PROPERTY_IOTHUB_TO_TAG, iotHubUri.getPath()).
+                    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_049: [The function shall set the header field 'content-type' to be the message content type.]
+                            setHeaderField(HTTPS_PROPERTY_CONTENT_TYPE_TAG, httpsMessage.getContentType());
+            //Codes_SRS_HTTPSIOTHUBCONNECTION_21_046: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
+            request.setSSLContext(this.config.getIotHubSSLContext());
+
+            // Codes_SRS_HTTPSIOTHUBCONNECTION_21_051: [If the IoT Hub could not be reached, the function shall throw an IOException.]
+            HttpsResponse response = request.send();
+
+            // Codes_SRS_HTTPSIOTHUBCONNECTION_21_050: [The function shall return a ResponseMessage with the status and payload.]
             IotHubStatusCode status = IotHubStatusCode.getIotHubStatusCode(response.getStatus());
             byte[] body = response.getBody();
 
@@ -116,7 +181,7 @@ public class HttpsIotHubConnection
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_013: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03'.]
             IotHubMessageUri messageUri = new IotHubMessageUri(iotHubHostname, deviceId);
-            URL messageUrl = new URL("https://" + messageUri.toString());
+            URL messageUrl = new URL(HTTPS_HEAD_TAG + messageUri.toString());
 
             IotHubSasToken sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
                     this.config.getTokenValidSecs() + 1L);
@@ -127,13 +192,13 @@ public class HttpsIotHubConnection
                             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_015: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
                                     setReadTimeoutMillis(readTimeoutMillis).
                             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_016: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
-                                    setHeaderField("authorization",
+                                    setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG,
                                     sasToken.toString()).
                             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_017: [The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/messages/devicebound'.]
-                                    setHeaderField("iothub-to",
+                                    setHeaderField(HTTPS_PROPERTY_IOTHUB_TO_TAG,
                                     messageUri.getPath()).
                             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_018: [The function shall set the header field 'iothub-messagelocktimeout' to be the configuration parameter messageLockTimeoutSecs.]
-                                    setHeaderField("iothub-messagelocktimeout",
+                                    setHeaderField(HTTPS_PROPERTY_IOTHUB_MESSAGELOCKTIMEOUT_TAG,
                                     Integer.toString(messageLockTimeoutSecs));
             //Codes_SRS_HTTPSIOTHUBCONNECTION_25_041: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
             request.setSSLContext(this.config.getIotHubSSLContext());
@@ -148,7 +213,7 @@ public class HttpsIotHubConnection
             if (messageStatus == IotHubStatusCode.OK)
             {
                 // Codes_SRS_HTTPSIOTHUBCONNECTION_11_020: [If a response with IoT Hub status code OK is received, the function shall save the response header field 'etag'.]
-                this.messageEtag = sanitizeEtag(response.getHeaderField("etag"));
+                this.messageEtag = sanitizeEtag(response.getHeaderField(HTTPS_PROPERTY_ETAG_TAG));
 
                 HttpsSingleMessage httpsMsg = HttpsSingleMessage.parseHttpsMessage(response);
                 msg = httpsMsg.toMessage();
@@ -185,7 +250,7 @@ public class HttpsIotHubConnection
             String deviceId = this.config.getDeviceId();
             int readTimeoutMillis = this.config.getReadTimeoutMillis();
 
-            String resultUri = "https://";
+            String resultUri = HTTPS_HEAD_TAG;
             String resultPath;
             URL resultUrl;
             HttpsRequest request;
@@ -246,10 +311,10 @@ public class HttpsIotHubConnection
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_033: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
             request.setReadTimeoutMillis(readTimeoutMillis).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_034: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
-                            setHeaderField("authorization", sasToken.toString()).
-                    setHeaderField("iothub-to", resultPath).
+                            setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG, sasToken.toString()).
+                    setHeaderField(HTTPS_PROPERTY_IOTHUB_TO_TAG, resultPath).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_035: [The function shall set the header field 'if-match' to be the e-tag saved when receiveMessage() was previously called.]
-                            setHeaderField("if-match", this.messageEtag);
+                            setHeaderField(HTTPS_PROPERTY_IF_MATCH_TAG, this.messageEtag);
 
             //Codes_SRS_HTTPSIOTHUBCONNECTION_25_042: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
             request.setSSLContext(this.config.getIotHubSSLContext());

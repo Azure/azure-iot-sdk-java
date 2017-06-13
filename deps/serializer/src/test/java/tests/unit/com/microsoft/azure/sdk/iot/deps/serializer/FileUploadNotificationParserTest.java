@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for File Upload Notification deserializer
+ * 100% methods, 100% lines covered
  */
 public class FileUploadNotificationParserTest
 {
@@ -32,6 +33,7 @@ public class FileUploadNotificationParserTest
     private static final String INVALID_ENQUEUED_TIME_UTC = "\u12342016-06-01T21:22:43.7996883Z";
     private static final String INVALID_DATETIME_UTC = "2016-6-1T4:22:43.7996883";
     private static final Long VALID_BLOB_SIZE_IN_BYTES = 1234L;
+    private static final Long INVALID_BLOB_SIZE_IN_BYTES = -1234L;
 
     private static class TestParameters
     {
@@ -66,7 +68,7 @@ public class FileUploadNotificationParserTest
             new TestParameters(){{ deviceId = VALID_DEVICEID; blobUri = VALID_BLOB_UTI; blobName = VALID_BLOB_NAME; lastUpdatedTime = VALID_LAST_UPDATE_TIME; enqueuedTimeUtc = INVALID_ENQUEUED_TIME_UTC; blobSizeInBytes=VALID_BLOB_SIZE_IN_BYTES; }},
             new TestParameters(){{ deviceId = VALID_DEVICEID; blobUri = VALID_BLOB_UTI; blobName = VALID_BLOB_NAME; lastUpdatedTime = VALID_LAST_UPDATE_TIME; enqueuedTimeUtc = INVALID_DATETIME_UTC; blobSizeInBytes=VALID_BLOB_SIZE_IN_BYTES; }},
 
-            new TestParameters(){{ deviceId = VALID_DEVICEID; blobUri = VALID_BLOB_UTI; blobName = VALID_BLOB_NAME; lastUpdatedTime = VALID_LAST_UPDATE_TIME; enqueuedTimeUtc = VALID_ENQUEUED_TIME_UTC; blobSizeInBytes=null; }},
+            new TestParameters(){{ deviceId = VALID_DEVICEID; blobUri = VALID_BLOB_UTI; blobName = VALID_BLOB_NAME; lastUpdatedTime = VALID_LAST_UPDATE_TIME; enqueuedTimeUtc = VALID_ENQUEUED_TIME_UTC; blobSizeInBytes=INVALID_BLOB_SIZE_IN_BYTES; }},
     };
 
     private static void assertFileUploadNotification(FileUploadNotificationParser fileUploadNotificationParser,
@@ -165,6 +167,26 @@ public class FileUploadNotificationParserTest
         assertFileUploadNotification(fileUploadNotificationParser, "null", VALID_BLOB_UTI, VALID_BLOB_NAME, VALID_LAST_UPDATE_TIME, VALID_ENQUEUED_TIME_UTC, VALID_BLOB_SIZE_IN_BYTES);
     }
 
+    /* Codes_SRS_FILE_UPLOAD_NOTIFICATION_21_012: [If the provided json do not the keys `blobSizeInBytes`, the constructor shall assume the default value 0 for the blob size.] */
+    @Test
+    public void constructor_specialCase_blobSizeInBytes_notExists_succeed()
+    {
+        // arrange
+        String validJson = "{\n" +
+                "    \"deviceId\": \"null\",\n" +
+                "    \"blobUri\": \"" + VALID_BLOB_UTI + "\",\n" +
+                "    \"blobName\": \"" + VALID_BLOB_NAME + "\",\n" +
+                "    \"lastUpdatedTime\": \"" + VALID_LAST_UPDATE_TIME + "\",\n" +
+                "    \"enqueuedTimeUtc\": \"" + VALID_ENQUEUED_TIME_UTC + "\"\n" +
+                "}";
+
+        // act
+        FileUploadNotificationParser fileUploadNotificationParser = new FileUploadNotificationParser(validJson);
+
+        // assert
+        assertFileUploadNotification(fileUploadNotificationParser, "null", VALID_BLOB_UTI, VALID_BLOB_NAME, VALID_LAST_UPDATE_TIME, VALID_ENQUEUED_TIME_UTC, 0L);
+    }
+
     /* Tests_SRS_FILE_UPLOAD_NOTIFICATION_21_003: [If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructor_null_json_failed()
@@ -215,7 +237,7 @@ public class FileUploadNotificationParserTest
         }
     }
 
-    /* Tests_SRS_FILE_UPLOAD_NOTIFICATION_21_005: [If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, `enqueuedTimeUtc`, and `blobSizeInBytes`, the constructor shall throws IllegalArgumentException.] */
+    /* Tests_SRS_FILE_UPLOAD_NOTIFICATION_21_005: [If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, and `enqueuedTimeUtc`, the constructor shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructor_json_missing_deviceId_failed()
     {
@@ -232,7 +254,7 @@ public class FileUploadNotificationParserTest
         new FileUploadNotificationParser(validJson);
     }
 
-    /* Tests_SRS_FILE_UPLOAD_NOTIFICATION_21_005: [If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, `enqueuedTimeUtc`, and `blobSizeInBytes`, the constructor shall throws IllegalArgumentException.] */
+    /* Tests_SRS_FILE_UPLOAD_NOTIFICATION_21_005: [If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, and `enqueuedTimeUtc`, the constructor shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructor_json_missing_BlobUri_failed()
     {
@@ -249,7 +271,7 @@ public class FileUploadNotificationParserTest
         new FileUploadNotificationParser(validJson);
     }
 
-    /* Tests_SRS_FILE_UPLOAD_NOTIFICATION_21_005: [If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, `enqueuedTimeUtc`, and `blobSizeInBytes`, the constructor shall throws IllegalArgumentException.] */
+    /* Tests_SRS_FILE_UPLOAD_NOTIFICATION_21_005: [If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, and `enqueuedTimeUtc`, the constructor shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructor_json_missing_BlobName_failed()
     {
@@ -266,7 +288,7 @@ public class FileUploadNotificationParserTest
         new FileUploadNotificationParser(validJson);
     }
 
-    /* Tests_SRS_FILE_UPLOAD_NOTIFICATION_21_005: [If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, `enqueuedTimeUtc`, and `blobSizeInBytes`, the constructor shall throws IllegalArgumentException.] */
+    /* Tests_SRS_FILE_UPLOAD_NOTIFICATION_21_005: [If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, and `enqueuedTimeUtc`, the constructor shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructor_json_missing_lastUpdateTime_failed()
     {
@@ -283,24 +305,7 @@ public class FileUploadNotificationParserTest
         new FileUploadNotificationParser(validJson);
     }
 
-    /* Tests_SRS_FILE_UPLOAD_NOTIFICATION_21_005: [If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, `enqueuedTimeUtc`, and `blobSizeInBytes`, the constructor shall throws IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_json_missing_blobSize_failed()
-    {
-        // arrange
-        String validJson = "{\n" +
-                "    \"deviceId\": \"" + VALID_DEVICEID + "\",\n" +
-                "    \"blobUri\": \"" + VALID_BLOB_UTI + "\",\n" +
-                "    \"blobName\": \"" + VALID_BLOB_NAME + "\",\n" +
-                "    \"lastUpdatedTime\": \"" + VALID_LAST_UPDATE_TIME + "\",\n" +
-                "    \"enqueuedTimeUtc\": \"" + VALID_ENQUEUED_TIME_UTC + "\"\n" +
-                "}";
-
-        // act
-        new FileUploadNotificationParser(validJson);
-    }
-
-    /* Tests_SRS_FILE_UPLOAD_NOTIFICATION_21_005: [If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, `enqueuedTimeUtc`, and `blobSizeInBytes`, the constructor shall throws IllegalArgumentException.] */
+    /* Tests_SRS_FILE_UPLOAD_NOTIFICATION_21_005: [If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, and `enqueuedTimeUtc`, the constructor shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructor_json_missing_enqueuedTimeUtc_failed()
     {

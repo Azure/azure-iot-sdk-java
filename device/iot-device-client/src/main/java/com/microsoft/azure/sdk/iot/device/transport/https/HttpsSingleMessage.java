@@ -15,35 +15,73 @@ public final class HttpsSingleMessage implements HttpsMessage
 {
     private static final String HTTPS_SINGLE_MESSAGE_CONTENT_TYPE =
             "binary/octet-stream";
+    private static final String HTTPS_SINGLE_JSON_MESSAGE_CONTENT_TYPE =
+            "application/json;charset=utf-8";
     private static final String SYSTEM_PROPERTY_MESSAGE_ID = "messageid";
 
     private byte[] body;
     private boolean base64Encoded;
     private MessageProperty[] properties;
+    private String contentType;
 
     /**
-     * Returns the HTTPS message represented by the service-bound message.
+     * Returns the HTTPS message represented by the service-bound message for
+     * binary octets.  Content type "binary/octet-stream"
      *
      * @param message the service-bound message to be mapped to its HTTPS message
      * equivalent.
      *
      * @return the HTTPS message represented by the service-bound message.
      */
-    public static HttpsSingleMessage parseHttpsMessage(Message message) {
+    public static HttpsSingleMessage parseHttpsMessage(Message message)
+    {
         HttpsSingleMessage httpsMsg = new HttpsSingleMessage();
+
+        // Codes_SRS_HTTPSSINGLEMESSAGE_21_002: [The parsed HttpsSingleMessage shall set the contentType as `binary/octet-stream`.]
+        httpsMsg.contentType = HTTPS_SINGLE_MESSAGE_CONTENT_TYPE;
+
+        parser(httpsMsg, message);
+        return httpsMsg;
+    }
+
+    /**
+     * Returns the HTTPS message represented by the service-bound message for
+     * application json format. Content type "application/json;charset=utf-8"
+     *
+     * @param message the service-bound message to be mapped to its HTTPS message
+     * equivalent.
+     *
+     * @return the HTTPS message represented by the service-bound message.
+     */
+    public static HttpsSingleMessage parseHttpsJsonMessage(Message message)
+    {
+        HttpsSingleMessage httpsMsg = new HttpsSingleMessage();
+
+        // Codes_SRS_HTTPSSINGLEMESSAGE_21_017: [The parsed HttpsSingleMessage shall set the contentType as `application/json;charset=utf-8`.]
+        httpsMsg.contentType = HTTPS_SINGLE_JSON_MESSAGE_CONTENT_TYPE;
+
+        parser(httpsMsg, message);
+        return httpsMsg;
+    }
+
+    private static void parser(HttpsSingleMessage httpsMsg, Message message)
+    {
         int systemPropertyLength = 0;
 
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_001: [The parsed HttpsSingleMessage shall have a copy of the original message body as its body.]
+        // Codes_SRS_HTTPSSINGLEMESSAGE_21_016: [The parsed HttpsSingleMessage shall have a copy of the original message body as its body.]
         byte[] msgBody = message.getBytes();
         httpsMsg.body = Arrays.copyOf(msgBody, msgBody.length);
 
         // Codes_SRS_HTTPSSINGLEMESSAGE_21_014: [If the message contains messageId, the parsed HttpsSingleMessage shall add the property 'iothub-messageid' with the messageId value.]
+        // Codes_SRS_HTTPSSINGLEMESSAGE_21_019: [If the message contains messageId, the parsed HttpsSingleMessage shall add the property 'iothub-messageid' with the messageId value.]
         if(message.getMessageId() != null)
         {
             systemPropertyLength ++;
         }
 
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_003: [The parsed HttpsSingleMessage shall add the prefix 'iothub-app-' to each of the message properties.]
+        // Codes_SRS_HTTPSSINGLEMESSAGE_21_018: [The parsed HttpsSingleMessage shall add the prefix 'iothub-app-' to each of the message properties.]
         MessageProperty[] msgProperties = message.getProperties();
         httpsMsg.properties = new MessageProperty[msgProperties.length + systemPropertyLength];
         int countProperty;
@@ -61,8 +99,6 @@ public final class HttpsSingleMessage implements HttpsMessage
                     HTTPS_SYSTEM_PROPERTY_PREFIX + SYSTEM_PROPERTY_MESSAGE_ID,
                     message.getMessageId());
         }
-
-        return httpsMsg;
     }
 
 
@@ -141,14 +177,14 @@ public final class HttpsSingleMessage implements HttpsMessage
     }
 
     /**
-     * Returns the message content-type as 'binary/octet-stream'.
+     * Returns the message content-type.
      *
-     * @return the message content-type as 'binary/octet-stream'.
+     * @return the message content-type.
      */
     public String getContentType()
     {
         // Codes_SRS_HTTPSSINGLEMESSAGE_11_011: [The function shall return the message content-type as 'binary/octet-stream'.]
-        return HTTPS_SINGLE_MESSAGE_CONTENT_TYPE;
+        return this.contentType;
     }
 
     /**

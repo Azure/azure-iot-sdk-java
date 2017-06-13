@@ -69,7 +69,7 @@ public class FileUploadNotificationParser
     public FileUploadNotificationParser(String json) throws IllegalArgumentException
     {
         /* Codes_SRS_FILE_UPLOAD_NOTIFICATION_21_001: [The constructor shall create an instance of the FileUploadNotification.] */
-        Gson gson = new GsonBuilder().serializeNulls().create();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
         FileUploadNotificationParser fileUploadNotificationParser;
 
         /* Codes_SRS_FILE_UPLOAD_NOTIFICATION_21_003: [If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
@@ -84,13 +84,22 @@ public class FileUploadNotificationParser
         }
 
         /* Codes_SRS_FILE_UPLOAD_NOTIFICATION_21_004: [If the provided json do not contains a valid `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, `enqueuedTimeUtc`, and `blobSizeInBytes`, the constructor shall throws IllegalArgumentException.] */
-        /* Codes_SRS_FILE_UPLOAD_NOTIFICATION_21_005: [If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, `enqueuedTimeUtc`, and `blobSizeInBytes`, the constructor shall throws IllegalArgumentException.] */
+        /* Codes_SRS_FILE_UPLOAD_NOTIFICATION_21_005: [If the provided json do not contains one of the keys `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, and `enqueuedTimeUtc`, the constructor shall throws IllegalArgumentException.] */
         ParserUtility.validateStringUTF8(fileUploadNotificationParser.deviceId);
         ParserUtility.validateStringUTF8(fileUploadNotificationParser.blobUri);
         ParserUtility.validateBlobName(fileUploadNotificationParser.blobName);
         ParserUtility.validateStringUTF8(fileUploadNotificationParser.enqueuedTimeUtc);
         ParserUtility.validateStringUTF8(fileUploadNotificationParser.lastUpdatedTime);
-        ParserUtility.validateObject(fileUploadNotificationParser.blobSizeInBytes);
+
+        /* Codes_SRS_FILE_UPLOAD_NOTIFICATION_21_012: [If the provided json do not the keys `blobSizeInBytes`, the constructor shall assume the default value 0 for the blob size.] */
+        if(fileUploadNotificationParser.blobSizeInBytes == null)
+        {
+            fileUploadNotificationParser.blobSizeInBytes = 0L;
+        }
+        else if(fileUploadNotificationParser.blobSizeInBytes < 0)
+        {
+            throw new IllegalArgumentException("negative size");
+        }
 
         /* Codes_SRS_FILE_UPLOAD_NOTIFICATION_21_002: [The constructor shall parse the provided json and initialize `correlationId`, `hostName`, `containerName`, `blobName`, and `sasToken` using the information in the json.] */
         this.deviceId = fileUploadNotificationParser.deviceId;

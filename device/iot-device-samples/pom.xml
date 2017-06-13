@@ -19,6 +19,7 @@
         <module>send-receive-sample</module>
         <module>device-twin-sample</module>
         <module>device-method-sample</module>
+        <module>file-upload-sample</module>
     </modules>
     <dependencies>
         <dependency>
