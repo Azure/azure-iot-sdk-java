@@ -90,9 +90,9 @@ public class JobsParser
             throw new IllegalArgumentException("Null cloudToDeviceMethod parameter");
         }
 
-        /* Codes_SRS_JOBSPARSER_21_001: [The constructor shall evaluate and store the commons parameters using the internal function commonFields.] */
+        /* Codes_SRS_JOBSPARSER_21_001: [The constructor shall evaluate and store the commons parameters using the internal function validateCommonFields.] */
         /* Codes_SRS_JOBSPARSER_21_002: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
-        commonFields(jobId, queryCondition, startTime, maxExecutionTimeInSeconds);
+        validateCommonFields(jobId, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         /* Codes_SRS_JOBSPARSER_21_003: [The constructor shall store the JsonElement for the cloudToDeviceMethod.] */
         this.cloudToDeviceMethod = cloudToDeviceMethod.toJsonElement();
@@ -126,9 +126,9 @@ public class JobsParser
             throw new IllegalArgumentException("Null twinParser parameter");
         }
 
-        /* Codes_SRS_JOBSPARSER_21_007: [The constructor shall evaluate and store the commons parameters using the internal function commonFields.] */
+        /* Codes_SRS_JOBSPARSER_21_007: [The constructor shall evaluate and store the commons parameters using the internal function validateCommonFields.] */
         /* Codes_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
-        commonFields(jobId, queryCondition, startTime, maxExecutionTimeInSeconds);
+        validateCommonFields(jobId, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         /* Codes_SRS_JOBSPARSER_21_009: [The constructor shall store the JsonElement for the updateTwin.] */
         this.updateTwin = updateTwin.toJsonElement();
@@ -163,34 +163,34 @@ public class JobsParser
      * @param maxExecutionTimeInSeconds is the maximum time that the device can expend to execute the job. Cannot be negative
      * @throws IllegalArgumentException if one of the parameter is not valid.
      */
-    private void commonFields(
+    private void validateCommonFields(
             String jobId, String queryCondition, Date startTime, long maxExecutionTimeInSeconds)
             throws IllegalArgumentException
     {
-        /* Codes_SRS_JOBSPARSER_21_015: [If the jobId is null, empty, or invalid, the commonFields shall throws IllegalArgumentException.] */
+        /* Codes_SRS_JOBSPARSER_21_015: [If the jobId is null, empty, or invalid, the validateCommonFields shall throws IllegalArgumentException.] */
         ParserUtility.validateStringUTF8(jobId);
 
-        /* Codes_SRS_JOBSPARSER_21_016: [If the queryCondition is null, empty, or invalid, the commonFields shall throws IllegalArgumentException.] */
+        /* Codes_SRS_JOBSPARSER_21_016: [If the queryCondition is null, empty, or invalid, the validateCommonFields shall throws IllegalArgumentException.] */
         ParserUtility.validateStringUTF8(queryCondition);
 
-        /* Codes_SRS_JOBSPARSER_21_019: [If the startTime is null, the commonFields shall throws IllegalArgumentException.] */
+        /* Codes_SRS_JOBSPARSER_21_019: [If the startTime is null, the validateCommonFields shall throws IllegalArgumentException.] */
         if (startTime == null)
         {
             throw new IllegalArgumentException("Null start time");
         }
 
-        /* Codes_SRS_JOBSPARSER_21_017: [If the maxExecutionTimeInSeconds is negative, the commonFields shall throws IllegalArgumentException.] */
+        /* Codes_SRS_JOBSPARSER_21_017: [If the maxExecutionTimeInSeconds is negative, the validateCommonFields shall throws IllegalArgumentException.] */
         if(maxExecutionTimeInSeconds < 0)
         {
             throw new IllegalArgumentException("Negative max execution time in seconds");
         }
 
-        /* Codes_SRS_JOBSPARSER_21_014: [The commonFields shall store the jobId, queryCondition, and maxExecutionTimeInSeconds.] */
+        /* Codes_SRS_JOBSPARSER_21_014: [The validateCommonFields shall store the jobId, queryCondition, and maxExecutionTimeInSeconds.] */
         this.jobId = jobId;
         this.queryCondition = queryCondition;
         this.maxExecutionTimeInSeconds = maxExecutionTimeInSeconds;
 
-        /* Codes_SRS_JOBSPARSER_21_018: [The commonFields shall format startTime as a String and store it.] */
+        /* Codes_SRS_JOBSPARSER_21_018: [The validateCommonFields shall format startTime as a String and store it.] */
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
         dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
         this.startTime = dateFormat.format(startTime);

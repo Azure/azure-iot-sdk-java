@@ -6,18 +6,16 @@ import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 
 import mockit.Deencapsulation;
-import mockit.Mock;
-import mockit.NonStrictExpectations;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.util.Date;
 
 /**
- * Unit tests for Method serializer
+ * Unit tests for jobs serializer
+ * 100% methods, 100% lines covered
  */
 public class JobsParserTest
 {
