@@ -5,6 +5,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -16,6 +17,8 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static junit.framework.TestCase.fail;
 
 /**
  * Unit tests for DeviceClient.
@@ -30,6 +33,10 @@ public class DeviceClientTest
 
     @Mocked
     DeviceIO mockDeviceIO;
+
+    @Mocked
+    IotHubSasToken mockIoTHubSasToken;
+
 
     private static long SEND_PERIOD_MILLIS = 10L;
     private static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
@@ -1734,5 +1741,80 @@ public class DeviceClientTest
 
             }
         };
+    }
+
+    //Tests_SRS_DEVICECLIENT_34_046: [If The provided connection string contains an expired SAS token, throw a SecurityException.]
+    @Test (expected = SecurityException.class)
+    public void DeviceClientInitializedWithExpiredTokenThrowsSecurityException() throws SecurityException, URISyntaxException, IOException
+    {
+        //This token will always be expired
+        final Long expiryTime = 0L;
+        final String expiredConnString = "HostName=iothub.device.com;DeviceId=2;SharedAccessSignature=SharedAccessSignature sr=hub.azure-devices.net%2Fdevices%2F2&sig=3V1oYPdtyhGPHDDpjS2SnwxoU7CbI%2BYxpLjsecfrtgY%3D&se=" + expiryTime;
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        new NonStrictExpectations()
+        {
+            {
+                IotHubSasToken.isSasTokenExpired(anyString);
+                result = true;
+
+                mockConfig.getSharedAccessToken();
+                result = expiredConnString;
+            }
+        };
+
+        // act
+        DeviceClient client = new DeviceClient(expiredConnString, protocol);
+    }
+
+    //Tests_SRS_DEVICECLIENT_34_044: [**If the SAS token has expired before this call, throw a Security Exception**]
+    @Test (expected = SecurityException.class)
+    public void tokenExpiresAfterDeviceClientInitializedBeforeOpen() throws SecurityException, URISyntaxException, IOException
+    {
+        final Long expiryTime = Long.MAX_VALUE;
+        final String connString = "HostName=iothub.device.com;DeviceId=2;SharedAccessSignature=SharedAccessSignature sr=hub.azure-devices.net%2Fdevices%2F2&sig=3V1oYPdtyhGPHDDpjS2SnwxoU7CbI%2BYxpLjsecfrtgY%3D&se=" + expiryTime;
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        new NonStrictExpectations()
+        {
+            {
+                IotHubSasToken.isSasTokenExpired(anyString);
+                result = true;
+
+                mockConfig.getSharedAccessToken();
+                result = "SharedAccessSignature sr=hub.azure-devices.net%2Fdevices%2F2&sig=3V1oYPdtyhGPHDDpjS2SnwxoU7CbI%2BYxpLjsecfrtgY%3D&se=" + expiryTime;
+            }
+        };
+
+        // act
+        client.open();
+        //client.sendEventAsync(new Message("hello world"), null, null);
+    }
+
+    //Tests_SRS_DEVICECLIENT_34_045: [**If the SAS token has expired before this call, throw a Security Exception**]
+    @Test (expected = SecurityException.class)
+    public void tokenExpiresAfterDeviceClientInitializedBeforeSend() throws IOException, URISyntaxException
+    {
+        final Long expiryTime = Long.MAX_VALUE;
+        final String connString = "HostName=iothub.device.com;DeviceId=2;SharedAccessSignature=SharedAccessSignature sr=hub.azure-devices.net%2Fdevices%2F2&sig=3V1oYPdtyhGPHDDpjS2SnwxoU7CbI%2BYxpLjsecfrtgY%3D&se=" + expiryTime;
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        new NonStrictExpectations()
+        {
+            {
+                IotHubSasToken.isSasTokenExpired(anyString);
+                result = true;
+
+                mockConfig.getSharedAccessToken();
+                result = "SharedAccessSignature sr=hub.azure-devices.net%2Fdevices%2F2&sig=3V1oYPdtyhGPHDDpjS2SnwxoU7CbI%2BYxpLjsecfrtgY%3D&se=" + expiryTime;
+            }
+        };
+
+        // act
+        client.sendEventAsync(new Message("hello world"), null, null);
     }
 }

@@ -3,7 +3,10 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import mockit.Deencapsulation;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
@@ -21,6 +24,7 @@ public class IotHubConnectionStringTest
     private static final String VALID_DEVICEID = "testdevice";
     private static final String VALID_SHARED_ACCESS_KEY = "key+adjkl234j52=";
     private static final String VALID_SHARED_ACCESS_TOKEN = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + Long.MAX_VALUE;
+    private static final String EXPIRED_SHARED_ACCESS_TOKEN = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=0";
     private static final String IOTHUB_CONNECTION_STRING_CLASS = "com.microsoft.azure.sdk.iot.device.IotHubConnectionString";
 
     private void assertConnectionString(Object iotHubConnectionString, String expectedHostName,
@@ -536,5 +540,46 @@ public class IotHubConnectionStringTest
         assertEquals(VALID_HUBNAME, Deencapsulation.invoke(iotHubConnectionString, "getHubName"));
         assertEquals(VALID_DEVICEID, Deencapsulation.invoke(iotHubConnectionString, "getDeviceId"));
         assertEquals(VALID_SHARED_ACCESS_TOKEN, Deencapsulation.invoke(iotHubConnectionString, "getSharedAccessToken"));
+    }
+
+    /* Tests_SRS_IOTHUB_CONNECTIONSTRING_34_035: [If the connection string contains an expired SAS Token, throw a SecurityException] */
+    @Test (expected = SecurityException.class)
+    public void IotHubConnectionStringExpiredConnectionStringThrowsSecurityException(@Mocked final IotHubSasToken iotHubSasToken) throws SecurityException, ClassNotFoundException
+    {
+        // arrange
+        final String connString =
+                "HostName=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey;CredentialScope=Device;" +
+                        "DeviceId=" + VALID_DEVICEID + ";SharedAccessSignature=" + EXPIRED_SHARED_ACCESS_TOKEN + ";";
+
+        new NonStrictExpectations()
+        {
+            {
+                iotHubSasToken.isSasTokenExpired(anyString);
+                result = true;
+            }
+        };
+
+        // act
+        Object iotHubConnectionString = Deencapsulation.newInstance(Class.forName(IOTHUB_CONNECTION_STRING_CLASS),
+                new Class[] {String.class}, connString);
+    }
+
+    /* Tests_SRS_IOTHUB_CONNECTIONSTRING_34_036: [If the SAS Token has expired, throw a SecurityException.] */
+    @Test (expected = SecurityException.class)
+    public void IotHubConnectionStringExpiredSharedAccessTokenThrowsSecurityException(@Mocked final IotHubSasToken iotHubSasToken) throws SecurityException, ClassNotFoundException
+    {
+        // arrange
+        new NonStrictExpectations()
+        {
+            {
+                iotHubSasToken.isSasTokenExpired(anyString);
+                result = true;
+            }
+        };
+
+        // act
+        Object iotHubConnectionString = Deencapsulation.newInstance(Class.forName(IOTHUB_CONNECTION_STRING_CLASS),
+                new Class[]{String.class, String.class, String.class, String.class},
+                VALID_HOSTNAME, "test;device", null, EXPIRED_SHARED_ACCESS_TOKEN);
     }
 }

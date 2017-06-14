@@ -45,6 +45,7 @@ public DeviceClient(String connString, IotHubClientProtocol protocol) throws URI
 
 **SRS_DEVICECLIENT_21_005: [**If protocol is null, the function shall throw an IllegalArgumentException.**]**  
 
+**SRS_DEVICECLIENT_34_046: [**If The provided connection string contains an expired SAS token, throw a SecurityException.**]**
 
 ### open
 
@@ -56,6 +57,7 @@ public void open() throws IOException;
 
 **SRS_DEVICECLIENT_21_007: [**If the opening a connection via deviceIO is not successful, the open shall throw IOException.**]**  
 
+**SRS_DEVICECLIENT_34_044: [**If the SAS token has expired before this call, throw a Security Exception**]**
 
 ### close
 
@@ -92,6 +94,8 @@ public void sendEventAsync(Message msg, IotHubEventCallback callback, Object cal
 **SRS_DEVICECLIENT_21_010: [**The sendEventAsync shall asynchronously send the message using the deviceIO connection.**]**  
 
 **SRS_DEVICECLIENT_21_011: [**If starting to send via deviceIO is not successful, the sendEventAsync shall bypass the threw exception.**]**  
+
+**SRS_DEVICECLIENT_34_045: [**If the SAS token has expired before this call, throw a Security Exception**]**
 
 
 ### setMessageCallback

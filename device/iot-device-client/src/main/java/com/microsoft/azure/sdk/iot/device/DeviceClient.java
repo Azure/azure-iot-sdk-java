@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 
 import java.io.Closeable;
 import java.io.IOError;
@@ -143,6 +144,10 @@ public final class DeviceClient implements Closeable
         /* Codes_SRS_DEVICECLIENT_21_003: [The constructor shall save the connection configuration using the object DeviceClientConfig.] */
         this.config = new DeviceClientConfig(iotHubConnectionString);
 
+        /* Codes_SRS_DEVICECLIENT_34_046: [**If The provided connection string contains an expired SAS token, throw a SecurityException.**] */
+        if (this.config.getSharedAccessToken() != null && IotHubSasToken.isSasTokenExpired(this.config.getSharedAccessToken()))
+            throw new SecurityException("Your SasToken is expired");
+
         switch (protocol)
         {
             case HTTPS:
@@ -179,6 +184,10 @@ public final class DeviceClient implements Closeable
      */
     public void open() throws IOException
     {
+        /* Codes_SRS_DEVICECLIENT_34_044: [If the SAS token has expired before this call, throw a Security Exception] */
+        if (this.config.getSharedAccessToken() != null && IotHubSasToken.isSasTokenExpired(this.config.getSharedAccessToken()))
+            throw new SecurityException("Your SasToken is expired");
+
         /* Codes_SRS_DEVICECLIENT_21_006: [The open shall open the deviceIO connection.] */
         /* Codes_SRS_DEVICECLIENT_21_007: [If the opening a connection via deviceIO is not successful, the open shall throw IOException.] */
         this.deviceIO.open();
@@ -250,6 +259,10 @@ public final class DeviceClient implements Closeable
             IotHubEventCallback callback,
             Object callbackContext)
     {
+        /* Codes_SRS_DEVICECLIENT_34_045: [If the SAS token has expired before this call, throw a Security Exception] */
+        if (this.config.getSharedAccessToken() != null && IotHubSasToken.isSasTokenExpired(this.config.getSharedAccessToken()))
+            throw new SecurityException("Your SasToken is expired");
+
         /* Codes_SRS_DEVICECLIENT_21_010: [The sendEventAsync shall asynchronously send the message using the deviceIO connection.] */
         /* Codes_SRS_DEVICECLIENT_21_011: [If starting to send via deviceIO is not successful, the sendEventAsync shall bypass the threw exception.] */
         deviceIO.sendEventAsync(message, callback, callbackContext);
