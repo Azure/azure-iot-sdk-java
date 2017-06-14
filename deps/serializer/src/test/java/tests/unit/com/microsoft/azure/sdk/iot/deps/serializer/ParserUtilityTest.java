@@ -117,6 +117,72 @@ public class ParserUtilityTest
         Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateBlobName", bigBlobName.toString());
     }
 
+    //Tests_SRS_PARSER_UTILITY_25_026: [The validateQuery shall do nothing if the string is valid.]
+    @Test
+    public void validateQuerySucceeds() throws ClassNotFoundException
+    {
+        //arrange
+        final String testQuery = "select * from abc";
+
+        //act
+        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateQuery", testQuery);
+    }
+
+    //Tests_SRS_PARSER_UTILITY_25_027: [The validateQuery shall throw IllegalArgumentException is the provided query is null or empty.]
+    @Test (expected = IllegalArgumentException.class)
+    public void validateQueryInvalidateEmptyThrows() throws ClassNotFoundException
+    {
+        //arrange
+        final String testQuery = "";
+
+        //act
+        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateQuery", testQuery);
+    }
+
+    //Tests_SRS_PARSER_UTILITY_25_027: [The validateQuery shall throw IllegalArgumentException is the provided query is null or empty.]
+    @Test (expected = IllegalArgumentException.class)
+    public void validateQueryInvalidateNullThrows() throws ClassNotFoundException
+    {
+        //arrange
+        final String testQuery = null;
+
+        //act
+        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateQuery", testQuery);
+    }
+
+    //Tests_SRS_PARSER_UTILITY_25_028: [The validateQuery shall throw IllegalArgumentException is the provided query contains non UTF-8 character.]
+    @Test (expected = IllegalArgumentException.class)
+    public void validateQueryInvalidateUTFThrows() throws ClassNotFoundException
+    {
+        //arrange
+        final String testQuery = "select * from \u1234";
+
+        //act
+        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateQuery", testQuery);
+    }
+
+    //Tests_SRS_PARSER_UTILITY_25_029: [The validateQuery shall throw IllegalArgumentException is the provided query does not contain SELECT and FROM.]
+    @Test (expected = IllegalArgumentException.class)
+    public void validateQueryInvalidateFormat1Throws() throws ClassNotFoundException
+    {
+        //arrange
+        final String testQuery = "select *";
+
+        //act
+        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateQuery", testQuery);
+    }
+
+    //Tests_SRS_PARSER_UTILITY_25_029: [The validateQuery shall throw IllegalArgumentException is the provided query does not contain SELECT and FROM.]
+    @Test (expected = IllegalArgumentException.class)
+    public void validateQueryInvalidateFormat2Throws() throws ClassNotFoundException
+    {
+        //arrange
+        final String testQuery = "from abc";
+
+        //act
+        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateQuery", testQuery);
+    }
+
     /* Tests_SRS_PARSER_UTILITY_21_009: [The validateInteger shall do nothing if the object is valid.] */
     @Test
     public void validateObject_integer_success() throws ClassNotFoundException

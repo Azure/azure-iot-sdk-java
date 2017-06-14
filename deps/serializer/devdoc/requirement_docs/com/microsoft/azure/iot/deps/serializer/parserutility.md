@@ -21,6 +21,9 @@ class ParserUtility
     protected static void validateBoolean(Boolean condition) throws IllegalArgumentException;
     protected static void validateKey(String key, boolean allowDollar) throws IllegalArgumentException;
     
+    public static void validateBlobName(String blobName) throws IllegalArgumentException;
+    protected static void validateQuery(String query) throws IllegalArgumentException;
+    
     protected static Date getDateTimeUtc(String dataTime) throws IllegalArgumentException;
     protected static Date getDateTimeOffset(String dataTime) throws IllegalArgumentException;
 }
@@ -48,13 +51,28 @@ protected static void validateStringUTF8(String str) throws IllegalArgumentExcep
  * @param blobName is the blob name to be validated.
  * @throws IllegalArgumentException if the blob name do not fit the criteria.
  */
-protected static void validateBlobName(String blobName) throws IllegalArgumentException
+public static void validateBlobName(String blobName) throws IllegalArgumentException
 ```
 **SRS_PARSER_UTILITY_21_004: [**The validateBlobName shall do nothing if the string is valid.**]**  
 **SRS_PARSER_UTILITY_21_005: [**The validateBlobName shall throw IllegalArgumentException is the provided blob name is null or empty.**]**  
 **SRS_PARSER_UTILITY_21_006: [**The validateBlobName shall throw IllegalArgumentException is the provided blob name contains at least one not UTF-8 character.**]**  
 **SRS_PARSER_UTILITY_21_007: [**The validateBlobName shall throw IllegalArgumentException is the provided blob name contains more than 1024 characters.**]**  
 **SRS_PARSER_UTILITY_21_008: [**The validateBlobName shall throw IllegalArgumentException is the provided blob name contains more than 254 path segments.**]**  
+
+### validateQuery
+```java
+/**
+ * Helper to validate if the provided blob name is not null, empty, and valid.
+ *
+ * @param blobName is the blob name to be validated.
+ * @throws IllegalArgumentException if the blob name do not fit the criteria.
+ */
+protected static void validateQuery(String query) throws IllegalArgumentException;
+```
+**SRS_PARSER_UTILITY_25_026: [**The validateQuery shall do nothing if the string is valid.**]**  
+**SRS_PARSER_UTILITY_25_027: [**The validateQuery shall throw IllegalArgumentException is the provided query is null or empty.**]**  
+**SRS_PARSER_UTILITY_25_028: [**The validateQuery shall throw IllegalArgumentException is the provided query contains non UTF-8 character.**]**  
+**SRS_PARSER_UTILITY_25_029: [**The validateQuery shall throw IllegalArgumentException is the provided query does not contain SELECT and FROM.**]**  
 
 ### validateObject
 ```java
