@@ -160,17 +160,29 @@ public Object getPayload()
  */
 public String toJson()
 ```
-**SRS_METHODPARSER_21_014: [**The toJson shall create a String with the full information in the method collection using json format.**]**  
-**SRS_METHODPARSER_21_015: [**The toJson shall include name as `methodName` in the json.**]**  
-**SRS_METHODPARSER_21_016: [**The toJson shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.**]**  
-**SRS_METHODPARSER_21_017: [**If the responseTimeout is null, the toJson shall not include the `responseTimeoutInSeconds` in the json.**]**  
-**SRS_METHODPARSER_21_031: [**The toJson shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.**]**  
-**SRS_METHODPARSER_21_032: [**If the connectTimeout is null, the toJson shall not include the `connectTimeoutInSeconds` in the json.**]**  
-**SRS_METHODPARSER_21_018: [**The class toJson include payload as `payload` in the json.**]**  
-**SRS_METHODPARSER_21_019: [**If the payload is null, the toJson shall include `payload` with value `null`.**]**  
-**SRS_METHODPARSER_21_024: [**The class toJson include status as `status` in the json.**]**  
-**SRS_METHODPARSER_21_025: [**If the status is null, the toJson shall include `status` as `null`.**]**  
-**SRS_METHODPARSER_21_026: [**If the method operation is `invoke`, the toJson shall include the full method information in the json.**]**  
+**SRS_METHODPARSER_21_014: [**The toJson shall create a String with the full information in the method collection using json format, by using the toJsonElement.**]**  
+
+
+### toJsonElement
+```java
+/**
+ * Create a String with a json content that represents all the information in the method collection.
+ *
+ * @return String with the json content.
+ * @throws IllegalArgumentException This exception is thrown if the one of the provided information do not fits the requirements.
+ */
+public JsonElement toJsonElement()
+```
+**SRS_METHODPARSER_21_015: [**The toJsonElement shall include name as `methodName` in the json.**]**  
+**SRS_METHODPARSER_21_016: [**The toJsonElement shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.**]**  
+**SRS_METHODPARSER_21_017: [**If the responseTimeout is null, the toJsonElement shall not include the `responseTimeoutInSeconds` in the json.**]**  
+**SRS_METHODPARSER_21_031: [**The toJsonElement shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.**]**  
+**SRS_METHODPARSER_21_032: [**If the connectTimeout is null, the toJsonElement shall not include the `connectTimeoutInSeconds` in the json.**]**  
+**SRS_METHODPARSER_21_018: [**The class toJsonElement include payload as `payload` in the json.**]**  
+**SRS_METHODPARSER_21_019: [**If the payload is null, the toJsonElement shall include `payload` with value `null`.**]**  
+**SRS_METHODPARSER_21_024: [**The class toJsonElement include status as `status` in the json.**]**  
+**SRS_METHODPARSER_21_025: [**If the status is null, the toJsonElement shall include `status` as `null`.**]**  
+**SRS_METHODPARSER_21_026: [**If the method operation is `invoke`, the toJsonElement shall include the full method information in the json.**]**  
 Ex:
 ```json
 {
@@ -183,7 +195,7 @@ Ex:
     }
 }
 ```
-**SRS_METHODPARSER_21_027: [**If the method operation is `response`, the toJson shall parse both status and payload.**]**  
+**SRS_METHODPARSER_21_027: [**If the method operation is `response`, the toJsonElement shall parse both status and payload.**]**  
 Ex:
 ```json
 {
@@ -191,7 +203,7 @@ Ex:
     "payload": {"AnyValidPayload" : "" }
 }
 ```
-**SRS_METHODPARSER_21_028: [**If the method operation is `payload`, the toJson shall parse only the payload.**]**  
+**SRS_METHODPARSER_21_028: [**If the method operation is `payload`, the toJsonElement shall parse only the payload.**]**  
 Ex:
 ```json
 {
@@ -199,4 +211,4 @@ Ex:
     "input2": "anotherInput"
 }
 ```
-**SRS_METHODPARSER_21_036: [**If the method operation is `none`, the toJson shall throw IllegalArgumentException.**]**  
+**SRS_METHODPARSER_21_036: [**If the method operation is `none`, the toJsonElement shall throw IllegalArgumentException.**]**  

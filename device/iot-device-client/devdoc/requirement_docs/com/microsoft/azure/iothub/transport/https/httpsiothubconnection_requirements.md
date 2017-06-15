@@ -14,6 +14,7 @@ public class HttpsIotHubConnection
     public HttpsIotHubConnection(DeviceClientConfig config);
 
     public ResponseMessage sendEvent(HttpsMessage msg) throws IOException;
+    public ResponseMessage sendHttpsMessage(HttpsMessage httpsMessage, HttpsMethod httpsMethod, String httpsPath) throws IOException;
 
     public Message receiveMessage() throws IOException;
     public void sendMessageResult(IotHubMessageResult result) throws IOException;
@@ -57,6 +58,35 @@ public ResponseMessage sendEvent(HttpsMessage msg) throws IOException;
 **SRS_HTTPSIOTHUBCONNECTION_11_010: [**The function shall return a ResponseMessage with the status and payload.**]**
 
 **SRS_HTTPSIOTHUBCONNECTION_11_012: [**If the IoT Hub could not be reached, the function shall throw an IOException.**]**
+
+
+### sendHttpsMessage
+
+```Java
+public ResponseMessage sendHttpsMessage(HttpsMessage httpsMessage, HttpsMethod httpsMethod, String httpsPath) throws IOException
+```
+
+**SRS_HTTPSIOTHUBCONNECTION_21_041: [**The function shall send a request to the URL https://[iotHubHostname]/devices/[deviceId]/[path]?api-version=2016-02-03.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_21_042: [**The function shall send a `httpsMethod` request.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_21_043: [**The function shall set the request body to the message body.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_21_044: [**The function shall write each message property as a request header.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_21_045: [**The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_21_046: [**The function shall set the IotHub SSL context by calling setSSLContext on the request.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_21_047: [**The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.**]**  
+
+**SRS_HTTPSIOTHUBCONNECTION_21_048: [**The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/[path]'.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_21_049: [**The function shall set the header field 'content-type' to be the message content type.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_21_050: [**The function shall return a ResponseMessage with the status and payload.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_21_051: [**If the IoT Hub could not be reached, the function shall throw an IOException.**]**
 
 
 ### receiveMessage

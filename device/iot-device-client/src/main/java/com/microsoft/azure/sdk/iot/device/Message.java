@@ -374,7 +374,7 @@ public class Message
 
     /**
      * Setter for the Message type
-     * @param type The enum containing the the Message type value
+     * @param type The enum containing the Message type value
      */
     public void setMessageType(MessageType type)
     {

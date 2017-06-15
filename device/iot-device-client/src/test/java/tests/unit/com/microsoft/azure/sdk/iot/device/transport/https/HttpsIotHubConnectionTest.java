@@ -247,6 +247,10 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
+                new IotHubEventUri((String)any, (String)any);
+                result = mockUri;
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any);
+                result = mockRequest;
                 mockUri.getPath();
                 result = path;
             }
@@ -273,6 +277,10 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
+                new IotHubEventUri((String)any, (String)any);
+                result = mockUri;
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any);
+                result = mockRequest;
                 mockMsg.getContentType();
                 result = contentType;
             }
@@ -334,6 +342,331 @@ public class HttpsIotHubConnectionTest
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
         conn.sendEvent(mockMsg);
+    }
+
+    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_041: [The function shall send a request to the URL https://[iotHubHostname]/devices/[deviceId]/[path]?api-version=2016-02-03.]
+    @Test
+    public void sendHttpsMessageHasCorrectUrl(
+            @Mocked final IotHubUri mockUri) throws IOException
+    {
+        final String iotHubHostname = "test.iothub";
+        final String deviceId = "test-device-id";
+        final String eventUri = "test-event-uri";
+        final String uriPath = "/files";
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getIotHubHostname();
+                result = iotHubHostname;
+                mockConfig.getDeviceId();
+                result = deviceId;
+                new IotHubUri(iotHubHostname, deviceId, uriPath);
+                result = mockUri;
+                mockUri.toString();
+                result = eventUri;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+
+        final String expectedUrl = "https://" + eventUri;
+        new Verifications()
+        {
+            {
+                new URL(expectedUrl);
+            }
+        };
+    }
+
+    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_042: [The function shall send a `httpsMethod` request.]
+    @Test
+    public void sendHttpsMessageSendsPostRequest(
+            @Mocked final IotHubUri mockUri) throws IOException
+    {
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        final String uriPath = "/files";
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+
+        new Verifications()
+        {
+            {
+                new HttpsRequest((URL) any, httpsMethod, (byte[]) any);
+            }
+        };
+    }
+
+    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_043: [The function shall set the request body to the message body.]
+    @Test
+    public void sendHttpsMessageSendsMessageBody(
+            @Mocked final IotHubUri mockUri) throws IOException
+    {
+        final byte[] body = { 0x61, 0x62 };
+        final String uriPath = "/files";
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                mockMsg.getBody();
+                result = body;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+
+        final byte[] expectedBody = body;
+        new Verifications()
+        {
+            {
+                new HttpsRequest((URL) any, (HttpsMethod) any, expectedBody);
+            }
+        };
+    }
+
+    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_044: [The function shall write each message property as a request header.]
+    @Test
+    public void sendHttpsMessageSendsMessageProperties(
+            @Mocked final IotHubUri mockUri,
+            @Mocked final MessageProperty mockProperty) throws IOException
+    {
+        final MessageProperty[] properties = { mockProperty };
+        final String propertyName = "test-property-name";
+        final String propertyValue = "test-property-value";
+        final String uriPath = "/files";
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                mockMsg.getProperties();
+                result = properties;
+                mockProperty.getName();
+                result = propertyName;
+                mockProperty.getValue();
+                result = propertyValue;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+
+        final String expectedPropertyName = propertyName;
+        final String expectedPropertyValue = propertyValue;
+        new Verifications()
+        {
+            {
+                mockRequest.setHeaderField(expectedPropertyName,
+                        expectedPropertyValue);
+            }
+        };
+    }
+
+    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_045: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
+    @Test
+    public void sendHttpsMessageSetsReadTimeout(@Mocked final IotHubUri mockUri) throws IOException
+    {
+        final int readTimeoutMillis = 10;
+        final String uriPath = "/files";
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getReadTimeoutMillis();
+                result = readTimeoutMillis;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+
+        final int expectedReadTimeoutMillis = readTimeoutMillis;
+        new Verifications()
+        {
+            {
+                mockRequest.setReadTimeoutMillis(expectedReadTimeoutMillis);
+            }
+        };
+    }
+
+    //Codes_SRS_HTTPSIOTHUBCONNECTION_21_046: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
+    @Test
+    public void sendHttpsMessageSetsIotHubSSLContext(@Mocked final IotHubUri mockUri,
+                                              @Mocked final IotHubSSLContext mockContext) throws IOException
+    {
+        final String uriPath = "/files";
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getIotHubSSLContext();
+                result = mockContext;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+
+        new Verifications()
+        {
+            {
+                mockRequest.setSSLContext(mockContext);
+                times = 1;
+            }
+        };
+    }
+
+    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_047: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
+    @Test
+    public void sendHttpsMessageSetsAuthToSasToken(@Mocked final IotHubUri mockUri) throws IOException
+    {
+        final String iotHubHostname = "test-iothubname";
+        final String deviceId = "test-device-key";
+        final String deviceKey = "test-device-key";
+        final String tokenStr = "test-token-str";
+        final String uriPath = "/files";
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getIotHubHostname();
+                result = iotHubHostname;
+                mockConfig.getDeviceId();
+                result = deviceId;
+                mockConfig.getDeviceKey();
+                result = deviceKey;
+                new IotHubSasToken(mockConfig, anyLong);
+                result = mockToken;
+                mockToken.toString();
+                result = tokenStr;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+
+        final String expectedTokenStr = tokenStr;
+        new Verifications()
+        {
+            {
+                mockRequest.setHeaderField(withMatch("(?i)authorization"),
+                        expectedTokenStr);
+            }
+        };
+    }
+
+    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_048: [The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/[path]'.]
+    @Test
+    public void sendHttpsMessageSetsIotHubToToPath(@Mocked final IotHubUri mockUri) throws IOException
+    {
+        final String uriPath = "/files";
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        final String path = "test-path";
+        new NonStrictExpectations()
+        {
+            {
+                new IotHubUri((String)any, (String)any, uriPath);
+                result = mockUri;
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any);
+                result = mockRequest;
+                mockUri.getPath();
+                result = path;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+
+        new Verifications()
+        {
+            {
+                mockRequest.setHeaderField(withMatch("(?i)iothub-to"), path);
+                times = 1;
+            }
+        };
+    }
+
+    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_049: [The function shall set the header field 'content-type' to be the message content type.]
+    @Test
+    public void sendHttpsMessageSetsContentTypeCorrectly(@Mocked final IotHubUri mockUri) throws IOException
+    {
+        final String contentType = "test-content-type";
+        final String uriPath = "/files";
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                new IotHubUri((String)any, (String)any, uriPath);
+                result = mockUri;
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any);
+                result = mockRequest;
+                mockMsg.getContentType();
+                result = contentType;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+
+        final String expectedContentType = contentType;
+        new Verifications()
+        {
+            {
+                mockRequest.setHeaderField(withMatch("(?i)content-type"),
+                        expectedContentType);
+            }
+        };
+    }
+
+    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_050: [The function shall return a ResponseMessage with the status and payload.]
+    @Test
+    public void sendHttpsMessageReturnsCorrectResponse(@Mocked final IotHubUri mockUri) throws IOException
+    {
+        final byte[] body = {'A', 'B', 'C', '\0'};
+        final int statusVal = 200;
+        final String uriPath = "/files";
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        final IotHubStatusCode status = IotHubStatusCode.getIotHubStatusCode(statusVal);
+        new NonStrictExpectations()
+        {
+            {
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any);
+                result = mockRequest;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getBody();
+                result = body;
+                mockResponse.getStatus();
+                result = statusVal;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+
+        ResponseMessage testResponse = conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+
+        assertThat(testResponse.getStatus(), is(status));
+        assertThat(testResponse.getBytes(), is(body));
+    }
+
+    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_051: [If the IoT Hub could not be reached, the function shall throw an IOException.]
+    @Test(expected = IOException.class)
+    public void sendHttpsMessageThrowsIOExceptionIfRequestFails(@Mocked final IotHubUri mockUri) throws IOException
+    {
+        final String uriPath = "/files";
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                mockRequest.send();
+                result = new IOException();
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
     }
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_013: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03'.]

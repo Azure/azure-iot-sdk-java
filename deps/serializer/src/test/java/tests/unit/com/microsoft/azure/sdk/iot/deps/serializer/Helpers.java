@@ -6,9 +6,15 @@ package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
+import java.util.TimeZone;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.*;
 
 /**
@@ -16,6 +22,10 @@ import static org.junit.Assert.*;
  */
 public class Helpers
 {
+    private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'";
+    private static final String TIMEZONE = "UTC";
+    private static final long MAX_TIME_ERROR_IN_MILLISECONDS = 100L;
+
     /**
      * Test helper, will throw if the actual map do not fits the expected one. This helper will
      *              test maps and sub-maps.
@@ -71,8 +81,8 @@ public class Helpers
      * Test helper, will throw if the actual json do not fits the expected json. Better than compare the String,
      *              because field positions can be different.
      *
-     * @param actualJson
-     * @param expectedJson
+     * @param actualJson is a String with a json to compared
+     * @param expectedJson is a String with a valid json
      */
     protected static void assertJson(String actualJson, String expectedJson)
     {
@@ -96,6 +106,101 @@ public class Helpers
                 assertEquals(actual, expected);
             }
         }
+    }
+
+    /**
+     * Test helper, will throw if the string contains invalid data and time, or the
+     *              difference between data and time for both strings is bigger than 100 milliseconds.
+     * @param dt1Str is the first string with data and time
+     * @param dt2Str is the second string with data and time.
+     */
+    protected static void assertDateWithError(String dt1Str, String dt2Str)
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
+        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
+        Date dt1 = null;
+        Date dt2 = null;
+
+        try
+        {
+            dt1 = dateFormat.parse(dt1Str);
+            dt2 = dateFormat.parse(dt2Str);
+        }
+        catch (ParseException e)
+        {
+            assert(true);
+        }
+
+        long error = Math.abs(dt1.getTime()-dt2.getTime());
+
+        assertThat(error, lessThanOrEqualTo(MAX_TIME_ERROR_IN_MILLISECONDS));
+    }
+
+    /**
+     * Test helper, will throw if the string contains invalid data and time, or the
+     *              difference between data and time and the data and time in the string
+     *              is bigger than 100 milliseconds.
+     * @param dt1 is the data and time
+     * @param dt2Str is the string with data and time.
+     */
+    protected static void assertDateWithError(Date dt1, String dt2Str)
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
+        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
+        Date dt2 = null;
+
+        try
+        {
+            dt2 = dateFormat.parse(dt2Str);
+        }
+        catch (ParseException e)
+        {
+            assert(true);
+        }
+
+        long error = Math.abs(dt1.getTime()-dt2.getTime());
+
+        assertThat(error, lessThanOrEqualTo(MAX_TIME_ERROR_IN_MILLISECONDS));
+    }
+
+    /**
+     * Test helper, will throw if the string contains invalid data and time, or the
+     *              difference between the data and time in the string and the actual
+     *              data and time is bigger than 100 milliseconds.
+     * @param dt1Str is the string with data and time
+     */
+    protected static void assertNowWithError(String dt1Str)
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
+        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
+        Date dt1 = null;
+        Date dt2 = new Date();
+
+        try
+        {
+            dt1 = dateFormat.parse(dt1Str);
+        }
+        catch (ParseException e)
+        {
+            assert(true);
+        }
+
+        long error = Math.abs(dt1.getTime()-dt2.getTime());
+
+        assertThat(error, lessThanOrEqualTo(MAX_TIME_ERROR_IN_MILLISECONDS));
+    }
+
+    /**
+     * Return a string with the provided date and time in the UTC format.
+     *
+     * @param date is the date and time to be format in the string.
+     * @return String with the date and time in UTC format.
+     */
+    protected static String formatUTC(Date date)
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
+        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
+        return dateFormat.format(date);
     }
 
 }

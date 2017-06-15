@@ -20,6 +20,9 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     public URL getUrlTwin(String deviceId) throws MalformedURLException, IllegalArgumentException;
     public URL getUrlTwinTags(String deviceId) throws MalformedURLException, IllegalArgumentException;
     public URL getUrlTwinDesired(String deviceId) throws MalformedURLException, IllegalArgumentException;
+    public URL getUrlJobs(String jobId) throws MalformedURLException, IllegalArgumentException;
+    public URL getUrlQuery() throws MalformedURLException, IllegalArgumentException;
+    public URL getUrlJobsCancel(String jobId) throws MalformedURLException, IllegalArgumentException;
     public String toString();
 }
 ```
@@ -112,3 +115,31 @@ public URL getUrlMethod(String deviceId) throws MalformedURLException, IllegalAr
 **SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_016: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
 
 **SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_017: [** The function shall create a URL object from the given deviceId using the following format: https:hostname/twins/deviceId/methods/ **]**
+
+
+### getUrlJobs
+
+```java
+public URL getUrlJobs(String jobId) throws MalformedURLException, IllegalArgumentException;
+```
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_018: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
+
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_019: [** The function shall create a URL object from the given jobId using the following format: `https:hostname/jobs/v2/jobId?api-version=2016-11-14` **]**
+
+
+### getUrlQuery
+
+```java
+public URL getUrlQuery() throws MalformedURLException, IllegalArgumentException;
+```
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_022: [** The function shall create a URL object from the given jobId using the following format: `https:hostname/jobs/v2/query?api-version=2016-11-14` **]**
+
+
+### getUrlJobsCancel
+
+```java
+public URL getUrlJobsCancel(String jobId) throws MalformedURLException, IllegalArgumentException;
+```
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_020: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
+
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_021: [** The function shall create a URL object from the given jobId using the following format: `https:hostname/jobs/v2/jobId/cancel?api-version=2016-11-14` **]**

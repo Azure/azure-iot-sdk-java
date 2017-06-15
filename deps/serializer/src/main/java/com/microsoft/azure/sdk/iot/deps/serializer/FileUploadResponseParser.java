@@ -56,7 +56,7 @@ public class FileUploadResponseParser
     public FileUploadResponseParser(String json) throws IllegalArgumentException
     {
         /* Codes_SRS_FILE_UPLOAD_RESPONSE_21_001: [The constructor shall create an instance of the FileUploadResponseParser.] */
-        Gson gson = new GsonBuilder().serializeNulls().create();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
         FileUploadResponseParser newFileUploadResponseParser;
 
         /* Codes_SRS_FILE_UPLOAD_RESPONSE_21_003: [If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */

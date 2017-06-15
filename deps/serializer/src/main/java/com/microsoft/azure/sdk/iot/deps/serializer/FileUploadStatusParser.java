@@ -88,7 +88,7 @@ public class FileUploadStatusParser
      */
     public String toJson()
     {
-        Gson gson = new GsonBuilder().serializeNulls().create();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
 
         /* Codes_SRS_FILE_UPLOAD_STATUS_21_004: [The toJson shall return a string with a json that represents the contend of the FileUploadStatusParser.] */
         return gson.toJson(this);

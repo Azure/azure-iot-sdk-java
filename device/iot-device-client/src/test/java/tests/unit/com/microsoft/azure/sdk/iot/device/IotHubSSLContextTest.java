@@ -211,4 +211,116 @@ public class IotHubSSLContextTest
         assertNotNull(testSSLContext);
         testCollection.remove(mockedCertificate);
     }
+
+    // Tests_SRS_IOTHUBSSLCONTEXT_21_018: [If the pathToCertificate is not null, the constructor shall create a certificate to be used with IotHub with cert by calling setValidCertPath]
+    @Test
+    public void constructorWithValidPathAndNullString() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    {
+        //arrange
+        testCollection.add(mockedCertificate);
+        generateSSLContextExpectations();
+        final String path = "Test/Cert/Path";
+        final String cert = null;
+
+        //act
+        IotHubSSLContext testContext = Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {String.class, String.class},path, cert);
+
+        //assert
+        generateSSLContextVerifications();
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedDefaultCert, "setValidCertPath", new Class[] {String.class}, path);
+                times = 1;
+                Deencapsulation.invoke(mockedDefaultCert, "setValidCert", new Class[] {String.class}, cert);
+                times = 0;
+            }
+        };
+        assertNotNull(Deencapsulation.invoke(testContext, "getIotHubSSlContext"));
+        testCollection.remove(mockedCertificate);
+    }
+
+    // Tests_SRS_IOTHUBSSLCONTEXT_21_018: [If the pathToCertificate is not null, the constructor shall create a certificate to be used with IotHub with cert by calling setValidCertPath]
+    @Test
+    public void constructorWithValidPathAndValidString() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    {
+        //arrange
+        testCollection.add(mockedCertificate);
+        generateSSLContextExpectations();
+        final String path = "Test/Cert/Path";
+        final String cert = "validCert";
+
+        //act
+        IotHubSSLContext testContext = Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {String.class, String.class},path, cert);
+
+        //assert
+        generateSSLContextVerifications();
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedDefaultCert, "setValidCertPath", new Class[] {String.class}, path);
+                times = 1;
+                Deencapsulation.invoke(mockedDefaultCert, "setValidCert", new Class[] {String.class}, cert);
+                times = 0;
+            }
+        };
+        assertNotNull(Deencapsulation.invoke(testContext, "getIotHubSSlContext"));
+        testCollection.remove(mockedCertificate);
+    }
+
+    // Tests_SRS_IOTHUBSSLCONTEXT_21_019: [If the userCertificateString is not null, and pathToCertificate is null, the constructor shall create a certificate with 'cert' by calling setValidCert.]
+    @Test
+    public void constructorWithNullPathAndValidString() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    {
+        //arrange
+        testCollection.add(mockedCertificate);
+        generateSSLContextExpectations();
+        final String path = null;
+        final String cert = "validCert";
+
+        //act
+        IotHubSSLContext testContext = Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {String.class, String.class},path, cert);
+
+        //assert
+        generateSSLContextVerifications();
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedDefaultCert, "setValidCertPath", new Class[] {String.class}, path);
+                times = 0;
+                Deencapsulation.invoke(mockedDefaultCert, "setValidCert", new Class[] {String.class}, cert);
+                times = 1;
+            }
+        };
+        assertNotNull(Deencapsulation.invoke(testContext, "getIotHubSSlContext"));
+        testCollection.remove(mockedCertificate);
+    }
+
+    // Tests_SRS_IOTHUBSSLCONTEXT_21_020: [If both userCertificateString, and pathToCertificate are null, the constructor shall create a default certificate.]
+    @Test
+    public void constructorWithNullPathAndNullString() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    {
+        //arrange
+        testCollection.add(mockedCertificate);
+        generateSSLContextExpectations();
+        final String path = null;
+        final String cert = null;
+
+        //act
+        IotHubSSLContext testContext = Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {String.class, String.class},path, cert);
+
+        //assert
+        generateSSLContextVerifications();
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedDefaultCert, "setValidCertPath", new Class[] {String.class}, path);
+                times = 0;
+                Deencapsulation.invoke(mockedDefaultCert, "setValidCert", new Class[] {String.class}, cert);
+                times = 0;
+            }
+        };
+        assertNotNull(Deencapsulation.invoke(testContext, "getIotHubSSlContext"));
+        testCollection.remove(mockedCertificate);
+    }
 }

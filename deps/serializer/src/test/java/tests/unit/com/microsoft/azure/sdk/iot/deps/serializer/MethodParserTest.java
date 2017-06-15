@@ -529,16 +529,16 @@ public class MethodParserTest
         methodParser.getStatus();
     }
 
-    /* Tests_SRS_METHODPARSER_21_014: [The toJson shall create a String with the full information in the method collection using json format.] */
-    /* Tests_SRS_METHODPARSER_21_015: [The toJson shall include name as `methodName` in the json.] */
-    /* Tests_SRS_METHODPARSER_21_016: [The toJson shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.] */
-    /* Tests_SRS_METHODPARSER_21_017: [If the responseTimeout is null, the toJson shall not include the `responseTimeoutInSeconds` in the json.] */
-    /* Tests_SRS_METHODPARSER_21_031: [The toJson shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.] */
-    /* Tests_SRS_METHODPARSER_21_032: [If the connectTimeout is null, the toJson shall not include the `connectTimeoutInSeconds` in the json.] */
-    /* Tests_SRS_METHODPARSER_21_018: [The class toJson include payload as `payload` in the json.] */
-    /* Tests_SRS_METHODPARSER_21_019: [If the payload is null, the toJson shall include `payload` with value `null`.] */
+    /* Tests_SRS_METHODPARSER_21_014: [The toJsonElement shall create a String with the full information in the method collection using json format, by using the toJsonElement.] */
+    /* Tests_SRS_METHODPARSER_21_015: [The toJsonElement shall include name as `methodName` in the json.] */
+    /* Tests_SRS_METHODPARSER_21_016: [The toJsonElement shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.] */
+    /* Tests_SRS_METHODPARSER_21_017: [If the responseTimeout is null, the toJsonElement shall not include the `responseTimeoutInSeconds` in the json.] */
+    /* Tests_SRS_METHODPARSER_21_031: [The toJsonElement shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.] */
+    /* Tests_SRS_METHODPARSER_21_032: [If the connectTimeout is null, the toJsonElement shall not include the `connectTimeoutInSeconds` in the json.] */
+    /* Tests_SRS_METHODPARSER_21_018: [The class toJsonElement include payload as `payload` in the json.] */
+    /* Tests_SRS_METHODPARSER_21_019: [If the payload is null, the toJsonElement shall include `payload` with value `null`.] */
     /**
-     *  Tests_SRS_METHODPARSER_21_026: [If the method operation is `invoke`, the toJson shall include the full method information in the json.]
+     *  Tests_SRS_METHODPARSER_21_026: [If the method operation is `invoke`, the toJsonElement shall include the full method information in the json.]
      *  Ex:
      *  {
      *      "methodName": "reboot",
@@ -551,6 +551,23 @@ public class MethodParserTest
      *      }
      *  }
      */
+    @Test
+    public void toJsonElement_Method_succeed()
+    {
+        for (TestMethod testCase:successTestMethod)
+        {
+            // Arrange
+            MethodParser methodParser = new MethodParser(testCase.name, testCase.responseTimeout, testCase.connectTimeout, testCase.payload);
+
+            // Act
+            String json = methodParser.toJsonElement().toString();
+
+            // Assert
+            Helpers.assertJson(json, testCase.json);
+        }
+    }
+
+    /* Tests_SRS_METHODPARSER_21_014: [The toJsonElement shall create a String with the full information in the method collection using json format, by using the toJsonElement.] */
     @Test
     public void toJson_Method_succeed()
     {
@@ -567,10 +584,10 @@ public class MethodParserTest
         }
     }
 
-    /* Tests_SRS_METHODPARSER_21_024: [The class toJson include status as `status` in the json.] */
-    /* Tests_SRS_METHODPARSER_21_025: [If the status is null, the toJson shall include `status` as `null`.] */
+    /* Tests_SRS_METHODPARSER_21_024: [The class toJsonElement include status as `status` in the json.] */
+    /* Tests_SRS_METHODPARSER_21_025: [If the status is null, the toJsonElement shall include `status` as `null`.] */
     /**
-     * Tests_SRS_METHODPARSER_21_027: [If the method operation is `response`, the toJson shall parse both status and payload.]
+     * Tests_SRS_METHODPARSER_21_027: [If the method operation is `response`, the toJsonElement shall parse both status and payload.]
      *  Ex:
      *  {
      *      "status": 201,
@@ -578,7 +595,7 @@ public class MethodParserTest
      *  }
      */
     @Test
-    public void toJson_response_succeed()
+    public void toJsonElement_response_succeed()
     {
         // Arrange
         MethodParser methodParser = new MethodParser();
@@ -589,7 +606,7 @@ public class MethodParserTest
             methodParser.fromJson(testCase.jsonResult);
 
             // Act
-            String json = methodParser.toJson();
+            String json = methodParser.toJsonElement().toString();
 
             // Assert
             Helpers.assertJson(json, testCase.jsonResult);
@@ -597,7 +614,7 @@ public class MethodParserTest
     }
 
     /**
-     * Tests_SRS_METHODPARSER_21_028: [If the method operation is `payload`, the toJson shall parse only the payload.]
+     * Tests_SRS_METHODPARSER_21_028: [If the method operation is `payload`, the toJsonElement shall parse only the payload.]
      *  Ex:
      *  {
      *      "input1": "someInput",
@@ -605,7 +622,7 @@ public class MethodParserTest
      *  }
      */
     @Test
-    public void toJson_payload_succeed()
+    public void toJsonElement_payload_succeed()
     {
         for (TestMethod testCase:successTestResult)
         {
@@ -613,22 +630,22 @@ public class MethodParserTest
             MethodParser methodParser = new MethodParser(testCase.payload);
 
             // Act
-            String json = methodParser.toJson();
+            String json = methodParser.toJsonElement().toString();
 
             // Assert
             Helpers.assertJson(json, testCase.json);
         }
     }
 
-    /* Tests_SRS_METHODPARSER_21_036: [If the method operation is `none`, the toJson shall throw IllegalArgumentException.] */
+    /* Tests_SRS_METHODPARSER_21_036: [If the method operation is `none`, the toJsonElement shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
-    public void toJson_failed()
+    public void toJsonElement_failed()
     {
         // Arrange
         MethodParser methodParser = new MethodParser();
 
         // Act
-        methodParser.toJson();
+        methodParser.toJsonElement().toString();
     }
 
 }

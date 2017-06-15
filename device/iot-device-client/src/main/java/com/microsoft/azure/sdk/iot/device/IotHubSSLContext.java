@@ -71,6 +71,40 @@ public class IotHubSSLContext
         generateSSLContext(certManager);
     }
 
+    /**
+     * Creates a SSLContext for the IotHub with the specified certificate.
+     *      If the pathToCertificate is not {@code null}, a certificate will be read from the file.
+     *      If the userCertificateString is not {@code null}, it will be set as the certificate.
+     *      If no certificate is provided, a new default certificate will be generated.
+     * @param pathToCertificate is the path to certificate. It can be {@code null}.
+     * @param userCertificateString is the string with the certificate. It can be {@code null}.
+     * @throws NoSuchAlgorithmException   if no Provider supports a TrustManagerFactorySpi implementation for the specified protocol.
+     * @throws KeyStoreException  if no Provider supports a KeyStoreSpi implementation for the specified type or
+     *                            if the keystore has not been initialized,
+     *                            or the given alias already exists and does not identify an entry containing a trusted certificate,
+     *                            or this operation fails for some other reason.
+     * @throws KeyManagementException As per https://docs.oracle.com/javase/7/docs/api/java/security/KeyManagementException.html
+     * @throws IOException If the certificate provided was null or invalid
+     * @throws CertificateException As per https://docs.oracle.com/javase/7/docs/api/java/security/cert/CertificateException.html
+     */
+    IotHubSSLContext(String pathToCertificate, String userCertificateString)
+            throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    {
+        IotHubCertificateManager certManager = new IotHubCertificateManager();
+        if (pathToCertificate != null)
+        {
+            // Codes_SRS_IOTHUBSSLCONTEXT_21_018: [If the pathToCertificate is not null, the constructor shall create a certificate to be used with IotHub with cert by calling setValidCertPath]
+            certManager.setValidCertPath(pathToCertificate);
+        }
+        else if (userCertificateString != null)
+        {
+            // Codes_SRS_IOTHUBSSLCONTEXT_21_019: [If the userCertificateString is not null, and pathToCertificate is null, the constructor shall create a certificate with 'cert' by calling setValidCert.]
+            certManager.setValidCert(userCertificateString);
+        }
+        // Codes_SRS_IOTHUBSSLCONTEXT_21_020: [If both userCertificateString, and pathToCertificate are null, the constructor shall create a default certificate.]
+        generateSSLContext(certManager);
+    }
+
     private void generateSSLContext(IotHubCertificateManager certificate) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
     {
         //Codes_SRS_IOTHUBSSLCONTEXT_25_002: [**The constructor shall create default SSL context for TLSv1.2.**]**

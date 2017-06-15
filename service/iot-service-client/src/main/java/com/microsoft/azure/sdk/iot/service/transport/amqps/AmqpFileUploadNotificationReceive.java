@@ -14,6 +14,8 @@ import org.apache.qpid.proton.engine.Event;
 import org.apache.qpid.proton.reactor.Reactor;
 
 import java.io.IOException;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Instance of the QPID-Proton-J BaseHandler class
@@ -29,6 +31,7 @@ public class AmqpFileUploadNotificationReceive extends BaseHandler implements Am
     private IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private Reactor reactor = null;
     private FileUploadNotification fileUploadNotification;
+    private Queue<FileUploadNotification> fileUploadNotificationQueue;
     private static final int REACTOR_TIMEOUT = 3141; // reactor timeout in milliseconds
 
     /**
@@ -67,22 +70,28 @@ public class AmqpFileUploadNotificationReceive extends BaseHandler implements Am
     /**
      * Create AmqpsReceiveHandler and store it in a member variable
      */
-    public void open() throws IOException
+    public synchronized void open() throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_003: [The function shall create an AmqpsReceiveHandler object to handle reactor events]
         if (amqpReceiveHandler == null)
         {
             amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol, this);
+            this.fileUploadNotificationQueue = new LinkedBlockingDeque<>();
         }
     }
 
     /**
      * Invalidate AmqpsReceiveHandler member variable
      */
-    public void close()
+    public synchronized void close()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_004: [The function shall invalidate the member AmqpsReceiveHandler object]
         amqpReceiveHandler = null;
+        if ( fileUploadNotificationQueue!= null && !fileUploadNotificationQueue.isEmpty())
+        {
+            fileUploadNotificationQueue.clear();
+        }
+        fileUploadNotificationQueue = null;
     }
 
     /**
@@ -95,7 +104,6 @@ public class AmqpFileUploadNotificationReceive extends BaseHandler implements Am
      */
     public synchronized FileUploadNotification receive(long timeoutMs) throws IOException, InterruptedException
     {
-        fileUploadNotification = null;
         if  (amqpReceiveHandler != null)
         {
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_005: [The function shall initialize the Proton reactor object]
@@ -124,7 +132,14 @@ public class AmqpFileUploadNotificationReceive extends BaseHandler implements Am
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_009: [The function shall throw IOException if the send handler object is not initialized]
             throw new IOException("receive handler is not initialized. call open before receive");
         }
-        return fileUploadNotification;
+        if (!fileUploadNotificationQueue.isEmpty())
+        {
+            return fileUploadNotificationQueue.remove();
+        }
+        else
+        {
+            return null;
+        }
     }
 
     /**
@@ -133,7 +148,7 @@ public class AmqpFileUploadNotificationReceive extends BaseHandler implements Am
      * Release semaphore for wait function
      * @param feedbackJson Received Json string to process
      */
-    public void onFeedbackReceived(String feedbackJson)
+    public synchronized void onFeedbackReceived(String feedbackJson)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_010: [The function shall parse the received Json string to FeedbackBath object]
 
@@ -144,10 +159,17 @@ public class AmqpFileUploadNotificationReceive extends BaseHandler implements Am
             fileUploadNotification = new FileUploadNotification(notificationParser.getDeviceId(),
                     notificationParser.getBlobUri(), notificationParser.getBlobName(), notificationParser.getLastUpdatedTime(),
                     notificationParser.getBlobSizeInBytesTag(), notificationParser.getEnqueuedTimeUtc());
+
+            fileUploadNotificationQueue.add(fileUploadNotification);
         }
         catch (IOException e)
         {
             this.fileUploadNotification = null;
+        }
+        catch (Exception e)
+        {
+            // this should never happen. However if it does, proton can't handle it. So guard against throwing it at proton.
+            System.out.println("Service threw something mysteriously dangerous, message abandoned.");
         }
     }
 }

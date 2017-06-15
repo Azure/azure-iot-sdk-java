@@ -12,7 +12,7 @@ import java.util.TimeZone;
 /**
  * Set of static functions to help the serializer.
  */
-class ParserUtility
+public class ParserUtility
 {
     private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'";
     private static final String OFFSETFORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";
@@ -54,7 +54,7 @@ class ParserUtility
      * @param blobName is the blob name to be validated.
      * @throws IllegalArgumentException if the blob name do not fit the criteria.
      */
-    protected static void validateBlobName(String blobName) throws IllegalArgumentException
+    public static void validateBlobName(String blobName) throws IllegalArgumentException
     {
         /* Codes_SRS_PARSER_UTILITY_21_005: [The validateBlobName shall throw IllegalArgumentException is the provided blob name is null or empty.] */
         /* Codes_SRS_PARSER_UTILITY_21_006: [The validateBlobName shall throw IllegalArgumentException is the provided blob name contains at least one not UTF-8 character.] */

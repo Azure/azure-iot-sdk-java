@@ -51,6 +51,12 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     private static final String URL_PATH_TAGS = "tags";
     private static final String URL_PATH_METHODS = "methods";
 
+    // jobs
+    private static final String URL_PATH_JOBS = "jobs";
+    private static final String URL_PATH_VERSION = "v2";
+    private static final String URL_PATH_QUERY = "query";
+    private static final String URL_PATH_CANCEL = "cancel";
+
     protected IotHubConnectionString() {}
 
     /**
@@ -97,6 +103,93 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         stringBuilder.append(deviceId);
         stringBuilder.append(URL_SEPARATOR_0);
         stringBuilder.append(URL_PATH_METHODS);
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
+    }
+
+    /**
+     * Create url for requesting jobs
+     *
+     * @param jobId is the name of the job
+     * @return the URL in the follow format: "https:[hostname]/jobs/v2/[jobId]?api-version=2016-11-14"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     * @throws IllegalArgumentException This exception is thrown if job id is null or empty
+     */
+    public URL getUrlJobs(String jobId) throws MalformedURLException, IllegalArgumentException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_018: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
+        if (Tools.isNullOrEmpty(jobId))
+        {
+            throw new IllegalArgumentException("job name cannot be empty or null");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_019: [** The function shall create a URL object from the given jobId using the following format: `https:hostname/jobs/v2/jobId?api-version=2016-11-14` **]**
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_JOBS);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_VERSION);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(jobId);
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
+    }
+
+    /**
+     * Create url for querying
+     *
+     * @return the URL in the follow format: "https:[hostname]/jobs/v2/query?api-version=2016-11-14"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     */
+    public URL getUrlQuery() throws MalformedURLException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_022: [** The function shall create a URL object from the given jobId using the following format: `https:hostname/jobs/v2/query?api-version=2016-11-14` **]**
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_JOBS);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_VERSION);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_QUERY);
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
+    }
+
+    /**
+     * Create url for cancelling jobs
+     *
+     * @param jobId is the name of the job
+     * @return the URL in the follow format: "https:[hostname]/jobs/v2/[jobId]/cancel?api-version=2016-11-14"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     * @throws IllegalArgumentException This exception is thrown if job id is null or empty
+     */
+    public URL getUrlJobsCancel(String jobId) throws MalformedURLException, IllegalArgumentException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_020: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
+        if (Tools.isNullOrEmpty(jobId))
+        {
+            throw new IllegalArgumentException("job name cannot be empty or null");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_021: [** The function shall create a URL object from the given jobId using the following format: `https:hostname/jobs/v2/jobId/cancel?api-version=2016-11-14` **]**
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_JOBS);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_VERSION);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(jobId);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_CANCEL);
         stringBuilder.append(URL_SEPARATOR_1);
         stringBuilder.append(URL_API_VERSION);
         return new URL(stringBuilder.toString());
@@ -295,7 +388,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         stringBuilder.append(URL_HTTPS);
         stringBuilder.append(hostName);
         stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append("jobs");
+        stringBuilder.append(URL_PATH_JOBS);
         stringBuilder.append(URL_SEPARATOR_0);
         stringBuilder.append("create");
         stringBuilder.append(URL_SEPARATOR_1);
@@ -317,7 +410,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         stringBuilder.append(URL_HTTPS);
         stringBuilder.append(hostName);
         stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append("jobs");
+        stringBuilder.append(URL_PATH_JOBS);
         stringBuilder.append(URL_SEPARATOR_0);
         stringBuilder.append(jobId);
         stringBuilder.append(URL_SEPARATOR_1);
