@@ -12,6 +12,7 @@ import mockit.NonStrictExpectations;
 import mockit.Verifications;
 
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -1822,31 +1823,6 @@ public class DeviceClientTest
         // act
         client.open();
         //client.sendEventAsync(new Message("hello world"), null, null);
-    }
-
-    //Tests_SRS_DEVICECLIENT_34_045: [**If the SAS token has expired before this call, throw a Security Exception**]
-    @Test (expected = SecurityException.class)
-    public void tokenExpiresAfterDeviceClientInitializedBeforeSend() throws IOException, URISyntaxException
-    {
-        final Long expiryTime = Long.MAX_VALUE;
-        final String connString = "HostName=iothub.device.com;DeviceId=2;SharedAccessSignature=SharedAccessSignature sr=hub.azure-devices.net%2Fdevices%2F2&sig=3V1oYPdtyhGPHDDpjS2SnwxoU7CbI%2BYxpLjsecfrtgY%3D&se=" + expiryTime;
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-
-        DeviceClient client = new DeviceClient(connString, protocol);
-
-        new NonStrictExpectations()
-        {
-            {
-                IotHubSasToken.isSasTokenExpired(anyString);
-                result = true;
-
-                mockConfig.getSharedAccessToken();
-                result = "SharedAccessSignature sr=hub.azure-devices.net%2Fdevices%2F2&sig=3V1oYPdtyhGPHDDpjS2SnwxoU7CbI%2BYxpLjsecfrtgY%3D&se=" + expiryTime;
-            }
-        };
-
-        // act
-        client.sendEventAsync(new Message("hello world"), null, null);
     }
 
     /* Tests_SRS_DEVICECLIENT_21_044: [The uploadToBlobAsync shall asynchronously upload the stream in `inputStream` to the blob in `destinationBlobName`.] */
