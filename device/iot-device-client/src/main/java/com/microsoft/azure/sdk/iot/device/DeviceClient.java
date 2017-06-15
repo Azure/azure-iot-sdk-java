@@ -270,10 +270,6 @@ public final class DeviceClient implements Closeable
             IotHubEventCallback callback,
             Object callbackContext)
     {
-        /* Codes_SRS_DEVICECLIENT_34_045: [If the SAS token has expired before this call, throw a Security Exception] */
-        if (this.config.getSharedAccessToken() != null && IotHubSasToken.isSasTokenExpired(this.config.getSharedAccessToken()))
-            throw new SecurityException("Your SasToken is expired");
-
         /* Codes_SRS_DEVICECLIENT_21_010: [The sendEventAsync shall asynchronously send the message using the deviceIO connection.] */
         /* Codes_SRS_DEVICECLIENT_21_011: [If starting to send via deviceIO is not successful, the sendEventAsync shall bypass the threw exception.] */
         deviceIO.sendEventAsync(message, callback, callbackContext);
