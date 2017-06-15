@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -27,31 +28,31 @@ public class MethodParser
     @Expose(serialize = false, deserialize = false)
     private Operation operation;
 
-    /* Codes_SRS_METHODPARSER_21_015: [The toJson shall include name as `methodName` in the json.] */
+    /* Codes_SRS_METHODPARSER_21_015: [The toJsonElement shall include name as `methodName` in the json.] */
     private static final String METHOD_NAME_TAG = "methodName";
     @Expose(serialize = true, deserialize = false)
     @SerializedName(METHOD_NAME_TAG)
     private String name;
 
-    /* Codes_SRS_METHODPARSER_21_016: [The toJson shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.] */
+    /* Codes_SRS_METHODPARSER_21_016: [The toJsonElement shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.] */
     private static final String RESPONSE_TIMEOUT_IN_SECONDS_TAG = "responseTimeoutInSeconds";
     @Expose(serialize = true, deserialize = false)
     @SerializedName(RESPONSE_TIMEOUT_IN_SECONDS_TAG)
     private Long responseTimeout;
 
-    /* Codes_SRS_METHODPARSER_21_031: [The toJson shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.] */
+    /* Codes_SRS_METHODPARSER_21_031: [The toJsonElement shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.] */
     private static final String CONNECT_TIMEOUT_IN_SECONDS_TAG = "connectTimeoutInSeconds";
     @Expose(serialize = true, deserialize = false)
     @SerializedName(CONNECT_TIMEOUT_IN_SECONDS_TAG)
     private Long connectTimeout;
 
-    /* Codes_SRS_METHODPARSER_21_024: [The class toJson include status as `status` in the json.] */
+    /* Codes_SRS_METHODPARSER_21_024: [The class toJsonElement include status as `status` in the json.] */
     private static final String STATUS_TAG = "status";
     @Expose(serialize = false, deserialize = true)
     @SerializedName(STATUS_TAG)
     private Integer status;
 
-    /* Codes_SRS_METHODPARSER_21_018: [The class toJson include payload as `payload` in the json.] */
+    /* Codes_SRS_METHODPARSER_21_018: [The class toJsonElement include payload as `payload` in the json.] */
     private static final String PAYLOAD_TAG = "payload";
     @SerializedName(PAYLOAD_TAG)
     private Object payload;
@@ -284,16 +285,27 @@ public class MethodParser
      */
     public String toJson() throws IllegalArgumentException
     {
-        /* Codes_SRS_METHODPARSER_21_014: [The toJson shall create a String with the full information in the method collection using json format.] */
-        /* Codes_SRS_METHODPARSER_21_015: [The toJson shall include name as `methodName` in the json.] */
-        /* Codes_SRS_METHODPARSER_21_016: [The toJson shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.] */
-        /* Codes_SRS_METHODPARSER_21_017: [If the responseTimeout is null, the toJson shall not include the `responseTimeoutInSeconds` in the json.] */
-        /* Codes_SRS_METHODPARSER_21_031: [The toJson shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.] */
-        /* Codes_SRS_METHODPARSER_21_032: [If the connectTimeout is null, the toJson shall not include the `connectTimeoutInSeconds` in the json.] */
-        /* Codes_SRS_METHODPARSER_21_018: [The class toJson include payload as `payload` in the json.] */
-        /* Codes_SRS_METHODPARSER_21_019: [If the payload is null, the toJson shall include `payload` with value `null`.] */
-        /* Codes_SRS_METHODPARSER_21_024: [The class toJson include status as `status` in the json.] */
-        /* Codes_SRS_METHODPARSER_21_025: [If the status is null, the toJson shall include `status` as `null`.] */
+        /* Codes_SRS_METHODPARSER_21_014: [The toJson shall create a String with the full information in the method collection using json format, by using the toJsonElement.] */
+        return toJsonElement().toString();
+    }
+
+    /**
+     * Create a JsonElement with a content that represents all the information in the method collection.
+     *
+     * @return JsonElement with the content.
+     * @throws IllegalArgumentException This exception is thrown if the one of the provided information do not fits the requirements.
+     */
+    public JsonElement toJsonElement() throws IllegalArgumentException
+    {
+        /* Codes_SRS_METHODPARSER_21_015: [The toJsonElement shall include name as `methodName` in the json.] */
+        /* Codes_SRS_METHODPARSER_21_016: [The toJsonElement shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.] */
+        /* Codes_SRS_METHODPARSER_21_017: [If the responseTimeout is null, the toJsonElement shall not include the `responseTimeoutInSeconds` in the json.] */
+        /* Codes_SRS_METHODPARSER_21_031: [The toJsonElement shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.] */
+        /* Codes_SRS_METHODPARSER_21_032: [If the connectTimeout is null, the toJsonElement shall not include the `connectTimeoutInSeconds` in the json.] */
+        /* Codes_SRS_METHODPARSER_21_018: [The class toJsonElement include payload as `payload` in the json.] */
+        /* Codes_SRS_METHODPARSER_21_019: [If the payload is null, the toJsonElement shall include `payload` with value `null`.] */
+        /* Codes_SRS_METHODPARSER_21_024: [The class toJsonElement include status as `status` in the json.] */
+        /* Codes_SRS_METHODPARSER_21_025: [If the status is null, the toJsonElement shall include `status` as `null`.] */
         Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
         JsonObject jsonProperty = new JsonObject();
 
@@ -301,7 +313,7 @@ public class MethodParser
         {
             case invoke:
                 /**
-                 *  Codes_SRS_METHODPARSER_21_026: [If the method operation is `invoke`, the toJson shall include the full method information in the json.]
+                 *  Codes_SRS_METHODPARSER_21_026: [If the method operation is `invoke`, the toJsonElement shall include the full method information in the json.]
                  *  Ex:
                  *  {
                  *      "methodName": "reboot",
@@ -328,10 +340,10 @@ public class MethodParser
                     jsonProperty.addProperty(CONNECT_TIMEOUT_IN_SECONDS_TAG, connectTimeout);
                 }
                 jsonProperty.add(PAYLOAD_TAG, gson.toJsonTree(payload));
-                return jsonProperty.toString();
+                return jsonProperty;
 
             case response:
-                /** Codes_SRS_METHODPARSER_21_027: [If the method operation is `response`, the toJson shall parse both status and payload.]
+                /** Codes_SRS_METHODPARSER_21_027: [If the method operation is `response`, the toJsonElement shall parse both status and payload.]
                  *  Ex:
                  *  {
                  *      "status": 201,
@@ -340,11 +352,11 @@ public class MethodParser
                  */
                 jsonProperty.addProperty(STATUS_TAG, status);
                 jsonProperty.add(PAYLOAD_TAG, gson.toJsonTree(payload));
-                return jsonProperty.toString();
+                return jsonProperty;
 
             case payload:
                 /**
-                 * Codes_SRS_METHODPARSER_21_028: [If the method operation is `payload`, the toJson shall parse only the payload.]
+                 * Codes_SRS_METHODPARSER_21_028: [If the method operation is `payload`, the toJsonElement shall parse only the payload.]
                  *  Ex:
                  *  {
                  *      "input1": "someInput",
@@ -353,16 +365,16 @@ public class MethodParser
                  */
                 if (payload instanceof Map)
                 {
-                    return gson.toJson(payload, Map.class);
+                    return gson.toJsonTree(payload, Map.class);
                 }
-                return gson.toJson(payload);
+                return gson.toJsonTree(payload);
 
             default:
-                /* Codes_SRS_METHODPARSER_21_036: [If the method operation is `none`, the toJson shall throw IllegalArgumentException.] */
+                /* Codes_SRS_METHODPARSER_21_036: [If the method operation is `none`, the toJsonElement shall throw IllegalArgumentException.] */
                 throw new IllegalArgumentException("There is no content to parser");
         }
     }
-    
+
     /**
      * Validation helper, make sure that the key fits the requirements.
      *
