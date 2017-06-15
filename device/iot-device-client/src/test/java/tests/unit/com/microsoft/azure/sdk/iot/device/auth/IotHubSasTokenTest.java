@@ -25,9 +25,6 @@ public class IotHubSasTokenTest
 {
     @Mocked Signature mockSig;
 
-    //@Mocked
-    //IotHubConnectionString mockIotHubConnectionString;
-
     // Tests_SRS_IOTHUBSASTOKEN_11_001: [The SAS token shall have the format "SharedAccessSignature sig=<signature>&se=<expiryTime>&sr=<resourceURI>". The params can be in any order.]
     @Test
     public void sasTokenHasCorrectFormat() throws URISyntaxException

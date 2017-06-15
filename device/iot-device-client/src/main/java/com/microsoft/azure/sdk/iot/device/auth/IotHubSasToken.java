@@ -147,12 +147,25 @@ public final class IotHubSasToken
         return false;
     }
 
+    /**
+     * Returns if the provided sasToken has expired yet or not
+     *
+     * @param sasToken the token to check for expiration
+     */
     public static boolean isSasTokenExpired(String sasToken)
     {
         //expiry time is measured in seconds since Unix Epoch
         Long currentTime = System.currentTimeMillis() / 1000;
         Long expiryTime = getExpiryTimeFromToken(sasToken);
         return (currentTime >= expiryTime);
+    }
+
+    /**
+     * Returns if this token has expired yet or not
+     */
+    public boolean isSasTokenExpired()
+    {
+        return (System.currentTimeMillis() / 1000) >= this.expiryTime ;
     }
 
     public static Long getExpiryTimeFromToken(String sasToken)
