@@ -29,9 +29,10 @@ public final class DeviceClient
     public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
                                   IotHubEventCallback callback, Object callbackContext)
             throws IllegalArgumentException, IllegalStateException, IOException;
+    
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
 }
 ```
-
 
 ### DeviceClient
 
@@ -209,7 +210,6 @@ public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, O
 
 **SRS_DEVICECLIENT_25_039: [**This method shall not create a new instance of deviceMethod if called twice.**]**
 
-
 ### uploadToBlobAsync
 
 ```java
@@ -237,3 +237,14 @@ public void uploadToBlobAsync(String destinationBlobName, InputStream inputStrea
 **SRS_DEVICECLIENT_21_050: [**The uploadToBlobAsync shall start the stream upload process, by calling uploadToBlobAsync on the FileUpload class.**]**  
 
 **SRS_DEVICECLIENT_21_051: [**If uploadToBlobAsync failed to start the upload using the FileUpload, it shall bypass the exception.**]**  
+
+
+### registerConnectionStateCallback
+```java
+public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
+```
+
+**SRS_DEVICECLIENT_99_001: [**The registerConnectionStateCallback shall register the callback with the Device IO.**]**
+**SRS_DEVICECLIENT_99_002: [**The registerConnectionStateCallback shall register the callback even if the client is not open.**]**
+**SRS_DEVICECLIENT_99_003: [**If the callback is null the method shall throw an IllegalArgument exception.**]**
+

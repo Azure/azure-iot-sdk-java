@@ -1777,7 +1777,7 @@ public class DeviceClientTest
 
     //Tests_SRS_DEVICECLIENT_34_046: [If The provided connection string contains an expired SAS token, throw a SecurityException.]
     @Test (expected = SecurityException.class)
-    public void DeviceClientInitializedWithExpiredTokenThrowsSecurityException() throws SecurityException, URISyntaxException, IOException
+    public void deviceClientInitializedWithExpiredTokenThrowsSecurityException() throws SecurityException, URISyntaxException, IOException
     {
         //This token will always be expired
         final Long expiryTime = 0L;
@@ -1822,7 +1822,6 @@ public class DeviceClientTest
 
         // act
         client.open();
-        //client.sendEventAsync(new Message("hello world"), null, null);
     }
 
     /* Tests_SRS_DEVICECLIENT_21_044: [The uploadToBlobAsync shall asynchronously upload the stream in `inputStream` to the blob in `destinationBlobName`.] */
@@ -2172,7 +2171,7 @@ public class DeviceClientTest
                 Deencapsulation.newInstance(FileUpload.class, mockConfig);
                 result = mockedFileUpload;
                 Deencapsulation.invoke(mockedFileUpload, "uploadToBlobAsync",
-                        destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
+                                       destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
             }
         };
         DeviceClient client = new DeviceClient(connString, protocol);
@@ -2188,12 +2187,54 @@ public class DeviceClientTest
                 Deencapsulation.newInstance(FileUpload.class, mockConfig);
                 times = 1;
                 Deencapsulation.invoke(mockedFileUpload, "uploadToBlobAsync",
-                        destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
+                                       destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
                 times = 2;
+
             }
         };
     }
 
+    //Tests_SRS_DEVICECLIENT_99_001: [The registerConnectionStateCallback shall register the callback with the Device IO.]
+    //Tests_SRS_DEVICECLIENT_99_002: [The registerConnectionStateCallback shall register the callback even if the client is not open.]
+    @Test
+    public void registerConnectionStateCallback(@Mocked final IotHubConnectionStateCallback mockedStateCB) throws URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        final DeviceClient client = new DeviceClient(connString, protocol);
+        
+        //act
+        client.registerConnectionStateCallback(mockedStateCB, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockDeviceIO.registerConnectionStateCallback(mockedStateCB, null);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENT_99_003: [If the callback is null the method shall throw an IllegalArgument exception.]
+    @Test (expected = IllegalArgumentException.class)
+    public void registerConnectionStateCallbackNullCallback()
+            throws IllegalArgumentException, URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        final DeviceClient client = new DeviceClient(connString, protocol);
+
+        //act
+        client.registerConnectionStateCallback(null, null);
+    }
+    
     /* Tests_SRS_DEVICECLIENT_21_049: [If uploadToBlobAsync failed to create a new instance of the FileUpload, it shall bypass the exception.] */
     @Test (expected = IllegalArgumentException.class)
     public void startFileUploadNewInstanceThrows(@Mocked final FileUpload mockedFileUpload,
@@ -2280,12 +2321,12 @@ public class DeviceClientTest
             {
                 Deencapsulation.invoke(mockConfig, "getIotHubSSLContext");
                 result = null;
-                Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {String.class, String.class}, (String)any, (String)any);
+                Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {String.class, String.class}, (String) any, (String) any);
                 result = mockIotHubSSLContext;
                 Deencapsulation.newInstance(FileUpload.class, mockConfig);
                 result = mockedFileUpload;
                 Deencapsulation.invoke(mockedFileUpload, "uploadToBlobAsync",
-                        destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
+                                       destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
             }
         };
         DeviceClient client = new DeviceClient(connString, protocol);
@@ -2299,9 +2340,9 @@ public class DeviceClientTest
             {
                 Deencapsulation.invoke(mockConfig, "getIotHubSSLContext");
                 times = 1;
-                Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {String.class, String.class}, (String)any, (String)any);
+                Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {String.class, String.class}, (String) any, (String) any);
                 times = 1;
-                Deencapsulation.invoke(mockConfig, "setIotHubSSLContext", new Class[] {IotHubSSLContext.class}, (IotHubSSLContext)any);
+                Deencapsulation.invoke(mockConfig, "setIotHubSSLContext", new Class[] {IotHubSSLContext.class}, (IotHubSSLContext) any);
                 times = 1;
             }
         };

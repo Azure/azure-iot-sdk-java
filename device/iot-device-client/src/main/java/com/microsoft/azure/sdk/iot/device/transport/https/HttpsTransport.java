@@ -324,6 +324,19 @@ public final class HttpsTransport implements IotHubTransport
     }
 
     /**
+     * Registers a callback to be executed whenever the https connection is lost or established.
+     * 
+     * @param callback the callback to be called.
+     * @param callbackContext a context to be passed to the callback. Can be
+     * {@code null} if no callback is provided.
+     * @throws UnsupportedOperationException
+     */
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) {
+        //HTTPS is stateless and therefore does not support the registration of connection state callbacks
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Moves as many messages as can be sent in one HTTPS request from the
      * waiting list to the in-progress list. If a single message is moved to the
      * in-progress list, this indicates that the message is to be sent in the

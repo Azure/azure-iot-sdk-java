@@ -7,7 +7,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
-
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionStateCallback;
 
 import java.io.Closeable;
 import java.io.IOError;
@@ -810,4 +810,21 @@ public final class DeviceClient implements Closeable
 
     }
 
+    /**
+     * Registers a callback to be executed whenever the connection to the device is lost or established.
+     * 
+     * @param callback the callback to be called.
+     * @param callbackContext a context to be passed to the callback. Can be
+     * {@code null} if no callback is provided.
+     */
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) {
+        //Codes_SRS_DEVICECLIENT_99_003: [If the callback is null the method shall throw an IllegalArgument exception.]
+        if (null == callback) {
+            throw new IllegalArgumentException();
+        }
+
+        //Codes_SRS_DEVICECLIENT_99_001: [The registerConnectionStateCallback shall register the callback with the Device IO even if the not open.]
+        //Codes_SRS_DEVICECLIENT_99_002: [The registerConnectionStateCallback shall register the callback even if the client is not open.]
+        this.deviceIO.registerConnectionStateCallback(callback, callbackContext);
+    }
 }
