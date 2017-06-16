@@ -708,6 +708,46 @@ public class MqttTest {
     }
 
     /*
+    **Tests_SRS_Mqtt_25_012: [**If the MQTT connection is closed, the function shall throw an IOException.**]**
+    */
+    @Test (expected = IOException.class)
+    public void publishFailsWhenConnectionBrokenWhilePublishing() throws IOException, MqttException
+    {
+        //arrange
+        Mqtt mockMqtt = null;
+        try
+        {
+            baseConstructorExpectations(true);
+            final byte[] payload = {0x61, 0x62, 0x63};
+            final IMqttDeliveryToken[] testTokens = {mockMqttDeliveryToken, mockMqttDeliveryToken, mockMqttDeliveryToken,
+                    mockMqttDeliveryToken, mockMqttDeliveryToken, mockMqttDeliveryToken,
+                    mockMqttDeliveryToken, mockMqttDeliveryToken, mockMqttDeliveryToken,
+                    mockMqttDeliveryToken, mockMqttDeliveryToken, mockMqttDeliveryToken
+                    };
+            new NonStrictExpectations()
+            {
+                {
+                    mockMqttAsyncClient.isConnected();
+                    result = true;
+                    mockMqttAsyncClient.getPendingDeliveryTokens();
+                    result = testTokens;
+                    mockMqttAsyncClient.isConnected();
+                    result = false;
+                }
+            };
+            mockMqtt = instantiateMqtt(true);
+
+            //act
+            Deencapsulation.invoke(mockMqtt, "publish", mockParseTopic, payload);
+        }
+        finally
+        {
+            testCleanUp(mockMqtt);
+        }
+    }
+
+
+    /*
     **Tests_SRS_Mqtt_25_014: [**The function shall publish message payload on the publishTopic specified to the IoT Hub given in the configuration.**]**
      */
     @Test

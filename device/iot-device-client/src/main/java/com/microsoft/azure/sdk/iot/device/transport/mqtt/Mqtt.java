@@ -297,7 +297,7 @@ abstract public class Mqtt implements MqttCallback
                     /*
                     ** Codes_SRS_Mqtt_25_012: [**If the MQTT connection is closed, the function shall throw an IOException.**]**
                      */
-                        throw new IOException("Cannot publish when mqtt client is disconnected");
+                        throw new IOException("Cannot publish when mqtt client is holding 10 tokens and  is disconnected");
                     }
                 }
 
