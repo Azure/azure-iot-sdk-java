@@ -329,7 +329,8 @@ public final class HttpsTransport implements IotHubTransport
      * @param callback the callback to be called.
      * @param callbackContext a context to be passed to the callback. Can be
      * {@code null} if no callback is provided.
-     * @throws UnsupportedOperationException
+     * @throws UnsupportedOperationException to report that this functionality is not available
+     * because HTTPS is stateless.
      */
     public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) {
         //HTTPS is stateless and therefore does not support the registration of connection state callbacks
