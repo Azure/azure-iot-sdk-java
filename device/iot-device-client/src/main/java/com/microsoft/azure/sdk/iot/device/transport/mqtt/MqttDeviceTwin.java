@@ -403,7 +403,6 @@ public class MqttDeviceTwin extends Mqtt
         /*
         **Codes_SRS_MQTTDEVICETWIN_25_034: [**If the call parseTopic returns null or empty string then this method shall do nothing and return null**]**
          */
-
         if (topic != null && topic.length() > 0)
         {
             /*

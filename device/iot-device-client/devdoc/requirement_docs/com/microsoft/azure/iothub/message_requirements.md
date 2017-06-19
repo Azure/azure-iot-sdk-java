@@ -91,3 +91,83 @@ public byte[] getBytes();
 ```
 
 **SRS_MESSAGE_11_002: [**The function shall return the message body.**]**
+
+
+### getUserId
+
+```java
+public String getUserId();
+```
+
+**SRS_MESSAGE_34_037: [**The function shall return the message's user ID.**]**
+
+
+### getDeliveryAcknowledgement
+
+```java
+public String getDeliveryAcknowledgement();
+```
+
+**SRS_MESSAGE_34_039: [**The function shall return the message's DeliveryAcknowledgement.**]**
+
+
+### getTo
+
+```java
+public String getTo();
+```
+
+**SRS_MESSAGE_34_041: [**The function shall return the message's To value.**]**
+
+
+### getMessageId
+
+```java
+public String getMessageId();
+```
+
+**SRS_MESSAGE_34_043: [**The function shall return the message's message Id.**]**
+
+
+### setMessageId
+
+```java
+public void setMessageId(String messageId);
+```
+
+**SRS_MESSAGE_34_044: [**The function shall set the message's message ID to the provided value.**]**
+
+
+### getCorrelationId
+
+```java
+public String getCorrelationId();
+```
+
+**SRS_MESSAGE_34_045: [**The function shall return the message's correlation ID.**]**
+
+
+### setCorrelationId
+
+```java
+public void setCorrelationId(String correlationId);
+```
+
+**SRS_MESSAGE_34_046: [**The function shall set the message's correlation ID to the provided value.**]**
+
+
+### setExpiryTime
+
+```java
+public void setExpiryTime(String expiryTime);
+```
+
+**SRS_MESSAGE_34_047: [**The function shall set the message's expiry time.**]**
+
+
+### getMessageType
+```java
+public MessageType getMessageType();
+```
+
+**SRS_MESSAGE_34_049: [**The function shall return the message's message type.**]**
