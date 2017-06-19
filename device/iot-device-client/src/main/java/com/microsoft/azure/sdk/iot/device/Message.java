@@ -117,6 +117,8 @@ public class Message
      */
     private ArrayList<MessageProperty> properties;
 
+    private String deliveryAcknowledgement;
+
     /// <summary>
     /// The message body
     /// </summary>
