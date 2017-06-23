@@ -18,6 +18,10 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
+/**
+ * Unit test for device twin device
+ * 100% methods, 100% lines covered
+ */
 public class DeviceTwinDeviceTest
 {
     /*
@@ -46,7 +50,7 @@ public class DeviceTwinDeviceTest
     public void constructorThrowsOnNullDeviceID()
     {
         //act
-        DeviceTwinDevice testDevice = new DeviceTwinDevice(null);
+        DeviceTwinDevice testDevice = new DeviceTwinDevice((String)null);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -71,6 +75,76 @@ public class DeviceTwinDeviceTest
         //assert
         assertTrue(devId.equals("testDevice"));
 
+    }
+
+    /*
+    **Tests_SRS_DEVICETWINDEVICE_21_030: [** The setETag shall store the eTag.**]**
+     */
+    @Test
+    public void setETagSets()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+
+        //act
+        testDevice.setETag("validETag");
+
+        //assert
+        assertEquals("validETag", Deencapsulation.getField(testDevice, "eTag"));
+    }
+
+    /*
+    **Tests_SRS_DEVICETWINDEVICE_21_029: [** The setETag shall throw IllegalArgumentException if the input string is empty or null.**]**
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void setETagNullThrows()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+
+        //act
+        testDevice.setETag(null);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void setETagEmptyThrows()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+
+        //act
+        testDevice.setETag("");
+    }
+
+    /*
+    **Tests_SRS_DEVICETWINDEVICE_21_031: [** The getETag shall return the stored eTag.**]**
+     */
+    @Test
+    public void getETagGets()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        testDevice.setETag("validETag");
+
+        //act
+        String etag = testDevice.getETag();
+
+        //assert
+        assertEquals("validETag", etag);
+
+    }
+
+    @Test
+    public void getETagGetsNull()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+
+        //act
+        String etag = testDevice.getETag();
+
+        //assert
+        assertNull(etag);
     }
 
     /*
@@ -583,10 +657,10 @@ public class DeviceTwinDeviceTest
     }
 
     /*
-    **Tests_SRS_DEVICETWINDEVICE_25_015: [** This method shall append device id, tags, desired and reported properties to string (if present) and return **]**
+    **Tests_SRS_DEVICETWINDEVICE_25_015: [** This method shall append device id, etag, tags, desired and reported properties to string (if present) and return **]**
     */
     @Test
-    public void toStringReturnsAll()
+    public void toStringReturnsAllNoETag()
     {
         //arrange
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
@@ -605,6 +679,41 @@ public class DeviceTwinDeviceTest
         String testDeviceString = testDevice.toString();
 
         //assert
+        assertTrue(testDeviceString.contains("testDevice"));
+        assertTrue(testDeviceString.contains("testDes1"));
+        assertTrue(testDeviceString.contains("desObject1"));
+        assertTrue(testDeviceString.contains("testDes2"));
+        assertTrue(testDeviceString.contains("desObject2"));
+        assertTrue(testDeviceString.contains("testTag1"));
+        assertTrue(testDeviceString.contains("tagObject1"));
+        assertTrue(testDeviceString.contains("testTag2"));
+        assertTrue(testDeviceString.contains("tagObject2"));
+    }
+
+    @Test
+    public void toStringReturnsAll()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+
+        testDevice.setETag("validEtag");
+
+        Set<Pair> testDesProp = new HashSet<>();
+        testDesProp.add(new Pair("testDes1", "desObject1"));
+        testDesProp.add(new Pair("testDes2", "desObject2"));
+        testDevice.setDesiredProperties(testDesProp);
+
+        Set<Pair> testTags = new HashSet<>();
+        testTags.add(new Pair("testTag1", "tagObject1"));
+        testTags.add(new Pair("testTag2", "tagObject2"));
+        testDevice.setTags(testTags);
+
+        //act
+        String testDeviceString = testDevice.toString();
+
+        //assert
+        assertTrue(testDeviceString.contains("testDevice"));
+        assertTrue(testDeviceString.contains("validEtag"));
         assertTrue(testDeviceString.contains("testDes1"));
         assertTrue(testDeviceString.contains("desObject1"));
         assertTrue(testDeviceString.contains("testDes2"));

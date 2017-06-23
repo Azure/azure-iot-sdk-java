@@ -56,6 +56,9 @@ public class TwinParser
     public Map<String, Object> getReportedPropertyMap();
     public Map<String, Object> getTagsMap();
 
+    public void setDeviceId(String deviceId) throws IllegalArgumentException;
+    public void setETag(String eTag) throws IllegalArgumentException;
+
     public String getDeviceId();
     public String getGenerationId();
     public String getETag();
@@ -588,7 +591,7 @@ public void updateTwin(String json) throws IllegalArgumentException
 **SRS_TWINPARSER_21_094: [**If the provided json have any duplicated `key`, the updateTwin shall use the content of the last one in the String.**]**  
 **SRS_TWINPARSER_21_097: [**If the provided json have any duplicated `properties` or `tags`, the updateTwin shall throw IllegalArgumentException.**]**  
 **SRS_TWINPARSER_21_098: [**If the provided json is properties only and contains duplicated `desired` or `reported`, the updateTwin shall throws IllegalArgumentException.**]**  
-**SRS_TWINPARSER_21_112: [**If the provided json contains `deviceId`, `generationId`, `etag`, `status`, `statusReason`, `statusUpdatedTime`, `connectionState`, `connectionStateUpdatedTime`, `lastActivityTime`, and `lastAcceptingIpFilterRule`, the updateTwin shall store its value.**]**  
+**SRS_TWINPARSER_21_172: [**If the provided json contains `deviceId`, `generationId`, `etag`, `status`, `statusReason`, `statusUpdatedTime`, `connectionState`, `connectionStateUpdatedTime`, `lastActivityTime`, and `lastAcceptingIpFilterRule`, the updateTwin shall store its value.**]**  
 
 
 ### getDesiredPropertyVersion
@@ -761,4 +764,35 @@ public String getConnectionStateUpdatedTime()
 public String getLastActivityTime()
 ```
 **SRS_TWINPARSER_21_151: [**The `getLastActivityTime` shall return the last activity date and time.**]**  
+
+
+### setDeviceId
+```java
+/**
+ * Setter for device name
+ *
+ * @param deviceId device id
+ * A case-sensitive string (up to 128 char long)
+ * of ASCII 7-bit alphanumeric chars
+ * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}
+ * @throws IllegalArgumentException if the provided device Id is not valid.
+ */
+public void setDeviceId(String deviceId) throws IllegalArgumentException;
+```
+**SRS_TWINPARSER_21_168: [**The `setDeviceId` shall set the deviceId in the twin collection.**]**  
+**SRS_TWINPARSER_21_169: [**If the deviceId is empty, null, or not valid, the `setDeviceId` shall throw IllegalArgumentException.**]**  
+
+### setETag
+```java
+/**
+ * Setter for ETag.
+ * 
+ * @param eTag is a string representing a weak ETAG version
+ * of this JSON description. This is a hash.
+ * @throws IllegalArgumentException if the provided eTag Id is not valid.
+ */
+public void setETag(String eTag) throws IllegalArgumentException;
+```
+**SRS_TWINPARSER_21_170: [**The `setETag` shall set the ETag in the twin collection.**]**  
+**SRS_TWINPARSER_21_171: [**If the ETag is empty, null, or not valid, the `setETag` shall throw IllegalArgumentException.**]**  
 

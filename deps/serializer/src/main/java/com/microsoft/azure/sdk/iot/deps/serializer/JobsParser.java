@@ -20,6 +20,8 @@ public class JobsParser
 {
     private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'";
     private static final String TIMEZONE = "UTC";
+    private static final String SCHEDULE_DEVICE_METHOD = "scheduleDeviceMethod";
+    private static final String SCHEDULE_UPDATE_TWIN = "scheduleUpdateTwin";
 
     // Job identifier
     private static final String JOBID_TAG = "jobId";
@@ -32,7 +34,7 @@ public class JobsParser
     private static final String TYPE_TAG = "type";
     @Expose(serialize = true, deserialize = false)
     @SerializedName(TYPE_TAG)
-    private JobsType jobType;
+    private String jobType;
 
     // Required if jobType is cloudToDeviceMethod.
     // The method type and parameters.
@@ -97,8 +99,8 @@ public class JobsParser
         /* Codes_SRS_JOBSPARSER_21_003: [The constructor shall store the JsonElement for the cloudToDeviceMethod.] */
         this.cloudToDeviceMethod = cloudToDeviceMethod.toJsonElement();
 
-        /* Codes_SRS_JOBSPARSER_21_005: [The constructor shall set the jobType as scheduleDirectRequest.] */
-        this.jobType = JobsType.scheduleDirectRequest;
+        /* Codes_SRS_JOBSPARSER_21_005: [The constructor shall set the jobType as scheduleDeviceMethod.] */
+        this.jobType = SCHEDULE_DEVICE_METHOD;
 
         /* Codes_SRS_JOBSPARSER_21_006: [The constructor shall set the updateTwin as null.] */
         this.updateTwin = null;
@@ -133,8 +135,8 @@ public class JobsParser
         /* Codes_SRS_JOBSPARSER_21_009: [The constructor shall store the JsonElement for the updateTwin.] */
         this.updateTwin = updateTwin.toJsonElement();
 
-        /* Codes_SRS_JOBSPARSER_21_011: [The constructor shall set the jobType as scheduleTwinUpdate.] */
-        this.jobType = JobsType.scheduleTwinUpdate;
+        /* Codes_SRS_JOBSPARSER_21_011: [The constructor shall set the jobType as scheduleUpdateTwin.] */
+        this.jobType = SCHEDULE_UPDATE_TWIN;
 
         /* Codes_SRS_JOBSPARSER_21_012: [The constructor shall set the cloudToDeviceMethod as null.] */
         this.cloudToDeviceMethod = null;
@@ -169,9 +171,6 @@ public class JobsParser
     {
         /* Codes_SRS_JOBSPARSER_21_015: [If the jobId is null, empty, or invalid, the validateCommonFields shall throws IllegalArgumentException.] */
         ParserUtility.validateStringUTF8(jobId);
-
-        /* Codes_SRS_JOBSPARSER_21_016: [If the queryCondition is null, empty, or invalid, the validateCommonFields shall throws IllegalArgumentException.] */
-        ParserUtility.validateStringUTF8(queryCondition);
 
         /* Codes_SRS_JOBSPARSER_21_019: [If the startTime is null, the validateCommonFields shall throws IllegalArgumentException.] */
         if (startTime == null)
