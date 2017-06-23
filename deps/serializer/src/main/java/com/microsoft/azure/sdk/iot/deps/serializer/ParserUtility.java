@@ -26,13 +26,13 @@ public class ParserUtility
      */
     protected static void validateStringUTF8(String str) throws IllegalArgumentException
     {
-        /* Codes_SRS_PARSER_UTILITY_21_002: [The validateStringUTF8 shall throw IllegalArgumentException is the provided string is null or empty.] */
+        /* Codes_SRS_PARSER_UTILITY_21_002: [The validateStringUTF8 shall throw IllegalArgumentException if the provided string is null or empty.] */
         if((str == null) || str.isEmpty())
         {
             throw new IllegalArgumentException("parameter is null or empty");
         }
 
-        /* Codes_SRS_PARSER_UTILITY_21_003: [The validateStringUTF8 shall throw IllegalArgumentException is the provided string contains at least one not UTF-8 character.] */
+        /* Codes_SRS_PARSER_UTILITY_21_003: [The validateStringUTF8 shall throw IllegalArgumentException if the provided string contains at least one not UTF-8 character.] */
         try
         {
             if(str.getBytes("UTF-8").length != str.length())
@@ -56,8 +56,8 @@ public class ParserUtility
      */
     public static void validateBlobName(String blobName) throws IllegalArgumentException
     {
-        /* Codes_SRS_PARSER_UTILITY_21_005: [The validateBlobName shall throw IllegalArgumentException is the provided blob name is null or empty.] */
-        /* Codes_SRS_PARSER_UTILITY_21_006: [The validateBlobName shall throw IllegalArgumentException is the provided blob name contains at least one not UTF-8 character.] */
+        /* Codes_SRS_PARSER_UTILITY_21_005: [The validateBlobName shall throw IllegalArgumentException if the provided blob name is null or empty.] */
+        /* Codes_SRS_PARSER_UTILITY_21_006: [The validateBlobName shall throw IllegalArgumentException if the provided blob name contains at least one not UTF-8 character.] */
         try
         {
             validateStringUTF8(blobName);
@@ -67,13 +67,13 @@ public class ParserUtility
             throw new IllegalArgumentException("The provided blob name is not valid");
         }
 
-        /* Codes_SRS_PARSER_UTILITY_21_007: [The validateBlobName shall throw IllegalArgumentException is the provided blob name contains more than 1024 characters.] */
+        /* Codes_SRS_PARSER_UTILITY_21_007: [The validateBlobName shall throw IllegalArgumentException if the provided blob name contains more than 1024 characters.] */
         if(blobName.length() > 1024)
         {
             throw new IllegalArgumentException("The provided blob name exceed maximum size of 1024 characters");
         }
 
-        /* Codes_SRS_PARSER_UTILITY_21_008: [The validateBlobName shall throw IllegalArgumentException is the provided blob name contains more than 254 path segments.] */
+        /* Codes_SRS_PARSER_UTILITY_21_008: [The validateBlobName shall throw IllegalArgumentException if the provided blob name contains more than 254 path segments.] */
         if (blobName.split("/").length > 254)
         {
             throw new IllegalArgumentException("The provided blob name exceed 254 path segments");
@@ -91,7 +91,7 @@ public class ParserUtility
     protected static void validateObject(Object val) throws IllegalArgumentException
     {
         /* Codes_SRS_PARSER_UTILITY_21_009: [The validateObject shall do nothing if the object is valid.] */
-        /* Codes_SRS_PARSER_UTILITY_21_010: [The validateObject shall throw IllegalArgumentException is the provided object is null.] */
+        /* Codes_SRS_PARSER_UTILITY_21_010: [The validateObject shall throw IllegalArgumentException if the provided object is null.] */
         if(val == null)
         {
             throw new IllegalArgumentException("parameter is null");
@@ -107,8 +107,8 @@ public class ParserUtility
      */
     protected static void validateKey(String key, boolean isMetadata) throws IllegalArgumentException
     {
-        /* Codes_SRS_PARSER_UTILITY_21_014: [The validateKey shall throw IllegalArgumentException is the provided string is null or empty.] */
-        /* Codes_SRS_PARSER_UTILITY_21_015: [The validateKey shall throw IllegalArgumentException is the provided string contains at least one not UTF-8 character.] */
+        /* Codes_SRS_PARSER_UTILITY_21_014: [The validateKey shall throw IllegalArgumentException if the provided string is null or empty.] */
+        /* Codes_SRS_PARSER_UTILITY_21_015: [The validateKey shall throw IllegalArgumentException if the provided string contains at least one not UTF-8 character.] */
         try
         {
             validateStringUTF8(key);
@@ -118,13 +118,13 @@ public class ParserUtility
             throw new IllegalArgumentException("The provided key is not valid");
         }
 
-        /* Codes_SRS_PARSER_UTILITY_21_016: [The validateKey shall throw IllegalArgumentException is the provided string contains more than 128 characters.] */
+        /* Codes_SRS_PARSER_UTILITY_21_016: [The validateKey shall throw IllegalArgumentException if the provided string contains more than 128 characters.] */
         if(key.length() > 128)
         {
             throw new IllegalArgumentException("The provided key is bigger than 128 characters");
         }
 
-        /* Codes_SRS_PARSER_UTILITY_21_017: [The validateKey shall throw IllegalArgumentException is the provided string contains an illegal character (`$`,`.`, space).] */
+        /* Codes_SRS_PARSER_UTILITY_21_017: [The validateKey shall throw IllegalArgumentException if the provided string contains an illegal character (`$`,`.`, space).] */
         /* Codes_SRS_PARSER_UTILITY_21_018: [If `isMetadata` is `true`, the validateKey shall accept the character `$` as valid.] */
         /* Codes_SRS_PARSER_UTILITY_21_019: [If `isMetadata` is `false`, the validateKey shall not accept the character `$` as valid.] */
         if((key.contains(".") || key.contains(" ") || (key.contains("$") && ! isMetadata)))
@@ -133,6 +133,49 @@ public class ParserUtility
         }
 
         /* Codes_SRS_PARSER_UTILITY_21_013: [The validateKey shall do nothing if the string is a valid key.] */
+    }
+
+    /**
+     * Validate if a provided ID is valid using the follow criteria.
+     * A case-sensitive string (up to 128 char long)
+     * of ASCII 7-bit alphanumeric chars
+     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+     *
+     * @param id is the ID to test
+     * @throws IllegalArgumentException if the ID do not fits the criteria
+     */
+    protected static void validateId(String id) throws IllegalArgumentException
+    {
+        /* Codes_SRS_PARSER_UTILITY_21_026: [The validateId shall throw IllegalArgumentException if the provided string is null or empty.] */
+        /* Codes_SRS_PARSER_UTILITY_21_027: [The validateId shall throw IllegalArgumentException if the provided string contains at least one not UTF-8 character.] */
+        try
+        {
+            validateStringUTF8(id);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new IllegalArgumentException("The provided ID is not valid");
+        }
+
+        /* Codes_SRS_PARSER_UTILITY_21_028: [The validateId shall throw IllegalArgumentException if the provided string contains more than 128 characters.] */
+        if(id.length() > 128)
+        {
+            throw new IllegalArgumentException("The provided ID is bigger than 128 characters");
+        }
+
+        /* Codes_SRS_PARSER_UTILITY_21_029: [The validateId shall throw IllegalArgumentException if the provided string contains an illegal character.] */
+        byte[] chars = id.getBytes();
+        for (byte c:chars)
+        {
+            if(!(((c>='A') && (c<='Z')) || ((c>='a') && (c<='z')) || ((c>='0') && (c<='9')) ||
+                    (c=='-') || (c==':') || (c=='.') || (c=='+') || (c=='%') || (c=='_') || (c=='#') || (c=='*') || (c=='?') ||
+                    (c=='!') || (c=='(') || (c==')') || (c==',') || (c=='=') || (c=='@') || (c==';') || (c=='$') || (c=='\'')))
+            {
+                throw new IllegalArgumentException("The provided ID is not valid");
+            }
+        }
+
+        /* Codes_SRS_PARSER_UTILITY_21_030: [The validateId shall do nothing if the string is a valid ID.] */
     }
 
     /**

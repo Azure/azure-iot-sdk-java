@@ -870,6 +870,23 @@ public class TwinParser
     }
 
     /**
+     * Setter for device name
+     *
+     * @param deviceId device id
+     * A case-sensitive string (up to 128 char long)
+     * of ASCII 7-bit alphanumeric chars
+     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}
+     * @throws IllegalArgumentException if the provided device Id is not valid.
+     */
+    public void setDeviceId(String deviceId) throws IllegalArgumentException
+    {
+        /* Codes_SRS_TWINPARSER_21_169: [If the deviceId is empty, null, or not valid, the `setDeviceId` shall throw IllegalArgumentException.] */
+        ParserUtility.validateId(deviceId);
+        /* Codes_SRS_TWINPARSER_21_168: [The `setDeviceId` shall set the deviceId in the twin collection.] */
+        this.manager.setDeviceId(deviceId);
+    }
+
+    /**
      * Getter for device generation name
      *
      * @return Device generation Id
@@ -890,6 +907,21 @@ public class TwinParser
     {
         /* Codes_SRS_TWINPARSER_21_113: [The `getETag` shall return the string representing a weak ETAG version.] */
         return this.manager.eTag;
+    }
+
+    /**
+     * Setter for ETag.
+     *
+     * @param eTag is a string representing a weak ETAG version
+     * of this JSON description. This is a hash.
+     * @throws IllegalArgumentException if the provided eTag Id is not valid.
+     */
+    public void setETag(String eTag) throws IllegalArgumentException
+    {
+        /* Codes_SRS_TWINPARSER_21_171: [If the ETag is empty, null, or not valid, the `setETag` shall throw IllegalArgumentException.] */
+        ParserUtility.validateStringUTF8(eTag);
+        /* Codes_SRS_TWINPARSER_21_170: [The `setETag` shall set the ETag in the twin collection.] */
+        this.manager.eTag = eTag;
     }
 
     /**

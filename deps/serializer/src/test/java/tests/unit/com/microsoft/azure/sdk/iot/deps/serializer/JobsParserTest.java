@@ -1,7 +1,9 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.JobsType;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 
@@ -132,54 +134,6 @@ public class JobsParserTest
     }
 
     /* Tests_SRS_JOBSPARSER_21_002: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
-    /* Tests_SRS_JOBSPARSER_21_016: [If the queryCondition is null, empty, or invalid, the commonFields shall throws IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorMethodNullQueryConditionThrows()
-    {
-        // Arrange
-        String jobId = "testJobId";
-        String queryCondition = null;
-        Date startTime = new Date();
-        long maxExecutionTimeInSeconds = 10L;
-        MethodParser cloudToDeviceMethod = makeMethodSample();
-
-        // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
-    }
-
-    /* Tests_SRS_JOBSPARSER_21_002: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
-    /* Tests_SRS_JOBSPARSER_21_016: [If the queryCondition is null, empty, or invalid, the commonFields shall throws IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorMethodEmptyQueryConditionThrows()
-    {
-        // Arrange
-        String jobId = "testJobId";
-        String queryCondition = "";
-        Date startTime = new Date();
-        long maxExecutionTimeInSeconds = 10L;
-        MethodParser cloudToDeviceMethod = makeMethodSample();
-
-        // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
-    }
-
-    /* Tests_SRS_JOBSPARSER_21_002: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
-    /* Tests_SRS_JOBSPARSER_21_016: [If the queryCondition is null, empty, or invalid, the commonFields shall throws IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorMethodInvalidQueryConditionThrows()
-    {
-        // Arrange
-        String jobId = "testJobId";
-        String queryCondition = "test\u1234DeviceId";
-        Date startTime = new Date();
-        long maxExecutionTimeInSeconds = 10L;
-        MethodParser cloudToDeviceMethod = makeMethodSample();
-
-        // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
-    }
-
-    /* Tests_SRS_JOBSPARSER_21_002: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
     /* Tests_SRS_JOBSPARSER_21_017: [If the maxExecutionTimeInSeconds is negative, the commonFields shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorMethodInvalidMaxExecutionTimeInSecondsThrows()
@@ -244,7 +198,7 @@ public class JobsParserTest
         JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBSPARSER_21_005: [The constructor shall set the jobType as scheduleDirectRequest.] */
+    /* Tests_SRS_JOBSPARSER_21_005: [The constructor shall set the jobType as scheduleDeviceMethod.] */
     @Test
     public void constructorMethodSetJobTypeSucceed()
     {
@@ -259,7 +213,7 @@ public class JobsParserTest
         JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
-        assertEquals(JobsType.scheduleDirectRequest, Deencapsulation.getField(jobsParser, "jobType"));
+        assertEquals("scheduleDeviceMethod", Deencapsulation.getField(jobsParser, "jobType"));
     }
 
     /* Tests_SRS_JOBSPARSER_21_006: [The constructor shall set the updateTwin as null.] */
@@ -295,7 +249,7 @@ public class JobsParserTest
         String expectedJson =
                 "{" +
                         "\"jobId\":\"" + jobId + "\"," +
-                        "\"type\":\"scheduleDirectRequest\"," +
+                        "\"type\":\"scheduleDeviceMethod\"," +
                         "\"cloudToDeviceMethod\":" + cloudToDeviceMethod.toJson() + "," +
                         "\"queryCondition\":\"" + queryCondition + "\"," +
                         "\"startTime\":\"" + Helpers.formatUTC(startTime) + "\"," +
@@ -401,54 +355,6 @@ public class JobsParserTest
     }
 
     /* Tests_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
-    /* Tests_SRS_JOBSPARSER_21_016: [If the queryCondition is null, empty, or invalid, the commonFields shall throws IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void ConstructorNullQueryConditionThrows()
-    {
-        // Arrange
-        String jobId = "testJobId";
-        String queryCondition = null;
-        Date startTime = new Date();
-        long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = makeTwinSample();
-
-        // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
-    }
-
-    /* Tests_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
-    /* Tests_SRS_JOBSPARSER_21_016: [If the queryCondition is null, empty, or invalid, the commonFields shall throws IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void ConstructorEmptyQueryConditionThrows()
-    {
-        // Arrange
-        String jobId = "testJobId";
-        String queryCondition = "";
-        Date startTime = new Date();
-        long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = makeTwinSample();
-
-        // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
-    }
-
-    /* Tests_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
-    /* Tests_SRS_JOBSPARSER_21_016: [If the queryCondition is null, empty, or invalid, the commonFields shall throws IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void ConstructorInvalidQueryConditionThrows()
-    {
-        // Arrange
-        String jobId = "testJobId";
-        String queryCondition = "test\u1234DeviceId";
-        Date startTime = new Date();
-        long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = makeTwinSample();
-
-        // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
-    }
-
-    /* Tests_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
     /* Tests_SRS_JOBSPARSER_21_017: [If the maxExecutionTimeInSeconds is negative, the commonFields shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void ConstructorInvalidMaxExecutionTimeInSecondsThrows()
@@ -513,7 +419,7 @@ public class JobsParserTest
         JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBSPARSER_21_011: [The constructor shall set the jobType as scheduleTwinUpdate.] */
+    /* Tests_SRS_JOBSPARSER_21_011: [The constructor shall set the jobType as scheduleUpdateTwin.] */
     @Test
     public void constructorTwinSetJobTypeSucceed()
     {
@@ -528,7 +434,7 @@ public class JobsParserTest
         JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
-        assertEquals(JobsType.scheduleTwinUpdate, Deencapsulation.getField(jobsParser, "jobType"));
+        assertEquals("scheduleUpdateTwin", Deencapsulation.getField(jobsParser, "jobType"));
     }
 
     /* Tests_SRS_JOBSPARSER_21_012: [The constructor shall set the cloudToDeviceMethod as null.] */
@@ -564,7 +470,7 @@ public class JobsParserTest
         String expectedJson =
                 "{" +
                         "\"jobId\":\"" + jobId + "\"," +
-                        "\"type\":\"scheduleTwinUpdate\"," +
+                        "\"type\":\"scheduleUpdateTwin\"," +
                         "\"cloudToDeviceMethod\":" + twinParser.toJson() + "," +
                         "\"queryCondition\":\"" + queryCondition + "\"," +
                         "\"startTime\":\"" + Helpers.formatUTC(startTime) + "\"," +

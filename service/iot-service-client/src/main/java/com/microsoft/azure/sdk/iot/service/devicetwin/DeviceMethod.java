@@ -21,9 +21,9 @@ public class DeviceMethod
 {
     private IotHubConnectionString iotHubConnectionString = null;
     private Integer requestId = 0;
-    public static final int DEFAULT_RESPONSE_TIMEOUT = 30; // default response timeout is 30 seconds
-    public static final int DEFAULT_CONNECT_TIMEOUT = 0;
-    public static final int THOUSAND_MS = 1000;
+    private static final int DEFAULT_RESPONSE_TIMEOUT = 30; // default response timeout is 30 seconds
+    private static final int DEFAULT_CONNECT_TIMEOUT = 0;
+    private static final int THOUSAND_MS = 1000;
     /**
      * Create a DeviceMethod instance from the information in the connection string.
      *

@@ -1037,7 +1037,7 @@ public class MqttDeviceTwinTest
         }
     }
     /*
-    **Codes_SRS_MQTTDEVICETWIN_25_045: [**If the topic is of type response then this method shall set empty data and operation type as DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE if data is null or empty**]**
+    ** Tests_SRS_MQTTDEVICETWIN_25_045: [**If the topic is of type response then this method shall set empty data and operation type as DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE if data is null or empty**]**
      */
     @Test
     public void receiveDoesNotSetDataForUpdateReportedPropResp(@Mocked final Mqtt mockMqtt) throws IOException
