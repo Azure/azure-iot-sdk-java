@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -83,7 +84,7 @@ public class QueryResponseParser
         {
             queryResponseParser = gson.fromJson(json, QueryResponseParser.class);
         }
-        catch (Exception malformed)
+        catch (JsonSyntaxException malformed)
         {
             throw new IllegalArgumentException("Malformed json:" + malformed);
         }
