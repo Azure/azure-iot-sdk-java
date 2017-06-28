@@ -16,10 +16,6 @@ public class MqttMessaging extends Mqtt
     private String publishTopic;
     private String parseTopic;
 
-    private static final char PROPERTY_SEPARATOR = '&';
-    private static final char PAIR_SEPARATOR = '=';
-    private static final String DEVICE_ID_TAG = "$.mid";
-
     @Override
     String parseTopic() throws IOException
     {
@@ -178,42 +174,88 @@ public class MqttMessaging extends Mqtt
         {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(this.publishTopic);
-            boolean needAmpersand = false;
-            for(MessageProperty property : message.getProperties())
-            {
-                if(needAmpersand)
-                {
-                    stringBuilder.append(PROPERTY_SEPARATOR);
-                }
-                /*
-                **Codes_SRS_MqttMessaging_25_026: [**send method shall append the message properties to publishTopic before publishing.**]**
-                 */
-                stringBuilder.append(property.getName());
-                stringBuilder.append(PAIR_SEPARATOR);
-                stringBuilder.append(property.getValue());
-                needAmpersand = true;
-            }
+
+            boolean separatorNeeded = false;
+
             /*
              **Tests_SRS_MqttMessaging_21_027: [**send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.**]**
              */
-            if(message.getMessageId() != null)
+            if (message.getMessageId() != null)
             {
-                stringBuilder.append(PROPERTY_SEPARATOR);
-                stringBuilder.append(DEVICE_ID_TAG);
-                stringBuilder.append(PAIR_SEPARATOR);
+                stringBuilder.append(MESSAGE_ID);
+                stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
                 stringBuilder.append(message.getMessageId());
+
+                separatorNeeded = true;
             }
+
+            if (message.getCorrelationId() != null)
+            {
+                if (separatorNeeded)
+                {
+                    stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+                }
+
+                stringBuilder.append(CORRELATION_ID);
+                stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+                stringBuilder.append(message.getCorrelationId());
+
+                separatorNeeded = true;
+            }
+
+            if (message.getUserId() != null)
+            {
+                if (separatorNeeded)
+                {
+                    stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+                }
+
+                stringBuilder.append(USER_ID);
+                stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+                stringBuilder.append(message.getUserId());
+
+                separatorNeeded = true;
+            }
+
+            if (message.getTo() != null)
+            {
+                if (separatorNeeded)
+                {
+                    stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+                }
+
+                stringBuilder.append(TO);
+                stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+                stringBuilder.append(message.getTo());
+
+                separatorNeeded = true;
+            }
+
+            for(MessageProperty property : message.getProperties())
+            {
+                if (separatorNeeded)
+                {
+                    stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+                }
+
+                /*
+                **Codes_SRS_MqttMessaging_25_026: [send method shall append the message properties to publishTopic before publishing.]
+                 */
+                stringBuilder.append(property.getName());
+                stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+                stringBuilder.append(property.getValue());
+
+                separatorNeeded = true;
+            }
+
             messagePublishTopic = stringBuilder.toString();
         }
         else
         {
             messagePublishTopic = this.publishTopic;
         }
-        /*
-        **Codes_SRS_MqttMessaging_25_024: [**send method shall publish a message to the IOT Hub on the publish topic by calling method publish().**]**
-         */
+
+        //Codes_SRS_MqttMessaging_25_024: [send method shall publish a message to the IOT Hub on the publish topic by calling method publish().]
         this.publish(messagePublishTopic, message.getBytes());
-
     }
-
 }

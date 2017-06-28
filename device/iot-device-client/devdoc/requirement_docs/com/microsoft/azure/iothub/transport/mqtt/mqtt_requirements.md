@@ -145,16 +145,13 @@ protected void unsubscribe(String topic) throws IOException;
 public Message receive() throws IOException;
 ```
 
-**SRS_Mqtt_25_021: [**This method shall call parseTopic to parse the topic from the recevived Messages queue corresponding to the messaging client's operation.**]**
+**SRS_Mqtt_25_021: [**This method shall call parseTopic to parse the topic from the received Messages queue corresponding to the messaging client's operation.**]**
 
 **SRS_Mqtt_25_022: [**If the call parseTopic returns null or empty string then this method shall do nothing and return null**]**
 
 **SRS_Mqtt_25_023: [**This method shall call parsePayload to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
 
-**SRS_Mqtt_25_024: [**This method shall construct new Message with the bytes obtained from parsePayload and return the message.**]**
-
 **SRS_Mqtt_25_025: [**If the call to parsePayload returns null when topic is non-null then this method will throw IOException**]**
-
 
 ### connectionLost
 
@@ -177,6 +174,29 @@ public void messageArrived(String topic, MqttMessage mqttMessage);
 ```
 
 **SRS_Mqtt_25_030: [**The payload of the message and the topic is added to the received messages queue .**]**
+
+
+### constructMessage
+```java
+private Message constructMessage(byte[] data, String topic) throws IllegalArgumentException
+```
+
+**SRS_Mqtt_25_024: [**This method shall construct new Message with the bytes obtained from parsePayload and return the message.**]**
+
+**SRS_Mqtt_34_041: [**This method shall call assignPropertiesToMessage so that all properties from the topic string can be assigned to the message**]**
+
+
+### assignPropertiesToMessage
+
+```java
+private void assignPropertiesToMessage(Message message, String propertiesString) throws IllegalArgumentException, NumberFormatException
+```
+
+**SRS_Mqtt_34_051: [**If a topic string's property's key and value are not separated by the '=' symbol, an IllegalArgumentException shall be thrown**]**
+
+**SRS_Mqtt_34_053: [**A property's key and value may include unusual characters such as &, %, $**]**
+
+**SRS_Mqtt_34_054: [**A message may have 0 to many custom properties**]**
 
 
 ### parseTopic
