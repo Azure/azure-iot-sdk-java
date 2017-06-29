@@ -133,8 +133,9 @@ public class Message
     /**
      * Constructor.
      */
-    public Message() {
-         initialize();
+    public Message()
+    {
+        initialize();
     }
 
     /**
@@ -150,9 +151,11 @@ public class Message
      * Constructor.
      * @param body The body of the new Message instance.
      */
-    public Message(byte[] body) {
+    public Message(byte[] body)
+    {
         // Codes_SRS_MESSAGE_11_025: [If the message body is null, the constructor shall throw an IllegalArgumentException.]
-        if (body == null) {
+        if (body == null)
+        {
             throw new IllegalArgumentException("Message body cannot be 'null'.");
         }
 
@@ -166,8 +169,10 @@ public class Message
      * Constructor.
      * @param body The body of the new Message instance. It is internally serialized to a byte array using UTF-8 encoding.
      */
-    public Message(String body) {
-        if (body == null) {
+    public Message(String body)
+    {
+        if (body == null)
+        {
             throw new IllegalArgumentException("Message body cannot be 'null'.");
         }
 
@@ -176,13 +181,14 @@ public class Message
         this.body = body.getBytes(DEFAULT_IOTHUB_MESSAGE_CHARSET);
     }
 
-
+    
     // ----- Public Methods -----
 
     /// <summary>
     /// The stream content of the body.
     /// </summary>
-    public ByteArrayOutputStream getBodyStream() {
+    public ByteArrayOutputStream getBodyStream()
+    {
         return null;
     }
 
@@ -207,12 +213,14 @@ public class Message
      * @param name Name of the user-defined property to search for.
      * @return The value of the property if it is set, or null otherwise.
      */
-    public String getProperty(String name) {
-
+    public String getProperty(String name)
+    {
         MessageProperty messageProperty = null;
 
-        for (MessageProperty currentMessageProperty: this.properties) {
-            if (currentMessageProperty.hasSameName(name)) {
+        for (MessageProperty currentMessageProperty: this.properties)
+        {
+            if (currentMessageProperty.hasSameName(name))
+            {
                 messageProperty = currentMessageProperty;
                 break;
             }
@@ -233,28 +241,34 @@ public class Message
      * @param value Value of the property to be set.
      * @exception IllegalArgumentException If any of the arguments provided is null.
      */
-    public void setProperty(String name, String value) {
+    public void setProperty(String name, String value)
+    {
         // Codes_SRS_MESSAGE_11_028: [If name is null, the function shall throw an IllegalArgumentException.]
-        if (name == null) {
+        if (name == null)
+        {
             throw new IllegalArgumentException("Property name cannot be 'null'.");
         }
 
         // Codes_SRS_MESSAGE_11_029: [If value is null, the function shall throw an IllegalArgumentException.]
-        if (value == null) {
+        if (value == null)
+        {
             throw new IllegalArgumentException("Property value cannot be 'null'.");
         }
 
         // Codes_SRS_MESSAGE_11_026: [The function shall set the message property to the given value.]
         MessageProperty messageProperty = null;
 
-        for (MessageProperty currentMessageProperty: this.properties) {
-            if (currentMessageProperty.hasSameName(name)) {
+        for (MessageProperty currentMessageProperty: this.properties)
+        {
+            if (currentMessageProperty.hasSameName(name))
+            {
                 messageProperty = currentMessageProperty;
                 break;
             }
         }
 
-        if (messageProperty != null) {
+        if (messageProperty != null)
+        {
             this.properties.remove(messageProperty);
         }
 
@@ -324,6 +338,7 @@ public class Message
      */
     public String getMessageId()
     {
+        // Codes_SRS_MESSAGE_34_043: [The function shall return the message's message Id.]
         return messageId;
     }
 
@@ -333,6 +348,7 @@ public class Message
      */
     public void setMessageId(String messageId)
     {
+        // Codes_SRS_MESSAGE_34_044: [The function shall set the message's message ID to the provided value.]
         this.messageId = messageId;
     }
 
@@ -342,6 +358,7 @@ public class Message
      */
     public String getCorrelationId()
     {
+        // Codes_SRS_MESSAGE_34_045: [The function shall return the message's correlation ID.]
         return correlationId;
     }
 
@@ -351,6 +368,7 @@ public class Message
      */
     public void setCorrelationId(String correlationId)
     {
+        // Codes_SRS_MESSAGE_34_046: [The function shall set the message's correlation ID to the provided value.]
         this.correlationId = correlationId;
     }
 
@@ -360,6 +378,7 @@ public class Message
      */
     public void setExpiryTime(long timeOut)
     {
+        // Codes_SRS_MESSAGE_34_047: [The function shall set the message's expiry time.]
         long currentTime = System.currentTimeMillis();
         this.expiryTime = currentTime + timeOut;
         logger.LogInfo("The message with messageid %s has expiry time as %s milliseconds and the message will expire on %s, method name is %s ", this.getMessageId(), timeOut, new Date(this.expiryTime), logger.getMethodName());
@@ -388,6 +407,7 @@ public class Message
      */
     public MessageType getMessageType()
     {
+        // Codes_SRS_MESSAGE_34_049: [The function shall return the message's message type.]
         return this.messageType;
     }
 
@@ -397,6 +417,7 @@ public class Message
      */
     public void setMessageType(MessageType type)
     {
+        // Codes_SRS_MESSAGE_34_048: [The function shall set the message's message type.]
         this.messageType = type;
     }
 

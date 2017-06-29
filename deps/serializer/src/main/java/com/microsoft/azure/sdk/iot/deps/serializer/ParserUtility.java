@@ -17,6 +17,8 @@ public class ParserUtility
     private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'";
     private static final String OFFSETFORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";
     private static final String TIMEZONE = "UTC";
+    private static final String SELECT = "select";
+    private static final String FROM = "from";
 
     /**
      * Helper to validate if the provided string is not null, empty, and all characters are UTF-8.
@@ -46,6 +48,35 @@ public class ParserUtility
         }
 
         /* Codes_SRS_PARSER_UTILITY_21_001: [The validateStringUTF8 shall do nothing if the string is valid.] */
+    }
+
+    /**
+     *
+     * Validates if query contains select and from keywords and also if it is a valid utf-8 string
+     * @param query query to be validated
+     * @throws IllegalArgumentException if query does not contain "select" or "from" or is not a valid utf-8 string
+     */
+    protected static void validateQuery(String query) throws IllegalArgumentException
+    {
+        /*
+        Codes_SRS_PARSER_UTILITY_25_026: [The validateQuery shall do nothing if the string is valid.]
+        Codes_SRS_PARSER_UTILITY_25_027: [The validateQuery shall throw IllegalArgumentException is the provided query is null or empty.]
+        Codes_SRS_PARSER_UTILITY_25_028: [The validateQuery shall throw IllegalArgumentException is the provided query contains non UTF-8 character.]
+        Codes_SRS_PARSER_UTILITY_25_029: [The validateQuery shall throw IllegalArgumentException is the provided query does not contain SELECT and FROM.]
+         */
+        try
+        {
+            validateStringUTF8(query);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new IllegalArgumentException("The provided query is not valid");
+        }
+
+        if (!query.toLowerCase().contains(SELECT) || !query.toLowerCase().contains(FROM))
+        {
+            throw new IllegalArgumentException("Query must contain select and from");
+        }
     }
 
     /**
