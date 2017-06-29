@@ -123,9 +123,7 @@ public class Message
     /// The message body
     /// </summary>
     private byte[] body;
-
-    private String deliveryAcknowledgement;
-
+    
     /**
      * Stream that will provide the bytes for the body of the
      */

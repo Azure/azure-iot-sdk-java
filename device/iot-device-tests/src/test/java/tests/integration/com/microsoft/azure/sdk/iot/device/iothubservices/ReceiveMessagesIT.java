@@ -52,7 +52,7 @@ public class ReceiveMessagesIT
                 iotHubConnectionString = env.get(envName);
             }
         }
-
+        
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         String uuid = UUID.randomUUID().toString();
         String deviceIdHttps = "java-device-client-e2e-test-https".concat("-" + uuid);
@@ -238,24 +238,25 @@ public class ReceiveMessagesIT
             HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesIT.messageProperties;
             Success messageReceived = (Success)context;
             MessageProperty[] messagePropertiesFromService = msg.getProperties();
-            if (messageProperties.size() != messagePropertiesFromService.length)
+            if (!hasExpectedProperties(msg, messageProperties))
             {
                 resultValue = false;
             }
-            else
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    if (!messageProperties.containsKey(messagePropertiesFromService[i].getName())
-                            || !messageProperties.containsValue(messagePropertiesFromService[i].getValue()))
-                    {
-                        resultValue = false;
-                        break;
-                    }
-                }
-            }
+
             messageReceived.setResult(resultValue);
             return IotHubMessageResult.COMPLETE;
+        }
+
+        private boolean hasExpectedProperties(Message msg, Map<String, String> messageProperties)
+        {
+            for (String key : messageProperties.keySet())
+            {
+                if (msg.getProperty(key) == null || !msg.getProperty(key).equals(messageProperties.get(key)))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 
