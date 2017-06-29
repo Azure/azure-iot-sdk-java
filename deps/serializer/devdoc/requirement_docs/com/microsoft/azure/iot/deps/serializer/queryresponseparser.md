@@ -2,7 +2,7 @@
 
 ## Overview
 
-QueryResponseParser deserializes the response received for a query request as json.
+QueryResponseParser deserializes the response received for a query request as json array.
 
 ## References
 
@@ -13,19 +13,14 @@ QueryResponseParser deserializes the response received for a query request as js
 ```java
 /**
  * Ex of JSON format:
- *  {
-       type: <unknown|twin|deviceJob|jobResponse|raw>,
-       items: [Array of objects, can be deserialized to concrete types based on the ‘type’ above],
-       continuationToken: <for pagination>
- *  }
- */
+        [Array of objects, can be deserialized to concrete types based on the ‘type’]
+  */
 public class QueryResponseParser
 {
     public QueryResponseParser(String json) throws IllegalArgumentException;
 
     public String getType();
-    public String getJsonItemsArray();
-    public String getContinuationToken();
+    public List<String> getJsonItems();
     public List<TwinParser> getTwins() throws IllegalStateException, IllegalArgumentException;
     public List getDeviceJobs() throws IllegalStateException, IllegalArgumentException;
     public List getJobs() throws IllegalStateException, IllegalArgumentException;
@@ -37,12 +32,11 @@ public class QueryResponseParser
 ```java
 public QueryResponseParser(String json) throws IllegalArgumentException;
 ```
-**SRS_QUERY_RESPONSE_PARSER_25_001: [**The constructor shall create an instance of the QueryResponseParser.**]**  
-**SRS_QUERY_RESPONSE_PARSER_25_002: [**The constructor shall parse the provided json and initialize `type`, `continuationToken` and `jsonItems` using the information in the json.**]**  
+**SRS_QUERY_RESPONSE_PARSER_25_001: [**The constructor shall create an instance of the QueryResponseParser.**]**
+**SRS_QUERY_RESPONSE_PARSER_25_002: [**The constructor shall save the type provided.**]**
 **SRS_QUERY_RESPONSE_PARSER_25_003: [**If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.**]**  
-**SRS_QUERY_RESPONSE_PARSER_25_004: [**If the provided json do not contains a valid `type`, `continuationToken` and `jsonItems`, the constructor shall throws IllegalArgumentException.**]**  
-**SRS_QUERY_RESPONSE_PARSER_25_005: [**If the provided json do not contains one of the keys `type`, `continuationToken` and `jsonItems`, the constructor shall throws IllegalArgumentException.**]**  
-**SRS_QUERY_RESPONSE_PARSER_25_006: [**If the provided json is of `type` other than twin, raw, deviceJob or jobResponse, the constructor shall throws IllegalArgumentException.**]**  
+**SRS_QUERY_RESPONSE_PARSER_25_004: [**If the provided json do not contains a valid array of json items the constructor shall throws IllegalArgumentException.**]**
+**SRS_QUERY_RESPONSE_PARSER_25_005: [**If the provided `type` is `UNKNOWN` the constructor shall throws IllegalArgumentException.**]**
 
 ### getType
 ```java
@@ -50,17 +44,11 @@ public String getType();
 ```
 **SRS_QUERY_RESPONSE_PARSER_25_007: [**The getType shall return the string stored in `type` enum.**]**  
 
-### getJsonItemsArray
+### getJsonItems
 ```java
-public String getJsonItemsArray();
+public List<String> getJsonItems();
 ```
-**SRS_QUERY_RESPONSE_PARSER_25_008: [**The getJsonItemsArray shall return the array of json items as string .**]**  
-
-### getContinuationToken
-```java
-public String getContinuationToken();
-```
-**SRS_QUERY_RESPONSE_PARSER_25_009: [**The getContinuationToken shall return the string stored in `continuationToken`.**]**  
+**SRS_QUERY_RESPONSE_PARSER_25_008: [**The getJsonItems shall return the list of json items as strings .**]**  
 
 ### getTwins
 ```java
