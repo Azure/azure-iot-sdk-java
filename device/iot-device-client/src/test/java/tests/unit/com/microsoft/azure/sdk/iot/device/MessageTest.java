@@ -14,7 +14,9 @@ import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /** Unit tests for Message. */
 public class MessageTest
@@ -258,5 +260,29 @@ public class MessageTest
 
         boolean expectedResult = false;
         assertThat(expectedResult, is(actualResult));
+    }
+
+
+    // Tests_SRS_MESSAGE_34_037: [The function shall set the message's expiry time to be the number of milliseconds since the epoch provided in absoluteTimeout.]
+    @Test
+    public void setAbsoluteTimeSetsExpiryTime()
+    {
+        final Long absoluteExpiryTimeExpired = 1L;
+        final Long absoluteExpiryTimeNotExpired = Long.MAX_VALUE;
+        Message msg = new Message("body");
+
+        msg.setAbsoluteExpiryTime(absoluteExpiryTimeExpired);
+        assertTrue(msg.isExpired());
+
+        msg.setAbsoluteExpiryTime(absoluteExpiryTimeNotExpired);
+        assertFalse(msg.isExpired());
+    }
+
+    // Tests_SRS_MESSAGE_34_038: [If the provided absolute expiry time is negative, an IllegalArgumentException shall be thrown.]
+    @Test (expected = IllegalArgumentException.class)
+    public void setAbsoluteTimeWithNegativeTimeThrowsIllegalArgumentException()
+    {
+        Message msg = new Message("body");
+        msg.setAbsoluteExpiryTime(-1L);
     }
 }

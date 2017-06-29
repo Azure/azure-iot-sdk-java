@@ -34,6 +34,11 @@ public final class MessageProperty {
         reservedPropertyNames.add("iothub-connection-auth-generation-id");
         reservedPropertyNames.add("content-type");
         reservedPropertyNames.add("content-encoding");
+        reservedPropertyNames.add("messageId");
+        reservedPropertyNames.add("correlationId");
+        reservedPropertyNames.add("userId");
+        reservedPropertyNames.add("To");
+        reservedPropertyNames.add("Ack");
 
         RESERVED_PROPERTY_NAMES = Collections.unmodifiableSet(reservedPropertyNames);
     }
