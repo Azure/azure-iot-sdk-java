@@ -5,13 +5,10 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -20,13 +17,12 @@ import java.util.UUID;
 /** Manages device twin operations on IotHub */
 public class DeviceTwinSample
 {
-    private static final String iotHubConnectionString = "[Connection string goes here]";
-    private static final String deviceId = "[Device name goes here]";
+    public static final String iotHubConnectionString = "[IOT HUB Connection String]";
+    public static final String deviceId = "[Device ID]";
 
     /**
-     * @param args
-     * @throws IOException
-     * @throws URISyntaxException
+     * Manages device twin operations on IotHub
+     * @throws Exception Throws Exception if sample fails
      */
     public static void main(String[] args) throws Exception
     {
@@ -59,8 +55,24 @@ public class DeviceTwinSample
             twinClient.getTwin(device);
             System.out.println(device);
 
+            //Query twin
+            System.out.println("Started Querying twin");
+
+            SqlQuery sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, null, null);
+
+            Query twinQuery = twinClient.queryTwin(sqlQuery.getQuery(), 3);
+
+            while (twinClient.hasNextDeviceTwin(twinQuery))
+            {
+                DeviceTwinDevice d = twinClient.getNextDeviceTwin(twinQuery);
+                System.out.println(d);
+            }
         }
         catch (IotHubException e)
+        {
+            System.out.println(e.getMessage());
+        }
+        catch (IOException e)
         {
             System.out.println(e.getMessage());
         }

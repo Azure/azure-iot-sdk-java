@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for Iot Hub Connection String class.
- * 100% methods, 100% lines covered
+ * 64% methods, 94% lines covered
  */
 @RunWith(JMockit.class)
 public class IotHubConnectionStringTest
@@ -600,6 +600,27 @@ public class IotHubConnectionStringTest
 
         // act
         String actual = iotHubConnectionString.getUrlQuery().toString();
+
+        // assert
+        assertTrue(actual.equals(expected));
+    }
+
+    //Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_023: [ The function shall create a URL object from the given jobId using the following format: https:[hostname]/devices/query?api-version=2016-11-14 ]
+    @Test
+    public void getUrlTwinQuerySucceeds() throws IOException
+    {
+        // arrange
+        final String iotHubName = "b.c.d";
+        final String hostName = "HOSTNAME." + iotHubName;
+        final String sharedAccessKeyName = "ACCESSKEYNAME";
+        final String policyName = "SharedAccessKey";
+        final String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
+        final String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
+        final IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        final String expected = "https://HOSTNAME.b.c.d/devices/query?api-version=2016-11-14";
+
+        // act
+        String actual = iotHubConnectionString.getUrlTwinQuery().toString();
 
         // assert
         assertTrue(actual.equals(expected));

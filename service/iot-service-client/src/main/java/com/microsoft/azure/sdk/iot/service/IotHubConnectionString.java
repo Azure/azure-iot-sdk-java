@@ -50,6 +50,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     private static final String URL_PATH_DESIRED = "desired";
     private static final String URL_PATH_TAGS = "tags";
     private static final String URL_PATH_METHODS = "methods";
+    private static final String URL_PATH_TWIN_DEVICES = "devices";
 
     // jobs
     private static final String URL_PATH_JOBS = "jobs";
@@ -134,6 +135,27 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         stringBuilder.append(URL_PATH_VERSION);
         stringBuilder.append(URL_SEPARATOR_0);
         stringBuilder.append(jobId);
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
+    }
+
+    /**
+     * Create url for querying twin
+     *
+     * @return the URL in the follow format: "https:[hostname]/devices/query?api-version=2016-11-14"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     */
+    public URL getUrlTwinQuery() throws MalformedURLException
+    {
+        //Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_023: [ The function shall create a URL object from the given jobId using the following format: https:[hostname]/devices/query?api-version=2016-11-14 ]
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_TWIN_DEVICES);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_QUERY);
         stringBuilder.append(URL_SEPARATOR_1);
         stringBuilder.append(URL_API_VERSION);
         return new URL(stringBuilder.toString());
