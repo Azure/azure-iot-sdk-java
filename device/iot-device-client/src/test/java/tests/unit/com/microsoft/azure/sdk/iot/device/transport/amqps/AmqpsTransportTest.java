@@ -11,7 +11,10 @@ import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTransport;
 import mockit.*;
+import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
+import org.apache.qpid.proton.amqp.messaging.Data;
+import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,14 +24,18 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTransport.AMQPS_APP_PROPERTY_PREFIX;
+import static org.junit.Assert.*;
 
-/** Unit tests for AmqpsTransport. */
+/* Unit tests for AmqpsTransport
+* 100% methods covered
+* 95% lines covered
+*/
 public class AmqpsTransportTest
 {
     @Mocked
@@ -1247,5 +1254,80 @@ public class AmqpsTransportTest
         Boolean isEmpty = transport.isEmpty();
 
         Assert.assertFalse(isEmpty);
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_34_028: [The System properties saved in the Amqps message shall be saved within the Message instance sent as a part of the callback.]
+    @Test
+    public void systemPropertiesAreSetCorrectly(@Mocked final MessageCallback mockCallback, @Mocked final AmqpsMessage mockMessage, @Mocked final Properties properties) throws IOException
+    {
+        //arrange
+        final String correlationId = "1234";
+        final String messageId = "5678";
+        final Binary userId = new Binary("user1".getBytes());
+        final String to = "devices/deviceID/messages/devicebound/";
+        final Date absoluteExpiryTime = new Date(Long.MAX_VALUE);
+        final String customPropertyKey = "appProp";
+        final String customPropertyValue = "appValue";
+        final String toKey = "to";
+        final String userIdKey = "userId";
+
+        Map<String, String> applicationPropertiesMap = new HashMap<String, String>();
+        applicationPropertiesMap.put(customPropertyKey, customPropertyValue);
+
+        final ApplicationProperties applicationProperties = new ApplicationProperties(applicationPropertiesMap);
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+        transport.messageReceived(mockMessage);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockProtonMessage.getBody();
+                result = new Data(new Binary("body".getBytes()));
+
+                mockProtonMessage.getApplicationProperties();
+                result = applicationProperties;
+
+                properties.getMessageId();
+                result = messageId;
+
+                properties.getCorrelationId();
+                result = correlationId;
+
+                properties.getTo();
+                result = to;
+
+                properties.getUserId();
+                result = userId;
+
+                properties.getAbsoluteExpiryTime();
+                result = absoluteExpiryTime;
+            }
+        };
+
+        //act
+        transport.handleMessage();
+
+        //assert
+        new Verifications()
+        {
+            {
+                Message actualMessage;
+                mockCallback.execute(actualMessage = withCapture(), any);
+                times = 1;
+                assertEquals(correlationId, actualMessage.getCorrelationId());
+                assertEquals(messageId, actualMessage.getMessageId());
+                assertFalse(actualMessage.isExpired());
+                assertTrue(applicationProperties.getValue().containsKey(customPropertyKey));
+                assertNotNull(actualMessage.getProperty(customPropertyKey));
+                assertEquals(customPropertyValue, actualMessage.getProperty(customPropertyKey));
+
+                assertNotNull(actualMessage.getProperty(AMQPS_APP_PROPERTY_PREFIX + toKey));
+                assertEquals(to, actualMessage.getProperty(AMQPS_APP_PROPERTY_PREFIX + toKey));
+                assertNotNull(actualMessage.getProperty(AMQPS_APP_PROPERTY_PREFIX + userIdKey));
+                assertEquals(userId.toString(), actualMessage.getProperty(AMQPS_APP_PROPERTY_PREFIX + userIdKey));
+            }
+        };
     }
 }

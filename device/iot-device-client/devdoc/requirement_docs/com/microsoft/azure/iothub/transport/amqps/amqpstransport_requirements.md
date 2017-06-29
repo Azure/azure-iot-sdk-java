@@ -157,6 +157,8 @@ public void handleMessage() throws IOException;
 
 **SRS_AMQPSTRANSPORT_15_028: [**If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.**]**
 
+**SRS_AMQPSTRANSPORT_34_028: [**The System properties saved in the Amqps message shall be saved within the Message instance sent as a part of the callback.**]**
+
 
 ### messageSent
 

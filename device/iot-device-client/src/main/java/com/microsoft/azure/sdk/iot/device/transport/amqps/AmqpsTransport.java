@@ -17,8 +17,6 @@ import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,6 +60,10 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     private final DeviceClientConfig config;
     private final Boolean useWebSockets;
     private final CustomLogger logger;
+
+    private final static String TO_KEY = "to";
+    private final static String USER_ID_KEY = "userId";
+    public final static String AMQPS_APP_PROPERTY_PREFIX = "iothub-app-";
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -350,12 +352,6 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             logger.LogInfo("Converting the AmqpsMessage to IoT Hub message, method name is %s ", logger.getMethodName());
             Message message = protonMessageToIoTHubMessage(receivedMessage);
 
-			// set  messageId from messageId property if it exists. Fix for GitHub issue #990
-            if (message.getProperty("messageId") !=null)
-			{
-			  message.setMessageId(message.getProperty("messageId"));
-			}
-                    
             logger.LogInfo("Executing the callback function for received message, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSTRANSPORT_15_026: [The function shall invoke the callback on the message.]
             IotHubMessageResult result = callback.execute(message, this.config.getMessageContext());
@@ -493,35 +489,27 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         Message msg = new Message(msgBody);
         logger.LogInfo("Content of received message is %s, method name is %s ", new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), logger.getMethodName());
         Properties properties = protonMsg.getProperties();
+
         //Call all of the getters for the Proton message Properties and set those properties
         //in the IoT Hub message properties if they exist.
-        for (Method m : properties.getClass().getMethods())
+        if (properties.getCorrelationId() != null)
         {
-            if (m.getName().startsWith("get"))
-            {
-                try
-                {
-                    String propertyName = Character.toLowerCase(m.getName().charAt(3)) + m.getName().substring(4);
-                    Object value = m.invoke(properties);
-                    if (value != null && !propertyName.equals("class"))
-                    {
-                        String val = value.toString();
+            msg.setCorrelationId(properties.getCorrelationId().toString());
+        }
 
-                        if (MessageProperty.isValidAppProperty(propertyName, val))
-                        {
-                            msg.setProperty(propertyName, val);
-                        }
-                    }
-                }
-                catch (IllegalAccessException e)
-                {
-                    logger.LogError("Attempted to access private or protected member of class during message conversion." + e.getMessage());
-                }
-                catch (InvocationTargetException e)
-                {
-                   logger.LogError("Exception thrown while attempting to get member variable. See: " + e.getMessage());
-                }
-            }
+        if (properties.getMessageId() != null)
+        {
+            msg.setMessageId(properties.getMessageId().toString());
+        }
+
+        if (properties.getTo() != null)
+        {
+            msg.setProperty(AMQPS_APP_PROPERTY_PREFIX + TO_KEY, properties.getTo());
+        }
+
+        if (properties.getUserId() != null)
+        {
+            msg.setProperty(AMQPS_APP_PROPERTY_PREFIX + USER_ID_KEY, properties.getUserId().toString());
         }
 
         // Setting the user properties
@@ -537,6 +525,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                 }
             }
         }
+        
         logger.LogInfo("Completed the conversion of AmpqsMessage into IoT Hub message, method name is %s ", logger.getMethodName());
         return msg;
     }
