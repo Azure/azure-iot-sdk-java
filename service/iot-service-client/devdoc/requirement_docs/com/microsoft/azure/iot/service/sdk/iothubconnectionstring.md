@@ -21,6 +21,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     public URL getUrlTwinTags(String deviceId) throws MalformedURLException, IllegalArgumentException;
     public URL getUrlTwinDesired(String deviceId) throws MalformedURLException, IllegalArgumentException;
     public URL getUrlJobs(String jobId) throws MalformedURLException, IllegalArgumentException;
+    public URL getUrlTwinQuery() throws MalformedURLException;
     public URL getUrlQuery() throws MalformedURLException, IllegalArgumentException;
     public URL getUrlJobsCancel(String jobId) throws MalformedURLException, IllegalArgumentException;
     public String toString();
@@ -125,6 +126,13 @@ public URL getUrlJobs(String jobId) throws MalformedURLException, IllegalArgumen
 **SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_018: [** The function shall throw IllegalArgumentException if the input string is empty or null **]**
 
 **SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_019: [** The function shall create a URL object from the given jobId using the following format: `https:hostname/jobs/v2/jobId?api-version=2016-11-14` **]**
+
+### getUrlTwinQuery
+
+```java
+public URL getUrlTwinQuery() throws MalformedURLException
+```
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_023: [** The function shall create a URL object from the given jobId using the following format: `https:[hostname]/devices/query?api-version=2016-11-14` **]**
 
 
 ### getUrlQuery
