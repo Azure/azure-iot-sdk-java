@@ -6,6 +6,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 import com.microsoft.azure.sdk.iot.device.IotHubMethod;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 
 /**

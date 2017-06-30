@@ -7,7 +7,6 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStateCallback;
 
 import java.io.Closeable;
 import java.io.IOError;

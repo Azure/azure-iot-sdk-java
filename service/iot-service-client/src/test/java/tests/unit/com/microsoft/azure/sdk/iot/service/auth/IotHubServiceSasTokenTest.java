@@ -5,23 +5,20 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.auth;
 
-import static org.junit.Assert.assertEquals;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.apache.commons.codec.binary.Base64;
-import org.junit.Test;
-
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-
 import mockit.Deencapsulation;
 import mockit.Expectations;
+import org.apache.commons.codec.binary.Base64;
+import org.junit.Test;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  *

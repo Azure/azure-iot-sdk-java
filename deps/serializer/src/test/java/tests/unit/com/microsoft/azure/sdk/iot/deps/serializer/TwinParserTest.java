@@ -3,7 +3,6 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
-
 import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.deps.serializer.*;
 import mockit.Deencapsulation;

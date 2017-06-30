@@ -2,14 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
+
 import com.microsoft.azure.sdk.iot.deps.serializer.ErrorMessageParser;
-import mockit.Deencapsulation;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
-import java.util.Date;
 
 /**
  * Unit tests for jobs serializer

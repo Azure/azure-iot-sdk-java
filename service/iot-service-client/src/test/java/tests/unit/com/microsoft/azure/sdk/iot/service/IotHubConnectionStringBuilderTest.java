@@ -5,20 +5,14 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import com.microsoft.azure.sdk.iot.service.AuthenticationMethod;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.ServiceAuthenticationWithSharedAccessPolicyKey;
-import com.microsoft.azure.sdk.iot.service.ServiceAuthenticationWithSharedAccessPolicyToken;
-
+import com.microsoft.azure.sdk.iot.service.*;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.integration.junit4.JMockit;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(JMockit.class)
 public class IotHubConnectionStringBuilderTest

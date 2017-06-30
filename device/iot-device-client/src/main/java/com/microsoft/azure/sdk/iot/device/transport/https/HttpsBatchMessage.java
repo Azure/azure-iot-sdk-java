@@ -11,8 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage.*;
-
 /**
  * Builds a batched IoT Hub request body as a JSON array. The batched message
  * has a maximum size of 256 kb.

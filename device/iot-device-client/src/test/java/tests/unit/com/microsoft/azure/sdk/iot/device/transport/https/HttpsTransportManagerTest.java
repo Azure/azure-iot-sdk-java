@@ -8,7 +8,10 @@ import com.microsoft.azure.sdk.iot.device.IotHubMethod;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.ResponseMessage;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import com.microsoft.azure.sdk.iot.device.transport.https.*;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -17,9 +20,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * Unit test for https transport manager.

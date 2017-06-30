@@ -5,7 +5,9 @@ package tests.unit.com.microsoft.azure.sdk.iot.service.jobs;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsStatisticsParser;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatistics;
-import mockit.*;
+import mockit.Deencapsulation;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
