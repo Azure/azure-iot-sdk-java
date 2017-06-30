@@ -6,6 +6,9 @@ package com.microsoft.azure.sdk.iot.device.auth;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /** Grants device access to an IoT Hub for the specified amount of time. */
 public final class IotHubSasToken
 {
@@ -28,6 +31,37 @@ public final class IotHubSasToken
     private String scope = null;
 
     /**
+     * The following strings are all expected to be in a correct SAS Token
+     * SharedAccessSignature sig=<signature >&se=<expiryTime>&sr=<resourceURI>
+     */
+    private static final String SharedAccessSignature = "SharedAccessSignature";
+    private static final String FieldPairSeparator = "&";
+    private static final String FieldKeyValueSeparator = "=";
+    private static final String ExpiryTimeFieldKey = "se";
+    private static final String SignatureFieldKey = "sig";
+    private static final String ResourceURIFieldKey = "sr";
+
+    /**
+     *  KeyValue pairs are extracted from the second segment of the SAS token by finding strings in the
+     *  format <key>=<value>. These values are further split around the equals sign into arrays. The below
+     *  indices represent which index in each of those arrays represent the key and which represents the value
+     */
+    private static final int ExpectedNumberOfFieldParts = 2;
+    private static final int KeyValuePairKeyIndex = 0;
+    private static final int KeyValuePairValueIndex = 1;
+
+    /**
+     * In a correctly formatted SAS token, there are two segments separated by a space:
+     *      SharedAccessSignature
+     * and
+     *      sig=<signature >&se=<expiryTime>&sr=<resourceURI>
+     */
+    private static final int SASTokenConstantSegmentIndex = 0;
+    private static final int SASTokenFieldSegmentIndex = 1;
+    private static final int ExpectedSASTokenSegments = 2;
+    private static final String SASTokenSegmentSeparator = " ";
+
+    /**
      * Constructor. Generates a SAS token that grants access to an IoT Hub for
      * the specified amount of time.
      *
@@ -37,7 +71,6 @@ public final class IotHubSasToken
      */
     public IotHubSasToken(DeviceClientConfig config, long expiryTime)
     {
-
         // Codes_SRS_IOTHUBSASTOKEN_25_005: [**If device key is provided then the signature shall be correctly computed and set.**]**
         if (config.getDeviceKey() != null) {
             // Tests_SRS_IOTHUBSASTOKEN_11_002: [**The constructor shall save all input parameters to member variables.**]
@@ -51,9 +84,16 @@ public final class IotHubSasToken
         else if(config.getSharedAccessToken() != null)
         {
             this.sasToken = config.getSharedAccessToken();
+            this.expiryTime = getExpiryTimeFromToken(this.sasToken);
+
             // Codes_SRS_IOTHUBSASTOKEN_25_008: [**The required format for the SAS Token shall be verified and IllegalArgumentException is thrown if unmatched.**]**
             if (!isSasFormat())
                 throw new IllegalArgumentException("SasToken format is invalid");
+
+            // Codes_SRS_IOTHUBSASTOKEN_34_009: [**The SAS Token shall be verified as not expired and SecurityException will be thrown if it is expired.**]**
+            if (isSasTokenExpired(this.sasToken))
+                throw new SecurityException("Your SasToken has expired");
+
         }
         else
         {
@@ -86,24 +126,95 @@ public final class IotHubSasToken
         else
             return null;
     }
-
     private boolean isSasFormat()
     {
         /*
           The SAS token format. The parameters to be interpolated are, in any order:
           the signature, the expiry time, and the resource URI.
          */
+
         if (this.sasToken != null)
         {
             if(this.sasToken.startsWith("SharedAccessSignature"))
             {
-                if(this.sasToken.contains("sr=") && this.sasToken.contains("se=") &&
-                        this.sasToken.contains("sig="))
+                Map<String, String> fieldValues = extractFieldValues(this.sasToken);
+                if(fieldValues.containsKey(ExpiryTimeFieldKey)
+                        && fieldValues.containsKey(SignatureFieldKey)
+                        && fieldValues.containsKey(ResourceURIFieldKey))
                     return true;
             }
-
         }
         return false;
+    }
+
+    /**
+     * Returns if the provided sasToken has expired yet or not
+     *
+     * @param sasToken the token to check for expiration
+     * @return a boolean true if the SasToken is still valid,
+     * or false if it is expired.
+     */
+    public static boolean isSasTokenExpired(String sasToken)
+    {
+        //expiry time is measured in seconds since Unix Epoch
+        Long currentTime = System.currentTimeMillis() / 1000;
+        Long expiryTime = getExpiryTimeFromToken(sasToken);
+        return (currentTime >= expiryTime);
+    }
+
+    /**
+     * Returns if this token has expired yet or not
+     *
+     * @return a boolean true if the SasToken is still valid,
+     * or false if it is expired.
+     */
+    public boolean isSasTokenExpired()
+    {
+        return (System.currentTimeMillis() / 1000) >= this.expiryTime ;
+    }
+
+    /**
+     * Return the expiry time for the provided sasToken in seconds.
+     *
+     * @param sasToken the token to return the expiry time
+     * @return a long with the expiry time in seconds.
+     */
+    public static Long getExpiryTimeFromToken(String sasToken)
+    {
+        Map<String, String> fieldValues = extractFieldValues(sasToken);
+        return Long.parseLong(fieldValues.get(ExpiryTimeFieldKey));
+    }
+
+    private static Map<String, String> extractFieldValues(String sharedAccessSignature)
+    {
+        String[] lines = sharedAccessSignature.split(SASTokenSegmentSeparator);
+
+        String sasTokenFirstSegment = lines[SASTokenConstantSegmentIndex].trim().toUpperCase();
+        boolean sasTokenFirstSegmentMatchesExpected = sasTokenFirstSegment.equals(SharedAccessSignature.toUpperCase());
+        if (lines.length != ExpectedSASTokenSegments || !sasTokenFirstSegmentMatchesExpected)
+        {
+            throw new IllegalArgumentException("Malformed signature");
+        }
+
+        Map<String, String> parsedFields = new HashMap<String, String>();
+        String[] fields = lines[SASTokenFieldSegmentIndex].trim().split(FieldPairSeparator);
+
+        for (String field : fields)
+        {
+            if (!field.equals(""))
+            {
+                String[] fieldParts = field.split(FieldKeyValueSeparator);
+
+                if (fieldParts.length != ExpectedNumberOfFieldParts)
+                {
+                    throw new IllegalArgumentException("SasToken format is invalid: missing a key or value tied to your field: " + field);
+                }
+
+                parsedFields.put(fieldParts[KeyValuePairKeyIndex], fieldParts[KeyValuePairValueIndex]);
+            }
+        }
+
+        return parsedFields;
     }
 
     private String buildSasToken()

@@ -36,6 +36,7 @@ Note: the ‘skn’ attribute must be an empty string for connecting to IoT Hub.
 
 **SRS_IOTHUBSASTOKEN_25_008: [**The required format for the SAS Token shall be verified and IllegalArgumentException is thrown if unmatched.**]**
 
+**SRS_IOTHUBSASTOKEN_34_009: [**The SAS Token shall be checked to see if it has expired and a SecurityException will be thrown if it is expired.**]**
 
 ### toString
 

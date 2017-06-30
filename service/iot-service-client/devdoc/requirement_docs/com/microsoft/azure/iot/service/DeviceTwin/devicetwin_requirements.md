@@ -24,6 +24,13 @@ public class DeviceTwin
     public void replaceDesired(DeviceTwinDevice device) throws IotHubException, IOException;
     public void replaceTags(DeviceTwinDevice device) throws IotHubException, IOException;
 
+    
+    public synchronized Query queryTwin(String sqlQuery, Integer pageSize) throws IotHubException, IOException;
+    public synchronized Query queryTwin(String sqlQuery) throws IotHubException, IOException;
+
+    public synchronized boolean hasNextDeviceTwin(Query query) throws IotHubException, IOException;
+    public synchronized String getNextDeviceTwin(Query query) throws IOException, IotHubException, NoSuchElementException;
+
 }
 ```
 
@@ -188,3 +195,50 @@ public void replaceTags(DeviceTwinDevice device) throws IotHubException, IOExcep
 **SRS_DEVICETWIN_25_043: [** The function shall send the created request and get the response **]**
 
 **SRS_DEVICETWIN_25_044: [** The function shall verify the response status and throw proper Exception **]**
+
+
+### queryTwin
+
+```java
+ public synchronized Query queryTwin(String sqlQuery, Integer pageSize) throws IotHubException, IOException;
+ public synchronized Query queryTwin(String sqlQuery) throws IotHubException, IOException;
+```
+**SRS_DEVICETWIN_25_047: [** The method shall throw IllegalArgumentException if the query is null or empty.**]**
+
+**SRS_DEVICETWIN_25_048: [** The method shall throw IllegalArgumentException if the page size is zero or negative.**]**
+
+**SRS_DEVICETWIN_25_049: [** The method shall build the URL for this operation by calling getUrlTwinQuery **]**
+
+**SRS_DEVICETWIN_25_050: [** The method shall create a new Query Object of Type TWIN. **]**
+
+**SRS_DEVICETWIN_25_051: [** The method shall send a Query Request to IotHub as HTTP Method Post on the query Object by calling `sendQueryRequest`.**]**
+
+**SRS_DEVICETWIN_25_052: [** If the pageSize if not provided then a default pageSize of 100 is used for the query.**]**
+
+### hasNextDeviceTwin
+
+```java
+public synchronized boolean hasNextDeviceTwin(Query deviceTwinQuery) throws IotHubException, IOException;
+```
+**SRS_DEVICETWIN_25_053: [** The method shall throw IllegalArgumentException if deviceTwinQuery is null **]**
+
+**SRS_DEVICETWIN_25_054: [** The method shall check if a response to query is avaliable by calling `hasNext` on the query object.**]**
+
+**SRS_DEVICETWIN_25_055: [** If a queryResponse is available, this method shall return true as is to the user. **]**
+
+**SRS_DEVICETWIN_25_056: [** If a queryResponse is not available, this method shall check if continuation token is avaliable for this query.**]**
+
+**SRS_DEVICETWIN_25_057: [** If continuation token is found then a continuation query is sent to the IotHub and new response is given to the user **]**
+
+### getNextDeviceTwin
+
+```java
+public synchronized DeviceTwinDevice getNextDeviceTwin(Query deviceTwinQuery) throws IOException, IotHubException, NoSuchElementException;
+```
+**SRS_DEVICETWIN_25_058: [** The method shall check if hasNext returns true and throw NoSuchElementException otherwise **]**
+
+**SRS_DEVICETWIN_25_059: [** The method shall parse the next element from the query response as Twin Document using `TwinParser` and provide the response on DeviceTwinDevice.**]**
+
+**SRS_DEVICETWIN_25_060: [** If the next element from the query response is an object other than String, then this method shall throw IOException **]**
+
+

@@ -172,7 +172,7 @@ public class SendEvent
             {
                  e.printStackTrace(); // Trace the exception 
             }
-            
+
         }
         
         System.out.println("Wait for " + D2C_MESSAGE_TIMEOUT / 1000 + " second(s) for response from the IoT Hub...");

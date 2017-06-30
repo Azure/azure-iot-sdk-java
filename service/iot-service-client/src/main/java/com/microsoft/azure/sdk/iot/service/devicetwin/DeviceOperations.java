@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Map;
 
 /**
  * Set of common operations for Twin and Method.
@@ -31,6 +32,7 @@ public class DeviceOperations
     private static final String ACCEPT_CHARSET = "charset=utf-8";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final Integer DEFAULT_HTTP_TIMEOUT_MS = 24000;
+    private static Map<String, String> headers = null;
 
     /**
      * Send a http request to the IoTHub using the Twin/Method standard, and return its response.
@@ -78,18 +80,11 @@ public class DeviceOperations
             throw new IllegalArgumentException("Null payload");
         }
 
-        /* Codes_SRS_DEVICE_OPERATIONS_21_005: [The request shall throw IllegalArgumentException if the provided `requestId` is null or empty.] */
-        if((requestId == null) || requestId.isEmpty())
-        {
-            throw new IllegalArgumentException("requestId is null or empty");
-        }
-        
         /* Codes_SRS_DEVICE_OPERATIONS_99_018: [The request shall throw IllegalArgumentException if the provided `timeoutInMs` exceed Integer.MAX_VALUE.] */
         if((timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS) > Integer.MAX_VALUE) 
         {
             throw new IllegalArgumentException("HTTP Request timeout shouldn't not exceed " + Integer.MAX_VALUE + " milliseconds");
         }
-
 
         /* Codes_SRS_DEVICE_OPERATIONS_21_006: [The request shall create a new SASToken with the ServiceConnect rights.] */
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
@@ -108,8 +103,12 @@ public class DeviceOperations
         /* Codes_SRS_DEVICE_OPERATIONS_21_010: [The request shall add to the HTTP header an `authorization` key with the SASToken.] */
         request.setHeaderField(AUTHORIZATION, sasTokenString);
 
-        /* Codes_SRS_DEVICE_OPERATIONS_21_011: [The request shall add to the HTTP header a `Request-Id` key with a new unique string value for every request.] */
-        request.setHeaderField(REQUEST_ID, requestId);
+        //Codes_SRS_DEVICE_OPERATIONS_21_011: [If the requestId is not null or empty, the request shall add to the HTTP header a Request-Id key with a new unique string value for every request.]
+        if((requestId != null) && !requestId.isEmpty())
+        {
+            /* Codes_SRS_DEVICE_OPERATIONS_21_011: [The request shall add to the HTTP header a `Request-Id` key with a new unique string value for every request.] */
+            request.setHeaderField(REQUEST_ID, requestId);
+        }
 
         /* Codes_SRS_DEVICE_OPERATIONS_21_012: [The request shall add to the HTTP header a `User-Agent` key with the client Id and service version.] */
         request.setHeaderField(USER_AGENT, TransportUtils.getJavaServiceClientIdentifier() + TransportUtils.getServiceVersion());
@@ -120,6 +119,17 @@ public class DeviceOperations
         /* Codes_SRS_DEVICE_OPERATIONS_21_014: [The request shall add to the HTTP header a `Content-Type` key with `application/json; charset=utf-8`.] */
         request.setHeaderField(CONTENT_TYPE, ACCEPT_VALUE + "; " + ACCEPT_CHARSET);
 
+        if (headers != null)
+        {
+            //SRS_DEVICE_OPERATIONS_25_019: [The request shall add to the HTTP header all the additional custom headers set for this request.]
+            for(Map.Entry<String, String> header : headers.entrySet())
+            {
+                request.setHeaderField(header.getKey(), header.getValue());
+            }
+
+            headers = null;
+        }
+
         /* Codes_SRS_DEVICE_OPERATIONS_21_015: [The request shall send the created request and get the response.] */
         HttpResponse response = request.send();
 
@@ -128,5 +138,22 @@ public class DeviceOperations
         
         /* Codes_SRS_DEVICE_OPERATIONS_21_017: [If the resulted status represents success, the request shall return the http response.] */
         return response;
+    }
+
+    /**
+     * Sets headers to be used on next HTTP request
+     * @param httpHeaders non null and non empty custom headers
+     * @throws IllegalArgumentException This exception is thrown if headers were null or empty
+     */
+    public static void setHeaders(Map<String, String> httpHeaders) throws IllegalArgumentException
+    {
+        if (httpHeaders == null || httpHeaders.size() == 0)
+        {
+            //SRS_DEVICE_OPERATIONS_25_021: [If the headers map is null or empty then this method shall throw IllegalArgumentException.]
+            throw new IllegalArgumentException("Null or Empty headers can't be set");
+        }
+
+        //SRS_DEVICE_OPERATIONS_25_020: [This method shall set the headers map to be used for next request only.]
+        headers = httpHeaders;
     }
 }

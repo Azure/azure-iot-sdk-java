@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -15,12 +16,14 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-
+import java.util.NoSuchElementException;
 
 public class DeviceTwin
 {
     private IotHubConnectionString iotHubConnectionString = null;
     private Integer requestId = 0;
+    private final long USE_DEFAULT_TIMEOUT = 0;
+    private final int DEFAULT_PAGE_SIZE = 100;
 
     /**
      * Static constructor to create instance from connection string
@@ -85,7 +88,7 @@ public class DeviceTwin
          **Codes_SRS_DEVICETWIN_25_009: [** The function shall send the created request and get the response **]**
          **Codes_SRS_DEVICETWIN_25_010: [** The function shall verify the response status and throw proper Exception **]**
          */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.GET, new byte[0], String.valueOf(requestId++), 0);
+        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.GET, new byte[0], String.valueOf(requestId++), USE_DEFAULT_TIMEOUT);
         String twin = new String(response.getBody(), StandardCharsets.UTF_8);
 
         /*
@@ -358,4 +361,123 @@ public class DeviceTwin
         // HttpResponse response = this.processHttpTwinRequest(url, HttpMethod.PUT, tags.getBytes(), String.valueOf(requestId++));
     }
 
+    /**
+     * Sql style query for twin
+     * @param sqlQuery Sql query string to query IotHub for Twin
+     * @param pageSize Size to limit query response by
+     * @return Query Object to be used for looking up responses for this query
+     * @throws IotHubException If Query request was not successful at the IotHub
+     * @throws IOException If input parameters are invalid
+     */
+    public synchronized Query queryTwin(String sqlQuery, Integer pageSize) throws IotHubException, IOException
+    {
+        if (sqlQuery == null || sqlQuery.length() == 0)
+        {
+            //Codes_SRS_DEVICETWIN_25_047: [ The method shall throw IllegalArgumentException if the query is null or empty.]
+            throw new IllegalArgumentException("Query cannot be null or empty");
+        }
+
+        if (pageSize <= 0)
+        {
+            //Codes_SRS_DEVICETWIN_25_048: [ The method shall throw IllegalArgumentException if the page size is zero or negative.]
+            throw new IllegalArgumentException("pagesize cannot be negative or zero");
+        }
+
+        //Codes_SRS_DEVICETWIN_25_050: [ The method shall create a new Query Object of Type TWIN. ]
+        Query deviceTwinQuery = new Query(sqlQuery, pageSize, QueryType.TWIN);
+
+        //Codes_SRS_DEVICETWIN_25_049: [ The method shall build the URL for this operation by calling getUrlTwinQuery ]
+        //Codes_SRS_DEVICETWIN_25_051: [ The method shall send a Query Request to IotHub as HTTP Method Post on the query Object by calling sendQueryRequest.]
+        deviceTwinQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, USE_DEFAULT_TIMEOUT);
+        return deviceTwinQuery;
+    }
+
+    /**
+     * Sql style query for twin
+     * @param sqlQuery Sql query string to query IotHub for Twin
+     * @return Query Object to be used for looking up responses for this query
+     * @throws IotHubException If Query request was not successful at the IotHub
+     * @throws IOException If input parameters are invalid
+     */
+    public synchronized Query queryTwin(String sqlQuery) throws IotHubException, IOException
+    {
+        //Codes_SRS_DEVICETWIN_25_052: [ If the pagesize if not provided then a default pagesize of 100 is used for the query.]
+        return this.queryTwin(sqlQuery, DEFAULT_PAGE_SIZE);
+    }
+
+    /**
+     * Returns the availability of next twin element upon query. If non was found,
+     * Query is sent over again and response is updated accordingly until no response
+     * for the query was found.
+     * @param deviceTwinQuery Query object returned upon creation of query
+     * @return True if next is available and false other wise.
+     * @throws IotHubException If IotHub could not respond back to the query successfully
+     * @throws IOException If input parameter is incorrect
+     */
+    public synchronized boolean hasNextDeviceTwin(Query deviceTwinQuery) throws IotHubException, IOException
+    {
+        if (deviceTwinQuery == null)
+        {
+            //Codes_SRS_DEVICETWIN_25_053: [ The method shall throw IllegalArgumentException if query is null ]
+            throw new IllegalArgumentException("Query cannot be null");
+        }
+
+        //Codes_SRS_DEVICETWIN_25_054: [ The method shall check if a response to query is avaliable by calling hasNext on the query object.]
+        boolean isNextAvailable = deviceTwinQuery.hasNext();
+        //Codes_SRS_DEVICETWIN_25_056: [ If a queryResponse is not available, this method shall check if continuation token is avaliable for this query.]
+        if (!isNextAvailable && deviceTwinQuery.getContinuationToken() != null)
+        {
+            //Codes_SRS_DEVICETWIN_25_057: [ If continuation token is found then a continuation query is sent to the IotHub and new response is given to the user ]
+            deviceTwinQuery.continueQuery(deviceTwinQuery.getContinuationToken());
+            deviceTwinQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, USE_DEFAULT_TIMEOUT);
+            return deviceTwinQuery.hasNext();
+        }
+        else
+        {
+            //Codes_SRS_DEVICETWIN_25_055: [ If a queryResponse is available, this method shall return true as is to the user. ]
+            return isNextAvailable;
+        }
+    }
+
+    /**
+     * Returns the next device twin document
+     * @param deviceTwinQuery Object corresponding to the query in request
+     * @return Returns the next device twin document
+     * @throws IOException If input parameter is incorrect
+     * @throws IotHubException If a non successful response from IotHub is received
+     * @throws NoSuchElementException If no additional element was found
+     */
+    public synchronized DeviceTwinDevice getNextDeviceTwin(Query deviceTwinQuery) throws IOException, IotHubException, NoSuchElementException
+    {
+        if (hasNextDeviceTwin(deviceTwinQuery))
+        {
+            Object nextObject = deviceTwinQuery.next();
+
+            if (nextObject instanceof String)
+            {
+                //Codes_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinParser and provide the response on DeviceTwinDevice.]
+                String twinJson = (String) nextObject;
+                TwinParser twinParser = new TwinParser();
+                twinParser.enableTags();
+                twinParser.updateTwin(twinJson);
+
+                DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(twinParser.getDeviceId());
+                deviceTwinDevice.setTags(twinParser.getTagsMap());
+                deviceTwinDevice.setDesiredProperties(twinParser.getDesiredPropertyMap());
+                deviceTwinDevice.setReportedProperties(twinParser.getReportedPropertyMap());
+
+                return deviceTwinDevice;
+            }
+            else
+            {
+                //Codes_SRS_DEVICETWIN_25_060: [ If the next element from the query response is an object other than String, then this method shall throw IOException ]
+                throw new IOException("Received a response that could not be parsed");
+            }
+        }
+        else
+        {
+            //Codes_SRS_DEVICETWIN_25_058: [ The method shall check if hasNext returns true and throw NoSuchElementException otherwise ]
+            throw new NoSuchElementException();
+        }
+    }
 }

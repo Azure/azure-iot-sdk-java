@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -83,6 +85,12 @@ public class IotHubConnectionString
             else if (attr.startsWith(SHARED_ACCESS_TOKEN_ATTRIBUTE))
             {
                 this.sharedAccessToken = attr.substring(SHARED_ACCESS_TOKEN_ATTRIBUTE.length());
+
+                /* Codes_SRS_IOTHUB_CONNECTIONSTRING_34_035: [If the connection string contains an expired SAS Token, throw a SecurityException] */
+                if (IotHubSasToken.isSasTokenExpired(this.sharedAccessToken))
+                {
+                    throw new SecurityException("Your SAS Token has expired");
+                }
             }
         }
 
@@ -128,6 +136,12 @@ public class IotHubConnectionString
 
         /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_024: [The constructor shall save the shared access token as the value of `sharedAccessToken` in the connection string.] */
         this.sharedAccessToken = sharedAccessToken;
+
+        /* Codes_SRS_IOTHUB_CONNECTIONSTRING_34_036: [If the SAS Token has expired, throw a SecurityException.] */
+        if (this.sharedAccessToken != null && IotHubSasToken.isSasTokenExpired(this.sharedAccessToken))
+        {
+            throw new SecurityException("Your SAS Token has expired");
+        }
 
         this.logger = new CustomLogger(this.getClass());
         logger.LogInfo("IotHubConnectionString object is created successfully for %s, method name is %s ", this.hostName, logger.getMethodName());

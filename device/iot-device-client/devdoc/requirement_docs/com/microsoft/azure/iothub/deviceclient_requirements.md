@@ -29,9 +29,10 @@ public final class DeviceClient
     public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
                                   IotHubEventCallback callback, Object callbackContext)
             throws IllegalArgumentException, IllegalStateException, IOException;
+    
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
 }
 ```
-
 
 ### DeviceClient
 
@@ -49,6 +50,7 @@ public DeviceClient(String connString, IotHubClientProtocol protocol) throws URI
 
 **SRS_DEVICECLIENT_21_005: [**If protocol is null, the function shall throw an IllegalArgumentException.**]**  
 
+**SRS_DEVICECLIENT_34_046: [**If The provided connection string contains an expired SAS token, throw a SecurityException.**]**
 
 ### open
 
@@ -60,6 +62,7 @@ public void open() throws IOException;
 
 **SRS_DEVICECLIENT_21_007: [**If the opening a connection via deviceIO is not successful, the open shall throw IOException.**]**  
 
+**SRS_DEVICECLIENT_34_044: [**If the SAS token has expired before this call, throw a Security Exception**]**
 
 ### close
 
@@ -98,6 +101,8 @@ public void sendEventAsync(Message msg, IotHubEventCallback callback, Object cal
 **SRS_DEVICECLIENT_21_010: [**The sendEventAsync shall asynchronously send the message using the deviceIO connection.**]**  
 
 **SRS_DEVICECLIENT_21_011: [**If starting to send via deviceIO is not successful, the sendEventAsync shall bypass the threw exception.**]**  
+
+**SRS_DEVICECLIENT_34_045: [**If the SAS token has expired before this call, throw a Security Exception**]**
 
 
 ### setMessageCallback
@@ -205,7 +210,6 @@ public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, O
 
 **SRS_DEVICECLIENT_25_039: [**This method shall not create a new instance of deviceMethod if called twice.**]**
 
-
 ### uploadToBlobAsync
 
 ```java
@@ -233,3 +237,14 @@ public void uploadToBlobAsync(String destinationBlobName, InputStream inputStrea
 **SRS_DEVICECLIENT_21_050: [**The uploadToBlobAsync shall start the stream upload process, by calling uploadToBlobAsync on the FileUpload class.**]**  
 
 **SRS_DEVICECLIENT_21_051: [**If uploadToBlobAsync failed to start the upload using the FileUpload, it shall bypass the exception.**]**  
+
+
+### registerConnectionStateCallback
+```java
+public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
+```
+
+**SRS_DEVICECLIENT_99_001: [**The registerConnectionStateCallback shall register the callback with the Device IO.**]**
+**SRS_DEVICECLIENT_99_002: [**The registerConnectionStateCallback shall register the callback even if the client is not open.**]**
+**SRS_DEVICECLIENT_99_003: [**If the callback is null the method shall throw an IllegalArgument exception.**]**
+
