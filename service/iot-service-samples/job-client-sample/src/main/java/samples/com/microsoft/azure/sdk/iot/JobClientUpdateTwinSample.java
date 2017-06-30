@@ -3,7 +3,7 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package samples.com.microsoft.azure.sdk.iot.service.sdk;
+package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
@@ -23,6 +23,10 @@ public class JobClientUpdateTwinSample
 {
     private static final String iotHubConnectionString = "[IOT HUB Connection String]";
 
+    /**
+     * Schedule an update Twin job on IotHub using the JobClient
+     * @throws Exception Throws Exception if sample fails
+     */
     public static void main(String[] args) throws Exception
     {
         final String jobId = "DHCMD" + UUID.randomUUID();
