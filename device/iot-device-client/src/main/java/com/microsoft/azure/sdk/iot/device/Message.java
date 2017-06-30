@@ -117,13 +117,11 @@ public class Message
      */
     private ArrayList<MessageProperty> properties;
 
-    private String deliveryAcknowledgement;
-
     /// <summary>
     /// The message body
     /// </summary>
     private byte[] body;
-    
+
     /**
      * Stream that will provide the bytes for the body of the
      */
