@@ -22,10 +22,10 @@ public final class HttpsSingleMessage implements HttpsMessage
     /**
      * The property names as they are saved in the system properties of this object
      */
-    protected static final String CORRELATION_ID_KEY = "correlationid";
-    protected static final String MESSAGE_ID_KEY = "messageid";
-    protected static final String TO_KEY = "to";
-    protected static final String USER_ID_KEY = "userid";
+    protected static final String CORRELATION_ID_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "correlationid";
+    protected static final String MESSAGE_ID_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "messageid";
+    protected static final String TO_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "to";
+    protected static final String USER_ID_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "userid";
 
 
     private byte[] body;
@@ -152,7 +152,7 @@ public final class HttpsSingleMessage implements HttpsMessage
             {
                 // Codes_SRS_HTTPSSINGLEMESSAGE_34_021: [The parsed HttpsSingleMessage shall include all valid HTTPS system-defined properties in the response header as message properties.]
                 String systemPropertyName = propertyName.substring(HTTPS_SYSTEM_PROPERTY_PREFIX.length());
-                systemProperties.put(systemPropertyName.toLowerCase(), propertyValue);
+                systemProperties.put(HTTPS_SYSTEM_PROPERTY_PREFIX + systemPropertyName.toLowerCase(), propertyValue);
             }
         }
         msg.properties = new MessageProperty[properties.size()];

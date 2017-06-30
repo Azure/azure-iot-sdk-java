@@ -2,12 +2,7 @@
  * Copyright (c) Microsoft. All rights reserved.
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
-
-<<<<<<< HEAD
-package samples.com.microsoft.azure.sdk.iot.service.sdk;
-=======
 package samples.com.microsoft.azure.sdk.iot;
->>>>>>> master
 
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;

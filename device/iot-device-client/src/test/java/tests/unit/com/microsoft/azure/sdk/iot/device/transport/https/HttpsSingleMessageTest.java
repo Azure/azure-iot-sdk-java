@@ -175,13 +175,13 @@ public class HttpsSingleMessageTest
     {
         final byte[] body = { 0x61, 0x62, 0x63 };
         final MessageProperty[] properties = { mockProperty };
-        final String messageidName = "messageid";
+        final String messageidName = HTTPS_SYSTEM_PROPERTY_PREFIX + "messageid";
         final String messageidValue = "test_messageid-value";
-        final String correlationidName = "correlationid";
+        final String correlationidName = HTTPS_SYSTEM_PROPERTY_PREFIX + "correlationid";
         final String correlationidValue = "1234";
-        final String useridName = "userid";
+        final String useridName = HTTPS_SYSTEM_PROPERTY_PREFIX + "userid";
         final String useridValue = "3456";
-        final String toName = "to";
+        final String toName = HTTPS_SYSTEM_PROPERTY_PREFIX + "to";
         final String toValue = "device4";
 
         final String propertyName = "test-property-name";
@@ -339,13 +339,13 @@ public class HttpsSingleMessageTest
         // arrange
         final byte[] body = { 0x61, 0x62, 0x63 };
         final MessageProperty[] properties = { mockProperty };
-        final String messageidName = "messageid";
+        final String messageidName = HTTPS_SYSTEM_PROPERTY_PREFIX + "messageid";
         final String messageidValue = "test_messageid-value";
-        final String correlationidName = "correlationid";
+        final String correlationidName = HTTPS_SYSTEM_PROPERTY_PREFIX + "correlationid";
         final String correlationidValue = "1234";
-        final String useridName = "userid";
+        final String useridName = HTTPS_SYSTEM_PROPERTY_PREFIX + "userid";
         final String useridValue = "3456";
-        final String toName = "to";
+        final String toName = HTTPS_SYSTEM_PROPERTY_PREFIX + "to";
         final String toValue = "device4";
         final String propertyName = "test-property-name";
         final String propertyValue = "test-property-value";
@@ -716,10 +716,10 @@ public class HttpsSingleMessageTest
     public void parseHttpsMessageHandlesPropertiesCorrectlyAndToMessageExposesCorrectSystemProperties(@Mocked final HttpsResponse httpsResponse)
     {
         // arrange
-        String correlationIdKey = "correlationid";
-        String userIdKey = "userid";
-        String messageIdKey = "messageid";
-        String toKey = "to";
+        String correlationIdKey = HTTPS_SYSTEM_PROPERTY_PREFIX + "correlationid";
+        String userIdKey = HTTPS_SYSTEM_PROPERTY_PREFIX + "userid";
+        String messageIdKey = HTTPS_SYSTEM_PROPERTY_PREFIX + "messageid";
+        String toKey = HTTPS_SYSTEM_PROPERTY_PREFIX + "to";
         String appPropertyKey = "app_property";
         String correlationId = "1234";
         String messageId = "3456";
@@ -728,10 +728,10 @@ public class HttpsSingleMessageTest
         String appProperty = "app_property_value";
 
         final Map<String, String> headerFields = new HashMap<String, String>();
-        headerFields.put(HTTPS_SYSTEM_PROPERTY_PREFIX + correlationIdKey, correlationId);
-        headerFields.put(HTTPS_SYSTEM_PROPERTY_PREFIX + userIdKey, userId);
-        headerFields.put(HTTPS_SYSTEM_PROPERTY_PREFIX + messageIdKey, messageId);
-        headerFields.put(HTTPS_SYSTEM_PROPERTY_PREFIX + toKey, to);
+        headerFields.put(correlationIdKey, correlationId);
+        headerFields.put(userIdKey, userId);
+        headerFields.put(messageIdKey, messageId);
+        headerFields.put(toKey, to);
         headerFields.put(HTTPS_APP_PROPERTY_PREFIX + appPropertyKey, appProperty);
 
         new NonStrictExpectations()
