@@ -109,7 +109,7 @@ public class FileUploadSample
         }
         else
         {
-            uploadFileOrDirectoryRecursive(client, file.getPath(), file.getName());
+            uploadFile(client, file.getParent(), file.getName());
         }
     }
 

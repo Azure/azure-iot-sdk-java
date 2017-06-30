@@ -8,6 +8,10 @@ import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import javax.naming.SizeLimitExceededException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage.*;
 
 /**
  * Builds a batched IoT Hub request body as a JSON array. The batched message
@@ -32,6 +36,7 @@ public final class HttpsBatchMessage implements HttpsMessage
 
     /** The current batched message body. */
     private String batchBody;
+
     /** The current number of messages in the batch. */
     private int numMsgs;
 
@@ -137,26 +142,30 @@ public final class HttpsBatchMessage implements HttpsMessage
         jsonMsg.append(Boolean.toString(msg.isBase64Encoded()));
         // Codes_SRS_HTTPSBATCHMESSAGE_11_005: [The JSON object shall have the field "properties" set to a JSON object which has the field "content-type" set to the content type of the raw message.]
         MessageProperty[] properties = msg.getProperties();
-        int numProperties = properties.length;
+        Map<String, String> allProperties = new HashMap<>(msg.getSystemProperties());
+        for (MessageProperty p : properties)
+        {
+            allProperties.put(p.getName(), p.getValue());
+        }
+
+        int numProperties = allProperties.size();
         if (numProperties > 0)
         {
             jsonMsg.append(",");
             jsonMsg.append("\"properties\":");
             jsonMsg.append("{");
-            for (int i = 0; i < numProperties - 1; ++i)
+            for (String key : allProperties.keySet())
             {
-                MessageProperty property = properties[i];
-                jsonMsg.append("\"").append(property.getName()).append("\":");
-                jsonMsg.append("\"").append(property.getValue()).append("\",");
+                jsonMsg.append("\"").append(key).append("\":");
+                jsonMsg.append("\"").append(allProperties.get(key)).append("\",");
             }
-            if (numProperties > 0)
-            {
-                MessageProperty property = properties[numProperties - 1];
-                jsonMsg.append("\"").append(property.getName()).append("\":");
-                jsonMsg.append("\"").append(property.getValue()).append("\"");
-            }
+
+            //remove last trailing comma
+            jsonMsg.deleteCharAt(jsonMsg.length()-1);
+
             jsonMsg.append("}");
         }
+
         jsonMsg.append("}");
 
         return jsonMsg.toString();

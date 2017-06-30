@@ -25,9 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Unit tests for Http requester
+ * Coverage : method - 100%, lines - 97%
  */
 public class DeviceOperationsTest
 {
@@ -63,10 +65,9 @@ public class DeviceOperationsTest
         STANDARD_SASTOKEN_STRING = (new IotHubServiceSasToken(IOT_HUB_CONNECTION_STRING)).toString();
     }
 
-
     /* Tests_SRS_DEVICE_OPERATIONS_21_001: [The request shall throw IllegalArgumentException if the provided `iotHubConnectionString` is null.] */
     @Test (expected = IllegalArgumentException.class)
-    public void request_nullConnectionString_failed() throws Exception
+    public void requestNullConnectionStringFailed() throws Exception
     {
         //arrange
 
@@ -84,7 +85,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_002: [The request shall throw IllegalArgumentException if the provided `url` is null.] */
     @Test (expected = IllegalArgumentException.class)
-    public void request_nullUrl_failed() throws Exception
+    public void requestNullUrlFailed() throws Exception
     {
         //arrange
         final IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(STANDARD_CONNECTIONSTRING);
@@ -103,7 +104,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_003: [The request shall throw IllegalArgumentException if the provided `method` is null.] */
     @Test (expected = IllegalArgumentException.class)
-    public void request_nullHttpMethod_failed() throws Exception
+    public void requestNullHttpMethodFailed() throws Exception
     {
         //arrange
 
@@ -121,7 +122,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_004: [The request shall throw IllegalArgumentException if the provided `payload` is null.] */
     @Test (expected = IllegalArgumentException.class)
-    public void request_nullPayload_failed() throws Exception
+    public void requestNullPayloadFailed() throws Exception
     {
         //arrange
 
@@ -137,9 +138,10 @@ public class DeviceOperationsTest
         //assert
     }
 
-    /* Tests_SRS_DEVICE_OPERATIONS_21_005: [The request shall throw IllegalArgumentException if the provided `requestId` is null or empty.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void request_nullRequestId_failed() throws Exception
+    /* Tests_SRS_DEVICE_OPERATIONS_21_011: [If the requestId is not null or empty, the request shall add to the HTTP header a Request-Id key with a new unique string value for every request.] */
+    @Test
+    public void requestNullRequestIdPass(@Mocked IotHubServiceSasToken iotHubServiceSasToken,
+                                           @Mocked HttpRequest httpRequest) throws Exception
     {
         //arrange
 
@@ -153,11 +155,18 @@ public class DeviceOperationsTest
                 0);
 
         //assert
+        new Verifications()
+        {
+            {
+                httpRequest.setHeaderField(REQUEST_ID, STANDARD_REQUEST_ID);
+                times = 0;
+            }
+        };
     }
     
     /* Tests_SRS_DEVICE_OPERATIONS_99_018: [The request shall throw IllegalArgumentException if the provided `timeoutInMs` plus DEFAULT_HTTP_TIMEOUT_MS exceed Integer.MAX_VALUE.] */
     @Test (expected = IllegalArgumentException.class)
-    public void request_TimeoutExceeds_failed() throws Exception
+    public void requestTimeoutExceedsFailed() throws Exception
     {
         //arrange
 
@@ -173,11 +182,10 @@ public class DeviceOperationsTest
         //assert
     }
 
-    
-
-    /* Tests_SRS_DEVICE_OPERATIONS_21_005: [The request shall throw IllegalArgumentException if the provided `requestId` is null or empty.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void request_emptyRequestId_failed() throws Exception
+    /* Tests_SRS_DEVICE_OPERATIONS_21_011: [If the requestId is not null or empty, the request shall add to the HTTP header a Request-Id key with a new unique string value for every request.] */
+    @Test
+    public void requestEmptyRequestIdPass(@Mocked IotHubServiceSasToken iotHubServiceSasToken,
+                                              @Mocked HttpRequest httpRequest) throws Exception
     {
         //arrange
 
@@ -191,11 +199,18 @@ public class DeviceOperationsTest
                 0);
 
         //assert
+        new Verifications()
+        {
+            {
+                httpRequest.setHeaderField(REQUEST_ID, STANDARD_REQUEST_ID);
+                times = 0;
+            }
+        };
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_006: [The request shall create a new SASToken with the ServiceConnect rights.] */
     @Test (expected = IllegalArgumentException.class)
-    public void invoke_throwOnCreateIotHubServiceSasToken_failed() throws Exception
+    public void invokeThrowOnCreateIotHubServiceSasTokenFailed() throws Exception
     {
         //arrange
         new MockUp<IotHubServiceSasToken>()
@@ -219,7 +234,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_007: [If the SASToken is null or empty, the request shall throw IOException.] */
     @Test (expected = IOException.class)
-    public void invoke_throwOnSasTokenNull_failed(@Mocked IotHubServiceSasToken iotHubServiceSasToken) throws Exception
+    public void invokeThrowOnSasTokenNullFailed(@Mocked IotHubServiceSasToken iotHubServiceSasToken) throws Exception
     {
         //arrange
         new NonStrictExpectations()
@@ -242,7 +257,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_007: [If the SASToken is null or empty, the request shall throw IOException.] */
     @Test (expected = IOException.class)
-    public void invoke_throwOnSasTokenEmpty_failed(@Mocked IotHubServiceSasToken iotHubServiceSasToken) throws Exception
+    public void invokeThrowOnSasTokenEmptyFailed(@Mocked IotHubServiceSasToken iotHubServiceSasToken) throws Exception
     {
         //arrange
         new NonStrictExpectations()
@@ -265,7 +280,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_008: [The request shall create a new HttpRequest with the provided `url`, http `method`, and `payload`.] */
     @Test (expected = IOException.class)
-    public void invoke_throwOnHttpRequest_failed(@Mocked IotHubServiceSasToken iotHubServiceSasToken) throws Exception
+    public void invokeThrowOnHttpRequestFailed(@Mocked IotHubServiceSasToken iotHubServiceSasToken) throws Exception
     {
         //arrange
         new NonStrictExpectations()
@@ -295,7 +310,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_009: [The request shall add to the HTTP header the sum of timeout and default timeout in milliseconds.] */
     @Test (expected = IllegalArgumentException.class)
-    public void invoke_throwOnsetReadTimeoutMillis_failed(
+    public void invokeThrowOnsetReadTimeoutMillisFailed(
             @Mocked IotHubServiceSasToken iotHubServiceSasToken,
             @Mocked HttpRequest httpRequest)
             throws Exception
@@ -323,7 +338,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_010: [The request shall add to the HTTP header an `authorization` key with the SASToken.] */
     @Test (expected = IllegalArgumentException.class)
-    public void invoke_throwOnAutorization_failed(
+    public void invokeThrowOnAuthorizationFailed(
             @Mocked IotHubServiceSasToken iotHubServiceSasToken,
             @Mocked HttpRequest httpRequest)
             throws Exception
@@ -353,7 +368,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_011: [The request shall add to the HTTP header a `Request-Id` key with a new unique string value for every request.] */
     @Test (expected = IllegalArgumentException.class)
-    public void invoke_throwOnRequestID_failed(
+    public void invokeThrowOnRequestIDFailed(
             @Mocked IotHubServiceSasToken iotHubServiceSasToken,
             @Mocked HttpRequest httpRequest)
             throws Exception
@@ -385,7 +400,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_012: [The request shall add to the HTTP header a `User-Agent` key with the client Id and service version.] */
     @Test (expected = IllegalArgumentException.class)
-    public void invoke_throwOnUserAgent_failed(
+    public void invokeThrowOnUserAgentFailed(
             @Mocked IotHubServiceSasToken iotHubServiceSasToken,
             @Mocked HttpRequest httpRequest)
             throws Exception
@@ -419,7 +434,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_013: [The request shall add to the HTTP header a `Accept` key with `application/json`.] */
     @Test (expected = IllegalArgumentException.class)
-    public void invoke_throwOnAccept_failed(
+    public void invokeThrowOnAcceptFailed(
             @Mocked IotHubServiceSasToken iotHubServiceSasToken,
             @Mocked HttpRequest httpRequest)
             throws Exception
@@ -455,7 +470,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_014: [The request shall add to the HTTP header a `Content-Type` key with `application/json; charset=utf-8`.] */
     @Test (expected = IllegalArgumentException.class)
-    public void invoke_throwOnContentType_failed(
+    public void invokeThrowOnContentTypeFailed(
             @Mocked IotHubServiceSasToken iotHubServiceSasToken,
             @Mocked HttpRequest httpRequest)
             throws Exception
@@ -493,7 +508,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_015: [The request shall send the created request and get the response.] */
     @Test (expected = IOException.class)
-    public void invoke_throwOnSend_failed(
+    public void invokeThrowOnSendFailed(
             @Mocked IotHubServiceSasToken iotHubServiceSasToken,
             @Mocked HttpRequest httpRequest)
             throws Exception
@@ -533,7 +548,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_016: [If the resulted HttpResponseStatus represents fail, the request shall throw proper Exception by calling httpResponseVerification.] */
     @Test (expected = IotHubBadFormatException.class)
-    public void invoke_throwOnhttpResponseVerification_failed(
+    public void invokeThrowOnHttpResponseVerificationFailed(
             @Mocked IotHubServiceSasToken iotHubServiceSasToken,
             @Mocked HttpRequest httpRequest)
             throws Exception
@@ -581,7 +596,7 @@ public class DeviceOperationsTest
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_017: [If the resulted status represents success, the request shall return the http response.] */
     @Test
-    public void invoke_succeed(
+    public void invokeSucceed(
             @Mocked IotHubServiceSasToken iotHubServiceSasToken,
             @Mocked HttpRequest httpRequest)
             throws Exception
@@ -646,7 +661,7 @@ public class DeviceOperationsTest
     
  /* Tests_SRS_DEVICE_OPERATIONS_21_017: [If the resulted status represents success, the request shall return the http response.] */
     @Test
-    public void invoke_httprequesttimeout_succeed(
+    public void invokeHttpRequestTimeoutSucceed(
             @Mocked IotHubServiceSasToken iotHubServiceSasToken,
             @Mocked HttpRequest httpRequest)
             throws Exception
@@ -713,5 +728,86 @@ public class DeviceOperationsTest
                 times = 1;
             }
         };
+    }
+
+    //Tests_SRS_DEVICE_OPERATIONS_25_020: [This method shall set the headers map to be used for next request only.]
+    @Test
+    public void setCustomHeadersSucceed(@Mocked IotHubServiceSasToken iotHubServiceSasToken,
+                                        @Mocked HttpRequest httpRequest) throws Exception
+    {
+        //Arrange
+        Map<String, String> headers = new HashMap<>();
+        headers.put("TestKey", "TestValue");
+
+        //act
+        DeviceOperations.setHeaders(headers);
+        DeviceOperations.request(
+                IOT_HUB_CONNECTION_STRING,
+                new URL(STANDARD_URL),
+                HttpMethod.POST,
+                STANDARD_PAYLOAD,
+                STANDARD_REQUEST_ID,
+                0);
+
+        assertNull(Deencapsulation.getField(DeviceOperations.class, "headers"));
+
+        //assert
+        new Verifications()
+        {
+            {
+                httpRequest.setHeaderField("TestKey", "TestValue");
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void setCustomHeadersSetsOnlyOnce(@Mocked IotHubServiceSasToken iotHubServiceSasToken,
+                                        @Mocked HttpRequest httpRequest) throws Exception
+    {
+        //Arrange
+        Map<String, String> headers = new HashMap<>();
+        headers.put("TestKey", "TestValue");
+
+        //act
+        DeviceOperations.setHeaders(headers);
+        DeviceOperations.request(
+                IOT_HUB_CONNECTION_STRING,
+                new URL(STANDARD_URL),
+                HttpMethod.POST,
+                STANDARD_PAYLOAD,
+                STANDARD_REQUEST_ID,
+                0);
+
+        DeviceOperations.request(
+                IOT_HUB_CONNECTION_STRING,
+                new URL(STANDARD_URL),
+                HttpMethod.POST,
+                STANDARD_PAYLOAD,
+                STANDARD_REQUEST_ID,
+                0);
+        //assert
+        new Verifications()
+        {
+            {
+                httpRequest.setHeaderField("TestKey", "TestValue");
+                maxTimes = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICE_OPERATIONS_25_021: [If the headers map is null or empty then this method shall throw IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void setCustomHeadersThrowsOnNull() throws Exception
+    {
+        //act/assert
+        DeviceOperations.setHeaders(null);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void setCustomHeadersThrowsOnEmpty() throws Exception
+    {
+        //act/assert
+        DeviceOperations.setHeaders(new HashMap<>());
     }
 }

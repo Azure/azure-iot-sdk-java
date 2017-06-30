@@ -56,7 +56,7 @@ public class ParserUtility
      * @param query query to be validated
      * @throws IllegalArgumentException if query does not contain "select" or "from" or is not a valid utf-8 string
      */
-    protected static void validateQuery(String query) throws IllegalArgumentException
+    public static void validateQuery(String query) throws IllegalArgumentException
     {
         /*
         Codes_SRS_PARSER_UTILITY_25_026: [The validateQuery shall do nothing if the string is valid.]

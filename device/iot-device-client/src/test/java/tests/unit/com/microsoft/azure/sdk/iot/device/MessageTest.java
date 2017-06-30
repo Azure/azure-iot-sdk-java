@@ -5,6 +5,8 @@ package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
+import com.microsoft.azure.sdk.iot.device.MessageType;
+import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import org.junit.Test;
@@ -14,9 +16,12 @@ import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
-/** Unit tests for Message. */
+/**
+ * Unit test for Message class.
+ * 88% methods, 91% lines covered
+ */
 public class MessageTest
 {
     protected static Charset UTF8 = StandardCharsets.UTF_8;
@@ -258,5 +263,39 @@ public class MessageTest
 
         boolean expectedResult = false;
         assertThat(expectedResult, is(actualResult));
+    }
+
+
+    // Tests_SRS_MESSAGE_34_047: [The function shall set the message's expiry time.]
+    // Tests_SRS_MESSAGE_34_048: [The function shall set the message's message type.]
+    // Tests_SRS_MESSAGE_34_046: [The function shall set the message's correlation ID to the provided value.]
+    // Tests_SRS_MESSAGE_34_044: [The function shall set the message's message ID to the provided value.]
+    // Tests_SRS_MESSAGE_34_049: [The function shall return the message's message type.]
+    // Tests_SRS_MESSAGE_34_045: [The function shall return the message's correlation ID.]
+    // Tests_SRS_MESSAGE_34_043: [The function shall return the message's message Id.]
+    // Tests_SRS_MESSAGE_34_039: [The function shall return the message's DeliveryAcknowledgement.]
+    // Tests_SRS_MESSAGE_34_037: [The function shall return the message's user ID.]
+    // Tests_SRS_MESSAGE_34_041: [The function shall return the message's To value.]
+    @Test
+    public void testPropertyGettersAndSetters()
+    {
+        //arrange
+        Message msg = new Message();
+        MessageType type = MessageType.Telemetry;
+        String messageId = "1234";
+        String correlationId = "6789";
+
+        //act
+        msg.setMessageType(type);
+        msg.setCorrelationId(correlationId);
+        msg.setMessageId(messageId);
+
+        //assert
+        assertEquals(type, msg.getMessageType());
+        assertEquals(correlationId, msg.getCorrelationId());
+        assertEquals(messageId, msg.getMessageId());
+        assertNull(msg.getTo());
+        assertNull(msg.getUserId());
+        assertNull(msg.getDeliveryAcknowledgement());
     }
 }

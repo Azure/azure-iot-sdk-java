@@ -14,13 +14,19 @@ import org.junit.Test;
 import javax.naming.SizeLimitExceededException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
-/** Unit tests for HttpsBatchMessage. */
+/** Unit tests for HttpsBatchMessage.
+ * 100% methods covered
+ * 100% lines covered
+ */
 public class HttpsBatchMessageTest
 {
     protected static Charset UTF8 = StandardCharsets.UTF_8;
@@ -97,6 +103,37 @@ public class HttpsBatchMessageTest
 
     // Tests_SRS_HTTPSBATCHMESSAGE_11_005: [The JSON object shall have the field "properties" set to a JSON object which has a key-value pair for each message property, where the key is the HTTPS property name and the value is the property value.]
     @Test
+    public void addMessageSetsPropertiesCorrectlyWhenNoPropertiesPresent(@Mocked final HttpsSingleMessage mockMsg)
+            throws SizeLimitExceededException
+    {
+        //This keyword is present in the json whenever at least one app/system property is present
+        final String propertiesKeyword = "properties";
+        final String msgBody = "test-msg-body";
+        final boolean isBase64Encoded = false;
+        final MessageProperty[] properties = { };
+
+        new NonStrictExpectations()
+        {
+            {
+                mockMsg.getBodyAsString();
+                result = msgBody;
+                mockMsg.getProperties();
+                result = properties;
+                mockMsg.isBase64Encoded();
+                result = isBase64Encoded;
+            }
+        };
+
+        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
+        batchMsg.addMessage(mockMsg);
+        String testBatchBody =
+                new String(batchMsg.getBody(), UTF8).replaceAll("\\s", "");
+
+        assertFalse(testBatchBody.contains(propertiesKeyword));
+    }
+
+    // Tests_SRS_HTTPSBATCHMESSAGE_11_005: [The JSON object shall have the field "properties" set to a JSON object which has a key-value pair for each message property, where the key is the HTTPS property name and the value is the property value.]
+    @Test
     public void addMessageSetsPropertiesCorrectly(
             @Mocked final HttpsSingleMessage mockMsg,
             @Mocked final MessageProperty mockProperty) throws
@@ -107,6 +144,7 @@ public class HttpsBatchMessageTest
         final String propertyHttpsName = "test-property-name";
         final String propertyValue = "test-property-value";
         final MessageProperty[] properties = { mockProperty };
+
         new NonStrictExpectations()
         {
             {
@@ -133,6 +171,59 @@ public class HttpsBatchMessageTest
                         + propertyHttpsName + "\":\"" + propertyValue
                         + "\"}";
         assertThat(testBatchBody, containsString(expectedMsgProperties));
+    }
+
+    // Tests_SRS_HTTPSBATCHMESSAGE_11_005: [The JSON object shall have the field "properties" set to a JSON object which has a key-value pair for each message property, where the key is the HTTPS property name and the value is the property value.]
+    @Test
+    public void addMessageSetsPropertiesCorrectlyWhenThereAreSystemProperties(
+            @Mocked final HttpsSingleMessage mockMsg,
+            @Mocked final MessageProperty mockProperty) throws
+            SizeLimitExceededException
+    {
+        final String msgBody = "test-msg-body";
+        final boolean isBase64Encoded = false;
+        final String propertyHttpsName = "test-property-name";
+        final String propertyValue = "test-property-value";
+        final String correlationIdName = "correlationid";
+        final String correlationIdValue = "1234";
+        final String messageIdName = "messageid";
+        final String messageIdValue = "5678";
+
+        final MessageProperty[] properties = { mockProperty };
+        final Map<String, String> systemProperties = new HashMap<>();
+        systemProperties.put(correlationIdName, correlationIdValue);
+        systemProperties.put(messageIdName, messageIdValue);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockMsg.getBodyAsString();
+                result = msgBody;
+                mockMsg.getProperties();
+                result = properties;
+                mockProperty.getName();
+                result = propertyHttpsName;
+                mockProperty.getValue();
+                result = propertyValue;
+                mockMsg.isBase64Encoded();
+                result = isBase64Encoded;
+                mockMsg.getSystemProperties();
+                result = systemProperties;
+            }
+        };
+
+        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
+        batchMsg.addMessage(mockMsg);
+        String testBatchBody =
+                new String(batchMsg.getBody(), UTF8).replaceAll("\\s", "");
+
+        final String expectedApplicationPropertyString = propertyHttpsName + "\":\"" + propertyValue;
+        final String expectedCorrelationIdString = correlationIdName + "\":\"" + correlationIdValue;
+        final String expectedMessageIdString = messageIdName + "\":\"" + messageIdValue;
+
+        assertThat(testBatchBody, containsString(expectedApplicationPropertyString));
+        assertThat(testBatchBody, containsString(expectedCorrelationIdString));
+        assertThat(testBatchBody, containsString(expectedMessageIdString));
     }
 
     // Tests_SRS_HTTPSBATCHMESSAGE_11_009: [If the function throws a SizeLimitExceededException, the batched message shall remain as if the message was never added.]

@@ -39,7 +39,7 @@ public static HttpsSingleMessage parseHttpsMessage(Message msg);
 
 **SRS_HTTPSSINGLEMESSAGE_11_003: [**The parsed HttpsSingleMessage shall add the prefix 'iothub-app-' to each of the message properties.**]**
 
-**SRS_HTTPSSINGLEMESSAGE_21_014: [**If the message contains messageId, the parsed HttpsSingleMessage shall add the property 'iothub-messageid' with the messageId value.**]**
+**SRS_HTTPSSINGLEMESSAGE_34_014: [**If the message contains a system property, the parsed HttpsSingleMessage shall add the corresponding property with property value.**]**
 
 
 ### parseHttpsMessage
@@ -54,7 +54,7 @@ public static HttpsSingleMessage parseHttpsMessage(Message msg);
 
 **SRS_HTTPSSINGLEMESSAGE_21_018: [**The parsed HttpsSingleMessage shall add the prefix 'iothub-app-' to each of the message properties.**]**
 
-**SRS_HTTPSSINGLEMESSAGE_21_019: [**If the message contains messageId, the parsed HttpsSingleMessage shall add the property 'iothub-messageid' with the messageId value.**]**
+**SRS_HTTPSSINGLEMESSAGE_34_019: [**If the message contains a system property, the parsed HttpsSingleMessage shall add the corresponding property with property value.**]**
 
 
 ### parseHttpsMessage
@@ -69,6 +69,8 @@ public static HttpsSingleMessage parseHttpsMessage(HttpsResponse response);
 
 **SRS_HTTPSSINGLEMESSAGE_11_006: [**The parsed HttpsSingleMessage shall include all valid HTTPS application-defined properties in the response header as message properties.**]**
 
+**SRS_HTTPSSINGLEMESSAGE_34_021: [**The parsed HttpsSingleMessage shall include all valid HTTPS system-defined properties in the response header as message properties.**]**
+
 
 ### toMessage
 
@@ -79,6 +81,8 @@ public Message toMessage();
 **SRS_HTTPSSINGLEMESSAGE_11_007: [**The function shall return an IoT Hub message with a copy of the message body as its body.**]**
 
 **SRS_HTTPSSINGLEMESSAGE_11_008: [**The function shall return an IoT Hub message with application-defined properties that have the prefix 'iothub-app' removed.**]**
+
+**SRS_HTTPSSINGLEMESSAGE_34_020: [**The function shall return an IoT Hub message with all system properties set accordingly.**]**
 
 
 ### getBody
@@ -124,3 +128,12 @@ public MessageProperty[] getProperties();
 ```
 
 **SRS_HTTPSSINGLEMESSAGE_11_013: [**The function shall return a copy of the message properties.**]**
+
+
+### getSystemProperties
+
+```java
+public Map<String, String> getSystemProperties()
+```
+
+**SRS_HTTPSSINGLEMESSAGE_34_015: [**The function shall return a copy of the message's system properties.**]**

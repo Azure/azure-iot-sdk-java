@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -201,6 +202,22 @@ public class Helpers
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
         dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
         return dateFormat.format(date);
+
     }
 
+    /**
+     * Asserts when list contents are not equal
+     * @param expected expected list to verify
+     * @param test  list to test
+     */
+    protected static void assertListEquals(List expected, List test)
+    {
+        assertNotNull(expected);
+        assertNotNull(test);
+        assertTrue(expected.size() == test.size());
+        for(Object o : expected)
+        {
+            assertTrue(test.contains(o));
+        }
+    }
 }

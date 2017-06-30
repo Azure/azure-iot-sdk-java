@@ -66,7 +66,6 @@ public class FileUploadStatusParser
      * @param isSuccess is a Boolean representing whether the file was uploaded successfully.
      * @param statusCode is the status for the upload of the file to storage.
      * @param statusDescription is the description of the status code.
-     * @return a valid json that represents the content of this class.
      * @throws IllegalArgumentException if one of the parameters is null, empty, or not valid.
      */
     private void updateStatus(Boolean isSuccess, Integer statusCode, String statusDescription) throws IllegalArgumentException
