@@ -4,13 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-deps-parent</artifactId>
-    <version>0.5.4</version>
+    <version>0.6.5</version>
     <name>IoT SDK Dependencies</name>
 
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <artifactId>iot-sdk-java</artifactId>
-        <version>0.5.9</version>
+        <version>0.6.10</version>
     </parent>
     <developers>
         <developer>
