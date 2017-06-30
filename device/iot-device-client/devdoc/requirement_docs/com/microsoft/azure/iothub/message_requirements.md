@@ -92,6 +92,15 @@ public byte[] getBytes();
 
 **SRS_MESSAGE_11_002: [**The function shall return the message body.**]**
 
+### setAbsoluteExpiryTime()
+```java
+public void setAbsoluteExpiryTime(long absoluteTimeout);
+```
+
+**SRS_MESSAGE_34_037: [**The function shall set the message's expiry time to be the number of milliseconds since the epoch provided in absoluteTimeout.**]**
+
+**SRS_MESSAGE_34_038: [**If the provided absolute expiry time is negative, an IllegalArgumentException shall be thrown.**]**
+
 
 ### getUserId
 

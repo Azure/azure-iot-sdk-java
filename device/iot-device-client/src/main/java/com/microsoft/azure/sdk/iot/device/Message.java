@@ -115,12 +115,12 @@ public class Message
      */
     private ArrayList<MessageProperty> properties;
 
-    private String deliveryAcknowledgement;
-
     /// <summary>
     /// The message body
     /// </summary>
     private byte[] body;
+
+    private String deliveryAcknowledgement;
 
     /**
      * Stream that will provide the bytes for the body of the
@@ -373,8 +373,8 @@ public class Message
     }
 
     /**
-     * Setter for the expiryTime property
-     * @param timeOut The time out for the message, in milliseconds.
+     * Setter for the expiryTime property. This setter uses relative time, not absolute time.
+     * @param timeOut The time out for the message, in milliseconds, from the current time.
      */
     public void setExpiryTime(long timeOut)
     {
@@ -382,6 +382,23 @@ public class Message
         long currentTime = System.currentTimeMillis();
         this.expiryTime = currentTime + timeOut;
         logger.LogInfo("The message with messageid %s has expiry time as %s milliseconds and the message will expire on %s, method name is %s ", this.getMessageId(), timeOut, new Date(this.expiryTime), logger.getMethodName());
+    }
+
+    /**
+     * Setter for the expiryTime property using absolute time
+     * @param absoluteTimeout The time out for the message, in milliseconds.
+     */
+    public void setAbsoluteExpiryTime(long absoluteTimeout)
+    {
+        // Codes_SRS_MESSAGE_34_038: [If the provided absolute expiry time is negative, an IllegalArgumentException shall be thrown.]
+        if (absoluteTimeout < 0)
+        {
+            throw new IllegalArgumentException("ExpiryTime may not be negative");
+        }
+
+        // Codes_SRS_MESSAGE_34_037: [The function shall set the message's expiry time to be the number of milliseconds since the epoch provided in absoluteTimeout.]
+        this.expiryTime = absoluteTimeout;
+        logger.LogInfo("The message with messageid %s has expiry time as %s milliseconds and the message will expire on %s, method name is %s ", this.getMessageId(), absoluteTimeout, new Date(this.expiryTime), logger.getMethodName());
     }
 
     /**
