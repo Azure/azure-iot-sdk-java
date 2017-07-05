@@ -60,19 +60,14 @@ public synchronized boolean hasNext(Query query) throws IotHubException, IOExcep
 ```
 **SRS_RAW_QUERY_25_010: [** The method shall throw IllegalArgumentException if query is null **]**
 
-**SRS_RAW_QUERY_25_011: [** The method shall check if a response to query is avaliable by calling `hasNext` on the query object.**]**
-
-**SRS_RAW_QUERY_25_012: [** If a queryResponse is available, this method shall return true as is to the user. **]**
-
-**SRS_RAW_QUERY_25_013: [** If a queryResponse is not available, this method shall check if continuation token is avaliable for this query.**]**
-
-**SRS_RAW_QUERY_25_014: [** If continuation token is found then a continuation query is sent to the IotHub and new response is given to the user **]**
+**SRS_RAW_QUERY_25_012: [** If a queryResponse is available, this method shall return true as is to the user, and false otherwise. **]**
 
 ### next
 
 ```java
 public synchronized String next(Query query) throws IOException, IotHubException, NoSuchElementException;
 ```
+
 **SRS_RAW_QUERY_25_015: [** The method shall check if hasNext returns true and throw NoSuchElementException otherwise **]**
 
 **SRS_RAW_QUERY_25_016: [** The method shall return the next element from the query response.**]**
