@@ -10,18 +10,19 @@ import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
+import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -29,8 +30,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -40,6 +43,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class JobClientTest
 {
+    private static String VALID_SQL_QUERY = null;
+    private static final JobType JOB_TYPE_DEFAULT = JobType.scheduleDeviceMethod;
+    private static final JobStatus JOB_STATUS_DEFAULT = JobStatus.completed;
+
     @Mocked
     IotHubConnectionStringBuilder mockedConnectionStringBuilder;
 
@@ -70,6 +77,13 @@ public class JobClientTest
     @Mocked
     URL mockedURL;
 
+
+    @Before
+    public void setUp() throws IOException
+    {
+        VALID_SQL_QUERY = SqlQuery.createSqlQuery("*",
+                                                  SqlQuery.FromType.JOBS, null, null).getQuery();
+    }
 
     /* Tests_SRS_JOBCLIENT_21_002: [The constructor shall create an IotHubConnectionStringBuilder object from the given connection string.] */
     /* Tests_SRS_JOBCLIENT_21_003: [The constructor shall create a new DeviceMethod instance and return it.] */
@@ -1828,5 +1842,423 @@ public class JobClientTest
                 times = 1;
             }
         };
+    }
+
+    //Tests_SRS_JOBCLIENT_25_039: [The queryDeviceJob shall create a query object for the type DEVICE_JOB.]
+    //Tests_SRS_JOBCLIENT_25_040: [The queryDeviceJob shall send a query request on the query object using Query URL, HTTP POST method and wait for the response by calling sendQueryRequest.]
+    @Test
+    public void queryDeviceJobSucceeds(@Mocked Query mockedQuery) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.DEVICE_JOB);
+                result = mockedQuery;
+            }
+        };
+
+        //act
+        testJobClient.queryDeviceJob(VALID_SQL_QUERY);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.DEVICE_JOB);
+                times = 1;
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_JOBCLIENT_25_036: [If the sqlQuery is null, empty, or invalid, the queryDeviceJob shall throw IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void queryDeviceJobThrowsOnNullQuery(@Mocked Query mockedQuery) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        //act
+        testJobClient.queryDeviceJob(null);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void queryDeviceJobThrowsOnEmptyQuery() throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        //act
+        testJobClient.queryDeviceJob("");
+    }
+
+    //Tests_SRS_JOBCLIENT_25_037: [If the pageSize is null, zero or negative, the queryDeviceJob shall throw IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void queryDeviceJobThrowsOnNegativePageSize() throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        //act
+        testJobClient.queryDeviceJob(VALID_SQL_QUERY, -1);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void queryDeviceJobThrowsOnZeroPageSize() throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        //act
+        testJobClient.queryDeviceJob(VALID_SQL_QUERY, 0);
+    }
+
+    @Test (expected = IotHubException.class)
+    public void queryDeviceJobThrowsOnNewQueryThrows(@Mocked Query mockedQuery) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.DEVICE_JOB);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                result = new IotHubException();
+            }
+        };
+
+        //act
+        testJobClient.queryDeviceJob(VALID_SQL_QUERY);
+    }
+
+    /*
+    Tests_SRS_JOBCLIENT_25_043: [If the pageSize is not specified, default pageSize of 100 shall be used.] SRS_JOBCLIENT_25_044: [The queryDeviceJob shall create a query object for the type JOB_RESPONSE.]
+    Tests_SRS_JOBCLIENT_25_045: [The queryDeviceJob shall send a query request on the query object using Query URL, HTTP GET method and wait for the response by calling sendQueryRequest.]
+     */
+    @Test
+    public void queryJobResponseSucceeds(@Mocked Query mockedQuery) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {Integer.class, QueryType.class}, anyInt, QueryType.JOB_RESPONSE);
+                result = mockedQuery;
+            }
+        };
+
+        //act
+        testJobClient.queryJobResponse(JOB_TYPE_DEFAULT, JOB_STATUS_DEFAULT);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {Integer.class, QueryType.class}, anyInt, QueryType.JOB_RESPONSE);
+                times = 1;
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.GET, any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_JOBCLIENT_25_041: [If the input parameters are null, empty, or invalid, the queryJobResponse shall throw IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void queryJobResponseThrowsOnNullType() throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        //act
+        testJobClient.queryJobResponse(null, JOB_STATUS_DEFAULT);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void queryJobResponseThrowsOnNullStatus() throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        //act
+        testJobClient.queryJobResponse(JOB_TYPE_DEFAULT, null);
+    }
+
+    //Tests_SRS_JOBCLIENT_25_042: [If the pageSize is null, zero or negative, the queryJobResponse shall throw IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void queryJobResponseThrowsOnNegativePageSize() throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        //act
+        testJobClient.queryJobResponse(JOB_TYPE_DEFAULT, JOB_STATUS_DEFAULT, -1);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void queryJobResponseThrowsOnZeroPageSize() throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        //act
+        testJobClient.queryJobResponse(JOB_TYPE_DEFAULT, JOB_STATUS_DEFAULT, 0);
+    }
+
+    @Test (expected = IotHubException.class)
+    public void queryJobResponseThrowsOnNewQueryThrows(@Mocked Query mockedQuery) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {Integer.class, QueryType.class}, anyInt, QueryType.JOB_RESPONSE);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.GET, any);
+                result = new IotHubException();
+            }
+        };
+
+        //act
+        testJobClient.queryJobResponse(JOB_TYPE_DEFAULT, JOB_STATUS_DEFAULT);
+    }
+
+    //Tests_SRS_JOBCLIENT_25_047: [hasNextJob shall return true if the next job exist, false other wise.]
+    @Test
+    public void hasNextSucceeds(@Mocked Query mockedQuery) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.DEVICE_JOB);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = true;
+            }
+        };
+
+        Query testQuery = testJobClient.queryDeviceJob(VALID_SQL_QUERY);
+
+        //act
+        boolean result = testJobClient.hasNextJob(testQuery);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                times = 1;
+            }
+        };
+
+        assertTrue(result);
+    }
+
+    //Tests_SRS_JOBCLIENT_25_046: [If the input query is null, empty, or invalid, the hasNextJob shall throw IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void hasNextThrowsOnNullQuery(@Mocked Query mockedQuery) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.DEVICE_JOB);
+                result = mockedQuery;
+            }
+        };
+
+        Query testQuery = testJobClient.queryDeviceJob(VALID_SQL_QUERY);
+
+        //act
+        boolean result = testJobClient.hasNextJob(null);
+    }
+
+    @Test (expected = IotHubException.class)
+    public void hasNextThrowsIfQueryHasNextThrows(@Mocked Query mockedQuery) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.DEVICE_JOB);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = new IotHubException();
+            }
+        };
+
+        Query testQuery = testJobClient.queryDeviceJob(VALID_SQL_QUERY);
+
+        //act
+        boolean result = testJobClient.hasNextJob(testQuery);
+    }
+
+    //Tests_SRS_JOBCLIENT_25_049: [getNextJob shall return next Job Result if the exist, and throw NoSuchElementException other wise.]
+    //Tests_SRS_JOBCLIENT_25_051: [getNextJob method shall parse the next job element from the query response provide the response as JobResult object.]
+    @Test
+    public void nextRetrievesCorrectly(@Mocked Query mockedQuery) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        final String expectedString = "testJsonAsNext";
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.DEVICE_JOB);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = true;
+                Deencapsulation.invoke(mockedQuery, "next");
+                result = expectedString;
+                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                result = mockedJobResult;
+            }
+        };
+
+        Query testQuery = testJobClient.queryDeviceJob(VALID_SQL_QUERY);
+
+        //act
+        JobResult result = testJobClient.getNextJob(testQuery);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                times = 1;
+                Deencapsulation.newInstance(JobResult.class, new Class [] {byte[].class}, expectedString.getBytes());
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_JOBCLIENT_25_048: [If the input query is null, empty, or invalid, the getNextJob shall throw IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void nextThrowsOnNullQuery(@Mocked Query mockedQuery) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.DEVICE_JOB);
+                result = mockedQuery;
+            }
+        };
+
+        Query testQuery = testJobClient.queryDeviceJob(VALID_SQL_QUERY);
+
+        //act
+        testJobClient.getNextJob(null);
+    }
+
+    @Test (expected = IotHubException.class)
+    public void nextThrowsOnQueryNextThrows(@Mocked Query mockedQuery) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.DEVICE_JOB);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "next");
+                result = new IotHubException();
+            }
+        };
+
+        Query testQuery = testJobClient.queryDeviceJob(VALID_SQL_QUERY);
+
+        //act
+        testJobClient.getNextJob(testQuery);
+    }
+
+    @Test (expected = NoSuchElementException.class)
+    public void nextThrowsIfNoNewElements(@Mocked Query mockedQuery) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.DEVICE_JOB);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = false;
+                Deencapsulation.invoke(mockedQuery, "next");
+                result = new NoSuchElementException();
+            }
+        };
+
+        Query testQuery = testJobClient.queryDeviceJob(VALID_SQL_QUERY);
+
+        //act
+        testJobClient.getNextJob(testQuery);
+    }
+
+    //Tests_SRS_JOBCLIENT_25_050: [getNextJob shall throw IOException if next Job Result exist and is not a string.]
+    @Test (expected = IOException.class)
+    public void nextThrowsIfNonStringRetrieved(@Mocked Query mockedQuery) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.DEVICE_JOB);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = true;
+                Deencapsulation.invoke(mockedQuery, "next");
+                result = 5;
+            }
+        };
+
+        Query testQuery = testJobClient.queryDeviceJob(VALID_SQL_QUERY);
+
+        //act
+        testJobClient.getNextJob(testQuery);
     }
 }

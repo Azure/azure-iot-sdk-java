@@ -401,7 +401,7 @@ public class DeviceTwin
      */
     public synchronized Query queryTwin(String sqlQuery) throws IotHubException, IOException
     {
-        //Codes_SRS_DEVICETWIN_25_052: [ If the pagesize if not provided then a default pagesize of 100 is used for the query.]
+        //Codes_SRS_DEVICETWIN_25_052: [ If the pageSize if not provided then a default pageSize of 100 is used for the query.]
         return this.queryTwin(sqlQuery, DEFAULT_PAGE_SIZE);
     }
 
@@ -422,21 +422,8 @@ public class DeviceTwin
             throw new IllegalArgumentException("Query cannot be null");
         }
 
-        //Codes_SRS_DEVICETWIN_25_054: [ The method shall check if a response to query is avaliable by calling hasNext on the query object.]
-        boolean isNextAvailable = deviceTwinQuery.hasNext();
-        //Codes_SRS_DEVICETWIN_25_056: [ If a queryResponse is not available, this method shall check if continuation token is avaliable for this query.]
-        if (!isNextAvailable && deviceTwinQuery.getContinuationToken() != null)
-        {
-            //Codes_SRS_DEVICETWIN_25_057: [ If continuation token is found then a continuation query is sent to the IotHub and new response is given to the user ]
-            deviceTwinQuery.continueQuery(deviceTwinQuery.getContinuationToken());
-            deviceTwinQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, USE_DEFAULT_TIMEOUT);
-            return deviceTwinQuery.hasNext();
-        }
-        else
-        {
-            //Codes_SRS_DEVICETWIN_25_055: [ If a queryResponse is available, this method shall return true as is to the user. ]
-            return isNextAvailable;
-        }
+        //Codes_SRS_DEVICETWIN_25_055: [ If a queryResponse is available, this method shall return true as is to the user, and false otherwise.. ]
+        return deviceTwinQuery.hasNext();
     }
 
     /**
@@ -449,35 +436,33 @@ public class DeviceTwin
      */
     public synchronized DeviceTwinDevice getNextDeviceTwin(Query deviceTwinQuery) throws IOException, IotHubException, NoSuchElementException
     {
-        if (hasNextDeviceTwin(deviceTwinQuery))
+        if (deviceTwinQuery == null)
         {
-            Object nextObject = deviceTwinQuery.next();
+            //Codes_SRS_DEVICETWIN_25_054: [ The method shall throw IllegalArgumentException if query is null ]
+            throw new IllegalArgumentException("Query cannot be null");
+        }
 
-            if (nextObject instanceof String)
-            {
-                //Codes_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinParser and provide the response on DeviceTwinDevice.]
-                String twinJson = (String) nextObject;
-                TwinParser twinParser = new TwinParser();
-                twinParser.enableTags();
-                twinParser.updateTwin(twinJson);
+        Object nextObject = deviceTwinQuery.next();
 
-                DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(twinParser.getDeviceId());
-                deviceTwinDevice.setTags(twinParser.getTagsMap());
-                deviceTwinDevice.setDesiredProperties(twinParser.getDesiredPropertyMap());
-                deviceTwinDevice.setReportedProperties(twinParser.getReportedPropertyMap());
+        if (nextObject instanceof String)
+        {
+            //Codes_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinParser and provide the response on DeviceTwinDevice.]
+            String twinJson = (String) nextObject;
+            TwinParser twinParser = new TwinParser();
+            twinParser.enableTags();
+            twinParser.updateTwin(twinJson);
 
-                return deviceTwinDevice;
-            }
-            else
-            {
-                //Codes_SRS_DEVICETWIN_25_060: [ If the next element from the query response is an object other than String, then this method shall throw IOException ]
-                throw new IOException("Received a response that could not be parsed");
-            }
+            DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(twinParser.getDeviceId());
+            deviceTwinDevice.setTags(twinParser.getTagsMap());
+            deviceTwinDevice.setDesiredProperties(twinParser.getDesiredPropertyMap());
+            deviceTwinDevice.setReportedProperties(twinParser.getReportedPropertyMap());
+
+            return deviceTwinDevice;
         }
         else
         {
-            //Codes_SRS_DEVICETWIN_25_058: [ The method shall check if hasNext returns true and throw NoSuchElementException otherwise ]
-            throw new NoSuchElementException();
+            //Codes_SRS_DEVICETWIN_25_060: [ If the next element from the query response is an object other than String, then this method shall throw IOException ]
+            throw new IOException("Received a response that could not be parsed");
         }
     }
 }

@@ -195,9 +195,7 @@ public class RawTwinQueryTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
-                times = 0;
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                 Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
                 times = 1;
             }
         };
@@ -217,58 +215,17 @@ public class RawTwinQueryTest
             {
                 Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.RAW);
                 result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = true;
             }
         };
 
         Query testQuery = rawTwinQuery.query(VALID_SQL_QUERY);
 
         //act
-        boolean result = rawTwinQuery.hasNext(null);
-    }
-
-    //Tests_SRS_RAW_QUERY_25_013: [ If a queryResponse is not available, this method shall check if continuation token is avaliable for this query.]
-    //Tests_SRS_RAW_QUERY_25_014: [ If continuation token is found then a continuation query is sent to the IotHub and new response is given to the user ]
-    @Test
-    public void hasNextSendsNewRequestOnEmpty() throws IotHubException, IOException
-    {
-        //arrange
-        RawTwinQuery rawTwinQuery = RawTwinQuery.createFromConnectionString(VALID_CONNECTION_STRING);
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.RAW);
-                result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = false;
-                Deencapsulation.invoke(mockedQuery, "getContinuationToken");
-                result = anyString;
-            }
-        };
-
-        Query testQuery = rawTwinQuery.query(VALID_SQL_QUERY);
-
-        //act
-        boolean result = rawTwinQuery.hasNext(testQuery);
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
-                times = 1;
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                times = 2;
-            }
-        };
-
-        assertFalse(result);
+        rawTwinQuery.hasNext(null);
     }
 
     @Test (expected = IotHubException.class)
-    public void hasNextSendsNewRequestOnEmptyThrowsIfSendThrows() throws IotHubException, IOException
+    public void hasNextThrowsIfQueryHasNextThrows() throws IotHubException, IOException
     {
         //arrange
         RawTwinQuery rawTwinQuery = RawTwinQuery.createFromConnectionString(VALID_CONNECTION_STRING);
@@ -279,61 +236,14 @@ public class RawTwinQueryTest
                 Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.RAW);
                 result = mockedQuery;
                 Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = false;
-                Deencapsulation.invoke(mockedQuery, "getContinuationToken");
-                result = anyString;
-            }
-        };
-
-        Query testQuery = rawTwinQuery.query(VALID_SQL_QUERY);
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
                 result = new IotHubException();
             }
         };
 
-        //act
-        boolean result = rawTwinQuery.hasNext(testQuery);
-    }
-
-    //Tests_SRS_RAW_QUERY_25_014: [ If continuation token is found then a continuation query is sent to the IotHub and new response is given to the user ]
-    @Test
-    public void hasNextDoesNotSendNewRequestOnEmptyAndNullToken() throws IotHubException, IOException
-    {
-        //arrange
-        RawTwinQuery rawTwinQuery = RawTwinQuery.createFromConnectionString(VALID_CONNECTION_STRING);
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.RAW);
-                result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = false;
-                Deencapsulation.invoke(mockedQuery, "getContinuationToken");
-                result = null;
-            }
-        };
-
         Query testQuery = rawTwinQuery.query(VALID_SQL_QUERY);
 
         //act
         boolean result = rawTwinQuery.hasNext(testQuery);
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
-                times = 0;
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                times = 1;
-            }
-        };
-        assertFalse(result);
     }
 
     //Tests_SRS_RAW_QUERY_25_016: [ The method shall return the next element from the query response.]
@@ -365,8 +275,6 @@ public class RawTwinQueryTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
-                times = 0;
                 Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
                 times = 1;
             }
@@ -386,8 +294,6 @@ public class RawTwinQueryTest
             {
                 Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.RAW);
                 result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = true;
             }
         };
 
@@ -398,7 +304,7 @@ public class RawTwinQueryTest
     }
 
     @Test (expected = IotHubException.class)
-    public void nextThrowsOnHasNextThrows() throws IotHubException, IOException
+    public void nextThrowsOnQueryNextThrows() throws IotHubException, IOException
     {
         //arrange
         RawTwinQuery rawTwinQuery = RawTwinQuery.createFromConnectionString(VALID_CONNECTION_STRING);
@@ -408,23 +314,12 @@ public class RawTwinQueryTest
             {
                 Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.RAW);
                 result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = false;
-                Deencapsulation.invoke(mockedQuery, "getContinuationToken");
-                result = anyString;
-
+                Deencapsulation.invoke(mockedQuery, "next");
+                result = new IotHubException();
             }
         };
 
         Query testQuery = rawTwinQuery.query(VALID_SQL_QUERY);
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                result = new IotHubException();
-            }
-        };
 
         //act
         rawTwinQuery.next(testQuery);
@@ -445,7 +340,7 @@ public class RawTwinQueryTest
                 Deencapsulation.invoke(mockedQuery, "hasNext");
                 result = false;
                 Deencapsulation.invoke(mockedQuery, "next");
-                result = null;
+                result = new NoSuchElementException();
             }
         };
 

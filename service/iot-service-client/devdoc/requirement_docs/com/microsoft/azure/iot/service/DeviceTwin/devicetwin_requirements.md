@@ -23,7 +23,6 @@ public class DeviceTwin
     
     public void replaceDesired(DeviceTwinDevice device) throws IotHubException, IOException;
     public void replaceTags(DeviceTwinDevice device) throws IotHubException, IOException;
-
     
     public synchronized Query queryTwin(String sqlQuery, Integer pageSize) throws IotHubException, IOException;
     public synchronized Query queryTwin(String sqlQuery) throws IotHubException, IOException;
@@ -222,20 +221,16 @@ public synchronized boolean hasNextDeviceTwin(Query deviceTwinQuery) throws IotH
 ```
 **SRS_DEVICETWIN_25_053: [** The method shall throw IllegalArgumentException if deviceTwinQuery is null **]**
 
-**SRS_DEVICETWIN_25_054: [** The method shall check if a response to query is avaliable by calling `hasNext` on the query object.**]**
-
-**SRS_DEVICETWIN_25_055: [** If a queryResponse is available, this method shall return true as is to the user. **]**
-
-**SRS_DEVICETWIN_25_056: [** If a queryResponse is not available, this method shall check if continuation token is avaliable for this query.**]**
-
-**SRS_DEVICETWIN_25_057: [** If continuation token is found then a continuation query is sent to the IotHub and new response is given to the user **]**
+**SRS_DEVICETWIN_25_055: [** If a queryResponse is available, this method shall return true as is to the user, and false otherwise. **]**
 
 ### getNextDeviceTwin
 
 ```java
 public synchronized DeviceTwinDevice getNextDeviceTwin(Query deviceTwinQuery) throws IOException, IotHubException, NoSuchElementException;
 ```
-**SRS_DEVICETWIN_25_058: [** The method shall check if hasNext returns true and throw NoSuchElementException otherwise **]**
+**SRS_DEVICETWIN_25_058: [** The method shall throw NoSuchElementException if no element is found.**]**
+
+**SRS_DEVICETWIN_25_054: [** The method shall throw IllegalArgumentException if deviceTwinQuery is null **]**
 
 **SRS_DEVICETWIN_25_059: [** The method shall parse the next element from the query response as Twin Document using `TwinParser` and provide the response on DeviceTwinDevice.**]**
 
