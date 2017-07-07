@@ -3,11 +3,15 @@
 
 package com.microsoft.azure.sdk.iot.deps.serializer;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Set of static functions to help the serializer.
@@ -59,10 +63,10 @@ public class ParserUtility
     public static void validateQuery(String query) throws IllegalArgumentException
     {
         /*
-        Codes_SRS_PARSER_UTILITY_25_026: [The validateQuery shall do nothing if the string is valid.]
-        Codes_SRS_PARSER_UTILITY_25_027: [The validateQuery shall throw IllegalArgumentException is the provided query is null or empty.]
-        Codes_SRS_PARSER_UTILITY_25_028: [The validateQuery shall throw IllegalArgumentException is the provided query contains non UTF-8 character.]
-        Codes_SRS_PARSER_UTILITY_25_029: [The validateQuery shall throw IllegalArgumentException is the provided query does not contain SELECT and FROM.]
+        Codes_SRS_PARSER_UTILITY_25_031: [The validateQuery shall do nothing if the string is valid.]
+        Codes_SRS_PARSER_UTILITY_25_032: [The validateQuery shall throw IllegalArgumentException is the provided query is null or empty.]
+        Codes_SRS_PARSER_UTILITY_25_033: [The validateQuery shall throw IllegalArgumentException is the provided query contains non UTF-8 character.]
+        Codes_SRS_PARSER_UTILITY_25_034: [The validateQuery shall throw IllegalArgumentException is the provided query does not contain SELECT and FROM.]
          */
         try
         {
@@ -279,4 +283,47 @@ public class ParserUtility
 
         return dateTimeOffset;
     }
+
+    /**
+     * Helper to convert a provided map in to a JsonElement, including sub-maps.
+     *
+     * @param map is the map to serialize
+     * @return a JsonElement that represents the content of the map.
+     * @throws IllegalArgumentException if the provided map is null.
+     */
+    protected static JsonElement mapToJsonElement(Map<String, Object> map) throws IllegalArgumentException
+    {
+        /* Codes_SRS_PARSER_UTILITY_21_035: [The mapToJsonElement shall serialize the provided map into a JsonElement.] */
+        /* Codes_SRS_PARSER_UTILITY_21_036: [The mapToJsonElement shall include keys with null values in the JsonElement.] */
+        Gson gson = new GsonBuilder().serializeNulls().create();
+
+        /* Codes_SRS_PARSER_UTILITY_21_038: [If the map is empty, the mapToJsonElement shall return a empty JsonElement.] */
+        JsonObject json = new JsonObject();
+
+        if(map == null)
+        {
+            /* Codes_SRS_PARSER_UTILITY_21_039: [If the map is null, the mapToJsonElement shall throw IllegalArgumentException.] */
+            throw new IllegalArgumentException("null map to parse");
+        }
+
+        for (Map.Entry<String, Object> entry : map.entrySet())
+        {
+            if (entry.getValue() == null)
+            {
+                json.addProperty(entry.getKey(), (String)null);
+            }
+            else if(entry.getValue() instanceof Map)
+            {
+                /* Codes_SRS_PARSER_UTILITY_21_037: [If the value is a map, the mapToJsonElement shall include it as a submap in the JsonElement.] */
+                json.add(entry.getKey(), mapToJsonElement((Map<String, Object>) entry.getValue()));
+            }
+            else
+            {
+                json.add(entry.getKey(), gson.toJsonTree(entry.getValue()));
+            }
+        }
+
+        return json;
+    }
+
 }

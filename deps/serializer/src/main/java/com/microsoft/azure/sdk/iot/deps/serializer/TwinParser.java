@@ -3,10 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.deps.serializer;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -168,7 +165,7 @@ public class TwinParser
         /* Codes_SRS_TWINPARSER_21_088: [The toJsonElement shall include the `reported` property in the json even if it has no content.] */
         twinJson.add(PROPERTIES_TAG, this.properties.toJsonElement());
 
-        return (JsonElement) twinJson;
+        return twinJson;
     }
 
     /**
@@ -241,7 +238,7 @@ public class TwinParser
         /* Codes_SRS_TWINPARSER_21_127: [The `key` and `value` in the maps shall be case sensitive.] */
         /* Codes_SRS_TWINPARSER_21_128: [If one of the provided map is empty, the updateTwin shall not change its the collection.] */
         /* Codes_SRS_TWINPARSER_21_081: [If any `key` already exists, the updateTwin shall replace the existed value by the new one.] */
-        /* Codes_SRS_TWINPARSER_21_082: [If any `value` is null, the updateTwin shall store it but do not report on Json.] */
+        /* Codes_SRS_TWINPARSER_21_082: [If any `value` is null, the updateTwin shall delete it from the collection and report on Json.] */
         JsonElement jsonDesiredProperty = innerUpdateDesiredProperty(desiredPropertyMap);
         if(jsonDesiredProperty != null)
         {
@@ -258,7 +255,7 @@ public class TwinParser
         /* Codes_SRS_TWINPARSER_21_127: [The `key` and `value` in the maps shall be case sensitive.] */
         /* Codes_SRS_TWINPARSER_21_128: [If one of the provided map is empty, the updateTwin shall not change its the collection.] */
         /* Codes_SRS_TWINPARSER_21_081: [If any `key` already exists, the updateTwin shall replace the existed value by the new one.] */
-        /* Codes_SRS_TWINPARSER_21_082: [If any `value` is null, the updateTwin shall store it but do not report on Json.] */
+        /* Codes_SRS_TWINPARSER_21_082: [If any `value` is null, the updateTwin shall delete it from the collection and report on Json.] */
         JsonElement jsonReportedProperty = innerUpdateReportedProperty(reportedPropertyMap);
         if(jsonReportedProperty != null)
         {
@@ -278,7 +275,7 @@ public class TwinParser
             /* Codes_SRS_TWINPARSER_21_127: [The `key` and `value` in the maps shall be case sensitive.] */
             /* Codes_SRS_TWINPARSER_21_128: [If one of the provided map is empty, the updateTwin shall not change its the collection.] */
             /* Codes_SRS_TWINPARSER_21_081: [If any `key` already exists, the updateTwin shall replace the existed value by the new one.] */
-            /* Codes_SRS_TWINPARSER_21_082: [If any `value` is null, the updateTwin shall store it but do not report on Json.] */
+            /* Codes_SRS_TWINPARSER_21_082: [If any `value` is null, the updateTwin shall delete it from the collection and report on Json.] */
             if(tagsMap == null)
             {
                 jsonTwin.add(TAGS_TAG, new JsonObject());
@@ -351,7 +348,7 @@ public class TwinParser
             /* Codes_SRS_TWINPARSER_21_059: [The updateDesiredProperty shall only change properties in the map, keep the others as is.] */
             /* Codes_SRS_TWINPARSER_21_061: [All `key` and `value` in property shall be case sensitive.] */
             /* Codes_SRS_TWINPARSER_21_077: [If any `key` already exists, the updateDesiredProperty shall replace the existed value by the new one.] */
-            /* Codes_SRS_TWINPARSER_21_078: [If any `value` is null, the updateDesiredProperty shall store it but do not report on Json.] */
+            /* Codes_SRS_TWINPARSER_21_078: [If any `value` is null, the updateDesiredProperty shall delete it from the collection and report on Json.] */
             updatedElements = properties.updateDesired(propertyMap);
         }
         else
@@ -401,7 +398,7 @@ public class TwinParser
             /* Codes_SRS_TWINPARSER_21_060: [The updateReportedProperty shall only change properties in the map, keep the others as is.] */
             /* Codes_SRS_TWINPARSER_21_062: [All `key` and `value` in property shall be case sensitive.] */
             /* Codes_SRS_TWINPARSER_21_083: [If any `key` already exists, the updateReportedProperty shall replace the existed value by the new one.] */
-            /* Codes_SRS_TWINPARSER_21_084: [If any `value` is null, the updateReportedProperty shall store it but do not report on Json.] */
+            /* Codes_SRS_TWINPARSER_21_084: [If any `value` is null, the updateReportedProperty shall delete it from the collection and report on Json.] */
             updatedElements = properties.updateReported(propertyMap);
         }
         else
@@ -454,7 +451,7 @@ public class TwinParser
             /* Codes_SRS_TWINPARSER_21_107: [The updateTags shall only change tags in the map, keep the others as is.] */
             /* Codes_SRS_TWINPARSER_21_108: [All `key` and `value` in tags shall be case sensitive.] */
             /* Codes_SRS_TWINPARSER_21_114: [If any `key` already exists, the updateTags shall replace the existed value by the new one.] */
-            /* Codes_SRS_TWINPARSER_21_115: [If any `value` is null, the updateTags shall store it but do not report on Json.] */
+            /* Codes_SRS_TWINPARSER_21_115: [If any `value` is null, the updateTags shall delete it from the collection and report on Json] */
             updatedElements = tags.update(tagsMap);
         }
         else
@@ -486,7 +483,7 @@ public class TwinParser
             /* Codes_SRS_TWINPARSER_21_120: [The resetDesiredProperty shall cleanup the desired collection and add all provided properties to the Desired property.] */
             /* Codes_SRS_TWINPARSER_21_123: [The `key` and `value` in property shall be case sensitive.] */
             /* Codes_SRS_TWINPARSER_21_124: [If the provided `propertyMap` is empty, the resetDesiredProperty shall cleanup the desired collection and return `{}`.] */
-            /* Codes_SRS_TWINPARSER_21_129: [If any `value` is null, the resetDesiredProperty shall store it but do not report on Json.] */
+            /* Codes_SRS_TWINPARSER_21_129: [If any `value` is null, the resetDesiredProperty shall delete it from the collection and report on Json.] */
             JsonElement updatedElements = properties.resetDesired(propertyMap);
 
             if (updatedElements == null)
@@ -528,7 +525,7 @@ public class TwinParser
             /* Codes_SRS_TWINPARSER_21_130: [The resetReportedProperty shall cleanup the reported collection and add all provided properties to the Reported property.] */
             /* Codes_SRS_TWINPARSER_21_133: [The `key` and `value` in property shall be case sensitive.] */
             /* Codes_SRS_TWINPARSER_21_134: [If the provided `propertyMap` is empty, the resetReportedProperty shall cleanup the reported collection and return `{}`.] */
-            /* Codes_SRS_TWINPARSER_21_139: [If any `value` is null, the resetReportedProperty shall store it but do not report on Json.] */
+            /* Codes_SRS_TWINPARSER_21_139: [If any `value` is null, the resetReportedProperty shall delete it from the collection and report on Json.] */
             JsonElement updatedElements = properties.resetReported(propertyMap);
 
             if (updatedElements == null)
@@ -577,7 +574,7 @@ public class TwinParser
             /* Codes_SRS_TWINPARSER_21_140: [The resetTags shall cleanup the tags collection and add all provided tags to the tags.] */
             /* Codes_SRS_TWINPARSER_21_143: [The `key` and `value` in tags shall be case sensitive.] */
             /* Codes_SRS_TWINPARSER_21_144: [If the provided `tagsMap` is empty, the resetTags shall cleanup the tags collection and return `{}`.] */
-            /* Codes_SRS_TWINPARSER_21_149: [If any `value` is null, the resetTags shall store it but do not report on Json.] */
+            /* Codes_SRS_TWINPARSER_21_149: [If any `value` is null, the resetTags shall delete it from the collection and report on Json.] */
             tags = new TwinTags();
             JsonElement updatedElements = this.tags.update(tagsMap);
 
@@ -619,19 +616,19 @@ public class TwinParser
         validateJson(json);
 
         /* Codes_SRS_TWINPARSER_21_071: [If the provided json is empty, the updateTwin shall not change the collection and not call the OnDesiredCallback or the OnReportedCallback.] */
-        if((json != null) && (!json.isEmpty()))
+        if(!json.isEmpty())
         {
+            Gson gson = new GsonBuilder().disableInnerClassSerialization().disableHtmlEscaping().create();
             Map<String, Object> jsonTree;
             try
             {
                 /* Codes_SRS_TWINPARSER_21_097: [If the provided json have any duplicated `properties` or `tags`, the updateTwin shall throw IllegalArgumentException.] */
                 /* Codes_SRS_TWINPARSER_21_098: [If the provided json is properties only and contains duplicated `desired` or `reported`, the updateTwin shall throws IllegalArgumentException.] */
                 /* Codes_SRS_TWINPARSER_21_094: [If the provided json have any duplicated `key`, the updateTwin shall use the content of the last one in the String.] */
-                Gson gson = new GsonBuilder().disableInnerClassSerialization().disableHtmlEscaping().create();
                 jsonTree = (Map<String, Object>) gson.fromJson(json, HashMap.class);
                 manager = gson.fromJson(json, RegisterManagerParser.class);
             }
-            catch (Exception e)
+            catch (JsonSyntaxException e)
             {
                 /* Codes_SRS_TWINPARSER_21_043: [If the provided json is not valid, the updateTwin shall throws IllegalArgumentException.] */
                 throw new IllegalArgumentException("Malformed Json: " + e);
@@ -698,7 +695,7 @@ public class TwinParser
         }
 
         /* Codes_SRS_TWINPARSER_21_065: [If the provided json is empty, the updateDesiredProperty shall not change the collection and not call the OnDesiredCallback.] */
-        if((json != null) && (!json.isEmpty()))
+        if(!json.isEmpty())
         {
             /* Codes_SRS_TWINPARSER_21_029: [The updateDesiredProperty shall update the Desired property using the information provided in the json.] */
             /* Codes_SRS_TWINPARSER_21_030: [The updateDesiredProperty shall generate a map with all pairs key value that had its content changed.] */
@@ -710,7 +707,7 @@ public class TwinParser
             {
                 properties.updateDesired(json, onDesiredCallback);
             }
-            catch (com.google.gson.JsonSyntaxException e)
+            catch (JsonSyntaxException e)
             {
                 /* Codes_SRS_TWINPARSER_21_096: [If the provided json have any duplicated `key`, the updateDesiredProperty shall throws IllegalArgumentException.] */
                 throw new IllegalArgumentException("Malformed json: " + e);
@@ -734,7 +731,7 @@ public class TwinParser
         }
 
         /* Codes_SRS_TWINPARSER_21_067: [If the provided json is empty, the updateReportedProperty shall not change the collection and not call the OnReportedCallback.] */
-        if((json != null) && (!json.isEmpty()))
+        if(!json.isEmpty())
         {
             /* Codes_SRS_TWINPARSER_21_034: [The updateReportedProperty shall update the Reported property using the information provided in the json.] */
             /* Codes_SRS_TWINPARSER_21_035: [The updateReportedProperty shall generate a map with all pairs key value that had its content changed.] */
@@ -746,7 +743,7 @@ public class TwinParser
             {
                 properties.updateReported(json, onReportedCallback);
             }
-            catch (com.google.gson.JsonSyntaxException e)
+            catch (JsonSyntaxException e)
             {
                 /* Codes_SRS_TWINPARSER_21_095: [If the provided json have any duplicated `key`, the updateReportedProperty shall throws IllegalArgumentException.] */
                 throw new IllegalArgumentException("Malformed json: " + e);
@@ -766,7 +763,6 @@ public class TwinParser
      */
     public String updateDeviceManager(String deviceId, TwinStatus status, String statusReason) throws IllegalArgumentException
     {
-        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         boolean change = false;
 
         manager.validateDeviceManager(deviceId, status, statusReason);
@@ -1042,7 +1038,7 @@ public class TwinParser
             }
 
             /* Codes_SRS_TWINPARSER_21_157: [A valid `value` can contains sub-maps.] */
-            if(value instanceof Map)
+            if((value != null) && (value instanceof Map))
             {
                 /* Codes_TWIN_21_158: [A valid `value` shall contains less than 5 levels of sub-maps.] */
                 if(level <= maxLevel)
