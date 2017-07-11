@@ -5,40 +5,31 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.exceptions;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import com.microsoft.azure.sdk.iot.service.exceptions.*;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+import mockit.integration.junit4.JMockit;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubBadFormatException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubBadGatewayException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubInternalServerErrorException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubPreconditionFailedException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubServerBusyException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyDevicesException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyRequestsException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
-import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
-
-import mockit.integration.junit4.JMockit;
-
+/**
+ * Unit test for IoTHub Exception Manager
+ * 100% methods, 100% lines covered
+ */
 @RunWith(JMockit.class)
 public class IotHubExceptionManagerTest
 {
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_001: [The function shall throw IotHubBadFormatException if the Http response status equal 400]
     // Assert
     @Test (expected = IotHubBadFormatException.class)
-    public void httpResponseVerification_400() throws IotHubException
+    public void httpResponseVerification400() throws IotHubException
     {
         // Arrange
         final int status = 400;
@@ -53,7 +44,7 @@ public class IotHubExceptionManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_002: [The function shall throw IotHubUnathorizedException if the Http response status equal 401]
     // Assert
     @Test (expected = IotHubUnathorizedException.class)
-    public void httpResponseVerification_401() throws IotHubException
+    public void httpResponseVerification401() throws IotHubException
     {
         // Arrange
         final int status = 401;
@@ -68,7 +59,7 @@ public class IotHubExceptionManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_003: [The function shall throw IotHubTooManyDevicesException if the Http response status equal 403]
     // Assert
     @Test (expected = IotHubTooManyDevicesException.class)
-    public void httpResponseVerification_403() throws IotHubException
+    public void httpResponseVerification403() throws IotHubException
     {
         // Arrange
         final int status = 403;
@@ -83,7 +74,7 @@ public class IotHubExceptionManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_004: [The function shall throw IotHubNotFoundException if the Http response status equal 404]
     // Assert
     @Test (expected = IotHubNotFoundException.class)
-    public void httpResponseVerification_404() throws IotHubException
+    public void httpResponseVerification404() throws IotHubException
     {
         // Arrange
         final int status = 404;
@@ -98,7 +89,7 @@ public class IotHubExceptionManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_005: [The function shall throw IotHubPreconditionFailedException if the Http response status equal 412]
     // Assert
     @Test (expected = IotHubPreconditionFailedException.class)
-    public void httpResponseVerification_412() throws IotHubException
+    public void httpResponseVerification412() throws IotHubException
     {
         // Arrange
         final int status = 412;
@@ -113,7 +104,7 @@ public class IotHubExceptionManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_006: [The function shall throw IotHubTooManyRequestsException if the Http response status equal 429]
     // Assert
     @Test (expected = IotHubTooManyRequestsException.class)
-    public void httpResponseVerification_429() throws IotHubException
+    public void httpResponseVerification429() throws IotHubException
     {
         // Arrange
         final int status = 429;
@@ -128,7 +119,7 @@ public class IotHubExceptionManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_007: [The function shall throw IotHubInternalServerErrorException if the Http response status equal 500]
     // Assert
     @Test (expected = IotHubInternalServerErrorException.class)
-    public void httpResponseVerification_500() throws IotHubException
+    public void httpResponseVerification500() throws IotHubException
     {
         // Arrange
         final int status = 500;
@@ -143,7 +134,7 @@ public class IotHubExceptionManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_008: [The function shall throw IotHubBadGatewayException if the Http response status equal 502]
     // Assert
     @Test (expected = IotHubBadGatewayException.class)
-    public void httpResponseVerification_502() throws IotHubException
+    public void httpResponseVerification502() throws IotHubException
     {
         // Arrange
         final int status = 502;
@@ -158,7 +149,7 @@ public class IotHubExceptionManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_009: [The function shall throw IotHubServerBusyException if the Http response status equal 503]
     // Assert
     @Test (expected = IotHubServerBusyException.class)
-    public void httpResponseVerification_503() throws IotHubException
+    public void httpResponseVerification503() throws IotHubException
     {
         // Arrange
         final int status = 503;
@@ -173,7 +164,7 @@ public class IotHubExceptionManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_010: [The function shall throw IotHubGatewayTimeoutException if the Http response status equal 504]
     // Assert
     @Test (expected = IotHubGatewayTimeoutException.class)
-    public void httpResponseVerification_504() throws IotHubException
+    public void httpResponseVerification504() throws IotHubException
     {
         // Arrange
         final int status = 504;
@@ -188,7 +179,7 @@ public class IotHubExceptionManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_011: [The function shall throw IotHubException if the Http response status none of them above and greater than 300 copying the error Http reason to the exception]
     // Assert
     @Test (expected = IotHubException.class)
-    public void httpResponseVerification_301_error_reason_ok() throws IotHubException
+    public void httpResponseVerification301ErrorReasonOk() throws IotHubException
     {
         // Arrange
         final int status = 301;
@@ -203,7 +194,7 @@ public class IotHubExceptionManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_011: [The function shall throw IotHubException if the Http response status none of them above and greater than 300 copying the error Http reason to the exception]
     // Assert
     @Test (expected = IotHubException.class)
-    public void httpResponseVerification_301_error_reason_invalid() throws IotHubException
+    public void httpResponseVerification301ErrorReasonInvalid() throws IotHubException
     {
         // Arrange
         final int status = 301;
@@ -215,9 +206,24 @@ public class IotHubExceptionManagerTest
         IotHubExceptionManager.httpResponseVerification(response);
     }
 
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_011: [The function shall throw IotHubException if the Http response status none of them above and greater than 300 copying the error Http reason to the exception]
+    // Assert
+    @Test (expected = IotHubException.class)
+    public void httpResponseVerification301ErrorInvalidEmptyReason() throws IotHubException
+    {
+        // Arrange
+        final int status = 301;
+        final byte[] body = { 1 };
+        final Map<String, List<String>> headerFields = new HashMap<>();
+        final byte[] errorReason = {};
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
+        // Act
+        IotHubExceptionManager.httpResponseVerification(response);
+    }
+
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_012: [The function shall return without exception if the response status equal or less than 300]
     @Test
-    public void httpResponseVerification_300() throws IotHubException
+    public void httpResponseVerification300() throws IotHubException
     {
         // Arrange
         final int status = 300;
@@ -237,7 +243,7 @@ public class IotHubExceptionManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
     // Assert
     @Test
-    public void httpResponseVerification_301_withErrorReason() throws IotHubException
+    public void httpResponseVerification301WithErrorReason() throws IotHubException
     {
         // Arrange
         final int status = 301;
@@ -254,7 +260,7 @@ public class IotHubExceptionManagerTest
         catch (IotHubException expected)
         {
             // Expected throw.
-            assertThat(expected.getMessage(), is("This is the error message"));
+            assertThat(expected.getMessage(), is("{\"ExceptionMessage\":\"This is the error message\"}"));
         }
         IotHubException iotHubException = new IotHubException("error message");
         IotHubExceptionManager iotHubExceptionManager = new IotHubExceptionManager();
@@ -266,7 +272,7 @@ public class IotHubExceptionManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
     // Assert
     @Test
-    public void httpResponseVerification_400_withErrorReason() throws IotHubException
+    public void httpResponseVerification400WithErrorReason() throws IotHubException
     {
         // Arrange
         final int status = 400;
@@ -283,14 +289,14 @@ public class IotHubExceptionManagerTest
         catch (IotHubBadFormatException expected)
         {
             // Expected throw.
-            assertThat(expected.getMessage(), is("Bad message format! This is the error message"));
+            assertThat(expected.getMessage(), is("Bad message format! {\"ExceptionMessage\":\"This is the error message\"}"));
         }
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
     // Assert
     @Test
-    public void httpResponseVerification_400_withNULLErrorReason() throws IotHubException
+    public void httpResponseVerification400WithNULLErrorReason() throws IotHubException
     {
         // Arrange
         final int status = 400;
@@ -307,14 +313,14 @@ public class IotHubExceptionManagerTest
         catch (IotHubBadFormatException expected)
         {
             // Expected throw.
-            assertThat(expected.getMessage(), is("Bad message format!"));
+            assertThat(expected.getMessage(), is("Bad message format! {\"ExceptionMessage\":null}"));
         }
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
     // Assert
     @Test
-    public void httpResponseVerification_400_withEmptyErrorReason() throws IotHubException
+    public void httpResponseVerification400WithEmptyErrorReason() throws IotHubException
     {
         // Arrange
         final int status = 400;
@@ -331,8 +337,55 @@ public class IotHubExceptionManagerTest
         catch (IotHubBadFormatException expected)
         {
             // Expected throw.
-            assertThat(expected.getMessage(), is("Bad message format!"));
+            assertThat(expected.getMessage(), is("Bad message format! {\"ExceptionMessage\":}"));
         }
     }
 
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
+    // Assert
+    @Test
+    public void httpResponseVerification400WithMessageAndException() throws IotHubException
+    {
+        // Arrange
+        final int status = 400;
+        final byte[] body = { 1 };
+        final Map<String, List<String>> headerFields = new HashMap<>();
+        final byte[] errorReason = "{\"Message\":\"ErrorCode:IotHubUnauthorizedAccess;Unauthorized\",\"ExceptionMessage\":\"Tracking ID:(tracking id)-TimeStamp:12/14/2016 03:15:17\"}".getBytes();
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
+        // Act
+        try
+        {
+            IotHubExceptionManager.httpResponseVerification(response);
+            assert true;
+        }
+        catch (IotHubBadFormatException expected)
+        {
+            // Expected throw.
+            assertThat(expected.getMessage(), is("Bad message format! ErrorCode:IotHubUnauthorizedAccess;Unauthorized Tracking ID:(tracking id)-TimeStamp:12/14/2016 03:15:17"));
+        }
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
+    // Assert
+    @Test
+    public void httpResponseVerification400WithInnerMessageAndException() throws IotHubException
+    {
+        // Arrange
+        final int status = 400;
+        final byte[] body = { 1 };
+        final Map<String, List<String>> headerFields = new HashMap<>();
+        final byte[] errorReason = "{\"Message\":\"ErrorCode:ArgumentInvalid;Error: BadRequest {\\\"Message\\\":\\\"ErrorCode:ArgumentInvalid;Missing or invalid etag for job type ScheduleUpdateTwin. ScheduleUpdateTwin job type is a force update, which only accepts '*' as the Etag.\\\",\\\"ExceptionMessage\\\":\\\"Tracking ID:1234-TimeStamp:06/26/2017 20:56:33\\\"}\",\"ExceptionMessage\":\"Tracking ID:5678-G:10-TimeStamp:06/26/2017 20:56:33\"}".getBytes();
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
+        // Act
+        try
+        {
+            IotHubExceptionManager.httpResponseVerification(response);
+            assert true;
+        }
+        catch (IotHubBadFormatException expected)
+        {
+            // Expected throw.
+            assertThat(expected.getMessage(), is("Bad message format! ErrorCode:ArgumentInvalid;Missing or invalid etag for job type ScheduleUpdateTwin. ScheduleUpdateTwin job type is a force update, which only accepts '*' as the Etag. Tracking ID:1234-TimeStamp:06/26/2017 20:56:33"));
+        }
+    }
 }

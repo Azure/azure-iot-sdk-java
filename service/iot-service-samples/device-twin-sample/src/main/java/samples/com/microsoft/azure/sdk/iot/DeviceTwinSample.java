@@ -5,13 +5,10 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -20,13 +17,12 @@ import java.util.UUID;
 /** Manages device twin operations on IotHub */
 public class DeviceTwinSample
 {
-    private static final String iotHubConnectionString = "[Connection string goes here]";
-    private static final String deviceId = "[Device name goes here]";
+    public static final String iotHubConnectionString = "[IOT HUB Connection String]";
+    public static final String deviceId = "[Device ID]";
 
     /**
-     * @param args
-     * @throws IOException
-     * @throws URISyntaxException
+     * Manages device twin operations on IotHub
+     * @throws Exception Throws Exception if sample fails
      */
     public static void main(String[] args) throws Exception
     {
@@ -38,6 +34,7 @@ public class DeviceTwinSample
         try
         {
             // Manage complete twin
+            // ============================== get initial twin properties =============================
             System.out.println("Getting device twin");
             twinClient.getTwin(device);
             System.out.println(device);
@@ -47,20 +44,50 @@ public class DeviceTwinSample
             tags.add(new Pair("HomeID", UUID.randomUUID()));
             device.setTags(tags);
 
+            // ============================== change desired property =============================
             Set<Pair> desProp = new HashSet<Pair>();
             int temp = new Random().nextInt(100);
+            int hum = new Random().nextInt(100);
             desProp.add(new Pair("temp", temp));
+            desProp.add(new Pair("hum", hum));
             device.setDesiredProperties(desProp);
 
-            System.out.println("Updating device twin");
+            System.out.println("Updating device twin (new temp, hum)");
             twinClient.updateTwin(device);
 
             System.out.println("Getting device twin");
             twinClient.getTwin(device);
             System.out.println(device);
 
+            // ============================== remove desired property =============================
+            desProp.clear();
+            desProp.add(new Pair("hum", null));
+            device.setDesiredProperties(desProp);
+            System.out.println("Updating device twin (remove hum)");
+            twinClient.updateTwin(device);
+
+            System.out.println("Getting device twin");
+            twinClient.getTwin(device);
+            System.out.println(device);
+
+            //Query twin
+            System.out.println("Started Querying twin");
+
+            SqlQuery sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, null, null);
+
+            Query twinQuery = twinClient.queryTwin(sqlQuery.getQuery(), 3);
+
+            while (twinClient.hasNextDeviceTwin(twinQuery))
+            {
+                DeviceTwinDevice d = twinClient.getNextDeviceTwin(twinQuery);
+                System.out.println(d);
+            }
         }
         catch (IotHubException e)
+        {
+            System.out.println(e.getMessage());
+        }
+        catch (IOException e)
         {
             System.out.println(e.getMessage());
         }

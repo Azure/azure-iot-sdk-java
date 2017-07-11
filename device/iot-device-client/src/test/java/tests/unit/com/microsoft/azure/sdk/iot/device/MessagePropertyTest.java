@@ -9,7 +9,10 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-/** Unit tests for MessageProperty. */
+/**
+ * Unit test for Message Property class.
+ * 87% methods, 87% lines covered
+ */
 public class MessagePropertyTest
 {
     // Tests_SRS_MESSAGEPROPERTY_11_001: [The constructor shall save the property name and value.]
@@ -159,7 +162,7 @@ public class MessagePropertyTest
     @Test
     public void isValidAppPropertyReturnsFalseForReservedProperty()
     {
-        final String reservedName = "to";
+        final String reservedName = "iothub-to";
         final String value = "test-value";
 
         boolean testIsValidAppProperty =

@@ -5,23 +5,20 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-
-import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.KeyGenerator;
-
-import org.junit.Test;
-
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.DeviceConnectionState;
 import com.microsoft.azure.sdk.iot.service.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
-
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.NonStrictExpectations;
+import org.junit.Test;
+
+import javax.crypto.KeyGenerator;
+import java.security.NoSuchAlgorithmException;
+
+import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class DeviceTest
 {

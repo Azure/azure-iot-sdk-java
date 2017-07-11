@@ -11,15 +11,13 @@ import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for file upload in progress class.

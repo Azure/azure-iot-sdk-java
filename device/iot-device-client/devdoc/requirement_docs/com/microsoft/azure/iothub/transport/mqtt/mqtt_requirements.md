@@ -150,6 +150,7 @@ public Message receive() throws IOException;
 
 **SRS_Mqtt_34_023: [**This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
 
+<<<<<<< HEAD
 **SRS_Mqtt_34_024: [**This method shall construct new Message with the bytes obtained from peekMessage and return the message.**]**
 
 **SRS_Mqtt_34_025: [**If the call to peekMessage returns null when topic is non-null then this method will throw IOException**]**
@@ -176,6 +177,31 @@ public void messageArrived(String topic, MqttMessage mqttMessage);
 ```
 
 **SRS_Mqtt_25_030: [**The payload of the message and the topic is added to the received messages queue .**]**
+
+
+### constructMessage
+
+```java
+private Message constructMessage(byte[] data, String topic) throws IllegalArgumentException
+```
+
+**SRS_Mqtt_25_024: [**This method shall construct new Message with the bytes obtained from parsePayload and return the message.**]**
+
+**SRS_Mqtt_34_041: [**This method shall call assignPropertiesToMessage so that all properties from the topic string can be assigned to the message**]**
+
+
+### assignPropertiesToMessage
+
+```java
+private void assignPropertiesToMessage(Message message, String propertiesString) throws IllegalArgumentException, NumberFormatException
+```
+
+**SRS_Mqtt_34_051: [**If a topic string's property's key and value are not separated by the '=' symbol, an IllegalArgumentException shall be thrown**]**
+
+**SRS_Mqtt_34_053: [**A property's key and value may include unusual characters such as &, %, $**]**
+
+**SRS_Mqtt_34_054: [**A message may have 0 to many custom properties**]**
+
 
 
 ### peekMessage

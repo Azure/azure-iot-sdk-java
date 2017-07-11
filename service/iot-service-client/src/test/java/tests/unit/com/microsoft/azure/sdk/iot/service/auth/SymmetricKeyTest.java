@@ -5,15 +5,13 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.auth;
 
-import static org.junit.Assert.assertEquals;
-
+import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
+import mockit.Deencapsulation;
+import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
-
-import mockit.Deencapsulation;
-import mockit.integration.junit4.JMockit;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(JMockit.class)
 public class SymmetricKeyTest

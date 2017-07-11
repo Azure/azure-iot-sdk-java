@@ -12,8 +12,7 @@ import javax.naming.SizeLimitExceededException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /** Integration tests for HttpsBatchMessage. */
 public class HttpsBatchMessageIT
@@ -36,6 +35,7 @@ public class HttpsBatchMessageIT
         msg1.setProperty("prop-1", "value-1");
         HttpsSingleMessage httpsMsg1 = HttpsSingleMessage.parseHttpsMessage(msg1);
         HttpsBatchMessage batch = new HttpsBatchMessage();
+
         batch.addMessage(httpsMsg0);
         batch.addMessage(httpsMsg1);
 
@@ -46,8 +46,10 @@ public class HttpsBatchMessageIT
                 + "{\"body\":\"abc\","
                 + "\"base64Encoded\":false,"
                 + "\"properties\":{"
+
+                +   "\"iothub-messageid\":\"" + messageid0 + "\"},"
                 +   "\"iothub-app-prop-0\":\"value-0\","
-                +   "\"iothub-messageid\":\"" + messageid0 + "\"}},"
+                + "},"
                 + "{\"body\":\"012\","
                 + "\"base64Encoded\":false,"
                 + "\"properties\":{"
@@ -55,7 +57,10 @@ public class HttpsBatchMessageIT
                 +   "\"iothub-messageid\":\"" + messageid1 + "\"}}"
                 + "]";
 
+        assertTrue(testBatchBody.contains("\"iothub-messageid\":\"" + messageid0));
+        assertTrue(testBatchBody.contains("\"iothub-messageid\":\"" + messageid1));
+        assertTrue(testBatchBody.contains("\"iothub-app-prop-0\":\"value-0\""));
+        assertTrue(testBatchBody.contains("\"iothub-app-prop-1\":\"value-1\""));
 
-        assertThat(testBatchBody, is(expectedBatchBody));
     }
 }

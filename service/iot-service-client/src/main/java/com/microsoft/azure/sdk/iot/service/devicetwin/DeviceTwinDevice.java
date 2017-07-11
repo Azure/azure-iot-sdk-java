@@ -18,6 +18,7 @@ public class DeviceTwinDevice
      *Codes_SRS_DEVICETWINDEVICE_25_001: [** The DeviceTwinDevice class has the following properties: deviceId, a container for tags, desired and reported properties, and a twin object. **]**
      */
     private String deviceId;
+    private String eTag;
     private Map<String, Object> tag = null;
     private Map<String, Object> reportedProperties = null;
     private Map<String, Object> desiredProperties = null;
@@ -42,6 +43,7 @@ public class DeviceTwinDevice
         **Codes_SRS_DEVICETWINDEVICE_25_003: [** The constructor shall create a new instance of twin object for this device and store the device id.**]**
          */
         this.deviceId = deviceId;
+        this.eTag = null;
         this.twinParser = new TwinParser();
         this.twinParser.enableTags();
     }
@@ -55,6 +57,41 @@ public class DeviceTwinDevice
         **Codes_SRS_DEVICETWINDEVICE_25_004: [** This method shall return the device id **]**
          */
         return this.deviceId;
+    }
+
+    /**
+     * Setter for ETag
+     *
+     * @param eTag is the value of the etag
+     * @throws IllegalArgumentException if the provided etag is null or empty
+     */
+    public void setETag(String eTag) throws IllegalArgumentException
+    {
+        if (eTag == null || eTag.length() == 0)
+        {
+            /*
+            **Codes_SRS_DEVICETWINDEVICE_21_029: [** The setETag shall throw IllegalArgumentException if the input string is empty or null.**]**
+             */
+            throw new IllegalArgumentException("ETag cannot be null or empty");
+        }
+
+        /*
+        **Codes_SRS_DEVICETWINDEVICE_21_030: [** The setETag shall store the eTag.**]**
+         */
+        this.eTag = eTag;
+    }
+
+    /**
+     * Getter for the eTag
+     *
+     * @return the stored eTag. It will be {@code null} if not set.
+     */
+    public String getETag()
+    {
+        /*
+        **Codes_SRS_DEVICETWINDEVICE_21_031: [** The getETag shall return the stored eTag.**]**
+         */
+        return this.eTag;
     }
 
     /**
@@ -262,11 +299,15 @@ public class DeviceTwinDevice
     public String toString()
     {
         /*
-        **Codes_SRS_DEVICETWINDEVICE_25_015: [** This method shall append device id, tags, desired and reported properties to string (if present) and return **]**
+        **Codes_SRS_DEVICETWINDEVICE_25_015: [** This method shall append device id, etag, tags, desired and reported properties to string (if present) and return **]**
          */
         StringBuilder thisDevice = new StringBuilder();
 
         thisDevice.append("Device ID: " + this.getDeviceId() + "\n");
+        if(this.getETag() != null)
+        {
+            thisDevice.append("ETag: " + this.getETag() + "\n");
+        }
         thisDevice.append(tagsToString());
         thisDevice.append(reportedPropertiesToString());
         thisDevice.append(desiredPropertiesToString());

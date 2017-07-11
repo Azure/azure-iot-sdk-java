@@ -14,7 +14,7 @@
 
     <groupId>com.microsoft.azure.sdk.iot.deps</groupId>
     <artifactId>iot-deps-serializer</artifactId>
-    <version>0.5.4</version>
+    <version>0.6.5</version>
     <packaging>jar</packaging>
 
     <properties>

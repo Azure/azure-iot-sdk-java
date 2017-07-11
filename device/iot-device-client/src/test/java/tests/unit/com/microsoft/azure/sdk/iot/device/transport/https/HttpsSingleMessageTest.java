@@ -15,11 +15,17 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.microsoft.azure.sdk.iot.device.transport.https.HttpsMessage.HTTPS_APP_PROPERTY_PREFIX;
+import static com.microsoft.azure.sdk.iot.device.transport.https.HttpsMessage.HTTPS_SYSTEM_PROPERTY_PREFIX;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
-/** Unit tests for HttpsSingleMessage. */
+
+/* Unit tests for HttpsSingleMessage.
+* 100% methods covered
+* 98% lines covered
+*/
 public class HttpsSingleMessageTest
 {
     // Tests_SRS_HTTPSSINGLEMESSAGE_11_001: [The parsed HttpsSingleMessage shall have a copy of the original message body as its body.]
@@ -161,7 +167,7 @@ public class HttpsSingleMessageTest
         assertThat(testBody, is(not(expectedBody)));
     }
 
-    // Tests_SRS_HTTPSSINGLEMESSAGE_21_014: [If the message contains messageId, the parsed HttpsSingleMessage shall add the property 'iothub-messageid' with the messageId value.]
+    // Tests_SRS_HTTPSSINGLEMESSAGE_34_014: [If the message contains a system property, the parsed HttpsSingleMessage shall add the corresponding property with property value]
     @Test
     public void parseHttpsMessageFromMessageWithMessageId(
             @Mocked final Message mockMsg,
@@ -169,8 +175,15 @@ public class HttpsSingleMessageTest
     {
         final byte[] body = { 0x61, 0x62, 0x63 };
         final MessageProperty[] properties = { mockProperty };
-        final String messageidName = "messageid";
+        final String messageidName = HTTPS_SYSTEM_PROPERTY_PREFIX + "messageid";
         final String messageidValue = "test_messageid-value";
+        final String correlationidName = HTTPS_SYSTEM_PROPERTY_PREFIX + "correlationid";
+        final String correlationidValue = "1234";
+        final String useridName = HTTPS_SYSTEM_PROPERTY_PREFIX + "userid";
+        final String useridValue = "3456";
+        final String toName = HTTPS_SYSTEM_PROPERTY_PREFIX + "to";
+        final String toValue = "device4";
+
         final String propertyName = "test-property-name";
         final String propertyValue = "test-property-value";
         new NonStrictExpectations()
@@ -186,21 +199,21 @@ public class HttpsSingleMessageTest
                 result = propertyName;
                 mockProperty.getValue();
                 result = propertyValue;
+                mockMsg.getCorrelationId();
+                result = correlationidValue;
+                mockMsg.getUserId();
+                result = useridValue;
+                mockMsg.getTo();
+                result = toValue;
             }
         };
 
-        HttpsSingleMessage.parseHttpsMessage(mockMsg);
+        HttpsSingleMessage httpsSingleMessage = HttpsSingleMessage.parseHttpsMessage(mockMsg);
 
-        final String expectedPrefix = "iothub-";
-        final String expectedMessageIdName = expectedPrefix + messageidName;
-        final String expectedMessageIdValue = messageidValue;
-        new Verifications()
-        {
-            {
-                new MessageProperty(expectedMessageIdName,
-                        expectedMessageIdValue);
-            }
-        };
+        assertTrue(systemPropertyAssignedCorrectly(httpsSingleMessage.getSystemProperties(), messageidName, messageidValue));
+        assertTrue(systemPropertyAssignedCorrectly(httpsSingleMessage.getSystemProperties(), correlationidName, correlationidValue));
+        assertTrue(systemPropertyAssignedCorrectly(httpsSingleMessage.getSystemProperties(), useridName, useridValue));
+        assertTrue(systemPropertyAssignedCorrectly(httpsSingleMessage.getSystemProperties(), toName, toValue));
     }
 
     // Tests_SRS_HTTPSSINGLEMESSAGE_21_016: [The parsed HttpsSingleMessage shall have a copy of the original message body as its body.]
@@ -317,7 +330,7 @@ public class HttpsSingleMessageTest
         };
     }
 
-    // Tests_SRS_HTTPSSINGLEMESSAGE_21_019: [If the message contains messageId, the parsed HttpsSingleMessage shall add the property 'iothub-messageid' with the messageId value.]
+    // Tests_SRS_HTTPSSINGLEMESSAGE_34_019: [If the message contains a system property, the parsed HttpsSingleMessage shall add the corresponding property with property value.]
     @Test
     public void parseHttpsJsonMessageFromMessageWithMessageId(
             @Mocked final Message mockMsg,
@@ -326,8 +339,14 @@ public class HttpsSingleMessageTest
         // arrange
         final byte[] body = { 0x61, 0x62, 0x63 };
         final MessageProperty[] properties = { mockProperty };
-        final String messageidName = "messageid";
+        final String messageidName = HTTPS_SYSTEM_PROPERTY_PREFIX + "messageid";
         final String messageidValue = "test_messageid-value";
+        final String correlationidName = HTTPS_SYSTEM_PROPERTY_PREFIX + "correlationid";
+        final String correlationidValue = "1234";
+        final String useridName = HTTPS_SYSTEM_PROPERTY_PREFIX + "userid";
+        final String useridValue = "3456";
+        final String toName = HTTPS_SYSTEM_PROPERTY_PREFIX + "to";
+        final String toValue = "device4";
         final String propertyName = "test-property-name";
         final String propertyValue = "test-property-value";
         new NonStrictExpectations()
@@ -343,23 +362,23 @@ public class HttpsSingleMessageTest
                 result = propertyName;
                 mockProperty.getValue();
                 result = propertyValue;
+                mockMsg.getCorrelationId();
+                result = correlationidValue;
+                mockMsg.getUserId();
+                result = useridValue;
+                mockMsg.getTo();
+                result = toValue;
             }
         };
 
         // act
-        HttpsSingleMessage.parseHttpsJsonMessage(mockMsg);
+        HttpsSingleMessage httpsSingleMessage = HttpsSingleMessage.parseHttpsJsonMessage(mockMsg);
 
         // assert
-        final String expectedPrefix = "iothub-";
-        final String expectedMessageIdName = expectedPrefix + messageidName;
-        final String expectedMessageIdValue = messageidValue;
-        new Verifications()
-        {
-            {
-                new MessageProperty(expectedMessageIdName,
-                        expectedMessageIdValue);
-            }
-        };
+        assertTrue(systemPropertyAssignedCorrectly(httpsSingleMessage.getSystemProperties(), messageidName, messageidValue));
+        assertTrue(systemPropertyAssignedCorrectly(httpsSingleMessage.getSystemProperties(), correlationidName, correlationidValue));
+        assertTrue(systemPropertyAssignedCorrectly(httpsSingleMessage.getSystemProperties(), useridName, useridValue));
+        assertTrue(systemPropertyAssignedCorrectly(httpsSingleMessage.getSystemProperties(), toName, toValue));
     }
 
     // Tests_SRS_HTTPSSINGLEMESSAGE_11_005: [The parsed HttpsSingleMessage shall not be Base64-encoded.]
@@ -688,5 +707,95 @@ public class HttpsSingleMessageTest
                 times = 2;
             }
         };
+    }
+
+    // Tests_SRS_HTTPSSINGLEMESSAGE_34_020: [The function shall return an IoT Hub message with all system properties set accordingly.]
+    // Tests_SRS_HTTPSSINGLEMESSAGE_34_021: [The parsed HttpsSingleMessage shall include all valid HTTPS system-defined properties in the response header as message properties.]
+    // Tests_SRS_HTTPSSINGLEMESSAGE_34_015: [The function shall return a copy of the message's system properties.]
+    @Test
+    public void parseHttpsMessageHandlesPropertiesCorrectlyAndToMessageExposesCorrectSystemProperties(@Mocked final HttpsResponse httpsResponse)
+    {
+        // arrange
+        String correlationIdKey = HTTPS_SYSTEM_PROPERTY_PREFIX + "correlationid";
+        String userIdKey = HTTPS_SYSTEM_PROPERTY_PREFIX + "userid";
+        String messageIdKey = HTTPS_SYSTEM_PROPERTY_PREFIX + "messageid";
+        String toKey = HTTPS_SYSTEM_PROPERTY_PREFIX + "to";
+        String appPropertyKey = "app_property";
+        String correlationId = "1234";
+        String messageId = "3456";
+        String userId = "6789";
+        String to = "device4";
+        String appProperty = "app_property_value";
+
+        final Map<String, String> headerFields = new HashMap<String, String>();
+        headerFields.put(correlationIdKey, correlationId);
+        headerFields.put(userIdKey, userId);
+        headerFields.put(messageIdKey, messageId);
+        headerFields.put(toKey, to);
+        headerFields.put(HTTPS_APP_PROPERTY_PREFIX + appPropertyKey, appProperty);
+
+        new NonStrictExpectations()
+        {
+            {
+                httpsResponse.getBody();
+                result = "body".getBytes();
+
+                httpsResponse.getHeaderFields();
+                result = headerFields;
+            }
+        };
+
+        // act (parseHttpMessage)
+        final HttpsSingleMessage actualHttpMessage = HttpsSingleMessage.parseHttpsMessage(httpsResponse);
+
+        // assert (parseHttpMessage)
+        assertEquals(1, actualHttpMessage.getProperties().length);
+        assertTrue(propertyAssignedCorrectly(actualHttpMessage.getProperties(),HTTPS_APP_PROPERTY_PREFIX + appPropertyKey, appProperty));
+
+        assertTrue(systemPropertyAssignedCorrectly(actualHttpMessage.getSystemProperties(), correlationIdKey, correlationId));
+        assertTrue(systemPropertyAssignedCorrectly(actualHttpMessage.getSystemProperties(), messageIdKey, messageId));
+        assertTrue(systemPropertyAssignedCorrectly(actualHttpMessage.getSystemProperties(), userIdKey, userId));
+        assertTrue(systemPropertyAssignedCorrectly(actualHttpMessage.getSystemProperties(), toKey, to));
+
+        // act (toMessage)
+        Message actualMessage = actualHttpMessage.toMessage();
+
+        // assert (toMessage)
+        assertEquals(correlationId, actualMessage.getCorrelationId());
+        assertEquals(messageId, actualMessage.getMessageId());
+
+        assertEquals(3, actualMessage.getProperties().length);
+        assertTrue(propertyAssignedCorrectly(actualMessage.getProperties(), appPropertyKey, appProperty));
+        assertTrue(propertyAssignedCorrectly(actualMessage.getProperties(), HTTPS_APP_PROPERTY_PREFIX + userIdKey, userId));
+        assertTrue(propertyAssignedCorrectly(actualMessage.getProperties(), HTTPS_APP_PROPERTY_PREFIX + toKey, to));
+    }
+
+    private static boolean propertyAssignedCorrectly(MessageProperty[] properties, String name, String value)
+    {
+        for (int i = 0; i < properties.length; i++)
+        {
+            if (properties[i].getName().equals(name))
+            {
+                if (properties[i].getValue().equals(value))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean systemPropertyAssignedCorrectly(Map<String, String> systemProperties, String name, String value)
+    {
+        for (String key : systemProperties.keySet())
+        {
+            if (key.equals(name))
+            {
+                return systemProperties.get(key).equals(value);
+            }
+        }
+
+        return false;
     }
 }

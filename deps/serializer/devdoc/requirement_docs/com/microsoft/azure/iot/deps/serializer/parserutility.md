@@ -19,13 +19,16 @@ class ParserUtility
     protected static void validateStringUTF8(String str) throws IllegalArgumentException;
     protected static void validateObject(object val) throws IllegalArgumentException;
     protected static void validateBoolean(Boolean condition) throws IllegalArgumentException;
-    protected static void validateKey(String key, boolean allowDollar) throws IllegalArgumentException;
+    protected static void validateKey(String key, boolean isMetadata) throws IllegalArgumentException;
+    protected static void validateId(String id) throws IllegalArgumentException;
     
     public static void validateBlobName(String blobName) throws IllegalArgumentException;
     protected static void validateQuery(String query) throws IllegalArgumentException;
     
     protected static Date getDateTimeUtc(String dataTime) throws IllegalArgumentException;
     protected static Date getDateTimeOffset(String dataTime) throws IllegalArgumentException;
+
+    protected static JsonElement mapToJsonElement(Map<String, Object> map);
 }
 ```
 
@@ -40,8 +43,8 @@ class ParserUtility
 protected static void validateStringUTF8(String str) throws IllegalArgumentException
 ```
 **SRS_PARSER_UTILITY_21_001: [**The validateStringUTF8 shall do nothing if the string is valid.**]**  
-**SRS_PARSER_UTILITY_21_002: [**The validateStringUTF8 shall throw IllegalArgumentException is the provided string is null or empty.**]**  
-**SRS_PARSER_UTILITY_21_003: [**The validateStringUTF8 shall throw IllegalArgumentException is the provided string contains at least one not UTF-8 character.**]**  
+**SRS_PARSER_UTILITY_21_002: [**The validateStringUTF8 shall throw IllegalArgumentException if the provided string is null or empty.**]**  
+**SRS_PARSER_UTILITY_21_003: [**The validateStringUTF8 shall throw IllegalArgumentException if the provided string contains at least one not UTF-8 character.**]**  
 
 ### validateBlobName
 ```java
@@ -54,10 +57,10 @@ protected static void validateStringUTF8(String str) throws IllegalArgumentExcep
 public static void validateBlobName(String blobName) throws IllegalArgumentException
 ```
 **SRS_PARSER_UTILITY_21_004: [**The validateBlobName shall do nothing if the string is valid.**]**  
-**SRS_PARSER_UTILITY_21_005: [**The validateBlobName shall throw IllegalArgumentException is the provided blob name is null or empty.**]**  
-**SRS_PARSER_UTILITY_21_006: [**The validateBlobName shall throw IllegalArgumentException is the provided blob name contains at least one not UTF-8 character.**]**  
-**SRS_PARSER_UTILITY_21_007: [**The validateBlobName shall throw IllegalArgumentException is the provided blob name contains more than 1024 characters.**]**  
-**SRS_PARSER_UTILITY_21_008: [**The validateBlobName shall throw IllegalArgumentException is the provided blob name contains more than 254 path segments.**]**  
+**SRS_PARSER_UTILITY_21_005: [**The validateBlobName shall throw IllegalArgumentException if the provided blob name is null or empty.**]**  
+**SRS_PARSER_UTILITY_21_006: [**The validateBlobName shall throw IllegalArgumentException if the provided blob name contains at least one not UTF-8 character.**]**  
+**SRS_PARSER_UTILITY_21_007: [**The validateBlobName shall throw IllegalArgumentException if the provided blob name contains more than 1024 characters.**]**  
+**SRS_PARSER_UTILITY_21_008: [**The validateBlobName shall throw IllegalArgumentException if the provided blob name contains more than 254 path segments.**]**  
 
 ### validateQuery
 ```java
@@ -69,10 +72,10 @@ public static void validateBlobName(String blobName) throws IllegalArgumentExcep
  */
 protected static void validateQuery(String query) throws IllegalArgumentException;
 ```
-**SRS_PARSER_UTILITY_25_026: [**The validateQuery shall do nothing if the string is valid.**]**  
-**SRS_PARSER_UTILITY_25_027: [**The validateQuery shall throw IllegalArgumentException is the provided query is null or empty.**]**  
-**SRS_PARSER_UTILITY_25_028: [**The validateQuery shall throw IllegalArgumentException is the provided query contains non UTF-8 character.**]**  
-**SRS_PARSER_UTILITY_25_029: [**The validateQuery shall throw IllegalArgumentException is the provided query does not contain SELECT and FROM.**]**  
+**SRS_PARSER_UTILITY_25_031: [**The validateQuery shall do nothing if the string is valid.**]**  
+**SRS_PARSER_UTILITY_25_032: [**The validateQuery shall throw IllegalArgumentException is the provided query is null or empty.**]**  
+**SRS_PARSER_UTILITY_25_033: [**The validateQuery shall throw IllegalArgumentException is the provided query contains non UTF-8 character.**]**  
+**SRS_PARSER_UTILITY_25_034: [**The validateQuery shall throw IllegalArgumentException is the provided query does not contain SELECT and FROM.**]**  
 
 ### validateObject
 ```java
@@ -85,7 +88,7 @@ protected static void validateQuery(String query) throws IllegalArgumentExceptio
 protected static void validateObject(object val) throws IllegalArgumentException
 ```
 **SRS_PARSER_UTILITY_21_009: [**The validateObject shall do nothing if the object is valid.**]**  
-**SRS_PARSER_UTILITY_21_010: [**The validateObject shall throw IllegalArgumentException is the provided object is null.**]**  
+**SRS_PARSER_UTILITY_21_010: [**The validateObject shall throw IllegalArgumentException if the provided object is null.**]**  
 
 ### validateKey
 ```java
@@ -99,12 +102,31 @@ protected static void validateObject(object val) throws IllegalArgumentException
 protected static void validateKey(String key, boolean isMetadata) throws IllegalArgumentException
 ```
 **SRS_PARSER_UTILITY_21_013: [**The validateKey shall do nothing if the string is a valid key.**]**  
-**SRS_PARSER_UTILITY_21_014: [**The validateKey shall throw IllegalArgumentException is the provided string is null or empty.**]**  
-**SRS_PARSER_UTILITY_21_015: [**The validateKey shall throw IllegalArgumentException is the provided string contains at least one not UTF-8 character.**]**  
-**SRS_PARSER_UTILITY_21_016: [**The validateKey shall throw IllegalArgumentException is the provided string contains more than 128 characters.**]**  
-**SRS_PARSER_UTILITY_21_017: [**The validateKey shall throw IllegalArgumentException is the provided string contains an illegal character (`$`,`.`, space).**]**  
+**SRS_PARSER_UTILITY_21_014: [**The validateKey shall throw IllegalArgumentException if the provided string is null or empty.**]**  
+**SRS_PARSER_UTILITY_21_015: [**The validateKey shall throw IllegalArgumentException if the provided string contains at least one not UTF-8 character.**]**  
+**SRS_PARSER_UTILITY_21_016: [**The validateKey shall throw IllegalArgumentException if the provided string contains more than 128 characters.**]**  
+**SRS_PARSER_UTILITY_21_017: [**The validateKey shall throw IllegalArgumentException if the provided string contains an illegal character (`$`,`.`, space).**]**  
 **SRS_PARSER_UTILITY_21_018: [**If `isMetadata` is `true`, the validateKey shall accept the character `$` as valid. **]**  
 **SRS_PARSER_UTILITY_21_019: [**If `isMetadata` is `false`, the validateKey shall not accept the character `$` as valid. **]**  
+
+### validateId
+```java
+/**
+ * Validate if a provided ID is valid using the follow criteria.
+ * A case-sensitive string (up to 128 char long)
+ * of ASCII 7-bit alphanumeric chars
+ * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+ *
+ * @param id is the ID to test
+ * @throws IllegalArgumentException if the ID do not fits the criteria
+ */
+protected static void validateId(String id) throws IllegalArgumentException
+```
+**SRS_PARSER_UTILITY_21_026: [**The validateKey shall throw IllegalArgumentException if the provided string is null or empty.**]**  
+**SRS_PARSER_UTILITY_21_027: [**The validateKey shall throw IllegalArgumentException if the provided string contains at least one not UTF-8 character.**]**  
+**SRS_PARSER_UTILITY_21_028: [**The validateId shall throw IllegalArgumentException if the provided string contains more than 128 characters.**]**  
+**SRS_PARSER_UTILITY_21_029: [**The validateId shall throw IllegalArgumentException if the provided string contains an illegal character.**]**  
+**SRS_PARSER_UTILITY_21_030: [**The validateId shall do nothing if the string is a valid ID.**]**  
 
 ### getDateTimeUtc
 ```java
@@ -139,3 +161,20 @@ protected static Date getDateTimeOffset(String dataTime) throws IllegalArgumentE
 **SRS_PARSER_UTILITY_21_023: [**The getDateTimeOffset shall parse the provide string using `UTC` timezone.**]**  
 **SRS_PARSER_UTILITY_21_024: [**The getDateTimeOffset shall parse the provide string using the data format `2016-06-01T21:22:41+00:00`.**]**  
 **SRS_PARSER_UTILITY_21_025: [**If the provide string is null, empty or contains an invalid data format, the getDateTimeOffset shall throw IllegalArgumentException.**]**  
+
+### mapToJsonElement
+```java
+/**
+ * Helper to convert a provided map in to a JsonElement, including sub-maps.
+ *
+ * @param map is the map to serialize
+ * @return a JsonElement that represents the content of the map.
+ * @throws IllegalArgumentException if the provided map is null.
+ */
+protected static JsonElement mapToJsonElement(Map<String, Object> map) throws IllegalArgumentException
+```
+**SRS_PARSER_UTILITY_21_035: [**The mapToJsonElement shall serialize the provided map into a JsonElement.**]**  
+**SRS_PARSER_UTILITY_21_036: [**The mapToJsonElement shall include keys with null values in the JsonElement.**]**  
+**SRS_PARSER_UTILITY_21_037: [**If the value is a map, the mapToJsonElement shall include it as a submap in the JsonElement.**]**  
+**SRS_PARSER_UTILITY_21_038: [**If the map is empty, the mapToJsonElement shall return a empty JsonElement.**]**  
+**SRS_PARSER_UTILITY_21_039: [**If the map is null, the mapToJsonElement shall throw IllegalArgumentException.**]**  

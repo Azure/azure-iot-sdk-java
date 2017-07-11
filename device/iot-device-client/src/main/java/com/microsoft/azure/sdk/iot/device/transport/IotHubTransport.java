@@ -3,10 +3,10 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionStateCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubResponseCallback;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStateCallback;
 
 import java.io.Closeable;
 import java.io.IOException;

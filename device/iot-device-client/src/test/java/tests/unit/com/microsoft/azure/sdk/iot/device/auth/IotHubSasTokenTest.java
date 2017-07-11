@@ -8,7 +8,6 @@ import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.auth.Signature;
 import mockit.Deencapsulation;
-import mockit.Mock;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import org.junit.Test;

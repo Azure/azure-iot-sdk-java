@@ -3,18 +3,15 @@
 
 package com.microsoft.azure.sdk.iot.device.fileupload;
 
+import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.CustomLogger;
-
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;

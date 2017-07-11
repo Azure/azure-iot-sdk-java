@@ -387,7 +387,7 @@ public class MqttMessagingTest {
         MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);;
         testMqttMessaging.send(mockMessage);
         final String publishTopicWithProperties = String.format(
-                "devices/%s/messages/events/%s=%s&$.mid=%s", clientId, propertyName, propertyValue,messageidValue);
+                "devices/%s/messages/events/$.mid=%s&%s=%s", clientId, messageidValue, propertyName, propertyValue);
 
         new Verifications()
         {

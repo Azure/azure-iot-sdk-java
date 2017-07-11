@@ -13,6 +13,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -23,15 +24,19 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import static org.junit.Assert.*;
 
-/* Unit tests for Mqtt
- * Code coverage: 82% methods, 83% lines
+/**
+ * Unit test for Mqtt class.
+ * 84% methods, 84% lines covered
  */
 public class MqttTest {
     final String serverUri = "test.host.name";
     final String clientId = "test.iothub";
     final String userName = "test-deviceId";
     final String password = "test-devicekey?&test";
-    final String mockParseTopic = "testTopic";
+    final String mockParseTopic = "devices/deviceID/messages/devicebound/%24.mid=69ea4caf-d83e-454b-81f2-caafda4c81c8&%24.exp=0&%24.to=%2Fdevices%2FdeviceID%2Fmessages%2FdeviceBound&%24.cid=169c34b3-99b0-49f9-b0f6-8fa9d2c99345&iothub-ack=full&property1=value1";
+    final byte[] expectedPayload = {0x61, 0x62, 0x63};
+    static Message expectedMessage;
+
 
     @Mocked
     private MqttAsyncClient mockMqttAsyncClient;
@@ -56,6 +61,14 @@ public class MqttTest {
 
     @Mocked
     IotHubSSLContext mockIotHubSSLContext;
+
+    @Before
+    public void setUp() {
+        expectedMessage = new Message(expectedPayload);
+        expectedMessage.setProperty("property1", "value1");
+        expectedMessage.setMessageId("69ea4caf-d83e-454b-81f2-caafda4c81c8");
+        expectedMessage.setCorrelationId("169c34b3-99b0-49f9-b0f6-8fa9d2c99345");
+    }
 
     private Mqtt instantiateMqtt(boolean withParameters) throws IOException
     {
@@ -435,7 +448,7 @@ public class MqttTest {
     /*
     **Tests_SRS_Mqtt_25_005: [**The function shall establish an MQTT connection with an IoT Hub using the provided host name, user name, device ID, and sas token.**]**
      */
-   @Test
+    @Test
     public void connectSuccess() throws IOException, MqttException
     {
         //arrange
@@ -589,9 +602,9 @@ public class MqttTest {
                 }
             };
 
-           Object actualInfoInstance = Deencapsulation.getField(mockMqtt, "info");
-           MqttAsyncClient actualMqttAsyncClient = Deencapsulation.getField(actualInfoInstance, "mqttAsyncClient");
-           assertNull(actualMqttAsyncClient);
+            Object actualInfoInstance = Deencapsulation.getField(mockMqtt, "info");
+            MqttAsyncClient actualMqttAsyncClient = Deencapsulation.getField(actualInfoInstance, "mqttAsyncClient");
+            assertNull(actualMqttAsyncClient);
         }
         finally
         {
@@ -715,7 +728,7 @@ public class MqttTest {
                     mockMqttDeliveryToken, mockMqttDeliveryToken, mockMqttDeliveryToken,
                     mockMqttDeliveryToken, mockMqttDeliveryToken, mockMqttDeliveryToken,
                     mockMqttDeliveryToken, mockMqttDeliveryToken, mockMqttDeliveryToken
-                    };
+            };
             new NonStrictExpectations()
             {
                 {
@@ -1089,8 +1102,8 @@ public class MqttTest {
             new NonStrictExpectations()
             {
                 {
-                   mockMqttAsyncClient.isConnected();
-                   result = true;
+                    mockMqttAsyncClient.isConnected();
+                    result = true;
                 }
             };
 
@@ -1106,7 +1119,12 @@ public class MqttTest {
             {
                 assertEquals(actualPayload[i], payload[i]);
             }
+            assertEquals(expectedMessage.getMessageId(), receivedMessage.getMessageId());
+            assertEquals(expectedMessage.getCorrelationId(), receivedMessage.getCorrelationId());
 
+            assertEquals(expectedMessage.getProperties().length, receivedMessage.getProperties().length);
+            assertEquals(expectedMessage.getProperties()[0].getName(), receivedMessage.getProperties()[0].getName());
+            assertEquals(expectedMessage.getProperties()[0].getValue(), receivedMessage.getProperties()[0].getValue());
         }
         finally
         {
@@ -1399,17 +1417,159 @@ public class MqttTest {
         try
         {
             //arrange
-            MqttMessaging testMqttClient = new MqttMessaging("serverURI","deviceId","username","password", iotHubSSLContext);
+            MqttMessaging testMqttClient = new MqttMessaging("serverURI", "deviceId", "username", "password", iotHubSSLContext);
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             Deencapsulation.setField(testMqttClient, "allReceivedMessages", testAllReceivedMessages);
 
             //act
             receivedMessage = testMqttClient.receive();
-        }
-        finally
+        } finally
         {
             //assert
             assertNull(receivedMessage);
+        }
+    }
+
+    /*
+    **Tests_SRS_Mqtt_34_051: [**If a topic string's property's key and value are not separated by the '=' symbol, an IllegalArgumentException shall be thrown**]**
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void receiveFailureFromInvalidPropertyStringThrowsIllegalArgumentException() throws IOException, MqttException, IllegalArgumentException
+    {
+        //arrange
+        final byte[] payload = {0x61, 0x62, 0x63};
+        final String mockParseTopicInvalidPropertyFormat = "devices/deviceID/messages/devicebound/%24.mid=69ea4caf-d83e-454b-81f2-caafda4c81c8&%24.exp=99999&%24.to=%2Fdevices%2FdeviceID%2Fmessages%2FdeviceBound&%24.cid=169c34b3-99b0-49f9-b0f6-8fa9d2c99345&iothub-ack=full&property1value1";
+        baseConnectExpectation();
+        new MockUp<MqttMessaging>()
+        {
+            @Mock
+            Pair<String, byte[]> peekMessage()
+            {
+                return new MutablePair<>(mockParseTopicInvalidPropertyFormat, payload);
+            }
+        };
+
+        final Mqtt mockMqtt = new MqttMessaging(serverUri, clientId, userName, password,  mockIotHubSSLContext);
+        try
+        {
+            new NonStrictExpectations()
+            {
+                {
+                    mockMqttAsyncClient.isConnected();
+                    result = true;
+                }
+            };
+
+            Deencapsulation.invoke(mockMqtt, "connect");
+
+            //act
+            mockMqtt.receive();
+        }
+        finally
+        {
+            testCleanUp(mockMqtt);
+        }
+    }
+
+    /*
+    **Test_SRS_Mqtt_34_054: [**A message may have 0 to many custom properties**]**
+    */
+    @Test
+    public void receiveSuccessNoCustomProperties() throws IOException, MqttException
+    {
+        //arrange
+        final byte[] payload = {0x61, 0x62, 0x63};
+        final String mockParseTopicNoCustomProperties = "devices/deviceID/messages/devicebound/%24.mid=69ea4caf-d83e-454b-81f2-caafda4c81c8&%24.exp=0&%24.to=%2Fdevices%2FdeviceID%2Fmessages%2FdeviceBound&%24.cid=169c34b3-99b0-49f9-b0f6-8fa9d2c99345&iothub-ack=full";
+        baseConstructorExpectations(true);
+        baseConnectExpectation();
+        new MockUp<MqttMessaging>()
+        {
+            @Mock
+            Pair<String, byte[]> peekMessage()
+            {
+                return new MutablePair<>(mockParseTopicNoCustomProperties, payload);
+            }
+        };
+
+        final Mqtt mockMqtt = new MqttMessaging(serverUri, clientId, userName, password,  mockIotHubSSLContext);
+        try
+        {
+            new NonStrictExpectations()
+            {
+                {
+                    mockMqttAsyncClient.isConnected();
+                    result = true;
+                }
+            };
+
+            Deencapsulation.invoke(mockMqtt, "connect");
+
+            //act
+            Message receivedMessage = mockMqtt.receive();
+
+            //assert
+            assertEquals(receivedMessage.getProperties().length, 0);
+        }
+        finally
+        {
+            testCleanUp(mockMqtt);
+        }
+    }
+
+    /*
+    **Tests_SRS_Mqtt_34_053: [**A property's key and value may include unusual characters such as &, %, $**]**
+    */
+    @Test
+    public void receiveSuccessCustomPropertyHasUnusualCharacters() throws IOException, MqttException
+    {
+        //arrange
+        final byte[] payload = {0x61, 0x62, 0x63};
+        final String mockParseTopicWithUnusualCharacters = "devices/deviceID/messages/devicebound/%24.mid=69ea4caf-d83e-454b-81f2-caafda4c81c8&%24.exp=0&%24.to=%2Fdevices%2FdeviceID%2Fmessages%2FdeviceBound&%24.cid=169c34b3-99b0-49f9-b0f6-8fa9d2c99345&iothub-ack=full&property1=%24&property2=%26&%25=%22&finalProperty=%3d";
+        baseConstructorExpectations(true);
+        baseConnectExpectation();
+        new MockUp<MqttMessaging>()
+        {
+            @Mock
+            Pair<String, byte[]> peekMessage()
+            {
+                return new MutablePair<>(mockParseTopicWithUnusualCharacters, payload);
+            }
+        };
+
+        final Mqtt mockMqtt = new MqttMessaging(serverUri, clientId, userName, password,  mockIotHubSSLContext);
+        try
+        {
+            new NonStrictExpectations()
+            {
+                {
+                    mockMqttAsyncClient.isConnected();
+                    result = true;
+                }
+            };
+
+            Deencapsulation.invoke(mockMqtt, "connect");
+
+            //act
+            Message receivedMessage = mockMqtt.receive();
+
+            //assert
+            byte[] actualPayload = receivedMessage.getBytes();
+            assertTrue(actualPayload.length == payload.length);
+            for (int i = 0; i < payload.length; i++)
+            {
+                assertEquals(actualPayload[i], payload[i]);
+            }
+
+            assertEquals(4, receivedMessage.getProperties().length);
+            assertEquals("$", receivedMessage.getProperties()[0].getValue());
+            assertEquals("&", receivedMessage.getProperties()[1].getValue());
+            assertEquals("%", receivedMessage.getProperties()[2].getName());
+            assertEquals("\"", receivedMessage.getProperties()[2].getValue());
+            assertEquals("=", receivedMessage.getProperties()[3].getValue());
+        }
+        finally
+        {
+            testCleanUp(mockMqtt);
         }
     }
 }

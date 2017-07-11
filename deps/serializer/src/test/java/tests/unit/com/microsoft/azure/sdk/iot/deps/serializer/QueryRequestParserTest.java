@@ -6,7 +6,6 @@
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.QueryRequestParser;
-
 import mockit.Deencapsulation;
 import org.junit.Test;
 

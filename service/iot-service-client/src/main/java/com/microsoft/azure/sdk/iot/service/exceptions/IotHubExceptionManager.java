@@ -5,13 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.service.Tools;
+import com.microsoft.azure.sdk.iot.deps.serializer.ErrorMessageParser;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -50,24 +46,9 @@ public class IotHubExceptionManager
             IotHubException
     {
         int responseStatus = httpResponse.getStatus();
-        String errorMessage = "";
-        try
-        {
-            String jsonString = new String(httpResponse.getErrorReason(), StandardCharsets.UTF_8);
-            try (JsonReader jsonReader = Json.createReader(new StringReader(jsonString)))
-            {
-                JsonObject jsonObject = jsonReader.readObject();
-                if ((jsonObject != JsonObject.NULL) && (jsonObject != null))
-                {
-                    errorMessage = Tools.getValueFromJsonObject(jsonObject, "ExceptionMessage");
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            /* If it cannot parser the errorReason, just log a error without message.*/
-            // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
-        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
+        String errorMessage = ErrorMessageParser.bestErrorMessage(new String(httpResponse.getErrorReason(), StandardCharsets.UTF_8));
 
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_001: [The function shall throw IotHubBadFormatException if the Http response status equal 400]
         if (400 == responseStatus)
@@ -133,5 +114,4 @@ public class IotHubExceptionManager
         }
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_012: [The function shall return without exception if the response status equal or less than 300]
     }
-
 }

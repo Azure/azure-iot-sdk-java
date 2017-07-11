@@ -9,24 +9,32 @@ import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
+/*
+    Unit tests for Device Twin
+    Coverage : 90% method, 85% line
+ */
 public class DeviceTwinTest
 {
     @Mocked
@@ -51,14 +59,35 @@ public class DeviceTwinTest
     TwinParser mockedTwinParser;
 
     @Mocked
-    DeviceTwinDevice mockedDevice;
+    Query mockedQuery;
+
+    static String VALID_SQL_QUERY = null;
+
+    @Before
+    public void setUp() throws IOException
+    {
+        VALID_SQL_QUERY = SqlQuery.createSqlQuery("tags.Floor, AVG(properties.reported.temperature) AS AvgTemperature",
+                                                  SqlQuery.FromType.DEVICES, "tags.building = '43'", null).getQuery();
+    }
+
+    private void assetEqualSetAndMap(Set<Pair> pairSet, Map<String, String> map)
+    {
+        assertEquals(pairSet.size(), map.size());
+        for(Pair p : pairSet)
+        {
+            String val = map.get(p.getKey());
+            assertNotNull(val);
+            assertEquals(p.getValue(), val);
+        }
+    }
 
     /*
     **Tests_SRS_DEVICETWIN_25_002: [** The constructor shall create an IotHubConnectionStringBuilder object from the given connection string **]**
     **Tests_SRS_DEVICETWIN_25_003: [** The constructor shall create a new DeviceTwin instance and return it **]**
      */
     @Test
-    public void constructorCreatesTwin(@Mocked IotHubConnectionStringBuilder mockedConnectionStringBuilder) throws Exception
+    public void constructorCreatesTwin(@Mocked IotHubConnectionStringBuilder mockedConnectionStringBuilder,
+                                       @Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -130,7 +159,7 @@ public class DeviceTwinTest
      **Tests_SRS_DEVICETWIN_25_012: [** The function shall set tags, desired property map, reported property map on the user device **]**
      */
     @Test
-    public void getTwinSucceeds() throws Exception
+    public void getTwinSucceeds(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -181,7 +210,7 @@ public class DeviceTwinTest
     **Tests_SRS_DEVICETWIN_25_004: [** The function shall throw IllegalArgumentException if the input device is null or if deviceId is null or empty **]**
      */
     @Test (expected =  IllegalArgumentException.class)
-    public void getTwinThrowsOnNullDevice() throws Exception
+    public void getTwinThrowsOnNullDevice(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -192,7 +221,7 @@ public class DeviceTwinTest
     }
 
     @Test (expected =  IllegalArgumentException.class)
-    public void getTwinThrowsOnEmptyDeviceID() throws Exception
+    public void getTwinThrowsOnEmptyDeviceID(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -211,7 +240,7 @@ public class DeviceTwinTest
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void getTwinThrowsOnNullDeviceID() throws Exception
+    public void getTwinThrowsOnNullDeviceID(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -232,7 +261,7 @@ public class DeviceTwinTest
     **Tests_SRS_DEVICETWIN_25_010: [** The function shall verify the response status and throw proper Exception **]**
      */
     @Test (expected = IotHubException.class)
-    public void getTwinThrowsVerificationFailure() throws Exception
+    public void getTwinThrowsVerificationFailure(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -314,7 +343,7 @@ public class DeviceTwinTest
     **Tests_SRS_DEVICETWIN_25_029: [** The function shall throw IllegalArgumentException if the input device is null or if deviceId is null or empty **]**
      */
     @Test (expected = IllegalArgumentException.class)
-    public void replaceDesiredPropertiesThrowsIfDeviceIsNull() throws Exception
+    public void replaceDesiredPropertiesThrowsIfDeviceIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     { //arrange
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
@@ -324,7 +353,7 @@ public class DeviceTwinTest
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void replaceDesiredPropertiesThrowsIfDeviceIDIsNull() throws Exception
+    public void replaceDesiredPropertiesThrowsIfDeviceIDIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -342,7 +371,7 @@ public class DeviceTwinTest
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void replaceDesiredPropertiesThrowsIfDeviceIDIsEmpty() throws Exception
+    public void replaceDesiredPropertiesThrowsIfDeviceIDIsEmpty(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -363,7 +392,7 @@ public class DeviceTwinTest
      **Tests_SRS_DEVICETWIN_25_045: [** If resetDesiredProperty call returns null or empty string then this method shall throw IOException**]**
      */
     @Test (expected = IOException.class)
-    public void replaceDesiredPropertiesThrowsIfJsonIsNull() throws Exception
+    public void replaceDesiredPropertiesThrowsIfJsonIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -377,7 +406,6 @@ public class DeviceTwinTest
                 result = mockedTwinParser;
                 mockedTwinParser.resetDesiredProperty((Map<String, Object>)any);
                 result = null;
-
             }
         };
 
@@ -392,13 +420,12 @@ public class DeviceTwinTest
                 times = 1;
                 mockedTwinParser.resetDesiredProperty((Map<String, Object>)any);
                 times = 1;
-
             }
         };
     }
 
     @Test (expected = IOException.class)
-    public void replaceDesiredPropertiesThrowsIfJsonIsEmpty() throws Exception
+    public void replaceDesiredPropertiesThrowsIfJsonIsEmpty(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -412,7 +439,6 @@ public class DeviceTwinTest
                 result = mockedTwinParser;
                 mockedTwinParser.resetDesiredProperty((Map<String, Object>)any);
                 result = "";
-
             }
         };
 
@@ -427,7 +453,6 @@ public class DeviceTwinTest
                 times = 1;
                 mockedTwinParser.resetDesiredProperty((Map<String, Object>)any);
                 times = 1;
-
             }
         };
     }
@@ -534,7 +559,7 @@ public class DeviceTwinTest
     Tests_SRS_DEVICETWIN_25_037: [ The function shall throw IllegalArgumentException if the input device is null or if deviceId is null or empty ]
      */
     @Test (expected = IllegalArgumentException.class)
-    public void replaceTagsThrowsIfDeviceIsNull() throws Exception
+    public void replaceTagsThrowsIfDeviceIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -546,7 +571,7 @@ public class DeviceTwinTest
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void replaceTagsThrowsIfDeviceIDIsNull() throws Exception
+    public void replaceTagsThrowsIfDeviceIDIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {        //arrange
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
@@ -555,7 +580,6 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = null;
-
             }
         };
 
@@ -565,7 +589,7 @@ public class DeviceTwinTest
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void replaceTagsThrowsIfDeviceIDIsEmpty() throws Exception
+    public void replaceTagsThrowsIfDeviceIDIsEmpty(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
@@ -574,7 +598,6 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = "";
-
             }
         };
 
@@ -626,7 +649,7 @@ public class DeviceTwinTest
     **Tests_SRS_DEVICETWIN_25_046: [** If resetTags call returns null or empty string then this method shall throw IOException**]**
      */
     @Test (expected = IOException.class)
-    public void replaceTagsThrowsJsonIsNull() throws Exception
+    public void replaceTagsThrowsJsonIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -652,13 +675,12 @@ public class DeviceTwinTest
                 times = 1;
                 mockedTwinParser.resetTags((Map<String, Object>)any);
                 times = 1;
-
             }
         };
     }
 
     @Test (expected = IOException.class)
-    public void replaceTagsThrowsJsonIsEmpty() throws Exception
+    public void replaceTagsThrowsJsonIsEmpty(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -684,7 +706,6 @@ public class DeviceTwinTest
                 times = 1;
                 mockedTwinParser.resetTags((Map<String, Object>)any);
                 times = 1;
-
             }
         };
     }
@@ -713,7 +734,7 @@ public class DeviceTwinTest
 
      */
     @Test
-    public void updateTwinSucceeds() throws Exception
+    public void updateTwinSucceeds(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -759,7 +780,7 @@ public class DeviceTwinTest
      **Tests_SRS_DEVICETWIN_25_013: [** The function shall throw IllegalArgumentException if the input device is null or if deviceId is null or empty **]**
      */
     @Test (expected = IllegalArgumentException.class)
-    public void updateTwinThrowsIfDeviceIsNull() throws Exception
+    public void updateTwinThrowsIfDeviceIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     { //arrange
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
@@ -769,7 +790,7 @@ public class DeviceTwinTest
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void updateTwinThrowsIfDeviceIDIsNull() throws Exception
+    public void updateTwinThrowsIfDeviceIDIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -787,7 +808,7 @@ public class DeviceTwinTest
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void updateTwinThrowsIfDeviceIDIsEmpty() throws Exception
+    public void updateTwinThrowsIfDeviceIDIsEmpty(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -808,7 +829,7 @@ public class DeviceTwinTest
     **Tests_SRS_DEVICETWIN_25_045: [** The function shall throw IllegalArgumentException if the both desired and tags maps are either empty or null **]**
      */
     @Test (expected = IllegalArgumentException.class)
-    public void updateTwinThrowsIfBothDesiredAndTagsIsEmpty() throws Exception
+    public void updateTwinThrowsIfBothDesiredAndTagsIsEmpty(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -833,7 +854,7 @@ public class DeviceTwinTest
 
 
     @Test
-    public void updateTwinDoesNotThrowsIfOnlyDesiredHasValue() throws Exception
+    public void updateTwinDoesNotThrowsIfOnlyDesiredHasValue(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -877,7 +898,7 @@ public class DeviceTwinTest
 
 
     @Test
-    public void updateTwinDoesNotThrowsIfOnlyTagsHasValue() throws Exception
+    public void updateTwinDoesNotThrowsIfOnlyTagsHasValue(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -923,7 +944,7 @@ public class DeviceTwinTest
      **Tests_SRS_DEVICETWIN_25_046: [** The function shall throw IOException if updateTwin Api call returned an empty or null json**]**
      */
     @Test (expected = IOException.class)
-    public void updateTwinThrowsIfJsonIsNull() throws Exception
+    public void updateTwinThrowsIfJsonIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -943,7 +964,6 @@ public class DeviceTwinTest
                 result = mockedTwinParser;
                 mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
                 result = null;
-
             }
         };
 
@@ -958,13 +978,12 @@ public class DeviceTwinTest
                 times = 1;
                 mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
                 times = 1;
-
             }
         };
     }
 
     @Test (expected = IOException.class)
-    public void updateTwinThrowsIfJsonIsEmpty() throws Exception
+    public void updateTwinThrowsIfJsonIsEmpty(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -984,7 +1003,6 @@ public class DeviceTwinTest
                 result = mockedTwinParser;
                 mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
                 result = "";
-
             }
         };
 
@@ -999,13 +1017,12 @@ public class DeviceTwinTest
                 times = 1;
                 mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
                 times = 1;
-
             }
         };
     }
 
     @Test (expected = IotHubException.class)
-    public void updateTwinThrowsVerificationThrows() throws Exception
+    public void updateTwinThrowsVerificationThrows(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -1032,6 +1049,469 @@ public class DeviceTwinTest
 
         //act
         testTwin.updateTwin(mockedDevice);
+    }
 
+    //Tests_SRS_DEVICETWIN_25_049: [ The method shall build the URL for this operation by calling getUrlTwinQuery ]
+    //Tests_SRS_DEVICETWIN_25_050: [ The method shall create a new Query Object of Type TWIN. ]
+    //Tests_SRS_DEVICETWIN_25_051: [ The method shall send a Query Request to IotHub as HTTP Method Post on the query Object by calling sendQueryRequest.]
+    //Tests_SRS_DEVICETWIN_25_052: [ If the pagesize if not provided then a default pagesize of 100 is used for the query.]
+    @Test
+    public void queryTwinSucceeds(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                result = mockedQuery;
+            }
+        };
+
+        //act
+        testTwin.queryTwin(VALID_SQL_QUERY);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                times = 1;
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICETWIN_25_047: [ The method shall throw IllegalArgumentException if the query is null or empty.]
+    @Test (expected = IllegalArgumentException.class)
+    public void twinQueryThrowsOnNullQuery(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        //act
+        testTwin.queryTwin(null);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void twinQueryThrowsOnEmptyQuery(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        //act
+        testTwin.queryTwin("");
+    }
+
+    //Tests_SRS_DEVICETWIN_25_048: [ The method shall throw IllegalArgumentException if the page size is zero or negative.]
+    @Test (expected = IllegalArgumentException.class)
+    public void twinQueryThrowsOnNegativePageSize(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        //act
+        testTwin.queryTwin(VALID_SQL_QUERY, -1);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void twinQueryThrowsOnZeroPageSize(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        //act
+        testTwin.queryTwin(VALID_SQL_QUERY, 0);
+    }
+
+    @Test (expected = IotHubException.class)
+    public void twinQueryThrowsOnNewQueryThrows(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                result = new IotHubException();
+            }
+        };
+
+        //act
+        testTwin.queryTwin(VALID_SQL_QUERY);
+    }
+
+    //Tests_SRS_DEVICETWIN_25_055: [ If a queryResponse is available, this method shall return true as is to the user. ]
+    @Test
+    public void hasNextSucceeds(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = true;
+            }
+        };
+
+        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
+
+        //act
+        boolean result = testTwin.hasNextDeviceTwin(testQuery);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
+                times = 0;
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                times = 1;
+            }
+        };
+
+        assertTrue(result);
+    }
+
+    //Tests_SRS_DEVICETWIN_25_053: [ The method shall throw IllegalArgumentException if query is null ]
+    @Test (expected = IllegalArgumentException.class)
+    public void hasNextThrowsOnNullQuery(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = true;
+            }
+        };
+
+        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
+
+        //act
+        boolean result = testTwin.hasNextDeviceTwin(null);
+    }
+
+    //Tests_SRS_DEVICETWIN_25_054: [ The method shall check if a response to query is avaliable by calling hasNext on the query object.]
+    //Tests_SRS_DEVICETWIN_25_056: [ If a queryResponse is not available, this method shall check if continuation token is avaliable for this query.]
+    //Tests_SRS_DEVICETWIN_25_057: [ If continuation token is found then a continuation query is sent to the IotHub and new response is given to the user ]
+    @Test
+    public void hasNextSendsNewRequestOnEmpty(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = false;
+                Deencapsulation.invoke(mockedQuery, "getContinuationToken");
+                result = anyString;
+            }
+        };
+
+        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
+
+        //act
+        boolean result = testTwin.hasNextDeviceTwin(testQuery);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
+                times = 1;
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                times = 2;
+            }
+        };
+
+        assertFalse(result);
+    }
+
+    @Test (expected = IotHubException.class)
+    public void hasNextSendsNewRequestOnEmptyThrowsIfSendThrows(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = false;
+                Deencapsulation.invoke(mockedQuery, "getContinuationToken");
+                result = anyString;
+            }
+        };
+
+        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                result = new IotHubException();
+            }
+        };
+
+        //act
+        boolean result = testTwin.hasNextDeviceTwin(testQuery);
+    }
+
+    @Test
+    public void hasNextDoesNotSendNewRequestOnEmptyAndNullToken(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = false;
+                Deencapsulation.invoke(mockedQuery, "getContinuationToken");
+                result = null;
+            }
+        };
+
+        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
+
+        //act
+        boolean result = testTwin.hasNextDeviceTwin(testQuery);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
+                times = 0;
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                times = 1;
+            }
+        };
+        assertFalse(result);
+    }
+
+    //Tests_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinParser and provide the response on DeviceTwinDevice.]
+    @Test
+    public void nextRetrievesCorrectly() throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        final String expectedString = "testJsonAsNext";
+        Map tags = new HashMap();
+        tags.put("tagsKey", "tagsValue");
+        Map rp = new HashMap();
+        rp.put("rpKey", "rpValue");
+        Map dp = new HashMap();
+        dp.put("dpKey", "dpValue");
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = true;
+                Deencapsulation.invoke(mockedQuery, "next");
+                result = expectedString;
+                mockedTwinParser.getDeviceId();
+                result = "testDeviceID";
+                mockedTwinParser.getTagsMap();
+                result = tags;
+                mockedTwinParser.getDesiredPropertyMap();
+                result = dp;
+                mockedTwinParser.getReportedPropertyMap();
+                result = rp;
+            }
+        };
+
+        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
+
+        //act
+        DeviceTwinDevice result = testTwin.getNextDeviceTwin(testQuery);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
+                times = 0;
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                times = 1;
+            }
+        };
+
+        assertNotNull(result.getTags());
+        assertNotNull(result.getReportedProperties());
+        assertNotNull(result.getDesiredProperties());
+
+        assetEqualSetAndMap(result.getTags(), tags);
+        assetEqualSetAndMap(result.getDesiredProperties(), dp);
+        assetEqualSetAndMap(result.getReportedProperties(), rp);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void nextThrowsOnNullQuery(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = true;
+            }
+        };
+
+        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
+
+        //act
+        testTwin.getNextDeviceTwin(null);
+    }
+
+    @Test (expected = IotHubException.class)
+    public void nextThrowsOnHasNextThrows(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = false;
+                Deencapsulation.invoke(mockedQuery, "getContinuationToken");
+                result = anyString;
+
+            }
+        };
+
+        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                result = new IotHubException();
+            }
+        };
+
+        //act
+        testTwin.getNextDeviceTwin(testQuery);
+    }
+
+    //Tests_SRS_DEVICETWIN_25_058: [ The method shall check if hasNext returns true and throw NoSuchElementException otherwise ]
+    @Test (expected = NoSuchElementException.class)
+    public void nextThrowsIfNoNewElements(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = false;
+                Deencapsulation.invoke(mockedQuery, "next");
+                result = null;
+            }
+        };
+
+        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
+
+        //act
+        DeviceTwinDevice result = testTwin.getNextDeviceTwin(testQuery);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
+                times = 0;
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICETWIN_25_060: [ If the next element from the query response is an object other than String, then this method shall throw IOException ]
+    @Test (expected = IOException.class)
+    public void nextThrowsIfNonStringRetrieved(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    {
+        //arrange
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = true;
+                Deencapsulation.invoke(mockedQuery, "next");
+                result = 5;
+            }
+        };
+
+        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
+
+        //act
+        DeviceTwinDevice result = testTwin.getNextDeviceTwin(testQuery);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
+                times = 0;
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                times = 1;
+            }
+        };
     }
 }

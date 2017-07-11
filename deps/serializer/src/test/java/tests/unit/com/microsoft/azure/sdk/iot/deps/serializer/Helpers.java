@@ -8,10 +8,7 @@ import com.google.gson.GsonBuilder;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
@@ -35,15 +32,22 @@ public class Helpers
      * @param <k> it the key type, normally a String.
      * @param <v> is the value type, normally an Object.
      */
-    protected static <k,v> void assertMap(Map<k, v> actual, Map<k, v> expected)
+    protected static <k,v> void assertMap(Map<k, v> actual, Map<k, v> expected, String message)
     {
         if(expected == null)
         {
-            assertNull("Expected null map, received " + actual, actual);
+            assertNull((message==null?"Expected null map, received " + actual : message), actual);
         }
         else
         {
-            assertEquals(expected.size(), actual.size());
+            if(message == null)
+            {
+                assertEquals(expected.size(), actual.size());
+            }
+            else
+            {
+                assertEquals(message, expected.size(), actual.size());
+            }
 
             for (Map.Entry entry : expected.entrySet())
             {
@@ -52,26 +56,65 @@ public class Helpers
                 v expectedValue = expected.get(key);
                 if(expectedValue == null)
                 {
-                    assertNull(actualValue);
+                    if(message == null)
+                    {
+                        assertNull(actualValue);
+                    }
+                    else
+                    {
+                        assertNull(message, actualValue);
+                    }
+                }
+                else if(actualValue == null)
+                {
+                    if(message == null)
+                    {
+                        assertTrue("Expected key:" + key + " does not exist in Actual Map", false);
+                    }
+                    else
+                    {
+                        assertTrue(message, false);
+                    }
                 }
                 else if(expectedValue instanceof Map)
                 {
                     if(actualValue instanceof Map)
                     {
-                        assertMap((Map<k, v>)actualValue, (Map<k, v>)expectedValue);
+                        assertMap((Map<k, v>)actualValue, (Map<k, v>)expectedValue, message);
                     }
                     else
                     {
-                        assert true;
+                        if(message == null)
+                        {
+                            assertTrue("Map contains invalid Object", false);
+                        }
+                        else
+                        {
+                            assertTrue(message, false);
+                        }
                     }
                 }
                 else if(expectedValue instanceof ArrayList)
                 {
-                    assertTrue("Map failed: " + actualValue + " != " + expectedValue, actualValue.toString().equals(expectedValue.toString()));
+                    if(message == null)
+                    {
+                        assertTrue("Map failed on " + key + ": " + actualValue + " != " + expectedValue, actualValue.toString().equals(expectedValue.toString()));
+                    }
+                    else
+                    {
+                        assertTrue(message, actualValue.toString().equals(expectedValue.toString()));
+                    }
                 }
                 else
                 {
-                    assertTrue("Map failed: <" + actualValue + "> != <" + expectedValue + ">", actualValue.equals(expectedValue));
+                    if(message == null)
+                    {
+                        assertEquals("Map failed on " + key + ": <" + actualValue + "> != <" + expectedValue + ">", actualValue.toString(), expectedValue.toString());
+                    }
+                    else
+                    {
+                        assertTrue(message, actualValue.equals(expectedValue));
+                    }
                 }
             }
         }
@@ -99,7 +142,7 @@ public class Helpers
 
             if(actual instanceof Map)
             {
-                assertMap((Map<String, Object>) actual, (Map<String, Object>)expected);
+                assertMap((Map<String, Object>) actual, (Map<String, Object>)expected, "\r\nExpected :" + expectedJson + "\r\nActual   :" + actualJson);
             }
             else
             {
@@ -201,6 +244,22 @@ public class Helpers
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
         dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
         return dateFormat.format(date);
+
     }
 
+    /**
+     * Asserts when list contents are not equal
+     * @param expected expected list to verify
+     * @param test  list to test
+     */
+    protected static void assertListEquals(List expected, List test)
+    {
+        assertNotNull(expected);
+        assertNotNull(test);
+        assertTrue(expected.size() == test.size());
+        for(Object o : expected)
+        {
+            assertTrue(test.contains(o));
+        }
+    }
 }

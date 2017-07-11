@@ -25,7 +25,7 @@ public class HttpsIotHubConnection
     private static final String HTTPS_PROPERTY_ETAG_TAG = "etag";
 
     /** The HTTPS connection lock. */
-    private static final Object HTTPS_CONNECTION_LOCK = new Object();
+    private final Object HTTPS_CONNECTION_LOCK = new Object();
 
     /** The client configuration. */
     private final DeviceClientConfig config;

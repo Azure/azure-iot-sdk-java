@@ -56,6 +56,9 @@ public class TwinParser
     public Map<String, Object> getReportedPropertyMap();
     public Map<String, Object> getTagsMap();
 
+    public void setDeviceId(String deviceId) throws IllegalArgumentException;
+    public void setETag(String eTag) throws IllegalArgumentException;
+
     public String getDeviceId();
     public String getGenerationId();
     public String getETag();
@@ -321,7 +324,7 @@ public String updateDesiredProperty(Map<String, Object> propertyMap) throws Ille
 **SRS_TWINPARSER_21_063: [**If the provided `property` map is empty, the updateDesiredProperty shall not change the collection and return null.**]**  
 **SRS_TWINPARSER_21_073: [**If the map is invalid, the updateDesiredProperty shall throw IllegalArgumentException.**]**  
 **SRS_TWINPARSER_21_077: [**If any `key` already exists, the updateDesiredProperty shall replace the existed value by the new one.**]**  
-**SRS_TWINPARSER_21_078: [**If any `value` is null, the updateDesiredProperty shall store it but do not report on Json.**]**  
+**SRS_TWINPARSER_21_078: [**If any `value` is null, the updateDesiredProperty shall delete it from the collection and report on Json.**]**  
 
 
 ### updateReportedProperty
@@ -347,7 +350,7 @@ public String updateReportedProperty(Map<String, Object> propertyMap) throws Ill
 **SRS_TWINPARSER_21_064: [**If the provided `property` map is empty, the updateReportedProperty shall not change the collection and return null.**]**  
 **SRS_TWINPARSER_21_079: [**If the map is invalid, the updateReportedProperty shall throw IllegalArgumentException.**]**  
 **SRS_TWINPARSER_21_083: [**If any `key` already exists, the updateReportedProperty shall replace the existed value by the new one.**]**  
-**SRS_TWINPARSER_21_084: [**If any `value` is null, the updateReportedProperty shall store it but do not report on Json.**]**  
+**SRS_TWINPARSER_21_084: [**If any `value` is null, the updateReportedProperty shall delete it from the collection and report on Json.**]**  
 
 
 ### updateTags
@@ -375,7 +378,7 @@ public String updateTags(Map<String, Object> tagsMap) throws IllegalArgumentExce
 **SRS_TWINPARSER_21_110: [**If the map is invalid, the updateTags shall throw IllegalArgumentException.**]**  
 **SRS_TWINPARSER_21_111: [**If Tags is not enable, the updateTags shall throw IOException.**]**  
 **SRS_TWINPARSER_21_114: [**If any `key` already exists, the updateTags shall replace the existed value by the new one.**]**  
-**SRS_TWINPARSER_21_115: [**If any `value` is null, the updateTags shall store it but do not report on Json.**]**  
+**SRS_TWINPARSER_21_115: [**If any `value` is null, the updateTags shall delete it from the collection and report on Json.**]**  
 
 
 ### updateTwin
@@ -408,7 +411,7 @@ public String updateTwin(Map<String, Object> desiredPropertyMap,
 **SRS_TWINPARSER_21_128: [**If one of the provided map is empty, the updateTwin shall not change its the collection.**]**  
 **SRS_TWINPARSER_21_080: [**If one of the map is invalid, the updateTwin shall not change the collection and throw IllegalArgumentException.**]**  
 **SRS_TWINPARSER_21_081: [**If any `key` already exists, the updateTwin shall replace the existed value by the new one.**]**  
-**SRS_TWINPARSER_21_082: [**If any `value` is null, the updateTwin shall store it but do not report on Json.**]**  
+**SRS_TWINPARSER_21_082: [**If any `value` is null, the updateTwin shall delete it from the collection and report on Json.**]**  
 **SRS_TWINPARSER_21_075: [**If Tags is not enable and `tagsMap` is not null, the updateTwin shall throw IOException.**]**  
 **SRS_TWINPARSER_21_076: [**If `deviceId`, `generationId`, `etag`, `status`, `statusReason`, `statusUpdatedTime`, `connectionState`, `connectionStateUpdatedTime`, `lastActivityTime`, and `lastAcceptingIpFilterRule` are not null, the updateTwin shall include its value in the json.**]**  
 
@@ -457,7 +460,7 @@ public String resetDesiredProperty(Map<String, Object> propertyMap) throws Illeg
 **SRS_TWINPARSER_21_123: [**The `key` and `value` in property shall be case sensitive.**]**  
 **SRS_TWINPARSER_21_124: [**If the provided `propertyMap` is empty, the resetDesiredProperty shall cleanup the desired collection and return `{}`.**]**  
 **SRS_TWINPARSER_21_125: [**If the map is invalid, the resetDesiredProperty shall not change the collection and throw IllegalArgumentException.**]**  
-**SRS_TWINPARSER_21_129: [**If any `value` is null, the resetDesiredProperty shall store it but do not report on Json.**]**  
+**SRS_TWINPARSER_21_129: [**If any `value` is null, the resetDesiredProperty shall delete it from the collection and report on Json.**]**  
 
 
 ### resetReportedProperty
@@ -480,7 +483,7 @@ public String resetReportedProperty(Map<String, Object> propertyMap) throws Ille
 **SRS_TWINPARSER_21_133: [**The `key` and `value` in property shall be case sensitive.**]**  
 **SRS_TWINPARSER_21_134: [**If the provided `propertyMap` is empty, the resetReportedProperty shall cleanup the reported collection and return `{}`.**]**  
 **SRS_TWINPARSER_21_135: [**If the map is invalid, the resetReportedProperty shall not change the collection and throw IllegalArgumentException.**]**  
-**SRS_TWINPARSER_21_139: [**If any `value` is null, the resetReportedProperty shall store it but do not report on Json.**]**  
+**SRS_TWINPARSER_21_139: [**If any `value` is null, the resetReportedProperty shall delete it from the collection and report on Json.**]**  
 
 
 ### resetTags
@@ -505,7 +508,7 @@ public String resetTags(Map<String, Object> tagsMap) throws IllegalArgumentExcep
 **SRS_TWINPARSER_21_144: [**If the provided `tagsMap` is empty, the resetTags shall cleanup the tags collection and return `{}`.**]**  
 **SRS_TWINPARSER_21_145: [**If the map is invalid, the resetTags shall not change the collection and throw IllegalArgumentException.**]**  
 **SRS_TWINPARSER_21_146: [**If Tags is not enable, the resetTags shall throw IOException.**]**  
-**SRS_TWINPARSER_21_149: [**If any `value` is null, the resetTags shall store it but do not report on Json.**]**  
+**SRS_TWINPARSER_21_149: [**If any `value` is null, the resetTags shall delete it from the collection and report on Json.**]**  
 
 
 ### updateDesiredProperty
@@ -588,7 +591,7 @@ public void updateTwin(String json) throws IllegalArgumentException
 **SRS_TWINPARSER_21_094: [**If the provided json have any duplicated `key`, the updateTwin shall use the content of the last one in the String.**]**  
 **SRS_TWINPARSER_21_097: [**If the provided json have any duplicated `properties` or `tags`, the updateTwin shall throw IllegalArgumentException.**]**  
 **SRS_TWINPARSER_21_098: [**If the provided json is properties only and contains duplicated `desired` or `reported`, the updateTwin shall throws IllegalArgumentException.**]**  
-**SRS_TWINPARSER_21_112: [**If the provided json contains `deviceId`, `generationId`, `etag`, `status`, `statusReason`, `statusUpdatedTime`, `connectionState`, `connectionStateUpdatedTime`, `lastActivityTime`, and `lastAcceptingIpFilterRule`, the updateTwin shall store its value.**]**  
+**SRS_TWINPARSER_21_172: [**If the provided json contains `deviceId`, `generationId`, `etag`, `status`, `statusReason`, `statusUpdatedTime`, `connectionState`, `connectionStateUpdatedTime`, `lastActivityTime`, and `lastAcceptingIpFilterRule`, the updateTwin shall store its value.**]**  
 
 
 ### getDesiredPropertyVersion
@@ -761,4 +764,35 @@ public String getConnectionStateUpdatedTime()
 public String getLastActivityTime()
 ```
 **SRS_TWINPARSER_21_151: [**The `getLastActivityTime` shall return the last activity date and time.**]**  
+
+
+### setDeviceId
+```java
+/**
+ * Setter for device name
+ *
+ * @param deviceId device id
+ * A case-sensitive string (up to 128 char long)
+ * of ASCII 7-bit alphanumeric chars
+ * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}
+ * @throws IllegalArgumentException if the provided device Id is not valid.
+ */
+public void setDeviceId(String deviceId) throws IllegalArgumentException;
+```
+**SRS_TWINPARSER_21_168: [**The `setDeviceId` shall set the deviceId in the twin collection.**]**  
+**SRS_TWINPARSER_21_169: [**If the deviceId is empty, null, or not valid, the `setDeviceId` shall throw IllegalArgumentException.**]**  
+
+### setETag
+```java
+/**
+ * Setter for ETag.
+ * 
+ * @param eTag is a string representing a weak ETAG version
+ * of this JSON description. This is a hash.
+ * @throws IllegalArgumentException if the provided eTag Id is not valid.
+ */
+public void setETag(String eTag) throws IllegalArgumentException;
+```
+**SRS_TWINPARSER_21_170: [**The `setETag` shall set the ETag in the twin collection.**]**  
+**SRS_TWINPARSER_21_171: [**If the ETag is empty, null, or not valid, the `setETag` shall throw IllegalArgumentException.**]**  
 

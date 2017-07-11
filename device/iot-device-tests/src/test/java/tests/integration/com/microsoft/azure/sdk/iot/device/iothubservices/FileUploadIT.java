@@ -5,17 +5,25 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.device.iothubservices;
 
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.device.DeviceConnectionString;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;

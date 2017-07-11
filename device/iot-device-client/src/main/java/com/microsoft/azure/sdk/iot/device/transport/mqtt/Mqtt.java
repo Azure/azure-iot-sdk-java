@@ -12,6 +12,9 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -21,13 +24,30 @@ abstract public class Mqtt implements MqttCallback
      Variables which apply to all the concrete classes as well as to Mqtt and are to be instantiated only once
      in lifetime.
      */
+
     private static MqttConnectionInfo info ;
     static ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
     private static Object MQTT_LOCK;
 
-    /*
-      Inner class which holds the basic information related to Mqtt Client Async.
-     */
+
+    /* Each property is separated by & and all system properties start with an encoded $ (except for iothub-ack) */
+    protected final static char MESSAGE_PROPERTY_SEPARATOR = '&';
+    private final static String MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_ENCODED = "%24";
+    private final static char MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED = '$';
+    protected final static char MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR = '=';
+    private final static int PROPERTY_KEY_INDEX = 0;
+    private final static int PROPERTY_VALUE_INDEX = 1;
+
+    /* The system property keys expected in a message */
+    //This may be common with amqp as well
+    protected final static String ABSOLUTE_EXPIRY_TIME = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".exp";
+    protected final static String CORRELATION_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cid";
+    protected final static String MESSAGE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".mid";
+    protected final static String TO = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".to";
+    protected final static String USER_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".uid";
+    protected final static String IOTHUB_ACK = "iothub-ack";
+
+    /* Inner class which holds the basic information related to Mqtt Client Async. */
     protected class MqttConnectionInfo
     {
         protected MqttAsyncClient mqttAsyncClient = null;
@@ -66,7 +86,6 @@ abstract public class Mqtt implements MqttCallback
          * @param userName the user name for the mqtt broker connection.
          * @param userPassword the user password for the mqtt broker connection.
          */
-
         private void updateConnectionOptions(String userName, String userPassword, IotHubSSLContext iotHubSSLContext)
         {
             this.connectionOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL);
@@ -448,7 +467,7 @@ abstract public class Mqtt implements MqttCallback
                         allReceivedMessages.poll();
 
                         // Codes_SRS_Mqtt_34_024: [This method shall construct new Message with the bytes obtained from peekMessage and return the message.]
-                        return new Message(data);
+                        return constructMessage(data, topic);
                     }
                     else
                     {
@@ -549,5 +568,103 @@ abstract public class Mqtt implements MqttCallback
         }
 
         return allReceivedMessages.peek();
+    }
+
+
+    /**
+     * Converts the provided data and topic string into an instance of Message
+     * @param data the payload from the topic
+     * @param topic the topic string for this message
+     * @return a new instance of Message containing the payload and all the properties in the topic string
+     * @throws IllegalArgumentException if the topic string has no system properties
+     */
+    private Message constructMessage(byte[] data, String topic) throws IllegalArgumentException
+    {
+        /*
+        **Codes_SRS_Mqtt_25_024: [**This method shall construct new Message with the bytes obtained from parsePayload and return the message.**]**
+        */
+        Message message = new Message(data);
+
+        int propertiesStringStartingIndex = topic.indexOf(MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_ENCODED);
+        if (propertiesStringStartingIndex != -1)
+        {
+            String propertiesString = topic.substring(propertiesStringStartingIndex);
+
+            /*
+            **Codes_SRS_Mqtt_34_041: [**This method shall call assignPropertiesToMessage so that all properties from the topic string can be assigned to the message**]**
+            */
+            assignPropertiesToMessage(message, propertiesString);
+        }
+
+        return message;
+    }
+
+    /**
+     * Takes propertiesString and parses it for all the properties it holds and then assigns them to the provided message
+     * @param propertiesString the string to parse containing all the properties
+     * @param message the message to add the parsed properties to
+     * @throws IllegalArgumentException if a property's key and value are not separated by the '=' symbol
+     * @throws NumberFormatException if the property for expiry time is present, but the value cannot be parsed as a Long
+     * */
+    private void assignPropertiesToMessage(Message message, String propertiesString) throws IllegalArgumentException, NumberFormatException
+    {
+        /*
+        **Codes_SRS_Mqtt_34_054: [**A message may have 0 to many custom properties**]**
+        */
+        //expected format is <key>=<value><MESSAGE_PROPERTY_SEPARATOR><key>=<value><MESSAGE_PROPERTY_SEPARATOR>...
+        for (String propertyString : propertiesString.split(String.valueOf(MESSAGE_PROPERTY_SEPARATOR)))
+        {
+            if (propertyString.contains("="))
+            {
+                //Expected format is <key>=<value> where both key and value may be encoded
+                String key = propertyString.split("=")[PROPERTY_KEY_INDEX];
+                String value = propertyString.split("=")[PROPERTY_VALUE_INDEX];
+                try
+                {
+                    /*
+                    **Codes_SRS_Mqtt_34_053: [**A property's key and value may include unusual characters such as &, %, $**]**
+                    */
+                    key = URLDecoder.decode(key, StandardCharsets.UTF_8.name());
+                    value = URLDecoder.decode(value, StandardCharsets.UTF_8.name());
+                }
+                catch (UnsupportedEncodingException e)
+                {
+                    // should never happen, since the encoding is hard-coded.
+                    throw new IllegalStateException(e);
+                }
+
+                //Some properties are reserved system properties and must be saved in the message differently
+                switch (key)
+                {
+                    case TO:
+                        //do nothing
+                        break;
+                    case MESSAGE_ID:
+                        message.setMessageId(value);
+                        break;
+                    case IOTHUB_ACK:
+                        //do nothing
+                        break;
+                    case CORRELATION_ID:
+                        message.setCorrelationId(value);
+                        break;
+                    case USER_ID:
+                        //do nothing
+                        break;
+                    case ABSOLUTE_EXPIRY_TIME:
+                        //do nothing
+                        break;
+                    default:
+                        message.setProperty(key, value);
+                }
+            }
+            else
+            {
+                /*
+                 **Codes_SRS_Mqtt_34_051: [**If a topic string's property's key and value are not separated by the '=' symbol, an IllegalArgumentException shall be thrown**]**
+                 */
+                throw new IllegalArgumentException("Unexpected property string provided. Expected '=' symbol between key and value of the property in string: " + propertyString);
+            }
+        }
     }
 }
