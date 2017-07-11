@@ -145,6 +145,10 @@ public class DeviceTwinSample
                 {
                     homeKit.setReportedProp(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING));
                 }
+                if(i == MAX_EVENTS_TO_REPORT-1)
+                {
+                    homeKit.setReportedProp(new Property("BedroomRoomLights", null));
+                }
                 client.sendReportedProperties(homeKit.getReportedProp());
                 System.out.println("Updating reported properties..");
             }

@@ -34,6 +34,7 @@ public class DeviceTwinSample
         try
         {
             // Manage complete twin
+            // ============================== get initial twin properties =============================
             System.out.println("Getting device twin");
             twinClient.getTwin(device);
             System.out.println(device);
@@ -43,12 +44,26 @@ public class DeviceTwinSample
             tags.add(new Pair("HomeID", UUID.randomUUID()));
             device.setTags(tags);
 
+            // ============================== change desired property =============================
             Set<Pair> desProp = new HashSet<Pair>();
             int temp = new Random().nextInt(100);
+            int hum = new Random().nextInt(100);
             desProp.add(new Pair("temp", temp));
+            desProp.add(new Pair("hum", hum));
             device.setDesiredProperties(desProp);
 
-            System.out.println("Updating device twin");
+            System.out.println("Updating device twin (new temp, hum)");
+            twinClient.updateTwin(device);
+
+            System.out.println("Getting device twin");
+            twinClient.getTwin(device);
+            System.out.println(device);
+
+            // ============================== remove desired property =============================
+            desProp.clear();
+            desProp.add(new Pair("hum", null));
+            device.setDesiredProperties(desProp);
+            System.out.println("Updating device twin (remove hum)");
             twinClient.updateTwin(device);
 
             System.out.println("Getting device twin");

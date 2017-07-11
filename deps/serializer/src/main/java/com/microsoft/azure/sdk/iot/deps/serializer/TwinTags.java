@@ -49,7 +49,8 @@ public class TwinTags
 
             if(newValue == null)
             {
-                oldMap.put(key, null);
+                oldMap.remove(key);
+                diffJson.add(key, null);
             }
             else
             {

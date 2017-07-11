@@ -90,14 +90,26 @@ public class TwinProperty
             throw new IllegalArgumentException("Property key contains illegal character");
         }
 
-        if((!property.containsKey(key)) || (!property.get(key).value.equals(value)) || reportMetadata)
+        if(value == null)
         {
+            /* Codes_SRS_TWINPARSER_21_078: [If any `value` is null, the updateDesiredProperty shall delete it from the collection and report on Json.] */
+            /* Codes_SRS_TWINPARSER_21_084: [If any `value` is null, the updateReportedProperty shall delete it from the collection and report on Json.] */
+            if(property.containsKey(key))
+            {
+                property.remove(key);
+            }
             change = true;
         }
-
-        /* Codes_SRS_TWINPARSER_21_077: [If any `key` already exists, the updateDesiredProperty shall replace the existed value by the new one.] */
-        /* Codes_SRS_TWINPARSER_21_083: [If any `key` already exists, the updateReportedProperty shall replace the existed value by the new one.] */
-        property.put(key, new Property(value, propertyVersion));
+        else
+        {
+            /* Codes_SRS_TWINPARSER_21_077: [If any `key` already exists, the updateDesiredProperty shall replace the existed value by the new one.] */
+            /* Codes_SRS_TWINPARSER_21_083: [If any `key` already exists, the updateReportedProperty shall replace the existed value by the new one.] */
+            if ((!property.containsKey(key)) || (!property.get(key).value.equals(value)) || reportMetadata)
+            {
+                change = true;
+            }
+            property.put(key, new Property(value, propertyVersion));
+        }
 
         return change;
     }
@@ -115,12 +127,9 @@ public class TwinProperty
                 {
                     if (addProperty(entry.getKey(), entry.getValue(), null))
                     {
-                        if (entry.getValue() != null)
-                        {
-                            /* Codes_SRS_TWINPARSER_21_078: [If any `value` is null, the updateDesiredProperty shall store it but do not report on Json.] */
-                            /* Codes_SRS_TWINPARSER_21_084: [If any `value` is null, the updateReportedProperty shall store it but do not report on Json.] */
-                            updated.addProperty(entry.getKey(), entry.getValue(), null);
-                        }
+                        /* Codes_SRS_TWINPARSER_21_078: [If any `value` is null, the updateDesiredProperty shall delete it from the collection and report on Json.] */
+                        /* Codes_SRS_TWINPARSER_21_084: [If any `value` is null, the updateReportedProperty shall delete it from the collection and report on Json.] */
+                        updated.property.put(entry.getKey(), new Property(entry.getValue(), null));
                     }
                 }
 
@@ -183,15 +192,16 @@ public class TwinProperty
             else
             {
                 propertyMap = new HashMap<>();
-                for (Map.Entry<String, Property> e : property.entrySet())
+                for (Map.Entry<String, Property> entry : property.entrySet())
                 {
-                    if (e.getValue().value == null)
+                    Object value = entry.getValue().value;
+                    if (value == null)
                     {
-                        propertyMap.put(e.getKey(), null);
+                        propertyMap.put(entry.getKey(), null);
                     }
                     else
                     {
-                        propertyMap.put(e.getKey(), e.getValue().value.toString());
+                        propertyMap.put(entry.getKey(), value);
                     }
                 }
             }
@@ -230,20 +240,15 @@ public class TwinProperty
     protected JsonElement toJsonElement()
     {
         /* Codes_SRS_TWINPARSER_21_017: [The toJsonElement shall return a JsonElement with information in the TwinParser using json format.] */
-        Gson gson = new GsonBuilder().create();
         Map<String, Object> diffMap = new HashMap<>();
-        Map<String, TwinMetadata> metadata = new HashMap<>();
+        Map<String, JsonElement> metadata = new HashMap<>();
 
         synchronized (lock)
         {
             for (Map.Entry<String, Property> entry : property.entrySet())
             {
-                /* Codes_SRS_TWINPARSER_21_018: [The toJsonElement shall not include null fields.] */
-                if(entry.getValue().value != null)
-                {
-                    diffMap.put(entry.getKey(), entry.getValue().value);
-                    metadata.put(entry.getKey(), entry.getValue().metadata);
-                }
+                diffMap.put(entry.getKey(), entry.getValue().value);
+                metadata.put(entry.getKey(), entry.getValue().metadata.toJsonElement());
             }
         }
 
@@ -257,7 +262,7 @@ public class TwinProperty
             diffMap.put(VERSION_TAG, version);
         }
 
-        return gson.toJsonTree(diffMap);
+        return ParserUtility.mapToJsonElement(diffMap);
     }
 
     protected void update(LinkedTreeMap<String, Object> jsonTree,
