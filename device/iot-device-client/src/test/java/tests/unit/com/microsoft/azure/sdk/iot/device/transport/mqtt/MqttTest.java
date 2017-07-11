@@ -9,17 +9,23 @@ import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttDeviceTwin;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttMessaging;
 import mockit.*;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import static org.junit.Assert.*;
 
-/* Unit tests for Mqtt */
+/* Unit tests for Mqtt
+ * Code coverage: 82% methods, 83% lines
+ */
 public class MqttTest {
     final String serverUri = "test.host.name";
     final String clientId = "test.iothub";
@@ -64,15 +70,9 @@ public class MqttTest {
                 }
 
                 @Mock
-                String parseTopic() throws IOException
+                Pair<String, byte[]> peekMessage() throws IOException
                 {
-                    return mockParseTopic;
-                }
-
-                @Mock
-                byte[] parsePayload(String topic) throws IOException
-                {
-                    return new byte[0];
+                    return new MutablePair<>(mockParseTopic, new byte[0]);
                 }
             };
             return new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);
@@ -88,15 +88,9 @@ public class MqttTest {
                 }
 
                 @Mock
-                String parseTopic() throws IOException
+                Pair<String, byte[]> peekMessage() throws IOException
                 {
-                    return mockParseTopic;
-                }
-
-                @Mock
-                byte[] parsePayload(String topic) throws IOException
-                {
-                    return new byte[0];
+                    return new MutablePair<>(mockParseTopic, new byte[0]);
                 }
             };
             return new MqttDeviceTwin();
@@ -116,7 +110,6 @@ public class MqttTest {
                     result = mockMqttAsyncClient;
                     new MqttConnectOptions();
                     result = mockMqttConnectionOptions;
-
                 }
             };
         }
@@ -132,7 +125,6 @@ public class MqttTest {
                 mockMqttAsyncClient.connect();
                 result = mockMqttToken;
                 mockMqttToken.waitForCompletion();
-
             }
         };
     }
@@ -278,7 +270,7 @@ public class MqttTest {
     ** Tests_SRS_Mqtt_25_004: [**If an instance of the inner class MqttConnectionInfo is already created than it shall return doing nothing.**]**
      */
     @Test
-    public void manyExtendsOfAbstractClassDoesntChangeConfig() throws IOException, MqttException
+    public void manyExtendsOfAbstractClassDoesNotChangeConfig() throws IOException, MqttException
     {
         //arrange
         baseConstructorExpectations(true);
@@ -287,17 +279,17 @@ public class MqttTest {
         //act
         Mqtt mockMqtt1 = instantiateMqtt(true);
         Object actualInfoInstance1 = Deencapsulation.getField(mockMqtt1, "info");
-        ConcurrentSkipListMap<String, byte[]> actualMap1 = Deencapsulation.getField(mockMqtt1, "allReceivedMessages");
+        Queue<Pair<String, byte[]>> actualQueue1 = Deencapsulation.getField(mockMqtt1, "allReceivedMessages");
         Object actualLock1 = Deencapsulation.getField(mockMqtt1, "MQTT_LOCK");
 
         Mqtt mockMqtt2 = instantiateMqtt(false);
         Object actualInfoInstance2 = Deencapsulation.getField(mockMqtt2, "info");
-        ConcurrentSkipListMap<String, byte[]> actualMap2 = Deencapsulation.getField(mockMqtt2, "allReceivedMessages");
+        Queue<Pair<String, byte[]>> actualQueue2 = Deencapsulation.getField(mockMqtt2, "allReceivedMessages");
         Object actualLock2 = Deencapsulation.getField(mockMqtt2, "MQTT_LOCK");
 
         //assert
         assertEquals(actualInfoInstance1, actualInfoInstance2);
-        assertEquals(actualMap1, actualMap2);
+        assertEquals(actualQueue1, actualQueue2);
         assertEquals(actualLock1, actualLock2);
 
         baseConstructorVerifications(true);
@@ -311,7 +303,7 @@ public class MqttTest {
     **Tests_SRS_Mqtt_25_003: [**The constructor shall use the configuration to instantiate an instance of the inner class MqttConnectionInfo if not already created.**]**
      */
     @Test
-    public void constructorInitiliasesWithConfig() throws IOException, MqttException
+    public void constructorInitialisesWithConfig() throws IOException, MqttException
     {
         //arrange
         baseConstructorExpectations(true);
@@ -326,8 +318,8 @@ public class MqttTest {
         assertNotNull(actualAsyncClient);
         MqttConnectOptions actualConnectionOptions = Deencapsulation.getField(actualInfo, "connectionOptions");
         assertNotNull(actualConnectionOptions);
-        ConcurrentSkipListMap<String, byte[]> actualMap = Deencapsulation.getField(mockMqtt, "allReceivedMessages");
-        assertNotNull(actualMap);
+        Queue<Pair<String, byte[]>> actualQueue = Deencapsulation.getField(mockMqtt, "allReceivedMessages");
+        assertNotNull(actualQueue);
         Object actualLock = Deencapsulation.getField(mockMqtt, "MQTT_LOCK");
         assertNotNull(actualLock);
 
@@ -397,8 +389,8 @@ public class MqttTest {
         //assert
         Object actualInfoInstance = Deencapsulation.getField(mockMqtt, "info");
         assertNull(actualInfoInstance);
-        ConcurrentSkipListMap<String, byte[]> actualMap = Deencapsulation.getField(mockMqtt, "allReceivedMessages");
-        assertNull(actualMap);
+        Queue<Pair<String, byte[]>> actualQueue = Deencapsulation.getField(mockMqtt, "allReceivedMessages");
+        assertNull(actualQueue);
 
         Object actualLock = Deencapsulation.getField(mockMqtt, "MQTT_LOCK");
         assertNotNull(actualLock);
@@ -421,17 +413,17 @@ public class MqttTest {
 
         //assert
         Object actualInfoInstance1 = Deencapsulation.getField(mockMqtt1, "info");
-        ConcurrentSkipListMap<String, byte[]> actualMap1 = Deencapsulation.getField(mockMqtt1, "allReceivedMessages");
+        Queue<Pair<String, byte[]>> actualQueue1 = Deencapsulation.getField(mockMqtt1, "allReceivedMessages");
         Mqtt mockMqtt2 = instantiateMqtt(false);
         Object actualInfoInstance2 = Deencapsulation.getField(mockMqtt2, "info");
-        ConcurrentSkipListMap<String, byte[]> actualMap2 = Deencapsulation.getField(mockMqtt2, "allReceivedMessages");
+        Queue<Pair<String, byte[]>> actualQueue2 = Deencapsulation.getField(mockMqtt2, "allReceivedMessages");
 
         Object actualLock1 = Deencapsulation.getField(mockMqtt1, "MQTT_LOCK");
         Object actualLock2 = Deencapsulation.getField(mockMqtt2, "MQTT_LOCK");
 
 
         assertEquals(actualInfoInstance1, actualInfoInstance2);
-        assertEquals(actualMap1, actualMap2);
+        assertEquals(actualQueue1, actualQueue2);
         assertEquals(actualLock1, actualLock2);
 
         baseConstructorVerifications(true);
@@ -1073,15 +1065,8 @@ public class MqttTest {
         }
     }
 
-    /*
-    **Tests_SRS_Mqtt_25_021: [**This method shall call parseTopic to parse the topic from the recevived Messages queue corresponding to the messaging client's operation.**]**
-     */
-    /*
-    **Tests_SRS_Mqtt_25_023: [**This method shall call parsePayload to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
-     */
-    /*
-    Tests_SRS_Mqtt_25_024: [**This method shall construct new Message with the bytes obtained from parsePayload and return the message.**]**
-     */
+    // Tests_SRS_Mqtt_34_023: [This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.]
+    // Tests_SRS_Mqtt_34_024: [This method shall construct new Message with the bytes obtained from peekMessage and return the message.]
    @Test
     public void receiveSuccess() throws IOException, MqttException
     {
@@ -1092,15 +1077,9 @@ public class MqttTest {
         new MockUp<MqttMessaging>()
         {
             @Mock
-            String parseTopic() throws IOException
+            Pair<String, byte[]> peekMessage() throws IOException
             {
-                return mockParseTopic;
-            }
-
-            @Mock
-            byte[] parsePayload(String topic) throws IOException
-            {
-                return payload;
+                return new MutablePair<>(mockParseTopic, payload);
             }
         };
 
@@ -1135,9 +1114,7 @@ public class MqttTest {
         }
     }
 
-    /*
-    **Tests_SRS_Mqtt_25_022: [**If the call parseTopic returns null or empty string then this method shall do nothing and return null**]**
-     */
+    // Codes_SRS_Mqtt_34_022: [If the call peekMessage returns a null or empty string then this method shall do nothing and return null]
     @Test
     public void receiveReturnsNullMessageWhenParseTopicReturnsNull() throws IOException, MqttException
     {
@@ -1148,17 +1125,10 @@ public class MqttTest {
         new MockUp<MqttMessaging>()
         {
             @Mock
-            String parseTopic() throws IOException
+            Pair<String, byte[]> peekMessage() throws IOException
             {
-                return null;
+                return new MutablePair<>(null, payload);
             }
-
-            @Mock
-            byte[] parsePayload(String topic) throws IOException
-            {
-                return payload;
-            }
-
         };
         final Mqtt mockMqtt = new MqttMessaging(serverUri, clientId, userName, password,  mockIotHubSSLContext);
         try
@@ -1178,7 +1148,6 @@ public class MqttTest {
 
             //assert
             assertNull(receivedMessage);
-
         }
         finally
         {
@@ -1186,9 +1155,7 @@ public class MqttTest {
         }
     }
 
-    /*
-    **Tests_SRS_Mqtt_25_025: [**If the call to parsePayload returns null when topic is non-null then this method will throw IOException**]**
-     */
+    // Codes_SRS_Mqtt_34_025: [If the call to peekMessage returns null when topic is non-null then this method will throw IOException]
     @Test(expected = IOException.class)
     public void receiveThrowsIOExceptionWhenParsePayloadReturnsNull() throws IOException, MqttException
     {
@@ -1198,15 +1165,9 @@ public class MqttTest {
         new MockUp<MqttMessaging>()
         {
             @Mock
-            String parseTopic() throws IOException
+            Pair<String, byte[]> peekMessage() throws IOException
             {
-                return mockParseTopic;
-            }
-
-            @Mock
-            byte[] parsePayload(String topic) throws IOException
-            {
-                return null;
+                return new MutablePair<>(mockParseTopic, null);
             }
         };
 
@@ -1231,15 +1192,9 @@ public class MqttTest {
         new MockUp<MqttMessaging>()
         {
             @Mock
-            String parseTopic() throws IOException
+            Pair<String, byte[]> peekMessage() throws IOException
             {
-                return mockParseTopic;
-            }
-
-            @Mock
-            byte[] parsePayload(String topic) throws IOException
-            {
-                return null;
+                return new MutablePair<>(mockParseTopic, null);
             }
         };
 
@@ -1268,7 +1223,6 @@ public class MqttTest {
         try
         {
             final byte[] actualPayload = {0x61, 0x62, 0x63};
-            baseConstructorExpectations(true);
             baseConnectExpectation();
 
             new NonStrictExpectations()
@@ -1286,10 +1240,13 @@ public class MqttTest {
             mockMqtt.messageArrived(mockParseTopic, new MqttMessage(actualPayload));
 
             //assert
-            ConcurrentSkipListMap<String, byte[]> actualMap = Deencapsulation.getField(mockMqtt, "allReceivedMessages");
-            assertTrue(actualMap.containsKey(mockParseTopic));
+            Queue<Pair<String, byte[]>> actualQueue = Deencapsulation.getField(mockMqtt, "allReceivedMessages");
 
-            byte[] receivedPayload = actualMap.get(mockParseTopic);
+            Pair<String, byte[]> messagePair = actualQueue.poll();
+            assertNotNull(messagePair);
+            assertTrue(messagePair.getKey().equals(mockParseTopic));
+
+            byte[] receivedPayload = messagePair.getValue();
             assertTrue(actualPayload.length == receivedPayload.length);
             for (int i = 0; i < actualPayload.length; i++)
             {
@@ -1430,6 +1387,29 @@ public class MqttTest {
         finally
         {
             testCleanUp(mockMqtt);
+        }
+    }
+
+    // Tests_SRS_Mqtt_34_021: [If the call peekMessage returns null then this method shall do nothing and return null]
+    @Test
+    public void receiveReturnsNullMessageIfTopicNotFound(@Mocked final IotHubSSLContext iotHubSSLContext) throws IOException
+    {
+        //can't be initialized to null, so set it as a default message
+        Message receivedMessage = new Message();
+        try
+        {
+            //arrange
+            MqttMessaging testMqttClient = new MqttMessaging("serverURI","deviceId","username","password", iotHubSSLContext);
+            Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
+            Deencapsulation.setField(testMqttClient, "allReceivedMessages", testAllReceivedMessages);
+
+            //act
+            receivedMessage = testMqttClient.receive();
+        }
+        finally
+        {
+            //assert
+            assertNull(receivedMessage);
         }
     }
 }

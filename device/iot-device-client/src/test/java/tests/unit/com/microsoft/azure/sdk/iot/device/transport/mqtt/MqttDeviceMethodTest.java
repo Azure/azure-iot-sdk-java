@@ -12,28 +12,31 @@ import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttDeviceMethod;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.Verifications;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
 import static org.junit.Assert.*;
 
+/* Unit tests for MqttDeviceMethod
+ * Code coverage: 100% methods, 97% lines
+ */
 public class MqttDeviceMethodTest
 {
-    @Mocked
-    Mqtt mockedMqtt;
-
     /*
     Tests_SRS_MqttDeviceMethod_25_001: [**The constructor shall instantiate super class without any parameters.**]**
 
     Tests_SRS_MqttDeviceMethod_25_002: [**The constructor shall create subscribe and response topics strings for device methods as per the spec.**]**
      */
     @Test
-    public void constructorSucceeds() throws IOException
+    public void constructorSucceeds(@Mocked final Mqtt mockMqtt) throws IOException
     {
         //arrange
         String actualSubscribeTopic = "$iothub/methods/POST/#";
@@ -57,10 +60,10 @@ public class MqttDeviceMethodTest
     Tests_SRS_MqttDeviceMethod_25_014: [**start method shall just mark that this class is ready to start.**]**
      */
     @Test
-    public void startSucceedsCalls() throws IOException
+    public void startSucceedsCalls(@Mocked final Mqtt mockMqtt) throws IOException
     {
         //arrange
-        MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        final MqttDeviceMethod testMethod = new MqttDeviceMethod();
 
         //act
         testMethod.start();
@@ -69,7 +72,7 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedMqtt, "subscribe", anyString);
+                Deencapsulation.invoke(testMethod, "subscribe", anyString);
                 times = 0;
             }
         };
@@ -77,10 +80,10 @@ public class MqttDeviceMethodTest
 
 
     @Test
-    public void startSucceedsDoesNotCallsSubscribeIfStarted() throws IOException
+    public void startSucceedsDoesNotCallsSubscribeIfStarted(@Mocked final Mqtt mockMqtt) throws IOException
     {
         //arrange
-        MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        final MqttDeviceMethod testMethod = new MqttDeviceMethod();
         testMethod.start();
         //act
         testMethod.start();
@@ -89,7 +92,7 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedMqtt, "subscribe", anyString);
+                Deencapsulation.invoke(testMethod, "subscribe", anyString);
                 maxTimes = 0;
             }
         };
@@ -99,10 +102,10 @@ public class MqttDeviceMethodTest
     Tests_SRS_MqttDeviceMethod_25_015: [**stop method shall unsubscribe from method subscribe topic ($iothub/methods/POST/#) and throw IoException otherwise.**]**
      */
     @Test
-    public void stopSucceedsCallsUnSubscribe() throws IOException
+    public void stopSucceedsCallsUnSubscribe(@Mocked final Mqtt mockMqtt) throws IOException
     {
         //arrange
-        MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        final MqttDeviceMethod testMethod = new MqttDeviceMethod();
         testMethod.start();
 
         //act
@@ -113,17 +116,17 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedMqtt, "unsubscribe", anyString);
+                Deencapsulation.invoke(testMethod, "unsubscribe", anyString);
                 maxTimes = 1;
             }
         };
     }
 
     @Test
-    public void stopSucceedsDoesNotCallUnSubscribeIfStopped() throws IOException
+    public void stopSucceedsDoesNotCallUnSubscribeIfStopped(@Mocked final Mqtt mockMqtt) throws IOException
     {
         //arrange
-        MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        final MqttDeviceMethod testMethod = new MqttDeviceMethod();
         testMethod.start();
         testMethod.stop();
 
@@ -134,17 +137,17 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedMqtt, "unsubscribe", anyString);
+                Deencapsulation.invoke(testMethod, "unsubscribe", anyString);
                 maxTimes = 1;
             }
         };
     }
 
     @Test
-    public void stopSucceedsDoesNotCallUnSubscribeIfNotStarted() throws IOException
+    public void stopSucceedsDoesNotCallUnSubscribeIfNotStarted(@Mocked final Mqtt mockMqtt) throws IOException
     {
         //arrange
-        MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        final MqttDeviceMethod testMethod = new MqttDeviceMethod();
 
         //act
         testMethod.stop();
@@ -153,29 +156,23 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedMqtt, "unsubscribe", anyString);
+                Deencapsulation.invoke(testMethod, "unsubscribe", anyString);
                 maxTimes = 0;
             }
         };
     }
     /*
-    Tests_SRS_MqttDeviceMethod_25_004: [**parseTopic shall look for the method topic($iothub/methods) prefix from received message queue as per spec and if found shall return it as string.**]**
-
-    Tests_SRS_MqttDeviceMethod_25_005: [**If none of the topics from the received queue match the methods topic prefix then this method shall return null string .**]**
-
-    Tests_SRS_MqttDeviceMethod_25_006: [**If received messages queue is empty then parseTopic shall return null string.**]**
-
     Tests_SRS_MqttDeviceMethod_25_020: [**send method shall subscribe to topic from spec ($iothub/methods/POST/#) if the operation is of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST.**]**
      */
     @Test
-    public void sendSucceedsCallsSubscribe() throws IOException
+    public void sendSucceedsCallsSubscribe(@Mocked final Mqtt mockMqtt) throws IOException
     {
         //arrange
         final String actualSubscribeTopic = "$iothub/methods/POST/#";
         byte[] actualPayload = "TestMessage".getBytes();
         DeviceMethodMessage testMessage = new DeviceMethodMessage(actualPayload);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
-        MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        final MqttDeviceMethod testMethod = new MqttDeviceMethod();
         testMethod.start();
 
         //act
@@ -185,7 +182,7 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedMqtt, "subscribe", actualSubscribeTopic);
+                Deencapsulation.invoke(testMethod, "subscribe", actualSubscribeTopic);
                 maxTimes = 1;
             }
         };
@@ -195,14 +192,14 @@ public class MqttDeviceMethodTest
     Tests_SRS_MqttDeviceMethod_25_022: [**send method shall build the publish topic of the format mentioned in spec ($iothub/methods/res/{status}/?$rid={request id}) and publish if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
      */
     @Test
-    public void sendSucceedsCallsPublish() throws IOException
+    public void sendSucceedsCallsPublish(@Mocked final Mqtt mockMqtt) throws IOException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
         final DeviceMethodMessage testMessage = new DeviceMethodMessage(actualPayload);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SEND_RESPONSE);
         testMessage.setRequestId("ReqId");
         testMessage.setStatus("testStatus");
-        MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        final MqttDeviceMethod testMethod = new MqttDeviceMethod();
         Map<String, DeviceOperations> testRequestMap = new HashMap<>();
         testRequestMap.put("ReqId", DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
         Deencapsulation.setField(testMethod, "requestMap", testRequestMap);
@@ -215,7 +212,7 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedMqtt, "publish", anyString, actualPayload);
+                Deencapsulation.invoke(testMethod, "publish", anyString, actualPayload);
                 maxTimes = 1;
             }
         };
@@ -223,7 +220,7 @@ public class MqttDeviceMethodTest
     }
 
     @Test (expected = IOException.class)
-    public void sendThrowsOnInvalidOperation() throws IOException
+    public void sendThrowsOnInvalidOperation(@Mocked final Mqtt mockMqtt) throws IOException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
         final DeviceMethodMessage testMessage = new DeviceMethodMessage(actualPayload);
@@ -239,7 +236,7 @@ public class MqttDeviceMethodTest
     Tests_SRS_MqttDeviceMethod_25_018: [**send method shall throw an IoException if device method has not been started yet.**]**
      */
     @Test (expected = IOException.class)
-    public void sendThrowsIfNotStarted() throws IOException
+    public void sendThrowsIfNotStarted(@Mocked final Mqtt mockMqtt) throws IOException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
         final DeviceMethodMessage testMessage = new DeviceMethodMessage(actualPayload);
@@ -265,12 +262,12 @@ public class MqttDeviceMethodTest
     Tests_SRS_MqttDeviceMethod_25_017: [**send method shall return if the message is not of Type DeviceMethod.**]**
      */
     @Test
-    public void sendDoesNotSendOnDifferentMessageType() throws IOException
+    public void sendDoesNotSendOnDifferentMessageType(@Mocked final Mqtt mockMqtt) throws IOException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
         final DeviceMethodMessage testMessage = new DeviceMethodMessage(actualPayload);
         testMessage.setMessageType(MessageType.DeviceTwin);
-        MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        final MqttDeviceMethod testMethod = new MqttDeviceMethod();
         testMethod.start();
 
         //act
@@ -280,9 +277,9 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedMqtt, "publish", anyString, actualPayload);
+                Deencapsulation.invoke(testMethod, "publish", anyString, actualPayload);
                 maxTimes = 0;
-                Deencapsulation.invoke(mockedMqtt, "subscribe", anyString);
+                Deencapsulation.invoke(testMethod, "subscribe", anyString);
                 maxTimes = 0;
             }
         };
@@ -346,23 +343,21 @@ public class MqttDeviceMethodTest
     }
 
     /*
-    Tests_SRS_MqttDeviceMethod_25_024: [**This method shall call parseTopic to parse the topic from the received Messages queue looking for presence of $iothub/methods/ in the topics .**]**
-    Tests_SRS_MqttDeviceMethod_25_026: [**This method shall call parsePayload to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
-    Tests_SRS_MqttDeviceMethod_25_028: [**If the topic is of type post topic then this method shall parse further for method name and set it for the message by calling setMethodName for the message**]**
-    Tests_SRS_MqttDeviceMethod_25_030: [**If the topic is of type post topic then this method shall parse further to look for request id which if found is set by calling setRequestId**]**
-    Tests_SRS_MqttDeviceMethod_25_032: [**If the topic is of type post topic and if method name and request id has been successfully parsed then this method shall set operation type as DEVICE_OPERATION_METHOD_RECEIVE_REQUEST **]**
-     */
+    * Tests_SRS_MQTTDEVICEMETHOD_25_026: [**This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
+    * Tests_SRS_MQTTDEVICEMETHOD_25_028: [**If the topic is of type post topic then this method shall parse further for method name and set it for the message by calling setMethodName for the message**]**
+    * Tests_SRS_MQTTDEVICEMETHOD_25_030: [**If the topic is of type post topic then this method shall parse further to look for request id which if found is set by calling setRequestId**]**
+    * Tests_SRS_MQTTDEVICEMETHOD_25_032: [**If the topic is of type post topic and if method name and request id has been successfully parsed then this method shall set operation type as DEVICE_OPERATION_METHOD_RECEIVE_REQUEST **]**
+    */
     @Test
     public void receiveSucceeds() throws IOException
     {
         //arrange
         String topic = "$iothub/methods/POST/testMethod/?$rid=10";
         byte[] actualPayload = "TestPayload".getBytes();
-        ConcurrentSkipListMap<String, byte[]> testAllReceivedMessages = new ConcurrentSkipListMap<>();
-        testAllReceivedMessages.put(topic, actualPayload);
-        Deencapsulation.setField(mockedMqtt, "allReceivedMessages", testAllReceivedMessages);
-
+        Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
+        testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
         testMethod.start();
 
         //act
@@ -377,20 +372,14 @@ public class MqttDeviceMethodTest
         assertTrue(testDMMessage.getDeviceOperationType().equals(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST));
     }
 
-    /*
-    Tests_SRS_MqttDeviceMethod_25_025: [**If the call parseTopic returns null or empty string then this method shall do nothing and return null**]**
-     */
+    // Tests_SRS_MQTTDEVICEMETHOD_25_026: [**This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
     @Test
     public void receiveReturnsNullMessageIfTopicNotFound() throws IOException
     {
         //arrange
-        String topic = "$iothub/not_methods/POST/testMethod/?$rid=10";
-        byte[] actualPayload = "TestPayload".getBytes();
-        ConcurrentSkipListMap<String, byte[]> testAllReceivedMessages = new ConcurrentSkipListMap<>();
-        testAllReceivedMessages.put(topic, actualPayload);
-        Deencapsulation.setField(mockedMqtt, "allReceivedMessages", testAllReceivedMessages);
-
+        Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
         testMethod.start();
 
         //act
@@ -400,44 +389,42 @@ public class MqttDeviceMethodTest
         assertNull(testMessage);
     }
 
-    /*
-    Tests_SRS_MqttDeviceMethod_25_027: [**This method shall parse topic to look for Post topic ($iothub/methods/POST/) and throw unsupportedoperation exception other wise.**]**
-     */
-    @Test (expected = UnsupportedOperationException.class)
+
+    //Tests_SRS_MqttDeviceMethod_34_027: [This method shall parse message to look for Post topic ($iothub/methods/POST/) and return null other wise.]
+    @Test
     public void receiveReturnsNullMessageIfTopicWasNotPost() throws IOException
     {
         //arrange
         String topic = "$iothub/methods/Not_POST/testMethod/?$rid=10";
         byte[] actualPayload = "TestPayload".getBytes();
-        ConcurrentSkipListMap<String, byte[]> testAllReceivedMessages = new ConcurrentSkipListMap<>();
-        testAllReceivedMessages.put(topic, actualPayload);
-        Deencapsulation.setField(mockedMqtt, "allReceivedMessages", testAllReceivedMessages);
-
+        Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
+        testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
         testMethod.start();
 
         //act
-        Message testMessage = testMethod.receive();
+        Message actualMessage = testMethod.receive();
+
+        //assert
+        assertNull(actualMessage);
     }
 
-    /*
-    Tests_SRS_MqttDeviceMethod_25_029: [**If method name not found or is null then receive shall throw IOException **]**
-     */
+    // Tests_SRS_MQTTDEVICEMETHOD_25_029: [**If method name not found or is null then receive shall throw IOException **]**
     @Test (expected = IOException.class)
     public void receiveThrowsIfMethodNameCouldNotBeParsed() throws IOException
     {
         //arrange
         String topic = "$iothub/methods/POST/";
         byte[] actualPayload = "TestPayload".getBytes();
-        ConcurrentSkipListMap<String, byte[]> testAllReceivedMessages = new ConcurrentSkipListMap<>();
-        testAllReceivedMessages.put(topic, actualPayload);
-        Deencapsulation.setField(mockedMqtt, "allReceivedMessages", testAllReceivedMessages);
-
+        Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
+        testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
         testMethod.start();
 
         //act
-        Message testMessage = testMethod.receive();
+        testMethod.receive();
     }
 
     /*
@@ -449,15 +436,14 @@ public class MqttDeviceMethodTest
         //arrange
         String topic = "$iothub/methods/POST/testMethod/";
         byte[] actualPayload = "TestPayload".getBytes();
-        ConcurrentSkipListMap<String, byte[]> testAllReceivedMessages = new ConcurrentSkipListMap<>();
-        testAllReceivedMessages.put(topic, actualPayload);
-        Deencapsulation.setField(mockedMqtt, "allReceivedMessages", testAllReceivedMessages);
-
+        Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
+        testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
         testMethod.start();
 
         //act
-        Message testMessage = testMethod.receive();
+        testMethod.receive();
     }
 
     @Test
@@ -466,12 +452,11 @@ public class MqttDeviceMethodTest
         //arrange
         String topic = "$iothub/methods/POST/testMethod/?$rid=10";
         byte[] actualPayload = "".getBytes();
-        ConcurrentSkipListMap<String, byte[]> testAllReceivedMessages = new ConcurrentSkipListMap<>();
-        testAllReceivedMessages.put(topic, actualPayload);
-        Deencapsulation.setField(mockedMqtt, "allReceivedMessages", testAllReceivedMessages);
-
+        Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
+        testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
         testMethod.start();
+        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
 
         //act
         Message testMessage = testMethod.receive();
@@ -485,5 +470,14 @@ public class MqttDeviceMethodTest
         assertTrue(testDMMessage.getMethodName().equals("testMethod"));
         assertTrue(testDMMessage.getDeviceOperationType().equals(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST));
 
+    }
+
+    // Codes_SRS_MQTTDEVICEMETHOD_34_034: [If allReceivedMessages queue is null then this method shall throw IOException.]
+    @Test (expected = IOException.class)
+    public void nullReceivingQueueThrows() throws IOException
+    {
+        MqttDeviceMethod mqttDeviceMethod = new MqttDeviceMethod();
+        Deencapsulation.setField(mqttDeviceMethod, "allReceivedMessages", null);
+        mqttDeviceMethod.receive();
     }
 }
