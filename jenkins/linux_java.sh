@@ -7,12 +7,26 @@ build_root=$(cd "$(dirname "$0")/.." && pwd)
 # -- Java Dependencies --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/deps
+mvn -q javadoc:javadoc
+[ $? -eq 0 ] || exit $?
+echo
+echo [info] ---------------------------------------------------------------------
+echo [info] javadoc for deps succeeded
+echo [info] ---------------------------------------------------------------------
+echo
 mvn install
 [ $? -eq 0 ] || exit $?
 
 # -- Java Service Client --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/service/iot-service-client
+mvn -q javadoc:javadoc
+[ $? -eq 0 ] || exit $?
+echo
+echo [info] ---------------------------------------------------------------------
+echo [info] javadoc for iot-service-client succeeded
+echo [info] ---------------------------------------------------------------------
+echo
 mvn install
 [ $? -eq 0 ] || exit $?
 
@@ -25,6 +39,13 @@ mvn install
 # -- Java Device Client --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/device/iot-device-client
+mvn -q javadoc:javadoc
+[ $? -eq 0 ] || exit $?
+echo
+echo [info] ---------------------------------------------------------------------
+echo [info] javadoc for iot-device-client succeeded
+echo [info] ---------------------------------------------------------------------
+echo
 mvn install
 [ $? -eq 0 ] || exit $?
 
