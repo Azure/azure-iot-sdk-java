@@ -445,6 +445,7 @@ public class MqttDeviceMethodTest
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
         Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
         Deencapsulation.setField(testMethod, "MQTT_LOCK", new Object());
+
         testMethod.start();
 
         //act

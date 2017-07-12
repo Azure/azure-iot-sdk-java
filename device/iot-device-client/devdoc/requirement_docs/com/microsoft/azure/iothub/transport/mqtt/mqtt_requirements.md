@@ -208,3 +208,5 @@ private void assignPropertiesToMessage(Message message, String propertiesString)
 ```java
 Pair<String, byte[]> peekMessage() throws IOException;
 ```
+
+**SRS_Mqtt_34_040: [**If allReceivedMessages queue is null then this method shall throw IOException.**]**

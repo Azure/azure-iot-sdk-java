@@ -683,6 +683,7 @@ public class MqttDeviceTwinTest
             Deencapsulation.setField(testTwin, "allReceivedMessages", testAllReceivedMessages);
             Deencapsulation.setField(testTwin, "MQTT_LOCK", new Object());
 
+
             Map<String, DeviceOperations> requestMap = new HashMap<>();
             requestMap.put(mockReqId, DEVICE_OPERATION_TWIN_GET_REQUEST);
             Deencapsulation.setField(testTwin, "requestMap", requestMap);

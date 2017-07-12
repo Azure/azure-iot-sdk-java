@@ -25,9 +25,8 @@ abstract public class Mqtt implements MqttCallback
      in lifetime.
      */
     private static MqttConnectionInfo info ;
-    protected static Object MQTT_LOCK;
-
     static ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
+    protected static Object MQTT_LOCK;
 
     /* Each property is separated by & and all system properties start with an encoded $ (except for iothub-ack) */
     protected final static char MESSAGE_PROPERTY_SEPARATOR = '&';
