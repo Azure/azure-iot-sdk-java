@@ -8,103 +8,12 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 
 import java.io.IOException;
-import java.util.Map;
 
 public class MqttMessaging extends Mqtt
 {
     private String subscribeTopic;
     private String publishTopic;
     private String parseTopic;
-
-    @Override
-    String parseTopic() throws IOException
-    {
-        /*
-        **Codes_SRS_MqttMessaging_25_004: [**parseTopic concrete method shall be implemeted by MqttMessaging concrete class.**]**
-         */
-        String topic = null;
-
-        if (allReceivedMessages == null)
-        {
-            /*
-            **Codes_SRS_MqttMessaging_25_008: [**If receiveMessage queue is null then parseTopic shall throw IOException.**]**
-             */
-            throw new IOException("Queue cannot be null");
-        }
-
-        if(!allReceivedMessages.isEmpty())
-        {
-
-           for ( Map.Entry<String, byte[]> data : allReceivedMessages.entrySet())
-           {
-               String topicFound = data.getKey();
-
-               /*
-               **Codes_SRS_MqttMessaging_25_005: [**parseTopic shall look for the subscribe topic prefix from received message queue.**]**
-                */
-               /*
-               **Codes_SRS_MqttMessaging_25_006: [**If none of the topics from the received queue match the subscribe topic prefix then this method shall return null string .**]**
-                */
-               /*
-               **Codes_SRS_MqttMessaging_25_007: [**If received messages queue is empty then parseTopic shall return null string.**]**
-                */
-               if (topicFound != null && topicFound.length() > parseTopic.length() && topicFound.startsWith(parseTopic))
-               {
-                   topic = topicFound;
-                   break;
-               }
-           }
-        }
-        return topic;
-    }
-
-    @Override
-    byte[] parsePayload(String topic) throws IOException
-    {
-        /*
-            This method is called only when you are certain that there is a message in the queue meant for device messaging that needs to be retrieved and then deleted.
-         */
-        /*
-        **Codes_SRS_MqttMessaging_25_009: [**parsePayload concrete method shall be implemeted by MqttMessaging concrete class.**]**
-         */
-
-        if (topic == null)
-        {
-            /*
-            **Codes_SRS_MqttMessaging_25_011: [**If the topic is null then parsePayload shall stop parsing for payload and return.**]**
-             */
-            return null;
-        }
-        if (allReceivedMessages == null)
-        {
-            /*
-            **Codes_SRS_MqttMessaging_25_013: [**If receiveMessage queue is null then this method shall throw IOException.**]**
-             */
-            throw new IOException("Invalid State - topic is not null and could not be found in queue");
-        }
-
-        if (!allReceivedMessages.containsKey(topic))
-        {
-            /*
-            **Codes_SRS_MqttMessaging_25_012: [**If the topic is non-null and received messagesqueue could not locate the payload then this method shall throw IOException**]**
-             */
-            throw new IOException("Topic is should be present in received queue at this point");
-        }
-
-        /*
-        **Codes_SRS_MqttMessaging_25_010: [**This parsePayload method look for payload for the corresponding topic from the received messagesqueue.**]**
-         */
-        if(!allReceivedMessages.isEmpty())
-        {
-            /*
-            **Codes_SRS_MqttMessaging_25_014: [**If the topic is found in the message queue then parsePayload shall delete it from the queue.**]**
-             */
-            return allReceivedMessages.remove(topic);
-        }
-
-        return null;
-
-    }
 
     public MqttMessaging(String serverURI, String deviceId, String userName, String password, IotHubSSLContext context) throws IOException
     {

@@ -48,7 +48,7 @@ public class JobResultTest
     final static String DEVICE_ID = "validDeviceId";
     final static String PARENT_JOB_ID = "validParentJobId";
     final static String ETAG = "validETag";
-    final static String DATEFORMAT_JSON = "MMM dd, yyyy h:mm:ss a";
+    final static String DATEFORMAT_JSON = "MMM d, yyyy h:mm:ss a";
 
 
     private void JobsResponseParserExpectations(String json, TwinParser twinParser, MethodParser methodParser, Date date)

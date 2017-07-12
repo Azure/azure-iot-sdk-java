@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for Method serializer
+ * 100% methods, 97% lines covered
  */
 public class MethodParserTest
 {
@@ -82,7 +83,7 @@ public class MethodParserTest
     private static final Map<String, Object> STANDARD_PAYLOAD = new HashMap<String, Object>()
     {{
         put("myPar1", "myVal1");
-        put("myPar2", "myVal2");
+        put("myPar2", new HashMap<String, Object>(){{ put("innerKey", "innerVal"); }});
     }};
 
     private static class TestMethod
@@ -146,7 +147,7 @@ public class MethodParserTest
                                         "\"payload\":" +
                                         "{" +
                                             "\"myPar1\": \"myVal1\"," +
-                                            "\"myPar2\": \"myVal2\"" +
+                                            "\"myPar2\": {\"innerKey\":\"innerVal\"}" +
                                         "}" +
                                 "}";
                         name = STANDARD_NAME;
@@ -173,7 +174,7 @@ public class MethodParserTest
                                         "\"payload\":" +
                                         "{" +
                                             "\"myPar1\": \"myVal1\"," +
-                                            "\"myPar2\": \"myVal2\"" +
+                                            "\"myPar2\": {\"innerKey\":\"innerVal\"}" +
                                         "}" +
                                 "}";
                         name = STANDARD_NAME;
@@ -189,7 +190,7 @@ public class MethodParserTest
                                     "\"payload\":" +
                                     "{" +
                                         "\"myPar1\": \"myVal1\"," +
-                                        "\"myPar2\": \"myVal2\"" +
+                                        "\"myPar2\": {\"innerKey\":\"innerVal\"}" +
                                     "}" +
                                 "}";
                         name = STANDARD_NAME;
@@ -313,7 +314,7 @@ public class MethodParserTest
     /* Tests_SRS_METHODPARSER_21_030: [The constructor shall initialize all data in the collection as null.] */
     /* Tests_SRS_METHODPARSER_21_022: [The constructor shall initialize the method operation as `none`.] */
     @Test
-    public void Constructor_succeed()
+    public void ConstructorSucceed()
     {
         // Arrange
 
@@ -330,7 +331,7 @@ public class MethodParserTest
     /* Tests_SRS_METHODPARSER_21_003: [All Strings are case sensitive.] */
     /* Tests_SRS_METHODPARSER_21_023: [The constructor shall initialize the method operation as `invoke`.] */
     @Test
-    public void Constructor_Method_succeed()
+    public void ConstructorMethodSucceed()
     {
         // Arrange
 
@@ -350,7 +351,7 @@ public class MethodParserTest
     /* Tests_SRS_METHODPARSER_21_005: [If the responseTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
     /* Tests_SRS_METHODPARSER_21_033: [If the connectTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
     @Test
-    public void Constructor_Method_failed()
+    public void ConstructorMethodFailed()
     {
         // Arrange
 
@@ -360,7 +361,7 @@ public class MethodParserTest
             // Act
             try
             {
-                MethodParser methodParser = new MethodParser(testCase.name, testCase.responseTimeout, testCase.connectTimeout, testCase.payload);
+                new MethodParser(testCase.name, testCase.responseTimeout, testCase.connectTimeout, testCase.payload);
                 assert true;
             }
             catch (IllegalArgumentException expected)
@@ -375,7 +376,7 @@ public class MethodParserTest
     /* Tests_SRS_METHODPARSER_21_021: [The constructor shall update the method collection using the provided information.] */
     /* Tests_SRS_METHODPARSER_21_034: [The constructor shall set the method operation as `payload`.] */
     @Test
-    public void Constructor_map_Payload_success()
+    public void ConstructorMapPayloadSuccess()
     {
         // Arrange
 
@@ -403,7 +404,7 @@ public class MethodParserTest
      *  }
      */
     @Test
-    public void fromJson_payload_succeed()
+    public void fromJsonPayloadSucceed()
     {
 
         for (TestMethod testCase:successTestResult)
@@ -431,7 +432,7 @@ public class MethodParserTest
      *  }
      */
     @Test
-    public void fromJson_response_succeed()
+    public void fromJsonResponseSucceed()
     {
         // Arrange
         MethodParser methodParser = new MethodParser();
@@ -464,7 +465,7 @@ public class MethodParserTest
      *  }
      */
     @Test
-    public void fromJson_method_succeed()
+    public void fromJsonMethodSucceed()
     {
         // Arrange
         MethodParser methodParser = new MethodParser();
@@ -482,7 +483,7 @@ public class MethodParserTest
 
     /* Tests_SRS_METHODPARSER_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
     @Test
-    public void fromJson_failed()
+    public void fromJsonFailed()
     {
         // Arrange
         MethodParser methodParser = new MethodParser();
@@ -506,11 +507,11 @@ public class MethodParserTest
     /* Tests_SRS_METHODPARSER_21_012: [The getStatus shall return an Integer with the status in the parsed json.] */
     /* Tests_SRS_METHODPARSER_21_013: [The getPayload shall return an Object with the Payload in the parsed json.] */
     @Test
-    public void getResults_succeed()
+    public void getResultsSucceed()
     {
         // Arrange
         MethodParser methodParser = new MethodParser();
-        methodParser.fromJson("{\"status\":201,\"payload\":{\"myPar1\":\"myVal1\",\"myPar2\":\"myVal2\"}}");
+        methodParser.fromJson("{\"status\":201,\"payload\":{\"myPar1\":\"myVal1\",\"myPar2\":{\"innerKey\":\"innerVal\"}}}");
 
         // Act
         // Assert
@@ -520,7 +521,7 @@ public class MethodParserTest
 
     /* Tests_SRS_METHODPARSER_21_035: [If the operation is not `response`, the getStatus shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
-    public void getResults_failed()
+    public void getResultsFailed()
     {
         // Arrange
         MethodParser methodParser = new MethodParser();
@@ -552,7 +553,7 @@ public class MethodParserTest
      *  }
      */
     @Test
-    public void toJsonElement_Method_succeed()
+    public void toJsonElementMethodSucceed()
     {
         for (TestMethod testCase:successTestMethod)
         {
@@ -569,7 +570,7 @@ public class MethodParserTest
 
     /* Tests_SRS_METHODPARSER_21_014: [The toJsonElement shall create a String with the full information in the method collection using json format, by using the toJsonElement.] */
     @Test
-    public void toJson_Method_succeed()
+    public void toJsonMethodSucceed()
     {
         for (TestMethod testCase:successTestMethod)
         {
@@ -595,7 +596,7 @@ public class MethodParserTest
      *  }
      */
     @Test
-    public void toJsonElement_response_succeed()
+    public void toJsonElementResponseSucceed()
     {
         // Arrange
         MethodParser methodParser = new MethodParser();
@@ -622,7 +623,7 @@ public class MethodParserTest
      *  }
      */
     @Test
-    public void toJsonElement_payload_succeed()
+    public void toJsonElementPayloadSucceed()
     {
         for (TestMethod testCase:successTestResult)
         {
@@ -639,13 +640,13 @@ public class MethodParserTest
 
     /* Tests_SRS_METHODPARSER_21_036: [If the method operation is `none`, the toJsonElement shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
-    public void toJsonElement_failed()
+    public void toJsonElementFailed()
     {
         // Arrange
         MethodParser methodParser = new MethodParser();
 
         // Act
-        methodParser.toJsonElement().toString();
+        methodParser.toJsonElement();
     }
 
 }

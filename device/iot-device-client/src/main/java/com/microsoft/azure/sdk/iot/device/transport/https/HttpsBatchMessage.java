@@ -110,6 +110,11 @@ public final class HttpsBatchMessage implements HttpsMessage
         return new MessageProperty[0];
     }
 
+    public Map<String, String> getSystemProperties()
+    {
+        return new HashMap<>();
+    }
+
     /**
      * Returns the number of messages currently in the batch.
      *

@@ -14,11 +14,12 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.util.concurrent.ConcurrentSkipListMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
-/* Unit tests for Mqtt Messaging */
+/* Unit tests for MqttMessaging
+ * Code coverage: 100% methods, 94% lines
+ */
 public class MqttMessagingTest {
 
     final String serverUri = "test.host.name";
@@ -54,7 +55,6 @@ public class MqttMessagingTest {
         assertNotNull(actualSubscribeTopic);
         String actualParseTopic = Deencapsulation.getField(testMqttMessaging, "parseTopic");
         assertNotNull(actualParseTopic);
-
     }
 
     /*
@@ -232,181 +232,6 @@ public class MqttMessagingTest {
     }
 
     /*
-    **Tests_SRS_MqttMessaging_25_005: [**parseTopic shall look for the subscribe topic prefix from received message queue.**]**
-     */
-    @Test
-    public void parseTopicLooksForNextAvailableMessagesForDeviceMessagingTopic(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);
-
-        String insertTopic = "devices/" + clientId + "/messages/devicebound/abc";
-        ConcurrentSkipListMap<String, byte[]> testMap = new ConcurrentSkipListMap<String, byte[]>();
-        testMap.put(insertTopic, "DataData".getBytes());
-        Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
-
-        String retrieveTopic = Deencapsulation.invoke(testMqttMessaging, "parseTopic");
-
-        assertEquals(retrieveTopic.length(),insertTopic.length());
-        for (int i = 0 ; i < retrieveTopic.length(); i++)
-        {
-            assertEquals(retrieveTopic.charAt(i), insertTopic.charAt(i));
-        }
-    }
-
-    /*
-    **Tests_SRS_MqttMessaging_25_007: [**If received messages queue is empty then parseTopic shall return null string.**]**
-     */
-    @Test
-    public void parseTopicReturnsNullIfQueueIsEmpty(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);;
-
-        ConcurrentSkipListMap<String, byte[]> testMap = new ConcurrentSkipListMap<String, byte[]>();
-
-        Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
-
-        String retrieveTopic = Deencapsulation.invoke(testMqttMessaging, "parseTopic");
-
-        assertNull(retrieveTopic);
-    }
-
-    /*
-    **Tests_SRS_MqttMessaging_25_006: [**If none of the topics from the received queue match the subscribe topic prefix then this method shall return null string .**]**
-     */
-    @Test
-    public void parseTopicReturnsNullIfNoMessageMatchingKeyIsFound(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);;
-
-        String insertTopic = "devices/" + clientId + "/fakemessages/devicebound/abc";
-        ConcurrentSkipListMap<String, byte[]> testMap = new ConcurrentSkipListMap<String, byte[]>();
-        testMap.put(insertTopic, "DataData".getBytes());
-        Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
-
-        String retrieveTopic = Deencapsulation.invoke(testMqttMessaging, "parseTopic");
-
-        assertNull(retrieveTopic);
-
-    }
-
-    /*
-    **Tests_SRS_MqttMessaging_25_010: [**This parsePayload method look for payload for the corresponding topic from the received messagesqueue.**]**
-     */
-    @Test
-    public void parsePayloadLooksForValueWithGivenKeyTopic(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);;
-
-        final String insertTopic = "devices/" + clientId + "/messages/devicebound/abc";
-        final byte[] insertMessage = {0x61, 0x62, 0x63};
-        ConcurrentSkipListMap<String, byte[]> testMap = new ConcurrentSkipListMap<String, byte[]>();
-        testMap.put(insertTopic, insertMessage);
-        Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
-
-        byte[] retrieveMessage = Deencapsulation.invoke(testMqttMessaging, "parsePayload", insertTopic);
-
-        assertEquals(insertMessage.length, retrieveMessage.length);
-        for (int i = 0 ; i < retrieveMessage.length; i++)
-        {
-            assertEquals(retrieveMessage[i], insertMessage[i]);
-        }
-
-    }
-
-    /*
-    **Tests_SRS_MqttMessaging_25_014: [**If the topic is found in the message queue then parsePayload shall delete it from the queue.**]**
-     */
-    @Test
-    public void parsePayloadRemovesTheKeyValuePairFromQueueIfFound(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);;
-
-        final String insertTopic = "devices/" + clientId + "/messages/devicebound/abc";
-        final byte[] insertMessage = {0x61, 0x62, 0x63};
-        ConcurrentSkipListMap<String, byte[]> testMap = new ConcurrentSkipListMap<String, byte[]>();
-        testMap.put(insertTopic, insertMessage);
-        Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
-
-        byte[] retrieveMessage = Deencapsulation.invoke(testMqttMessaging, "parsePayload", insertTopic);
-
-        assertTrue(testMap.isEmpty());
-
-    }
-
-    @Test (expected = IOException.class)
-    public void parsePayloadShallThrowIOExceptionIfQueueIsEmpty(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);;
-
-        final String insertTopic = "devices/" + clientId + "/messages/devicebound/abc";
-        final byte[] insertMessage = {0x61, 0x62, 0x63};
-        ConcurrentSkipListMap<String, byte[]> testMap = new ConcurrentSkipListMap<String, byte[]>();
-
-        Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
-
-        byte[] retrieveMessage = Deencapsulation.invoke(testMqttMessaging, "parsePayload", insertTopic);
-        assertNull(retrieveMessage);
-
-    }
-
-    /*
-    **Tests_SRS_MqttMessaging_25_011: [**If the topic is null then parsePayload shall stop parsing for payload and return.**]**
-     */
-    @Test
-    public void parsePayloadShallReturnNullIfTopicIsNull(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);;
-
-        final String insertTopic_messaging = "devices/" + clientId + "/messages/devicebound/abc";
-        final byte[] insertMessage = {0x61, 0x62, 0x63};
-        ConcurrentSkipListMap<String, byte[]> testMap = new ConcurrentSkipListMap<String, byte[]>();
-        testMap.put(insertTopic_messaging, insertMessage);
-        Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
-
-
-        byte[] retrieveMessage = Deencapsulation.invoke(testMqttMessaging, "parsePayload", String.class);
-        assertNull(retrieveMessage);
-    }
-
-    /*
-    **Tests_SRS_MqttMessaging_25_012: [**If the topic is non-null and received messagesqueue could not locate the payload then this method shall throw IOException**]**
-     */
-    @Test (expected =  IOException.class)
-    public void parsePayloadShallThrowIOExceptionIfTopicIsNotFound(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);;
-
-        final String insertTopic_actual = "$iothub/twin/PATCH/properties/desired/#";
-        final String insertTopic_messaging = "devices/" + clientId + "/messages/devicebound/abc";
-        final byte[] insertMessage = {0x61, 0x62, 0x63};
-        ConcurrentSkipListMap<String, byte[]> testMap = new ConcurrentSkipListMap<String, byte[]>();
-        testMap.put(insertTopic_actual, insertMessage);
-        Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
-
-
-        byte[] retrieveMessage = Deencapsulation.invoke(testMqttMessaging, "parsePayload", insertTopic_messaging);
-
-    }
-
-    /*
-    **Tests_SRS_MqttMessaging_25_013: [**If receiveMessage queue is null then this method shall throw IOException.**]**
-     */
-    @Test (expected =  IOException.class)
-    public void parsePayloadShallThrowIOExceptionIfQueueIsNull(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);;
-
-        final String insertTopic = "$iothub/twin/PATCH/properties/desired/#";
-        ConcurrentSkipListMap<String, byte[]> testMap = null;
-
-        Deencapsulation.setField(mockMqtt, "allReceivedMessages", testMap);
-
-
-        byte[] retrieveMessage = Deencapsulation.invoke(testMqttMessaging, "parsePayload", insertTopic);
-
-    }
-
-    /*
     **Tests_SRS_MqttMessaging_25_024: [**send method shall publish a message to the IOT Hub on the publish topic by calling method publish().**]**
      */
     @Test
@@ -489,7 +314,6 @@ public class MqttMessagingTest {
 
             }
         };
-
     }
 
     /*
@@ -501,6 +325,8 @@ public class MqttMessagingTest {
         final byte[] messageBody = {0x61, 0x62, 0x63};
         final String propertyName = "key";
         final String propertyValue = "value";
+        final String expectedCorrelationId = "1234";
+        final String expectedMessageId = "5678";
         final MessageProperty[] messageProperties = new MessageProperty[]
                 {
                         new MessageProperty(propertyName, propertyValue)
@@ -513,14 +339,20 @@ public class MqttMessagingTest {
                 mockMessage.getProperties();
                 result = messageProperties;
                 Deencapsulation.invoke(mockMqtt, "publish", anyString, messageBody);
+                mockMessage.getCorrelationId();
+                result = expectedCorrelationId;
+                mockMessage.getMessageId();
+                result = expectedMessageId;
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);;
-        testMqttMessaging.send(mockMessage);
-        final String publishTopicWithProperties = String.format(
-                "devices/%s/messages/events/%s=%s", clientId, propertyName, propertyValue);
+        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);
 
+        // act
+        testMqttMessaging.send(mockMessage);
+
+        final String publishTopicWithProperties = String.format(
+                "devices/%s/messages/events/$.mid=%s&$.cid=%s&%s=%s", clientId, expectedMessageId, expectedCorrelationId, propertyName, propertyValue);
         new Verifications()
         {
             {
@@ -578,5 +410,4 @@ public class MqttMessagingTest {
             }
         };
     }
-
 }

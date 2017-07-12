@@ -6,6 +6,8 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
@@ -14,22 +16,18 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 abstract public class Mqtt implements MqttCallback
 {
-
-    abstract String parseTopic() throws IOException;
-    abstract byte[] parsePayload(String topic) throws IOException;
-
-    /*
-    Variables which apply to all the concrete classes as well as to Mqtt and are to be instantiated only once
-    in lifetime.
-    */
+     /*
+     Variables which apply to all the concrete classes as well as to Mqtt and are to be instantiated only once
+     in lifetime.
+     */
     private static MqttConnectionInfo info ;
-    static ConcurrentSkipListMap<String, byte[]> allReceivedMessages;
-    private static Object MQTT_LOCK;
+    protected static Object MQTT_LOCK;
 
+    static ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
 
     /* Each property is separated by & and all system properties start with an encoded $ (except for iothub-ack) */
     protected final static char MESSAGE_PROPERTY_SEPARATOR = '&';
@@ -109,7 +107,7 @@ abstract public class Mqtt implements MqttCallback
         if (Mqtt.info == null)
         {
             Mqtt.info = new MqttConnectionInfo(serverURI, clientId, userName, password, iotHubSSLContext);
-            Mqtt.allReceivedMessages = new ConcurrentSkipListMap<>();
+            Mqtt.allReceivedMessages = new ConcurrentLinkedQueue<>();
             Mqtt.MQTT_LOCK = new Object();
         }
     }
@@ -257,7 +255,6 @@ abstract public class Mqtt implements MqttCallback
             }
             Mqtt.info.mqttAsyncClient = null;
         }
-
         catch (MqttException e)
         {
             /*
@@ -454,36 +451,38 @@ abstract public class Mqtt implements MqttCallback
             {
                 throw new InvalidParameterException("Mqtt client should be initialised at least once before using it");
             }
-            /*
-            **Codes_SRS_Mqtt_25_021: [**This method shall call parseTopic to parse the topic from the recevived Messages queue corresponding to the messaging client's operation.**]**
-             */
-            String topic = parseTopic();
 
-            if (topic != null)
+            // Codes_SRS_Mqtt_34_023: [This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.]
+            Pair<String, byte[]> messagePair = peekMessage();
+            if (messagePair != null)
             {
-                /*
-                 **Codes_SRS_Mqtt_25_023: [**This method shall call parsePayload to get the message payload from the received Messages queue corresponding to the messaging client's operation.**]**
-                 */
-                byte[] data = parsePayload(topic);
-                if (data != null)
+                String topic = messagePair.getKey();
+                if (topic != null)
                 {
-                    return constructMessage(data, topic);
+                    byte[] data = messagePair.getValue();
+                    if (data != null)
+                    {
+                        //remove this message from the queue as this is the correct handler
+                        allReceivedMessages.poll();
+
+                        // Codes_SRS_Mqtt_34_024: [This method shall construct new Message with the bytes obtained from peekMessage and return the message.]
+                        return constructMessage(data, topic);
+                    }
+                    else
+                    {
+                        // Codes_SRS_Mqtt_34_025: [If the call to peekMessage returns null when topic is non-null then this method will throw IOException]
+                        throw new IOException("Data cannot be null when topic is non-null");
+                    }
                 }
                 else
                 {
-                    /*
-                    **Codes_SRS_Mqtt_25_025: [**If the call to parsePayload returns null when topic is non-null then this method will throw IOException**]**
-                     */
-                    throw new IOException("Data cannot be null when topic is non-null");
+                    // Codes_SRS_Mqtt_34_022: [If the call peekMessage returns a null or empty string then this method shall do nothing and return null]
+                    return null;
                 }
             }
-            else
-            {
-                /*
-                **Codes_SRS_Mqtt_25_022: [**If the call parseTopic returns null or empty string then this method shall do nothing and return null**]**
-                 */
-                return null;
-            }
+
+            // Codes_SRS_Mqtt_34_021: [If the call peekMessage returns null then this method shall do nothing and return null]
+            return null;
         }
     }
 
@@ -545,7 +544,7 @@ abstract public class Mqtt implements MqttCallback
         /*
         **Codes_SRS_Mqtt_25_030: [**The payload of the message and the topic is added to the received messages queue .**]**
          */
-        Mqtt.allReceivedMessages.put(topic, mqttMessage.getPayload());
+        Mqtt.allReceivedMessages.add(new MutablePair<>(topic, mqttMessage.getPayload()));
     }
 
     /**
@@ -557,6 +556,17 @@ abstract public class Mqtt implements MqttCallback
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
     {
 
+    }
+
+    public Pair<String, byte[]> peekMessage() throws IOException
+    {
+        if (allReceivedMessages == null)
+        {
+            // Codes_SRS_MQTTDEVICEMETHOD_34_034: [If allReceivedMessages queue is null then this method shall throw IOException.]
+            throw new IOException("Queue cannot be null");
+        }
+
+        return allReceivedMessages.peek();
     }
 
     /**

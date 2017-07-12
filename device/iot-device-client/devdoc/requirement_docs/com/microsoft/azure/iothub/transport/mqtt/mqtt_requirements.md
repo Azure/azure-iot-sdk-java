@@ -14,8 +14,7 @@ public final class Mqtt implements MqttCallback
     public Mqtt(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext) throws IOException;
     public Mqtt() throws IOException;
 
-    abstract String parseTopic() throws IOException;
-    abstract byte[] parsePayload(String topic) throws IOException;
+    Pair<String, byte[]> peekMessage() throws IOException;
 
     private class MqttConnectionInfo
     {
@@ -145,13 +144,16 @@ protected void unsubscribe(String topic) throws IOException;
 public Message receive() throws IOException;
 ```
 
-**SRS_Mqtt_25_021: [**This method shall call parseTopic to parse the topic from the received Messages queue corresponding to the messaging client's operation.**]**
+**SRS_Mqtt_34_021: [**If the call peekMessage returns null then this method shall do nothing and return null**]**
 
-**SRS_Mqtt_25_022: [**If the call parseTopic returns null or empty string then this method shall do nothing and return null**]**
+**SRS_Mqtt_34_022: [**If the call peekMessage returns a null or empty string then this method shall do nothing and return null**]**
 
-**SRS_Mqtt_25_023: [**This method shall call parsePayload to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
+**SRS_Mqtt_34_023: [**This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
 
-**SRS_Mqtt_25_025: [**If the call to parsePayload returns null when topic is non-null then this method will throw IOException**]**
+**SRS_Mqtt_34_024: [**This method shall construct new Message with the bytes obtained from peekMessage and return the message.**]**
+
+**SRS_Mqtt_34_025: [**If the call to peekMessage returns null when topic is non-null then this method will throw IOException**]**
+
 
 ### connectionLost
 
@@ -177,6 +179,7 @@ public void messageArrived(String topic, MqttMessage mqttMessage);
 
 
 ### constructMessage
+
 ```java
 private Message constructMessage(byte[] data, String topic) throws IllegalArgumentException
 ```
@@ -199,35 +202,9 @@ private void assignPropertiesToMessage(Message message, String propertiesString)
 **SRS_Mqtt_34_054: [**A message may have 0 to many custom properties**]**
 
 
-### parseTopic
+
+### peekMessage
 
 ```java
-abstract String parseTopic() throws IOException;
+Pair<String, byte[]> peekMessage() throws IOException;
 ```
-
-**SRS_Mqtt_25_031: [**This abstract method shall be implemeted by the concrete classes.**]**
-
-**SRS_Mqtt_25_032: [**This abstract method shall parse the topic from received message queue corresponding to the concrete classes operation.**]**
-
-**SRS_Mqtt_25_033: [**If none of the topics from the received queue match the concrete classes operation then this method shall return null string .**]**
-
-**SRS_Mqtt_25_034: [**If received messages queue is empty then this method shall return null string in its concrete implementation.**]**
-
-**SRS_Mqtt_25_035: [**If receiveMessage queue is null then this method shall throw IOException.**]**
-
-
-### parsePayload
-
-```java
-abstract byte[] parsePayload(String topic) throws IOException;
-```
-
-**SRS_Mqtt_25_036: [**This abstract method shall be implemeted by the concrete classes.**]**
-
-**SRS_Mqtt_25_037: [**This abstract method look for payload for the corresponding topic from the received messagesqueue in the concrete classes implementation.**]**
-
-**SRS_Mqtt_25_038: [**If the topic is null then this method stop parsing for payload and return.**]**
-
-**SRS_Mqtt_25_039: [**If the topic is non-null and received messagesqueue could not locate the payload then this method shall throw IOException**]**
-
-**SRS_Mqtt_25_040: [**If receiveMessage queue is null then this method shall throw IOException.**]**

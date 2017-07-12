@@ -5,6 +5,8 @@ package com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 
+import java.util.Map;
+
 /**
  * An HTTPS message. An HTTPS message is distinguished from a plain IoT Hub
  * message by its property names, which are prefixed with 'iothub-app-';
@@ -31,4 +33,8 @@ public interface HttpsMessage
     /**Gets the collection of message properties.
      * @return Returns the message properties. */
     MessageProperty[] getProperties();
+
+    /**Gets the collection of system message properties.
+     * @return Returns the system message properties. */
+    Map<String, String> getSystemProperties();
 }

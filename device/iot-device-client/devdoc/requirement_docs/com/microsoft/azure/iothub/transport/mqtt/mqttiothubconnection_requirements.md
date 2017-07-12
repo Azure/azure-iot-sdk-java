@@ -87,4 +87,6 @@ public Message receiveMessage() throws IllegalStateException, IOException;
 
 **SRS_MQTTIOTHUBCONNECTION_15_015: [**If the MQTT connection is closed, the function shall throw an IllegalStateException.**]**
 
-**SRS_MQTTIOTHUBCONNECTION_25_016: [**If any of the messaging clients fail to receive, the function shall throw an IOException.**]**
+**SRS_MQTTIOTHUBCONNECTION_34_016: [**If any of the messaging clients throw an exception, The associated message will be removed from the queue and the exception will be propagated up to the receive task.**]**
+
+**SRS_MQTTIOTHUBCONNECTION_34_017: [**If all of the messaging clients fail to receive, the function shall throw an UnsupportedOperationException.**]**

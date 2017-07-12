@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.device.net.*;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Map;
 
 /**
  * An HTTPS connection between a device and an IoT Hub. Contains functionality
@@ -25,7 +26,7 @@ public class HttpsIotHubConnection
     private static final String HTTPS_PROPERTY_ETAG_TAG = "etag";
 
     /** The HTTPS connection lock. */
-    private static final Object HTTPS_CONNECTION_LOCK = new Object();
+    private final Object HTTPS_CONNECTION_LOCK = new Object();
 
     /** The client configuration. */
     private final DeviceClientConfig config;
@@ -84,6 +85,13 @@ public class HttpsIotHubConnection
                 request.setHeaderField(property.getName(),
                         property.getValue());
             }
+
+            Map<String, String> systemProperties = msg.getSystemProperties();
+            for (String systemProperty : systemProperties.keySet())
+            {
+                request.setHeaderField(systemProperty, systemProperties.get(systemProperty));
+            }
+
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_006: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
             request.setReadTimeoutMillis(readTimeoutMillis).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_007: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
