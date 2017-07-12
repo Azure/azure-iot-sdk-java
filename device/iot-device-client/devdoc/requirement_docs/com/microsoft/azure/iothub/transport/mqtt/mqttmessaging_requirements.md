@@ -2,8 +2,8 @@
 
 ## Overview
 
-MqttMessaging is a concrete class extending Mqtt. This class implements all the abstract methods from MQTT and overrides the parseTopic, 
-parsePayload, onReconnect, and onReconnectComplete events.
+MqttMessaging is a concrete class extending Mqtt. This class implements all the abstract methods from MQTT and
+overrides the onReconnect and onReconnectComplete events.
 
 ## References
 
@@ -15,8 +15,6 @@ public final class MqttMessaging extends Mqtt
     public MqttMessaging(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext) throws IOException;
         
     public Message receive() throws IOException;
-    String parseTopic() throws IOException;
-    byte[] parsePayload(String topic) throws IOException;
     void onReconnect() throws IOException;
     void onReconnectComplete(boolean status) throws IOException;
 
@@ -38,42 +36,6 @@ public MqttMessaging(String serverURI, String clientId, String userName, String 
 **SRS_MqttMessaging_25_002: [**The constructor shall use the configuration to instantiate super class and passing the parameters.**]**
 
 **SRS_MqttMessaging_25_003: [**The constructor construct publishTopic and subscribeTopic from deviceId.**]**
-
-
-### parseTopic
-
-```java
-String parseTopic() throws IOException;
-```
-
-**SRS_MqttMessaging_25_004: [**parseTopic concrete method shall be implemeted by MqttMessaging concrete class.**]**
-
-**SRS_MqttMessaging_25_005: [**parseTopic shall look for the subscribe topic prefix from received message queue.**]**
-
-**SRS_MqttMessaging_25_006: [**If none of the topics from the received queue match the subscribe topic prefix then this method shall return null string .**]**
-
-**SRS_MqttMessaging_25_007: [**If received messages queue is empty then parseTopic shall return null string.**]**
-
-**SRS_MqttMessaging_25_008: [**If receiveMessage queue is null then parseTopic shall throw IOException.**]**
-
-
-### parsePayload
-
-```java
-byte[] parsePayload(String topic) throws IOException;
-```
-
-**SRS_MqttMessaging_25_009: [**parsePayload concrete method shall be implemeted by MqttMessaging concrete class.**]**
-
-**SRS_MqttMessaging_25_010: [**This parsePayload method look for payload for the corresponding topic from the received messagesqueue.**]**
-
-**SRS_MqttMessaging_25_011: [**If the topic is null then parsePayload shall stop parsing for payload and return.**]**
-
-**SRS_MqttMessaging_25_012: [**If the topic is non-null and received messagesqueue could not locate the payload then this method shall throw IOException**]**
-
-**SRS_MqttMessaging_25_013: [**If receiveMessage queue is null then this method shall throw IOException.**]**
-
-**SRS_MqttMessaging_25_014: [**If the topic is found in the message queue then parsePayload shall delete it from the queue.**]**
 
 
 ### onReconnect

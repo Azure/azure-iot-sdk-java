@@ -2,8 +2,8 @@
 
 ## Overview
 
-MqttDeviceTwin is a concrete class extending Mqtt. This class implements all the abstract methods from MQTT and overrides the parseTopic, 
-parsePayload, receive, onReconnect, and onReconnectComplete events.
+MqttDeviceTwin is a concrete class extending Mqtt. This class implements all the abstract methods from MQTT and overrides
+the receive, onReconnect, and onReconnectComplete events.
 
 ## References
 
@@ -30,43 +30,6 @@ public MqttDeviceTwin();
 ```
 
 **SRS_MQTTDEVICETWIN_25_001: [**The constructor shall instantiate super class without any parameters.**]**
-
-
-
-### parseTopic
-
-```java
-String parseTopic() throws IOException;
-```
-
-**SRS_MQTTDEVICETWIN_25_003: [**parseTopic concrete method shall be implemeted by MqttDeviceTwin concrete class.**]**
-
-**SRS_MQTTDEVICETWIN_25_004: [**parseTopic shall look for the twin topic($iothub/twin) prefix from received message queue as per spec and if found shall return it as string.**]**
-
-**SRS_MQTTDEVICETWIN_25_005: [**If none of the topics from the received queue match the twin topic prefix then this method shall return null string .**]**
-
-**SRS_MQTTDEVICETWIN_25_006: [**If received messages queue is empty then parseTopic shall return null string.**]**
-
-**SRS_MQTTDEVICETWIN_25_007: [**If receiveMessage queue is null then parseTopic shall throw IOException.**]**
-
-
-### parsePayload
-
-```java
-byte[] parsePayload(String topic) throws IOException;
-```
-
-**SRS_MQTTDEVICETWIN_25_008: [**parsePayload concrete method shall be implemeted by MqttDeviceTwin concrete class.**]**
-
-**SRS_MQTTDEVICETWIN_25_009: [**This parsePayload method look for payload for the corresponding topic from the received messagesqueue.**]**
-
-**SRS_MQTTDEVICETWIN_25_010: [**If the topic is null then parsePayload shall stop parsing for payload and return.**]**
-
-**SRS_MQTTDEVICETWIN_25_011: [**If the topic is non-null and received messagesqueue could not locate the payload then this method shall throw IOException**]**
-
-**SRS_MQTTDEVICETWIN_25_012: [**If receiveMessage queue is null then this method shall throw IOException.**]**
-
-**SRS_MQTTDEVICETWIN_25_013: [**If the topic is found in the message queue then parsePayload shall delete it from the queue and return it.**]**
 
 
 ### start
@@ -123,11 +86,11 @@ public void stop() throws IOException;
  public Message receive() throws IOException;
 ```
 
-**SRS_MQTTDEVICETWIN_25_033: [**This method shall call parseTopic to parse the topic from the recevived Messages queue corresponding to the messaging client's operation.**]**
+**SRS_MQTTDEVICETWIN_34_034: [**If the call peekMessage returns null or empty string then this method shall do nothing and return null**]**
 
-**SRS_MQTTDEVICETWIN_25_034: [**If the call parseTopic returns null or empty string then this method shall do nothing and return null**]**
+**SRS_MQTTDEVICETWIN_25_035: [**This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
 
-**SRS_MQTTDEVICETWIN_25_035: [**This method shall call parsePayload to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
+**SRS_MQTTDEVICETWIN_25_035: [**This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
 
 **SRS_MQTTDEVICETWIN_25_037: [**This method shall parse topic to look for only either twin response topic or twin patch topic and thorw unsupportedoperation exception other wise.**]**
 

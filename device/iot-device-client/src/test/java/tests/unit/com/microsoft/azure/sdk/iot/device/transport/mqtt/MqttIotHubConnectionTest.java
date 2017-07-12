@@ -4,28 +4,31 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodMessage;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttDeviceMethod;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttDeviceTwin;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttMessaging;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.*;
+import mockit.*;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.junit.Assert.*;
+import static junit.framework.TestCase.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
-/** Unit tests for MqttIotHubConnection. */
+/* Unit tests for MqttIotHubConnection
+ * Code coverage: 100% methods, 95% lines
+ */
 public class MqttIotHubConnectionTest
 {
     private static String sslPrefix = "ssl://";
@@ -51,9 +54,6 @@ public class MqttIotHubConnectionTest
 
     @Mocked
     private MqttMessaging mockDeviceMessaging;
-
-    @Mocked
-    private MqttDeviceMethod mockDeviceMethods;
 
     @Mocked
     protected IotHubSasToken mockToken;
@@ -241,10 +241,18 @@ public class MqttIotHubConnectionTest
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_004: [The function shall establish an MQTT connection with an IoT Hub
     // using the provided host name, user name, device ID, and sas token.]
     @Test
-    public void openEstablishesConnectionUsingCorrectConfig() throws IOException
+    public void openEstablishesConnectionUsingCorrectConfig(@Mocked final MqttDeviceMethod mockDeviceMethod) throws IOException
     {
         baseExpectations();
         openExpectations();
+
+        new Expectations()
+        {
+            {
+                new MqttDeviceMethod();
+                result = mockDeviceMethod;
+            }
+        };
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         connection.open();
@@ -268,7 +276,7 @@ public class MqttIotHubConnectionTest
             {
                 new MqttDeviceMethod();
                 times = 1;
-                new MqttMessaging(sslPrefix + iotHubHostName + sslPortSuffix, deviceId, anyString, anyString, mockIotHubSSLContext);
+                new MqttMessaging(anyString, anyString, anyString, anyString, mockIotHubSSLContext);
                 mockDeviceMessaging.start();
                 times = 1;
                 new MqttDeviceTwin();
@@ -313,7 +321,7 @@ public class MqttIotHubConnectionTest
     }
 
     @Test(expected = IOException.class)
-    public void openThrowsIOExceptionIfConnectionFailsInMethod() throws IOException {
+    public void openThrowsIOExceptionIfConnectionFailsInMethod(@Mocked final MqttDeviceMethod mockMethod, @Mocked final MqttMessaging mockDeviceMessaging) throws IOException {
         baseExpectations();
 
         new NonStrictExpectations()
@@ -321,7 +329,7 @@ public class MqttIotHubConnectionTest
             {
                 new IotHubSasToken(mockConfig, anyLong);
                 result = mockToken;
-                new MqttMessaging(sslPrefix + iotHubHostName + sslPortSuffix, deviceId, anyString, anyString, mockIotHubSSLContext);
+                new MqttMessaging(anyString, anyString, anyString, anyString, mockIotHubSSLContext);
                 result = mockDeviceMessaging;
                 new MqttDeviceMethod();
                 result = new IOException(anyString);
@@ -340,7 +348,6 @@ public class MqttIotHubConnectionTest
                 {
                     mockDeviceMessaging.stop();
                     times = 1;
-
                 }
             };
 
@@ -349,7 +356,7 @@ public class MqttIotHubConnectionTest
     }
 
     @Test(expected = IOException.class)
-    public void openThrowsIOExceptionIfConnectionFailsInTwin() throws IOException {
+    public void openThrowsIOExceptionIfConnectionFailsInTwin(@Mocked final MqttDeviceMethod mockDeviceMethods) throws IOException {
         baseExpectations();
 
         new NonStrictExpectations()
@@ -409,7 +416,7 @@ public class MqttIotHubConnectionTest
 
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_005: [The function shall close the MQTT connection.]
     @Test
-    public void closeClosesMqttConnection() throws IOException
+    public void closeClosesMqttConnection(@Mocked final MqttDeviceMethod mockDeviceMethods) throws IOException
     {
         baseExpectations();
         openExpectations();
@@ -447,7 +454,7 @@ public class MqttIotHubConnectionTest
 
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_007: [If the MQTT connection is closed, the function shall do nothing.]
     @Test
-    public void closeDoesNothingIfConnectionNotYetOpened() throws IOException
+    public void closeDoesNothingIfConnectionNotYetOpened(@Mocked final MqttDeviceMethod mockDeviceMethods) throws IOException
     {
         baseExpectations();
 
@@ -473,7 +480,7 @@ public class MqttIotHubConnectionTest
 
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_007: [If the MQTT connection is closed, the function shall do nothing.]
     @Test
-    public void closeDoesNothingIfConnectionAlreadyClosed() throws IOException
+    public void closeDoesNothingIfConnectionAlreadyClosed(@Mocked final MqttDeviceMethod mockDeviceMethods) throws IOException
     {
         baseExpectations();
         openExpectations();
@@ -662,7 +669,8 @@ public class MqttIotHubConnectionTest
     }
 
     @Test
-    public void sendEventSendsDeviceTwinMessage(@Mocked final DeviceTwinMessage mockDeviceTwinMsg) throws IOException
+    public void sendEventSendsDeviceTwinMessage(@Mocked final DeviceTwinMessage mockDeviceTwinMsg,
+                                                @Mocked final MqttDeviceMethod mockDeviceMethods) throws IOException
     {
         baseExpectations();
         openExpectations();
@@ -701,7 +709,7 @@ public class MqttIotHubConnectionTest
     }
 
     @Test
-    public void sendEventSendsDeviceMethodMessage(@Mocked final DeviceMethodMessage mockDeviceMethodMsg) throws IOException
+    public void sendEventSendsDeviceMethodMessage(@Mocked final DeviceMethodMessage mockDeviceMethodMsg, @Mocked final MqttDeviceMethod mockDeviceMethods) throws IOException
     {
         baseExpectations();
         openExpectations();
@@ -742,7 +750,7 @@ public class MqttIotHubConnectionTest
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_014: [The function shall attempt to consume a message
     // from the received messages queue.]
     @Test
-    public void receiveMessageSucceeds() throws IOException
+    public void receiveMessageSucceeds(@Mocked final MqttDeviceMethod mockDeviceMethods) throws IOException
     {
         baseExpectations();
         openExpectations();
@@ -784,7 +792,7 @@ public class MqttIotHubConnectionTest
     }
 
     @Test
-    public void receiveDeviceTwinMessageSucceeds() throws IOException
+    public void receiveDeviceTwinMessageSucceeds(@Mocked final MqttDeviceMethod mockDeviceMethods) throws IOException
     {
         baseExpectations();
         openExpectations();
@@ -824,7 +832,7 @@ public class MqttIotHubConnectionTest
     }
 
     @Test
-    public void receiveDeviceMethodMessageSucceeds() throws IOException
+    public void receiveDeviceMethodMessageSucceeds(@Mocked final MqttDeviceMethod mockDeviceMethods) throws IOException
     {
         baseExpectations();
         openExpectations();
@@ -886,6 +894,79 @@ public class MqttIotHubConnectionTest
         connection.receiveMessage();
     }
 
+    //Tests_SRS_MQTTIOTHUBCONNECTION_34_017: [If all of the messaging clients fail to receive, the function shall throw an UnsupportedOperationException.]
+    @Test(expected = UnsupportedOperationException.class)
+    public void receiveMessageThrowsUnsupportedOperationExceptionWhenMessageCannotBeParsed(
+            @Mocked final MqttDeviceTwin mockDeviceTwin,
+            @Mocked final MqttDeviceMethod mockDeviceMethod,
+            @Mocked final MqttMessaging mockDeviceMessaging)
+            throws IOException, UnsupportedOperationException
+    {
+        //arrange
+        baseExpectations();
+        MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        connection.open();
+        Deencapsulation.setField(connection, "deviceMessaging", mockDeviceMessaging);
+        Deencapsulation.setField(connection, "deviceTwin", mockDeviceTwin);
+        Deencapsulation.setField(connection, "deviceMethod", mockDeviceMethod);
+
+        new Expectations()
+        {
+            {
+                mockDeviceMethod.receive();
+                result = null;
+
+                mockDeviceTwin.receive();
+                result = null;
+
+                mockDeviceMessaging.receive();
+                result = null;
+            }
+        };
+
+        //act
+        connection.receiveMessage();
+    }
+
+    // Codes_SRS__MQTTIOTHUBCONNECTION_34_016: [If any of the messaging clients throw an exception, The associated message will be removed from the queue and the exception will be propagated up to the receive task.]
+    @Test (expected = IOException.class)
+    public void messagingClientThrowsPropagatesUpCorrectly(@Mocked final Mqtt mockMqtt) throws IOException
+    {
+        final MqttDeviceMethod method = new MqttDeviceMethod();
+
+        //arrange
+        baseExpectations();
+        MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        connection.open();
+
+        Deencapsulation.setField(connection, "deviceMethod", method);
+
+        try
+        {
+            final Queue<Pair<String, byte[]>> actualQueue = new ConcurrentLinkedQueue<>();
+            Pair p = new MutablePair<String, byte[]>("$iothub/methods/POST/", "test".getBytes());
+            actualQueue.add(p);
+
+            Deencapsulation.setField(method, "allReceivedMessages", actualQueue);
+
+            new Expectations()
+            {
+                {
+                    method.peekMessage();
+                    result = actualQueue;
+                }
+            };
+
+            connection.receiveMessage();
+        }
+        catch (IOException e)
+        {
+            Queue<Pair<String, byte[]>> receivedMessagesQueue = Deencapsulation.getField(method, "allReceivedMessages");
+            assertEquals(receivedMessagesQueue.size(), 0);
+            throw e;
+        }
+    }
+
     private void baseExpectations()
     {
         new NonStrictExpectations() {
@@ -907,8 +988,6 @@ public class MqttIotHubConnectionTest
                 result = mockToken;
                 new MqttMessaging(sslPrefix + iotHubHostName + sslPortSuffix, deviceId, anyString, anyString, mockIotHubSSLContext);
                 result = mockDeviceMessaging;
-                new MqttDeviceMethod();
-                result = mockDeviceMethods;
                 new MqttDeviceTwin();
                 result = mockDeviceTwin;
                 mockDeviceMessaging.start();

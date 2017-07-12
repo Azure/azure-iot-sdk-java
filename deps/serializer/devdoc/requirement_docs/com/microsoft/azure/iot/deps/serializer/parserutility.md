@@ -27,6 +27,8 @@ class ParserUtility
     
     protected static Date getDateTimeUtc(String dataTime) throws IllegalArgumentException;
     protected static Date getDateTimeOffset(String dataTime) throws IllegalArgumentException;
+
+    protected static JsonElement mapToJsonElement(Map<String, Object> map);
 }
 ```
 
@@ -70,10 +72,10 @@ public static void validateBlobName(String blobName) throws IllegalArgumentExcep
  */
 protected static void validateQuery(String query) throws IllegalArgumentException;
 ```
-**SRS_PARSER_UTILITY_25_026: [**The validateQuery shall do nothing if the string is valid.**]**  
-**SRS_PARSER_UTILITY_25_027: [**The validateQuery shall throw IllegalArgumentException is the provided query is null or empty.**]**  
-**SRS_PARSER_UTILITY_25_028: [**The validateQuery shall throw IllegalArgumentException is the provided query contains non UTF-8 character.**]**  
-**SRS_PARSER_UTILITY_25_029: [**The validateQuery shall throw IllegalArgumentException is the provided query does not contain SELECT and FROM.**]**  
+**SRS_PARSER_UTILITY_25_031: [**The validateQuery shall do nothing if the string is valid.**]**  
+**SRS_PARSER_UTILITY_25_032: [**The validateQuery shall throw IllegalArgumentException is the provided query is null or empty.**]**  
+**SRS_PARSER_UTILITY_25_033: [**The validateQuery shall throw IllegalArgumentException is the provided query contains non UTF-8 character.**]**  
+**SRS_PARSER_UTILITY_25_034: [**The validateQuery shall throw IllegalArgumentException is the provided query does not contain SELECT and FROM.**]**  
 
 ### validateObject
 ```java
@@ -159,3 +161,20 @@ protected static Date getDateTimeOffset(String dataTime) throws IllegalArgumentE
 **SRS_PARSER_UTILITY_21_023: [**The getDateTimeOffset shall parse the provide string using `UTC` timezone.**]**  
 **SRS_PARSER_UTILITY_21_024: [**The getDateTimeOffset shall parse the provide string using the data format `2016-06-01T21:22:41+00:00`.**]**  
 **SRS_PARSER_UTILITY_21_025: [**If the provide string is null, empty or contains an invalid data format, the getDateTimeOffset shall throw IllegalArgumentException.**]**  
+
+### mapToJsonElement
+```java
+/**
+ * Helper to convert a provided map in to a JsonElement, including sub-maps.
+ *
+ * @param map is the map to serialize
+ * @return a JsonElement that represents the content of the map.
+ * @throws IllegalArgumentException if the provided map is null.
+ */
+protected static JsonElement mapToJsonElement(Map<String, Object> map) throws IllegalArgumentException
+```
+**SRS_PARSER_UTILITY_21_035: [**The mapToJsonElement shall serialize the provided map into a JsonElement.**]**  
+**SRS_PARSER_UTILITY_21_036: [**The mapToJsonElement shall include keys with null values in the JsonElement.**]**  
+**SRS_PARSER_UTILITY_21_037: [**If the value is a map, the mapToJsonElement shall include it as a submap in the JsonElement.**]**  
+**SRS_PARSER_UTILITY_21_038: [**If the map is empty, the mapToJsonElement shall return a empty JsonElement.**]**  
+**SRS_PARSER_UTILITY_21_039: [**If the map is null, the mapToJsonElement shall throw IllegalArgumentException.**]**  

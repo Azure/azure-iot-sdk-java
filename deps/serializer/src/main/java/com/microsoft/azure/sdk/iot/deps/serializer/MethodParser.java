@@ -3,10 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.deps.serializer;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -182,7 +179,7 @@ public class MethodParser
             {
                 newMethodParser = gson.fromJson(json, MethodParser.class);
             }
-            catch (Exception malformed)
+            catch (JsonSyntaxException malformed)
             {
                 /* Codes_SRS_METHODPARSER_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
                 throw new IllegalArgumentException("Malformed json:" + malformed);
@@ -209,7 +206,7 @@ public class MethodParser
             {
                 newMethodParser = gson.fromJson(json, MethodParser.class);
             }
-            catch (Exception malformed)
+            catch (JsonSyntaxException malformed)
             {
                 /* Codes_SRS_METHODPARSER_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
                 throw new IllegalArgumentException("Malformed json:" + malformed);
@@ -240,7 +237,7 @@ public class MethodParser
                 this.payload = gson.fromJson(json, Object.class);
                 this.operation = Operation.payload;
             }
-            catch (Exception malformed)
+            catch (JsonSyntaxException malformed)
             {
                 /* Codes_SRS_METHODPARSER_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
                 throw new IllegalArgumentException("Malformed json:" + malformed);
@@ -339,7 +336,14 @@ public class MethodParser
                 {
                     jsonProperty.addProperty(CONNECT_TIMEOUT_IN_SECONDS_TAG, connectTimeout);
                 }
-                jsonProperty.add(PAYLOAD_TAG, gson.toJsonTree(payload));
+                if(payload instanceof Map)
+                {
+                    jsonProperty.add(PAYLOAD_TAG, ParserUtility.mapToJsonElement((Map<String, Object>) payload));
+                }
+                else
+                {
+                    jsonProperty.add(PAYLOAD_TAG, gson.toJsonTree(payload));
+                }
                 return jsonProperty;
 
             case response:
@@ -351,7 +355,14 @@ public class MethodParser
                  *  }
                  */
                 jsonProperty.addProperty(STATUS_TAG, status);
-                jsonProperty.add(PAYLOAD_TAG, gson.toJsonTree(payload));
+                if(payload instanceof Map)
+                {
+                    jsonProperty.add(PAYLOAD_TAG, ParserUtility.mapToJsonElement((Map<String, Object>) payload));
+                }
+                else
+                {
+                    jsonProperty.add(PAYLOAD_TAG, gson.toJsonTree(payload));
+                }
                 return jsonProperty;
 
             case payload:
@@ -365,7 +376,7 @@ public class MethodParser
                  */
                 if (payload instanceof Map)
                 {
-                    return gson.toJsonTree(payload, Map.class);
+                    return ParserUtility.mapToJsonElement((Map<String, Object>) payload);
                 }
                 return gson.toJsonTree(payload);
 

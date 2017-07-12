@@ -70,8 +70,9 @@ public class MqttIotHubConnection
             if (config.getDeviceKey() == null || config.getDeviceKey().length() == 0)
             {
                 if(config.getSharedAccessToken() == null || config.getSharedAccessToken().length() == 0)
-
+                {
                     throw new IllegalArgumentException("Both deviceKey and shared access signature cannot be null or empty.");
+                }
             }
 
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_001: [The constructor shall save the configuration.]
@@ -247,9 +248,10 @@ public class MqttIotHubConnection
      * @return the message received, or null if none exists.
      *
      * @throws IllegalStateException if the connection state is currently closed.
+     * @throws UnsupportedOperationException if the message found in the queue cannot be understood by any of the messaging clients
      * @throws IOException if receiving on any of messaging clients fail.
      */
-    public Message receiveMessage() throws IllegalStateException, IOException
+    public Message receiveMessage() throws IllegalStateException, IOException, UnsupportedOperationException
     {
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_015: [If the MQTT connection is closed,
         // the function shall throw an IllegalStateException.]
@@ -263,18 +265,25 @@ public class MqttIotHubConnection
 
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_014: [The function shall attempt to consume a message
         // from various messaging clients.]
+        // Codes_SRS__MQTTIOTHUBCONNECTION_34_016: [If any of the messaging clients throw an exception, The associated message will be removed from the queue and the exception will be propagated up to the receive task.]
 
-        /*
-        **Codes_SRS_MQTTIOTHUBCONNECTION_25_016: [**If any of the messaging clients fail to receive, the function shall throw an IOException.**]**
-         */
         message = this.deviceMethod.receive();
         if (message == null)
         {
             message = deviceTwin.receive();
         }
+
         if (message == null)
         {
             message = deviceMessaging.receive();
+        }
+
+        if (message == null)
+        {
+            String unsupportedTopicString = deviceMessaging.peekMessage().getKey();
+
+            //Codes_SRS_MQTTIOTHUBCONNECTION_34_017: [If all of the messaging clients fail to receive, the function shall throw an UnsupportedOperationException.]
+            throw new UnsupportedOperationException("Queued message's topic string is not supported by any messaging client: " + unsupportedTopicString);
         }
 
         return message;

@@ -3,6 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.deps.serializer;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
 
 import java.text.SimpleDateFormat;
@@ -100,5 +103,11 @@ public class TwinMetadata
     protected synchronized String getLastUpdate()
     {
         return this.lastUpdated;
+    }
+
+    protected JsonElement toJsonElement()
+    {
+        Gson gson = new GsonBuilder().create();
+        return gson.toJsonTree(this);
     }
 }

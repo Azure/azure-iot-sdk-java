@@ -470,7 +470,7 @@ public class JobsParserTest
                 "{" +
                         "\"jobId\":\"" + jobId + "\"," +
                         "\"type\":\"scheduleUpdateTwin\"," +
-                        "\"cloudToDeviceMethod\":" + twinParser.toJson() + "," +
+                        "\"updateTwin\":" + twinParser.toJson() + "," +
                         "\"queryCondition\":\"" + queryCondition + "\"," +
                         "\"startTime\":\"" + Helpers.formatUTC(startTime) + "\"," +
                         "\"maxExecutionTimeInSeconds\":" + maxExecutionTimeInSeconds +
@@ -480,7 +480,7 @@ public class JobsParserTest
         String json = jobsParser.toJson();
 
         // Assert
-        Helpers.assertJson(json,expectedJson);
+        Helpers.assertJson(json, expectedJson);
     }
 
 }
