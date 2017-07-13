@@ -41,9 +41,9 @@ public void addMessage(HttpsSingleMessage msg);
 
 **SRS_HTTPSBATCHMESSAGE_11_002: [**The function shall add the message as a JSON object appended to the current JSON array.**]**
 
-**SRS_HTTPSBATCHMESSAGE_11_003: [**The JSON object shall have the field "body" set to the raw message.**]**
+**SRS_HTTPSBATCHMESSAGE_11_003: [**The JSON object shall have the field "body" set to the raw message encoded in Base64.**]**
 
-**SRS_HTTPSBATCHMESSAGE_11_004: [**The JSON object shall have the field "base64Encoded" set to whether the raw message was Base64-encoded.**]**
+**SRS_HTTPSBATCHMESSAGE_11_004: [**The JSON object shall have the field "base64Encoded" set to true and always encode the body for a batch message.**]**
 
 **SRS_HTTPSBATCHMESSAGE_11_005: [**The JSON object shall have the field "properties" set to a JSON object which has a key-value pair for each message property, where the key is the HTTPS property name and the value is the property value.**]**
 
