@@ -3,12 +3,12 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
-import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsBatchMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 
 import javax.naming.SizeLimitExceededException;
@@ -24,9 +24,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
 /** Unit tests for HttpsBatchMessage.
- * 100% methods covered
- * 100% lines covered
- */
+ *  Coverage 100% method, 93% line
+ * */
+
 public class HttpsBatchMessageTest
 {
     protected static Charset UTF8 = StandardCharsets.UTF_8;
@@ -46,21 +46,18 @@ public class HttpsBatchMessageTest
     }
 
     // Tests_SRS_HTTPSBATCHMESSAGE_11_002: [The function shall add the message as a JSON object appended to the current JSON array.]
-    // Tests_SRS_HTTPSBATCHMESSAGE_11_003: [The JSON object shall have the field "body" set to the raw message.]
+    // Tests_SRS_HTTPSBATCHMESSAGE_11_003: [The JSON object shall have the field "body" set to the raw message  encoded in Base64.]
     @Test
-    public void addMessageSetsBodyCorrectly(
+    public void addMessageEncodesBodyCorrectly(
             @Mocked final HttpsSingleMessage mockMsg) throws
             SizeLimitExceededException
     {
         final String msgBody = "test-msg-body";
-        final boolean isBase64Encoded = false;
         new NonStrictExpectations()
         {
             {
-                mockMsg.getBodyAsString();
-                result = msgBody;
-                mockMsg.isBase64Encoded();
-                result = isBase64Encoded;
+                mockMsg.getBody();
+                result = msgBody.getBytes();
             }
         };
 
@@ -69,25 +66,22 @@ public class HttpsBatchMessageTest
         String testBatchBody =
                 new String(batchMsg.getBody(), UTF8).replaceAll("\\s", "");
 
-        final String expectedMsgBody = "\"body\":\"" + msgBody + "\"";
+        final String expectedMsgBody = Base64.encodeBase64String(msgBody.getBytes());
         assertThat(testBatchBody, containsString(expectedMsgBody));
     }
 
-    // Tests_SRS_HTTPSBATCHMESSAGE_11_004: [The JSON object shall have the field "base64Encoded" set to whether the raw message was Base64-encoded.]
+    // Tests_SRS_HTTPSBATCHMESSAGE_11_004: [The JSON object shall have the field "base64Encoded" set to true and always encode the body for a batch message.]
     @Test
     public void addMessageSetsBase64Correctly(
             @Mocked final HttpsSingleMessage mockMsg) throws
             SizeLimitExceededException
     {
         final String msgBody = "test-msg-body";
-        final boolean isBase64Encoded = false;
         new NonStrictExpectations()
         {
             {
-                mockMsg.getBodyAsString();
-                result = msgBody;
-                mockMsg.isBase64Encoded();
-                result = isBase64Encoded;
+                mockMsg.getBody();
+                result = msgBody.getBytes();
             }
         };
 
@@ -97,7 +91,7 @@ public class HttpsBatchMessageTest
                 new String(batchMsg.getBody(), UTF8).replaceAll("\\s", "");
 
         final String expectedMsgBase64 =
-                "\"base64Encoded\":" + Boolean.toString(isBase64Encoded);
+                "\"base64Encoded\":" + Boolean.toString(true);
         assertThat(testBatchBody, containsString(expectedMsgBase64));
     }
 
@@ -140,7 +134,6 @@ public class HttpsBatchMessageTest
             SizeLimitExceededException
     {
         final String msgBody = "test-msg-body";
-        final boolean isBase64Encoded = false;
         final String propertyHttpsName = "test-property-name";
         final String propertyValue = "test-property-value";
         final MessageProperty[] properties = { mockProperty };
@@ -148,16 +141,14 @@ public class HttpsBatchMessageTest
         new NonStrictExpectations()
         {
             {
-                mockMsg.getBodyAsString();
-                result = msgBody;
+                mockMsg.getBody();
+                result = msgBody.getBytes();
                 mockMsg.getProperties();
                 result = properties;
                 mockProperty.getName();
                 result = propertyHttpsName;
                 mockProperty.getValue();
                 result = propertyValue;
-                mockMsg.isBase64Encoded();
-                result = isBase64Encoded;
             }
         };
 
@@ -234,15 +225,11 @@ public class HttpsBatchMessageTest
     {
         final int msgBodySize = SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES / 2 + 1;
         final byte[] msgBodyBytes = new byte[msgBodySize];
-        final String msgBody = new String(msgBodyBytes, UTF8);
-        final boolean isBase64Encoded = false;
         new NonStrictExpectations()
         {
             {
-                mockMsg.getBodyAsString();
-                result = msgBody;
-                mockMsg.isBase64Encoded();
-                result = isBase64Encoded;
+                mockMsg.getBody();
+                result = msgBodyBytes;
             }
         };
 
@@ -304,14 +291,11 @@ public class HttpsBatchMessageTest
             SizeLimitExceededException
     {
         final String msgBody = "test-msg-body";
-        final boolean isBase64Encoded = false;
         new NonStrictExpectations()
         {
             {
-                mockMsg.getBodyAsString();
-                result = msgBody;
-                mockMsg.isBase64Encoded();
-                result = isBase64Encoded;
+                mockMsg.getBody();
+                result = msgBody.getBytes();
             }
         };
 
@@ -339,8 +323,8 @@ public class HttpsBatchMessageTest
         new NonStrictExpectations()
         {
             {
-                mockMsg.getBodyAsString();
-                result = new String(validSizeBody, Message.DEFAULT_IOTHUB_MESSAGE_CHARSET);
+                mockMsg.getBody();
+                result = validSizeBody;
             }
         };
 
