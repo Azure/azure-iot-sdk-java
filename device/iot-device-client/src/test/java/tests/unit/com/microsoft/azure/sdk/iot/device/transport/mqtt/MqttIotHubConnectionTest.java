@@ -988,6 +988,7 @@ public class MqttIotHubConnectionTest
                 result = mockToken;
                 new MqttMessaging(sslPrefix + iotHubHostName + sslPortSuffix, deviceId, anyString, anyString, mockIotHubSSLContext);
                 result = mockDeviceMessaging;
+                Deencapsulation.invoke(mockDeviceMessaging, "setDeviceClientConfig", mockConfig);
                 new MqttDeviceTwin();
                 result = mockDeviceTwin;
                 mockDeviceMessaging.start();

@@ -3,8 +3,10 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
+import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttDeviceTwin;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttMessaging;
@@ -26,7 +28,7 @@ import static org.junit.Assert.*;
 
 /**
  * Unit test for Mqtt class.
- * 84% methods, 84% lines covered
+ * 90% methods, 86% lines covered
  */
 public class MqttTest {
     final String serverUri = "test.host.name";
@@ -61,6 +63,13 @@ public class MqttTest {
 
     @Mocked
     IotHubSSLContext mockIotHubSSLContext;
+
+    @Mocked
+    protected IotHubSasToken mockSASToken;
+
+    @Mocked
+    protected DeviceClientConfig mockDeviceClientConfig;
+
 
     @Before
     public void setUp() {
@@ -681,6 +690,31 @@ public class MqttTest {
         testCleanUp(mockMqtt);
     }
 
+    /*
+    **Tests_SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
+     */
+    @Test (expected = IOException.class) 
+    public void publishThrowsExceptionifUserSuppliedSASTokenHasExpired() throws IOException, MqttException
+    {
+        //arrange
+        Mqtt mockMqtt = null;
+        try
+        {
+            baseConstructorExpectations(true);
+            final byte[] payload = {0x61, 0x62, 0x63};
+           
+            mockMqtt = instantiateMqtt(true);
+            
+            //act
+            Deencapsulation.setField(mockMqtt,"userSpecifiedSASTokenExpiredOnRetry",true);
+            Deencapsulation.invoke(mockMqtt, "publish", mockParseTopic, payload);
+            
+        }
+        finally
+        {
+            testCleanUp(mockMqtt);
+        }
+    }
 
     /*
     **Tests_SRS_Mqtt_25_012: [**If the MQTT connection is closed, the function shall throw an IOException.**]**
@@ -1033,6 +1067,32 @@ public class MqttTest {
     }
 
     /*
+    **Tests_SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
+     */
+    @Test(expected = IOException.class)
+    public void subscribeThrowsExceptionWhenUserSuppliedSASTokenHasExpired() throws IOException, MqttException
+    {
+        //arrange
+        Mqtt mockMqtt = null;
+        try
+        {
+            baseConstructorExpectations(true);
+
+            mockMqtt = instantiateMqtt(true);
+            Deencapsulation.invoke(mockMqtt, "connect");
+
+            //act
+            Deencapsulation.setField(mockMqtt,"userSpecifiedSASTokenExpiredOnRetry",true);
+            Deencapsulation.invoke(mockMqtt, "subscribe", mockParseTopic);
+        }
+        
+        finally
+        {
+            testCleanUp(mockMqtt);
+        }
+    }
+    
+    /*
     **Tests_SRS_Mqtt_25_048: [**If the Mqtt Client Async throws MqttException for any reason, the function shall throw an IOException with the message.**]**
      */
     @Test(expected = IOException.class)
@@ -1277,6 +1337,9 @@ public class MqttTest {
 
     }
 
+   /*
+    **Tests_SRS_Mqtt_99_050: [**The function shall check if SAS token has already expired.**]**
+    */
     /*
     **Tests_SRS_Mqtt_25_026: [**The function shall notify all its concrete classes by calling abstract method onReconnect at the entry of the function**]**
      */
@@ -1284,7 +1347,7 @@ public class MqttTest {
     **Tests_SRS_Mqtt_25_029: [**The function shall notify all its concrete classes by calling abstract method onReconnectComplete at the exit of the function**]**
      */
     @Test
-    public void connectionLostAttemptsToReconnect() throws IOException, MqttException
+    public void connectionLostAttemptsToReconnectWithSASTokenStillValid() throws IOException, MqttException
     {
         //arrange
         Mqtt mockMqtt = null;
@@ -1311,8 +1374,13 @@ public class MqttTest {
                     mockMqttConnectionOptions.setSocketFactory(mockIotHubSSLContext.getIotHubSSlContext().getSocketFactory());
                     mockMqttAsyncClient.isConnected();
                     result = false;
+
+                    IotHubSasToken.isSasTokenExpired(new String(mockMqttConnectionOptions.getPassword()));
+                    result = false;
+
                     mockMqttAsyncClient.isConnected();
                     result = false;
+
                     mockMqttAsyncClient.connect(mockMqttConnectionOptions);
                     result = mockMqttToken;
                     mockMqttToken.waitForCompletion();
@@ -1338,7 +1406,168 @@ public class MqttTest {
             testCleanUp(mockMqtt);
         }
     }
+    
+    /*
+     **Tests_SRS_Mqtt_99_050: [**The function shall check if SAS token has already expired.**]**
+    */
+    /*
+     **Tests_SRS_Mqtt_99_051: [**The function shall check if SAS token in based on user supplied SharedAccessKey.**]**
+    */
+     /*
+     **Tests_SRS_Mqtt_99_052: [**The function shall generate a new SAS token.**]**
+    */
+    /*
+    **Tests_SRS_Mqtt_25_026: [**The function shall notify all its concrete classes by calling abstract method onReconnect at the entry of the function**]**
+     */
+    /*
+    **Tests_SRS_Mqtt_25_029: [**The function shall notify all its concrete classes by calling abstract method onReconnectComplete at the exit of the function**]**
+    */
 
+    @Test
+    public void connectionLostAttemptsToReconnectWithUserSuppliedSharedKeyBasedSASTokenAlreadyExpired() throws IOException, MqttException
+    {
+        //arrange
+        Mqtt mockMqtt = null;
+        Throwable t = new Throwable();
+
+        try
+        {
+            new NonStrictExpectations()
+            {
+                {
+                    new MemoryPersistence();
+                    result = mockMemoryPersistence;
+                    new MqttAsyncClient(serverUri, clientId, mockMemoryPersistence);
+                    result = mockMqttAsyncClient;
+                    mockMqttAsyncClient.setCallback((Mqtt) any);
+
+                    new MqttConnectOptions();
+                    result = mockMqttConnectionOptions;
+                    mockMqttConnectionOptions.setKeepAliveInterval(anyInt);
+                    mockMqttConnectionOptions.setCleanSession(anyBoolean);
+                    mockMqttConnectionOptions.setMqttVersion(anyInt);
+                    mockMqttConnectionOptions.setUserName(anyString);
+                    mockMqttConnectionOptions.setPassword(password.toCharArray());
+                    mockMqttConnectionOptions.setSocketFactory(mockIotHubSSLContext.getIotHubSSlContext().getSocketFactory());
+                }
+            };
+
+            new StrictExpectations()
+            {
+                {
+                    mockMqttAsyncClient.isConnected();
+                    result = false;
+                    mockMqttConnectionOptions.getPassword();
+                    result = anyString.toCharArray();
+                    IotHubSasToken.isSasTokenExpired(anyString);
+                    result = true; // SAS token has expired
+                    mockDeviceClientConfig.getDeviceKey();
+                    result = anyString;
+                    mockDeviceClientConfig.getTokenValidSecs();
+                    result = anyLong;
+                }
+            };
+
+            new NonStrictExpectations()
+            {
+                {
+                    new IotHubSasToken((DeviceClientConfig)any, anyLong);
+                    result = mockSASToken;
+                }
+            };
+
+            new StrictExpectations()
+            {
+                {
+                    mockMqttConnectionOptions.setPassword((char[])any);
+                    mockMqttAsyncClient.isConnected();
+                    result = false;
+                    mockMqttAsyncClient.connect(mockMqttConnectionOptions);
+                    result = mockMqttToken;
+                    mockMqttToken.waitForCompletion();
+                    mockMqttAsyncClient.isConnected();
+                    result = true;
+                }
+            };
+
+            //act
+            try
+            {
+                mockMqtt = instantiateMqtt(true);
+                Deencapsulation.invoke(mockMqtt, "setDeviceClientConfig", mockDeviceClientConfig);
+                mockMqtt.connectionLost(t);
+            }
+            catch (Exception e)
+            {
+                System.out.print("Completed throwing exception - " + e.getCause() + e.getMessage());
+            }
+        }
+        finally
+        {
+            testCleanUp(mockMqtt);
+        }
+    }
+
+	/*
+     **Tests_SRS_Mqtt_99_050: [**The function shall check if SAS token has already expired.**]**
+    */
+	/*
+     **Tests_SRS_Mqtt_99_051: [**The function shall check if SAS token in based on user supplied SharedAccessKey.**]**
+    */
+
+    @Test(expected = IOException.class)
+    public void connectionLostAttemptsToReconnectWithUserSuppliedSASTokenAlreadyExpired() throws IOException, MqttException
+    {
+        final byte[] payload = {0x61, 0x62, 0x63};
+        //arrange
+        Mqtt mockMqtt = null;
+        Throwable t = new Throwable();
+
+        try
+        {
+            new StrictExpectations()
+            {
+                {
+                    new MemoryPersistence();
+                    result = mockMemoryPersistence;
+                    new MqttAsyncClient(serverUri, clientId, mockMemoryPersistence);
+                    result = mockMqttAsyncClient;
+                    mockMqttAsyncClient.setCallback((Mqtt) any);
+
+                    new MqttConnectOptions();
+                    result = mockMqttConnectionOptions;
+                    mockMqttConnectionOptions.setKeepAliveInterval(anyInt);
+                    mockMqttConnectionOptions.setCleanSession(anyBoolean);
+                    mockMqttConnectionOptions.setMqttVersion(anyInt);
+                    mockMqttConnectionOptions.setUserName(anyString);
+                    mockMqttConnectionOptions.setPassword(password.toCharArray());
+                    mockMqttConnectionOptions.setSocketFactory(mockIotHubSSLContext.getIotHubSSlContext().getSocketFactory());
+                    mockMqttAsyncClient.isConnected();
+                    result = false;
+
+                    IotHubSasToken.isSasTokenExpired(new String(mockMqttConnectionOptions.getPassword()));
+                    result = true; // User specified SAS token has expired
+
+                    mockDeviceClientConfig.getDeviceKey();
+                    result = null;
+
+                }
+            };
+
+            //act
+            mockMqtt = instantiateMqtt(true);
+            Deencapsulation.invoke(mockMqtt, "setDeviceClientConfig", mockDeviceClientConfig);
+            mockMqtt.connectionLost(t);
+            Deencapsulation.invoke(mockMqtt, "publish", mockParseTopic, payload);
+
+        }
+
+        finally
+        {
+            testCleanUp(mockMqtt);
+        }
+    }
+    
     /*
     **Tests_SRS_Mqtt_25_027: [**The function shall attempt to reconnect to the IoTHub in a loop with exponential backoff until it succeeds**]**
      */
@@ -1370,12 +1599,19 @@ public class MqttTest {
 
                     mockMqttAsyncClient.isConnected();
                     result = false;
+                
+                    IotHubSasToken.isSasTokenExpired(new String(mockMqttConnectionOptions.getPassword()));
+                    result = false;
+
                     mockMqttAsyncClient.isConnected();
                     result = false;
                     mockMqttAsyncClient.connect(mockMqttConnectionOptions);
                     result = mockMqttException;
 
                     mockMqttAsyncClient.isConnected();
+                    result = false;
+                    
+                    IotHubSasToken.isSasTokenExpired(new String(mockMqttConnectionOptions.getPassword()));
                     result = false;
 
                     mockMqttAsyncClient.isConnected();
@@ -1572,4 +1808,55 @@ public class MqttTest {
             testCleanUp(mockMqtt);
         }
     }
+    /*
+    **Tests_SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
+     */
+    @Test(expected = IOException.class)
+    public void unsubscribeThrowsExceptionWhenUserSuppliedSASTokenHasExpired() throws IOException, MqttException
+    {
+        //arrange
+        Mqtt mockMqtt = null;
+        try
+        {
+            baseConstructorExpectations(true);
+            new NonStrictExpectations()
+            {
+                {
+                    mockMqttAsyncClient.isConnected();
+                    result = true;
+                }
+            };
+
+            mockMqtt = instantiateMqtt(true);
+            Deencapsulation.invoke(mockMqtt, "connect");
+
+            //act
+            Deencapsulation.setField(mockMqtt,"userSpecifiedSASTokenExpiredOnRetry",true);
+            Deencapsulation.invoke(mockMqtt, "unsubscribe", mockParseTopic);
+        }
+        
+        finally
+        {
+            testCleanUp(mockMqtt);
+        }
+    }
+   
+    /*
+    ** Codes_SRS_Mqtt_99_50: [**If deviceConfig is null, the function shall throw an IllegalArgumentException**]**
+    */
+    @Test  (expected = IllegalArgumentException.class)
+    public void deviceConfigNullThrows() throws IOException, MqttException
+    {
+        // Act
+        Mqtt mockMqtt = instantiateMqtt(true);
+
+        try
+        {
+           Deencapsulation.invoke(mockMqtt,"setDeviceClientConfig", new Class[] {DeviceClientConfig.class},(DeviceClientConfig)null);
+        }
+        finally
+        {
+            testCleanUp(mockMqtt);
+        }
+    } 
 }

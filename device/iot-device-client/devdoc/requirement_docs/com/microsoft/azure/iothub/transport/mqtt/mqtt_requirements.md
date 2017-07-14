@@ -99,6 +99,8 @@ protected void disconnect() throws IOException;
 ```java
 protected void publish(String publishTopic, byte[] payload) throws IOException;
 ```
+**SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
+
 **SRS_Mqtt_25_012: [**If the MQTT connection is closed, the function shall throw an IOException.**]**
 
 **SRS_Mqtt_25_013: [**If the either publishTopic or payload is null or empty, the function shall throw an IOException.**]**
@@ -120,6 +122,8 @@ protected void subscribe(String topic) throws IOException;
 
 **SRS_Mqtt_25_016: [**If the subscribeTopic is null or empty, the function shall throw an InvalidParameter Exception.**]**
 
+**SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
+
 **SRS_Mqtt_25_048: [**If the Mqtt Client Async throws MqttException for any reason, the function shall throw an IOException with the message.**]**
 
 **SRS_Mqtt_25_017: [**The function shall subscribe to subscribeTopic specified to the IoT Hub given in the configuration.**]**
@@ -132,6 +136,8 @@ protected void unsubscribe(String topic) throws IOException;
 ```
 
 **SRS_Mqtt_25_018: [**If the MQTT connection is closed, the function shall throw an IOException with message.**]**
+
+**SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
 
 **SRS_Mqtt_25_019: [**If the unsubscribeTopic is null or empty, the function shall throw an IOException.**]**
 
@@ -161,6 +167,14 @@ public Message receive() throws IOException;
 public void connectionLost(Throwable throwable);
 ```
 **SRS_Mqtt_25_026: [**The function shall notify all its concrete classes by calling abstract method onReconnect at the entry of the function**]**
+
+**SRS_Mqtt_99_050: [**The function shall check if SAS token has already expired.**]**
+
+**SRS_Mqtt_99_051: [**The function shall check if SAS token in based on user supplied SharedAccessKey.**]**
+
+**SRS_Mqtt_99_052: [**The function shall generate a new SAS token.**]**
+
+**SRS_Mqtt_99_053: [**The function shall set user supplied SAS token expiration flag to true.**]**
 
 **SRS_Mqtt_25_027: [**The function shall attempt to reconnect to the IoTHub in a loop with exponential backoff until it succeeds**]**
 
