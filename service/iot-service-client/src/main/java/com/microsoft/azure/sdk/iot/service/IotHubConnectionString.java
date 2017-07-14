@@ -56,6 +56,8 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     private static final String URL_PATH_JOBS = "jobs";
     private static final String URL_PATH_VERSION = "v2";
     private static final String URL_PATH_QUERY = "query";
+    private static final String URL_PATH_JOB_TYPE = "jobType";
+    private static final String URL_PATH_JOB_STATUS = "jobStatus";
     private static final String URL_PATH_CANCEL = "cancel";
 
     protected IotHubConnectionString() {}
@@ -163,13 +165,14 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
     /**
      * Create url for querying
-     *
-     * @return the URL in the follow format: "https:[hostname]/jobs/v2/query?api-version=2016-11-14"
+     * @param jobStatus jobStatus as String
+     * @param jobType jobType as String
+     * @return the URL in the follow format: "https:[hostname]/jobs/v2/query?jobType=jobTypeValue&amp;jobStatus=jobStatusValue&amp;api-version=2016-11-14"
      * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
      */
-    public URL getUrlQuery() throws MalformedURLException
+    public URL getUrlQuery(String jobType, String jobStatus) throws MalformedURLException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_022: [** The function shall create a URL object from the given jobId using the following format: `https:hostname/jobs/v2/query?api-version=2016-11-14` **]**
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_022: [** The function shall create a URL object from the given jobId using the following format: `https:hostname/jobs/v2/query?jobType=<>&jobStatus=<>&api-version=2016-11-14` **]**
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(URL_HTTPS);
         stringBuilder.append(hostName);
@@ -178,8 +181,20 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         stringBuilder.append(URL_SEPARATOR_0);
         stringBuilder.append(URL_PATH_VERSION);
         stringBuilder.append(URL_SEPARATOR_0);
+
         stringBuilder.append(URL_PATH_QUERY);
         stringBuilder.append(URL_SEPARATOR_1);
+
+        stringBuilder.append(URL_PATH_JOB_TYPE);
+        stringBuilder.append(VALUE_PAIR_SEPARATOR);
+        stringBuilder.append(jobType);
+        stringBuilder.append(URL_SEPARATOR_2);
+
+        stringBuilder.append(URL_PATH_JOB_STATUS);
+        stringBuilder.append(VALUE_PAIR_SEPARATOR);
+        stringBuilder.append(jobStatus);
+        stringBuilder.append(URL_SEPARATOR_2);
+
         stringBuilder.append(URL_API_VERSION);
         return new URL(stringBuilder.toString());
     }

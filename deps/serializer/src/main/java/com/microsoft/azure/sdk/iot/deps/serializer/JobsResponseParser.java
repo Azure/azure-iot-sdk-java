@@ -3,9 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.deps.serializer;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
+import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -30,7 +28,7 @@ public class JobsResponseParser
     @SerializedName(JOBID_TAG)
     private String jobId;
 
-    // Required if jobType is updateTwin or cloudToDeviceMethod.
+    // Required if type is updateTwin or cloudToDeviceMethod.
     // Condition for device query to get devices to execute the job on
     private static final String QUERYCONDITION_TAG = "queryCondition";
     @SerializedName(QUERYCONDITION_TAG)
@@ -40,6 +38,11 @@ public class JobsResponseParser
     private static final String CREATETIME_TAG = "createdTime";
     @SerializedName(CREATETIME_TAG)
     private String createdTime;
+    // Scheduled job start time in UTC for Query Response.
+    private static final String CREATE_TIME_UTC_TAG = "createdDateTimeUtc";
+    @SerializedName(CREATE_TIME_UTC_TAG)
+    private String createdTimeUTC;
+
     @Expose(deserialize = false)
     private Date createdTimeDate;
 
@@ -47,6 +50,11 @@ public class JobsResponseParser
     private static final String STARTTIME_TAG = "startTime";
     @SerializedName(STARTTIME_TAG)
     private String startTime;
+    // System generated start time in UTC for Query Response.
+    private static final String START_TIME_UTC_TAG = "startTimeUtc";
+    @SerializedName(START_TIME_UTC_TAG)
+    private String startTimeUTC;
+
     @Expose(deserialize = false)
     private Date startTimeDate;
 
@@ -55,8 +63,22 @@ public class JobsResponseParser
     private static final String ENDTIME_TAG = "endTime";
     @SerializedName(ENDTIME_TAG)
     private String endTime;
+    // System generated end time in UTC for Query Response.
+    // Represents the time the job stopped processing.
+    private static final String END_TIME_UTC_TAG = "endTimeUtc";
+    @SerializedName(END_TIME_UTC_TAG)
+    private String endTimeUTC;
+
     @Expose(deserialize = false)
     private Date endTimeDate;
+
+    // System generated end time in UTC for Query Response.
+    // Represents the time the job was last updated.
+    private static final String LAST_UPDATED_TIME_UTC_TAG = "lastUpdatedDateTimeUtc";
+    @SerializedName(LAST_UPDATED_TIME_UTC_TAG)
+    private String lastUpdatedTime;
+    @Expose(serialize = false, deserialize = true)
+    private Date lastUpdatedTimeDate;
 
     // Max execution time in seconds (ttl duration)
     private static final String MAXEXECUTIONTIMEINSECONDS_TAG = "maxExecutionTimeInSeconds";
@@ -67,6 +89,12 @@ public class JobsResponseParser
     // The type of job to execute.
     private static final String TYPE_TAG = "type";
     @SerializedName(TYPE_TAG)
+    private String type;
+
+    // Required for Query Response.
+    // The type of job to execute.
+    private static final String JOB_TYPE_TAG = "jobType";
+    @SerializedName(JOB_TYPE_TAG)
     private String jobType;
 
     // Required.
@@ -75,14 +103,23 @@ public class JobsResponseParser
     @SerializedName(STATUS_TAG)
     private String jobsStatus;
 
-    // Required if jobType is cloudToDeviceMethod.
+    // Required if type is cloudToDeviceMethod.
     // The method type and parameters.
     // Ignored by the json serializer if null.
     private static final String CLOUDTODEVICEMETHOD_TAG = "cloudToDeviceMethod";
     @SerializedName(CLOUDTODEVICEMETHOD_TAG)
     private MethodParser cloudToDeviceMethod = null;
 
-    // Required if jobType is updateTwin.
+    // The outcome for job query if any.
+    private static final String OUTCOME_TAG = "outcome";
+    @SerializedName(OUTCOME_TAG)
+    private JsonElement outcome = null;
+
+    // The contents of outcome for job query if any.
+    private static final String DEVICE_METHOD_RESPONSE_TAG = "deviceMethodResponse";
+    private MethodParser methodResponse;
+
+    // Required if type is updateTwin.
     // The Update Twin tags and desired properties.
     // Ignored by the json serializer if null.
     private static final String UPDATETWIN_TAG = "updateTwin";
@@ -118,6 +155,11 @@ public class JobsResponseParser
     @SerializedName(PARENTJOBID_TAG)
     private String parentJobId = null;
 
+    // The error on the Job Response, if any.
+    private static final String ERROR_TAG = "error";
+    @SerializedName(ERROR_TAG)
+    private JobQueryResponseError error = null;
+
     /**
      * Static constructor to create a instance based on the provided json
      *
@@ -151,15 +193,25 @@ public class JobsResponseParser
         }
 
         /* Codes_SRS_JOBSRESPONSEPARSER_21_009: [If the json do not contains `type`, or the `type` is invalid, the createFromJson shall throws IllegalArgumentException.] */
-        if((jobsResponseParser.jobType == null) || jobsResponseParser.jobType.isEmpty())
+        if(((jobsResponseParser.type == null) || jobsResponseParser.type.isEmpty()) && (jobsResponseParser.jobType == null || jobsResponseParser.jobType.isEmpty()))
         {
             throw new IllegalArgumentException("Json do not contains " + TYPE_TAG);
+        }
+
+        if((jobsResponseParser.type != null) && (jobsResponseParser.jobType != null))
+        {
+            throw new IllegalArgumentException("Json contains both " + TYPE_TAG + " and " + JOB_TYPE_TAG);
         }
 
         /* Codes_SRS_JOBSRESPONSEPARSER_21_010: [If the json do not contains `status`, or the `status` is invalid, the createFromJson shall throws IllegalArgumentException.] */
         if((jobsResponseParser.jobsStatus == null) || jobsResponseParser.jobsStatus.isEmpty())
         {
             throw new IllegalArgumentException("Json do not contains " + STATUS_TAG);
+        }
+
+        if (jobsResponseParser.type == null)
+        {
+            jobsResponseParser.type = jobsResponseParser.jobType;
         }
 
         Map map = gson.fromJson(json, Map.class);
@@ -176,7 +228,35 @@ public class JobsResponseParser
             jobsResponseParser.cloudToDeviceMethod.fromJson(gson.toJson(map.get(CLOUDTODEVICEMETHOD_TAG)));
         }
 
+        if (map.containsKey(OUTCOME_TAG))
+        {
+            Map responseMap = gson.fromJson(jobsResponseParser.outcome, Map.class);
+            if (responseMap.containsKey(DEVICE_METHOD_RESPONSE_TAG))
+            {
+                //Codes_SRS_JOBSRESPONSEPARSER_25_028: [If the json contains outcome, the createFromJson shall parse the value of the key deviceMethodResponse for MethodParser class.]
+                MethodParser methodParserResponse = new MethodParser();
+                String outcomeResponse = gson.toJson(responseMap.get(DEVICE_METHOD_RESPONSE_TAG));
+                methodParserResponse.fromJson(outcomeResponse);
+                jobsResponseParser.methodResponse = methodParserResponse;
+            }
+            else
+            {
+                //Codes_SRS_JOBSRESPONSEPARSER_25_029: [If the json contains outcome, and the key deviceMethodResponse does not exist then this method shall create empty method parser for MethodParser class.]
+                /*As out come has a value only for method response, in all other cases it should not be looked for values and Exception should be throw
+                * As this is already done by method parser, Initialise the outcome to empty method parser.*/
+                MethodParser methodParserResponse = new MethodParser();
+                methodParserResponse.fromJson(gson.toJson(map.get(OUTCOME_TAG)));
+                jobsResponseParser.methodResponse = methodParserResponse;
+            }
+        }
+
+        // Codes_SRS_JOBSRESPONSEPARSER_25_034: [If the json contains both of the dates createdTime and createdDateTimeUtc or startTime and startTimeUtc or endTime and endTimeUtc, the createFromJson shall throw IllegalArgumentException.]
         /* Codes_SRS_JOBSRESPONSEPARSER_21_011: [If the json contains any of the dates `createdTime`, `startTime`, or `endTime`, the createFromJson shall parser it as ISO_8601.] */
+        if (jobsResponseParser.createdTime != null && jobsResponseParser.createdTimeUTC != null)
+        {
+            throw new IllegalArgumentException("Both createdTime and createdTimeUTC cannot be sent at the same time");
+        }
+
         if(jobsResponseParser.createdTime != null)
         {
             try
@@ -188,6 +268,23 @@ public class JobsResponseParser
                 /* Codes_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
                 jobsResponseParser.createdTimeDate = null;
             }
+        }
+        else if (jobsResponseParser.createdTimeUTC != null)
+        {
+            try
+            {
+                jobsResponseParser.createdTimeDate = dateFormat.parse(jobsResponseParser.createdTimeUTC);
+            }
+            catch (ParseException e)
+            {
+                /* Codes_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
+                jobsResponseParser.createdTimeDate = null;
+            }
+        }
+
+        if (jobsResponseParser.startTime != null && jobsResponseParser.startTimeUTC != null)
+        {
+            throw new IllegalArgumentException("Both startTime and startTimeUTC cannot be sent at the same time");
         }
 
         if(jobsResponseParser.startTime != null)
@@ -202,6 +299,23 @@ public class JobsResponseParser
                 jobsResponseParser.startTimeDate = null;
             }
         }
+        else if (jobsResponseParser.startTimeUTC != null)
+        {
+            try
+            {
+                jobsResponseParser.startTimeDate = dateFormat.parse(jobsResponseParser.startTimeUTC);
+            }
+            catch (ParseException e)
+            {
+                /* Codes_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
+                jobsResponseParser.startTimeDate = null;
+            }
+        }
+
+        if (jobsResponseParser.endTime != null && jobsResponseParser.endTimeUTC != null)
+        {
+            throw new IllegalArgumentException("Both endTime and endTimeUTC cannot be sent at the same time");
+        }
 
         if(jobsResponseParser.endTime != null)
         {
@@ -213,6 +327,31 @@ public class JobsResponseParser
             {
                 /* Codes_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
                 jobsResponseParser.endTimeDate = null;
+            }
+        }
+        else if (jobsResponseParser.endTimeUTC != null)
+        {
+            try
+            {
+                jobsResponseParser.endTimeDate = dateFormat.parse(jobsResponseParser.endTimeUTC);
+            }
+            catch (ParseException e)
+            {
+                /* Codes_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
+                jobsResponseParser.endTimeDate = null;
+            }
+        }
+
+        if (jobsResponseParser.lastUpdatedTime != null)
+        {
+            try
+            {
+                jobsResponseParser.lastUpdatedTimeDate = dateFormat.parse(jobsResponseParser.lastUpdatedTime);
+            }
+            catch (ParseException e)
+            {
+                /* Codes_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
+                jobsResponseParser.lastUpdatedTimeDate = null;
             }
         }
 
@@ -288,14 +427,24 @@ public class JobsResponseParser
     }
 
     /**
+     * Getter for last updated time in UTC
+     * @return System generated last updated time in UTC. Can be {@code null}
+     */
+    public Date getLastUpdatedTimeDate()
+    {
+        //Codes_SRS_JOBSRESPONSEPARSER_25_031: [The getLastUpdatedTimeDate shall return the LastUpdatedTimeUTCDate value.]
+        return lastUpdatedTimeDate;
+    }
+
+    /**
      * Getter for the job type
      *
      * @return the type of job to execute
      */
-    public String getJobType()
+    public String getType()
     {
-        /* Codes_SRS_JOBSRESPONSEPARSER_21_019: [The getJobType shall return a String with the job type value.] */
-        return this.jobType;
+        /* Codes_SRS_JOBSRESPONSEPARSER_21_019: [The getType shall return a String with the job type value.] */
+        return this.type;
     }
 
     /**
@@ -312,7 +461,7 @@ public class JobsResponseParser
     /**
      * Getter for cloud to device method json
      *
-     * @return the json of cloud to device method. It is {@code null} if jobType
+     * @return the json of cloud to device method. It is {@code null} if type
      * is not scheduleDeviceMethod
      */
     public MethodParser getCloudToDeviceMethod()
@@ -322,9 +471,29 @@ public class JobsResponseParser
     }
 
     /**
+     * Returns the error as json
+     * @return the json error returned by IotHub
+     */
+    public JobQueryResponseError getError()
+    {
+        //Codes_SRS_JOBSRESPONSEPARSER_25_032: [The getError shall return the error value.]
+        return error;
+    }
+
+    /**
+     * Getter for the outcome of device method
+     * @return the outcome in json for device method when querying device method job
+     */
+    public MethodParser getOutcome()
+    {
+        //Codes_SRS_JOBSRESPONSEPARSER_25_033: [The getOutcome shall return the outcome value.]
+        return this.methodResponse;
+    }
+
+    /**
      * Getter for update twin json
      *
-     * @return the json of update twin. It is {@code null} if jobType
+     * @return the json of update twin. It is {@code null} if type
      * is not scheduleUpdateTwin
      */
     public TwinParser getUpdateTwin()

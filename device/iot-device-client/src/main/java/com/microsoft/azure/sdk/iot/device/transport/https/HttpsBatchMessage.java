@@ -10,6 +10,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.codec.binary.Base64;
+
 
 /**
  * Builds a batched IoT Hub request body as a JSON array. The batched message
@@ -137,12 +139,12 @@ public final class HttpsBatchMessage implements HttpsMessage
     private static String msgToJson(HttpsSingleMessage msg)
     {
         StringBuilder jsonMsg = new StringBuilder("{");
-        // Codes_SRS_HTTPSBATCHMESSAGE_11_003: [The JSON object shall have the field "body" set to the raw message.]
+        // Codes_SRS_HTTPSBATCHMESSAGE_11_003: [The JSON object shall have the field "body" set to the raw message encoded in Base64.]
         jsonMsg.append("\"body\":");
-        jsonMsg.append("\"").append(msg.getBodyAsString()).append("\",");
-        // Codes_SRS_HTTPSBATCHMESSAGE_11_004: [The JSON object shall have the field "base64Encoded" set to whether the raw message was Base64-encoded.]
+        jsonMsg.append("\"").append(Base64.encodeBase64String(msg.getBody())).append("\",");
+        // Codes_SRS_HTTPSBATCHMESSAGE_11_004: [The JSON object shall have the field "base64Encoded" set to true and always encode the body for a batch message.]
         jsonMsg.append("\"base64Encoded\":");
-        jsonMsg.append(Boolean.toString(msg.isBase64Encoded()));
+        jsonMsg.append(true);
         // Codes_SRS_HTTPSBATCHMESSAGE_11_005: [The JSON object shall have the field "properties" set to a JSON object which has the field "content-type" set to the content type of the raw message.]
         MessageProperty[] properties = msg.getProperties();
         Map<String, String> allProperties = new HashMap<>(msg.getSystemProperties());

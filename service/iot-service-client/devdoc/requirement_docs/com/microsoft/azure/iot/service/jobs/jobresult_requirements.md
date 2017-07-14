@@ -31,6 +31,9 @@ public class JobResult
     public JobStatistics getJobStatistics();
     public String getDeviceId();
     public String getParentJobId();
+    public getLastUpdatedDateTime();
+    public String getOutcome();
+    public String getError();
     
     @Override public String toString();
 }
@@ -134,6 +137,24 @@ public String getDeviceId();
 public String getParentJobId();
 ```
 **SRS_JOBRESULT_21_019: [**The getParentJobId shall return the stored parentJobId.**]**  
+
+### getLastUpdatedDateTime
+```java
+public Date getLastUpdatedDateTime();
+```
+**SRS_JOBRESULT_25_023: [**The getLastUpdatedDateTime shall return the stored LastUpdatedDateTime.**]**  
+
+### getOutcome
+```java
+public String getOutcome();
+```
+**SRS_JOBRESULT_25_021: [**The getOutcome shall return the stored outcome.**]**  
+
+### getError
+```java
+public String getError();
+```
+**SRS_JOBRESULT_25_022: [**The getError shall return the stored error message.**]**  
 
 ### toString
 ```java

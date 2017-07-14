@@ -10,10 +10,9 @@ import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatistics;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.JobType;
+import mockit.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -51,7 +50,7 @@ public class JobResultTest
     final static String DATEFORMAT_JSON = "MMM d, yyyy h:mm:ss a";
 
 
-    private void JobsResponseParserExpectations(String json, TwinParser twinParser, MethodParser methodParser, Date date)
+    private void JobsResponseParserExpectations(String json, TwinParser twinParser, MethodParser methodParser, Date date, MethodParser methodParserResponse)
     {
         new NonStrictExpectations()
         {
@@ -67,16 +66,20 @@ public class JobResultTest
                 result = date;
                 mockedJobsResponseParser.getStartTime();
                 result = date;
+                mockedJobsResponseParser.getLastUpdatedTimeDate();
+                result = date;
                 mockedJobsResponseParser.getEndTime();
                 result = date;
                 mockedJobsResponseParser.getMaxExecutionTimeInSeconds();
                 result = MAX_EXECUTION_TIME_IN_SECONDS;
-                mockedJobsResponseParser.getJobType();
+                mockedJobsResponseParser.getType();
                 result = "scheduleUpdateTwin";
                 mockedJobsResponseParser.getJobsStatus();
                 result = "enqueued";
                 mockedJobsResponseParser.getCloudToDeviceMethod();
                 result = methodParser;
+                mockedJobsResponseParser.getOutcome();
+                result = methodParserResponse;
                 mockedJobsResponseParser.getUpdateTwin();
                 result = twinParser;
                 mockedJobsResponseParser.getFailureReason();
@@ -123,7 +126,7 @@ public class JobResultTest
         twinParser.setETag(ETAG);
         twinParser.resetTags(tags);
 
-        JobsResponseParserExpectations(json, twinParser, null, new Date());
+        JobsResponseParserExpectations(json, twinParser, null, new Date(), null);
 
         //act
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
@@ -174,7 +177,7 @@ public class JobResultTest
         twinParser.setETag(ETAG);
         twinParser.resetTags(tags);
 
-        JobsResponseParserExpectations(json, twinParser, null, now);
+        JobsResponseParserExpectations(json, twinParser, null, now, null);
 
         //act
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
@@ -186,8 +189,8 @@ public class JobResultTest
         assertEquals(now, Deencapsulation.getField(jobResult, "startTime"));
         assertEquals(now, Deencapsulation.getField(jobResult, "endTime"));
         assertEquals(MAX_EXECUTION_TIME_IN_SECONDS, (long)Deencapsulation.getField(jobResult, "maxExecutionTimeInSeconds"));
-        assertEquals(JobResult.JobType.scheduleUpdateTwin, Deencapsulation.getField(jobResult, "jobType"));
-        assertEquals(JobResult.JobStatus.enqueued, Deencapsulation.getField(jobResult, "jobStatus"));
+        assertEquals(JobType.scheduleUpdateTwin, Deencapsulation.getField(jobResult, "jobType"));
+        assertEquals(JobStatus.enqueued, Deencapsulation.getField(jobResult, "jobStatus"));
         assertNull(Deencapsulation.getField(jobResult, "cloudToDeviceMethod"));
         assertNotNull(Deencapsulation.getField(jobResult, "updateTwin"));
         assertEquals(FAILURE_REASON, Deencapsulation.getField(jobResult, "failureReason"));
@@ -213,7 +216,7 @@ public class JobResultTest
         twinParser.setETag(ETAG);
         twinParser.resetDesiredProperty(desired);
 
-        JobsResponseParserExpectations(json, twinParser, null, now);
+        JobsResponseParserExpectations(json, twinParser, null, now, null);
 
         //act
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
@@ -228,7 +231,7 @@ public class JobResultTest
     /* Tests_SRS_JOBRESULT_21_008: [The getStartTime shall return the stored startTime.] */
     /* Tests_SRS_JOBRESULT_21_009: [The getEndTime shall return the stored endTime.] */
     /* Tests_SRS_JOBRESULT_21_010: [The getMaxExecutionTimeInSeconds shall return the stored maxExecutionTimeInSeconds.] */
-    /* Tests_SRS_JOBRESULT_21_011: [The getJobType shall return the stored jobType.] */
+    /* Tests_SRS_JOBRESULT_21_011: [The getType shall return the stored jobType.] */
     /* Tests_SRS_JOBRESULT_21_012: [The getJobStatus shall return the stored jobStatus.] */
     /* Tests_SRS_JOBRESULT_21_014: [The getUpdateTwin shall return the stored updateTwin.] */
     /* Tests_SRS_JOBRESULT_21_015: [The getFailureReason shall return the stored failureReason.] */
@@ -252,7 +255,7 @@ public class JobResultTest
         twinParser.setETag(ETAG);
         twinParser.resetTags(tags);
 
-        JobsResponseParserExpectations(json, twinParser, null, now);
+        JobsResponseParserExpectations(json, twinParser, null, now, null);
 
         //act
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
@@ -264,8 +267,8 @@ public class JobResultTest
         assertEquals(now, jobResult.getStartTime());
         assertEquals(now, jobResult.getEndTime());
         assertEquals(MAX_EXECUTION_TIME_IN_SECONDS, (long)jobResult.getMaxExecutionTimeInSeconds());
-        assertEquals(JobResult.JobType.scheduleUpdateTwin, jobResult.getJobType());
-        assertEquals(JobResult.JobStatus.enqueued, jobResult.getJobStatus());
+        assertEquals(JobType.scheduleUpdateTwin, jobResult.getJobType());
+        assertEquals(JobStatus.enqueued, jobResult.getJobStatus());
         assertNull(jobResult.getCloudToDeviceMethod());
         assertNotNull(jobResult.getUpdateTwin());
         assertEquals(FAILURE_REASON, jobResult.getFailureReason());
@@ -276,16 +279,20 @@ public class JobResultTest
     }
 
     /* Tests_SRS_JOBRESULT_21_013: [The getCloudToDeviceMethod shall return the stored cloudToDeviceMethod.] */
+    /* Tests_SRS_JOBRESULT_25_020: [The getLastUpdatedDateTime shall return the stored LastUpdatedDateTime.] */
+    /* Tests_SRS_JOBRESULT_25_021: [The getOutcome shall return the stored outcome.] */
+    /* Tests_SRS_JOBRESULT_25_022: [The getError shall return the stored error message.] */
     @Test
-    public void gettersMethodContent() throws IOException
+    public void gettersMethodContent(@Mocked MethodParser mockedMethodParser) throws IOException
     {
         //arrange
         final String json = "validJson";
         final Date now = new Date();
 
         MethodParser methodParser = new MethodParser("methodName", null, null, new HashMap<String, Object>());
+        MethodParser methodParserResponse = mockedMethodParser;
 
-        JobsResponseParserExpectations(json, null, methodParser, now);
+        JobsResponseParserExpectations(json, null, methodParser, now, methodParserResponse);
         new NonStrictExpectations()
         {
             {
@@ -294,12 +301,16 @@ public class JobResultTest
 
                 mockedJobsResponseParser.getJobId();
                 result = JOB_ID;
-                mockedJobsResponseParser.getJobType();
+                mockedJobsResponseParser.getType();
                 result = "scheduleDeviceMethod";
                 mockedJobsResponseParser.getJobsStatus();
                 result = "completed";
                 mockedJobsResponseParser.getCloudToDeviceMethod();
                 result = methodParser;
+                mockedJobsResponseParser.getOutcome();
+                result = methodParserResponse;
+                methodParserResponse.toJson();
+                result = json;
 
                 Deencapsulation.newInstance(JobStatistics.class, mockedJobsStatisticsParser);
                 result = mockedJobStatistics;
@@ -311,9 +322,12 @@ public class JobResultTest
 
         //assert
         assertEquals(JOB_ID, jobResult.getJobId());
-        assertEquals(JobResult.JobType.scheduleDeviceMethod, jobResult.getJobType());
-        assertEquals(JobResult.JobStatus.completed, jobResult.getJobStatus());
+        assertEquals(JobType.scheduleDeviceMethod, jobResult.getJobType());
+        assertEquals(JobStatus.completed, jobResult.getJobStatus());
         assertNotNull(jobResult.getCloudToDeviceMethod());
+        assertEquals(json, jobResult.getOutcome());
+        assertNotNull(jobResult.getLastUpdatedDateTime());
+        assertNull(jobResult.getError());
     }
 
     /* Tests_SRS_JOBRESULT_21_020: [The toString shall return a String with a pretty print json that represents this class.] */
@@ -331,6 +345,7 @@ public class JobResultTest
                 "  \"queryCondition\": \"DeviceId IN ['validDevice']\",\n" +
                 "  \"createdTime\": \"" + nowString + "\",\n" +
                 "  \"startTime\": \"" + nowString + "\",\n" +
+                "  \"lastUpdatedDateTime\": \"" + nowString + "\",\n" +
                 "  \"endTime\": \"" + nowString + "\",\n" +
                 "  \"maxExecutionTimeInSeconds\": 100,\n" +
                 "  \"jobType\": \"scheduleUpdateTwin\",\n" +
@@ -383,7 +398,7 @@ public class JobResultTest
         twinParser.setETag(ETAG);
         twinParser.resetTags(tags);
 
-        JobsResponseParserExpectations(json, twinParser, null, now);
+        JobsResponseParserExpectations(json, twinParser, null, now, null);
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
 
         //act

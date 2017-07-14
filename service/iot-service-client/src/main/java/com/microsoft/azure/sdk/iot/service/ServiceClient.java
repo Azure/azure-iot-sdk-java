@@ -30,7 +30,7 @@ public class ServiceClient
 
     /**
      * Create ServiceClient from the specified connection string
-     *
+     * @param iotHubServiceClientProtocol  protocol to use
      * @param connectionString The connection string for the IotHub
      * @return The created ServiceClient object
      * @throws IOException This exception is thrown if the object creation failed
@@ -55,6 +55,7 @@ public class ServiceClient
      * Initialize AMQP sender using given connection string
      *
      * @param iotHubConnectionString The ConnectionString object for the IotHub
+     * @param iotHubServiceClientProtocol protocol to use
      */
     protected ServiceClient(IotHubConnectionString iotHubConnectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
@@ -114,6 +115,7 @@ public class ServiceClient
      * @param deviceId The device identifier for the target device
      * @param message The message for the device
      * @throws IOException This exception is thrown if the AmqpSender object is not initialized
+     * @throws IotHubException This exception is thrown if IotHub rejects the message for any reason
      */
     public void send(String deviceId, Message message) throws IOException, IotHubException
     {

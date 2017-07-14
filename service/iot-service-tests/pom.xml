@@ -3,7 +3,7 @@
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-service-tests</artifactId>
     <name>Iot Hub Java Service SDK Integration Tests</name>
-    <version>1.5.22</version>
+    <version>1.6.23</version>
     <description>Integration tests for the Microsoft Azure IoT Service SDK for Java</description>
     <developers>
         <developer>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-service-client</artifactId>
-            <version>1.5.22</version>
+            <version>1.6.23</version>
         </dependency>
         <dependency>
             <groupId>org.jmockit</groupId>
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-device-client</artifactId>
-            <version>1.3.30</version>
+            <version>1.3.31</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure</groupId>

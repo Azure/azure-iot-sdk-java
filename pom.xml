@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-sdk-java</artifactId>
-    <version>0.6.10</version>
+    <version>0.7.11</version>
     <name>Azure IoT Sdk Java</name>
     <packaging>pom</packaging>
     <developers>

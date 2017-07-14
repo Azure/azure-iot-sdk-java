@@ -27,6 +27,7 @@ public class AuthenticationMechanism
 
     /**
      * Constructor for initialization.
+     * @param symmetricKey symmetricKey used for Auth
      */
     public AuthenticationMechanism(SymmetricKey symmetricKey)
     {
