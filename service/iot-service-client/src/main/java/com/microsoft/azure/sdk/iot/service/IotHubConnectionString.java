@@ -165,7 +165,9 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
     /**
      * Create url for querying
-     * @return the URL in the follow format: "https:[hostname]/jobs/v2/query?jobType=<>&jobStatus=<>&api-version=2016-11-14"
+     * @param jobStatus jobStatus as String
+     * @param jobType jobType as String
+     * @return the URL in the follow format: "https:[hostname]/jobs/v2/query?jobType=jobTypeValue&amp;jobStatus=jobStatusValue&amp;api-version=2016-11-14"
      * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
      */
     public URL getUrlQuery(String jobType, String jobStatus) throws MalformedURLException

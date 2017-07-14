@@ -50,6 +50,7 @@ public class DeviceTwinDevice
 
     /**
      * Getter to get device ID
+     * @return device id for this device
      */
     public String getDeviceId()
     {
