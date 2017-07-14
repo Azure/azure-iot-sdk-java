@@ -69,7 +69,7 @@ public class FeedbackReceiver extends Receiver
      * @param hostName The iot hub host name
      * @param userName The iot hub user name
      * @param sasToken The iot hub SAS token for the given device
-     * @param iotHubServiceClientProtocol
+     * @param iotHubServiceClientProtocol protocol to be used
      * 
      */
     public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)

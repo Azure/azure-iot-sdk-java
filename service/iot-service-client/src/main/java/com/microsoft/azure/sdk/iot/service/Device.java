@@ -27,7 +27,7 @@ public class Device
      * If input device status and symmetric key are null then they will be auto generated.
      *
      * @param deviceId - String containing the device name
-     * @param deviceId - Device status. If parameter is null, then the status will be set to Enabled.
+     * @param status - Device status. If parameter is null, then the status will be set to Enabled.
      * @param symmetricKey - Device key. If parameter is null, then the key will be auto generated.
      * @return Device object
      * @throws IllegalArgumentException This exception is thrown if {@code deviceId} is {@code null} or empty.
@@ -52,7 +52,7 @@ public class Device
      * Create an Device instance using the given device name
      *
      * @param deviceId Name of the device (used as device id)
-     * @param deviceId - Device status. If parameter is null, then the status will be set to Enabled.
+     * @param status - Device status. If parameter is null, then the status will be set to Enabled.
      * @param symmetricKey - Device key. If parameter is null, then the key will be auto generated.
      * @throws NoSuchAlgorithmException This exception is thrown if the encryption method is not supported by the keyGenerator
      */
@@ -152,7 +152,7 @@ public class Device
     /**
      * Setter for SymmetricKey object
      *
-     * @param symmetricKey
+     * @param symmetricKey symmetricKey to be set
      */
     public void setSymmetricKey(SymmetricKey symmetricKey)
     {
@@ -215,7 +215,7 @@ public class Device
     /**
      * Setter for DeviceStatus object
      *
-     * @param status
+     * @param status status to be set
      */
     public void setStatus(DeviceStatus status)
     {

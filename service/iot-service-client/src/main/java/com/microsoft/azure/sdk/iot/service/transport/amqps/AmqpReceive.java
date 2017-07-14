@@ -36,6 +36,7 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
      * @param hostName The address string of the service (example: AAA.BBB.CCC)
      * @param userName The username string to use SASL authentication (example: user@sas.service)
      * @param sasToken The SAS token string
+     * @param iotHubServiceClientProtocol protocol to use
      */
     public AmqpReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
