@@ -5,6 +5,9 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.device.iothubservices;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -12,9 +15,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.device.DeviceConnectionString;
@@ -45,12 +46,17 @@ public class DeviceTwinIT
     //Max devices to test
     private static final Integer MAX_DEVICES = 5;
 
+    //Default Page Size for Query
+    private static final Integer PAGE_SIZE = 2;
+
     private static final String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
 
     // Constants used in for Testing
     private static final String PROPERTY_KEY = "Key";
+    private static final String PROPERTY_KEY_QUERY = "KeyQuery";
     private static final String PROPERTY_VALUE = "Value";
+    private static final String PROPERTY_VALUE_QUERY = "ValueQuery";
     private static final String PROPERTY_VALUE_UPDATE = "Update";
     private static final String TAG_KEY = "Tag_Key";
     private static final String TAG_VALUE = "Tag_Value";
@@ -59,6 +65,7 @@ public class DeviceTwinIT
     // States of SDK
     private static RegistryManager registryManager;
     private static DeviceClient deviceClient;
+    private static RawTwinQuery scRawTwinQueryClient;
     private static DeviceTwin sCDeviceTwin;
     private static DeviceState deviceUnderTest = null;
     private static DeviceState[] devicesUnderTest;
@@ -237,6 +244,7 @@ public class DeviceTwinIT
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+        scRawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
     }
 
     @AfterClass
@@ -706,7 +714,6 @@ public class DeviceTwinIT
         removeMultipleDevices();
     }
 
-
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
     public void testGetTwinUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
     {
@@ -765,6 +772,316 @@ public class DeviceTwinIT
                 assertEquals(dp.getKey(), PROPERTY_KEY + i);
                 assertEquals(dp.getValue(), PROPERTY_VALUE_UPDATE + i);
             }
+        }
+        removeMultipleDevices();
+    }
+
+    @Test
+    public void testRawQueryTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    {
+        addMultipleDevices();
+        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
+
+        // Add same desired on multiple devices
+        final String queryProperty = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
+        final String queryPropertyValue = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
+        final double actualNumOfDevices = MAX_DEVICES;
+
+        for (int i = 0; i < MAX_DEVICES; i++)
+        {
+            Set<Pair> desiredProperties = new HashSet<>();
+            desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
+            devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
+
+            sCDeviceTwin.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
+            devicesUnderTest[i].sCDeviceForTwin.clearTwin();
+        }
+
+        // Raw Query for multiple devices having same property
+        final String select = "properties.desired." + queryProperty + " AS " + queryProperty + "," + " COUNT() AS numberOfDevices";
+        final String groupBy = "properties.desired." + queryProperty ;
+        final SqlQuery sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy);
+        Query rawTwinQuery = scRawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
+
+        while (scRawTwinQueryClient.hasNext(rawTwinQuery))
+        {
+            String result = scRawTwinQueryClient.next(rawTwinQuery);
+            assertNotNull(result);
+            Map map = gson.fromJson(result, Map.class);
+            if (map.containsKey("numberOfDevices") && map.containsKey(queryProperty))
+            {
+                double value = (double) map.get("numberOfDevices");
+                assertEquals(value, actualNumOfDevices, 0);
+            }
+        }
+
+        removeMultipleDevices();
+    }
+
+    @Test
+    public void testRawQueryMultipleInParallelTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    {
+        addMultipleDevices();
+        final Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        // Add same desired on multiple devices
+        final String queryProperty = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
+        final String queryPropertyValue = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
+        final double actualNumOfDevices = MAX_DEVICES;
+
+        final String queryPropertyEven = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
+        final String queryPropertyValueEven = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
+        int noOfEvenDevices = 0;
+
+        for (int i = 0; i < MAX_DEVICES; i++)
+        {
+            Set<Pair> desiredProperties = new HashSet<>();
+            desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
+            if (i % 2 == 0)
+            {
+                desiredProperties.add(new Pair(queryPropertyEven, queryPropertyValueEven));
+                noOfEvenDevices++;
+            }
+            devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
+
+            sCDeviceTwin.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
+            devicesUnderTest[i].sCDeviceForTwin.clearTwin();
+        }
+
+        executor.submit(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    // Raw Query for multiple devices having same property
+                    final String select = "properties.desired." + queryProperty + " AS " + queryProperty + "," + " COUNT() AS numberOfDevices";
+                    final String groupBy = "properties.desired." + queryProperty ;
+                    final SqlQuery sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy);
+                    Query rawTwinQuery = scRawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
+
+                    while (scRawTwinQueryClient.hasNext(rawTwinQuery))
+                    {
+                        String result = scRawTwinQueryClient.next(rawTwinQuery);
+                        assertNotNull(result);
+                        Map map = gson.fromJson(result, Map.class);
+                        if (map.containsKey("numberOfDevices") && map.containsKey(queryProperty))
+                        {
+                            double value = (double) map.get("numberOfDevices");
+                            assertEquals(value, actualNumOfDevices, 0);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    assertTrue(e.getMessage(), true);
+                }
+
+            }
+        });
+
+        final double actualNumOfDevicesEven = noOfEvenDevices;
+        executor.submit(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    // Raw Query for multiple devices having same property
+                    final String select = "properties.desired." + queryPropertyEven + " AS " + queryPropertyEven + "," + " COUNT() AS numberOfDevices";
+                    final String groupBy = "properties.desired." + queryPropertyEven ;
+                    final SqlQuery sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy);
+                    Query rawTwinQuery = scRawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
+
+                    while (scRawTwinQueryClient.hasNext(rawTwinQuery))
+                    {
+                        String result = scRawTwinQueryClient.next(rawTwinQuery);
+                        assertNotNull(result);
+                        Map map = gson.fromJson(result, Map.class);
+                        if (map.containsKey("numberOfDevices") && map.containsKey(queryPropertyEven))
+                        {
+                            double value = (double) map.get("numberOfDevices");
+                            assertEquals(value, actualNumOfDevicesEven, 0);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    assertTrue(e.getMessage(), true);
+                }
+            }
+        });
+
+        executor.shutdown();
+        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        {
+            executor.shutdownNow();
+        }
+
+        removeMultipleDevices();
+    }
+
+    @Test
+    public void testQueryTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    {
+        addMultipleDevices();
+
+        // Add same desired on multiple devices
+        final String queryProperty = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
+        final String queryPropertyValue = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
+
+        for (int i = 0; i < MAX_DEVICES; i++)
+        {
+            Set<Pair> desiredProperties = new HashSet<>();
+            desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
+            devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
+
+            sCDeviceTwin.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
+            devicesUnderTest[i].sCDeviceForTwin.clearTwin();
+        }
+
+        // Query multiple devices having same property
+        final String where = "is_defined(properties.desired." + queryProperty + ")";
+        SqlQuery sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, where, null);
+        Query twinQuery = sCDeviceTwin.queryTwin(sqlQuery.getQuery(), PAGE_SIZE);
+
+        for (int i = 0; i < MAX_DEVICES; i++)
+        {
+            if (sCDeviceTwin.hasNextDeviceTwin(twinQuery))
+            {
+                DeviceTwinDevice d = sCDeviceTwin.getNextDeviceTwin(twinQuery);
+
+                for (Pair dp : d.getDesiredProperties())
+                {
+                    assertEquals(dp.getKey(), queryProperty);
+                    assertEquals(dp.getValue(), queryPropertyValue);
+                }
+            }
+        }
+        assertFalse(sCDeviceTwin.hasNextDeviceTwin(twinQuery));
+        removeMultipleDevices();
+    }
+
+    @Test
+    public void testMultipleQueryTwinInParallel() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    {
+        addMultipleDevices();
+
+        // Add same desired on multiple devices
+        final String queryProperty = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
+        final String queryPropertyEven = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
+        final String queryPropertyValue = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
+        final String queryPropertyValueEven = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
+        int noOfEvenDevices = 0;
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        for (int i = 0; i < MAX_DEVICES; i++)
+        {
+            Set<Pair> desiredProperties = new HashSet<>();
+            desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
+            if (i % 2 == 0)
+            {
+                desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
+                noOfEvenDevices++;
+            }
+            devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
+
+            sCDeviceTwin.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
+            devicesUnderTest[i].sCDeviceForTwin.clearTwin();
+        }
+
+        // Query multiple devices having same property
+
+        executor.submit(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    final String where = "is_defined(properties.desired." + queryProperty + ")";
+                    SqlQuery sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, where, null);
+                    final Query twinQuery = sCDeviceTwin.queryTwin(sqlQuery.getQuery(), PAGE_SIZE);
+
+                    for (int i = 0; i < MAX_DEVICES; i++)
+                    {
+                        try
+                        {
+                            if (sCDeviceTwin.hasNextDeviceTwin(twinQuery))
+                            {
+                                DeviceTwinDevice d = sCDeviceTwin.getNextDeviceTwin(twinQuery);
+
+                                for (Pair dp : d.getDesiredProperties())
+                                {
+                                    assertEquals(dp.getKey(), queryProperty);
+                                    assertEquals(dp.getValue(), queryPropertyValue);
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            assertTrue(e.getMessage(), true);
+                        }
+
+                        assertFalse(sCDeviceTwin.hasNextDeviceTwin(twinQuery));
+                    }
+                }
+                catch (Exception e)
+                {
+                    assertTrue(e.getMessage(), true);
+                }
+            }
+        });
+
+        final int maximumEvenDevices = noOfEvenDevices;
+        executor.submit(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    final String whereEvenDevices = "is_defined(properties.desired." + queryPropertyEven + ")";
+                    SqlQuery sqlQueryEvenDevices = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, whereEvenDevices, null);
+                    final Query twinQueryEven = sCDeviceTwin.queryTwin(sqlQueryEvenDevices.getQuery(), PAGE_SIZE);
+
+                    for (int i = 0; i < maximumEvenDevices; i++)
+                    {
+                        try
+                        {
+                            if (sCDeviceTwin.hasNextDeviceTwin(twinQueryEven))
+                            {
+                                DeviceTwinDevice d = sCDeviceTwin.getNextDeviceTwin(twinQueryEven);
+
+                                for (Pair dp : d.getDesiredProperties())
+                                {
+                                    assertEquals(dp.getKey(), queryPropertyEven);
+                                    assertEquals(dp.getValue(), queryPropertyValueEven);
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            assertTrue(e.getMessage(), true);
+                        }
+
+                        assertFalse(sCDeviceTwin.hasNextDeviceTwin(twinQueryEven));
+                    }
+                }
+                catch (Exception e)
+                {
+                    assertTrue(e.getMessage(), true);
+                }
+            }
+        });
+
+        executor.shutdown();
+        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        {
+            executor.shutdownNow();
         }
         removeMultipleDevices();
     }
