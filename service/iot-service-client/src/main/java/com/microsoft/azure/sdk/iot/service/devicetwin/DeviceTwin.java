@@ -16,6 +16,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.NoSuchElementException;
 
 public class DeviceTwin
@@ -479,5 +480,51 @@ public class DeviceTwin
             //Codes_SRS_DEVICETWIN_25_058: [ The method shall check if hasNext returns true and throw NoSuchElementException otherwise ]
             throw new NoSuchElementException();
         }
+    }
+
+    /**
+     * Creates a new Job to update twin tags and desired properties on one or multiple devices
+     *
+     * @param queryCondition Query condition to evaluate which devices to run the job on. It can be {@code null} or empty
+     * @param updateTwin Twin object to use for the update
+     * @param startTimeUtc Date time in Utc to start the job
+     * @param maxExecutionTimeInSeconds Max execution time in seconds, i.e., ttl duration the job can run
+     * @return a Job class that represent this job on IotHub
+     * @throws IOException if the function contains invalid parameters
+     * @throws IotHubException if the http request failed
+     */
+    public Job scheduleUpdateTwin(String queryCondition,
+                                  DeviceTwinDevice updateTwin,
+                                  Date startTimeUtc,
+                                  long maxExecutionTimeInSeconds) throws IOException, IotHubException
+    {
+        // Codes_SRS_DEVICETWIN_21_061: [If the updateTwin is null, the scheduleUpdateTwin shall throws IllegalArgumentException ]
+        if(updateTwin == null)
+        {
+            throw new IllegalArgumentException("null updateTwin");
+        }
+
+        // Codes_SRS_DEVICETWIN_21_062: [If the startTimeUtc is null, the scheduleUpdateTwin shall throws IllegalArgumentException ]
+        if(startTimeUtc == null)
+        {
+            throw new IllegalArgumentException("null startTimeUtc");
+        }
+
+        // Codes_SRS_DEVICETWIN_21_063: [If the maxExecutionTimeInSeconds is negative, the scheduleUpdateTwin shall throws IllegalArgumentException ]
+        if(maxExecutionTimeInSeconds < 0)
+        {
+            throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
+        }
+
+        // Codes_SRS_DEVICETWIN_21_064: [The scheduleUpdateTwin shall create a new instance of the Job class ]
+        // Codes_SRS_DEVICETWIN_21_065: [If the scheduleUpdateTwin failed to create a new instance of the Job class, it shall throws IOException. Threw by the Jobs constructor ]
+        Job job = new Job(iotHubConnectionString.toString());
+
+        // Codes_SRS_DEVICETWIN_21_066: [The scheduleUpdateTwin shall invoke the scheduleUpdateTwin in the Job class with the received parameters ]
+        // Codes_SRS_DEVICETWIN_21_067: [If scheduleUpdateTwin failed, the scheduleUpdateTwin shall throws IotHubException. Threw by the scheduleUpdateTwin ]
+        job.scheduleUpdateTwin(queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
+
+        // Codes_SRS_DEVICETWIN_21_068: [The scheduleUpdateTwin shall return the created instance of the Job class ]
+        return job;
     }
 }

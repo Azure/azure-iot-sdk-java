@@ -6,7 +6,9 @@ DeviceTwin enables service client to manage the tags and desired properties for 
 
 ## References
 
-([IoTHub DeviceTwin.doc](to https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins)
+[IoTHub DeviceTwin.doc](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins)
+
+[Schedule jobs on multiple devices](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-jobs)
 
 ## Exposed API
 
@@ -31,6 +33,10 @@ public class DeviceTwin
     public synchronized boolean hasNextDeviceTwin(Query query) throws IotHubException, IOException;
     public synchronized String getNextDeviceTwin(Query query) throws IOException, IotHubException, NoSuchElementException;
 
+    public Job scheduleUpdateTwin(String queryCondition,
+                                  DeviceTwinDevice updateTwin,
+                                  Date startTimeUtc,
+                                  long maxExecutionTimeInSeconds) throws IOException, IotHubException;
 }
 ```
 
@@ -241,4 +247,28 @@ public synchronized DeviceTwinDevice getNextDeviceTwin(Query deviceTwinQuery) th
 
 **SRS_DEVICETWIN_25_060: [** If the next element from the query response is an object other than String, then this method shall throw IOException **]**
 
+
+### scheduleUpdateTwin
+
+```java
+public Job scheduleUpdateTwin(String queryCondition,
+                              DeviceTwinDevice updateTwin,
+                              Date startTimeUtc,
+                              long maxExecutionTimeInSeconds) throws IOException, IotHubException
+```
+**SRS_DEVICETWIN_21_061: [** If the updateTwin is null, the scheduleUpdateTwin shall throws IllegalArgumentException **]**
+
+**SRS_DEVICETWIN_21_062: [** If the startTimeUtc is null, the scheduleUpdateTwin shall throws IllegalArgumentException **]**
+
+**SRS_DEVICETWIN_21_063: [** If the maxExecutionTimeInSeconds is negative, the scheduleUpdateTwin shall throws IllegalArgumentException **]**
+
+**SRS_DEVICETWIN_21_064: [** The scheduleUpdateTwin shall create a new instance of the Job class **]**
+
+**SRS_DEVICETWIN_21_065: [** If the scheduleUpdateTwin failed to create a new instance of the Job class, it shall throws IOException. Threw by the Jobs constructor **]**
+
+**SRS_DEVICETWIN_21_066: [** The scheduleUpdateTwin shall invoke the scheduleUpdateTwin in the Job class with the received parameters **]**
+
+**SRS_DEVICETWIN_21_067: [** If scheduleUpdateTwin failed, the scheduleUpdateTwin shall throws IotHubException. Threw by the scheduleUpdateTwin **]**
+
+**SRS_DEVICETWIN_21_068: [** The scheduleUpdateTwin shall return the created instance of the Job class **]**
 
