@@ -251,10 +251,9 @@ public class MqttIotHubConnection
      * @return the message received, or null if none exists.
      *
      * @throws IllegalStateException if the connection state is currently closed.
-     * @throws UnsupportedOperationException if the message found in the queue cannot be understood by any of the messaging clients
      * @throws IOException if receiving on any of messaging clients fail.
      */
-    public Message receiveMessage() throws IllegalStateException, IOException, UnsupportedOperationException
+    public Message receiveMessage() throws IllegalStateException, IOException
     {
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_015: [If the MQTT connection is closed,
         // the function shall throw an IllegalStateException.]
@@ -279,14 +278,6 @@ public class MqttIotHubConnection
         if (message == null)
         {
             message = deviceMessaging.receive();
-        }
-
-        if (message == null)
-        {
-            String unsupportedTopicString = deviceMessaging.peekMessage().getKey();
-
-            //Codes_SRS_MQTTIOTHUBCONNECTION_34_017: [If all of the messaging clients fail to receive, the function shall throw an UnsupportedOperationException.]
-            throw new UnsupportedOperationException("Queued message's topic string is not supported by any messaging client: " + unsupportedTopicString);
         }
 
         return message;

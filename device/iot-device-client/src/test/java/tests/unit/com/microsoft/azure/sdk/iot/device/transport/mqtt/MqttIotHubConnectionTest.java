@@ -894,40 +894,6 @@ public class MqttIotHubConnectionTest
         connection.receiveMessage();
     }
 
-    //Tests_SRS_MQTTIOTHUBCONNECTION_34_017: [If all of the messaging clients fail to receive, the function shall throw an UnsupportedOperationException.]
-    @Test(expected = UnsupportedOperationException.class)
-    public void receiveMessageThrowsUnsupportedOperationExceptionWhenMessageCannotBeParsed(
-            @Mocked final MqttDeviceTwin mockDeviceTwin,
-            @Mocked final MqttDeviceMethod mockDeviceMethod,
-            @Mocked final MqttMessaging mockDeviceMessaging)
-            throws IOException, UnsupportedOperationException
-    {
-        //arrange
-        baseExpectations();
-        MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
-        connection.open();
-        Deencapsulation.setField(connection, "deviceMessaging", mockDeviceMessaging);
-        Deencapsulation.setField(connection, "deviceTwin", mockDeviceTwin);
-        Deencapsulation.setField(connection, "deviceMethod", mockDeviceMethod);
-
-        new Expectations()
-        {
-            {
-                mockDeviceMethod.receive();
-                result = null;
-
-                mockDeviceTwin.receive();
-                result = null;
-
-                mockDeviceMessaging.receive();
-                result = null;
-            }
-        };
-
-        //act
-        connection.receiveMessage();
-    }
-
     // Codes_SRS__MQTTIOTHUBCONNECTION_34_016: [If any of the messaging clients throw an exception, The associated message will be removed from the queue and the exception will be propagated up to the receive task.]
     @Test (expected = IOException.class)
     public void messagingClientThrowsPropagatesUpCorrectly(@Mocked final Mqtt mockMqtt) throws IOException

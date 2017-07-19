@@ -34,21 +34,19 @@ public final class IotHubReceiveTask implements Runnable
 
     public void run()
     {
-        logger.LogTrace("Now trying to receive messages from IoT Hub");
-
+    
         try
         {
             // Codes_SRS_IOTHUBRECEIVETASK_11_002: [The function shall poll an IoT Hub for messages, invoke the message callback if one exists, and return one of COMPLETE, ABANDON, or REJECT to the IoT Hub.]
             this.transport.handleMessage();
 
-            logger.LogTrace("Successfully received messages from IoT Hub");
         }
         // Codes_SRS_IOTHUBRECEIVETASK_11_004: [The function shall not crash because of an IOException thrown by the transport.]
         // Codes_SRS_IOTHUBRECEIVETASK_11_005: [The function shall not crash because of any error or exception thrown by the transport.]
         catch (Throwable e)
         {
             logger.LogError(e.toString() + ": " + e.getMessage());
-            logger.LogDebug("Exception on sending queued messages to IoT Hub", e);
+            logger.LogDebug("Exception on receiving queued messages to IoT Hub", e);
         }
     }
 }
