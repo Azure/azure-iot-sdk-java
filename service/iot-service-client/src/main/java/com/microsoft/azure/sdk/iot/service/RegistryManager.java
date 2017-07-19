@@ -618,7 +618,8 @@ public class RegistryManager
 
     /**
      * Async wrapper for exportDevices() operation
-     *
+     * @param excludeKeys if to exclude keys or not
+     * @param exportBlobContainerUri the blob storage container URI to store at.
      * @return The future object for the requested operation
      *
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
@@ -688,6 +689,8 @@ public class RegistryManager
     /**
      * Async wrapper for importDevices() operation
      *
+     * @param importBlobContainerUri Uri for importBlobContainer
+     * @param outputBlobContainerUri Uri for outputBlobContainer
      * @return The future object for the requested operation
      *
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
@@ -753,7 +756,7 @@ public class RegistryManager
 
     /**
      * Async wrapper for getJob() operation
-     *
+     * @param jobId jobID as String
      * @return The future object for the requested operation
      *
      * @throws IllegalArgumentException This exception is thrown if the jobId parameter is null

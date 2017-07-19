@@ -116,6 +116,9 @@ public class MqttIotHubConnection
 
                 this.deviceMethod = new MqttDeviceMethod();
                 this.deviceTwin = new MqttDeviceTwin();
+                
+                // Codes_SRS_MQTTIOTHUBCONNECTION_99_017 : [The function shall set DeviceClientConfig object needed for SAS token renewal.]
+                this.deviceMessaging.setDeviceClientConfig(this.config);
 
                 this.deviceMessaging.start();
                 this.state = State.OPEN;

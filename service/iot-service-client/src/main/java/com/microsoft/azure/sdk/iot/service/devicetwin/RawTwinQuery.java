@@ -87,7 +87,7 @@ public class RawTwinQuery
      */
     public synchronized Query query(String sqlQuery) throws IotHubException, IOException
     {
-        //Codes_SRS_RAW_QUERY_25_009: [ If the pagesize if not provided then a default pagesize of 100 is used for the query.]
+        //Codes_SRS_RAW_QUERY_25_009: [ If the pageSize if not provided then a default pageSize of 100 is used for the query.]
         return this.query(sqlQuery, DEFAULT_PAGE_SIZE);
     }
 
@@ -108,20 +108,7 @@ public class RawTwinQuery
         }
 
         //Codes_SRS_RAW_QUERY_25_011: [ The method shall check if a response to query is avaliable by calling hasNext on the query object.]
-        boolean isNextAvailable = query.hasNext();
-        //Codes_SRS_RAW_QUERY_25_013: [ If a queryResponse is not available, this method shall check if continuation token is avaliable for this query.]
-        if (!isNextAvailable && query.getContinuationToken() != null)
-        {
-            //Codes_SRS_RAW_QUERY_25_014: [ If continuation token is found then a continuation query is sent to the IotHub and new response is given to the user ]
-            query.continueQuery(query.getContinuationToken());
-            query.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, USE_DEFAULT_TIMEOUT);
-            return query.hasNext();
-        }
-        else
-        {
-            //Codes_SRS_RAW_QUERY_25_012: [ If a queryResponse is available, this method shall return true as is to the user. ]
-            return isNextAvailable;
-        }
+        return query.hasNext();
     }
 
     /**
@@ -136,23 +123,23 @@ public class RawTwinQuery
     {
         //Codes_SRS_RAW_QUERY_25_015: [ The method shall check if hasNext returns true and throw NoSuchElementException otherwise ]
         //Codes_SRS_RAW_QUERY_25_018: [ If the input query is null, then this method shall throw IllegalArgumentException ]
-        if (hasNext(query))
-        {
-            Object nextObject = query.next();
 
-            if (nextObject instanceof String)
-            {
-                return (String) nextObject;
-            }
-            else
-            {
-                //Codes_SRS_RAW_QUERY_25_017: [ If the next element from the query response is an object other than String, then this method shall throw IOException ]
-                throw new IOException("Received a response that could not be parsed");
-            }
+        if (query == null)
+        {
+            throw new IllegalArgumentException();
+        }
+
+        Object nextObject = query.next();
+
+        if (nextObject instanceof String)
+        {
+            return (String) nextObject;
         }
         else
         {
-            throw new NoSuchElementException();
+            //Codes_SRS_RAW_QUERY_25_017: [ If the next element from the query response is an object other than String, then this method shall throw IOException ]
+            throw new IOException("Received a response that could not be parsed");
         }
+
     }
 }

@@ -358,6 +358,7 @@ public class MqttDeviceMethodTest
         testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
         Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
+        Deencapsulation.setField(testMethod, "MQTT_LOCK", new Object());
         testMethod.start();
 
         //act
@@ -380,6 +381,7 @@ public class MqttDeviceMethodTest
         Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
         Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
+        Deencapsulation.setField(testMethod, "MQTT_LOCK", new Object());
         testMethod.start();
 
         //act
@@ -401,6 +403,7 @@ public class MqttDeviceMethodTest
         testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
         Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
+        Deencapsulation.setField(testMethod, "MQTT_LOCK", new Object());
         testMethod.start();
 
         //act
@@ -421,6 +424,7 @@ public class MqttDeviceMethodTest
         testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
         Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
+        Deencapsulation.setField(testMethod, "MQTT_LOCK", new Object());
         testMethod.start();
 
         //act
@@ -440,6 +444,8 @@ public class MqttDeviceMethodTest
         testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
         Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
+        Deencapsulation.setField(testMethod, "MQTT_LOCK", new Object());
+
         testMethod.start();
 
         //act
@@ -455,6 +461,8 @@ public class MqttDeviceMethodTest
         Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
         testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
+        Deencapsulation.setField(testMethod, "MQTT_LOCK", new Object());
+        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
         testMethod.start();
         Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
 
@@ -469,7 +477,6 @@ public class MqttDeviceMethodTest
         assertTrue(testDMMessage.getRequestId().equals(String.valueOf(10)));
         assertTrue(testDMMessage.getMethodName().equals("testMethod"));
         assertTrue(testDMMessage.getDeviceOperationType().equals(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST));
-
     }
 
     // Codes_SRS_MQTTDEVICEMETHOD_34_034: [If allReceivedMessages queue is null then this method shall throw IOException.]

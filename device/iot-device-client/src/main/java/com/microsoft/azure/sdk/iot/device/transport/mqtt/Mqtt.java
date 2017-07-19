@@ -3,8 +3,10 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
+import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -24,11 +26,13 @@ abstract public class Mqtt implements MqttCallback
      Variables which apply to all the concrete classes as well as to Mqtt and are to be instantiated only once
      in lifetime.
      */
-
     private static MqttConnectionInfo info ;
     static ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
-    private static Object MQTT_LOCK;
-
+    protected static Object MQTT_LOCK;
+    
+    private DeviceClientConfig deviceClientConfig = null;
+    // SAS token expiration check on retry
+    private boolean userSpecifiedSASTokenExpiredOnRetry = false; // by default set to false
 
     /* Each property is separated by & and all system properties start with an encoded $ (except for iothub-ack) */
     protected final static char MESSAGE_PROPERTY_SEPARATOR = '&';
@@ -110,6 +114,7 @@ abstract public class Mqtt implements MqttCallback
             Mqtt.info = new MqttConnectionInfo(serverURI, clientId, userName, password, iotHubSSLContext);
             Mqtt.allReceivedMessages = new ConcurrentLinkedQueue<>();
             Mqtt.MQTT_LOCK = new Object();
+            this.userSpecifiedSASTokenExpiredOnRetry = false;
         }
     }
 
@@ -126,6 +131,7 @@ abstract public class Mqtt implements MqttCallback
         {
             Mqtt.MQTT_LOCK = new Object();
         }
+        this.userSpecifiedSASTokenExpiredOnRetry = false;
     }
 
     /**
@@ -283,6 +289,14 @@ abstract public class Mqtt implements MqttCallback
                     System.out.println("Mqtt client should be initialised atleast once before using it");
                     throw new InvalidParameterException();
                 }
+                
+                if (this.userSpecifiedSASTokenExpiredOnRetry)
+                {
+                    /*
+                    ** Codes_SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
+                     */
+                    throw new IOException("Cannot publish when user supplied SAS token has expired");
+                }
 
                 if (!Mqtt.info.mqttAsyncClient.isConnected())
                 {
@@ -370,6 +384,13 @@ abstract public class Mqtt implements MqttCallback
                     throw new InvalidParameterException("Topic cannot be null");
 
                 }
+                else if (this.userSpecifiedSASTokenExpiredOnRetry)
+                {
+                    /*
+                    ** Codes_SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
+                     */
+                    throw new IOException("Cannot subscribe when user supplied SAS token has expired");
+                }
                 else if (!Mqtt.info.mqttAsyncClient.isConnected())
                 {
                     /*
@@ -412,6 +433,15 @@ abstract public class Mqtt implements MqttCallback
                      */
                     throw new IOException("Cannot unsubscribe when mqtt client is disconnected");
                 }
+
+                if (this.userSpecifiedSASTokenExpiredOnRetry)
+                {
+                    /*
+                    ** Codes_SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
+                     */
+                    throw new IOException("Cannot unsubscribe when user supplied SAS token has expired");
+                }
+
                 /*
                 **Codes_SRS_Mqtt_25_020: [**The function shall unsubscribe from subscribeTopic specified to the IoT Hub given in the configuration.**]**
                  */
@@ -505,9 +535,41 @@ abstract public class Mqtt implements MqttCallback
                     try
                     {
                         currentReconnectionAttempt++;
-                        connect();
+                        /*
+                        **Codes_SRS_Mqtt_99_050: [**The function shall check if SAS token has already expired.**]**
+                        */
+                        if (!IotHubSasToken.isSasTokenExpired(new String(Mqtt.info.connectionOptions.getPassword())))
+                        {
+                            connect(); // Try to reconnect
+                        }
+                        else
+                        {
+                            /*
+                            **Codes_SRS_Mqtt_99_051: [**The function shall check if SAS token in based on user supplied SharedAccessKey.**]**
+                            */
+                            if (this.deviceClientConfig.getDeviceKey() != null)
+                            {
+                            /*
+                            **Codes_SRS_Mqtt_99_052: [**The function shall generate a new SAS token.**]**
+                            */
+                                IotHubSasToken sasToken = new IotHubSasToken(this.deviceClientConfig , System.currentTimeMillis() / 1000L + deviceClientConfig .getTokenValidSecs() + 1L);
+                                Mqtt.info.connectionOptions.setPassword(sasToken.toString().toCharArray());
+                                connect(); // Try to reconnect
+                            }
+                            else
+                            {
+                            /*
+                            **Codes_SRS_Mqtt_99_053: [**The function shall set user supplied SAS token expiration flag to true .**]**
+                            */
+                                this.userSpecifiedSASTokenExpiredOnRetry  = true;
+                                return; // no reconnect exit now
+                            }
+
+                        }
+
+
                     }
-                    catch (Exception e)
+                    catch (IOException e)
                     {
                         try
                         {
@@ -569,7 +631,6 @@ abstract public class Mqtt implements MqttCallback
 
         return allReceivedMessages.peek();
     }
-
 
     /**
      * Converts the provided data and topic string into an instance of Message
@@ -666,5 +727,23 @@ abstract public class Mqtt implements MqttCallback
                 throw new IllegalArgumentException("Unexpected property string provided. Expected '=' symbol between key and value of the property in string: " + propertyString);
             }
         }
+    }
+    
+    /**
+     * Set device client configuration used for SAS token validation.
+     * @param deviceConfig is the device client configuration to be set
+     * @throws IllegalArgumentException if device client configuration is null
+     */
+    protected void setDeviceClientConfig(DeviceClientConfig deviceConfig) throws IllegalArgumentException
+    {
+        if (deviceConfig == null)
+        {
+          /*
+          ** Codes_SRS_Mqtt_99_50: [**If deviceConfig is null, the function shall throw an IllegalArgumentException**]**
+          */
+            throw new IllegalArgumentException("DeviceClientConfig is null");
+        }
+
+        this.deviceClientConfig = deviceConfig; // set device client config object
     }
 }

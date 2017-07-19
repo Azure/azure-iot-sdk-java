@@ -36,7 +36,19 @@ public class JobClient
             throws IllegalArgumentException, IOException, IotHubException;
 
     public synchronized JobResult cancelJob(String jobId)
-            throws IllegalArgumentException, IOException, IotHubException;    
+            throws IllegalArgumentException, IOException, IotHubException;  
+
+    public synchronized Query queryDeviceJob(String sqlQuery, Integer pageSize) throws IotHubException, IOException;
+
+    public synchronized Query queryDeviceJob(String sqlQuery) throws IotHubException, IOException;
+
+    public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus, Integer pageSize) throws IOException, IotHubException;
+
+    public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus) throws IotHubException, IOException;
+
+    public synchronized boolean hasNextJob(Query query) throws IotHubException, IOException;
+
+    public synchronized JobResult getNextJob(Query query) throws IOException, IotHubException, NoSuchElementException;
 }
 ```
 
@@ -117,3 +129,41 @@ public synchronized JobResult cancelJob(String jobId)
 **SRS_JOBCLIENT_21_033: [**If the cancelJob failed to send a POST request, it shall throw IOException.**]**  
 **SRS_JOBCLIENT_21_034: [**If the cancelJob failed to verify the iothub response, it shall throw IotHubException.**]**  
 **SRS_JOBCLIENT_21_035: [**The cancelJob shall parse the iothub response and return it as JobResult.**]**  
+
+### queryDeviceJob
+```java
+public synchronized Query queryDeviceJob(String sqlQuery, Integer pageSize) throws IotHubException, IOException;
+public synchronized Query queryDeviceJob(String sqlQuery) throws IotHubException, IOException;
+```
+**SRS_JOBCLIENT_25_036: [**If the sqlQuery is null , empty, or invalid, the queryDeviceJob shall throw IllegalArgumentException.**]** 
+**SRS_JOBCLIENT_25_037: [**If the pageSize is null, zero or negative, the queryDeviceJob shall throw IllegalArgumentException.**]** 
+**SRS_JOBCLIENT_25_038: [**If the pageSize is not specified, default pageSize of 100 shall be used .**]**
+**SRS_JOBCLIENT_25_039: [**The queryDeviceJob shall create a query object for the type `DEVICE_JOB`.**]**  
+**SRS_JOBCLIENT_25_040: [**The queryDeviceJob shall send a query request on the query object using Query URL, HTTP POST method and wait for the response by calling `sendQueryRequest`.**]**  
+
+### queryJobResponse
+```java
+public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus, Integer pageSize) throws IOException, IotHubException;
+public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus) throws IotHubException, IOException;
+```
+**SRS_JOBCLIENT_25_041: [**If the input parameters are null, the queryJobResponse shall throw IllegalArgumentException.**]** 
+**SRS_JOBCLIENT_25_042: [**If the pageSize is null, zero or negative, the queryJobResponse shall throw IllegalArgumentException.**]** 
+**SRS_JOBCLIENT_25_043: [**If the pageSize is not specified, default pageSize of 100 shall be used.**]** 
+**SRS_JOBCLIENT_25_044: [**The queryDeviceJob shall create a query object for the type `JOB_RESPONSE`.**]**  
+**SRS_JOBCLIENT_25_045: [**The queryDeviceJob shall send a query request on the query object using Query URL, HTTP GET method and wait for the response by calling `sendQueryRequest`.**]** 
+
+### hasNextJob
+```java
+public synchronized boolean hasNextJob(Query query) throws IotHubException, IOException;
+```
+**SRS_JOBCLIENT_25_046: [**If the input query is null, the hasNextJob shall throw IllegalArgumentException.**]**
+**SRS_JOBCLIENT_25_047: [**hasNextJob shall return true if the next job exist, false otherwise.**]**
+
+### getNextJob
+```java
+public synchronized JobResult getNextJob(Query query) throws IOException, IotHubException, NoSuchElementException;
+```
+**SRS_JOBCLIENT_25_048: [**If the input query is null, the getNextJob shall throw IllegalArgumentException.**]**
+**SRS_JOBCLIENT_25_049: [**getNextJob shall return next Job Result if the exist, and throw  NoSuchElementException otherwise.**]**
+**SRS_JOBCLIENT_25_050: [**getNextJob shall throw IOException if next Job Result exist and is not a string.**]**
+**SRS_JOBCLIENT_25_051: [**getNextJob method shall parse the next job element from the query response provide the response as JobResult object.**]**

@@ -1150,6 +1150,7 @@ public class DeviceTwinTest
     }
 
     //Tests_SRS_DEVICETWIN_25_055: [ If a queryResponse is available, this method shall return true as is to the user. ]
+    //Tests_SRS_DEVICETWIN_25_054: [ The method shall check if a response to query is avaliable by calling hasNext on the query object.]
     @Test
     public void hasNextSucceeds(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
     {
@@ -1176,8 +1177,6 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
-                times = 0;
                 Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
                 times = 1;
             }
@@ -1199,8 +1198,6 @@ public class DeviceTwinTest
             {
                 Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
                 result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = true;
             }
         };
 
@@ -1210,49 +1207,8 @@ public class DeviceTwinTest
         boolean result = testTwin.hasNextDeviceTwin(null);
     }
 
-    //Tests_SRS_DEVICETWIN_25_054: [ The method shall check if a response to query is avaliable by calling hasNext on the query object.]
-    //Tests_SRS_DEVICETWIN_25_056: [ If a queryResponse is not available, this method shall check if continuation token is avaliable for this query.]
-    //Tests_SRS_DEVICETWIN_25_057: [ If continuation token is found then a continuation query is sent to the IotHub and new response is given to the user ]
-    @Test
-    public void hasNextSendsNewRequestOnEmpty(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
-    {
-        //arrange
-        final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
-                result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = false;
-                Deencapsulation.invoke(mockedQuery, "getContinuationToken");
-                result = anyString;
-            }
-        };
-
-        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
-
-        //act
-        boolean result = testTwin.hasNextDeviceTwin(testQuery);
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
-                times = 1;
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                times = 2;
-            }
-        };
-
-        assertFalse(result);
-    }
-
     @Test (expected = IotHubException.class)
-    public void hasNextSendsNewRequestOnEmptyThrowsIfSendThrows(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    public void hasNextThrowsIfHasNextOnQueryThrows(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
     {
         //arrange
         final String connectionString = "testString";
@@ -1264,61 +1220,14 @@ public class DeviceTwinTest
                 Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
                 result = mockedQuery;
                 Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = false;
-                Deencapsulation.invoke(mockedQuery, "getContinuationToken");
-                result = anyString;
-            }
-        };
-
-        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
                 result = new IotHubException();
             }
         };
 
-        //act
-        boolean result = testTwin.hasNextDeviceTwin(testQuery);
-    }
-
-    @Test
-    public void hasNextDoesNotSendNewRequestOnEmptyAndNullToken(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
-    {
-        //arrange
-        final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
-                result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = false;
-                Deencapsulation.invoke(mockedQuery, "getContinuationToken");
-                result = null;
-            }
-        };
-
         Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
 
         //act
         boolean result = testTwin.hasNextDeviceTwin(testQuery);
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
-                times = 0;
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                times = 1;
-            }
-        };
-        assertFalse(result);
     }
 
     //Tests_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinParser and provide the response on DeviceTwinDevice.]
@@ -1365,8 +1274,6 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
-                times = 0;
                 Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
                 times = 1;
             }
@@ -1393,8 +1300,6 @@ public class DeviceTwinTest
             {
                 Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
                 result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = true;
             }
         };
 
@@ -1405,7 +1310,7 @@ public class DeviceTwinTest
     }
 
     @Test (expected = IotHubException.class)
-    public void nextThrowsOnHasNextThrows(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
+    public void nextThrowsOnQueryNextThrows(@Mocked DeviceTwinDevice mockedDevice) throws IotHubException, IOException
     {
         //arrange
         final String connectionString = "testString";
@@ -1416,23 +1321,12 @@ public class DeviceTwinTest
             {
                 Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
                 result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = false;
-                Deencapsulation.invoke(mockedQuery, "getContinuationToken");
-                result = anyString;
-
+                Deencapsulation.invoke(mockedQuery, "next");
+                result = new IotHubException();
             }
         };
 
         Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                result = new IotHubException();
-            }
-        };
 
         //act
         testTwin.getNextDeviceTwin(testQuery);
@@ -1451,10 +1345,8 @@ public class DeviceTwinTest
             {
                 Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
                 result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = false;
                 Deencapsulation.invoke(mockedQuery, "next");
-                result = null;
+                result = new NoSuchElementException();
             }
         };
 
@@ -1462,17 +1354,6 @@ public class DeviceTwinTest
 
         //act
         DeviceTwinDevice result = testTwin.getNextDeviceTwin(testQuery);
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "continueQuery", new Class[] {String.class}, anyString);
-                times = 0;
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                times = 1;
-            }
-        };
     }
 
     //Tests_SRS_DEVICETWIN_25_060: [ If the next element from the query response is an object other than String, then this method shall throw IOException ]

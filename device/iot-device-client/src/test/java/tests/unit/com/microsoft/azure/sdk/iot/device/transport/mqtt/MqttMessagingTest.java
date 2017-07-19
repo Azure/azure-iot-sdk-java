@@ -325,6 +325,8 @@ public class MqttMessagingTest {
         final byte[] messageBody = {0x61, 0x62, 0x63};
         final String propertyName = "key";
         final String propertyValue = "value";
+        final String expectedCorrelationId = "1234";
+        final String expectedMessageId = "5678";
         final MessageProperty[] messageProperties = new MessageProperty[]
                 {
                         new MessageProperty(propertyName, propertyValue)
@@ -337,14 +339,20 @@ public class MqttMessagingTest {
                 mockMessage.getProperties();
                 result = messageProperties;
                 Deencapsulation.invoke(mockMqtt, "publish", anyString, messageBody);
+                mockMessage.getCorrelationId();
+                result = expectedCorrelationId;
+                mockMessage.getMessageId();
+                result = expectedMessageId;
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);;
-        testMqttMessaging.send(mockMessage);
-        final String publishTopicWithProperties = String.format(
-                "devices/%s/messages/events/%s=%s", clientId, propertyName, propertyValue);
+        MqttMessaging testMqttMessaging = new MqttMessaging(serverUri, clientId, userName, password, mockIotHubSSLContext);
 
+        // act
+        testMqttMessaging.send(mockMessage);
+
+        final String publishTopicWithProperties = String.format(
+                "devices/%s/messages/events/$.mid=%s&$.cid=%s&%s=%s", clientId, expectedMessageId, expectedCorrelationId, propertyName, propertyValue);
         new Verifications()
         {
             {

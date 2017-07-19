@@ -583,7 +583,7 @@ public class IotHubConnectionStringTest
     }
 
     /*
-    ** Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_022: [The function shall create a URL object from the given jobId using the following format: `https:hostname/jobs/v2/query?api-version=2016-11-14` ]
+    ** Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_022: [The function shall create a URL object from the given jobId using the following format: `https:[hostname]/jobs/v2/query?jobType=<>&jobStatus=<>&api-version=2016-11-14` ]
      */
     @Test
     public void getUrlQuerySucceeds() throws IOException
@@ -596,10 +596,12 @@ public class IotHubConnectionStringTest
         final String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         final String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         final IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
-        final String expected = "https://HOSTNAME.b.c.d/jobs/v2/query?api-version=2016-11-14";
+        final String expected = "https://HOSTNAME.b.c.d/jobs/v2/query?jobType=jobType&jobStatus=jobStatus&api-version=2016-11-14";
+        final String jobType = "jobType";
+        final String jobStatus = "jobStatus";
 
         // act
-        String actual = iotHubConnectionString.getUrlQuery().toString();
+        String actual = iotHubConnectionString.getUrlQuery(jobType, jobStatus).toString();
 
         // assert
         assertTrue(actual.equals(expected));

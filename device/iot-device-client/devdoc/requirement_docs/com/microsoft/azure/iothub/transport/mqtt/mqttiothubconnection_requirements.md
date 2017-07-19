@@ -45,6 +45,7 @@ public void open() throws IOException, IllegalArgumentException;
 
 **SRS_MQTTIOTHUBCONNECTION_15_006: [**If the MQTT connection is already open, the function shall do nothing.**]**
 
+**SRS_MQTTIOTHUBCONNECTION_99_017: [**The function shall set DeviceClientConfig object needed for SAS token renewal.**]**
 
 ### close
 

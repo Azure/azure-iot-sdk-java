@@ -36,6 +36,7 @@ public class AmqpSend extends BaseHandler
      * @param hostName The address string of the service (example: AAA.BBB.CCC)
      * @param userName The username string to use SASL authentication (example: user@sas.service)
      * @param sasToken The SAS token string
+     * @param iotHubServiceClientProtocol protocol to use
      */
     public AmqpSend(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
@@ -107,6 +108,7 @@ public class AmqpSend extends BaseHandler
      * @param deviceId The device name string
      * @param message The message to be sent
      * @throws IOException This exception is thrown if the AmqpSend object is not initialized
+     * @throws IotHubException If IotHub rejects the message for any reason
      */
     public void send(String deviceId, Message message) throws IOException, IotHubException
     {

@@ -541,10 +541,16 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         MessageImpl outgoingMessage = (MessageImpl) Proton.message();
         logger.LogInfo("Content of message is %s, method name is %s ", new String(message.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), logger.getMethodName());
         Properties properties = new Properties();
-        if(message.getMessageId() != null)
+        if (message.getMessageId() != null)
         {
             properties.setMessageId(message.getMessageId());
         }
+
+        if (message.getCorrelationId() != null)
+        {
+            properties.setCorrelationId(message.getCorrelationId());
+        }
+
         outgoingMessage.setProperties(properties);
 
         // Codes_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]

@@ -27,27 +27,6 @@ public class JobResult
 {
     private static final Charset DEFAULT_IOTHUB_MESSAGE_CHARSET = StandardCharsets.UTF_8;
 
-    // List of possible jobs
-    public enum JobType
-    {
-        scheduleDeviceMethod,
-        scheduleUpdateTwin
-    }
-
-    // List of possible IoTHub response status for a job
-    public enum JobStatus
-    {
-        unknown,
-        enqueued,
-        running,
-        completed,
-        failed,
-        cancelled,
-        scheduled,
-        queued
-    }
-
-
     // Job identifier
     private String jobId;
 
@@ -60,6 +39,9 @@ public class JobResult
 
     // System generated start time in UTC.
     private Date startTime;
+
+    // System generated last Updated Time in UTC.
+    private Date lastUpdatedDateTime;
 
     // System generated end time in UTC.
     // Represents the time the job stopped processing.
@@ -105,7 +87,11 @@ public class JobResult
     // The jobId of the parent orchestration, if any.
     private String parentJobId = null;
 
+    // The outcome of the job in query, if any.
+    private String outcome = null;
 
+    // The error message of the job in query, if any.
+    private String error = null;
     /**
      * CONSTRUCTOR
      *
@@ -132,13 +118,26 @@ public class JobResult
         this.createdTime = jobsResponseParser.getCreatedTime();
         this.startTime = jobsResponseParser.getStartTime();
         this.endTime = jobsResponseParser.getEndTime();
+        this.lastUpdatedDateTime = jobsResponseParser.getLastUpdatedTimeDate();
         this.maxExecutionTimeInSeconds = jobsResponseParser.getMaxExecutionTimeInSeconds();
-        this.jobType = JobType.valueOf(jobsResponseParser.getJobType().toString());
-        this.jobStatus = JobStatus.valueOf(jobsResponseParser.getJobsStatus().toString());
+        this.jobType = JobType.valueOf(jobsResponseParser.getType());
+        this.jobStatus = JobStatus.valueOf(jobsResponseParser.getJobsStatus());
+
         if(jobsResponseParser.getCloudToDeviceMethod() != null)
         {
             this.cloudToDeviceMethod = jobsResponseParser.getCloudToDeviceMethod().toJson();
         }
+
+        if (jobsResponseParser.getOutcome() != null)
+        {
+            this.outcome = jobsResponseParser.getOutcome().toJson();
+        }
+
+        if (jobsResponseParser.getError() != null)
+        {
+            this.error = jobsResponseParser.getError().toJson();
+        }
+
         TwinParser twinParser = jobsResponseParser.getUpdateTwin();
         if(twinParser != null)
         {
@@ -239,7 +238,7 @@ public class JobResult
      */
     public JobType getJobType()
     {
-        /* Codes_SRS_JOBRESULT_21_011: [The getJobType shall return the stored jobType.] */
+        /* Codes_SRS_JOBRESULT_21_011: [The getType shall return the stored jobType.] */
         return this.jobType;
     }
 
@@ -334,6 +333,36 @@ public class JobResult
     {
         /* Codes_SRS_JOBRESULT_21_019: [The getParentJobId shall return the stored parentJobId.] */
         return this.parentJobId;
+    }
+
+    /**
+     * Getter for last updated time in UTC
+     * @return System generated last updated time in UTC
+     */
+    public Date getLastUpdatedDateTime()
+    {
+        //Codes_SRS_JOBRESULT_25_023: [The getLastUpdatedDateTime shall return the stored LastUpdatedDateTime.]
+        return lastUpdatedDateTime;
+    }
+
+    /**
+     * Outcome for the device method job
+     * @return outcome for device method job
+     */
+    public String getOutcome()
+    {
+        //Codes_SRS_JOBRESULT_25_021: [The getOutcome shall return the stored outcome.]
+        return outcome;
+    }
+
+    /**
+     * getter for the error
+     * @return returns the json formatted error as string
+     */
+    public String getError()
+    {
+        //Codes_SRS_JOBRESULT_25_022: [The getError shall return the stored error message.]
+        return error;
     }
 
     /**

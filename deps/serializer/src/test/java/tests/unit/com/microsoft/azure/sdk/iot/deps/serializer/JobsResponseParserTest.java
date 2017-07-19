@@ -4,7 +4,9 @@
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.google.gson.JsonParseException;
+import com.microsoft.azure.sdk.iot.deps.serializer.JobQueryResponseError;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
+import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -45,7 +47,7 @@ public class JobsResponseParserTest
         assertEquals("jobName", Deencapsulation.getField(jobsResponseParser, "jobId"));
         assertEquals("DeviceId IN ['new_device']", Deencapsulation.getField(jobsResponseParser, "queryCondition"));
         assertEquals(120L, Deencapsulation.getField(jobsResponseParser, "maxExecutionTimeInSeconds"));
-        assertEquals("scheduleUpdateTwin", Deencapsulation.getField(jobsResponseParser, "jobType").toString());
+        assertEquals("scheduleUpdateTwin", Deencapsulation.getField(jobsResponseParser, "type").toString());
         assertEquals("enqueued", Deencapsulation.getField(jobsResponseParser, "jobsStatus").toString());
         assertEquals("Valid failure reason", Deencapsulation.getField(jobsResponseParser, "failureReason"));
         assertEquals("Valid status message", Deencapsulation.getField(jobsResponseParser, "statusMessage"));
@@ -71,7 +73,7 @@ public class JobsResponseParserTest
 
         // assert
         assertEquals("jobName", Deencapsulation.getField(jobsResponseParser, "jobId"));
-        assertEquals("scheduleUpdateTwin", Deencapsulation.getField(jobsResponseParser, "jobType").toString());
+        assertEquals("scheduleUpdateTwin", Deencapsulation.getField(jobsResponseParser, "type").toString());
         assertEquals("enqueued", Deencapsulation.getField(jobsResponseParser, "jobsStatus").toString());
     }
 
@@ -127,6 +129,116 @@ public class JobsResponseParserTest
 
         // assert
         assertNotNull(Deencapsulation.getField(jobsResponseParser, "cloudToDeviceMethod"));
+    }
+
+    @Test
+    public void constructorQueryResponseTwinSucceed() throws ParseException
+    {
+        // arrange
+        String json =
+                "{\"deviceId\":\"validDeviceID\"," +
+                        "\"jobId\":\"DHCMD302dbaae-cec5-4755-b529-1ca48d17dabc\"," +
+                        "\"jobType\":\"scheduleUpdateTwin\"," +
+                        "\"status\":\"completed\"," +
+                        "\"startTimeUtc\":\"2017-07-11T23:55:12.0052Z\"," +
+                        "\"endTimeUtc\":\"2017-07-11T23:56:52.0052Z\"," +
+                        "\"createdDateTimeUtc\":\"2017-07-11T23:55:13.4955445Z\"," +
+                        "\"lastUpdatedDateTimeUtc\":\"2017-07-11T23:55:13.5267866Z\"," +
+                        "\"outcome\":{}}";
+
+        // act
+        JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
+
+        // assert
+        assertNull(Deencapsulation.getField(jobsResponseParser, "cloudToDeviceMethod"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "startTimeDate"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "endTimeDate"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "createdTimeDate"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "lastUpdatedTimeDate"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "outcome"));
+        MethodParser methodParser = Deencapsulation.getField(jobsResponseParser, "methodResponse");
+        assertNotNull(methodParser);
+
+        try
+        {
+            methodParser.getStatus();
+            methodParser.getPayload();
+            assertTrue("Expected an exception as outcome does not apply to twin", true);
+        }
+        catch (IllegalArgumentException e)
+        {
+            // Do nothing as this is expected exception
+        }
+    }
+
+    //Tests_SRS_JOBSRESPONSEPARSER_25_033: [The getOutcome shall return the outcome value.]
+    //Tests_SRS_JOBSRESPONSEPARSER_25_031: [The getLastUpdatedTimeDate shall return the LastUpdatedTimeUTCDate value.]
+    @Test
+    public void constructorQueryResponseMethodSucceed() throws ParseException
+    {
+        // arrange
+        String json =
+                "{\"deviceId\":\"validDeviceID\"," +
+                        "\"jobId\":\"DHCMD7605b0fb-dff4-4368-aa00-9be5c563cfcd\"," +
+                        "\"jobType\":\"scheduleDeviceMethod\"," +
+                        "\"status\":\"completed\"," +
+                        "\"startTimeUtc\":\"2017-07-11T23:55:12.0052Z\"," +
+                        "\"endTimeUtc\":\"2017-07-11T23:56:52.0052Z\"," +
+                        "\"createdDateTimeUtc\":\"2017-07-11T23:55:14.0580263Z\"," +
+                        "\"lastUpdatedDateTimeUtc\":\"2017-07-11T23:55:14.198687Z\"," +
+                        "\"outcome\":{\"deviceMethodResponse\":{\"status\":404,\"payload\":\"executed reboot\"}}}";
+
+        // act
+        JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
+
+        // assert
+
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "startTimeDate"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "endTimeDate"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "createdTimeDate"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "lastUpdatedTimeDate"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "outcome"));
+        MethodParser methodParser = Deencapsulation.getField(jobsResponseParser, "methodResponse");
+        assertNotNull(methodParser.getStatus());
+        assertNotNull(methodParser.getPayload());
+    }
+
+    //Tests_SRS_JOBSRESPONSEPARSER_25_032: [The getError shall return the error value.]
+    @Test
+    public void constructorQueryResponseErrorSucceed() throws ParseException
+    {
+        // arrange
+        String json =
+                "{\"deviceId\":\"validDeviceID\"," +
+                        "\"jobId\":\"DHCMD798400e8-6d6c-44a5-b0ec-a790ad9705de\"," +
+                        "\"jobType\":\"scheduleDeviceMethod\"," +
+                        "\"status\":\"failed\"," +
+                        "\"startTimeUtc\":\"2017-07-08T00:02:25.0556Z\"," +
+                        "\"endTimeUtc\":\"2017-07-08T00:04:05.0556Z\"," +
+                        "\"createdDateTimeUtc\":\"2017-07-08T00:02:31.6162976Z\"," +
+                        "\"lastUpdatedDateTimeUtc\":\"2017-07-08T00:04:05.0736166Z\"," +
+                        "\"outcome\":{}," +
+                        "\"error\":{" +
+                            "\"code\":\"JobRunPreconditionFailed\"," +
+                        "   \"description\":\"The job did not start within specified period: either device did not come online or invalid endTime specified.\"" +
+                            "}" +
+                        "}";
+
+        // act
+        JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
+
+        // assert
+        assertNull(Deencapsulation.getField(jobsResponseParser, "cloudToDeviceMethod"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "startTimeDate"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "endTimeDate"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "createdTimeDate"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "lastUpdatedTimeDate"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "outcome"));
+        assertNotNull(Deencapsulation.getField(jobsResponseParser, "error"));
+        JobQueryResponseError jobQueryResponseError = Deencapsulation.getField(jobsResponseParser, "error");
+        assertNotNull(jobQueryResponseError.toJson());
+        assertNotNull(jobQueryResponseError.getCode());
+        assertNotNull(jobQueryResponseError.getDescription());
     }
 
     /* Tests_SRS_JOBSRESPONSEPARSER_21_005: [If the json contains `deviceJobStatistics`, the createFromJson shall parse the content of it for JobsStatisticsParser class.] */
@@ -387,6 +499,188 @@ public class JobsResponseParserTest
 
     /* Tests_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
     @Test
+    public void constructorEmptyCreateTimeUTCSucceed() throws ParseException
+    {
+        // arrange
+        String json =
+                "{\n" +
+                        "    \"jobId\":\"jobName\",\n" +
+                        "    \"status\":\"enqueued\",\n" +
+                        "    \"type\":\"scheduleUpdateTwin\",\n" +
+                        "    \"createdDateTimeUtc\":\"\",\n" +
+                        "    \"startTime\":\"2017-06-21T16:47:33.798692Z\",\n" +
+                        "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
+                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "}";
+
+        // act
+        JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
+
+        // assert
+        assertNull(Deencapsulation.getField(jobsResponseParser, "createdTimeDate"));
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(jobsResponseParser, "startTimeDate"),"2017-06-21T16:47:33.798692Z");
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(jobsResponseParser, "endTimeDate"),"2017-06-21T20:47:33.798692Z");
+    }
+
+    @Test
+    public void constructorEmptyLastUpdatedTimeUTCSucceed() throws ParseException
+    {
+        // arrange
+        String json =
+                "{\n" +
+                        "    \"jobId\":\"jobName\",\n" +
+                        "    \"status\":\"enqueued\",\n" +
+                        "    \"type\":\"scheduleUpdateTwin\",\n" +
+                        "    \"createdDateTimeUtc\":\"2017-06-21T16:47:33.798692Z\",\n" +
+                        "    \"startTime\":\"2017-06-21T16:47:33.798692Z\",\n" +
+                        "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
+                        "    \"lastUpdatedDateTimeUtc\":\"\",\n" +
+                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "}";
+
+        // act
+        JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
+
+        // assert
+        assertNull(Deencapsulation.getField(jobsResponseParser, "lastUpdatedTimeDate"));
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(jobsResponseParser, "createdTimeDate"),"2017-06-21T16:47:33.798692Z");
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(jobsResponseParser, "startTimeDate"),"2017-06-21T16:47:33.798692Z");
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(jobsResponseParser, "endTimeDate"),"2017-06-21T20:47:33.798692Z");
+    }
+
+    //Tests_SRS_JOBSRESPONSEPARSER_25_034: [If the json contains both of the dates createdTime and createdDateTimeUtc or startTime and startTimeUtc or endTime and endTimeUtc, the createFromJson shall throw IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorBothCreateTimeAndUTCInJsonThrows() throws ParseException
+    {
+        // arrange
+        String json =
+                "{\n" +
+                        "    \"jobId\":\"jobName\",\n" +
+                        "    \"status\":\"enqueued\",\n" +
+                        "    \"type\":\"scheduleUpdateTwin\",\n" +
+                        "    \"createdTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
+                        "    \"createdDateTimeUtc\":\"2017-06-21T10:47:33.798692Z\",\n" +
+                        "    \"startTimeUtc\":\"invalidDate\",\n" +
+                        "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
+                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "}";
+
+        // act
+        JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorBothStartTimeAndUTCInJsonThrows() throws ParseException
+    {
+        // arrange
+        String json =
+                "{\n" +
+                        "    \"jobId\":\"jobName\",\n" +
+                        "    \"status\":\"enqueued\",\n" +
+                        "    \"type\":\"scheduleUpdateTwin\",\n" +
+                        "    \"createdTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
+                        "    \"startTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
+                        "    \"startTimeUtc\":\"2017-06-21T10:47:33.798692Z\",\n" +
+                        "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
+                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "}";
+
+        // act
+        JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorBothEndTimeAndUTCInJsonThrows() throws ParseException
+    {
+        // arrange
+        String json =
+                "{\n" +
+                        "    \"jobId\":\"jobName\",\n" +
+                        "    \"status\":\"enqueued\",\n" +
+                        "    \"type\":\"scheduleUpdateTwin\",\n" +
+                        "    \"createdTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
+                        "    \"startTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
+                        "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
+                        "    \"endTimeUtc\":\"2017-06-21T20:47:33.798692Z\",\n" +
+                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "}";
+
+        // act
+        JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorBothTypeAndJobTypeInJsonThrows() throws ParseException
+    {
+        // arrange
+        String json =
+                "{\n" +
+                        "    \"jobId\":\"jobName\",\n" +
+                        "    \"status\":\"enqueued\",\n" +
+                        "    \"type\":\"scheduleUpdateTwin\",\n" +
+                        "    \"jobType\":\"scheduleUpdateTwin\",\n" +
+                        "    \"createdTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
+                        "    \"startTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
+                        "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
+                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "}";
+
+        // act
+        JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
+    }
+
+    /* Tests_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
+    @Test
+    public void constructorEmptyStartTimeUTCSucceed() throws ParseException
+    {
+        // arrange
+        String json =
+                "{\n" +
+                        "    \"jobId\":\"jobName\",\n" +
+                        "    \"status\":\"enqueued\",\n" +
+                        "    \"type\":\"scheduleUpdateTwin\",\n" +
+                        "    \"createdTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
+                        "    \"startTimeUtc\":\"invalidDate\",\n" +
+                        "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
+                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "}";
+
+        // act
+        JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
+
+        // assert
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(jobsResponseParser, "createdTimeDate"),"2017-06-21T10:47:33.798692Z");
+        assertNull(Deencapsulation.getField(jobsResponseParser, "startTimeDate"));
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(jobsResponseParser, "endTimeDate"),"2017-06-21T20:47:33.798692Z");
+    }
+
+    /* Tests_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
+    @Test
+    public void constructorEmptyEndTimeUTCSucceed() throws ParseException
+    {
+        // arrange
+        String json =
+                "{\n" +
+                        "    \"jobId\":\"jobName\",\n" +
+                        "    \"status\":\"enqueued\",\n" +
+                        "    \"type\":\"scheduleUpdateTwin\",\n" +
+                        "    \"createdTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
+                        "    \"startTime\":\"2017-06-21T16:47:33.798692Z\",\n" +
+                        "    \"endTimeUtc\":\"invalidDate\",\n" +
+                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "}";
+
+        // act
+        JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
+
+        // assert
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(jobsResponseParser, "createdTimeDate"),"2017-06-21T10:47:33.798692Z");
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(jobsResponseParser, "startTimeDate"),"2017-06-21T16:47:33.798692Z");
+        assertNull(Deencapsulation.getField(jobsResponseParser, "endTimeDate"));
+    }
+
+    /* Tests_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
+    @Test
     public void constructorEmptyCreateTimeSucceed() throws ParseException
     {
         // arrange
@@ -466,7 +760,7 @@ public class JobsResponseParserTest
     /* Tests_SRS_JOBSRESPONSEPARSER_21_016: [The getStartTime shall return the startTime value.] */
     /* Tests_SRS_JOBSRESPONSEPARSER_21_017: [The getEndTime shall return the endTime value.] */
     /* Tests_SRS_JOBSRESPONSEPARSER_21_018: [The getMaxExecutionTimeInSeconds shall return the maxExecutionTimeInSeconds value.] */
-    /* Tests_SRS_JOBSRESPONSEPARSER_21_019: [The getJobType shall return a String with the job type value.] */
+    /* Tests_SRS_JOBSRESPONSEPARSER_21_019: [The getType shall return a String with the job type value.] */
     /* Tests_SRS_JOBSRESPONSEPARSER_21_020: [The getJobsStatus shall return a String with the job status value.] */
     /* Tests_SRS_JOBSRESPONSEPARSER_21_022: [The getUpdateTwin shall return the updateTwin value.] */
     /* Tests_SRS_JOBSRESPONSEPARSER_21_023: [The getFailureReason shall return the failureReason value.] */
@@ -517,7 +811,7 @@ public class JobsResponseParserTest
         Helpers.assertDateWithError(jobsResponseParser.getStartTime(),"2017-06-21T16:47:33.798692Z");
         Helpers.assertDateWithError(jobsResponseParser.getEndTime(),"2017-06-21T20:47:33.798692Z");
         assertEquals(120L, (long)jobsResponseParser.getMaxExecutionTimeInSeconds());
-        assertEquals("scheduleUpdateTwin", jobsResponseParser.getJobType());
+        assertEquals("scheduleUpdateTwin", jobsResponseParser.getType());
         assertEquals("enqueued", jobsResponseParser.getJobsStatus());
         assertNull(jobsResponseParser.getCloudToDeviceMethod());
         assertNotNull(jobsResponseParser.getUpdateTwin());
@@ -526,6 +820,40 @@ public class JobsResponseParserTest
         assertEquals("Valid status message", jobsResponseParser.getStatusMessage());
         assertEquals("ValidDeviceId", jobsResponseParser.getDeviceId());
         assertEquals("ValidParentJobId", jobsResponseParser.getParentJobId());
+    }
+
+    @Test
+    public void gettersSucceedQueryResponse() throws ParseException
+    {
+        // arrange
+        String json =
+                "{\"deviceId\":\"validDeviceID\"," +
+                        "\"jobId\":\"jobName\"," +
+                        "\"jobType\":\"scheduleDeviceMethod\"," +
+                        "\"status\":\"completed\"," +
+                        "\"startTimeUtc\":\"2017-07-11T23:55:12.0052Z\"," +
+                        "\"endTimeUtc\":\"2017-07-11T23:56:52.0052Z\"," +
+                        "\"createdDateTimeUtc\":\"2017-07-11T23:55:14.0580263Z\"," +
+                        "\"lastUpdatedDateTimeUtc\":\"2017-07-11T23:55:14.198687Z\"," +
+                        "\"outcome\":{\"deviceMethodResponse\":{\"status\":404,\"payload\":\"executed reboot\"}}}";
+        ;
+        JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
+
+        // act
+        // assert
+        assertEquals("validDeviceID", jobsResponseParser.getDeviceId());
+        assertEquals("jobName", jobsResponseParser.getJobId());
+        Helpers.assertDateWithError(jobsResponseParser.getCreatedTime(),"2017-07-11T23:55:14.0580263Z");
+        Helpers.assertDateWithError(jobsResponseParser.getStartTime(),"2017-07-11T23:55:12.0052Z");
+        Helpers.assertDateWithError(jobsResponseParser.getEndTime(),"2017-07-11T23:56:52.0052Z");
+        Helpers.assertDateWithError(jobsResponseParser.getLastUpdatedTimeDate(), "2017-07-11T23:55:14.198687Z");
+        assertEquals("scheduleDeviceMethod", jobsResponseParser.getType());
+        assertEquals("completed", jobsResponseParser.getJobsStatus());
+        assertNotNull(jobsResponseParser.getOutcome());
+        assertNull(jobsResponseParser.getCloudToDeviceMethod());
+        assertNull(jobsResponseParser.getUpdateTwin());
+        assertNull(jobsResponseParser.getJobStatistics());
+        assertNull(jobsResponseParser.getError());
     }
 
     /* Tests_SRS_JOBSRESPONSEPARSER_21_021: [The getCloudToDeviceMethod shall return the cloudToDeviceMethod value.] */
