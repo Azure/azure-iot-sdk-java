@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
+import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 
 import java.io.IOException;
 import java.util.Date;
@@ -100,7 +101,7 @@ public class Job
         /* Codes_SRS_JOB_21_010: [If scheduleUpdateTwin failed, the scheduleUpdateTwin shall throws IotHubException. Threw by the scheduleUpdateTwin.] */
         JobResult jobResult = this.jobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
 
-        if(jobResult.getJobStatus() == JobResult.JobStatus.failed)
+        if(jobResult.getJobStatus() == JobStatus.failed)
         {
             /* Codes_SRS_JOB_21_011: [If the Iothub reported fail as result of the scheduleUpdateTwin, the scheduleUpdateTwin shall throws IotHubException.] */
             throw new IotHubException(jobResult.getStatusMessage() == null ? "Iothub failed to create the job" : jobResult.getStatusMessage());
@@ -149,7 +150,7 @@ public class Job
                 methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload,
                 startTimeUtc, maxExecutionTimeInSeconds);
 
-        if(jobResult.getJobStatus() == JobResult.JobStatus.failed)
+        if(jobResult.getJobStatus() == JobStatus.failed)
         {
             /* Codes_SRS_JOB_21_017: [If the Iothub reported fail as result of the scheduleDeviceMethod, the scheduleDeviceMethod shall throws IotHubException.] */
             throw new IotHubException(jobResult.getStatusMessage() == null ? "Iothub failed to create the job" : jobResult.getStatusMessage());

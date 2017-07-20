@@ -8,14 +8,13 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Job;
+import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import mockit.*;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Date;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 /**
@@ -268,7 +267,7 @@ public class JobTest
                 result = mockedJobResult;
                 times = 1;
                 mockedJobResult.getJobStatus();
-                result = JobResult.JobStatus.enqueued;
+                result = JobStatus.enqueued;
             }
         };
 
@@ -331,7 +330,7 @@ public class JobTest
                 mockedJobClient.scheduleUpdateTwin((String)any, queryCondition,deviceTwin, now, maxExecutionTimeInSeconds);
                 result = mockedJobResult;
                 mockedJobResult.getJobStatus();
-                result = JobResult.JobStatus.failed;
+                result = JobStatus.failed;
                 times = 1;
             }
         };
@@ -442,7 +441,7 @@ public class JobTest
                 result = mockedJobResult;
                 times = 1;
                 mockedJobResult.getJobStatus();
-                result = JobResult.JobStatus.enqueued;
+                result = JobStatus.enqueued;
             }
         };
 
@@ -507,7 +506,7 @@ public class JobTest
                 mockedJobClient.scheduleDeviceMethod((String)any, queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
                 result = mockedJobResult;
                 mockedJobResult.getJobStatus();
-                result = JobResult.JobStatus.failed;
+                result = JobStatus.failed;
             }
         };
 
