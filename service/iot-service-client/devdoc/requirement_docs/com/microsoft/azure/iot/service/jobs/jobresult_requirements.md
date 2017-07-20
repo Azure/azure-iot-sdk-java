@@ -32,7 +32,7 @@ public class JobResult
     public String getDeviceId();
     public String getParentJobId();
     public getLastUpdatedDateTime();
-    public String getOutcome();
+    public String getOutcomeResult();
     public String getError();
     
     @Override public String toString();
@@ -144,11 +144,11 @@ public Date getLastUpdatedDateTime();
 ```
 **SRS_JOBRESULT_25_023: [**The getLastUpdatedDateTime shall return the stored LastUpdatedDateTime.**]**  
 
-### getOutcome
+### getOutcomeResult
 ```java
-public String getOutcome();
+public String getOutcomeResult();
 ```
-**SRS_JOBRESULT_25_021: [**The getOutcome shall return the stored outcome.**]**  
+**SRS_JOBRESULT_25_021: [**The getOutcomeResult shall return the stored outcome.**]**  
 
 ### getError
 ```java

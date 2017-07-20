@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsStatisticsParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
+import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatistics;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
@@ -280,10 +281,68 @@ public class JobResultTest
 
     /* Tests_SRS_JOBRESULT_21_013: [The getCloudToDeviceMethod shall return the stored cloudToDeviceMethod.] */
     /* Tests_SRS_JOBRESULT_25_020: [The getLastUpdatedDateTime shall return the stored LastUpdatedDateTime.] */
-    /* Tests_SRS_JOBRESULT_25_021: [The getOutcome shall return the stored outcome.] */
+    /* Tests_SRS_JOBRESULT_25_021: [The getOutcomeResult shall return the stored outcome.] */
     /* Tests_SRS_JOBRESULT_25_022: [The getError shall return the stored error message.] */
     @Test
     public void gettersMethodContent(@Mocked MethodParser mockedMethodParser) throws IOException
+    {
+        //arrange
+        final String json = "validJson";
+        final String methodReturnPayload = "validResult";
+        final int methodReturnStatus = 200;
+        final Date now = new Date();
+
+        MethodParser methodParser = new MethodParser("methodName", null, null, new HashMap<String, Object>());
+        MethodParser methodParserResponse = mockedMethodParser;
+
+        JobsResponseParserExpectations(json, null, methodParser, now, methodParserResponse);
+        new NonStrictExpectations()
+        {
+            {
+                JobsResponseParser.createFromJson(json);
+                result = mockedJobsResponseParser;
+
+                mockedJobsResponseParser.getJobId();
+                result = JOB_ID;
+                mockedJobsResponseParser.getType();
+                result = "scheduleDeviceMethod";
+                mockedJobsResponseParser.getJobsStatus();
+                result = "completed";
+                mockedJobsResponseParser.getCloudToDeviceMethod();
+                result = methodParser;
+                mockedJobsResponseParser.getOutcome();
+                result = methodParserResponse;
+                methodParserResponse.toJson();
+                result = json;
+                methodParserResponse.getStatus();
+                result = methodReturnStatus;
+                methodParserResponse.getPayload();
+                result = methodReturnPayload;
+
+                Deencapsulation.newInstance(JobStatistics.class, mockedJobsStatisticsParser);
+                result = mockedJobStatistics;
+            }
+        };
+
+        //act
+        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
+
+        //assert
+        assertEquals(JOB_ID, jobResult.getJobId());
+        assertEquals(JobType.scheduleDeviceMethod, jobResult.getJobType());
+        assertEquals(JobStatus.completed, jobResult.getJobStatus());
+        assertNotNull(jobResult.getCloudToDeviceMethod());
+        assertNotNull(jobResult.getOutcome());
+        MethodResult methodResult = jobResult.getOutcomeResult();
+        assertEquals(methodReturnStatus, (long)methodResult.getStatus());
+        assertEquals(methodReturnPayload, methodResult.getPayload());
+        assertNotNull(jobResult.getLastUpdatedDateTime());
+        assertNull(jobResult.getError());
+    }
+
+    /* Tests_SRS_JOBRESULT_25_021: [The getOutcomeResult shall return the stored outcome.] */
+    @Test
+    public void gettersEmptyOutcome(@Mocked MethodParser mockedMethodParser) throws IOException
     {
         //arrange
         final String json = "validJson";
@@ -311,6 +370,8 @@ public class JobResultTest
                 result = methodParserResponse;
                 methodParserResponse.toJson();
                 result = json;
+                methodParserResponse.getStatus();
+                result = new IllegalArgumentException();
 
                 Deencapsulation.newInstance(JobStatistics.class, mockedJobsStatisticsParser);
                 result = mockedJobStatistics;
@@ -321,13 +382,7 @@ public class JobResultTest
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
 
         //assert
-        assertEquals(JOB_ID, jobResult.getJobId());
-        assertEquals(JobType.scheduleDeviceMethod, jobResult.getJobType());
-        assertEquals(JobStatus.completed, jobResult.getJobStatus());
-        assertNotNull(jobResult.getCloudToDeviceMethod());
-        assertEquals(json, jobResult.getOutcome());
-        assertNotNull(jobResult.getLastUpdatedDateTime());
-        assertNull(jobResult.getError());
+        assertNull(jobResult.getOutcomeResult());
     }
 
     /* Tests_SRS_JOBRESULT_21_020: [The toString shall return a String with a pretty print json that represents this class.] */

@@ -1756,7 +1756,7 @@ public class JobClientTest
         new Verifications()
         {
             {
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.POST, new byte[]{}, (String)any, 0);
+                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.POST, (byte[])any, (String)any, 0);
                 times = 1;
             }
         };
@@ -1780,7 +1780,7 @@ public class JobClientTest
                 mockedIotHubConnectionString.getUrlJobsCancel(jobId);
                 result = mockedURL;
 
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.POST, new byte[]{}, (String)any, 0);
+                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.POST, (byte[])any, (String)any, 0);
                 result = new IOException();
             }
         };

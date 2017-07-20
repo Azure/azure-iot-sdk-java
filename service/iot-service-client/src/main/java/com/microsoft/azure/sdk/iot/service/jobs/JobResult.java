@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsStatisticsParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 
 import java.io.IOException;
@@ -89,6 +90,7 @@ public class JobResult
 
     // The outcome of the job in query, if any.
     private String outcome = null;
+    private MethodResult outcomeResult = null;
 
     // The error message of the job in query, if any.
     private String error = null;
@@ -131,6 +133,18 @@ public class JobResult
         if (jobsResponseParser.getOutcome() != null)
         {
             this.outcome = jobsResponseParser.getOutcome().toJson();
+
+            if (this.jobType == JobType.scheduleDeviceMethod)
+            {
+                try
+                {
+                    this.outcomeResult = new MethodResult(jobsResponseParser.getOutcome().getStatus(), jobsResponseParser.getOutcome().getPayload());
+                }
+                catch (IllegalArgumentException e)
+                {
+                    this.outcomeResult = null;
+                }
+            }
         }
 
         if (jobsResponseParser.getError() != null)
@@ -347,12 +361,24 @@ public class JobResult
 
     /**
      * Outcome for the device method job
+     * @deprecated As of release 1.7.23, replaced by {@link #getOutcomeResult()}
      * @return outcome for device method job
      */
+    @Deprecated
     public String getOutcome()
     {
-        //Codes_SRS_JOBRESULT_25_021: [The getOutcome shall return the stored outcome.]
+        //Codes_SRS_JOBRESULT_25_021: [The getOutcomeResult shall return the stored outcome.]
         return outcome;
+    }
+
+    /**
+     * Outcome for the device method job
+     * @return outcome for device method job
+     */
+    public MethodResult getOutcomeResult()
+    {
+        //Codes_SRS_JOBRESULT_25_021: [The getOutcomeResult shall return the stored outcome.]
+        return outcomeResult;
     }
 
     /**

@@ -28,6 +28,8 @@ public class JobClient
     private final static long MAX_TIMEOUT = Integer.MAX_VALUE - 24000;
     private final static Integer DEFAULT_PAGE_SIZE = 100;
 
+    private final static byte[] EMPTY_JSON = "{}".getBytes();
+
     private IotHubConnectionString iotHubConnectionString = null;
 
     /**
@@ -270,7 +272,7 @@ public class JobClient
         /* Codes_SRS_JOBCLIENT_21_032: [The cancelJob shall send a POST request to the iothub using the created url.] */
         /* Codes_SRS_JOBCLIENT_21_033: [If the cancelJob failed to send a POST request, it shall throw IOException.] */
         /* Codes_SRS_JOBCLIENT_21_034: [If the cancelJob failed to verify the iothub response, it shall throw IotHubException.] */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.POST, new byte[]{}, null, USE_DEFAULT_TIMEOUT);
+        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.POST, EMPTY_JSON, null, USE_DEFAULT_TIMEOUT);
 
         /* Codes_SRS_JOBCLIENT_21_035: [The cancelJob shall parse the iothub response and return it as JobResult.] */
         return new JobResult(response.getBody());
@@ -410,7 +412,6 @@ public class JobClient
         {
             //Codes_SRS_JOBCLIENT_25_051: [getNextJob method shall parse the next job element from the query response provide the response as JobResult object.]
             String deviceJobJson = (String) nextObject;
-            System.out.println(deviceJobJson);
             return new JobResult(deviceJobJson.getBytes());
         }
         else
