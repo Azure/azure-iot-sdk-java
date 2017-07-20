@@ -182,7 +182,7 @@ public class DeviceEmulator  implements Runnable
         if(deviceTwin == null)
         {
             deviceTwin = new DeviceTwinProperty();
-            propertyCallBackContext = null;
+            propertyCallBackContext = twinChanges;
         }
 
         deviceClient.startDeviceTwin(deviceTwinStatusCallBack, deviceTwinStatusCallbackContext, deviceTwin, propertyCallBackContext);
@@ -257,6 +257,8 @@ public class DeviceEmulator  implements Runnable
         @Override
         public synchronized void PropertyCall(String propertyKey, Object propertyValue, Object context)
         {
+            System.out.println("Device updated " + propertyKey + " to " + propertyValue.toString());
+            ConcurrentMap<String, ConcurrentLinkedQueue<Object>> twinChanges = (ConcurrentMap<String, ConcurrentLinkedQueue<Object>>)context;
             if(!twinChanges.containsKey(propertyKey))
             {
                 twinChanges.put(propertyKey, new ConcurrentLinkedQueue<>());
@@ -270,6 +272,7 @@ public class DeviceEmulator  implements Runnable
         @Override
         public synchronized DeviceMethodData call(String methodName, Object methodData, Object context)
         {
+            System.out.println("Device invoked " + methodName);
             DeviceMethodData deviceMethodData;
             int status;
             String result;

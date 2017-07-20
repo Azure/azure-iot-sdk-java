@@ -17,7 +17,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import sun.rmi.server.InactiveGroupException;
 import tests.integration.com.microsoft.azure.sdk.iot.service.helpers.DeviceEmulator;
 import tests.integration.com.microsoft.azure.sdk.iot.service.helpers.DeviceTestManager;
 
@@ -47,15 +46,15 @@ public class JobClientIT
 
     private static final long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(120);
     private static final long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toSeconds(5);
-    private static final long TEST_TIMEOUT_MS = 30000L; // 30 seconds
+    private static final long TEST_TIMEOUT_MS = 60000L; // 1 minute
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 200; // 0.2 sec
     private static final String PAYLOAD_STRING = "This is a valid payload";
+    private static int newTemperature = 70;
 
     private static List<DeviceTestManager> devices = new LinkedList<>();
 
     private static final int MAX_NUMBER_JOBS = 3;
     private static final long MAX_EXECUTION_TIME_IN_MS = 100;
-    private static final int NEW_TEMPERATURE_TEST = 50;
 
     private JobResult queryDeviceJobResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
     {
@@ -71,6 +70,7 @@ public class JobClientIT
                     (jobResult.getJobType() == jobType) &&
                     (jobResult.getJobStatus() == jobStatus))
             {
+                System.out.println("Iothub confirmed " + jobId + " " + jobStatus + " for " + jobType);
                 return jobResult;
             }
         }
@@ -79,7 +79,7 @@ public class JobClientIT
 
     private JobResult queryJobResponseResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
     {
-        Query query = jobClient.queryJobResponse(jobType, JobStatus.completed);
+        Query query = jobClient.queryJobResponse(jobType, jobStatus);
         JobResult jobResult;
         while(jobClient.hasNextJob(query))
         {
@@ -88,6 +88,7 @@ public class JobClientIT
                     (jobResult.getJobType() == jobType) &&
                     (jobResult.getJobStatus() == jobStatus))
             {
+                System.out.println("Iothub confirmed " + jobId + " " + jobStatus + " for " + jobType);
                 return jobResult;
             }
         }
@@ -151,11 +152,12 @@ public class JobClientIT
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
         ConcurrentMap<String, Exception> jobExceptions = new ConcurrentHashMap<>();
         ConcurrentMap<String, JobResult> jobResults = new ConcurrentHashMap<>();
+        ConcurrentMap<String, Integer> twinExpectedTemperature = new ConcurrentHashMap<>();
 
         // Act
         for (int i = 0; i < MAX_NUMBER_JOBS; i++)
         {
-            final int index = i;
+            final int jobTemperature = (newTemperature++);
             executor.submit(new Runnable()
             {
                 @Override
@@ -166,8 +168,9 @@ public class JobClientIT
                     {
                         DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(deviceId);
                         Set<Pair> testDesProp = new HashSet<>();
-                        testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, (NEW_TEMPERATURE_TEST + index)));
+                        testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, jobTemperature));
                         deviceTwinDevice.setDesiredProperties(testDesProp);
+                        twinExpectedTemperature.put(jobId, jobTemperature);
 
                         jobClient.scheduleUpdateTwin(
                                 jobId, queryCondition,
@@ -200,6 +203,12 @@ public class JobClientIT
         }
 
         // Assert
+        // asserts for the client side.
+        assertEquals(0, deviceTestManger.getStatusError());
+        ConcurrentMap<String, ConcurrentLinkedQueue<Object>> changes = deviceTestManger.getTwinChanges();
+        ConcurrentLinkedQueue<Object> receivedTemperatures = changes.get(STANDARD_PROPERTY_HOMETEMP);
+        assertEquals(MAX_NUMBER_JOBS, receivedTemperatures.size());
+
         // asserts for the service side.
         if(jobExceptions.size() != 0)
         {
@@ -210,21 +219,14 @@ public class JobClientIT
             assertTrue("Service throw an exception enqueuing jobs", false);
         }
         assertEquals("Missing job result", MAX_NUMBER_JOBS, jobResults.size());
-        for (Map.Entry<String, JobResult> jobResult: jobResults.entrySet())
+        for (Map.Entry<String, JobResult> job: jobResults.entrySet())
         {
-            assertNotNull(jobResult.getValue());
-            assertEquals("JobResult reported incorrect jobId", jobResult.getKey(), jobResult.getValue().getJobId());
-        }
-
-        // asserts for the client side.
-        assertEquals(0, deviceTestManger.getStatusError());
-        ConcurrentMap<String, ConcurrentLinkedQueue<Object>> changes = deviceTestManger.getTwinChanges();
-        ConcurrentLinkedQueue<Object> temperatures = changes.get(STANDARD_PROPERTY_HOMETEMP);
-        assertEquals(MAX_NUMBER_JOBS, temperatures.size());
-        for (int i = 0; i < MAX_NUMBER_JOBS; i++)
-        {
-            String expectedTemperature = Integer.toString(NEW_TEMPERATURE_TEST + i) + ".0";
-            assertTrue("Device do not change " + STANDARD_PROPERTY_HOMETEMP + " to " + expectedTemperature, temperatures.contains(expectedTemperature));
+            String jobId = job.getKey();
+            JobResult jobResult = job.getValue();
+            assertNotNull(jobResult);
+            assertEquals("JobResult reported incorrect jobId", jobId, jobResult.getJobId());
+            String expectedTemperature = Integer.toString(twinExpectedTemperature.get(jobId)) + ".0";
+            assertTrue("Device do not change " + STANDARD_PROPERTY_HOMETEMP + " to " + expectedTemperature, receivedTemperatures.contains(expectedTemperature));
         }
     }
 
@@ -326,6 +328,7 @@ public class JobClientIT
         for (int i = 0; i < MAX_NUMBER_JOBS; i++)
         {
             final int index = i;
+            final int jobTemperature = (newTemperature++);
             executor.submit(new Runnable()
             {
                 @Override
@@ -345,10 +348,9 @@ public class JobClientIT
                         {
                             DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(deviceId);
                             Set<Pair> testDesProp = new HashSet<>();
-                            int temperature = NEW_TEMPERATURE_TEST + index;
-                            testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, temperature));
+                            testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, jobTemperature));
                             deviceTwinDevice.setDesiredProperties(testDesProp);
-                            twinExpectedTemperature.put(jobId, temperature);
+                            twinExpectedTemperature.put(jobId, jobTemperature);
 
                             jobClient.scheduleUpdateTwin(
                                     jobId, queryCondition,
@@ -382,6 +384,19 @@ public class JobClientIT
             assertTrue("Test finish with timeout", false);
         }
 
+        // wait until device receive the Twin change
+        ConcurrentMap<String, ConcurrentLinkedQueue<Object>> changes = deviceTestManger.getTwinChanges();
+        int timeout = 0;
+        while(changes.size() == 0)
+        {
+            if((timeout += MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB) >= TEST_TIMEOUT_MS)
+            {
+                assertTrue("Device didn't receive the twin change", false);
+            }
+            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB); // wait 10 seconds
+            changes = deviceTestManger.getTwinChanges();
+        }
+
         // Assert
         // asserts for the service side.
         if(jobExceptions.size() != 0)
@@ -393,12 +408,7 @@ public class JobClientIT
             assertTrue("Service throw an exception enqueuing jobs", false);
         }
         assertEquals("Missing job result", MAX_NUMBER_JOBS, jobResults.size());
-        ConcurrentMap<String, ConcurrentLinkedQueue<Object>> changes = deviceTestManger.getTwinChanges();
         ConcurrentLinkedQueue<Object> temperatures = changes.get(STANDARD_PROPERTY_HOMETEMP);
-        if(temperatures == null)
-        {
-            System.out.println(changes.toString());
-        }
         assertNotNull("There is no " + STANDARD_PROPERTY_HOMETEMP + " in the device changes", temperatures);
         for (Map.Entry<String, JobResult> job: jobResults.entrySet())
         {
@@ -468,6 +478,7 @@ public class JobClientIT
                             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
                             jobResult = jobClient.getJob(jobId);
                         }
+                        System.out.println("Iothub confirmed " + jobId + " " + expectedJobStatus + " for " + JobType.scheduleDeviceMethod);
                     }
                     catch (IotHubException | IOException |InterruptedException e)
                     {
