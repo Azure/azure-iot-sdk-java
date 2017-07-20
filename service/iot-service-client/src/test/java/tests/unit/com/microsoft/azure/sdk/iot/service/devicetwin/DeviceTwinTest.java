@@ -24,16 +24,13 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
 /*
     Unit tests for Device Twin
-    Coverage : 90% method, 84% line
+    Coverage : 90% method, 86% line
  */
 public class DeviceTwinTest
 {
@@ -1395,4 +1392,166 @@ public class DeviceTwinTest
             }
         };
     }
+
+    // Tests_SRS_DEVICETWIN_21_061: [If the updateTwin is null, the scheduleUpdateTwin shall throws IllegalArgumentException ]
+    @Test (expected = IllegalArgumentException.class)
+    public void scheduleUpdateTwinFailedOnUpdateTwinNull(@Mocked Job mockedJob) throws IOException, IotHubException
+    {
+        //arrange
+        final String connectionString = "testString";
+        final String queryCondition = "validQueryCondition";
+        final Date now = new Date();
+        final long maxExecutionTimeInSeconds = 100;
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        //act
+        testTwin.scheduleUpdateTwin(queryCondition, null, now, maxExecutionTimeInSeconds);
+    }
+
+    // Tests_SRS_DEVICETWIN_21_062: [If the startTimeUtc is null, the scheduleUpdateTwin shall throws IllegalArgumentException ]
+    @Test (expected = IllegalArgumentException.class)
+    public void scheduleUpdateTwinFailedOnStartTimeUtcNull(@Mocked Job mockedJob, @Mocked DeviceTwinDevice mockedDevice) throws IOException, IotHubException
+    {
+        //arrange
+        final String connectionString = "testString";
+        final String queryCondition = "validQueryCondition";
+        final long maxExecutionTimeInSeconds = 100;
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        //act
+        testTwin.scheduleUpdateTwin(queryCondition, mockedDevice, null, maxExecutionTimeInSeconds);
+    }
+
+    // Tests_SRS_DEVICETWIN_21_063: [If the maxExecutionTimeInSeconds is negative, the scheduleUpdateTwin shall throws IllegalArgumentException ]
+    @Test (expected = IllegalArgumentException.class)
+    public void scheduleUpdateTwinFailedOnInvalidMaxExecutionTimeInSeconds(@Mocked Job mockedJob, @Mocked DeviceTwinDevice mockedDevice) throws IOException, IotHubException
+    {
+        //arrange
+        final String connectionString = "testString";
+        final String queryCondition = "validQueryCondition";
+        final Date now = new Date();
+        final long maxExecutionTimeInSeconds = -100;
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        //act
+        testTwin.scheduleUpdateTwin(queryCondition, mockedDevice, now, maxExecutionTimeInSeconds);
+    }
+
+    // Tests_SRS_DEVICETWIN_21_064: [The scheduleUpdateTwin shall create a new instance of the Job class ]
+    // Tests_SRS_DEVICETWIN_21_068: [The scheduleUpdateTwin shall return the created instance of the Job class ]
+    @Test
+    public void scheduleUpdateTwinCreateJobSucceed(@Mocked Job mockedJob, @Mocked DeviceTwinDevice mockedDevice) throws IOException, IotHubException
+    {
+        //arrange
+        final String connectionString = "testString";
+        final String queryCondition = "validQueryCondition";
+        final Date now = new Date();
+        final long maxExecutionTimeInSeconds = 100;
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedConnectionString.toString();
+                result = connectionString;
+                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, connectionString);
+                result = mockedJob;
+                times = 1;
+            }
+        };
+
+        //act
+        Job job = testTwin.scheduleUpdateTwin(queryCondition, mockedDevice, now, maxExecutionTimeInSeconds);
+
+        //assert
+        assertNotNull(job);
+    }
+
+    // Tests_SRS_DEVICETWIN_21_065: [If the scheduleUpdateTwin failed to create a new instance of the Job class, it shall throws IOException. Threw by the Jobs constructor ]
+    @Test (expected = IOException.class)
+    public void scheduleUpdateTwinCreateJobFailed(@Mocked Job mockedJob, @Mocked DeviceTwinDevice mockedDevice) throws IOException, IotHubException
+    {
+        //arrange
+        final String connectionString = "testString";
+        final String queryCondition = "validQueryCondition";
+        final Date now = new Date();
+        final long maxExecutionTimeInSeconds = 100;
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedConnectionString.toString();
+                result = connectionString;
+                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, connectionString);
+                result = new IOException();
+            }
+        };
+
+        //act
+        testTwin.scheduleUpdateTwin(queryCondition, mockedDevice, now, maxExecutionTimeInSeconds);
+    }
+
+    // Tests_SRS_DEVICETWIN_21_066: [The scheduleUpdateTwin shall invoke the scheduleUpdateTwin in the Job class with the received parameters ]
+    @Test
+    public void schedule(@Mocked Job mockedJob, @Mocked DeviceTwinDevice mockedDevice) throws IOException, IotHubException
+    {
+        //arrange
+        final String connectionString = "testString";
+        final String queryCondition = "validQueryCondition";
+        final Date now = new Date();
+        final long maxExecutionTimeInSeconds = 100;
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedConnectionString.toString();
+                result = connectionString;
+                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, connectionString);
+                result = mockedJob;
+            }
+        };
+
+        //act
+        Job job = testTwin.scheduleUpdateTwin(queryCondition, mockedDevice, now, maxExecutionTimeInSeconds);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedJob, "scheduleUpdateTwin", queryCondition, mockedDevice, now, maxExecutionTimeInSeconds);
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_DEVICETWIN_21_067: [If scheduleUpdateTwin failed, the scheduleUpdateTwin shall throws IotHubException. Threw by the scheduleUpdateTwin ]
+    @Test (expected = IotHubException.class)
+    public void scheduleUpdateTwinScheduleUpdateTwinFailed(@Mocked Job mockedJob, @Mocked DeviceTwinDevice mockedDevice) throws IOException, IotHubException
+    {
+        //arrange
+        final String connectionString = "testString";
+        final String queryCondition = "validQueryCondition";
+        final Date now = new Date();
+        final long maxExecutionTimeInSeconds = 100;
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedConnectionString.toString();
+                result = connectionString;
+                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, connectionString);
+                result = mockedJob;
+                Deencapsulation.invoke(mockedJob, "scheduleUpdateTwin", queryCondition, mockedDevice, now, maxExecutionTimeInSeconds);
+                result = new IotHubException();
+                times = 1;
+            }
+        };
+
+        //act
+        testTwin.scheduleUpdateTwin(queryCondition, mockedDevice, now, maxExecutionTimeInSeconds);
+    }
+
 }

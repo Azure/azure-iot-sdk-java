@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 /**
  * DeviceMethod enables service client to directly invoke methods on various devices from service client.
@@ -27,7 +28,7 @@ public class DeviceMethod
     /**
      * Create a DeviceMethod instance from the information in the connection string.
      *
-     * @param connectionString is a Azure IoTHub connection string.
+     * @param connectionString is the IoTHub connection string.
      * @return an instance of the DeviceMethod.
      * @throws IOException This exception is thrown if the object creation failed
      */
@@ -125,4 +126,55 @@ public class DeviceMethod
         return new MethodResult(methodParserResponse.getStatus(), methodParserResponse.getPayload());
     }
 
+    /**
+     * Creates a new Job to invoke method on one or multiple devices
+     *
+     * @param queryCondition Query condition to evaluate which devices to run the job on. It can be {@code null} or empty
+     * @param methodName Method name to be invoked
+     * @param responseTimeoutInSeconds Maximum interval of time, in seconds, that the Direct Method will wait for answer. It can be {@code null}.
+     * @param connectTimeoutInSeconds Maximum interval of time, in seconds, that the Direct Method will wait for the connection. It can be {@code null}.
+     * @param payload Object that contains the payload defined by the user. It can be {@code null}.
+     * @param startTimeUtc Date time in Utc to start the job
+     * @param maxExecutionTimeInSeconds Max execution time in seconds, i.e., ttl duration the job can run
+     * @return a Job class that represent this job on IotHub
+     * @throws IOException if the function contains invalid parameters
+     * @throws IotHubException if the http request failed
+     */
+    public Job scheduleDeviceMethod(String queryCondition,
+                                    String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload,
+                                    Date startTimeUtc, long maxExecutionTimeInSeconds)
+            throws IOException, IotHubException
+    {
+        /* Codes_SRS_DEVICEMETHOD_21_016: [If the methodName is null or empty, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+        if((methodName == null) || methodName.isEmpty())
+        {
+            throw new IllegalArgumentException("null updateTwin");
+        }
+
+        /* Codes_SRS_DEVICEMETHOD_21_017: [If the startTimeUtc is null, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+        if(startTimeUtc == null)
+        {
+            throw new IllegalArgumentException("null startTimeUtc");
+        }
+
+        /* Codes_SRS_DEVICEMETHOD_21_018: [If the maxExecutionTimeInSeconds is negative, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+        if(maxExecutionTimeInSeconds < 0)
+        {
+            throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
+        }
+
+        /* Codes_SRS_DEVICEMETHOD_21_019: [The scheduleDeviceMethod shall create a new instance of the Job class.] */
+        /* Codes_SRS_DEVICEMETHOD_21_020: [If the scheduleDeviceMethod failed to create a new instance of the Job class, it shall throws IOException. Threw by the Jobs constructor.] */
+        Job job = new Job(iotHubConnectionString.toString());
+
+        /* Codes_SRS_DEVICEMETHOD_21_021: [The scheduleDeviceMethod shall invoke the scheduleDeviceMethod in the Job class with the received parameters.] */
+        /* Codes_SRS_DEVICEMETHOD_21_022: [If scheduleDeviceMethod failed, the scheduleDeviceMethod shall throws IotHubException. Threw by the scheduleUpdateTwin.] */
+        job.scheduleDeviceMethod(
+                queryCondition,
+                methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload,
+                startTimeUtc, maxExecutionTimeInSeconds);
+
+        /* Codes_SRS_DEVICEMETHOD_21_023: [The scheduleDeviceMethod shall return the created instance of the Job class.] */
+        return job;
+    }
 }
