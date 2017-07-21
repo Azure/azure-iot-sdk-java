@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.device.transport;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubResponseCallback;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.MessageType;
 
 /**
  * A packet containing the data needed for an IoT Hub transport to send a
@@ -17,6 +18,7 @@ public final class IotHubOutboundPacket
     private final IotHubEventCallback eventCallback;
     private final IotHubResponseCallback responseCallback;
     private final Object callbackContext;
+    private MessageType messageType;
 
     /**
      * Constructor.
@@ -37,6 +39,8 @@ public final class IotHubOutboundPacket
 
         // Codes_SRS_IOTHUBOUTBOUNDPACKET_21_007: [The constructor shall set the response callback as null.]
         this.responseCallback = null;
+
+        this.messageType = null;
     }
 
     /**
@@ -58,6 +62,8 @@ public final class IotHubOutboundPacket
 
         // Codes_SRS_IOTHUBOUTBOUNDPACKET_21_008: [The constructor shall set the event callback as null.]
         this.eventCallback = null;
+
+        this.messageType = null;
     }
 
     /**
@@ -102,5 +108,15 @@ public final class IotHubOutboundPacket
     {
         // Codes_SRS_IOTHUBOUTBOUNDPACKET_11_004: [The function shall return the callback context given in the constructor.]
         return callbackContext;
+    }
+
+    public MessageType getMessageType()
+    {
+        return messageType;
+    }
+
+    public void setMessageType(MessageType messageType)
+    {
+        this.messageType = messageType;
     }
 }

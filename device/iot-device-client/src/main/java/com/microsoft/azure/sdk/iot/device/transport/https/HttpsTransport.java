@@ -288,8 +288,8 @@ public final class HttpsTransport implements IotHubTransport
         }
 
         MessageCallback callback =
-                this.config.getMessageCallback();
-        Object context = this.config.getMessageContext();
+                this.config.getTelemetryMessageCallback();
+        Object context = this.config.getTelemetryMessageContext();
         if (callback == null)
         {
             return;

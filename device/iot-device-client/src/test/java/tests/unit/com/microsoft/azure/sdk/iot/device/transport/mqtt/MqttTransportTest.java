@@ -580,9 +580,9 @@ public class MqttTransportTest {
         new NonStrictExpectations()
         {
             {
-                mockConfig.getMessageCallback();
+                mockConfig.getTelemetryMessageCallback();
                 result = mockCallback;
-                mockConfig.getMessageContext();
+                mockConfig.getTelemetryMessageContext();
                 result = context;
             }
         };
@@ -611,9 +611,9 @@ public class MqttTransportTest {
         new NonStrictExpectations()
         {
             {
-                mockConfig.getMessageCallback();
+                mockConfig.getTelemetryMessageCallback();
                 result = mockCallback;
-                mockConfig.getMessageContext();
+                mockConfig.getTelemetryMessageContext();
                 result = context;
                 mockConnection.receiveMessage();
                 result = mockMsg;

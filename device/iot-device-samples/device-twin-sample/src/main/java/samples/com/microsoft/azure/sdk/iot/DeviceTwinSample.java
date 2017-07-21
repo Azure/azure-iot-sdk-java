@@ -78,19 +78,50 @@ public class DeviceTwinSample
         System.out.println("Beginning setup.");
 
 
-        if (args.length != 1)
+        if (args.length < 1)
         {
             System.out.format(
                     "Expected the following argument but received: %d.\n"
                             + "The program should be called with the following args: \n"
-                            + "[Device connection string] - String containing Hostname, Device Id & Device Key in the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n",
+                            + "[Device connection string] - String containing Hostname, Device Id & Device Key in the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
+                            + "[Protocol] - (mqtt | amqps | amqps_ws)\n",
                     args.length);
             return;
         }
 
         String connString = args[0];
 
-        IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+        IotHubClientProtocol protocol;
+        if (args.length == 1)
+        {
+            protocol = IotHubClientProtocol.MQTT;
+        }
+        else
+        {
+            String protocolStr = args[1];
+            if (protocolStr.equals("amqps"))
+            {
+                protocol = IotHubClientProtocol.AMQPS;
+            }
+            else if (protocolStr.equals("mqtt"))
+            {
+                protocol = IotHubClientProtocol.MQTT;
+            }
+            else if (protocolStr.equals("amqps_ws"))
+            {
+                protocol = IotHubClientProtocol.AMQPS_WS;
+            }
+            else
+            {
+                System.out.format(
+                        "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n"
+                                + "The program should be called with the following args: \n"
+                                + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
+                                + "2. (mqtt | amqps | amqps_ws)\n",
+                        protocolStr);
+                return;
+            }
+        }
 
         System.out.println("Successfully read input parameters.");
         System.out.format("Using communication protocol %s.\n",
@@ -144,10 +175,6 @@ public class DeviceTwinSample
                 else
                 {
                     homeKit.setReportedProp(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING));
-                }
-                if(i == MAX_EVENTS_TO_REPORT-1)
-                {
-                    homeKit.setReportedProp(new Property("BedroomRoomLights", null));
                 }
                 client.sendReportedProperties(homeKit.getReportedProp());
                 System.out.println("Updating reported properties..");

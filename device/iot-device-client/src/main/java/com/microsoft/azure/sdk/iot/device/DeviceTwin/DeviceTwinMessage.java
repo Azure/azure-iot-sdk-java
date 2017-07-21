@@ -16,8 +16,8 @@ public class DeviceTwinMessage extends Message
     private DeviceOperations operationType;
 
 
-  public DeviceTwinMessage(byte[] data)
-  {
+    public DeviceTwinMessage(byte[] data)
+    {
       /*
       **Codes_SRS_DEVICETWINMESSAGE_25_001: [**The constructor shall save the message body by calling super with the body as parameter.**]**
       **Codes_SRS_DEVICETWINMESSAGE_25_002: [**If the message body is null, the constructor shall throw an IllegalArgumentException thrown by base constructor.**]**
@@ -28,7 +28,7 @@ public class DeviceTwinMessage extends Message
       this.requestId = null;
       this.status = null;
       this.operationType = DEVICE_OPERATION_UNKNOWN;
-  }
+    }
 
     public void setVersion(String version)
     {

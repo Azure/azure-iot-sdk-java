@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -15,10 +16,15 @@ import java.util.Scanner;
  * Handles messages from an IoT Hub. Default protocol is to use
  * MQTT transport.
  */
-public class SendReceive
+public class FullClientSample
 {
     private static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
     private static List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+
+    private static final int METHOD_SUCCESS = 200;
+    private static final int METHOD_HUNG = 300;
+    private static final int METHOD_NOT_FOUND = 404;
+    private static final int METHOD_NOT_DEFINED = 404;
 
     /** Used as a counter in the message callback. */
     protected static class Counter
@@ -120,6 +126,53 @@ public class SendReceive
           {
               failedMessageListOnClose.add(msg.getMessageId());
           }
+        }
+    }
+
+    private static int method_command(Object command)
+    {
+        System.out.println("invoking command on this device");
+        // Insert code to invoke command here
+        return METHOD_SUCCESS;
+    }
+
+    private static int method_default(Object data)
+    {
+        System.out.println("invoking default method for this device");
+        // Insert device specific code here
+        return METHOD_NOT_DEFINED;
+    }
+
+    protected static class DeviceMethodStatusCallBack implements IotHubEventCallback
+    {
+        public void execute(IotHubStatusCode status, Object context)
+        {
+            System.out.println("IoT Hub responded to device method operation with status " + status.name());
+        }
+    }
+
+    protected static class SampleDeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
+    {
+        @Override
+        public DeviceMethodData call(String methodName, Object methodData, Object context)
+        {
+            DeviceMethodData deviceMethodData ;
+            switch (methodName)
+            {
+                case "command" :
+                {
+                    int status = method_command(methodData);
+                    deviceMethodData = new DeviceMethodData(status, "executed " + methodName);
+                    break;
+                }
+                default:
+                {
+                    int status = method_default(methodData);
+                    deviceMethodData = new DeviceMethodData(status, "executed " + methodName);
+                }
+            }
+
+            return deviceMethodData;
         }
     }
 
@@ -253,6 +306,12 @@ public class SendReceive
         System.out.println("Sending the following event messages: ");
 
         System.out.println("Updated token expiry time to " + time);
+
+        client.subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+
+        System.out.println("Subscribed to device method");
+
+        System.out.println("Waiting for method trigger");
 
         String deviceId = "MyJavaDevice";
         double temperature = 0.0;

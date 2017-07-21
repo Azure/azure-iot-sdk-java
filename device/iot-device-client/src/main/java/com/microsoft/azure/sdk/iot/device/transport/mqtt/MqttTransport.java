@@ -276,14 +276,14 @@ public final class MqttTransport implements IotHubTransport
                 throw new IllegalStateException("MQTT transport is closed.");
             }
 
-            MessageCallback callback = this.config.getMessageCallback();
-            Object context = this.config.getMessageContext();
+            MessageCallback callback = this.config.getTelemetryMessageCallback();
+            Object context = this.config.getTelemetryMessageContext();
 
             MessageCallback deviceTwinMessageCallback = this.config.getDeviceTwinMessageCallback();
             Object deviceTwinContext = this.config.getDeviceTwinMessageContext();
 
             MessageCallback deviceMethodMessageCallback = this.config.getDeviceMethodMessageCallback();
-            Object deviceMethodContext = this.config.getDeviceMethodMessageContext();
+            Object deviceMethodContext = this.config.getDeviceMethodsMessageContext();
 
             if (callback == null && deviceTwinMessageCallback == null && deviceMethodMessageCallback == null)
             {

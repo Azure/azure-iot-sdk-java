@@ -192,7 +192,7 @@ public void onLinkFlow(Event event)
 public void onLinkRemoteOpen(Event event)
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_15_041 [**The connection state shall be considered OPEN when the sender link is open remotely.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_041 [**The connection state shall be considered OPEN when the sender link is open remotely for telemetry, methods or twin.**]**
 **SRS_AMQPSIOTHUBCONNECTION_99_001 [**All server listeners shall be notified when that the connection has been established.**]**
 
 ## onLinkRemoteClose
@@ -201,7 +201,7 @@ public void onLinkRemoteOpen(Event event)
 public void onLinkRemoteClose(Event event)
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_15_042 [**The event handler shall attempt to reconnect to the IoTHub.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_042 [**The event handler shall attempt to reconnect to the IoTHub either the telemetry, methods or twin link closed.**]**
 
 
 ## onLinkInit

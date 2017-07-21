@@ -34,9 +34,9 @@ public final class DeviceClientConfig
     /**
      * The callback to be invoked if a message of Device Method type received.
      */
-    private MessageCallback deviceMethodCallback;
+    private MessageCallback deviceMethodsCallback;
     /** The context to be passed in to the device method type message callback. */
-    private Object deviceMethodMessageContext;
+    private Object deviceMethodsMessageContext;
 
     /**
      * The callback to be invoked if a message of Device Twin type received.
@@ -48,9 +48,9 @@ public final class DeviceClientConfig
     /**
      * The callback to be invoked if a message is received.
      */
-    private MessageCallback messageCallback;
+    private MessageCallback telemetryMessageCallback;
     /** The context to be passed in to the message callback. */
-    private Object messageContext;
+    private Object telemetryMessageContext;
 
     private CustomLogger logger;
 
@@ -150,8 +150,8 @@ public final class DeviceClientConfig
             Object context)
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_006: [The function shall set the message callback, with its associated context.]
-        this.messageCallback = callback;
-        this.messageContext = context;
+        this.telemetryMessageCallback = callback;
+        this.telemetryMessageContext = context;
     }
 
     /**
@@ -252,10 +252,10 @@ public final class DeviceClientConfig
      *
      * @return the message callback.
      */
-    public MessageCallback getMessageCallback()
+    public MessageCallback getTelemetryMessageCallback()
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_010: [The function shall return the current message callback.]
-        return this.messageCallback;
+        return this.telemetryMessageCallback;
     }
 
     /**
@@ -263,10 +263,10 @@ public final class DeviceClientConfig
      *
      * @return the message context.
      */
-    public Object getMessageContext()
+    public Object getTelemetryMessageContext()
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_011: [The function shall return the current message context.]
-        return this.messageContext;
+        return this.telemetryMessageContext;
     }
 
     /**
@@ -280,12 +280,12 @@ public final class DeviceClientConfig
         /*
         Codes_SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceMethod message callback.**] **
          */
-        this.deviceMethodCallback = callback;
+        this.deviceMethodsCallback = callback;
 
         /*
         Codes_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DeviceMethod message context.**] **
          */
-        this.deviceMethodMessageContext = context;
+        this.deviceMethodsMessageContext = context;
     }
 
     /**
@@ -298,7 +298,7 @@ public final class DeviceClientConfig
         /*
         Codes_SRS_DEVICECLIENTCONFIG_25_021: [**The function shall return the current DeviceMethod message callback.**] **
          */
-        return this.deviceMethodCallback;
+        return this.deviceMethodsCallback;
     }
 
     /**
@@ -306,12 +306,12 @@ public final class DeviceClientConfig
      *
      * @return the device method message context.
      */
-    public Object getDeviceMethodMessageContext()
+    public Object getDeviceMethodsMessageContext()
     {
         /*
         Codes_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DeviceMethod message context.**] **
          */
-        return this.deviceMethodMessageContext;
+        return this.deviceMethodsMessageContext;
     }
 
     /**

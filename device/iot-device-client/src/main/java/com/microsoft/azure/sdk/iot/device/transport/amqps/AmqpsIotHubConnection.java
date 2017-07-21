@@ -6,15 +6,11 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
-import com.microsoft.azure.sdk.iot.device.CustomLogger;
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
-import com.microsoft.azure.sdk.iot.device.ObjectLock;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import org.apache.qpid.proton.Proton;
-import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
@@ -30,15 +26,11 @@ import org.apache.qpid.proton.reactor.Reactor;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-
 
 /**
  * An AMQPS IotHub connection between a device and an IoTHub. This class contains functionality for sending/receiving
@@ -50,28 +42,29 @@ public final class AmqpsIotHubConnection extends BaseHandler
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
     private State state;
 
-    private static final String SENDER_TAG = "sender";
-    private static final String RECEIVE_TAG = "receiver";
-
-    private static final String SEND_ENDPOINT_FORMAT = "/devices/%s/messages/events";
-    private final String sendEndpoint;
-    private static final String RECEIVE_ENDPOINT_FORMAT = "/devices/%s/messages/devicebound";
-    private final String receiveEndpoint;
-
     private int linkCredit = -1;
     /** The {@link Delivery} tag. */
     private long nextTag = 0;
-    private static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
     private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
     private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
     private static final int AMQP_PORT = 5671;
     private static final int AMQP_WEB_SOCKET_PORT = 443;
     private String sasToken;
 
-    private Sender sender;
-    private Receiver receiver;
     private Connection connection;
     private Session session;
+
+    private AmqpsDeviceTelemetry deviceTelemetry = null;
+    private Sender senderLinkDeviceTelemetry;
+    private Receiver receiverLinkDeviceTelemetry;
+
+    private AmqpsDeviceMethods deviceMethod = null;
+    private Sender senderLinkDeviceMethods;
+    private Receiver receiverLinkDeviceMethods;
+
+    private AmqpsDeviceTwin deviceTwin = null;
+    private Sender senderLinkDeviceTwin;
+    private Receiver receiverLinkDeviceTwin;
 
     private String hostName;
     private String userName;
@@ -145,8 +138,10 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_003: [The constructor shall initialize the sender and receiver
         // endpoint private member variables using the send/RECEIVE_ENDPOINT_FORMAT constants and device id.]
-        this.sendEndpoint = String.format(SEND_ENDPOINT_FORMAT, deviceId);
-        this.receiveEndpoint = String.format(RECEIVE_ENDPOINT_FORMAT, deviceId);
+        this.deviceTelemetry = new AmqpsDeviceTelemetry(deviceId);
+        this.deviceMethod = new AmqpsDeviceMethods(deviceId);
+        this.deviceTwin = new AmqpsDeviceTwin(deviceId);
+
         this.logger = new CustomLogger(this.getClass());
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_004: [The constructor shall initialize a new Handshaker
         // (Proton) object to handle communication handshake.]
@@ -295,10 +290,28 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall close the AMQPS sender and receiver links,
         // the AMQPS session and the AMQPS connection.]
-        if (this.sender != null)
-            this.sender.close();
-        if (this.receiver != null)
-            this.receiver.close();
+        if (this.deviceTelemetry != null)
+        {
+            if (this.senderLinkDeviceTelemetry != null)
+                this.senderLinkDeviceTelemetry.close();
+            if (this.receiverLinkDeviceTelemetry != null)
+                this.receiverLinkDeviceTelemetry.close();
+        }
+        if (this.deviceMethod != null)
+        {
+            if (this.senderLinkDeviceMethods != null)
+                this.senderLinkDeviceMethods.close();
+            if (this.receiverLinkDeviceMethods != null)
+                this.receiverLinkDeviceMethods.close();
+        }
+        if (this.deviceTwin != null)
+        {
+            if (this.senderLinkDeviceTwin != null)
+                this.senderLinkDeviceTwin.close();
+            if (this.receiverLinkDeviceTwin != null)
+                this.receiverLinkDeviceTwin.close();
+        }
+
         if (this.session != null)
             this.session.close();
         if (this.connection != null)
@@ -315,7 +328,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      * @param message The message to be sent.
      * @return An {@link Integer} representing the hash of the message, or -1 if the connection is closed.
      */
-    public Integer sendMessage(Message message)
+    public Integer sendMessage(Message message, MessageType messageType)
     {
         Integer deliveryHash;
 
@@ -327,7 +340,6 @@ public final class AmqpsIotHubConnection extends BaseHandler
         }
         else
         {
-
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_016: [The function shall encode the message and copy the contents to the byte buffer.]
             byte[] msgData = new byte[1024];
             int length;
@@ -349,29 +361,93 @@ public final class AmqpsIotHubConnection extends BaseHandler
             }
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_017: [The function shall set the delivery tag for the sender.]
             byte[] tag = String.valueOf(this. nextTag++).getBytes();
-	    Delivery dlv = sender.delivery(tag);
-	    try
-	    {
-            logger.LogInfo("Attempting to send the message using the sender link, method name is %s ", logger.getMethodName());
+
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_018: [The function shall attempt to send the message using the sender link.]
-            sender.send(msgData, 0, length);
-
-            logger.LogInfo("Advancing the sender link, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_019: [The function shall advance the sender link.]
-            sender.advance();
-
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_020: [The function shall set the delivery hash to the value returned by the sender link.]
-            deliveryHash = dlv.hashCode();
-            logger.LogInfo("Delivery hash returned by the sender link %s, method name is %s ", deliveryHash, logger.getMethodName());
-        }
-        catch (Exception e)
-        {
-            // If proton failed sending, release dlv object. Otherwise release it when received a disposition frame from proton.
-            sender.advance();
-            dlv.free();
             deliveryHash = -1;
-	    }
-	}
+            switch (messageType)
+            {
+                case Telemetry:
+                    if (this.deviceTelemetry != null)
+                    {
+                        Delivery deliveryTelemetry = senderLinkDeviceTelemetry.delivery(tag);
+                        try
+                        {
+                            logger.LogInfo("Attempting to send the device-telemetry message using the sender link, method name is %s ", logger.getMethodName());
+                            senderLinkDeviceTelemetry.send(msgData, 0, length);
+
+                            logger.LogInfo("Advancing the device-telemetry sender link, method name is %s ", logger.getMethodName());
+                            senderLinkDeviceTelemetry.advance();
+
+                            deliveryHash = deliveryTelemetry.hashCode();
+                            logger.LogInfo("Delivery hash returned for device-telemetry by the sender link %s, method name is %s ", deliveryHash, logger.getMethodName());
+                        } catch (Exception e)
+                        {
+                            // If proton failed sending, release dlv object. Otherwise release it when received a disposition frame from proton.
+                            senderLinkDeviceTelemetry.advance();
+                            deliveryTelemetry.free();
+                        }
+                    }
+                    else
+                    {
+                        logger.LogInfo("MessageType is Telemetry but DeviceTelemetry is not enabled");
+                    }
+                    break;
+                case DeviceMethods:
+                    if (this.deviceMethod != null)
+                    {
+                        Delivery deliveryMethod = senderLinkDeviceMethods.delivery(tag);
+                        try
+                        {
+                            logger.LogInfo("Attempting to send the device-method message using the sender link, method name is %s ", logger.getMethodName());
+                            senderLinkDeviceMethods.send(msgData, 0, length);
+
+                            logger.LogInfo("Advancing the device-method sender link, method name is %s ", logger.getMethodName());
+                            senderLinkDeviceMethods.advance();
+
+                            deliveryHash = deliveryMethod.hashCode();
+                            logger.LogInfo("Delivery hash returned for device-method by the sender link %s, method name is %s ", deliveryHash, logger.getMethodName());
+                        } catch (Exception e)
+                        {
+                            // If proton failed sending, release dlv object. Otherwise release it when received a disposition frame from proton.
+                            senderLinkDeviceMethods.advance();
+                            deliveryMethod.free();
+                        }
+                    }
+                    else
+                    {
+                        logger.LogInfo("MessageType is DeviceMethods but DeviceMethods is not enabled");
+                    }
+                    break;
+                case DeviceTwin:
+                    if (this.deviceTwin != null)
+                    {
+                        Delivery deliveryTwin = senderLinkDeviceTwin.delivery(tag);
+                        try
+                        {
+                            logger.LogInfo("Attempting to send the device-twin message using the sender link, method name is %s ", logger.getMethodName());
+                            senderLinkDeviceTwin.send(msgData, 0, length);
+
+                            logger.LogInfo("Advancing the device-twin sender link, method name is %s ", logger.getMethodName());
+                            senderLinkDeviceTwin.advance();
+
+                            deliveryHash = deliveryTwin.hashCode();
+                            logger.LogInfo("Delivery hash returned for device-twin by the sender link %s, method name is %s ", deliveryHash, logger.getMethodName());
+                        } catch (Exception e)
+                        {
+                            // If proton failed sending, release dlv object. Otherwise release it when received a disposition frame from proton.
+                            senderLinkDeviceTwin.advance();
+                            deliveryTwin.free();
+                        }
+                    }
+                    else
+                    {
+                        logger.LogInfo("MessageType is DeviceTwin but DeviceTwin is not enabled");
+                    }
+                    break;
+            }
+        }
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_021: [The function shall return the delivery hash.]
         return deliveryHash;
@@ -388,39 +464,51 @@ public final class AmqpsIotHubConnection extends BaseHandler
     public Boolean sendMessageResult(AmqpsMessage message, IotHubMessageResult result)
     {
         Boolean ackResult = false;
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_022: [If the AMQPS Connection is closed, the function shall return false.]
-        if(this.state != State.CLOSED)
-        {
-            try
-            {
-                logger.LogInfo("Acknowledgement for received message is %s, method name is %s ", result.name(), logger.getMethodName());
-                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_023: [If the message result is COMPLETE, ABANDON, or REJECT,
-                // the function shall acknowledge the last message with acknowledgement type COMPLETE, ABANDON, or REJECT respectively.]
-                switch (result)
-                {
-                    case COMPLETE:
-                        message.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
-                        break;
-                    case REJECT:
-                        message.acknowledge(AmqpsMessage.ACK_TYPE.REJECT);
-                        break;
-                    case ABANDON:
-                        message.acknowledge(AmqpsMessage.ACK_TYPE.ABANDON);
-                        break;
-                    default:
-                        // should never happen.
-                        logger.LogError("Invalid IoT Hub message result (%s), method name is %s ", result.name(), logger.getMethodName());
-                        throw new IllegalStateException("Invalid IoT Hub message result.");
-                }
 
-                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_024: [The function shall return true after the message was acknowledged.]
-                ackResult = true;
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e);
-                //do nothing, since ackResult is already false
-            }
+        switch (message.getAmqpsMessageType())
+        {
+            case Telemetry:
+                if (this.deviceTelemetry != null)
+                {
+                    // Codes_SRS_AMQPSIOTHUBCONNECTION_15_022: [If the AMQPS Connection is closed, the function shall return false.]
+                    if (this.state != State.CLOSED)
+                    {
+                        try
+                        {
+                            logger.LogInfo("Acknowledgement for received message is %s, method name is %s ", result.name(), logger.getMethodName());
+                            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_023: [If the message result is COMPLETE, ABANDON, or REJECT,
+                            // the function shall acknowledge the last message with acknowledgement type COMPLETE, ABANDON, or REJECT respectively.]
+                            switch (result)
+                            {
+                                case COMPLETE:
+                                    message.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
+                                    break;
+                                case REJECT:
+                                    message.acknowledge(AmqpsMessage.ACK_TYPE.REJECT);
+                                    break;
+                                case ABANDON:
+                                    message.acknowledge(AmqpsMessage.ACK_TYPE.ABANDON);
+                                    break;
+                                default:
+                                    // should never happen.
+                                    logger.LogError("Invalid IoT Hub message result (%s), method name is %s ", result.name(), logger.getMethodName());
+                                    throw new IllegalStateException("Invalid IoT Hub message result.");
+                            }
+
+                            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_024: [The function shall return true after the message was acknowledged.]
+                            ackResult = true;
+                        } catch (Exception e)
+                        {
+                            logger.LogError(e);
+                            //do nothing, since ackResult is already false
+                        }
+                    }
+                }
+                break;
+            case DeviceMethods:
+                break;
+            case DeviceTwin:
+                break;
         }
         return ackResult;
     }
@@ -437,24 +525,53 @@ public final class AmqpsIotHubConnection extends BaseHandler
         this.connection = event.getConnection();
         this.connection.setHostname(this.hostName);
 
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_026: [The event handler shall create a Session (Proton) object from the connection.]
-        this.session = this.connection.session();
-
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_027: [The event handler shall create a Receiver and Sender (Proton) links and set the protocol tag on them to a predefined constant.]
-        this.receiver = this.session.receiver(RECEIVE_TAG);
-        this.sender = this.session.sender(SENDER_TAG);
-
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_028: [The Receiver and Sender links shall have the properties set to client version identifier.]
-        Map<Symbol, Object> properties = new HashMap<>();
-        properties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION);
-        this.receiver.setProperties(properties);
-        this.sender.setProperties(properties);
+        if ((this.deviceTelemetry == null) && (this.deviceMethod == null) && (this.deviceTwin == null))
+        {
+            logger.LogDebug("Nothing to open. Exited from method %s", logger.getMethodName());
+            return;
+        }
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_029: [The event handler shall open the connection, session, sender and receiver objects.]
         this.connection.open();
+        this.session = this.connection.session();
         this.session.open();
-        receiver.open();
-        sender.open();
+
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_026: [The event handler shall create a Session (Proton) object from the connection.]
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_027: [The event handler shall create a Receiver and Sender (Proton) links and set the protocol tag on them to a predefined constant.]
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_028: [The Receiver and Sender links shall have the properties set to client version identifier.]
+        if (this.deviceTelemetry != null)
+        {
+            this.receiverLinkDeviceTelemetry = this.session.receiver(this.deviceTelemetry.getReceiverLinkTag());
+            this.senderLinkDeviceTelemetry = this.session.sender(this.deviceTelemetry.getSenderLinkTag());
+
+            this.receiverLinkDeviceTelemetry.setProperties(this.deviceTelemetry.getAmqpProperties());
+            this.senderLinkDeviceTelemetry.setProperties(this.deviceTelemetry.getAmqpProperties());
+
+            this.receiverLinkDeviceTelemetry.open();
+            this.senderLinkDeviceTelemetry.open();
+        }
+        if (this.deviceMethod != null)
+        {
+            this.receiverLinkDeviceMethods = this.session.receiver(this.deviceMethod.getReceiverLinkTag());
+            this.senderLinkDeviceMethods = this.session.sender(this.deviceMethod.getSenderLinkTag());
+
+            this.receiverLinkDeviceMethods.setProperties(this.deviceMethod.getAmqpProperties());
+            this.senderLinkDeviceMethods.setProperties(this.deviceMethod.getAmqpProperties());
+
+            this.receiverLinkDeviceMethods.open();
+            this.senderLinkDeviceMethods.open();
+        }
+        if (this.deviceTwin != null)
+        {
+            this.receiverLinkDeviceTwin = this.session.receiver(this.deviceTwin.getReceiverLinkTag());
+            this.senderLinkDeviceTwin = this.session.sender(this.deviceTwin.getSenderLinkTag());
+
+            this.receiverLinkDeviceTwin.setProperties(this.deviceTwin.getAmqpProperties());
+            this.senderLinkDeviceTwin.setProperties(this.deviceTwin.getAmqpProperties());
+
+            this.receiverLinkDeviceTwin.open();
+            this.senderLinkDeviceTwin.open();
+        }
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
@@ -554,13 +671,19 @@ public final class AmqpsIotHubConnection extends BaseHandler
     public void onDelivery(Event event)
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
-        if(event.getLink().getName().equals(RECEIVE_TAG))
+
+        Link link = event.getLink();
+
+        if (((this.deviceTelemetry != null) && (link.getName().equals(this.deviceTelemetry.getReceiverLinkTag()))) ||
+            ((this.deviceMethod != null) && (link.getName().equals(this.deviceMethod.getReceiverLinkTag()))) ||
+            ((this.deviceTwin != null) && (link.getName().equals(this.deviceTwin.getReceiverLinkTag()))))
         {
             logger.LogInfo("Reading the receiver link, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_034: [If this link is the Receiver link, the event handler shall get the Receiver and Delivery (Proton) objects from the event.]
-            Receiver receiveLink = (Receiver) event.getLink();
+            Receiver receiveLink = (Receiver) link;
             Delivery delivery = receiveLink.current();
-            if (delivery.isReadable() && !delivery.isPartial()) {
+            if (delivery.isReadable() && !delivery.isPartial())
+            {
                 logger.LogInfo("Reading the received buffer, method name is %s ", logger.getMethodName());
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_035: [The event handler shall read the received buffer.]
                 int size = delivery.pending();
@@ -570,6 +693,13 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 logger.LogInfo("Reading the received buffer completed, method name is %s ", logger.getMethodName());
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_036: [The event handler shall create an AmqpsMessage object from the decoded buffer.]
                 AmqpsMessage msg = new AmqpsMessage();
+
+                if ((this.deviceTelemetry != null) && (link.getName().equals(this.deviceTelemetry.getReceiverLinkTag())))
+                    msg.setAmqpsMessageType(MessageType.Telemetry);
+                else if ((this.deviceMethod != null) && (link.getName().equals(this.deviceMethod.getReceiverLinkTag())))
+                    msg.setAmqpsMessageType(MessageType.DeviceMethods);
+                else if ((this.deviceTwin != null) && (link.getName().equals(this.deviceTwin.getReceiverLinkTag())))
+                    msg.setAmqpsMessageType(MessageType.DeviceTwin);
 
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_037: [The event handler shall set the AmqpsMessage Deliver (Proton) object.]
                 msg.setDelivery(delivery);
@@ -583,7 +713,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         else
         {
             //Sender specific section for dispositions it receives
-            if(event.getType() == Event.Type.DELIVERY)
+            if (event.getType() == Event.Type.DELIVERY)
             {
                 logger.LogInfo("Reading the delivery event in Sender link, method name is %s ", logger.getMethodName());
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_038: [If this link is the Sender link and the event type is DELIVERY, the event handler shall get the Delivery (Proton) object from the event.]
@@ -595,12 +725,12 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 logger.LogInfo("Is state of remote Delivery COMPLETE ? %s, method name is %s ", state, logger.getMethodName());
                 logger.LogInfo("Inform listener that a message has been sent to IoT Hub along with remote state, method name is %s ", logger.getMethodName());
                 //let any listener know that the message was received by the server
-                for(ServerListener listener : listeners)
+                for (ServerListener listener : listeners)
                 {
                     listener.messageSent(d.hashCode(), state);
                 }
-		        // release the delivery object which created in sendMessage().
-		        d.free();
+                // release the delivery object which created in sendMessage().
+                d.free();
             }
         }
         logger.LogDebug("Exited from method %s", logger.getMethodName());
@@ -629,13 +759,15 @@ public final class AmqpsIotHubConnection extends BaseHandler
     public void onLinkRemoteOpen(Event event)
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_041: [The connection state shall be considered OPEN when the sender link is open remotely.]
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_041: [The connection state shall be considered OPEN when the sender link is open remotely for telemetry, methods or twin.]
         Link link = event.getLink();
-        if (link.getName().equals(SENDER_TAG))
+        if (((this.deviceTelemetry != null) && (link.getName().equals(this.deviceTelemetry.getSenderLinkTag()))) ||
+            ((this.deviceMethod != null) && (link.getName().equals(this.deviceMethod.getSenderLinkTag()))) ||
+            ((this.deviceTwin != null) && (link.getName().equals(this.deviceTwin.getSenderLinkTag()))))
         {
             this.state = State.OPEN;
             // Codes_SRS_AMQPSIOTHUBCONNECTION_99_001: [All server listeners shall be notified when that the connection has been established.]
-            for(ServerListener listener : listeners)
+            for (ServerListener listener : listeners)
             {
                 listener.connectionEstablished();
             }
@@ -655,9 +787,12 @@ public final class AmqpsIotHubConnection extends BaseHandler
         logger.LogDebug("Entered in method %s", logger.getMethodName());
         this.state = State.CLOSED;
 
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_042 [The event handler shall attempt to startReconnect to the IoTHub.]
-        if (event.getLink().getName().equals(SENDER_TAG))
+        Link link = event.getLink();
+        if (((this.deviceTelemetry != null) && (link.getName().equals(this.deviceTelemetry.getSenderLinkTag()))) ||
+            ((this.deviceMethod != null) && (link.getName().equals(this.deviceMethod.getSenderLinkTag()))) ||
+            ((this.deviceTwin != null) && (link.getName().equals(this.deviceTwin.getSenderLinkTag()))))
         {
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_042 [The event handler shall attempt to startReconnect to the IoTHub either the telemetry, methods or twin link closed.]
             logger.LogInfo("Starting to reconnect to IotHub, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to startReconnect to IoTHub.]
             startReconnect();
@@ -674,26 +809,70 @@ public final class AmqpsIotHubConnection extends BaseHandler
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
         Link link = event.getLink();
-        if(link.getName().equals(SENDER_TAG))
+
+        if (this.deviceTelemetry != null)
         {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_043: [If the link is the Sender link, the event handler shall create a new Target (Proton) object using the sender endpoint address member variable.]
-            Target t = new Target();
-            t.setAddress(this.sendEndpoint);
+            if (link.getName().equals(this.deviceTelemetry.getSenderLinkTag()))
+            {
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_043: [If the link is the Sender link, the event handler shall create a new Target (Proton) object using the sender endpoint address member variable.]
+                Target t = new Target();
+                t.setAddress(this.deviceTelemetry.getSenderLinkAddress());
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_044: [If the link is the Sender link, the event handler shall set its target to the created Target (Proton) object.]
-            link.setTarget(t);
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_044: [If the link is the Sender link, the event handler shall set its target to the created Target (Proton) object.]
+                link.setTarget(t);
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_045: [If the link is the Sender link, the event handler shall set the SenderSettleMode to UNSETTLED.]
-            link.setSenderSettleMode(SenderSettleMode.UNSETTLED);
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_14_045: [If the link is the Sender link, the event handler shall set the SenderSettleMode to UNSETTLED.]
+                link.setSenderSettleMode(SenderSettleMode.UNSETTLED);
+            }
+            if (link.getName().equals(this.deviceTelemetry.getReceiverLinkTag()))
+            {
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_14_046: [If the link is the Receiver link, the event handler shall create a new Source (Proton) object using the receiver endpoint address member variable.]
+                Source source = new Source();
+                source.setAddress(this.deviceTelemetry.getReceiverLinkAddress());
+
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_14_047: [If the link is the Receiver link, the event handler shall set its source to the created Source (Proton) object.]
+                link.setSource(source);
+            }
         }
-        else
-        {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_046: [If the link is the Receiver link, the event handler shall create a new Source (Proton) object using the receiver endpoint address member variable.]
-            Source source = new Source();
-            source.setAddress(this.receiveEndpoint);
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_047: [If the link is the Receiver link, the event handler shall set its source to the created Source (Proton) object.]
-            link.setSource(source);
+        if (this.deviceMethod != null)
+        {
+            if (link.getName().equals(this.deviceMethod.getSenderLinkTag()))
+            {
+                Target t = new Target();
+                t.setAddress(this.deviceMethod.getSenderLinkAddress());
+
+                link.setTarget(t);
+
+                link.setSenderSettleMode(SenderSettleMode.UNSETTLED);
+            }
+            if (link.getName().equals(this.deviceMethod.getReceiverLinkTag()))
+            {
+                Source source = new Source();
+                source.setAddress(this.deviceMethod.getReceiverLinkAddress());
+
+                link.setSource(source);
+            }
+        }
+
+        if (this.deviceTwin != null)
+        {
+            if (link.getName().equals(this.deviceTwin.getSenderLinkTag()))
+            {
+                Target t = new Target();
+                t.setAddress(this.deviceTwin.getSenderLinkAddress());
+
+                link.setTarget(t);
+
+                link.setSenderSettleMode(SenderSettleMode.UNSETTLED);
+            }
+            if (link.getName().equals(this.deviceTwin.getReceiverLinkTag()))
+            {
+                Source source = new Source();
+                source.setAddress(this.deviceTwin.getReceiverLinkAddress());
+
+                link.setSource(source);
+            }
         }
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
