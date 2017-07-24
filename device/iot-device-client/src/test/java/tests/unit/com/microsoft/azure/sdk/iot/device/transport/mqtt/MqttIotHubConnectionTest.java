@@ -741,8 +741,6 @@ public class MqttIotHubConnectionTest
                 times = 1;
                 mockDeviceMessaging.send(mockDeviceMethodMsg);
                 times = 0;
-                mockDeviceTwin.send(mockDeviceMethodMsg);
-                times = 0;
             }
         };
     }

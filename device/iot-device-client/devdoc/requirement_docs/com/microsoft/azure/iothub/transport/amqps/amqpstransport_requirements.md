@@ -125,6 +125,9 @@ public void sendMessages() throws IOException;
 
 **SRS_AMQPSTRANSPORT_15_039: [**If the message is expired, the function shall create a callback with the MESSAGE_EXPIRED status and add it to the callback list.**]**
 
+**SRS_AMQPSTRANSPORT_12_002: [**The function does nothing if the message type is device methods and operation type is subscribe response or receive request.**]**
+
+**SRS_AMQPSTRANSPORT_12_003: [**The function does nothing if the message type is device twin and operation type is response.**]**
 
 ### invokeCallbacks
 
@@ -159,6 +162,7 @@ public void handleMessage() throws IOException;
 
 **SRS_AMQPSTRANSPORT_34_028: [**The System properties saved in the Amqps message shall be saved within the Message instance sent as a part of the callback.**]**
 
+**SRS_AMQPSTRANSPORT_12_001: [**The function removes message from the received message queue but do not call callback if callback is null.**]**
 
 ### messageSent
 

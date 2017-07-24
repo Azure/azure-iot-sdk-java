@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.device.MessageType;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.messaging.Rejected;
 import org.apache.qpid.proton.amqp.messaging.Released;
@@ -18,6 +19,8 @@ import org.apache.qpid.proton.message.impl.MessageImpl;
 public class AmqpsMessage extends MessageImpl
 {
     private Delivery _delivery;
+
+    private MessageType amqpsMessageType;
 
     public enum ACK_TYPE
     {
@@ -61,5 +64,15 @@ public class AmqpsMessage extends MessageImpl
     public void setDelivery(Delivery _delivery)
     {
         this._delivery = _delivery;
+    }
+
+    public MessageType getAmqpsMessageType()
+    {
+        return amqpsMessageType;
+    }
+
+    public void setAmqpsMessageType(MessageType amqpsMessageType)
+    {
+        this.amqpsMessageType = amqpsMessageType;
     }
 }

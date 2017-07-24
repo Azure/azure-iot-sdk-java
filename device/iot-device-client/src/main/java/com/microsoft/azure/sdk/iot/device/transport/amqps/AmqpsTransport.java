@@ -4,16 +4,16 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
-import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
-import org.apache.qpid.proton.amqp.messaging.Data;
+import org.apache.qpid.proton.amqp.Symbol;
+import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.amqp.messaging.Properties;
-import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
 import java.io.IOException;
@@ -145,7 +145,6 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             {
                 IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE, packet.getCallback(), packet.getContext());
                 this.callbackList.add(callbackPacket);
-                
             }
         }
         
@@ -154,7 +153,6 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             IotHubOutboundPacket packet = entry.getValue();
             IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE, packet.getCallback(), packet.getContext());
             this.callbackList.add(callbackPacket);
-           
         }
                     
         // Codes_SRS_AMQPSTRANSPORT_99_037: [The method will invoke all the callbacks..]
@@ -243,44 +241,132 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_15_014: [The function shall attempt to send every message on its waiting list, one at a time.]
         while (!this.waitingMessages.isEmpty())
         {
-           logger.LogInfo("Get the message from waiting message queue to be sent to IoT Hub, method name is %s ", logger.getMethodName());
-           IotHubOutboundPacket packet = this.waitingMessages.remove();
+            logger.LogInfo("Get the message from waiting message queue to be sent to IoT Hub, method name is %s ", logger.getMethodName());
+            IotHubOutboundPacket packet = this.waitingMessages.remove();
 
             Message message = packet.getMessage();
 
             // Codes_SRS_AMQPSTRANSPORT_15_015: [The function shall skip messages with null or empty body.]
-            if (message != null && message.getBytes().length > 0)
+            if (message != null)
             {
-                // Codes_SRS_AMQPSTRANSPORT_15_039: [If the message is expired, the function shall create a callback
-                // with the MESSAGE_EXPIRED status and add it to the callback list.]
-                if (message.isExpired())
+                MessageType messageType  = (message.getMessageType());
+                switch(messageType)
                 {
-                    logger.LogInfo("Creating a callback for the expired message with MESSAGE_EXPIRED status, method name is %s ", logger.getMethodName());
-                    IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_EXPIRED, packet.getCallback(), packet.getContext());
-                    this.callbackList.add(callbackPacket);
-                }
-                else
-                {
-                    logger.LogInfo("Converting the IoT Hub message into AmqpsMessage, method name is %s ", logger.getMethodName());
-                    // Codes_SRS_AMQPSTRANSPORT_15_036: [The function shall create a new Proton message from the IoTHub message.]
-                    MessageImpl protonMessage = iotHubMessageToProtonMessage(message);
+                    case Telemetry:
+                        if (message.getBytes().length > 0)
+                        {
+                            // Codes_SRS_AMQPSTRANSPORT_15_039: [If the message is expired, the function shall create a callback
+                            // with the MESSAGE_EXPIRED status and add it to the callback list.]
+                            if (message.isExpired())
+                            {
+                                logger.LogInfo("Creating a callback for the expired message with MESSAGE_EXPIRED status, method name is %s ", logger.getMethodName());
+                                IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_EXPIRED, packet.getCallback(), packet.getContext());
+                                this.callbackList.add(callbackPacket);
+                            } else
+                            {
+                                logger.LogInfo("Converting the IoT Hub message into AmqpsMessage, method name is %s ", logger.getMethodName());
+                                // Codes_SRS_AMQPSTRANSPORT_15_036: [The function shall create a new Proton message from the IoTHub message.]
+                                MessageImpl protonMessage = iotHubMessageToProtonMessage(message);
 
-                    // Codes_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
-                    Integer sendHash = connection.sendMessage(protonMessage);
+                                // Codes_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
+                                Integer sendHash = connection.sendMessage(protonMessage, MessageType.Telemetry);
 
-                    // Codes_SRS_AMQPSTRANSPORT_15_016: [If the sent message hash is valid, it shall be added to the in progress map.]
-                    if (sendHash != -1)
-                    {
-                        this.inProgressMessages.put(sendHash, packet);
-                    }
-                    // Codes_SRS_AMQPSTRANSPORT_15_017: [If the sent message hash is not valid, it shall be buffered to be sent in a subsequent attempt.]
-                    else
-                    {
-                        failedMessages.add(packet);
+                                // Codes_SRS_AMQPSTRANSPORT_15_016: [If the sent message hash is valid, it shall be added to the in progress map.]
+                                if (sendHash != -1)
+                                {
+                                    this.inProgressMessages.put(sendHash, packet);
+                                }
+                                // Codes_SRS_AMQPSTRANSPORT_15_017: [If the sent message hash is not valid, it shall be buffered to be sent in a subsequent attempt.]
+                                else
+                                {
+                                    failedMessages.add(packet);
+                                }
+                            }
+                        }
+                        break;
+                    case DeviceMethods:
+                        DeviceMethodMessage deviceMethodMessage = (DeviceMethodMessage) message;
+                        switch (deviceMethodMessage.getDeviceOperationType())
+                        {
+                            case DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST:
+                                MessageImpl protonMessageTelemetry = deviceMethodMessageToProtonMessage(deviceMethodMessage);
+
+                                // Codes_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
+                                Integer sendHashTelemetry = connection.sendMessage(protonMessageTelemetry, MessageType.DeviceMethods);
+
+                                // Codes_SRS_AMQPSTRANSPORT_15_016: [If the sent message hash is valid, it shall be added to the in progress map.]
+                                if (sendHashTelemetry != -1)
+                                {
+                                    this.inProgressMessages.put(sendHashTelemetry, packet);
+                                }
+                                // Codes_SRS_AMQPSTRANSPORT_15_017: [If the sent message hash is not valid, it shall be buffered to be sent in a subsequent attempt.]
+                                else
+                                {
+                                    failedMessages.add(packet);
+                                }
+                                break;
+                            case DEVICE_OPERATION_METHOD_SEND_RESPONSE:
+                                MessageImpl protonMessageDeviceMethod = deviceMethodMessageToProtonMessage(deviceMethodMessage);
+
+                                // Codes_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
+                                Integer sendHashDeviceMethod = connection.sendMessage(protonMessageDeviceMethod, MessageType.DeviceMethods);
+
+                                // Codes_SRS_AMQPSTRANSPORT_15_016: [If the sent message hash is valid, it shall be added to the in progress map.]
+                                if (sendHashDeviceMethod != -1)
+                                {
+                                    this.inProgressMessages.put(sendHashDeviceMethod, packet);
+                                }
+                                // Codes_SRS_AMQPSTRANSPORT_15_017: [If the sent message hash is not valid, it shall be buffered to be sent in a subsequent attempt.]
+                                else
+                                {
+                                    failedMessages.add(packet);
+                                }
+                                break;
+                            default:
+                                // Codes_SRS_AMQPSTRANSPORT_12_002: [The function does nothing if the message type is device methods and operation type is subscribe response or receive request.]
+                                break;
+                        }
+                        break;
+                    case DeviceTwin:
+                        DeviceTwinMessage deviceTwinMessage = (DeviceTwinMessage) message;
+                        boolean doSend = false;
+                        switch (deviceTwinMessage.getDeviceOperationType())
+                        {
+                            // Tests_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
+                            case DEVICE_OPERATION_TWIN_GET_REQUEST:
+                            case DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST:
+                            case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST:
+                                doSend = true;
+                                break;
+                            // Codes_SRS_AMQPSTRANSPORT_12_003: [The function does nothing if the message type is device twin and operation type is response.]
+                            case DEVICE_OPERATION_TWIN_GET_RESPONSE:
+                            case DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE:
+                            case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE:
+                                break;
+                        }
+
+                        if (doSend)
+                        {
+                            MessageImpl protonMessageDeviceTwin = deviceTwinMessageToProtonMessage(deviceTwinMessage);
+
+                            // Codes_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
+                            Integer sendHashTwin = connection.sendMessage(protonMessageDeviceTwin, MessageType.DeviceTwin);
+
+                            // Codes_SRS_AMQPSTRANSPORT_15_016: [If the sent message hash is valid, it shall be added to the in progress map.]
+                            if (sendHashTwin != -1)
+                            {
+                                this.inProgressMessages.put(sendHashTwin, packet);
+                            }
+                            // Codes_SRS_AMQPSTRANSPORT_15_017: [If the sent message hash is not valid, it shall be buffered to be sent in a subsequent attempt.]
+                            else
+                            {
+                                failedMessages.add(packet);
+                            }
+                        }
+                        break;
                     }
                 }
             }
-        }
 
         this.waitingMessages.addAll(failedMessages);
     }
@@ -333,10 +419,13 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         }
         
         logger.LogInfo("Get the callback function for the received message, method name is %s ", logger.getMethodName());
-        MessageCallback callback = this.config.getMessageCallback();
+
+        MessageCallback callbackTelemetry = this.config.getTelemetryMessageCallback();
+        MessageCallback callbackDeviceMethods = this.config.getDeviceMethodMessageCallback();
+        MessageCallback callbackDeviceTwin = this.config.getDeviceTwinMessageCallback();
 
         // Codes_SRS_AMQPSTRANSPORT_15_025: [If no callback is defined, the list of received messages is cleared.]
-        if (callback == null)
+        if (((callbackTelemetry == null) && (callbackDeviceMethods == null)) && (callbackDeviceTwin == null))
         {
             logger.LogError("Callback is not defined therefore response to IoT Hub cannot be generated. All received messages will be removed from receive message queue, method name is %s ", logger.getMethodName());
             this.receivedMessages.clear();
@@ -348,21 +437,69 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         if (this.receivedMessages.size() > 0)
         {
             logger.LogInfo("Consuming a message received from IoT Hub using receive message queue, method name is %s ", logger.getMethodName());
+
+            // Codes_SRS_AMQPSTRANSPORT_12_001: [The function removes message from the received message queue but do not call callback if callback is null.]
             AmqpsMessage receivedMessage = this.receivedMessages.remove();
+
             logger.LogInfo("Converting the AmqpsMessage to IoT Hub message, method name is %s ", logger.getMethodName());
-            Message message = protonMessageToIoTHubMessage(receivedMessage);
-
-            logger.LogInfo("Executing the callback function for received message, method name is %s ", logger.getMethodName());
-            // Codes_SRS_AMQPSTRANSPORT_15_026: [The function shall invoke the callback on the message.]
-            IotHubMessageResult result = callback.execute(message, this.config.getMessageContext());
-
-            // Codes_SRS_AMQPSTRANSPORT_15_027: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
-            Boolean ackResult = this.connection.sendMessageResult(receivedMessage, result);
-            // Codes_SRS_AMQPSTRANSPORT_15_028: [If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.]
-            if (!ackResult)
+            Message message = amqpsMessageToIoTHubMessage(receivedMessage);
+            if (message != null)
             {
-                logger.LogWarn("Callback did not return a response for IoT Hub. Message has been added in the queue to be processed again, method name is %s", logger.getMethodName());
-                receivedMessages.add(receivedMessage);
+                switch (message.getMessageType())
+                {
+                    case Telemetry:
+                        // Codes_SRS_AMQPSTRANSPORT_12_001: [The function removes message from the received message queue but do not call callback if callback is null.]
+                        if (callbackTelemetry != null)
+                        {
+                            logger.LogInfo("Executing the telemetry callback function for received message, method name is %s ", logger.getMethodName());
+                            // Codes_SRS_AMQPSTRANSPORT_15_026: [The function shall invoke the callback on the message.]
+                            IotHubMessageResult result = callbackTelemetry.execute(message, this.config.getTelemetryMessageContext());
+
+                            // Codes_SRS_AMQPSTRANSPORT_15_027: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
+                            Boolean ackResult = this.connection.sendMessageResult(receivedMessage, result);
+                            // Codes_SRS_AMQPSTRANSPORT_15_028: [If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.]
+                            if (!ackResult)
+                            {
+                                logger.LogWarn("Callback did not return a response for IoT Hub. Message has been added in the queue to be processed again, method name is %s", logger.getMethodName());
+                                receivedMessages.add(receivedMessage);
+                            }
+                        }
+                        break;
+                    case DeviceMethods:
+                        // Codes_SRS_AMQPSTRANSPORT_12_001: [The function removes message from the received message queue but do not call callback if callback is null.]
+                        if (callbackDeviceMethods != null)
+                        {
+                            logger.LogInfo("Executing the method callback function for received message, method name is %s ", logger.getMethodName());
+
+                            // Codes_SRS_AMQPSTRANSPORT_15_026: [The function shall invoke the callback on the message.]
+                            DeviceMethodMessage deviceMethodMessage = ioTHubMessageToDeviceMethodMessage(receivedMessage);
+                            IotHubMessageResult deviceMethodResult = callbackDeviceMethods.execute(deviceMethodMessage, this.config.getTelemetryMessageContext());
+
+                            if (deviceMethodResult != null)
+                            {
+                                logger.LogInfo("Executing the callback function for received message, method name is %s ", logger.getMethodName());
+                            }
+                        }
+                        break;
+                    case DeviceTwin:
+                        // Codes_SRS_AMQPSTRANSPORT_12_001: [The function removes message from the received message queue but do not call callback if callback is null.]
+                        if (callbackDeviceTwin != null)
+                        {
+                            logger.LogInfo("Executing the twin callback function for received message, method name is %s ", logger.getMethodName());
+
+                            // Codes_SRS_AMQPSTRANSPORT_15_026: [The function shall invoke the callback on the message.]
+                            DeviceTwinMessage deviceTwinMessage = ioTHubMessageToDeviceTwinMessage(receivedMessage);
+
+                            logger.LogInfo("Executing the callback function for desired property update , method name is %s ", logger.getMethodName());
+                            IotHubMessageResult deviceTwinResult = callbackDeviceTwin.execute(deviceTwinMessage, this.config.getTelemetryMessageContext());
+
+                            if (deviceTwinResult != IotHubMessageResult.COMPLETE)
+                            {
+                                logger.LogWarn("Callback returned with result: %s", deviceTwinResult);
+                            }
+                        }
+                        break;
+                }
             }
         }
     }
@@ -477,7 +614,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
      *
      * @return the corresponding IoT Hub message.
      */
-    private Message protonMessageToIoTHubMessage(MessageImpl protonMsg)
+    private Message amqpsMessageToIoTHubMessage(AmqpsMessage protonMsg)
     {
         logger.LogInfo("Started converting AmpqsMessage into IoT Hub message, method name is %s ", logger.getMethodName());
         Data d = (Data) protonMsg.getBody();
@@ -487,6 +624,9 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         buffer.get(msgBody);
 
         Message msg = new Message(msgBody);
+
+        msg.setMessageType(protonMsg.getAmqpsMessageType());
+
         logger.LogInfo("Content of received message is %s, method name is %s ", new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), logger.getMethodName());
         Properties properties = protonMsg.getProperties();
 
@@ -541,16 +681,10 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         MessageImpl outgoingMessage = (MessageImpl) Proton.message();
         logger.LogInfo("Content of message is %s, method name is %s ", new String(message.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), logger.getMethodName());
         Properties properties = new Properties();
-        if (message.getMessageId() != null)
+        if(message.getMessageId() != null)
         {
             properties.setMessageId(message.getMessageId());
         }
-
-        if (message.getCorrelationId() != null)
-        {
-            properties.setCorrelationId(message.getCorrelationId());
-        }
-
         outgoingMessage.setProperties(properties);
 
         // Codes_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
@@ -574,6 +708,233 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         Section section = new Data(binary);
         outgoingMessage.setBody(section);
         logger.LogInfo("Started converting IoT Hub message into AmpqsMessage, method name is %s ", logger.getMethodName());
+        return outgoingMessage;
+    }
+
+    private DeviceMethodMessage ioTHubMessageToDeviceMethodMessage(AmqpsMessage amqpsMessage)
+    {
+        logger.LogInfo("Started converting AmpqsMessage into DeviceMethodMessage, method name is %s ", logger.getMethodName());
+        Data d = (Data) amqpsMessage.getBody();
+        Binary b = d.getValue();
+        byte[] msgBody = new byte[b.getLength()];
+        ByteBuffer buffer = b.asByteBuffer();
+        buffer.get(msgBody);
+
+        DeviceMethodMessage deviceMethodMessage = new DeviceMethodMessage(msgBody);
+
+        deviceMethodMessage.setMessageType(amqpsMessage.getAmqpsMessageType());
+
+        logger.LogInfo("Content of received message is %s, method name is %s ", new String(deviceMethodMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), logger.getMethodName());
+        Properties properties = amqpsMessage.getProperties();
+
+        //Call all of the getters for the Proton message Properties and set those properties
+        //in the IoT Hub message properties if they exist.
+        if (properties.getCorrelationId() != null)
+        {
+            deviceMethodMessage.setCorrelationId(properties.getCorrelationId().toString());
+        }
+
+        if (properties.getMessageId() != null)
+        {
+            deviceMethodMessage.setMessageId(properties.getMessageId().toString());
+        }
+
+        if (properties.getTo() != null)
+        {
+            deviceMethodMessage.setProperty(AMQPS_APP_PROPERTY_PREFIX + TO_KEY, properties.getTo());
+        }
+
+        if (properties.getUserId() != null)
+        {
+            deviceMethodMessage.setProperty(AMQPS_APP_PROPERTY_PREFIX + USER_ID_KEY, properties.getUserId().toString());
+        }
+
+        // Setting the user properties
+        if (amqpsMessage.getApplicationProperties() != null)
+        {
+            Map<String, String> applicationProperties = amqpsMessage.getApplicationProperties().getValue();
+            for (Map.Entry<String, String> entry : applicationProperties.entrySet())
+            {
+                String propertyKey = entry.getKey();
+                if (propertyKey.equals(AmqpsDeviceMethods.APPLICATION_PROPERTY_KEY_IOTHUB_METHOD_NAME))
+                {
+                    deviceMethodMessage.setMethodName(entry.getValue());
+                }
+                else
+                {
+                    if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(propertyKey))
+                    {
+                        deviceMethodMessage.setProperty(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+        }
+
+        deviceMethodMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
+
+        logger.LogInfo("Completed the conversion of AmpqsMessage into DeviceMethodMessage, method name is %s ", logger.getMethodName());
+        return deviceMethodMessage;
+    }
+
+
+    private DeviceTwinMessage ioTHubMessageToDeviceTwinMessage(AmqpsMessage amqpsMessage)
+    {
+        logger.LogInfo("Started converting AmpqsMessage into DeviceMethodMessage, method name is %s ", logger.getMethodName());
+        Data d = (Data) amqpsMessage.getBody();
+        Binary b = d.getValue();
+        byte[] msgBody = new byte[b.getLength()];
+        ByteBuffer buffer = b.asByteBuffer();
+        buffer.get(msgBody);
+
+        DeviceTwinMessage deviceTwinMessage = new DeviceTwinMessage(msgBody);
+
+        deviceTwinMessage.setMessageType(amqpsMessage.getAmqpsMessageType());
+
+        logger.LogInfo("Content of received message is %s, method name is %s ", new String(deviceTwinMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), logger.getMethodName());
+        Properties properties = amqpsMessage.getProperties();
+
+        //Call all of the getters for the Proton message Properties and set those properties
+        //in the IoT Hub message properties if they exist.
+        if (properties.getCorrelationId() != null)
+        {
+            deviceTwinMessage.setCorrelationId(properties.getCorrelationId().toString());
+        }
+
+        if (properties.getMessageId() != null)
+        {
+            deviceTwinMessage.setMessageId(properties.getMessageId().toString());
+        }
+
+        if (properties.getTo() != null)
+        {
+            deviceTwinMessage.setProperty(AMQPS_APP_PROPERTY_PREFIX + TO_KEY, properties.getTo());
+        }
+
+        if (properties.getUserId() != null)
+        {
+            deviceTwinMessage.setProperty(AMQPS_APP_PROPERTY_PREFIX + USER_ID_KEY, properties.getUserId().toString());
+        }
+
+        // Setting the user properties
+        if (amqpsMessage.getApplicationProperties() != null)
+        {
+            Map<String, String> applicationProperties = amqpsMessage.getApplicationProperties().getValue();
+            for (Map.Entry<String, String> entry : applicationProperties.entrySet())
+            {
+                String propertyKey = entry.getKey();
+                if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(propertyKey))
+                {
+                    deviceTwinMessage.setProperty(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        deviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
+
+        logger.LogInfo("Completed the conversion of AmpqsMessage into DeviceMethodMessage, method name is %s ", logger.getMethodName());
+        return deviceTwinMessage;
+    }
+
+
+    private MessageImpl deviceMethodMessageToProtonMessage(DeviceMethodMessage deviceMethodMessage)
+    {
+        logger.LogInfo("Started converting DeviceMethodMessage into AmpqsMessage, method name is %s ", logger.getMethodName());
+        MessageImpl outgoingMessage = (MessageImpl) Proton.message();
+        logger.LogInfo("Content of message is %s, method name is %s ", new String(deviceMethodMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), logger.getMethodName());
+        Properties properties = new Properties();
+        if(deviceMethodMessage.getMessageId() != null)
+        {
+            properties.setMessageId(deviceMethodMessage.getMessageId());
+        }
+        if(deviceMethodMessage.getCorrelationId() != null)
+        {
+            properties.setCorrelationId(UUID.fromString(deviceMethodMessage.getCorrelationId()));
+        }
+        outgoingMessage.setProperties(properties);
+
+        // Codes_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
+        Map<String, Object> userProperties = new HashMap<>(deviceMethodMessage.getProperties().length);
+        if (deviceMethodMessage.getProperties().length > 0)
+        {
+            for(MessageProperty messageProperty : deviceMethodMessage.getProperties())
+            {
+                if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(messageProperty.getName()))
+                {
+                    userProperties.put(messageProperty.getName(), messageProperty.getValue());
+                }
+            }
+        }
+        userProperties.put(AmqpsDeviceMethods.APPLICATION_PROPERTY_KEY_IOTHUB_STATUS, Integer.parseInt(deviceMethodMessage.getStatus()));
+        ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
+        outgoingMessage.setApplicationProperties(applicationProperties);
+
+        Binary binary = new Binary(deviceMethodMessage.getBytes());
+        Section section = new Data(binary);
+        outgoingMessage.setBody(section);
+        logger.LogInfo("Started converting DeviceMethodMessage into AmpqsMessage, method name is %s ", logger.getMethodName());
+        return outgoingMessage;
+    }
+
+    private MessageImpl deviceTwinMessageToProtonMessage(DeviceTwinMessage deviceTwinMessage)
+    {
+        logger.LogInfo("Started converting DeviceMethodMessage into AmpqsMessage, method name is %s ", logger.getMethodName());
+        MessageImpl outgoingMessage = (MessageImpl) Proton.message();
+        logger.LogInfo("Content of message is %s, method name is %s ", new String(deviceTwinMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), logger.getMethodName());
+        Properties properties = new Properties();
+
+        if(deviceTwinMessage.getMessageId() != null)
+        {
+            properties.setMessageId(deviceTwinMessage.getMessageId());
+        }
+        if(deviceTwinMessage.getCorrelationId() != null)
+        {
+            properties.setCorrelationId(UUID.fromString(deviceTwinMessage.getCorrelationId()));
+        }
+        outgoingMessage.setProperties(properties);
+
+        // Codes_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
+        Map<String, Object> userProperties = new HashMap<>(deviceTwinMessage.getProperties().length);
+        if (deviceTwinMessage.getProperties().length > 0)
+        {
+            for(MessageProperty messageProperty : deviceTwinMessage.getProperties())
+            {
+                if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(messageProperty.getName()))
+                {
+                    userProperties.put(messageProperty.getName(), messageProperty.getValue());
+                }
+            }
+        }
+        ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
+        outgoingMessage.setApplicationProperties(applicationProperties);
+
+        Map<Symbol, Object> messageAnnotationsMap = new HashMap<>();
+        switch (deviceTwinMessage.getDeviceOperationType())
+        {
+            case DEVICE_OPERATION_TWIN_GET_REQUEST:
+                messageAnnotationsMap.put(Symbol.valueOf(AmqpsDeviceTwin.MESSAGE_ANNOTATION_FIELD_KEY_OPERATION), AmqpsDeviceTwin.MESSAGE_ANNOTATION_FIELD_VALUE_OPERATION_GET);
+                break;
+            case DEVICE_OPERATION_TWIN_GET_RESPONSE:
+                break;
+            case DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST:
+                messageAnnotationsMap.put(Symbol.valueOf(AmqpsDeviceTwin.MESSAGE_ANNOTATION_FIELD_KEY_OPERATION), AmqpsDeviceTwin.MESSAGE_ANNOTATION_FIELD_VALUE_OPERATION_PATCH);
+                messageAnnotationsMap.put(Symbol.valueOf(AmqpsDeviceTwin.MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE), AmqpsDeviceTwin.MESSAGE_ANNOTATION_FIELD_VALUE_RESOURCE_REPORTED);
+                break;
+            case DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE:
+                break;
+            case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST:
+                messageAnnotationsMap.put(Symbol.valueOf(AmqpsDeviceTwin.MESSAGE_ANNOTATION_FIELD_KEY_OPERATION), AmqpsDeviceTwin.MESSAGE_ANNOTATION_FIELD_VALUE_OPERATION_PUT);
+                messageAnnotationsMap.put(Symbol.valueOf(AmqpsDeviceTwin.MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE), AmqpsDeviceTwin.MESSAGE_ANNOTATION_FIELD_VALUE_RESOURCE_DESIRED);
+                break;
+            case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE:
+                break;
+        }
+        MessageAnnotations messageAnnotations = new MessageAnnotations(messageAnnotationsMap);
+        outgoingMessage.setMessageAnnotations(messageAnnotations);
+
+        Binary binary = new Binary(deviceTwinMessage.getBytes());
+        Section section = new Data(binary);
+        outgoingMessage.setBody(section);
+        logger.LogInfo("Started converting DeviceTwinMessage into AmpqsMessage, method name is %s ", logger.getMethodName());
         return outgoingMessage;
     }
 }

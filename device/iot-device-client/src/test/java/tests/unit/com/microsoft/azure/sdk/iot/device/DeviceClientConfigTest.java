@@ -207,7 +207,7 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
-        MessageCallback testCallback = config.getMessageCallback();
+        MessageCallback testCallback = config.getTelemetryMessageCallback();
 
         final MessageCallback expectedCallback = mockCallback;
         assertThat(testCallback, is(expectedCallback));
@@ -235,7 +235,7 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
-        Object testContext = config.getMessageContext();
+        Object testContext = config.getTelemetryMessageContext();
 
         final Object expectedContext = context;
         assertThat(testContext, is(expectedContext));
@@ -300,7 +300,7 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
         Object context = new Object();
         config.setDeviceMethodMessageCallback(mockCallback, context);
-        Object testContext = config.getDeviceMethodMessageContext();
+        Object testContext = config.getDeviceMethodsMessageContext();
 
 
         final Object expectedContext = context;
@@ -328,7 +328,7 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
         Object dMContext = new Object();
         config.setDeviceMethodMessageCallback(mockCallback, dMContext);
-        Object testContextDM = config.getDeviceMethodMessageContext();
+        Object testContextDM = config.getDeviceMethodsMessageContext();
 
         Object dTcontext = new Object();
         config.setDeviceTwinMessageCallback(mockCallback, dTcontext);

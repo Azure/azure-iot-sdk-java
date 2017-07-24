@@ -4,6 +4,9 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodMessage;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.State;
@@ -20,12 +23,16 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
 import static com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTransport.AMQPS_APP_PROPERTY_PREFIX;
+import static java.lang.Class.forName;
 import static org.junit.Assert.*;
 
 /* Unit tests for AmqpsTransport
@@ -202,24 +209,28 @@ public class AmqpsTransportTest
         new Verifications()
         {
             {
-                
+
                 expectedConnection.close();
             }
         };
     }
-   
+
     // Tests_SRS_AMQPSTRANSPORT_15_008: [The function shall close an AMQPS connection with the IoT Hub given in the configuration.]
     // Tests_SRS_AMQPSTRANSPORT_99_036: [The method shall remove all the messages which are in progress or waiting to be sent and add them to the callback list.]
     // Tests_SRS_AMQPSTRANSPORT_99_037: [The method shall invoke all the callbacks.]
-            
-   @Test
-    public void closeClosesAmqpsConnectionAndRemovePendingMessages(@Mocked final Message mockMsg,
-                                                             @Mocked final IotHubEventCallback mockCallback,
-                                                             @Mocked final IotHubOutboundPacket mockedPacket) throws IOException, InterruptedException
+
+    @Test
+    public void closeClosesAmqpsConnectionAndRemovePendingMessages(
+            @Mocked
+            final Message mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockedPacket) throws IOException, InterruptedException
     {
         final AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
         final AmqpsIotHubConnection expectedConnection = mockConnection;
-        
+
         new NonStrictExpectations()
         {
             {
@@ -229,8 +240,8 @@ public class AmqpsTransportTest
                 result = "AnyData".getBytes();
             }
         };
-        
-        
+
+
         transport.open();
         transport.addMessage(mockMsg, mockCallback, null);
         transport.close();
@@ -238,11 +249,11 @@ public class AmqpsTransportTest
 
         Queue<IotHubOutboundPacket> actualWaitingMessages = Deencapsulation.getField(transport, "waitingMessages");
         Map<Integer, IotHubOutboundPacket> actualInProgressMessages = Deencapsulation.getField(transport, "inProgressMessages");
-       
+
         assertEquals(actualWaitingMessages.size(), 0);
-        assertEquals(actualInProgressMessages.size(), 0);        
-        
-        
+        assertEquals(actualInProgressMessages.size(), 0);
+
+
         new Verifications()
         {
             {
@@ -252,9 +263,9 @@ public class AmqpsTransportTest
                 minTimes = 1;
             }
         };
-        
+
     }
-   
+
     // Tests_SRS_AMQPSTRANSPORT_15_009: [The function shall set the transport state to CLOSED.]
     @Test
     public void closeSetsStateToClosed() throws IOException
@@ -270,9 +281,10 @@ public class AmqpsTransportTest
     // Tests_SRS_AMQPSTRANSPORT_15_010: [If the AMQPS session is closed, the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void addMessageFailsIfTransportNotOpened(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback)
-            throws IOException
+            @Mocked
+            final Message mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback) throws IOException
     {
         final Map<String, Object> context = new HashMap<>();
 
@@ -283,9 +295,10 @@ public class AmqpsTransportTest
     // Tests_SRS_AMQPSTRANSPORT_15_010: [If the AMQPS session is closed, the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void addMessageFailsIfTransportAlreadyClosed(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback)
-            throws IOException
+            @Mocked
+            final Message mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback) throws IOException
     {
         final Map<String, Object> context = new HashMap<>();
 
@@ -299,9 +312,12 @@ public class AmqpsTransportTest
     // and callback context to the queue of messages waiting to be sent.]
     @Test
     public <T extends Queue> void addMessageAddsToTransportQueue(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket) throws IOException
+            @Mocked
+            final Message mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
     {
         final Queue mockQueue = new MockUp<T>()
         {
@@ -324,9 +340,10 @@ public class AmqpsTransportTest
     // Tests_SRS_AMQPSTRANSPORT_21_040: [The function shall throws `UnsupportedOperationException`.]
     @Test(expected = UnsupportedOperationException.class)
     public void addMessageWithResponseNotSupportedThrows(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubResponseCallback mockCallback)
-            throws IOException
+            @Mocked
+            final Message mockMsg,
+            @Mocked
+            final IotHubResponseCallback mockCallback) throws IOException
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
@@ -358,8 +375,9 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_15_013: [If there are no messages in the waiting list, the function shall return.]
     @Test
-    public void sendMessagesReturnsIfNoMessagesAreWaiting(@Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
+    public void sendMessagesReturnsIfNoMessagesAreWaiting(
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
     {
         new NonStrictExpectations()
         {
@@ -389,13 +407,15 @@ public class AmqpsTransportTest
     // Tests_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
     @Test
     public void sendMessagesSendsAllMessages(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
+            @Mocked
+            final Message mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
     {
         final Map<String, Object> context = new HashMap<>();
-        final byte[] messageBytes = new byte[] {1, 2};
+        final byte[] messageBytes = new byte[]{1, 2};
         new NonStrictExpectations()
         {
             {
@@ -423,7 +443,7 @@ public class AmqpsTransportTest
                 times = 2;
                 mockPacket.getMessage();
                 times = 2;
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, null);
                 times = 2;
             }
         };
@@ -432,10 +452,12 @@ public class AmqpsTransportTest
     // Tests_SRS_AMQPSTRANSPORT_15_015: [The function shall skip messages with null or empty body.]
     @Test
     public void sendMessagesSkipsMessagesWithNullBody(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
+            @Mocked
+            final Message mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
     {
         final Map<String, Object> context = new HashMap<>();
         new NonStrictExpectations()
@@ -459,7 +481,7 @@ public class AmqpsTransportTest
         new Verifications()
         {
             {
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, null);
                 times = 0;
             }
         };
@@ -467,19 +489,17 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
     @Test
-    public void sendMessagesAddsUserPropertiesToProtonApplicationProperties(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
+    public void sendMessagesAddsUserPropertiesToProtonApplicationPropertiesTelemetry(
+            @Mocked
+            final Message mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
     {
         final Map<String, Object> context = new HashMap<>();
-        final byte[] messageBytes = new byte[] {1, 2};
-        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]
-        {
-            new MessageProperty("key1", "value1"),
-            new MessageProperty("key2", "value2")
-        };
+        final byte[] messageBytes = new byte[]{1, 2};
+        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]{new MessageProperty("key1", "value1"), new MessageProperty("key2", "value2")};
 
         final Map<String, String> userProperties = new HashMap<>(2);
         userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
@@ -496,11 +516,13 @@ public class AmqpsTransportTest
                 result = mockMsg;
                 mockMsg.getBytes();
                 result = messageBytes;
+                mockMsg.getMessageType();
+                result = MessageType.Telemetry;
                 new MessageImpl();
                 result = mockProtonMessage;
                 mockMsg.getProperties();
                 result = iotHubMessageProperties;
-                mockConnection.sendMessage(mockProtonMessage);
+                mockConnection.sendMessage(mockProtonMessage, null);
                 result = 1;
                 new ApplicationProperties(userProperties);
             }
@@ -519,7 +541,7 @@ public class AmqpsTransportTest
                 times = 1;
                 mockPacket.getMessage();
                 times = 1;
-                mockConnection.sendMessage(mockProtonMessage);
+                mockConnection.sendMessage(mockProtonMessage, MessageType.Telemetry);
                 times = 1;
                 new ApplicationProperties(userProperties);
                 times = 1;
@@ -529,13 +551,643 @@ public class AmqpsTransportTest
         };
     }
 
+    // Tests_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
+    @Test
+    public void sendMessagesAddsUserPropertiesToProtonApplicationPropertiesDeviceMethodSubscribeRequest(
+            @Mocked
+            final DeviceMethodMessage mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+        final byte[] messageBytes = new byte[]{1, 2};
+        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]{new MessageProperty("key1", "value1"), new MessageProperty("key2", "value2")};
+
+        final Map<String, String> userProperties = new HashMap<>(2);
+        userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
+        userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
+
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                result = mockPacket;
+                mockPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = messageBytes;
+                mockMsg.getMessageType();
+                result = MessageType.DeviceMethods;
+                mockMsg.getDeviceOperationType();
+                result = DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST;
+                mockMsg.getStatus();
+                result = 0;
+                mockMsg.getMessageId();
+                result = "messageId";
+                mockMsg.getCorrelationId();
+                result = "1612b9f2-3d79-4772-a210-189b1369b9ea";
+                new MessageImpl();
+                result = mockProtonMessage;
+                mockMsg.getProperties();
+                result = iotHubMessageProperties;
+                mockConnection.sendMessage(mockProtonMessage, null);
+                result = 1;
+                new ApplicationProperties(userProperties);
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+        transport.sendMessages();
+
+
+        new Verifications()
+        {
+            {
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                times = 1;
+                mockPacket.getMessage();
+                times = 1;
+                new ApplicationProperties(userProperties);
+                times = 1;
+                mockProtonMessage.setApplicationProperties((ApplicationProperties) any);
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
+    @Test
+    public void sendMessagesAddsUserPropertiesToProtonApplicationPropertiesDeviceMethodSendResponse(
+            @Mocked
+            final DeviceMethodMessage mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+        final byte[] messageBytes = new byte[]{1, 2};
+        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]{new MessageProperty("key1", "value1"), new MessageProperty("key2", "value2")};
+
+        final Map<String, String> userProperties = new HashMap<>(2);
+        userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
+        userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
+
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                result = mockPacket;
+                mockPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = messageBytes;
+                mockMsg.getMessageType();
+                result = MessageType.DeviceMethods;
+                mockMsg.getDeviceOperationType();
+                result = DEVICE_OPERATION_METHOD_SEND_RESPONSE;
+                mockMsg.getStatus();
+                result = 0;
+                mockMsg.getMessageId();
+                result = "messageId";
+                mockMsg.getCorrelationId();
+                result = "1612b9f2-3d79-4772-a210-189b1369b9ea";
+                new MessageImpl();
+                result = mockProtonMessage;
+                mockMsg.getProperties();
+                result = iotHubMessageProperties;
+                mockConnection.sendMessage(mockProtonMessage, null);
+                result = 1;
+                new ApplicationProperties(userProperties);
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+        transport.sendMessages();
+
+
+        new Verifications()
+        {
+            {
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                times = 1;
+                mockPacket.getMessage();
+                times = 1;
+                new ApplicationProperties(userProperties);
+                times = 1;
+                mockProtonMessage.setApplicationProperties((ApplicationProperties) any);
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_12_002: [The function does nothing if the operation type is subscribe response or receive request.]
+    @Test
+    public void sendMessagesDoesNothingDeviceMethodOperationTypeSubscribeResponse(
+            @Mocked
+            final DeviceMethodMessage mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+        final byte[] messageBytes = new byte[]{1, 2};
+        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]{new MessageProperty("key1", "value1"), new MessageProperty("key2", "value2")};
+
+        final Map<String, String> userProperties = new HashMap<>(2);
+        userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
+        userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
+
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                result = mockPacket;
+                mockPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = messageBytes;
+                mockMsg.getMessageType();
+                result = MessageType.DeviceMethods;
+                mockMsg.getDeviceOperationType();
+                result = DEVICE_OPERATION_METHOD_SUBSCRIBE_RESPONSE;
+                mockMsg.getStatus();
+                result = 0;
+                mockMsg.getProperties();
+                result = iotHubMessageProperties;
+                mockConnection.sendMessage(mockProtonMessage, null);
+                result = 1;
+                new ApplicationProperties(userProperties);
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+        transport.sendMessages();
+
+
+        new Verifications()
+        {
+            {
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                times = 1;
+                mockPacket.getMessage();
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_12_002: [The function does nothing if the message type is device methods and operation type is subscribe response or receive request.]
+    @Test
+    public void sendMessagesDoesNothingDeviceMethodDeviceMethodOperationTypeReceiveRequest(
+            @Mocked
+            final DeviceMethodMessage mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+        final byte[] messageBytes = new byte[]{1, 2};
+        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]{new MessageProperty("key1", "value1"), new MessageProperty("key2", "value2")};
+
+        final Map<String, String> userProperties = new HashMap<>(2);
+        userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
+        userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
+
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                result = mockPacket;
+                mockPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = messageBytes;
+                mockMsg.getMessageType();
+                result = MessageType.DeviceMethods;
+                mockMsg.getDeviceOperationType();
+                result = DEVICE_OPERATION_METHOD_RECEIVE_REQUEST;
+                mockMsg.getStatus();
+                result = 0;
+                mockMsg.getProperties();
+                result = iotHubMessageProperties;
+                mockConnection.sendMessage(mockProtonMessage, null);
+                result = 1;
+                new ApplicationProperties(userProperties);
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+        transport.sendMessages();
+
+        new Verifications()
+        {
+            {
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                times = 1;
+                mockPacket.getMessage();
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
+    @Test
+    public void sendMessagesAddsUserPropertiesToProtonApplicationPropertiesDeviceTwinGetRequest(
+            @Mocked
+            final DeviceTwinMessage mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+        final byte[] messageBytes = new byte[]{1, 2};
+        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]{new MessageProperty("key1", "value1"), new MessageProperty("key2", "value2")};
+
+        final Map<String, String> userProperties = new HashMap<>(2);
+        userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
+        userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
+
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                result = mockPacket;
+                mockPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = messageBytes;
+                mockMsg.getMessageType();
+                result = MessageType.DeviceTwin;
+                mockMsg.getDeviceOperationType();
+                result = DEVICE_OPERATION_TWIN_GET_REQUEST;
+                mockMsg.getStatus();
+                result = 0;
+                mockMsg.getMessageId();
+                result = "messageId";
+                mockMsg.getCorrelationId();
+                result = "1612b9f2-3d79-4772-a210-189b1369b9ea";
+                new MessageImpl();
+                result = mockProtonMessage;
+                mockMsg.getProperties();
+                result = iotHubMessageProperties;
+                mockConnection.sendMessage(mockProtonMessage, null);
+                result = 1;
+                new ApplicationProperties(userProperties);
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+        transport.sendMessages();
+
+
+        new Verifications()
+        {
+            {
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                times = 1;
+                mockPacket.getMessage();
+                times = 1;
+                new ApplicationProperties(userProperties);
+                times = 1;
+                mockProtonMessage.setApplicationProperties((ApplicationProperties) any);
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
+    @Test
+    public void sendMessagesAddsUserPropertiesToProtonApplicationPropertiesDeviceTwinUpdateReportedPropertiesRequest(
+            @Mocked
+            final DeviceTwinMessage mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+        final byte[] messageBytes = new byte[]{1, 2};
+        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]{new MessageProperty("key1", "value1"), new MessageProperty("key2", "value2")};
+
+        final Map<String, String> userProperties = new HashMap<>(2);
+        userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
+        userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
+
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                result = mockPacket;
+                mockPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = messageBytes;
+                mockMsg.getMessageType();
+                result = MessageType.DeviceTwin;
+                mockMsg.getDeviceOperationType();
+                result = DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST;
+                mockMsg.getStatus();
+                result = 0;
+                mockMsg.getMessageId();
+                result = "messageId";
+                mockMsg.getCorrelationId();
+                result = "1612b9f2-3d79-4772-a210-189b1369b9ea";
+                new MessageImpl();
+                result = mockProtonMessage;
+                mockMsg.getProperties();
+                result = iotHubMessageProperties;
+                mockConnection.sendMessage(mockProtonMessage, null);
+                result = 1;
+                new ApplicationProperties(userProperties);
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+        transport.sendMessages();
+
+
+        new Verifications()
+        {
+            {
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                times = 1;
+                mockPacket.getMessage();
+                times = 1;
+                new ApplicationProperties(userProperties);
+                times = 1;
+                mockProtonMessage.setApplicationProperties((ApplicationProperties) any);
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
+    @Test
+    public void sendMessagesAddsUserPropertiesToProtonApplicationPropertiesDeviceTwinSubscribeDesiredPropertiesRequest(
+            @Mocked
+            final DeviceTwinMessage mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+        final byte[] messageBytes = new byte[]{1, 2};
+        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]{new MessageProperty("key1", "value1"), new MessageProperty("key2", "value2")};
+
+        final Map<String, String> userProperties = new HashMap<>(2);
+        userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
+        userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
+
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                result = mockPacket;
+                mockPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = messageBytes;
+                mockMsg.getMessageType();
+                result = MessageType.DeviceTwin;
+                mockMsg.getDeviceOperationType();
+                result = DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
+                mockMsg.getStatus();
+                result = 0;
+                mockMsg.getMessageId();
+                result = "messageId";
+                mockMsg.getCorrelationId();
+                result = "1612b9f2-3d79-4772-a210-189b1369b9ea";
+                new MessageImpl();
+                result = mockProtonMessage;
+                mockMsg.getProperties();
+                result = iotHubMessageProperties;
+                mockConnection.sendMessage(mockProtonMessage, null);
+                result = 1;
+                new ApplicationProperties(userProperties);
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+        transport.sendMessages();
+
+
+        new Verifications()
+        {
+            {
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                times = 1;
+                mockPacket.getMessage();
+                times = 1;
+                new ApplicationProperties(userProperties);
+                times = 1;
+                mockProtonMessage.setApplicationProperties((ApplicationProperties) any);
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_12_003: [The function does nothing if the message type is device twin and operation type is response.]
+    @Test
+    public void sendMessagesDoesNothingDeviceTwinGetResponse(
+            @Mocked
+            final DeviceTwinMessage mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+        final byte[] messageBytes = new byte[]{1, 2};
+        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]{new MessageProperty("key1", "value1"), new MessageProperty("key2", "value2")};
+
+        final Map<String, String> userProperties = new HashMap<>(2);
+        userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
+        userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
+
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                result = mockPacket;
+                mockPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = messageBytes;
+                mockMsg.getMessageType();
+                result = MessageType.DeviceTwin;
+                mockMsg.getDeviceOperationType();
+                result = DEVICE_OPERATION_TWIN_GET_RESPONSE;
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+        transport.sendMessages();
+
+
+        new Verifications()
+        {
+            {
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                times = 1;
+                mockPacket.getMessage();
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_12_003: [The function does nothing if the message type is device twin and operation type is response.]
+    @Test
+    public void sendMessagesDoesNothingDeviceTwinUpdateReportedPropertiesResponse(
+            @Mocked
+            final DeviceTwinMessage mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+        final byte[] messageBytes = new byte[]{1, 2};
+        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]{new MessageProperty("key1", "value1"), new MessageProperty("key2", "value2")};
+
+        final Map<String, String> userProperties = new HashMap<>(2);
+        userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
+        userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
+
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                result = mockPacket;
+                mockPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = messageBytes;
+                mockMsg.getMessageType();
+                result = MessageType.DeviceTwin;
+                mockMsg.getDeviceOperationType();
+                result = DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE;
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+        transport.sendMessages();
+
+
+        new Verifications()
+        {
+            {
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                times = 1;
+                mockPacket.getMessage();
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_12_003: [The function does nothing if the message type is device twin and operation type is response.]
+    @Test
+    public void sendMessagesDoesNothingDeviceTwinSubscribeDesiredPropertiesResponse(
+            @Mocked
+            final DeviceTwinMessage mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
+    {
+        final Map<String, Object> context = new HashMap<>();
+        final byte[] messageBytes = new byte[]{1, 2};
+        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]{new MessageProperty("key1", "value1"), new MessageProperty("key2", "value2")};
+
+        final Map<String, String> userProperties = new HashMap<>(2);
+        userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
+        userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
+
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                result = mockPacket;
+                mockPacket.getMessage();
+                result = mockMsg;
+                mockMsg.getBytes();
+                result = messageBytes;
+                mockMsg.getMessageType();
+                result = MessageType.DeviceTwin;
+                mockMsg.getDeviceOperationType();
+                result = DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE;
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+        transport.sendMessages();
+
+
+        new Verifications()
+        {
+            {
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                times = 1;
+                mockPacket.getMessage();
+                times = 1;
+            }
+        };
+    }
+
     // Tests_SRS_AMQPSTRANSPORT_15_015: [The function shall skip messages with null or empty body.]
     @Test
     public void sendMessagesSkipsMessagesWithEmptyBody(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
+            @Mocked
+            final Message mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
     {
         final Map<String, Object> context = new HashMap<>();
         new NonStrictExpectations()
@@ -561,7 +1213,7 @@ public class AmqpsTransportTest
         new Verifications()
         {
             {
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, null);
                 times = 0;
             }
         };
@@ -570,13 +1222,15 @@ public class AmqpsTransportTest
     // Tests_SRS_AMQPSTRANSPORT_15_016: [If the sent message hash is valid, it shall be added to the in progress map.]
     @Test
     public void sendMessagesAddsSentMessagesToInProgressMap(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
+            @Mocked
+            final Message mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
     {
         final Map<String, Object> context = new HashMap<>();
-        final byte[] messageBytes = new byte[] {1, 2};
+        final byte[] messageBytes = new byte[]{1, 2};
         new NonStrictExpectations()
         {
             {
@@ -588,8 +1242,8 @@ public class AmqpsTransportTest
                 result = mockMsg;
                 mockMsg.getBytes();
                 result = messageBytes;
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any);
-                returns (1, 2);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, null);
+                returns(1, 2);
             }
         };
 
@@ -609,7 +1263,7 @@ public class AmqpsTransportTest
                 times = 2;
                 mockPacket.getMessage();
                 times = 2;
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, null);
                 times = 2;
             }
         };
@@ -618,13 +1272,15 @@ public class AmqpsTransportTest
     // Tests_SRS_AMQPSTRANSPORT_15_017: [If the sent message hash is not valid, it shall be buffered to be sent in a subsequent attempt.]
     @Test
     public void sendMessagesAddsNotSentMessagesToInProgressMap(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
+            @Mocked
+            final Message mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
     {
         final Map<String, Object> context = new HashMap<>();
-        final byte[] messageBytes = new byte[] {1, 2};
+        final byte[] messageBytes = new byte[]{1, 2};
         new NonStrictExpectations()
         {
             {
@@ -636,8 +1292,8 @@ public class AmqpsTransportTest
                 result = mockMsg;
                 mockMsg.getBytes();
                 result = messageBytes;
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any);
-                returns (1, -1);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, null);
+                returns(1, -1);
             }
         };
 
@@ -660,7 +1316,7 @@ public class AmqpsTransportTest
                 times = 2;
                 mockPacket.getMessage();
                 times = 2;
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, null);
                 times = 2;
             }
         };
@@ -670,13 +1326,15 @@ public class AmqpsTransportTest
     // with the MESSAGE_EXPIRED status and add it to the callback list.]
     @Test
     public void sendMessagesAddsExpiredMessagesToCallbackListWithCorrectCode(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
+            @Mocked
+            final Message mockMsg,
+            @Mocked
+            final IotHubEventCallback mockCallback,
+            @Mocked
+            final IotHubOutboundPacket mockPacket) throws IOException
     {
         final Map<String, Object> context = new HashMap<>();
-        final byte[] messageBytes = new byte[] {1, 2};
+        final byte[] messageBytes = new byte[]{1, 2};
         new NonStrictExpectations()
         {
             {
@@ -689,8 +1347,8 @@ public class AmqpsTransportTest
                 mockMsg.getBytes();
                 result = messageBytes;
                 mockMsg.isExpired();
-                returns (true, false);
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any);
+                returns(true, false);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, null);
                 result = 1;
             }
         };
@@ -717,7 +1375,7 @@ public class AmqpsTransportTest
                 times = 2;
                 mockPacket.getMessage();
                 times = 2;
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, null);
                 times = 1;
                 new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_EXPIRED, (IotHubEventCallback) any, any);
                 times = 1;
@@ -727,8 +1385,7 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_15_019: [If the transport closed, the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
-    public void invokeCallbacksFailsIfTransportNotOpen()
-            throws IOException
+    public void invokeCallbacksFailsIfTransportNotOpen() throws IOException
     {
         AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
         transport.invokeCallbacks();
@@ -736,8 +1393,7 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_15_019: [If the transport closed, the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
-    public void invokeCallbacksFailsIfTransportOpenedAndClosed()
-            throws IOException
+    public void invokeCallbacksFailsIfTransportOpenedAndClosed() throws IOException
     {
         AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
         transport.open();
@@ -817,7 +1473,11 @@ public class AmqpsTransportTest
             {
                 new AmqpsIotHubConnection(mockConfig, false);
                 result = mockConnection;
-                mockConfig.getMessageCallback();
+                mockConfig.getTelemetryMessageCallback();
+                result = null;
+                mockConfig.getDeviceMethodMessageCallback();
+                result = null;
+                mockConfig.getDeviceTwinMessageCallback();
                 result = null;
             }
         };
@@ -837,6 +1497,211 @@ public class AmqpsTransportTest
         Assert.assertTrue(receivedTransportMessages.size() == 0);
     }
 
+    // Tests_SRS_AMQPSTRANSPORT_12_001: [The function removes message from the received message queue but do not call callback if callback is null.]
+    @Test
+    public void handleMessageRemovesMessageFromQueueAndDoNotCallCallbackIfNoCallbackIsDefinedTelemetry() throws IOException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                mockConfig.getTelemetryMessageCallback();
+                result = null;
+                mockConfig.getDeviceMethodMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceTwinMessageCallback();
+                result = mockMessageCallback;
+            }
+        };
+
+        new MockUp<AmqpsTransport>()
+        {
+            @Mock
+            Message amqpsMessageToIoTHubMessage(AmqpsMessage protonMessage)
+            {
+                Message returnMessage = new Message();
+                returnMessage.setMessageType(MessageType.Telemetry);
+                return returnMessage;
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+
+        Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
+        receivedMessages.add(mockAmqpsMessage);
+        Deencapsulation.setField(transport, "receivedMessages", receivedMessages);
+
+        transport.handleMessage();
+
+        Queue<AmqpsMessage> receivedTransportMessages = Deencapsulation.getField(transport, "receivedMessages");
+
+        Assert.assertTrue(receivedTransportMessages.size() == 0);
+
+        new Verifications()
+        {
+            {
+                mockMessageCallback.execute((Message) any, any);
+                times = 0;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_12_001: [The function removes message from the received message queue but do not call callback if callback is null.]
+    @Test
+    public void handleMessageRemovesMessageFromQueueAndDoNotCallCallbackIsNoCallbackIsDefinedDeviceMethods() throws IOException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                mockConfig.getTelemetryMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceMethodMessageCallback();
+                result = null;
+                mockConfig.getDeviceTwinMessageCallback();
+                result = mockMessageCallback;
+            }
+        };
+
+        new MockUp<AmqpsTransport>()
+        {
+            @Mock
+            Message amqpsMessageToIoTHubMessage(AmqpsMessage protonMessage)
+            {
+                Message returnMessage = new Message();
+                returnMessage.setMessageType(MessageType.DeviceMethods);
+                return returnMessage;
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+
+        Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
+        receivedMessages.add(mockAmqpsMessage);
+        Deencapsulation.setField(transport, "receivedMessages", receivedMessages);
+
+        transport.handleMessage();
+
+        Queue<AmqpsMessage> receivedTransportMessages = Deencapsulation.getField(transport, "receivedMessages");
+
+        Assert.assertTrue(receivedTransportMessages.size() == 0);
+
+        new Verifications()
+        {
+            {
+                mockMessageCallback.execute((Message) any, any);
+                times = 0;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_12_001: [The function removes message from the received message queue but do not call callback if callback is null.]
+    @Test
+    public void handleMessageRemovesMessageFromQueueAndDoNotCallCallbackIfNoCallbackIsDefinedDeviceTwin() throws IOException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                mockConfig.getTelemetryMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceMethodMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceTwinMessageCallback();
+                result = null;
+            }
+        };
+
+        new MockUp<AmqpsTransport>()
+        {
+            @Mock
+            Message amqpsMessageToIoTHubMessage(AmqpsMessage protonMessage)
+            {
+                Message returnMessage = new Message();
+                returnMessage.setMessageType(MessageType.DeviceTwin);
+                return returnMessage;
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+
+        Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
+        receivedMessages.add(mockAmqpsMessage);
+        Deencapsulation.setField(transport, "receivedMessages", receivedMessages);
+
+        transport.handleMessage();
+
+        Queue<AmqpsMessage> receivedTransportMessages = Deencapsulation.getField(transport, "receivedMessages");
+
+        Assert.assertTrue(receivedTransportMessages.size() == 0);
+
+        new Verifications()
+        {
+            {
+                mockMessageCallback.execute((Message) any, any);
+                times = 0;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_12_001: [The function removes message from the received message queue but do not call callback if callback is null.]
+    @Test
+    public void handleMessageRemovesMessageFromQueueAndDoNotCallCallbackIsNoCallbackIsDefinedTelemetry() throws IOException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                mockConfig.getTelemetryMessageCallback();
+                result = null;
+                mockConfig.getDeviceMethodMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceTwinMessageCallback();
+                result = mockMessageCallback;
+            }
+        };
+
+        new MockUp<AmqpsTransport>()
+        {
+            @Mock
+            Message amqpsMessageToIoTHubMessage(AmqpsMessage protonMessage)
+            {
+                Message returnMessage = new Message();
+                returnMessage.setMessageType(MessageType.Telemetry);
+                return returnMessage;
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+
+        Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
+        receivedMessages.add(mockAmqpsMessage);
+        Deencapsulation.setField(transport, "receivedMessages", receivedMessages);
+
+        transport.handleMessage();
+
+        Queue<AmqpsMessage> receivedTransportMessages = Deencapsulation.getField(transport, "receivedMessages");
+
+        Assert.assertTrue(receivedTransportMessages.size() == 0);
+
+        new Verifications()
+        {
+            {
+                mockMessageCallback.execute((Message) any, any);
+                times = 0;
+            }
+        };
+    }
+
+
     // Tests_SRS_AMQPSTRANSPORT_15_024: [If no message was received from IotHub, the function shall return.]
     @Test
     public void handleMessageReturnsIfConfigIsNull() throws IOException
@@ -846,7 +1711,7 @@ public class AmqpsTransportTest
             {
                 new AmqpsIotHubConnection(mockConfig, false);
                 result = mockConnection;
-                mockConfig.getMessageCallback();
+                mockConfig.getTelemetryMessageCallback();
                 result = mockMessageCallback;
             }
         };
@@ -871,14 +1736,14 @@ public class AmqpsTransportTest
     // Tests_SRS_AMQPSTRANSPORT_15_026: [The function shall invoke the callback on the message.]
     // Tests_SRS_AMQPSTRANSPORT_15_027: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
     @Test
-    public void handleMessageConsumesAMessage() throws IOException
+    public void handleMessageConsumesAMessageTelemetry() throws IOException
     {
         new NonStrictExpectations()
         {
             {
                 new AmqpsIotHubConnection(mockConfig, false);
                 result = mockConnection;
-                mockConfig.getMessageCallback();
+                mockConfig.getTelemetryMessageCallback();
                 result = mockMessageCallback;
                 mockMessageCallback.execute((Message) any, any);
                 result = IotHubMessageResult.COMPLETE;
@@ -887,10 +1752,14 @@ public class AmqpsTransportTest
             }
         };
 
-        new MockUp<AmqpsTransport>() {
+        new MockUp<AmqpsTransport>()
+        {
             @Mock
-            Message protonMessageToIoTHubMessage(MessageImpl protonMessage) {
-                return new Message();
+            Message amqpsMessageToIoTHubMessage(AmqpsMessage protonMessage)
+            {
+                Message returnMessage = new Message();
+                returnMessage.setMessageType(MessageType.Telemetry);
+                return returnMessage;
             }
         };
 
@@ -919,17 +1788,157 @@ public class AmqpsTransportTest
         Assert.assertTrue(receivedTransportMessages.size() == 1);
     }
 
-    // Tests_SRS_AMQPSTRANSPORT_15_028: [If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.]
-    // Tests_SRS_AMQPSTRANSPORT_15_028: [If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.]
+    // Tests_SRS_AMQPSTRANSPORT_15_023: [The function shall attempt to consume a message from the IoT Hub.]
+    // Tests_SRS_AMQPSTRANSPORT_15_026: [The function shall invoke the callback on the message.]
     @Test
-    public void handleMessagePutsMessageBackIntoQueueIfCannotSendResultBackToServer() throws IOException
+    public void handleMessageConsumesAMessageDeviceMethods() throws IOException
     {
         new NonStrictExpectations()
         {
             {
                 new AmqpsIotHubConnection(mockConfig, false);
                 result = mockConnection;
-                mockConfig.getMessageCallback();
+                mockConfig.getTelemetryMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceMethodMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceTwinMessageCallback();
+                result = mockMessageCallback;
+                mockMessageCallback.execute((Message) any, any);
+                result = IotHubMessageResult.COMPLETE;
+                mockConnection.sendMessageResult(mockAmqpsMessage, IotHubMessageResult.COMPLETE);
+                result = true;
+            }
+        };
+
+        new MockUp<AmqpsTransport>()
+        {
+            @Mock
+            Message amqpsMessageToIoTHubMessage(AmqpsMessage protonMessage)
+            {
+                Message returnMessage = new Message();
+                returnMessage.setMessageType(MessageType.DeviceMethods);
+                return returnMessage;
+            }
+        };
+
+        new MockUp<AmqpsTransport>()
+        {
+            @Mock
+            DeviceMethodMessage ioTHubMessageToDeviceMethodMessage(AmqpsMessage protonMessage)
+            {
+                DeviceMethodMessage returnMessage = new DeviceMethodMessage(new byte[]{1});
+                returnMessage.setMessageType(MessageType.DeviceMethods);
+                return returnMessage;
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+
+        Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
+        receivedMessages.add(mockAmqpsMessage);
+        receivedMessages.add(mockAmqpsMessage);
+        Deencapsulation.setField(transport, "receivedMessages", receivedMessages);
+
+        transport.handleMessage();
+
+        Queue<AmqpsMessage> receivedTransportMessages = Deencapsulation.getField(transport, "receivedMessages");
+
+        new Verifications()
+        {
+            {
+                mockMessageCallback.execute((Message) any, any);
+                times = 1;
+            }
+        };
+
+        Assert.assertTrue(receivedTransportMessages.size() == 1);
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_15_023: [The function shall attempt to consume a message from the IoT Hub.]
+    // Tests_SRS_AMQPSTRANSPORT_15_026: [The function shall invoke the callback on the message.]
+    @Test
+    public void handleMessageConsumesAMessageDeviceTwin() throws IOException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                mockConfig.getTelemetryMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceMethodMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceTwinMessageCallback();
+                result = mockMessageCallback;
+                mockMessageCallback.execute((Message) any, any);
+                result = IotHubMessageResult.COMPLETE;
+                mockConnection.sendMessageResult(mockAmqpsMessage, IotHubMessageResult.COMPLETE);
+                result = true;
+            }
+        };
+
+        new MockUp<AmqpsTransport>()
+        {
+            @Mock
+            Message amqpsMessageToIoTHubMessage(AmqpsMessage protonMessage)
+            {
+                Message returnMessage = new Message();
+                returnMessage.setMessageType(MessageType.DeviceTwin);
+                return returnMessage;
+            }
+        };
+
+        new MockUp<AmqpsTransport>()
+        {
+            @Mock
+            DeviceTwinMessage ioTHubMessageToDeviceTwinMessage(AmqpsMessage protonMessage)
+            {
+                DeviceTwinMessage returnMessage = new DeviceTwinMessage(new byte[]{1});
+                returnMessage.setMessageType(MessageType.DeviceTwin);
+                return returnMessage;
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+
+        Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
+        receivedMessages.add(mockAmqpsMessage);
+        receivedMessages.add(mockAmqpsMessage);
+        Deencapsulation.setField(transport, "receivedMessages", receivedMessages);
+
+        transport.handleMessage();
+
+        Queue<AmqpsMessage> receivedTransportMessages = Deencapsulation.getField(transport, "receivedMessages");
+
+        new Verifications()
+        {
+            {
+                mockMessageCallback.execute((Message) any, any);
+                times = 1;
+            }
+        };
+
+        Assert.assertTrue(receivedTransportMessages.size() == 1);
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_15_028: [If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.]
+    // Tests_SRS_AMQPSTRANSPORT_15_028: [If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.]
+    @Test
+    public void handleMessagePutsMessageBackIntoQueueIfCannotSendResultBackToServerTelemetry() throws IOException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                mockConfig.getTelemetryMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceMethodMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceTwinMessageCallback();
                 result = mockMessageCallback;
                 mockMessageCallback.execute((Message) any, any);
                 result = IotHubMessageResult.COMPLETE;
@@ -938,10 +1947,14 @@ public class AmqpsTransportTest
             }
         };
 
-        new MockUp<AmqpsTransport>() {
+        new MockUp<AmqpsTransport>()
+        {
             @Mock
-            Message protonMessageToIoTHubMessage(MessageImpl protonMessage) {
-                return new Message();
+            Message amqpsMessageToIoTHubMessage(AmqpsMessage protonMessage)
+            {
+                Message returnMessage = new Message();
+                returnMessage.setMessageType(MessageType.Telemetry);
+                return returnMessage;
             }
         };
 
@@ -970,6 +1983,146 @@ public class AmqpsTransportTest
         };
 
         Assert.assertTrue(receivedTransportMessages.size() == 2);
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_15_028: [If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.]
+    // Tests_SRS_AMQPSTRANSPORT_15_028: [If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.]
+    @Test
+    public void handleMessageRemovesMessageFromQueueIfMessageTypeIsDeviceMethods() throws IOException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                mockConfig.getTelemetryMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceMethodMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceTwinMessageCallback();
+                result = mockMessageCallback;
+                mockMessageCallback.execute((Message) any, any);
+                result = IotHubMessageResult.COMPLETE;
+                mockConnection.sendMessageResult(mockAmqpsMessage, IotHubMessageResult.COMPLETE);
+                result = false;
+            }
+        };
+
+        new MockUp<AmqpsTransport>()
+        {
+            @Mock
+            Message amqpsMessageToIoTHubMessage(AmqpsMessage protonMessage)
+            {
+                Message returnMessage = new Message();
+                returnMessage.setMessageType(MessageType.DeviceMethods);
+                return returnMessage;
+            }
+        };
+
+        new MockUp<AmqpsTransport>()
+        {
+            @Mock
+            DeviceMethodMessage ioTHubMessageToDeviceMethodMessage(AmqpsMessage protonMessage)
+            {
+                DeviceMethodMessage returnMessage = new DeviceMethodMessage(new byte[]{1});
+                returnMessage.setMessageType(MessageType.DeviceMethods);
+                return returnMessage;
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+
+        Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
+        receivedMessages.add(mockAmqpsMessage);
+        receivedMessages.add(mockAmqpsMessage);
+        Deencapsulation.setField(transport, "receivedMessages", receivedMessages);
+
+        transport.handleMessage();
+
+        Queue<AmqpsMessage> receivedTransportMessages = Deencapsulation.getField(transport, "receivedMessages");
+
+        Assert.assertTrue(receivedTransportMessages.size() == 1);
+
+        new Verifications()
+        {
+            {
+                mockMessageCallback.execute((Message) any, any);
+                times = 1;
+            }
+        };
+
+        Assert.assertTrue(receivedTransportMessages.size() == 1);
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_15_028: [If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.]
+    // Tests_SRS_AMQPSTRANSPORT_15_028: [If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.]
+    @Test
+    public void handleMessageRemovesMessageFromQueueIfMessageTypeIsDeviceTwin() throws IOException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, false);
+                result = mockConnection;
+                mockConfig.getTelemetryMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceMethodMessageCallback();
+                result = mockMessageCallback;
+                mockConfig.getDeviceTwinMessageCallback();
+                result = mockMessageCallback;
+                mockMessageCallback.execute((Message) any, any);
+                result = IotHubMessageResult.COMPLETE;
+                mockConnection.sendMessageResult(mockAmqpsMessage, IotHubMessageResult.COMPLETE);
+                result = false;
+            }
+        };
+
+        new MockUp<AmqpsTransport>()
+        {
+            @Mock
+            Message amqpsMessageToIoTHubMessage(AmqpsMessage protonMessage)
+            {
+                Message returnMessage = new Message();
+                returnMessage.setMessageType(MessageType.DeviceTwin);
+                return returnMessage;
+            }
+        };
+
+        new MockUp<AmqpsTransport>()
+        {
+            @Mock
+            DeviceTwinMessage ioTHubMessageToDeviceTwinMessage(AmqpsMessage protonMessage)
+            {
+                DeviceTwinMessage returnMessage = new DeviceTwinMessage(new byte[]{1});
+                returnMessage.setMessageType(MessageType.DeviceTwin);
+                return returnMessage;
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
+        transport.open();
+
+        Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
+        receivedMessages.add(mockAmqpsMessage);
+        receivedMessages.add(mockAmqpsMessage);
+        Deencapsulation.setField(transport, "receivedMessages", receivedMessages);
+
+        transport.handleMessage();
+
+        Queue<AmqpsMessage> receivedTransportMessages = Deencapsulation.getField(transport, "receivedMessages");
+
+        Assert.assertTrue(receivedTransportMessages.size() == 1);
+
+        new Verifications()
+        {
+            {
+                mockMessageCallback.execute((Message) any, any);
+                times = 1;
+            }
+        };
+
+        Assert.assertTrue(receivedTransportMessages.size() == 1);
     }
 
     // Tests_SRS_AMQPSTRANSPORT_15_029: [If the hash cannot be found in the list of keys for the messages in progress, the method returns.]
@@ -1033,7 +2186,7 @@ public class AmqpsTransportTest
         };
 
         Queue<IotHubOutboundPacket> waitingMessages = Deencapsulation.getField(transport, "waitingMessages");
-        Queue<IotHubCallbackPacket> callbackList  = Deencapsulation.getField(transport, "callbackList");
+        Queue<IotHubCallbackPacket> callbackList = Deencapsulation.getField(transport, "callbackList");
 
         Assert.assertTrue(inProgressMessages.size() == 1);
         Assert.assertTrue(waitingMessages.size() == 0);
@@ -1071,7 +2224,7 @@ public class AmqpsTransportTest
         };
 
         Queue<IotHubOutboundPacket> waitingMessages = Deencapsulation.getField(transport, "waitingMessages");
-        Queue<IotHubCallbackPacket> callbackList  = Deencapsulation.getField(transport, "callbackList");
+        Queue<IotHubCallbackPacket> callbackList = Deencapsulation.getField(transport, "callbackList");
 
         Assert.assertTrue(inProgressMessages.size() == 1);
         Assert.assertTrue(waitingMessages.size() == 1);
@@ -1254,7 +2407,13 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_34_028: [The System properties saved in the Amqps message shall be saved within the Message instance sent as a part of the callback.]
     @Test
-    public void systemPropertiesAreSetCorrectly(@Mocked final MessageCallback mockCallback, @Mocked final AmqpsMessage mockMessage, @Mocked final Properties properties) throws IOException
+    public void systemPropertiesAreSetCorrectly(
+            @Mocked
+            final MessageCallback mockCallback,
+            @Mocked
+            final AmqpsMessage mockMessage,
+            @Mocked
+            final Properties properties) throws IOException
     {
         //arrange
         final String correlationId = "1234";
