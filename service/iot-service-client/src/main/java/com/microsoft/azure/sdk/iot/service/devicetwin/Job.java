@@ -35,7 +35,7 @@ public class Job
         }
 
         /* Codes_SRS_JOB_21_003: [If no jobId is provided, the constructor shall generate a unique jobId to identify the Job in the Iothub.] */
-        this.jobId = "JOB_" + UUID.randomUUID();
+        this.jobId = "JOB-" + UUID.randomUUID();
 
         /* Codes_SRS_JOB_21_004: [The constructor shall create a new instance of JobClient to manage the Job.] */
         /* Codes_SRS_JOB_21_005: [The constructor shall throw IOException if it failed to create a new instance of the JobClient. Threw by the JobClient constructor.] */
