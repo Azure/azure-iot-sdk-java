@@ -19,9 +19,18 @@ import static org.junit.Assert.*;
  */
 public class Helpers
 {
-    private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'";
+    private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    private static final String DATEFORMAT_NO_MS = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String TIMEZONE = "UTC";
     private static final long MAX_TIME_ERROR_IN_MILLISECONDS = 100L;
+
+    private static final int NO_MILLISECONDS_IN_DATE = 0;
+    private static final int DATE_AND_TIME_IN_DATE = 0;
+    private static final int MILLISECONDS_IN_DATE = 1;
+    private static final int EXPECTED_PARTS_IN_DATE = 2;
+    private static final int MAX_MILLISECONDS_LENGTH_IN_DATE = 3;
+    private static final double MILLISECONDS_NUMERIC_BASE = 10;
+    private static final String MILLISECONDS_REGEX = "[.,Z]";
 
     /**
      * Test helper, will throw if the actual map do not fits the expected one. This helper will
@@ -159,15 +168,13 @@ public class Helpers
      */
     protected static void assertDateWithError(String dt1Str, String dt2Str)
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
-        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
         Date dt1 = null;
         Date dt2 = null;
 
         try
         {
-            dt1 = dateFormat.parse(dt1Str);
-            dt2 = dateFormat.parse(dt2Str);
+            dt1 = getDateTimeUtc(dt1Str);
+            dt2 = getDateTimeUtc(dt2Str);
         }
         catch (ParseException e)
         {
@@ -188,13 +195,11 @@ public class Helpers
      */
     protected static void assertDateWithError(Date dt1, String dt2Str)
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
-        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
         Date dt2 = null;
 
         try
         {
-            dt2 = dateFormat.parse(dt2Str);
+            dt2 = getDateTimeUtc(dt2Str);
         }
         catch (ParseException e)
         {
@@ -214,14 +219,12 @@ public class Helpers
      */
     protected static void assertNowWithError(String dt1Str)
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
-        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
         Date dt1 = null;
         Date dt2 = new Date();
 
         try
         {
-            dt1 = dateFormat.parse(dt1Str);
+            dt1 = getDateTimeUtc(dt1Str);
         }
         catch (ParseException e)
         {
@@ -262,4 +265,49 @@ public class Helpers
             assertTrue(test.contains(o));
         }
     }
+
+    private static Date getDateTimeUtc(String dataTime) throws ParseException
+    {
+        Date dateTimeUtc;
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT_NO_MS);
+        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
+
+        if((dataTime == null) || dataTime.isEmpty() || (dataTime.charAt(dataTime.length()-1) != 'Z'))
+        {
+            throw new ParseException("date is null, empty, or invalid", 0);
+        }
+
+        try
+        {
+            String[] splitDateTime = dataTime.split(MILLISECONDS_REGEX);
+            int milliseconds;
+            if(splitDateTime.length > EXPECTED_PARTS_IN_DATE)
+            {
+                throw new ParseException("invalid time", 0);
+            }
+            else if((splitDateTime.length == EXPECTED_PARTS_IN_DATE) && !splitDateTime[MILLISECONDS_IN_DATE].isEmpty())
+            {
+                int millisecondsLength = splitDateTime[MILLISECONDS_IN_DATE].length();
+                if(millisecondsLength > MAX_MILLISECONDS_LENGTH_IN_DATE)
+                {
+                    millisecondsLength = MAX_MILLISECONDS_LENGTH_IN_DATE;
+                }
+
+                milliseconds = Integer.parseInt(splitDateTime[MILLISECONDS_IN_DATE].substring(0, millisecondsLength)) *
+                        (int)Math.pow(MILLISECONDS_NUMERIC_BASE, (MAX_MILLISECONDS_LENGTH_IN_DATE - millisecondsLength));
+            }
+            else
+            {
+                milliseconds = NO_MILLISECONDS_IN_DATE;
+            }
+            dateTimeUtc =  new Date(dateFormat.parse(splitDateTime[DATE_AND_TIME_IN_DATE]).getTime() + milliseconds);
+        }
+        catch (ParseException e)
+        {
+            throw new ParseException("invalid time", 0);
+        }
+
+        return dateTimeUtc;
+    }
+
 }

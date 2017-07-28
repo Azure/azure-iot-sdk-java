@@ -29,7 +29,7 @@ public class FileUploadNotificationParserTest
     private static final String INVALID_LAST_UPDATE_TIME = "\u12342016-06-01T21:22:41+00:00";
     private static final String INVALID_DATETIME_OFFSET = "2016-06-40T21:22:41 00:00";
     private static final String VALID_ENQUEUED_TIME_UTC = "2016-06-01T21:22:43.7996883Z";
-    private static final long VALID_ENQUEUED_TIME_UTC_IN_MILLISECONDS = 1464824159883L;
+    private static final long VALID_ENQUEUED_TIME_UTC_IN_MILLISECONDS = 1464816163799L;
     private static final String INVALID_ENQUEUED_TIME_UTC = "\u12342016-06-01T21:22:43.7996883Z";
     private static final String INVALID_DATETIME_UTC = "2016-6-1T4:22:43.7996883";
     private static final Long VALID_BLOB_SIZE_IN_BYTES = 1234L;

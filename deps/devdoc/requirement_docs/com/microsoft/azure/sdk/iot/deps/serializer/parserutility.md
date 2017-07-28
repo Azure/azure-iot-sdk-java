@@ -142,8 +142,10 @@ protected static void validateId(String id) throws IllegalArgumentException
 protected static Date getDateTimeUtc(String dataTime) throws IllegalArgumentException
 ```
 **SRS_PARSER_UTILITY_21_020: [**The getDateTimeUtc shall parse the provide string using `UTC` timezone.**]**  
-**SRS_PARSER_UTILITY_21_021: [**The getDateTimeUtc shall parse the provide string using the data format `yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'`.**]**  
+**SRS_PARSER_UTILITY_21_021: [**The getDateTimeUtc shall parse the provide string using the data format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`.**]**  
 **SRS_PARSER_UTILITY_21_022: [**If the provide string is null, empty or contains an invalid data format, the getDateTimeUtc shall throw IllegalArgumentException.**]**  
+**SRS_PARSER_UTILITY_21_040: [**If the provide string contains more than 3 digits for milliseconds, the getDateTimeUtc shall reduce the milliseconds to 3 digits.**]**  
+**SRS_PARSER_UTILITY_21_041: [**The getDateTimeUtc shall accept date without milliseconds.**]**  
 
 ### getDateTimeOffset
 ```java

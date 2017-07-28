@@ -18,11 +18,19 @@ import java.util.*;
  */
 public class ParserUtility
 {
-    private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'";
+    private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String OFFSETFORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";
     private static final String TIMEZONE = "UTC";
     private static final String SELECT = "select";
     private static final String FROM = "from";
+
+    private static final int NO_MILLISECONDS_IN_DATE = 0;
+    private static final int DATE_AND_TIME_IN_DATE = 0;
+    private static final int MILLISECONDS_IN_DATE = 1;
+    private static final int EXPECTED_PARTS_IN_DATE = 2;
+    private static final int MAX_MILLISECONDS_LENGTH_IN_DATE = 3;
+    private static final double MILLISECONDS_NUMERIC_BASE = 10;
+    private static final String MILLISECONDS_REGEX = "[.,Z]";
 
     /**
      * Helper to validate if the provided string is not null, empty, and all characters are UTF-8.
@@ -226,25 +234,48 @@ public class ParserUtility
     {
         Date dateTimeUtc;
         /* Codes_SRS_PARSER_UTILITY_21_020: [The getDateTimeUtc shall parse the provide string using `UTC` timezone.] */
-        /* Codes_SRS_PARSER_UTILITY_21_021: [The getDateTimeUtc shall parse the provide string using the data format `yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'`.] */
+        /* Codes_SRS_PARSER_UTILITY_21_021: [The getDateTimeUtc shall parse the provide string using the data format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`.] */
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
         dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
 
         /* Codes_SRS_PARSER_UTILITY_21_022: [If the provide string is null, empty or contains an invalid data format, the getDateTimeUtc shall throw IllegalArgumentException.] */
-        if((dataTime == null) || dataTime.isEmpty())
+        if((dataTime == null) || dataTime.isEmpty() || (dataTime.charAt(dataTime.length()-1) != 'Z'))
         {
-            throw new IllegalArgumentException("date is null or empty");
+            throw new IllegalArgumentException("date is null, empty, or invalid");
         }
 
         try
         {
-            dateTimeUtc = dateFormat.parse(dataTime);
+            /* Codes_SRS_PARSER_UTILITY_21_040: [If the provide string contains more than 3 digits for milliseconds, the getDateTimeUtc shall reduce the milliseconds to 3 digits.] */
+            String[] splitDateTime = dataTime.split(MILLISECONDS_REGEX);
+            int milliseconds;
+            if(splitDateTime.length > EXPECTED_PARTS_IN_DATE)
+            {
+                throw new IllegalArgumentException("invalid time:" + dataTime);
+            }
+            else if((splitDateTime.length == EXPECTED_PARTS_IN_DATE) && !splitDateTime[MILLISECONDS_IN_DATE].isEmpty())
+            {
+                int millisecondsLength = splitDateTime[MILLISECONDS_IN_DATE].length();
+                if(millisecondsLength > MAX_MILLISECONDS_LENGTH_IN_DATE)
+                {
+                    millisecondsLength = MAX_MILLISECONDS_LENGTH_IN_DATE;
+                }
+
+                milliseconds = Integer.parseInt(splitDateTime[MILLISECONDS_IN_DATE].substring(0, millisecondsLength)) *
+                        (int)Math.pow(MILLISECONDS_NUMERIC_BASE, (MAX_MILLISECONDS_LENGTH_IN_DATE - millisecondsLength));
+            }
+            else
+            {
+                /* Codes_SRS_PARSER_UTILITY_21_041: [The getDateTimeUtc shall accept date without milliseconds.] */
+                milliseconds = NO_MILLISECONDS_IN_DATE;
+            }
+            dateTimeUtc =  new Date(dateFormat.parse(splitDateTime[DATE_AND_TIME_IN_DATE]).getTime() + milliseconds);
         }
         catch (ParseException e)
         {
-            throw new IllegalArgumentException("invalid time:" + e.toString());
+            throw new IllegalArgumentException("invalid time:" + dataTime);
         }
-        
+
         return dateTimeUtc;
     }
 

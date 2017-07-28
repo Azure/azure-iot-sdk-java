@@ -21,7 +21,7 @@ import java.util.TimeZone;
 public class TwinMetadata
 {
 
-    private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'";
+    private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     private static final String TIMEZONE = "UTC";
 
     @SerializedName("$lastUpdated")

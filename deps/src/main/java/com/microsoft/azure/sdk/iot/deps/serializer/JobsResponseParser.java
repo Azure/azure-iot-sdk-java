@@ -19,7 +19,7 @@ import java.util.TimeZone;
 public class JobsResponseParser
 {
     @Expose(deserialize = false)
-    private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'";
+    private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     @Expose(deserialize = false)
     private static final String TIMEZONE = "UTC";
 
@@ -170,8 +170,6 @@ public class JobsResponseParser
      */
     public static JobsResponseParser createFromJson(String json) throws IllegalArgumentException, JsonParseException
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
-        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
         /* Codes_SRS_JOBSRESPONSEPARSER_21_006: [If the json is null or empty, the createFromJson shall throws IllegalArgumentException.] */
@@ -261,9 +259,9 @@ public class JobsResponseParser
         {
             try
             {
-                jobsResponseParser.createdTimeDate = dateFormat.parse(jobsResponseParser.createdTime);
+                jobsResponseParser.createdTimeDate = ParserUtility.getDateTimeUtc(jobsResponseParser.createdTime);
             }
-            catch (ParseException e)
+            catch (IllegalArgumentException e)
             {
                 /* Codes_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
                 jobsResponseParser.createdTimeDate = null;
@@ -273,9 +271,9 @@ public class JobsResponseParser
         {
             try
             {
-                jobsResponseParser.createdTimeDate = dateFormat.parse(jobsResponseParser.createdTimeUTC);
+                jobsResponseParser.createdTimeDate = ParserUtility.getDateTimeUtc(jobsResponseParser.createdTimeUTC);
             }
-            catch (ParseException e)
+            catch (IllegalArgumentException e)
             {
                 /* Codes_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
                 jobsResponseParser.createdTimeDate = null;
@@ -291,9 +289,9 @@ public class JobsResponseParser
         {
             try
             {
-                jobsResponseParser.startTimeDate = dateFormat.parse(jobsResponseParser.startTime);
+                jobsResponseParser.startTimeDate = ParserUtility.getDateTimeUtc(jobsResponseParser.startTime);
             }
-            catch (ParseException e)
+            catch (IllegalArgumentException e)
             {
                 /* Codes_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
                 jobsResponseParser.startTimeDate = null;
@@ -303,9 +301,9 @@ public class JobsResponseParser
         {
             try
             {
-                jobsResponseParser.startTimeDate = dateFormat.parse(jobsResponseParser.startTimeUTC);
+                jobsResponseParser.startTimeDate = ParserUtility.getDateTimeUtc(jobsResponseParser.startTimeUTC);
             }
-            catch (ParseException e)
+            catch (IllegalArgumentException e)
             {
                 /* Codes_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
                 jobsResponseParser.startTimeDate = null;
@@ -321,9 +319,9 @@ public class JobsResponseParser
         {
             try
             {
-                jobsResponseParser.endTimeDate = dateFormat.parse(jobsResponseParser.endTime);
+                jobsResponseParser.endTimeDate = ParserUtility.getDateTimeUtc(jobsResponseParser.endTime);
             }
-            catch (ParseException e)
+            catch (IllegalArgumentException e)
             {
                 /* Codes_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
                 jobsResponseParser.endTimeDate = null;
@@ -333,9 +331,9 @@ public class JobsResponseParser
         {
             try
             {
-                jobsResponseParser.endTimeDate = dateFormat.parse(jobsResponseParser.endTimeUTC);
+                jobsResponseParser.endTimeDate = ParserUtility.getDateTimeUtc(jobsResponseParser.endTimeUTC);
             }
-            catch (ParseException e)
+            catch (IllegalArgumentException e)
             {
                 /* Codes_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
                 jobsResponseParser.endTimeDate = null;
@@ -346,9 +344,9 @@ public class JobsResponseParser
         {
             try
             {
-                jobsResponseParser.lastUpdatedTimeDate = dateFormat.parse(jobsResponseParser.lastUpdatedTime);
+                jobsResponseParser.lastUpdatedTimeDate = ParserUtility.getDateTimeUtc(jobsResponseParser.lastUpdatedTime);
             }
-            catch (ParseException e)
+            catch (IllegalArgumentException e)
             {
                 /* Codes_SRS_JOBSRESPONSEPARSER_21_012: [If the createFromJson cannot properly parse the date in json, it shall ignore this value.] */
                 jobsResponseParser.lastUpdatedTimeDate = null;
