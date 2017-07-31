@@ -27,7 +27,7 @@ import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketHandlerImpl;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketUpgrade;
 import org.junit.Test;
 
-import javax.xml.bind.DatatypeConverter;
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.*;
@@ -100,7 +100,7 @@ public class WebSocketHandlerImplTest
                 String keyBase64 = line.substring(19);
                 if (keyBase64.length() == 24)
                 {
-                    byte[] decoded = DatatypeConverter.parseBase64Binary(keyBase64);
+                    byte[] decoded = Base64.decodeBase64(keyBase64.getBytes());
 
                     if (decoded.length == 16)
                     {

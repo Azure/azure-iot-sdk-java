@@ -35,7 +35,7 @@ public class DeviceOperationsTest
 {
     private static final String STANDARD_HOSTNAME = "testHostName.azure.net";
     private static final String STANDARD_SHAREDACCESSKEYNAME = "testKeyName";
-    private static final String STANDARD_SHAREDACCESSKEY = "1234567890ABCDEFGHIJKLMNOPQRESTUVWXYZ=";
+    private static final String STANDARD_SHAREDACCESSKEY = "1234567890ABCDEFGHIJKLMNOPQRESTUVWXYZab=";
     private static final String STANDARD_CONNECTIONSTRING =
             "HostName=" + STANDARD_HOSTNAME +
                     ";SharedAccessKeyName=" + STANDARD_SHAREDACCESSKEYNAME +

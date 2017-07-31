@@ -8,7 +8,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsBatchMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
-import org.apache.commons.codec.binary.Base64;
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import org.junit.Test;
 
 import javax.naming.SizeLimitExceededException;
