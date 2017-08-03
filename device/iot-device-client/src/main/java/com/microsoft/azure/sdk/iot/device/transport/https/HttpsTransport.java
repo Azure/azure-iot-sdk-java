@@ -4,11 +4,11 @@
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubSizeExceededException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 
-import javax.naming.SizeLimitExceededException;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Queue;
@@ -207,7 +207,7 @@ public final class HttpsTransport implements IotHubTransport
             // Codes_SRS_HTTPSTRANSPORT_11_013: [If no messages fit using the batch format, the function shall send a single message without the batch format.] 
             msg = this.inProgressListToMessage();
         }
-        catch (SizeLimitExceededException e)
+        catch (IotHubSizeExceededException e)
         {
             // should never happen, since inProgressList is populated with
             // either a single message to be sent in unbatched format or
@@ -356,7 +356,7 @@ public final class HttpsTransport implements IotHubTransport
                                 packet.getMessage());
                 batch.addMessage(httpsMsg);
             }
-            catch (SizeLimitExceededException e)
+            catch (IotHubSizeExceededException e)
             {
                 break;
             }
@@ -378,12 +378,12 @@ public final class HttpsTransport implements IotHubTransport
      *
      * @return the message to be sent.
      *
-     * @throws SizeLimitExceededException if the messages in {@code inProgressList}
+     * @throws IotHubSizeExceededException if the messages in {@code inProgressList}
      * exceed the service-bound message size limit of 255 kb.
      * @throws NoSuchElementException if {@code inProgressList} is empty.
      */
     private HttpsMessage inProgressListToMessage()
-            throws SizeLimitExceededException
+            throws IotHubSizeExceededException
     {
         HttpsMessage msg = null;
         int inProgressListSize = this.inProgressList.size();
