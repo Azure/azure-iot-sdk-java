@@ -194,4 +194,12 @@ public class JobsParser
         dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
         this.startTime = dateFormat.format(startTime);
     }
+
+    /**
+     * Empty constructor: Used only to keep GSON happy.
+     */
+    @SuppressWarnings("unused")
+    protected JobsParser()
+    {
+    }
 }

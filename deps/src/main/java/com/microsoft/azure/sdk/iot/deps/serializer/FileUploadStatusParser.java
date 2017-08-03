@@ -98,4 +98,12 @@ public class FileUploadStatusParser
         ParserUtility.validateStringUTF8(correlationId);
         this.correlationId = correlationId;
     }
+
+    /**
+     * Empty constructor: Used only to keep GSON happy.
+     */
+    @SuppressWarnings("unused")
+    protected FileUploadStatusParser()
+    {
+    }
 }

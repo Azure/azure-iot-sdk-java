@@ -141,4 +141,12 @@ public class FileUploadResponseParser
         /* Codes_SRS_FILE_UPLOAD_RESPONSE_21_009: [The getSasToken shall return the string stored in `sasToken`.] */
         return this.sasToken;
     }
+
+    /**
+     * Empty constructor: Used only to keep GSON happy.
+     */
+    @SuppressWarnings("unused")
+    protected FileUploadResponseParser()
+    {
+    }
 }
