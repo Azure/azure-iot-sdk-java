@@ -7,6 +7,7 @@ import android.widget.Button;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import com.microsoft.azure.sdk.iot.device.*;
 
 public class MainActivity extends AppCompatActivity {
 
