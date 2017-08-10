@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
  */
 public final class AmqpsIotHubConnection extends BaseHandler
 {
-    private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 1*60*1000; // 1 second timeout
+    private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 1*60*1000; // 1 minute timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
     private State state;
 
@@ -484,10 +484,6 @@ public final class AmqpsIotHubConnection extends BaseHandler
             SslDomain domain = makeDomain();
             transport.ssl(domain);
         }
-        synchronized (openLock)
-        {
-            openLock.notifyLock();
-        }
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
@@ -638,6 +634,11 @@ public final class AmqpsIotHubConnection extends BaseHandler
             for(ServerListener listener : listeners)
             {
                 listener.connectionEstablished();
+            }
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_21_051 [The open lock shall be notified when that the connection has been established.]
+            synchronized (openLock)
+            {
+                openLock.notifyLock();
             }
         }
         logger.LogDebug("Exited from method %s", logger.getMethodName());
