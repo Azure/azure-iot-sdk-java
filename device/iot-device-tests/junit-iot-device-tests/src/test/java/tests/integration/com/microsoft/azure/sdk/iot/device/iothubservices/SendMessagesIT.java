@@ -18,6 +18,7 @@ import org.junit.Test;
 import tests.integration.com.microsoft.azure.sdk.iot.device.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.device.EventCallback;
 import tests.integration.com.microsoft.azure.sdk.iot.device.Success;
+import tests.integration.com.microsoft.azure.sdk.iot.device.common.iothubservices.SendMessagesCommon;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -202,44 +203,11 @@ public class SendMessagesIT
     }
 
     @Test
-    public void SendMessagesOverHttps() throws URISyntaxException, IOException
-    {
+    public void SendMessagesOverHttps() throws URISyntaxException, IOException, InterruptedException {
         String messageString = "Java client e2e test message over Https protocol";
         Message msg = new Message(messageString);
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceHttps), IotHubClientProtocol.HTTPS);
-        client.open();
-
-        for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; ++i)
-        {
-            try
-            {
-                Success messageSent = new Success();
-                EventCallback callback = new EventCallback();
-
-                client.sendEventAsync(msg, callback, messageSent);
-
-                Integer waitDuration = 0;
-                while(!messageSent.getResult())
-                {
-                    Thread.sleep(RETRY_MILLISECONDS);
-                    if ((waitDuration += RETRY_MILLISECONDS) > SEND_TIMEOUT_MILLISECONDS)
-                    {
-                        break;
-                    }
-                }
-
-                if (!messageSent.getResult())
-                {
-                    Assert.fail("Sending message over HTTPS protocol failed");
-                }
-            }
-            catch (Exception e)
-            {
-                Assert.fail("Sending message over HTTPS protocol failed");
-            }
-        }
-
-        client.closeNow();
+        SendMessagesCommon.SendMessage(client,NUM_MESSAGES_PER_CONNECTION,RETRY_MILLISECONDS,SEND_TIMEOUT_MILLISECONDS);
     }
 
     @Test
@@ -248,39 +216,7 @@ public class SendMessagesIT
         String messageString = "Java client e2e test message over Amqps protocol";
         Message msg = new Message(messageString);
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqps), IotHubClientProtocol.AMQPS);
-        client.open();
-
-        for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; ++i)
-        {
-            try
-            {
-                Success messageSent = new Success();
-                EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, messageSent);
-
-                Integer waitDuration = 0;
-                while(!messageSent.getResult())
-                {
-                    Thread.sleep(RETRY_MILLISECONDS);
-                    if ((waitDuration += RETRY_MILLISECONDS) > SEND_TIMEOUT_MILLISECONDS)
-                    {
-                        break;
-                    }
-                }
-
-
-                if (!messageSent.getResult())
-                {
-                    Assert.fail("Sending message over AMQPS protocol failed");
-                }
-            }
-            catch (Exception e)
-            {
-                Assert.fail("Sending message over AMQPS protocol failed");
-            }
-        }
-
-        client.closeNow();
+        SendMessagesCommon.SendMessage(client,NUM_MESSAGES_PER_CONNECTION,RETRY_MILLISECONDS,SEND_TIMEOUT_MILLISECONDS);
     }
 
     @Test
@@ -315,42 +251,10 @@ public class SendMessagesIT
     }
 
     @Test
-    public void SendMessagesOverMqtt() throws URISyntaxException, IOException
-    {
+    public void SendMessagesOverMqtt() throws URISyntaxException, IOException, InterruptedException {
         String messageString = "Java client e2e test message over Mqtt protocol";
         Message msg = new Message(messageString);
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqtt), IotHubClientProtocol.MQTT);
-        client.open();
-
-        for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; ++i)
-        {
-            try
-            {
-                Success messageSent = new Success();
-                EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, messageSent);
-
-                Integer waitDuration = 0;
-                while(!messageSent.getResult())
-                {
-                    Thread.sleep(RETRY_MILLISECONDS);
-                    if ((waitDuration += RETRY_MILLISECONDS) > SEND_TIMEOUT_MILLISECONDS)
-                    {
-                        break;
-                    }
-                }
-
-                if (!messageSent.getResult())
-                {
-                    Assert.fail("Sending message over MQTT protocol failed");
-                }
-            }
-            catch (Exception e)
-            {
-                Assert.fail("Sending message over MQTT protocol failed");
-            }
-        }
-
-        client.closeNow();
+        SendMessagesCommon.SendMessage(client,NUM_MESSAGES_PER_CONNECTION,RETRY_MILLISECONDS,SEND_TIMEOUT_MILLISECONDS);
     }
 }
