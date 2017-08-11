@@ -906,6 +906,17 @@ public class TwinParser
     }
 
     /**
+     * Getter for Twin version
+     *
+     * @return A Integer representing a twin tags and properties version in the JSON. It can be {@code null}
+     */
+    public Integer getVersion()
+    {
+        /* Codes_SRS_TWINPARSER_21_173: [The `getVersion` shall return the Integer representing a twin version.] */
+        return this.manager.version;
+    }
+
+    /**
      * Setter for ETag.
      *
      * @param eTag is a string representing a weak ETAG version

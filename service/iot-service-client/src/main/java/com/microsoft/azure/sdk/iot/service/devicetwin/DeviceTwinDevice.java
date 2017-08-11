@@ -19,6 +19,7 @@ public class DeviceTwinDevice
      */
     private String deviceId;
     private String eTag;
+    private Integer version;
     private Map<String, Object> tag = null;
     private Map<String, Object> reportedProperties = null;
     private Map<String, Object> desiredProperties = null;
@@ -44,6 +45,7 @@ public class DeviceTwinDevice
          */
         this.deviceId = deviceId;
         this.eTag = null;
+        this.version = null;
         this.twinParser = new TwinParser();
         this.twinParser.enableTags();
     }
@@ -93,6 +95,32 @@ public class DeviceTwinDevice
         **Codes_SRS_DEVICETWINDEVICE_21_031: [** The getETag shall return the stored eTag.**]**
          */
         return this.eTag;
+    }
+
+    /**
+     * Setter for Twin version
+     *
+     * @param version is the value of the version
+     */
+    void setVersion(Integer version)
+    {
+        /*
+        **Codes_SRS_DEVICETWINDEVICE_21_032: [** The setVersion shall store the Twin version.**]**
+         */
+        this.version = version;
+    }
+
+    /**
+     * Getter for the Twin version
+     *
+     * @return the stored version. It can be {@code null}.
+     */
+    public Integer getVersion()
+    {
+        /*
+        **Codes_SRS_DEVICETWINDEVICE_21_033: [** The getVersion shall return the stored Twin version.**]**
+         */
+        return this.version;
     }
 
     /**
@@ -300,7 +328,7 @@ public class DeviceTwinDevice
     public String toString()
     {
         /*
-        **Codes_SRS_DEVICETWINDEVICE_25_015: [** This method shall append device id, etag, tags, desired and reported properties to string (if present) and return **]**
+        **Codes_SRS_DEVICETWINDEVICE_25_015: [** This method shall append device id, etag, version, tags, desired and reported properties to string (if present) and return **]**
          */
         StringBuilder thisDevice = new StringBuilder();
 
@@ -308,6 +336,10 @@ public class DeviceTwinDevice
         if(this.getETag() != null)
         {
             thisDevice.append("ETag: " + this.getETag() + "\n");
+        }
+        if(this.getVersion() != null)
+        {
+            thisDevice.append("Version: " + this.getVersion() + "\n");
         }
         thisDevice.append(tagsToString());
         thisDevice.append(reportedPropertiesToString());

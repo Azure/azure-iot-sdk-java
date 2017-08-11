@@ -1235,6 +1235,7 @@ public class DeviceTwinTest
     public void nextRetrievesCorrectly() throws IotHubException, IOException
     {
         //arrange
+        final Integer version = 15;
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
         final String expectedString = "testJsonAsNext";
@@ -1256,6 +1257,8 @@ public class DeviceTwinTest
                 result = expectedString;
                 mockedTwinParser.getDeviceId();
                 result = "testDeviceID";
+                mockedTwinParser.getVersion();
+                result = version;
                 mockedTwinParser.getTagsMap();
                 result = tags;
                 mockedTwinParser.getDesiredPropertyMap();
@@ -1283,6 +1286,7 @@ public class DeviceTwinTest
         assertNotNull(result.getReportedProperties());
         assertNotNull(result.getDesiredProperties());
 
+        assertEquals(version, result.getVersion());
         assetEqualSetAndMap(result.getTags(), tags);
         assetEqualSetAndMap(result.getDesiredProperties(), dp);
         assetEqualSetAndMap(result.getReportedProperties(), rp);

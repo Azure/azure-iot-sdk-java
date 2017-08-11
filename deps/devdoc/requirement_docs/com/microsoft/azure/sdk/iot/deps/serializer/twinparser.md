@@ -62,6 +62,7 @@ public class TwinParser
     public String getDeviceId();
     public String getGenerationId();
     public String getETag();
+    public Integer getVersion();
     public TwinStatus getStatus();
     public String getStatusReason();
     public String getStatusUpdatedTime();
@@ -689,6 +690,18 @@ public String getGenerationId()
 public String getETag()
 ```
 **SRS_TWINPARSER_21_113: [**The `getETag` shall return the string representing a weak ETAG version.**]**  
+
+
+### getVersion
+```java
+/**
+ * Getter for Twin version
+ *
+ * @return A Integer representing a twin tags and properties version in the JSON. It can be {@code null}
+ */
+public Integer getVersion()
+```
+**SRS_TWINPARSER_21_173: [**The `getVersion` shall return the Integer representing a twin version.**]**  
 
 
 ### getStatus

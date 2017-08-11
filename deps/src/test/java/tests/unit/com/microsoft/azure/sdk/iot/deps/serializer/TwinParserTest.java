@@ -2199,6 +2199,7 @@ public class TwinParserTest {
         assertThat(twinParser.getDeviceId(), is("DeviceName"));
         assertNull(twinParser.getGenerationId());
         assertNull(twinParser.getETag());
+        assertNull(twinParser.getVersion());
         assertNull(twinParser.getStatus());
         assertNull(twinParser.getStatusReason());
         assertNull(twinParser.getStatusUpdatedTime());
@@ -2231,6 +2232,7 @@ public class TwinParserTest {
         assertThat(twinParser.getDeviceId(), is("Device_Name"));
         assertNull(twinParser.getGenerationId());
         assertNull(twinParser.getETag());
+        assertNull(twinParser.getVersion());
         assertNull(twinParser.getStatus());
         assertNull(twinParser.getStatusReason());
         assertNull(twinParser.getStatusUpdatedTime());
@@ -2256,6 +2258,7 @@ public class TwinParserTest {
         assertThat(twinParser.getDeviceId(), is("DeviceName"));
         assertNull(twinParser.getGenerationId());
         assertNull(twinParser.getETag());
+        assertNull(twinParser.getVersion());
         assertNull(twinParser.getStatus());
         assertNull(twinParser.getStatusReason());
         assertNull(twinParser.getStatusUpdatedTime());
@@ -2280,6 +2283,7 @@ public class TwinParserTest {
         assertThat(twinParser.getDeviceId(), is("DeviceName"));
         assertNull(twinParser.getGenerationId());
         assertNull(twinParser.getETag());
+        assertNull(twinParser.getVersion());
         assertThat(twinParser.getStatus(), is(TwinStatus.disabled));
         assertThat(twinParser.getStatusReason(), is("starting system"));
         assertNull(twinParser.getStatusUpdatedTime());
@@ -2292,6 +2296,7 @@ public class TwinParserTest {
         assertThat(resultTwinParser.getDeviceId(), is("DeviceName"));
         assertNull(twinParser.getGenerationId());
         assertNull(twinParser.getETag());
+        assertNull(twinParser.getVersion());
         assertThat(resultTwinParser.getStatus(), is(TwinStatus.disabled));
         assertThat(resultTwinParser.getStatusReason(), is("starting system"));
         assertNull(resultTwinParser.getStatusUpdatedTime());
@@ -2320,6 +2325,7 @@ public class TwinParserTest {
         assertThat(twinParser.getDeviceId(), is("DeviceName"));
         assertNull(twinParser.getGenerationId());
         assertNull(twinParser.getETag());
+        assertNull(twinParser.getVersion());
         assertThat(twinParser.getStatus(), is(TwinStatus.disabled));
         assertThat(twinParser.getStatusReason(), is("starting system"));
         assertNull(twinParser.getStatusUpdatedTime());
@@ -3349,6 +3355,7 @@ public class TwinParserTest {
     /* Tests_SRS_TWINPARSER_21_112: [The `getDeviceId` shall return the DeviceName.] */
     /* Tests_SRS_TWINPARSER_21_150: [The `getGenerationId` shall return the device generation name.] */
     /* Tests_SRS_TWINPARSER_21_113: [The `getETag` shall return the string representing a weak ETAG version.] */
+    /* Tests_SRS_TWINPARSER_21_173: [The `getVersion` shall return the Integer representing a twin version.] */
     /* Tests_SRS_TWINPARSER_21_136: [The `getStatus` shall return the device status.] */
     /* Tests_SRS_TWINPARSER_21_137: [The `getStatusReason` shall return the device status reason.] */
     /* Tests_SRS_TWINPARSER_21_138: [The `getStatusUpdatedTime` shall return the device status update date and time.] */
@@ -3368,6 +3375,7 @@ public class TwinParserTest {
                     "\"deviceId\":\"DeviceName\"," +
                     "\"generationId\":\"generation name\"," +
                     "\"etag\":\"AAAAAAAAAAU=\"," +
+                    "\"version\":13," +
                     "\"status\":\"enabled\"," +
                     "\"statusReason\":\"because it is not disabled\"," +
                     "\"statusUpdatedTime\":\"2015-02-28T16:24:48.789Z\"," +
@@ -3392,6 +3400,7 @@ public class TwinParserTest {
         assertThat(twinParser.getDeviceId(), is("DeviceName"));
         assertThat(twinParser.getGenerationId(), is("generation name"));
         assertThat(twinParser.getETag(), is("AAAAAAAAAAU="));
+        assertThat(twinParser.getVersion(), is(13));
         assertThat(twinParser.getStatus(), is(TwinStatus.enabled));
         assertThat(twinParser.getStatusReason(), is("because it is not disabled"));
         assertThat(twinParser.getStatusUpdatedTime(), is("2015-02-28T16:24:48.789Z"));
@@ -3415,6 +3424,7 @@ public class TwinParserTest {
                     "\"deviceId\":\"DeviceName\"," +
                     "\"generationId\":\"generation name\"," +
                     "\"etag\":\"AAAAAAAAAAU=\"," +
+                    "\"version\":0," +
                     "\"status\":\"enabled\"," +
                     "\"statusReason\":\"because it is not disabled\"," +
                     "\"statusUpdatedTime\":\"2015-02-28T16:24:48.789Z\"," +
@@ -3434,6 +3444,7 @@ public class TwinParserTest {
         assertThat(twinParser.getDeviceId(), is("DeviceName"));
         assertThat(twinParser.getGenerationId(), is("generation name"));
         assertThat(twinParser.getETag(), is("AAAAAAAAAAU="));
+        assertThat(twinParser.getVersion(), is(0));
         assertThat(twinParser.getStatus(), is(TwinStatus.enabled));
         assertThat(twinParser.getStatusReason(), is("because it is not disabled"));
         assertThat(twinParser.getStatusUpdatedTime(), is("2015-02-28T16:24:48.789Z"));
@@ -3563,6 +3574,7 @@ public class TwinParserTest {
                 "{" +
                     "\"deviceId\":\"TwinDevice\"," +
                     "\"etag\":\"AAAAAAAAAAU=\"," +
+                    "\"version\":2," +
                     "\"properties\":" +
                     "{" +
                         "\"desired\":" +
@@ -3689,6 +3701,7 @@ public class TwinParserTest {
 
         assertThat(twinParser.getDeviceId(), is("TwinDevice"));
         assertThat(twinParser.getETag(), is("AAAAAAAAAAU="));
+        assertThat(twinParser.getVersion(), is(2));
 
         // TODO: Test disabled with bug.
 /*

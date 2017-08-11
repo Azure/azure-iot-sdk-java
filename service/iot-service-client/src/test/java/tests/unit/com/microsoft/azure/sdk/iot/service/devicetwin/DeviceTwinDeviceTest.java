@@ -148,6 +148,80 @@ public class DeviceTwinDeviceTest
     }
 
     /*
+    **Tests_SRS_DEVICETWINDEVICE_21_032: [** The setVersion shall store the Twin version.**]**
+     */
+    @Test
+    public void setVersionSets()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+
+        //act
+        Deencapsulation.invoke(testDevice, "setVersion", 10);
+
+        //assert
+        assertEquals(10L, (long)(Integer)Deencapsulation.getField(testDevice, "version"));
+    }
+
+    @Test
+    public void setVersionSetsZero()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+
+        //act
+        Deencapsulation.invoke(testDevice, "setVersion", 0);
+
+        //assert
+        assertEquals(0L, (long)(Integer)Deencapsulation.getField(testDevice, "version"));
+    }
+
+    @Test
+    public void setVersionSetsNull()
+    {
+        //arrange
+        Integer version = null;
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+
+        //act
+        Deencapsulation.invoke(testDevice, "setVersion", new Class[]{Integer.class}, version);
+
+        //assert
+        assertNull(Deencapsulation.getField(testDevice, "version"));
+    }
+
+    /*
+    **Tests_SRS_DEVICETWINDEVICE_21_033: [** The getVersion shall return the stored Twin version.**]**
+     */
+    @Test
+    public void getVersionGets()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Deencapsulation.invoke(testDevice, "setVersion", 10);
+
+        //act
+        Integer version = testDevice.getVersion();
+
+        //assert
+        assertEquals(10L, (long)version);
+
+    }
+
+    @Test
+    public void getVersionGetsNull()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+
+        //act
+        Integer version = testDevice.getVersion();
+
+        //assert
+        assertNull(version);
+    }
+
+    /*
     Tests_SRS_DEVICETWINDEVICE_25_028: [ This method shall return the twinObject for this device]
      */
     @Test
@@ -657,7 +731,7 @@ public class DeviceTwinDeviceTest
     }
 
     /*
-    **Tests_SRS_DEVICETWINDEVICE_25_015: [** This method shall append device id, etag, tags, desired and reported properties to string (if present) and return **]**
+    **Tests_SRS_DEVICETWINDEVICE_25_015: [** This method shall append device id, etag, version, tags, desired and reported properties to string (if present) and return **]**
     */
     @Test
     public void toStringReturnsAllNoETag()
@@ -697,6 +771,7 @@ public class DeviceTwinDeviceTest
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
 
         testDevice.setETag("validEtag");
+        Deencapsulation.invoke(testDevice, "setVersion", 10);
 
         Set<Pair> testDesProp = new HashSet<>();
         testDesProp.add(new Pair("testDes1", "desObject1"));
@@ -714,6 +789,7 @@ public class DeviceTwinDeviceTest
         //assert
         assertTrue(testDeviceString.contains("testDevice"));
         assertTrue(testDeviceString.contains("validEtag"));
+        assertTrue(testDeviceString.contains("10"));
         assertTrue(testDeviceString.contains("testDes1"));
         assertTrue(testDeviceString.contains("desObject1"));
         assertTrue(testDeviceString.contains("testDes2"));
