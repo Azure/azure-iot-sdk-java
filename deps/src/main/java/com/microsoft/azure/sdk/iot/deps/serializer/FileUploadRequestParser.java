@@ -51,4 +51,12 @@ public class FileUploadRequestParser
         /* Codes_SRS_FILE_UPLOAD_REQUEST_21_004: [The toJson shall return a string with a json that represents the contend of the FileUploadResponseParser.] */
         return gson.toJson(this);
     }
+
+    /**
+     * Empty constructor: Used only to keep GSON happy.
+     */
+    @SuppressWarnings("unused")
+    protected FileUploadRequestParser()
+    {
+    }
 }

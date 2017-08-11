@@ -178,4 +178,12 @@ public class FileUploadNotificationParser
         /* Codes_SRS_FILE_UPLOAD_NOTIFICATION_21_011: [The getBlobSizeInBytesTag shall return the integer stored in `blobSizeInBytes`.] */
         return this.blobSizeInBytes;
     }
+
+    /**
+     * Empty constructor: Used only to keep GSON happy.
+     */
+    @SuppressWarnings("unused")
+    protected FileUploadNotificationParser()
+    {
+    }
 }

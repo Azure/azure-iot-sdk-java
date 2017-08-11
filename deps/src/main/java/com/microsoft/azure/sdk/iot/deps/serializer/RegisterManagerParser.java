@@ -37,6 +37,12 @@ public class RegisterManagerParser
     protected String eTag = null;
 
     /**
+     * An Integer representing a Twin version.
+     */
+    @SerializedName("version")
+    protected Integer version = null;
+
+    /**
      * "Enabled", "Disabled".
      * If "enabled", this device is authorized to connect.
      * If "disabled" this device cannot receive or send messages, and statusReason must be set.

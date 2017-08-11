@@ -4,7 +4,7 @@
  */
 package com.microsoft.azure.sdk.iot.deps.ws.impl;
 
-import javax.xml.bind.DatatypeConverter;
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 import java.security.MessageDigest;
@@ -124,7 +124,7 @@ public class WebSocketUpgrade
             key[i] = (byte) (int) (Math.random() * 256);
         }
 
-        return DatatypeConverter.printBase64Binary(key).trim();
+        return Base64.encodeBase64String(key).trim();
     }
 
     public String createUpgradeRequest()
@@ -224,7 +224,7 @@ public class WebSocketUpgrade
                     break;
                 }
 
-                String expectedKey = DatatypeConverter.printBase64Binary(messageDigest.digest((this._webSocketKey + RFC_GUID).getBytes())).trim();
+                String expectedKey = Base64.encodeBase64String(messageDigest.digest((this._webSocketKey + RFC_GUID).getBytes())).trim();
 
                 if (line.contains(expectedKey))
                 {

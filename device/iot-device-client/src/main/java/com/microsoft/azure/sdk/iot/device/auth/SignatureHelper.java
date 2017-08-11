@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import org.apache.commons.codec.binary.Base64;
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;

@@ -5,12 +5,12 @@ package com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 
-import javax.naming.SizeLimitExceededException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.codec.binary.Base64;
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubSizeExceededException;
 
 
 /**
@@ -53,25 +53,26 @@ public final class HttpsBatchMessage implements HttpsMessage
      *
      * @param msg the message to be added.
      *
-     * @throws SizeLimitExceededException if adding the message causes the
+     * @throws IotHubSizeExceededException if adding the message causes the
      * batched message to exceed 256 kb in size. The batched message will remain
      * as if the message was never added.
      */
     public void addMessage(HttpsSingleMessage msg)
-            throws SizeLimitExceededException
+            throws IotHubSizeExceededException
     {
         String jsonMsg = msgToJson(msg);
         // Codes_SRS_HTTPSBATCHMESSAGE_11_002: [The function shall add the message as a JSON object appended to the current JSON array.]
         String newBatchBody = addJsonObjToArray(jsonMsg, this.batchBody);
 
-        // Codes_SRS_HTTPSBATCHMESSAGE_11_008: [If adding the message causes the batched message to exceed 256 kb in size, the function shall throw a SizeLimitExceededException.]
-        // Codes_SRS_HTTPSBATCHMESSAGE_11_009: [If the function throws a SizeLimitExceedException, the batched message shall remain as if the message was never added.]
+        // Codes_SRS_HTTPSBATCHMESSAGE_11_008: [If adding the message causes the batched message to exceed 256 kb in size, the function shall throw a IotHubSizeExceededException.]
+        // Codes_SRS_HTTPSBATCHMESSAGE_11_009: [If the function throws a IotHubSizeExceededException, the batched message shall remain as if the message was never added.]
         byte[] newBatchBodyBytes = newBatchBody.getBytes(BATCH_CHARSET);
 
-        if (newBatchBodyBytes.length > SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES) {
-            String errMsg = String.format("Service-bound message size (%d bytes) cannot exceed %d bytes.%n",
+        if (newBatchBodyBytes.length > SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES)
+        {
+            String errMsg = String.format("Service-bound message size (%d bytes) cannot exceed %d bytes.",
                     newBatchBodyBytes.length, SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES);
-            throw new SizeLimitExceededException(errMsg);
+            throw new IotHubSizeExceededException(errMsg);
         }
 
         this.batchBody = newBatchBody;
@@ -112,8 +113,15 @@ public final class HttpsBatchMessage implements HttpsMessage
         return new MessageProperty[0];
     }
 
+    /**
+     * It is part of the HttpsMessage interface to get the collection of system message
+     * properties. For batch, it just returns a empty Map.
+     *
+     * @return an empty Map.
+     */
     public Map<String, String> getSystemProperties()
     {
+        // Codes_SRS_HTTPSBATCHMESSAGE_21_013: [The function shall return an empty map.]
         return new HashMap<>();
     }
 

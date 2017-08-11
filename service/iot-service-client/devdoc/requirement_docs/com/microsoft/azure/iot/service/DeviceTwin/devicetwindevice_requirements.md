@@ -18,6 +18,7 @@ public class DeviceTwinDevice
     public String getDeviceId();
     public void setETag(String eTag) throws IllegalArgumentException;
     public String getETag();
+    public Integer getVersion();
 
     public Set<Pair> getReportedProperties();
 
@@ -35,6 +36,7 @@ public class DeviceTwinDevice
     protected void setReportedProperties(Map<String, Object> reportedProperties);
     protected void setDesiredProperties(Map<String, Object> desiredProperties);
     protected void setTags(Map<String, Object> tag);
+    void setVersion(Integer version);
 
     protected Map<String, Object> getTagMap();
     protected Map<String, Object> getDesiredMap();
@@ -110,7 +112,7 @@ public Set<Pair> getDesiredProperties();
 ```java
 public String toString();
 ```
-**SRS_DEVICETWINDEVICE_25_015: [** This method shall append device id, etag, tags, desired and reported properties to string (if present) and return **]**
+**SRS_DEVICETWINDEVICE_25_015: [** This method shall append device id, etag, version, tags, desired and reported properties to string (if present) and return **]**
 
 ### tagsToString
 
@@ -217,4 +219,22 @@ public String getETag()
 ```
 
 **SRS_DEVICETWINDEVICE_21_031: [** The getETag shall return the stored eTag.**]**
+
+
+### setVersion
+
+```java
+void setVersion(Integer version)
+```
+
+**SRS_DEVICETWINDEVICE_21_032: [** The setVersion shall store the Twin version.**]**
+
+
+### getVersion
+
+```java
+public Integer getVersion()
+```
+
+**SRS_DEVICETWINDEVICE_21_033: [** The getVersion shall return the stored Twin version.**]**
 

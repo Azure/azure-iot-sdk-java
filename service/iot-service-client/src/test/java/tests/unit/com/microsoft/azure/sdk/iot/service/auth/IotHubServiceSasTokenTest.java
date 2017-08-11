@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import mockit.Deencapsulation;
 import mockit.Expectations;
-import org.apache.commons.codec.binary.Base64;
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import org.junit.Test;
 
 import javax.crypto.Mac;

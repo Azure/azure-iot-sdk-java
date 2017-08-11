@@ -59,4 +59,12 @@ public class QueryResponseParser
         //Codes_SRS_QUERY_RESPONSE_PARSER_25_008: [The getJsonItems shall return the list of json items as strings .]
         return jsonElements;
     }
+
+    /**
+     * Empty constructor: Used only to keep GSON happy.
+     */
+    @SuppressWarnings("unused")
+    protected QueryResponseParser()
+    {
+    }
 }

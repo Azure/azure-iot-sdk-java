@@ -40,6 +40,11 @@ import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
 
+
+/**
+ * Unit tests for AMQPS Iothub Connection class.
+ * 92% methods, 85% lines covered
+ */
 public class AmqpsIotHubConnectionTest {
 
     final String hostName = "test.host.name";
@@ -1118,6 +1123,7 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_041: [The connection state shall be considered OPEN when the sender link is open remotely.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_99_001: [All server listeners shall be notified when that the connection has been established.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_21_051 [The open lock shall be notified when that the connection has been established.]
     @Test
     public void onLinkRemoteOpen() throws IOException
     {
@@ -1131,6 +1137,8 @@ public class AmqpsIotHubConnectionTest {
                 mockSender.getName();
                 result = "sender";
                 mockServerListener.connectionEstablished();
+                new ObjectLock();
+                result = mockOpenLock;
             }
         };
 
@@ -1151,6 +1159,8 @@ public class AmqpsIotHubConnectionTest {
                 mockSender.getName();
                 times = 1;
                 mockServerListener.connectionEstablished();
+                times = 1;
+                mockOpenLock.notifyLock();
                 times = 1;
             }
         };

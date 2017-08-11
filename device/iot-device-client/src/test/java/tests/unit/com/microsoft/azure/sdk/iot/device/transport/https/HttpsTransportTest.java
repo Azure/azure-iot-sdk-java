@@ -4,6 +4,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubSizeExceededException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.https.*;
@@ -11,7 +12,6 @@ import junit.framework.AssertionFailedError;
 import mockit.*;
 import org.junit.Test;
 
-import javax.naming.SizeLimitExceededException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -242,7 +242,7 @@ public class HttpsTransportTest
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
             @Mocked final IotHubStatusCode mockStatus)
-            throws URISyntaxException, IOException, SizeLimitExceededException
+            throws URISyntaxException, IOException, IotHubSizeExceededException
     {
         final Map<String, Object> context = new HashMap<>();
 
@@ -269,7 +269,7 @@ public class HttpsTransportTest
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
             @Mocked final IotHubStatusCode mockStatus)
-            throws URISyntaxException, IOException, SizeLimitExceededException
+            throws URISyntaxException, IOException, IotHubSizeExceededException
     {
         final Map<String, Object> context = new HashMap<>();
         new NonStrictExpectations()
@@ -309,7 +309,7 @@ public class HttpsTransportTest
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
             @Mocked final ResponseMessage mockResponseMessage)
-            throws URISyntaxException, IOException, SizeLimitExceededException
+            throws URISyntaxException, IOException, IotHubSizeExceededException
     {
         final Map<String, Object> context = new HashMap<>();
         new NonStrictExpectations()
@@ -363,7 +363,7 @@ public class HttpsTransportTest
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
             @Mocked final IotHubStatusCode mockStatus)
-            throws URISyntaxException, IOException, SizeLimitExceededException
+            throws URISyntaxException, IOException, IotHubSizeExceededException
     {
         final Map<String, Object> context = new HashMap<>();
         new NonStrictExpectations()
@@ -374,7 +374,7 @@ public class HttpsTransportTest
                 new HttpsBatchMessage();
                 result = mockBatch;
                 mockBatch.addMessage(mockHttpsMsg);
-                result = new SizeLimitExceededException();
+                result = new IotHubSizeExceededException();
             }
         };
 
@@ -764,7 +764,7 @@ public class HttpsTransportTest
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
             @Mocked final IotHubStatusCode mockStatus)
-            throws URISyntaxException, IOException, SizeLimitExceededException
+            throws URISyntaxException, IOException, IotHubSizeExceededException
     {
         final Map<String, Object> context = new HashMap<>();
         new NonStrictExpectations()
@@ -797,7 +797,7 @@ public class HttpsTransportTest
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final HttpsBatchMessage mockBatch,
             @Mocked final IotHubStatusCode mockStatus)
-            throws URISyntaxException, IOException, SizeLimitExceededException
+            throws URISyntaxException, IOException, IotHubSizeExceededException
     {
         final Map<String, Object> context = new HashMap<>();
         new NonStrictExpectations()

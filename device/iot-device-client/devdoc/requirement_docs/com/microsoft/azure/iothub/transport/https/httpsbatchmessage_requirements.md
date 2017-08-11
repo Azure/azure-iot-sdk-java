@@ -19,6 +19,7 @@ public class HttpsBatchMessage implements HttpsMessage
     public byte[] getBody();
     public String getContentType();
     public MessageProperty[] getProperties();
+    public Map<String, String> getSystemProperties();
     public int numMessages();
 }
 ```
@@ -47,7 +48,7 @@ public void addMessage(HttpsSingleMessage msg);
 
 **SRS_HTTPSBATCHMESSAGE_11_005: [**The JSON object shall have the field "properties" set to a JSON object which has a key-value pair for each message property, where the key is the HTTPS property name and the value is the property value.**]**
 
-**SRS_HTTPSBATCHMESSAGE_11_009: [**If the function throws a SizeLimitExceededException, the batched message shall remain as if the message was never added.**]**
+**SRS_HTTPSBATCHMESSAGE_11_009: [**If the function throws a IotHubSizeExceededException, the batched message shall remain as if the message was never added.**]**
 
 
 ### byte
@@ -77,6 +78,15 @@ public MessageProperty[] getProperties();
 ```
 
 **SRS_HTTPSBATCHMESSAGE_11_012: [**The function shall return an empty array.**]**
+
+
+### getSystemProperties
+
+```java
+public Map<String, String> getSystemProperties()
+```
+
+**SRS_HTTPSBATCHMESSAGE_21_013: [**The function shall return an empty map.**]**
 
 
 ### numMessages

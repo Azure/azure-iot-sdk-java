@@ -47,4 +47,11 @@ public class QueryRequestParser
         return gson.toJson(this);
     }
 
+    /**
+     * Empty constructor: Used only to keep GSON happy.
+     */
+    @SuppressWarnings("unused")
+    protected QueryRequestParser()
+    {
+    }
 }

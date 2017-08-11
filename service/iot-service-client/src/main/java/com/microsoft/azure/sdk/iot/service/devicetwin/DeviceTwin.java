@@ -454,6 +454,7 @@ public class DeviceTwin
             twinParser.updateTwin(twinJson);
 
             DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(twinParser.getDeviceId());
+            deviceTwinDevice.setVersion(twinParser.getVersion());
             deviceTwinDevice.setTags(twinParser.getTagsMap());
             deviceTwinDevice.setDesiredProperties(twinParser.getDesiredPropertyMap());
             deviceTwinDevice.setReportedProperties(twinParser.getReportedPropertyMap());
