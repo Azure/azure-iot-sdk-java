@@ -1,3 +1,4 @@
 com.microsoft.azure.sdk.iot.deps.serializer
+com.microsoft.azure.sdk.iot.deps.util
 com.microsoft.azure.sdk.iot.deps.ws
 com.microsoft.azure.sdk.iot.deps.ws.impl
