@@ -37,11 +37,11 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     private static final String URL_SEPARATOR_2 = "&";
     private static final String URL_HTTPS = "https:" + URL_SEPARATOR_0 + URL_SEPARATOR_0;
     private static final String URL_PATH_DEVICES = "devices";
-    private static final String URL_API_VERSION = "api-version=2016-11-14";
+    private static final String URL_API_VERSION = "api-version=2017-06-30";
     private static final String URL_MAX_COUNT = "top=";
     private static final String URL_PATH_DEVICESTATISTICS = "statistics";
     private static final String USER_SEPARATOR = "@";
-    private static final String USER_SAS = "sas.";
+    private static final String USER_SAS = "SAS.";
     private static final String USER_ROOT = "root.";
 
     // twin
@@ -65,12 +65,12 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     /**
      * Serialize user string
      *
-     * @return The user string in the following format: "SharedAccessKeyName@sas.root.IotHubName"
+     * @return The user string in the following format: "SharedAccessKeyName@SAS.root.IotHubName"
      */
     public String getUserString()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_001: [The function shall serialize the object
-        // properties to a string using the following format: SharedAccessKeyName@sas.root.IotHubName]
+        // properties to a string using the following format: SharedAccessKeyName@SAS.root.IotHubName]
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(this.sharedAccessKeyName);
         stringBuilder.append(USER_SEPARATOR);

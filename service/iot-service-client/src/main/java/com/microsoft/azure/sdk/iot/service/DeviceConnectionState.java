@@ -10,7 +10,31 @@ package com.microsoft.azure.sdk.iot.service;
  */
 public enum DeviceConnectionState
 {
-    Disconnected,
-    Connected
+    Disconnected("Disconnected"),
+    Connected("Connected");
+
+    private final String connectionState;
+
+    DeviceConnectionState(String state)
+    {
+        this.connectionState = state;
+    }
+
+    public String getValue()
+    {
+        return connectionState;
+    }
+
+    public static DeviceConnectionState fromString(String connectionState)
+    {
+        for (DeviceConnectionState possibleConnectionState : DeviceConnectionState.values())
+        {
+            if (possibleConnectionState.connectionState.equalsIgnoreCase(connectionState))
+            {
+                return possibleConnectionState;
+            }
+        }
+        return null;
+    }
 }
 

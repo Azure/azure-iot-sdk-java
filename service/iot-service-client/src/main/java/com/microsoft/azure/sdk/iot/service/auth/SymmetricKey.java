@@ -5,6 +5,12 @@
 
 package com.microsoft.azure.sdk.iot.service.auth;
 
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
+import com.microsoft.azure.sdk.iot.service.Tools;
+
+import javax.crypto.KeyGenerator;
+import java.security.NoSuchAlgorithmException;
+
 /**
  * Store primary and secondary keys
  * Provide function for key length validation
@@ -14,6 +20,7 @@ public class SymmetricKey
     private transient final int MinKeyLengthInBytes = 16;
     private transient final int MaxKeyLengthInBytes = 64;
     private transient final String DeviceKeyLengthInvalid = "DeviceKeyLengthInvalid";
+    private final String encryptionMethod = "AES";
 
     private String primaryKey;
     private String secondaryKey;
@@ -23,8 +30,16 @@ public class SymmetricKey
      */
     public SymmetricKey()
     {
-        this.primaryKey = "";
-        this.secondaryKey = "";
+        try
+        {
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(encryptionMethod);
+            this.primaryKey = Base64.encodeBase64String(keyGenerator.generateKey().getEncoded());
+            this.secondaryKey = Base64.encodeBase64String(keyGenerator.generateKey().getEncoded());
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            //encryption method is hardcoded, so this should never be caught
+        }
     }
 
     /**
@@ -76,8 +91,9 @@ public class SymmetricKey
     /**
      * Validate the length of the key
      * @param key The key to validate
+     * @throws IllegalArgumentException if the key has an invalid length
      */
-    private void validateDeviceAuthenticationKey(String key)
+    private void validateDeviceAuthenticationKey(String key) throws IllegalArgumentException
     {
         if (key != null)
         {
@@ -86,5 +102,18 @@ public class SymmetricKey
                 throw new IllegalArgumentException(DeviceKeyLengthInvalid);
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other instanceof SymmetricKey)
+        {
+            SymmetricKey otherSymmetricKey = (SymmetricKey) other;
+            return (Tools.areEqual(this.getPrimaryKey(), otherSymmetricKey.getPrimaryKey())
+                    && Tools.areEqual(this.getSecondaryKey(), otherSymmetricKey.getSecondaryKey()));
+        }
+
+        return false;
     }
 }

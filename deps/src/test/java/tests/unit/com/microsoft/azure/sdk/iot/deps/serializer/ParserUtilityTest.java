@@ -4,9 +4,11 @@
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.google.gson.JsonElement;
+import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +17,8 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for serializer utility helpers
- * 100% methods, 96% lines covered
+ * 100% methods
+ * 96% lines covered
  */
 public class ParserUtilityTest
 {
@@ -308,15 +311,15 @@ public class ParserUtilityTest
     }
 
     /* Tests_SRS_PARSER_UTILITY_21_020: [The getDateTimeUtc shall parse the provide string using `UTC` timezone.] */
-    /* Tests_SRS_PARSER_UTILITY_21_021: [The getDateTimeUtc shall parse the provide string using the data format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`.] */
+    /* Tests_SRS_PARSER_UTILITY_21_021: [The getDateTimeUtc shall parse the provide string using the data format `yyyy-MM-dd'T'HH:mm:ss`.] */
     @Test
     public void getDateTimeUtcSucceed() throws ClassNotFoundException
     {
         // act
-        Date date = Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"getDateTimeUtc", "2016-06-01T21:22:43.799Z");
+        Date date = Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"getDateTimeUtc", "2016-06-01T21:22:43");
 
         // assert
-        assertEquals(1464816163799L, date.getTime());
+        assertEquals(1464816163000L, date.getTime());
     }
 
     /* Tests_SRS_PARSER_UTILITY_21_040: [If the provide string contains more than 3 digits for milliseconds, the getDateTimeUtc shall reduce the milliseconds to 3 digits.] */
@@ -324,10 +327,10 @@ public class ParserUtilityTest
     public void getDateTimeUtcBigMillisecondsSucceed() throws ClassNotFoundException
     {
         // act
-        Date date = Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"getDateTimeUtc", "2016-06-01T21:22:43.7996883Z");
+        Date date = Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"getDateTimeUtc", "2016-06-01T21:22:43");
 
         // assert
-        assertEquals(1464816163799L, date.getTime());
+        assertEquals(1464816163000L, date.getTime());
     }
 
     /* Tests_SRS_PARSER_UTILITY_21_040: [If the provide string contains more than 3 digits for milliseconds, the getDateTimeUtc shall reduce the milliseconds to 3 digits.] */
@@ -335,10 +338,10 @@ public class ParserUtilityTest
     public void getDateTimeUtcShortMillisecondsSucceed() throws ClassNotFoundException
     {
         // act
-        Date date = Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"getDateTimeUtc", "2016-06-01T21:22:43.7Z");
+        Date date = Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"getDateTimeUtc", "2016-06-01T21:22:43");
 
         // assert
-        assertEquals(1464816163700L, date.getTime());
+        assertEquals(1464816163000L, date.getTime());
     }
 
     /* Tests_SRS_PARSER_UTILITY_21_040: [If the provide string contains more than 3 digits for milliseconds, the getDateTimeUtc shall reduce the milliseconds to 3 digits.] */
@@ -346,10 +349,10 @@ public class ParserUtilityTest
     public void getDateTimeUtcShort2MillisecondsSucceed() throws ClassNotFoundException
     {
         // act
-        Date date = Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"getDateTimeUtc", "2016-06-01T21:22:43.75Z");
+        Date date = Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"getDateTimeUtc", "2016-06-01T21:22:43");
 
         // assert
-        assertEquals(1464816163750L, date.getTime());
+        assertEquals(1464816163000L, date.getTime());
     }
 
     /* Tests_SRS_PARSER_UTILITY_21_041: [The getDateTimeUtc shall accept date without milliseconds.] */
@@ -357,7 +360,7 @@ public class ParserUtilityTest
     public void getDateTimeUtcEmptyMillisecondsSucceed() throws ClassNotFoundException
     {
         // act
-        Date date = Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"getDateTimeUtc", "2016-06-01T21:22:43.Z");
+        Date date = Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"getDateTimeUtc", "2016-06-01T21:22:43");
 
         // assert
         assertEquals(1464816163000L, date.getTime());
@@ -389,18 +392,10 @@ public class ParserUtilityTest
 
     /* Tests_SRS_PARSER_UTILITY_21_022: [If the provide string is null, empty or contains an invalid data format, the getDateTimeUtc shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
-    public void getDateTimeUtcInvalidMilliseconds() throws ClassNotFoundException
-    {
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"getDateTimeUtc", "2016-06-01T21:22:43.12.12Z");
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_022: [If the provide string is null, empty or contains an invalid data format, the getDateTimeUtc shall throw IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
     public void getDateTimeUtcInvalidDate() throws ClassNotFoundException
     {
         // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"getDateTimeUtc", "2016-5-6-01T21:22:43.12Z");
+        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"getDateTimeUtc", "2016-5-6-01T21:22:43");
     }
 
     /* Tests_SRS_PARSER_UTILITY_21_023: [The getDateTimeOffset shall parse the provide string using `UTC` timezone.] */
@@ -650,5 +645,30 @@ public class ParserUtilityTest
 
         // assert
         Helpers.assertJson(json.toString(), "{}");
+    }
+
+    //Codes_SRS_PARSER_UTILITY_21_042: [If the provided date is null, an IllegalArgumentException shall be thrown.]
+    @Test (expected = IllegalArgumentException.class)
+    public void getSimpleDateStringFromDateGivenNullDateThrows()
+    {
+        //act
+        ParserUtility.getDateStringFromDate(null);
+    }
+
+    //Codes_SRS_PARSER_UTILITY_34_043: [The provided date shall be converted into this format: "yyyy-MM-dd'T'HH:mm:ss".]
+    @Test
+    public void getSimpleDateStringFromDateSuccess()
+    {
+        //arrange
+        //A time that is comfortably after the UNIX epoch to avoid issues where other timezones take this time back before that epoch where dates cannot be parsed
+        Date date = new Date(200000000);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        String expectedString = dateFormat.format(date);
+
+        //act
+        String actualString = ParserUtility.getDateStringFromDate(date);
+
+        //assert
+        assertEquals(expectedString, actualString);
     }
 }
