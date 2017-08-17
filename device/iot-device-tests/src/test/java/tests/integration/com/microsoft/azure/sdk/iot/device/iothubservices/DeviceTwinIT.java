@@ -7,7 +7,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.device.iothubservices;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -36,6 +35,8 @@ public class DeviceTwinIT
 {
     // Max time to wait to see it on Hub
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 200; // 0.2 sec
+
+    private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB*10; // 2 sec
 
     //Max time to wait before timing out test
     private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB + 50000; // 50 secs
@@ -364,6 +365,7 @@ public class DeviceTwinIT
             assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
         }
 
+        Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
         int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE);
         assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
 
@@ -388,6 +390,7 @@ public class DeviceTwinIT
         assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
 
         // verify if they are received by SC
+        Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
         int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
         assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
     }
@@ -437,6 +440,7 @@ public class DeviceTwinIT
         assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
 
         // verify if they are received by SC
+        Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
         int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
         assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
     }
@@ -464,6 +468,7 @@ public class DeviceTwinIT
         assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
 
         // verify if they are received by SC
+        Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
         int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
         assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
     }
