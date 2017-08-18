@@ -17,6 +17,7 @@
         <module>device</module>
         <module>service</module>
         <module>deps</module>
+        <module>iot-e2e-tests</module>
     </modules>
     <build>
         <plugins>
