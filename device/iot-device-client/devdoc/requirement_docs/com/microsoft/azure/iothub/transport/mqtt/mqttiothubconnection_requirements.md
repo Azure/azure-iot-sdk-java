@@ -41,6 +41,10 @@ public void open() throws IOException, IllegalArgumentException;
 
 **SRS_MQTTIOTHUBCONNECTION_15_004: [**The function shall establish an MQTT connection with an IoT Hub using the provided host name, user name, device ID, and sas token.**]**
 
+**SRS_MQTTIOTHUBCONNECTION_25_018: [**The function shall establish an MQTT WS connection with a server uri as `wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true` if websocket was enabled.**]**
+
+**SRS_MQTTIOTHUBCONNECTION_25_019: [**The function shall establish an MQTT connection with a server uri as `ssl://<hostName>:8883` if websocket was not enabled.**]**
+
 **SRS_MQTTIOTHUBCONNECTION_15_005: [**If an MQTT connection is unable to be established for any reason, the function shall throw an IOException.**]**
 
 **SRS_MQTTIOTHUBCONNECTION_15_006: [**If the MQTT connection is already open, the function shall do nothing.**]**

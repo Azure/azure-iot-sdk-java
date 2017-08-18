@@ -40,10 +40,11 @@ public final class MessageProperty {
     }
 
     /** The property name. */
-    private final String name;
+    private String name;
     /** The property value. */
-    private final String value;
+    private String value;
     private CustomLogger logger;
+    
     /**
      * Constructor.
      *

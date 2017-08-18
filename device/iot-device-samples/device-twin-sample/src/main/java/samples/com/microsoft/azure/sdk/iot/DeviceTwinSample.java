@@ -21,6 +21,8 @@ import java.util.Scanner;
  */
 public class DeviceTwinSample
 {
+    private static IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+
     private enum LIGHTS{ ON, OFF, DISABLED }
 
     private enum CAMERA{ DETECTED_BURGLAR, SAFELY_WORKING }
@@ -111,13 +113,17 @@ public class DeviceTwinSample
             {
                 protocol = IotHubClientProtocol.AMQPS_WS;
             }
+            else if (protocolStr.equals("amqps_ws"))
+            {
+                protocol = IotHubClientProtocol.MQTT_WS;
+            }
             else
             {
                 System.out.format(
-                        "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n"
+                        "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' , 'mqtt_ws' or 'amqps_ws' but received %s\n"
                                 + "The program should be called with the following args: \n"
                                 + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                                + "2. (mqtt | amqps | amqps_ws)\n",
+                                + "2. (mqtt | amqps | amqps_ws | mqtt_ws)\n",
                         protocolStr);
                 return;
             }
@@ -191,7 +197,7 @@ public class DeviceTwinSample
         {
             System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
             homeKit.clean();
-            client.close();
+            client.closeNow();
             System.out.println("Shutting down...");
         }
 
@@ -201,7 +207,7 @@ public class DeviceTwinSample
         scanner.nextLine();
 
         homeKit.clean();
-        client.close();
+        client.closeNow();
 
         System.out.println("Shutting down...");
 

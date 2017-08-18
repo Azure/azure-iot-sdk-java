@@ -32,9 +32,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
- * Integration E2E test for Device Method on the service client.
+ * Integration E2E test for Device Method.
  */
-public class DeviceMethodIT
+public class DeviceMethodMqttWsIT
 {
     private static String iotHubConnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
@@ -42,7 +42,7 @@ public class DeviceMethodIT
 
     private static final int MAX_DEVICES = 1;
 
-    private static String DEVICE_ID_NAME = "E2EJavaMethodMqtt";
+    private static String DEVICE_ID_NAME = "E2EJavaMethodMqttWS";
 
     private static final Long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(200);
     private static final Long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toSeconds(5);
@@ -58,7 +58,7 @@ public class DeviceMethodIT
         Map<String, String> env = System.getenv();
         for (String envName : env.keySet())
         {
-            if (envName.equals(iotHubConnectionStringEnvVarName.toString()))
+            if (envName.equals(iotHubConnectionStringEnvVarName))
             {
                 iotHubConnectionString = env.get(envName);
                 break;
@@ -76,7 +76,7 @@ public class DeviceMethodIT
 
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            devices.add(new DeviceTestManager(registryManager, DEVICE_ID_NAME.concat("-" + i), IotHubClientProtocol.MQTT));
+            devices.add(new DeviceTestManager(registryManager, DEVICE_ID_NAME.concat("-" + i), IotHubClientProtocol.MQTT_WS));
         }
     }
 

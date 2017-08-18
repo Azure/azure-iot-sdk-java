@@ -16,10 +16,9 @@ import java.net.URISyntaxException;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
-/* Unit tests for DeviceClientConfig
-* 100% methods covered
-* 89% lines covered
-*/
+/** Unit tests for IoTHubClientConfig.
+ *  Coverage : 96% Method, 90% line
+ * */
 public class DeviceClientConfigTest
 {
     // Tests_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
@@ -367,6 +366,48 @@ public class DeviceClientConfigTest
 
         final int expectedReadTimeoutMillis = 240000;
         assertThat(testReadTimeoutMillis, is(expectedReadTimeoutMillis));
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_25_034: [The function shall save useWebsocket.]
+    @Test
+    public void setWebsocketEnabledSets() throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+        final IotHubConnectionString iotHubConnectionString =
+                Deencapsulation.newInstance(IotHubConnectionString.class,
+                                            new Class[] {String.class, String.class, String.class, String.class},
+                                            iotHubHostname,
+                                            deviceId,
+                                            deviceKey,
+                                            sharedAccessToken);
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        config.setUseWebsocket(true);
+        assertTrue(config.isUseWebsocket());
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_25_033: [The function shall return the true if websocket is enabled, false otherwise.]
+    @Test
+    public void getWebsocketEnabledGets() throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+        final IotHubConnectionString iotHubConnectionString =
+                Deencapsulation.newInstance(IotHubConnectionString.class,
+                                            new Class[] {String.class, String.class, String.class, String.class},
+                                            iotHubHostname,
+                                            deviceId,
+                                            deviceKey,
+                                            sharedAccessToken);
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        config.setUseWebsocket(true);
+        assertTrue(config.isUseWebsocket());
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_11_013: [The function shall return 180s.]

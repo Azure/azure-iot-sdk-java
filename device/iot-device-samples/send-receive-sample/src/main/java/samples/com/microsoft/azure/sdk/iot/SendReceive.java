@@ -148,7 +148,7 @@ public class SendReceive
                             + "The program should be called with the following args: \n"
                             + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
                             + "2. [number of requests to send]\n"
-                            + "3. (mqtt | https | amqps | amqps_ws)\n"
+                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
                             + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
                     args.length);
             return;
@@ -191,6 +191,10 @@ public class SendReceive
             {
                 protocol = IotHubClientProtocol.AMQPS_WS;
             }
+            else if (protocolStr.equals("mqtt_ws"))
+            {
+                protocol = IotHubClientProtocol.MQTT_WS;
+            }
             else
             {
                 System.out.format(
@@ -198,7 +202,7 @@ public class SendReceive
                             + "The program should be called with the following args: \n"
                             + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
                             + "2. [number of requests to send]\n"
-                            + "3. (mqtt | https | amqps | amqps_ws)\n"
+                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
                             + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
                         protocolStr);
                 return;
@@ -303,7 +307,7 @@ public class SendReceive
 
         // close the connection        
         System.out.println("Closing"); 
-        client.close();
+        client.closeNow();
         
         if (!failedMessageListOnClose.isEmpty())
         {

@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
- * Integration E2E test for Device Method on the service client.
+ * Integration E2E test for Device Method.
  */
 public class DeviceMethodAmqpsWsIT
 {
@@ -42,7 +42,7 @@ public class DeviceMethodAmqpsWsIT
 
     private static final int MAX_DEVICES = 1;
 
-    private static String DEVICE_ID_NAME = "E2EJavaMethod";
+    private static String DEVICE_ID_NAME = "E2EJavaMethodAmqpWs";
 
     private static final Long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(200);
     private static final Long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toSeconds(5);

@@ -39,11 +39,6 @@ import static org.junit.Assert.assertTrue;
 * 100% methods covered
 * 99% lines covered (Thread is not mockable...)
 */
-
-/**
- * Unit tests for AMQPS Iothub Connection class.
- * 92% methods, 85% lines covered
- */
 public class AmqpsIotHubConnectionTest {
 
     final String hostName = "test.host.name";
@@ -162,7 +157,7 @@ public class AmqpsIotHubConnectionTest {
     {
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        new AmqpsIotHubConnection(null, false, amqpsDeviceOperationsList);
+        new AmqpsIotHubConnection(null, amqpsDeviceOperationsList);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -183,7 +178,7 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceKey;
             }
         };
-        new AmqpsIotHubConnection(mockConfig, false, null);
+        new AmqpsIotHubConnection(mockConfig, null);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -205,7 +200,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
-        new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -224,12 +219,14 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
+                mockConfig.isUseWebsocket();
+                result = false;
             }
         };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -248,12 +245,14 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
+                mockConfig.isUseWebsocket();
+                result = false;
             }
         };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -272,12 +271,14 @@ public class AmqpsIotHubConnectionTest {
                 result = "";
                 mockConfig.getDeviceKey();
                 result = deviceKey;
+                mockConfig.isUseWebsocket();
+                result = false;
             }
         };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -296,12 +297,14 @@ public class AmqpsIotHubConnectionTest {
                 result = null;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
+                mockConfig.isUseWebsocket();
+                result = false;
             }
         };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -320,12 +323,14 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = "";
+                mockConfig.isUseWebsocket();
+                result = false;
             }
         };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -343,12 +348,15 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = null;
+                mockConfig.isUseWebsocket();
+                result = false;
             }
         };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
+
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -366,12 +374,14 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
+                mockConfig.isUseWebsocket();
+                result = false;
             }
         };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -389,12 +399,14 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
+                mockConfig.isUseWebsocket();
+                result = false;
             }
         };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_002: [The constructor shall save the configuration into private member variables.]
@@ -409,10 +421,17 @@ public class AmqpsIotHubConnectionTest {
     public void constructorCopiesAllData() throws IOException
     {
         baseExpectations();
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.isUseWebsocket();
+                result = false;
+            }
+        };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         DeviceClientConfig actualConfig = Deencapsulation.getField(connection, "config");
         String actualHostName = Deencapsulation.getField(connection, "hostName");
@@ -446,7 +465,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         new Verifications()
         {
@@ -473,17 +492,24 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
     }
 
     @Test
     public void constructorSetsHostNameCorrectlyWhenWebSocketsAreEnabled() throws IOException
     {
         baseExpectations();
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.isUseWebsocket();
+                result = true;
+            }
+        };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, true, amqpsDeviceOperationsList);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         String actualHostName = Deencapsulation.getField(connection, "hostName");
         assertEquals(hostName + ":" + amqpWebSocketPort, actualHostName);
@@ -497,7 +523,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         Deencapsulation.setField(connection, "state", State.OPEN);
 
@@ -522,7 +548,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         connection.open();
 
@@ -543,7 +569,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
         Deencapsulation.setField(connection, "reactor", null);
 
         new NonStrictExpectations()
@@ -559,24 +585,23 @@ public class AmqpsIotHubConnectionTest {
     }
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
     @Test
-    public void openTriggersProtonReactor() throws IOException, InterruptedException
+    public void openTriggersProtonReactor(@Mocked final Reactor mockedReactor) throws IOException, InterruptedException
     {
         baseExpectations();
 
         new NonStrictExpectations()
         {
             {
-                new IotHubReactor((Reactor) any);
-                result = mockIotHubReactor;
                 mockIotHubReactor.run();
-
+                times = 1;
                 mockOpenLock.waitLock(anyLong);
             }
         };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
+
         Deencapsulation.setField(connection, "openLock", mockOpenLock);
 
         connection.open();
@@ -610,7 +635,8 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
+
         Deencapsulation.setField(connection, "openLock", mockOpenLock);
 
         connection.open();
@@ -633,7 +659,8 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
+
         Deencapsulation.setField(connection, "openLock", mockOpenLock);
 
         new NonStrictExpectations()
@@ -655,7 +682,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
         Deencapsulation.setField(connection, "closeLock", mockCloseLock);
 
         new NonStrictExpectations()
@@ -677,7 +704,8 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
+
         Deencapsulation.setField(connection, "closeLock", mockCloseLock);
 
         new NonStrictExpectations()
@@ -734,7 +762,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         Deencapsulation.setField(connection, "state", State.OPEN);
         Deencapsulation.setField(connection, "session", mockSession);
@@ -777,7 +805,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         Deencapsulation.setField(connection, "state", State.OPEN);
         Deencapsulation.setField(connection, "session", mockSession);
@@ -815,7 +843,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         Deencapsulation.setField(connection, "state", State.CLOSED);
         Deencapsulation.setField(connection, "linkCredit", 100);
@@ -835,7 +863,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         Deencapsulation.setField(connection, "state", State.OPEN);
         Deencapsulation.setField(connection, "linkCredit", -1);
@@ -874,7 +902,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         Deencapsulation.setField(connection, "state", State.OPEN);
         Deencapsulation.setField(connection, "linkCredit", 100);
@@ -911,7 +939,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         Deencapsulation.setField(connection, "state", State.OPEN);
         Deencapsulation.setField(connection, "linkCredit", 100);
@@ -937,7 +965,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         Deencapsulation.setField(connection, "state", State.CLOSED);
 
@@ -963,7 +991,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         Deencapsulation.setField(connection, "state", State.OPEN);
 
@@ -990,7 +1018,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         Deencapsulation.setField(connection, "state", State.OPEN);
 
@@ -1035,8 +1063,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
-
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
         connection.onConnectionInit(mockEvent);
 
         new Verifications()
@@ -1070,6 +1097,8 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
+                mockConfig.isUseWebsocket();
+                result = false;
                 mockEvent.getConnection();
                 result = mockConnection;
                 mockConnection.getTransport();
@@ -1085,7 +1114,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         connection.onConnectionBound(mockEvent);
 
@@ -1141,7 +1170,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         Deencapsulation.setField(connection, "useWebSockets", true);
 
@@ -1180,7 +1209,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
         Deencapsulation.setField(connection, "state", State.OPEN);
 
         connection.onConnectionUnbound(mockEvent);
@@ -1206,7 +1235,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         connection.onReactorInit(mockEvent);
 
@@ -1230,6 +1259,8 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
+                mockConfig.isUseWebsocket();
+                result = true;
                 mockEvent.getReactor();
                 result = mockReactor;
                 mockReactor.connectionToHost(anyString, anyInt, (Handler) any);
@@ -1238,7 +1269,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, true, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         connection.onReactorInit(mockEvent);
 
@@ -1264,13 +1295,15 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
+                mockConfig.isUseWebsocket();
+                result = true;
                 mockCloseLock.notifyLock();
             }
         };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, true, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
         Deencapsulation.setField(connection, "closeLock", mockCloseLock);
         Deencapsulation.setField(connection, "reactor", mockReactor);
         Deencapsulation.setField(connection, "reconnectCall", false);
@@ -1302,8 +1335,6 @@ public class AmqpsIotHubConnectionTest {
         };
     }
 
-
-
     // Test_SRS_AMQPSIOTHUBCONNECTION_12_009: [The function shall call openAsync and disable reconnection if it is a reconnection attempt.]
     @Test
     public void onReactorFinalReconnect() throws IOException
@@ -1313,13 +1344,15 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
+                mockConfig.isUseWebsocket();
+                result = true;
                 mockCloseLock.notifyLock();
             }
         };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, true, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
         Deencapsulation.setField(connection, "closeLock", mockCloseLock);
         Deencapsulation.setField(connection, "reactor", mockReactor);
         Deencapsulation.setField(connection, "reconnectCall", true);
@@ -1360,13 +1393,15 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
+                mockConfig.isUseWebsocket();
+                result = true;
                 mockCloseLock.notifyLock();
             }
         };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, true, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
         Deencapsulation.setField(connection, "closeLock", mockCloseLock);
         Deencapsulation.setField(connection, "reactor", mockReactor);
         Deencapsulation.setField(connection, "reconnectCall", true);
@@ -1410,6 +1445,8 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
+                mockConfig.isUseWebsocket();
+                result = true;
                 mockEvent.getLink();
                 result = mockReceiver;
                 mockReceiver.getName();
@@ -1421,7 +1458,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(mockAmqpsDeviceTelemetry);
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
         connection.addListener(mockServerListener);
         connection.onDelivery(mockEvent);
 
@@ -1448,7 +1485,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(mockAmqpsDeviceTelemetry);
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         new NonStrictExpectations()
         {
@@ -1507,7 +1544,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
         connection.onLinkFlow(mockEvent);
 
         Integer expectedLinkCredit = 100;
@@ -1551,7 +1588,8 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
+
         connection.addListener(mockServerListener);
         connection.onLinkRemoteOpen(mockEvent);
 
@@ -1596,7 +1634,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         final Boolean[] openAsyncCalled = { false };
         final Boolean[] closeAsyncCalled = { false };
@@ -1646,7 +1684,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         connection.onLinkInit(mockEvent);
 
@@ -1676,7 +1714,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
         final Boolean[] openAsyncCalled = { false };
         final Boolean[] closeAsyncCalled = { false };
@@ -1728,7 +1766,7 @@ public class AmqpsIotHubConnectionTest {
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false, amqpsDeviceOperationsList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
         Deencapsulation.setField(connection, "currentReconnectionAttempt", Integer.MAX_VALUE);
 
         final Boolean[] openAsyncCalled = { false };
@@ -1780,6 +1818,8 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
+                mockConfig.isUseWebsocket();
+                result = false;
             }
         };
     }

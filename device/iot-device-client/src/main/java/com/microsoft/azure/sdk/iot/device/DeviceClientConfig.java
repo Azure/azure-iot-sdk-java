@@ -31,6 +31,8 @@ public final class DeviceClientConfig
     private String pathToCertificate;
     private IotHubSSLContext iotHubSSLContext;
 
+    private boolean useWebsocket;
+
     /**
      * The callback to be invoked if a message of Device Method type received.
      */
@@ -75,10 +77,31 @@ public final class DeviceClientConfig
         // Codes_SRS_DEVICECLIENTCONFIG_21_033: [The constructor shall save the IoT Hub hostname, hubname,
         // device ID, device key, and device token, provided in the `iotHubConnectionString`.]
         this.iotHubConnectionString = iotHubConnectionString;
+        this.useWebsocket = false;
 
         this.logger = new CustomLogger(this.getClass());
         logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
                 this.iotHubConnectionString.getHostName(), this.iotHubConnectionString.getDeviceId(), logger.getMethodName());
+    }
+
+    /**
+     * Getter for Websocket
+     * @return true if set, false otherwise
+     */
+    public boolean isUseWebsocket()
+    {
+        //Codes_SRS_DEVICECLIENTCONFIG_25_033: [The function shall return the true if websocket is enabled, false otherwise.]
+        return this.useWebsocket;
+    }
+
+    /**
+     * Setter for Websocket
+     * @param useWebsocket true if to be set, false otherwise
+     */
+    public void setUseWebsocket(boolean useWebsocket)
+    {
+        //Codes_SRS_DEVICECLIENTCONFIG_25_034: [The function shall save useWebsocket.]
+        this.useWebsocket = useWebsocket;
     }
 
     /**

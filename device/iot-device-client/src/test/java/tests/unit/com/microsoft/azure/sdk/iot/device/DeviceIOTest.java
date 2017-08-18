@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for DeviceIO.
+ * Coverage : 100% method, 99% line
  */
 public class DeviceIOTest
 {
@@ -66,7 +67,7 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsTransport(mockConfig, false);
+                new AmqpsTransport(mockConfig);
                 result = mockAmqpsTransport;
             }
         };
@@ -142,7 +143,7 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsTransport(mockConfig,false);
+                new AmqpsTransport(mockConfig);
                 result = mockAmqpsTransport;
                 times = 1;
             }
@@ -159,6 +160,14 @@ public class DeviceIOTest
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
         assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
         assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
+
+        new Verifications()
+        {
+            {
+                mockConfig.setUseWebsocket(false);
+                times = 1;
+            }
+        };
     }
     
     /* Tests_SRS_DEVICE_IO_21_002: [If the `config` is null, the constructor shall throw an IllegalArgumentException.] */
@@ -198,6 +207,14 @@ public class DeviceIOTest
         Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
                 new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
                 mockConfig, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_MQTT);
+
+        new Verifications()
+        {
+            {
+                mockConfig.setUseWebsocket(false);
+                times = 1;
+            }
+        };
     }
 
     /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
@@ -222,6 +239,13 @@ public class DeviceIOTest
                 new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
                 mockConfig, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_HTTPS);
 
+        new Verifications()
+        {
+            {
+                mockConfig.setUseWebsocket(false);
+                times = 1;
+            }
+        };
     }
 
     /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
@@ -235,7 +259,7 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsTransport(mockConfig, true);
+                new AmqpsTransport(mockConfig);
                 result = mockAmqpsTransport;
                 times = 1;
             }
@@ -245,6 +269,45 @@ public class DeviceIOTest
         Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
                 new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
                 mockConfig, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+
+        new Verifications()
+        {
+            {
+                mockConfig.setUseWebsocket(true);
+                times = 1;
+            }
+        };
+    }
+
+
+    @Test
+    public void constructorMqttWSSuccess() throws URISyntaxException
+    {
+        // arrange
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT_WS;
+
+        // assert
+        new NonStrictExpectations()
+        {
+            {
+                new MqttTransport(mockConfig);
+                result = mockMqttTransport;
+                times = 1;
+            }
+        };
+
+        // act
+        Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
+                                    new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
+                                    mockConfig, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+
+        new Verifications()
+        {
+            {
+                mockConfig.setUseWebsocket(true);
+                times = 1;
+            }
+        };
     }
 
     /* Tests_SRS_DEVICE_IO_21_004: [If the `protocol` is null, the constructor shall throw an IllegalArgumentException.] */

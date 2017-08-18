@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import org.apache.commons.lang3.tuple.Pair;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

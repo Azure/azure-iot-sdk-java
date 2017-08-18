@@ -14,7 +14,6 @@ import mockit.*;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
-
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Queue;
@@ -238,6 +237,7 @@ public class MqttIotHubConnectionTest
 
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_004: [The function shall establish an MQTT connection with an IoT Hub
     // using the provided host name, user name, device ID, and sas token.]
+    // Tests_SRS_MQTTIOTHUBCONNECTION_25_019: [The function shall establish an MQTT connection with a server uri as ssl://<hostName>:8883 if websocket was not enabled.]
     @Test
     public void openEstablishesConnectionUsingCorrectConfig(@Mocked final MqttDeviceMethod mockDeviceMethod) throws IOException
     {
@@ -278,6 +278,59 @@ public class MqttIotHubConnectionTest
                 mockDeviceMessaging.start();
                 times = 1;
                 new MqttDeviceTwin();
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MQTTIOTHUBCONNECTION_25_018: [The function shall establish an MQTT WS connection with a server uri as wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true if websocket was enabled.]
+    @Test
+    public void openEstablishesWSConnectionUsingCorrectConfig() throws IOException
+    {
+        final String WS_RAW_PATH = "/$iothub/websocket";
+        final String WS_QUERY = "?iothub-no-client-cert=true";
+        final String WS_SSLPrefix = "wss://";
+
+        baseExpectations();
+        openExpectations();
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.isUseWebsocket();
+                result = true;
+            }
+        };
+
+        MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        connection.open();
+
+        final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
+
+        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION, "UTF-8");
+        assertEquals(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "/" + clientIdentifier, actualIotHubUserName);
+
+        String expectedSasToken = mockToken.toString();
+        String actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
+
+        assertEquals(expectedSasToken, actualUserPassword);
+
+        State expectedState = State.OPEN;
+        State actualState =  Deencapsulation.getField(connection, "state");
+        assertEquals(expectedState, actualState);
+
+        new Verifications()
+        {
+            {
+                new MqttMessaging(sslPrefix + iotHubHostName + sslPortSuffix, deviceId, anyString, anyString, mockIotHubSSLContext);
+                times = 0;
+                new MqttMessaging(WS_SSLPrefix + iotHubHostName + WS_RAW_PATH + WS_QUERY, deviceId, anyString, anyString, mockIotHubSSLContext);
+                times = 1;
+                mockDeviceMessaging.start();
+                times = 1;
+                new MqttDeviceTwin();
+                times = 1;
+                new MqttDeviceMethod();
                 times = 1;
             }
         };
@@ -950,7 +1003,7 @@ public class MqttIotHubConnectionTest
             {
                 new IotHubSasToken(mockConfig, anyLong);
                 result = mockToken;
-                new MqttMessaging(sslPrefix + iotHubHostName + sslPortSuffix, deviceId, anyString, anyString, mockIotHubSSLContext);
+                new MqttMessaging(anyString, deviceId, anyString, anyString, mockIotHubSSLContext);
                 result = mockDeviceMessaging;
                 Deencapsulation.invoke(mockDeviceMessaging, "setDeviceClientConfig", mockConfig);
                 new MqttDeviceTwin();

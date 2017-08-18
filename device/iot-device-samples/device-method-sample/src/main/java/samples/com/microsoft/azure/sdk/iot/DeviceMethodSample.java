@@ -19,6 +19,7 @@ import java.util.Scanner;
  */
 public class DeviceMethodSample
 {
+    private static IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
     private static final int METHOD_SUCCESS = 200;
     private static final int METHOD_HUNG = 300;
     private static final int METHOD_NOT_FOUND = 404;
@@ -93,7 +94,7 @@ public class DeviceMethodSample
                     "Expected the following argument but received: %d.\n"
                             + "The program should be called with the following args: \n"
                             + "[Device connection string] - String containing Hostname, Device Id & Device Key in the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                            + "[Protocol] - (mqtt | amqps | amqps_ws)\n",
+                            + "[Protocol] - (mqtt | amqps | amqps_ws | mqtt_ws)\n",
                     args.length);
             return;
         }
@@ -120,13 +121,17 @@ public class DeviceMethodSample
             {
                 protocol = IotHubClientProtocol.AMQPS_WS;
             }
+            else if (protocolStr.equals("mqtt_ws"))
+            {
+                protocol = IotHubClientProtocol.MQTT_WS;
+            }
             else
             {
                 System.out.format(
                         "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n"
                                 + "The program should be called with the following args: \n"
                                 + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                                + "2. (mqtt | amqps | amqps_ws)\n",
+                                + "2. (mqtt | amqps | amqps_ws | mqtt_ws)\n",
                         protocolStr);
                 return;
             }
@@ -155,7 +160,7 @@ public class DeviceMethodSample
         catch (Exception e)
         {
             System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
-            client.close();
+            client.closeNow();
             System.out.println("Shutting down...");
         }
 
@@ -163,7 +168,7 @@ public class DeviceMethodSample
 
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
-        client.close();
+        client.closeNow();
         System.out.println("Shutting down...");
 
     }

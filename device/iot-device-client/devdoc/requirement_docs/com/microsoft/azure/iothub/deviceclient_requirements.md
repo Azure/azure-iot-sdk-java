@@ -146,7 +146,7 @@ Options handled by the client:
 
 **SRS_DEVICECLIENT_25_022: [**"SetSASTokenExpiryTime" should have value type long.**]**
 
-**SRS_DEVICECLIENT_25_023: [**"SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT.**]**
+**SRS_DEVICECLIENT_25_023: [**"SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT/AMQPS_WS/MQTT_WS**]**
 
 **SRS_DEVICECLIENT_25_024: [**"SetSASTokenExpiryTime" shall restart the transport
                                     1. If the device currently uses device key and
