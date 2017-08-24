@@ -36,7 +36,7 @@ public class SendMessagesIT {
     private static final Integer RETRY_MILLISECONDS = 100;
 
     //Device Connection String
-    private String connString = "HostName=android-test.azure-devices.net;DeviceId=dev1;SharedAccessKey=MOmBjZ6u7ItccxdHJqK2SpMbzUQtSnZwy5HHTe/VozE=";
+    private String connString = "";
 
 
     @Test
