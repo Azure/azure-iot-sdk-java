@@ -40,13 +40,17 @@ public AmqpsIotHubConnection(DeviceClientConfig config, Boolean useWebSockets);
 
 **SRS_AMQPSIOTHUBCONNECTION_15_002: [**The constructor shall save the configuration into private member variables.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_15_003: [**The constructor shall initialize the sender and receiver endpoint private member variables using the send/receiveEndpointFormat constants and device id.**]**
+**SRS_AMQPSIOTHUBCONNECTION_12_001: [**The constructor shall save the device operation list to private member variable.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_15_004: [**The constructor shall initialize a new Handshaker (Proton) object to handle communication handshake.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_15_005: [**The constructor shall initialize a new FlowController (Proton) object to handle communication flow.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_15_006: [**The constructor shall set its state to CLOSED.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_002: [**The constructor shall create a Proton reactor.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_003: [**The constructor shall throw IOException if the Proton reactor creation failed.**]**
 
 
 ### open
@@ -80,6 +84,10 @@ public synchronized void close()
 
 **SRS_AMQPSIOTHUBCONNECTION_15_014: [**The function shall stop the Proton reactor.**]**
 
+**SRS_AMQPSIOTHUBCONNECTION_12_004: [**The function shall throw IOException if the waitLock throws.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_005: [**The function shall throw IOException if the executor shutdown is interrupted.**]**
+
 
 ### sendMessage
 
@@ -93,14 +101,11 @@ public Integer sendMessage(Message message)
 
 **SRS_AMQPSIOTHUBCONNECTION_15_017: [**The function shall set the delivery tag for the sender.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_15_018: [**The function shall attempt to send the message using the sender link.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_019: [**The function shall advance the sender link.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_020: [**The function shall set the delivery hash to the value returned by the sender link.**]**
-
 **SRS_AMQPSIOTHUBCONNECTION_15_021: [**The function shall return the delivery hash.**]**
 
+**SRS_AMQPSIOTHUBCONNECTION_12_006: [**The function shall call sendMessageAndGetDeliveryHash on all device operation objects.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_007: [**The function shall doubles the buffer if encode throws BufferOverflowException.**]**
 
 ### sendMessageResult
 
@@ -114,6 +119,8 @@ public Boolean sendMessageResult(AmqpsMessage message, IotHubMessageResult resul
 
 **SRS_AMQPSIOTHUBCONNECTION_15_024: [**The function shall return true after the message was acknowledged.**]**
 
+**SRS_AMQPSIOTHUBCONNECTION_12_008: [**The function shall return false if message acknowledge throws exception.**]**
+
 
 ## onConnectionInit
 
@@ -125,11 +132,9 @@ public void onConnectionInit(Event event)
 
 **SRS_AMQPSIOTHUBCONNECTION_15_026: [**The event handler shall create a Session (Proton) object from the connection.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_15_027: [**The event handler shall create a Receiver and Sender (Proton) links and set the protocol tag on them to a predefined constant.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_028: [**The Receiver and Sender links shall have the properties set to client version identifier.**]**
-
 **SRS_AMQPSIOTHUBCONNECTION_15_029: [**The event handler shall open the connection, session, sender and receiver objects.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_009: [**The event handler shall calls the openLink on all device operation objects.**]**
 
 
 ## onConnectionBound
@@ -147,6 +152,15 @@ public void onConnectionBound(Event event)
 **SRS_AMQPSIOTHUBCONNECTION_15_032: [**The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport.**]**
 
 
+## onConnectionUnbound
+
+```java
+public void onConnectionUnbound(Event event)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_12_010: [**The function sets the state to closed.**]**
+
+
 ## onReactorInit
 
 ```java
@@ -156,25 +170,34 @@ public void onReactorInit(Event event)
 **SRS_AMQPSIOTHUBCONNECTION_15_033: [**The event handler shall set the current handler to handle the connection events.**]**
 
 
+## onReactorFinal
+
+```java
+public void onReactorFinal(Event event)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_12_011: [**The function shall call notify lock on close lock.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_012: [**The function shall set the reactor member variable to null.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_013: [**The function shall call openAsync and disable reconnection if it is a reconnection attempt.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_014: [**The function shall log the error if openAsync failed.**]**
+
+
 ## onDelivery
 
 ```java
 public void onDelivery(Event event)
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_15_034: [**If this link is the Receiver link, the event handler shall get the Receiver and Delivery (Proton) objects from the event.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_035: [**The event handler shall read the received buffer.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_036: [**The event handler shall create an AmqpsMessage object from the decoded buffer.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_037: [**The event handler shall set the AmqpsMessage Deliver (Proton) object.**]**
-
 **SRS_AMQPSIOTHUBCONNECTION_15_038: [**If this link is the Sender link and the event type is DELIVERY, the event handler shall get the Delivery (Proton) object from the event.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_15_039: [**The event handler shall note the remote delivery state and use it and the Delivery (Proton) hash code to inform the AmqpsIotHubConnection of the message receipt.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_15_050: [**All the listeners shall be notified that a message was received from the server.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_015: [**The function shall call getMessageFromReceiverLink on all device operation objects.**]**
 
 
 ## onLinkFlow
@@ -211,15 +234,7 @@ public void onLinkRemoteClose(Event event)
 public void onLinkInit(Event event)
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_15_043: [**If the link is the Sender link, the event handler shall create a new Target (Proton) object using the sender endpoint address member variable.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_044: [**If the link is the Sender link, the event handler shall set its target to the created Target (Proton) object.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_045: [**If the link is the Sender link, the event handler shall set the SenderSettleMode to UNSETTLED.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_046: [**If the link is the Receiver link, the event handler shall create a new Source (Proton) object using the receiver endpoint address member variable.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_047: [**If the link is the Receiver link, the event handler shall set its source to the created Source (Proton) object.**]**
+**SRS_AMQPSIOTHUBCONNECTION_12_016: [** The function shall get the link from the event and call device operation objects with it. **]**
 
 
 ## onTransportError

@@ -4,10 +4,9 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodMessage;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.*;
@@ -668,7 +667,7 @@ public class MqttIotHubConnectionTest
     }
 
     @Test
-    public void sendEventSendsDeviceTwinMessage(@Mocked final DeviceTwinMessage mockDeviceTwinMsg,
+    public void sendEventSendsDeviceTwinMessage(@Mocked final IotHubTransportMessage mockDeviceTwinMsg,
                                                 @Mocked final MqttDeviceMethod mockDeviceMethods) throws IOException
     {
         baseExpectations();
@@ -681,7 +680,7 @@ public class MqttIotHubConnectionTest
                 mockDeviceTwinMsg.getBytes();
                 result = msgBody;
                 mockDeviceTwinMsg.getMessageType();
-                result = MessageType.DeviceTwin;
+                result = MessageType.DEVICE_TWIN;
 
             }
         };
@@ -695,7 +694,7 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-                mockDeviceMethods.send((DeviceMethodMessage)any);
+                mockDeviceMethods.send((IotHubTransportMessage)any);
                 times = 0;
                 mockDeviceMessaging.send(mockDeviceTwinMsg);
                 times = 0;
@@ -708,7 +707,7 @@ public class MqttIotHubConnectionTest
     }
 
     @Test
-    public void sendEventSendsDeviceMethodMessage(@Mocked final DeviceMethodMessage mockDeviceMethodMsg, @Mocked final MqttDeviceMethod mockDeviceMethods) throws IOException
+    public void sendEventSendsDeviceMethodMessage(@Mocked final IotHubTransportMessage mockDeviceMethodMsg, @Mocked final MqttDeviceMethod mockDeviceMethods) throws IOException
     {
         baseExpectations();
         openExpectations();
@@ -720,7 +719,7 @@ public class MqttIotHubConnectionTest
                 mockDeviceMethodMsg.getBytes();
                 result = msgBody;
                 mockDeviceMethodMsg.getMessageType();
-                result = MessageType.DeviceMethods;
+                result = MessageType.DEVICE_METHODS;
 
             }
         };
@@ -802,7 +801,7 @@ public class MqttIotHubConnectionTest
                 mockDeviceMethods.receive();
                 result = null;
                 mockDeviceTwin.receive();
-                result = new DeviceTwinMessage(expectedMessageBody);
+                result = new IotHubTransportMessage(expectedMessageBody, MessageType.DEVICE_TWIN);
             }
         };
 
@@ -840,7 +839,7 @@ public class MqttIotHubConnectionTest
         {
             {
                 mockDeviceMethods.receive();
-                result = new DeviceMethodMessage(expectedMessageBody);
+                result = new IotHubTransportMessage(expectedMessageBody, MessageType.DEVICE_TWIN);
             }
         };
 

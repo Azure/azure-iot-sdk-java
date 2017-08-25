@@ -17,7 +17,6 @@ import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -61,9 +60,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     private final Boolean useWebSockets;
     private final CustomLogger logger;
 
-    private final static String TO_KEY = "to";
-    private final static String USER_ID_KEY = "userId";
-    public final static String AMQPS_APP_PROPERTY_PREFIX = "iothub-app-";
+    private ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList;
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -82,6 +79,13 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_15_002: [The constructor shall set the transport state to CLOSED.]
         this.state = State.CLOSED;
         this.logger = new CustomLogger(this.getClass());
+
+        // Codes_SRS_AMQPSTRANSPORT_12_001: [The constructor shall create device operation list with DEVICE_TELEMETRY, DEVICE_METHODS and DEVICE_TWIN objects.]
+        amqpsDeviceOperationsList = new ArrayList<>();
+
+        amqpsDeviceOperationsList.add(new AmqpsDeviceTelemetry(this.config.getDeviceId()));
+        amqpsDeviceOperationsList.add(new AmqpsDeviceMethods(this.config.getDeviceId()));
+        amqpsDeviceOperationsList.add(new AmqpsDeviceTwin(this.config.getDeviceId()));
     }
 
     /**
@@ -99,7 +103,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         }
         logger.LogInfo("Opening the connection..., method name is %s ", logger.getMethodName());
         // Codes_SRS_AMQPSTRANSPORT_15_004: [The function shall open an AMQPS connection with the IoT Hub given in the configuration.]
-        this.connection = new AmqpsIotHubConnection(this.config, this.useWebSockets);
+        this.connection = new AmqpsIotHubConnection(this.config, this.useWebSockets, amqpsDeviceOperationsList);
         try
         {
             // Codes_SRS_AMQPSTRANSPORT_15_005: [The function shall add the transport to the list of listeners subscribed to the connection events.]
@@ -109,6 +113,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         }
         catch (Exception e)
         {
+            // Codes_SRS_AMQPSTRANSPORT_12_004: [The function shall throw IOException if connection open throws.]
             logger.LogError(e);
             throw new IOException(e);
         }
@@ -148,13 +153,13 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                 
             }
         }
-        
+
+        // Codes_SRS_AMQPSTRANSPORT_12_005: [The function shall add a new outbound packet to the callback list.]
         for (Map.Entry<Integer, IotHubOutboundPacket> entry : inProgressMessages.entrySet())
         {
             IotHubOutboundPacket packet = entry.getValue();
             IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE, packet.getCallback(), packet.getContext());
             this.callbackList.add(callbackPacket);
-           
         }
                     
         // Codes_SRS_AMQPSTRANSPORT_99_037: [The method will invoke all the callbacks..]
@@ -243,13 +248,13 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_15_014: [The function shall attempt to send every message on its waiting list, one at a time.]
         while (!this.waitingMessages.isEmpty())
         {
-           logger.LogInfo("Get the message from waiting message queue to be sent to IoT Hub, method name is %s ", logger.getMethodName());
-           IotHubOutboundPacket packet = this.waitingMessages.remove();
+            logger.LogInfo("Get the message from waiting message queue to be sent to IoT Hub, method name is %s ", logger.getMethodName());
+            IotHubOutboundPacket packet = this.waitingMessages.remove();
 
             Message message = packet.getMessage();
 
             // Codes_SRS_AMQPSTRANSPORT_15_015: [The function shall skip messages with null or empty body.]
-            if (message != null && message.getBytes().length > 0)
+            if (message != null)
             {
                 // Codes_SRS_AMQPSTRANSPORT_15_039: [If the message is expired, the function shall create a callback
                 // with the MESSAGE_EXPIRED status and add it to the callback list.]
@@ -262,11 +267,30 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                 else
                 {
                     logger.LogInfo("Converting the IoT Hub message into AmqpsMessage, method name is %s ", logger.getMethodName());
-                    // Codes_SRS_AMQPSTRANSPORT_15_036: [The function shall create a new Proton message from the IoTHub message.]
-                    MessageImpl protonMessage = iotHubMessageToProtonMessage(message);
+
+                    // Codes_SRS_AMQPSTRANSPORT_12_002: [The function shall call device operation objects to convert the IoTHubMessage to Proton message.]
+                    AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = null;
+                    if (amqpsDeviceOperationsList != null)
+                    {
+                        for (int i = 0; i < amqpsDeviceOperationsList.size(); i++)
+                        {
+                            amqpsConvertToProtonReturnValue = amqpsDeviceOperationsList.get(i).convertToProton(message);
+                            if (amqpsConvertToProtonReturnValue != null)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    // Codes_SRS_AMQPSTRANSPORT_12_003: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
+                    if (amqpsConvertToProtonReturnValue == null)
+                    {
+                        // Should never happen
+                        throw new IllegalStateException("No handler found for message conversion!");
+                    }
 
                     // Codes_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
-                    Integer sendHash = connection.sendMessage(protonMessage);
+                    Integer sendHash = connection.sendMessage(amqpsConvertToProtonReturnValue.getMessageImpl(), amqpsConvertToProtonReturnValue.getMessageType());
 
                     // Codes_SRS_AMQPSTRANSPORT_15_016: [If the sent message hash is valid, it shall be added to the in progress map.]
                     if (sendHash != -1)
@@ -323,7 +347,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
      *
      * @throws IllegalStateException if the transport is closed.
      */
-    public void handleMessage() throws IllegalStateException
+    public void handleMessage() throws IllegalStateException, IOException
     {
         // Codes_SRS_AMQPSTRANSPORT_15_021: [If the transport is closed, the function shall throw an IllegalStateException.]
         if (this.state == State.CLOSED)
@@ -333,15 +357,6 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         }
         
         logger.LogInfo("Get the callback function for the received message, method name is %s ", logger.getMethodName());
-        MessageCallback callback = this.config.getMessageCallback();
-
-        // Codes_SRS_AMQPSTRANSPORT_15_025: [If no callback is defined, the list of received messages is cleared.]
-        if (callback == null)
-        {
-            logger.LogError("Callback is not defined therefore response to IoT Hub cannot be generated. All received messages will be removed from receive message queue, method name is %s ", logger.getMethodName());
-            this.receivedMessages.clear();
-            return;
-        }
 
         // Codes_SRS_AMQPSTRANSPORT_15_023: [The function shall attempt to consume a message from the IoT Hub.]
         // Codes_SRS_AMQPSTRANSPORT_15_024: [If no message was received from IotHub, the function shall return.]
@@ -349,12 +364,41 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         {
             logger.LogInfo("Consuming a message received from IoT Hub using receive message queue, method name is %s ", logger.getMethodName());
             AmqpsMessage receivedMessage = this.receivedMessages.remove();
+
+            AmqpsConvertFromProtonReturnValue amqpsHandleMessageReturnValue = null;
+
             logger.LogInfo("Converting the AmqpsMessage to IoT Hub message, method name is %s ", logger.getMethodName());
-            Message message = protonMessageToIoTHubMessage(receivedMessage);
+
+            // Codes_SRS_AMQPSTRANSPORT_12_006: [The function shall call device operation objects to convert the Proton message to IoTHubMessage.]
+            if (amqpsDeviceOperationsList != null)
+            {
+                for (int i = 0; i < amqpsDeviceOperationsList.size(); i++)
+                {
+                    amqpsHandleMessageReturnValue = amqpsDeviceOperationsList.get(i).convertFromProton(receivedMessage, config);
+                    if (amqpsHandleMessageReturnValue != null)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            // Codes_SRS_AMQPSTRANSPORT_12_007: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
+            if (amqpsHandleMessageReturnValue == null)
+            {
+                // Should never happen
+                throw new IllegalStateException("No handler found for received message!");
+            }
+
+            // Codes_SRS_AMQPSTRANSPORT_12_008: [The function shall return if there is no message callback defined.]
+            if (amqpsHandleMessageReturnValue.getMessageCallback() == null)
+            {
+                logger.LogError("Callback is not defined therefore response to IoT Hub cannot be generated. All received messages will be removed from receive message queue, method name is %s ", logger.getMethodName());
+                return;
+            }
 
             logger.LogInfo("Executing the callback function for received message, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSTRANSPORT_15_026: [The function shall invoke the callback on the message.]
-            IotHubMessageResult result = callback.execute(message, this.config.getMessageContext());
+            IotHubMessageResult result = amqpsHandleMessageReturnValue.getMessageCallback().execute(amqpsHandleMessageReturnValue.getMessage(), amqpsHandleMessageReturnValue.getMessageContext());
 
             // Codes_SRS_AMQPSTRANSPORT_15_027: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
             Boolean ackResult = this.connection.sendMessageResult(receivedMessage, result);
@@ -468,112 +512,5 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_99_003: [The registerConnectionStateCallback shall register the connection state callback.]
         this.stateCallback = callback;
         this.stateCallbackContext = callbackContext;
-    }
-
-    /**
-     * Converts an AMQPS message to a corresponding IoT Hub message.
-     *
-     * @param protonMsg the AMQPS message.
-     *
-     * @return the corresponding IoT Hub message.
-     */
-    private Message protonMessageToIoTHubMessage(MessageImpl protonMsg)
-    {
-        logger.LogInfo("Started converting AmpqsMessage into IoT Hub message, method name is %s ", logger.getMethodName());
-        Data d = (Data) protonMsg.getBody();
-        Binary b = d.getValue();
-        byte[] msgBody = new byte[b.getLength()];
-        ByteBuffer buffer = b.asByteBuffer();
-        buffer.get(msgBody);
-
-        Message msg = new Message(msgBody);
-        logger.LogInfo("Content of received message is %s, method name is %s ", new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), logger.getMethodName());
-        Properties properties = protonMsg.getProperties();
-
-        //Call all of the getters for the Proton message Properties and set those properties
-        //in the IoT Hub message properties if they exist.
-        if (properties.getCorrelationId() != null)
-        {
-            msg.setCorrelationId(properties.getCorrelationId().toString());
-        }
-
-        if (properties.getMessageId() != null)
-        {
-            msg.setMessageId(properties.getMessageId().toString());
-        }
-
-        if (properties.getTo() != null)
-        {
-            msg.setProperty(AMQPS_APP_PROPERTY_PREFIX + TO_KEY, properties.getTo());
-        }
-
-        if (properties.getUserId() != null)
-        {
-            msg.setProperty(AMQPS_APP_PROPERTY_PREFIX + USER_ID_KEY, properties.getUserId().toString());
-        }
-
-        // Setting the user properties
-        if (protonMsg.getApplicationProperties() != null)
-        {
-            Map<String, String> applicationProperties = protonMsg.getApplicationProperties().getValue();
-            for (Map.Entry<String, String> entry : applicationProperties.entrySet())
-            {
-                String propertyKey = entry.getKey();
-                if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(propertyKey))
-                {
-                    msg.setProperty(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-        
-        logger.LogInfo("Completed the conversion of AmpqsMessage into IoT Hub message, method name is %s ", logger.getMethodName());
-        return msg;
-    }
-
-    /**
-     * Creates a proton message from the IoTHub message.
-     * @param message the IoTHub input message.
-     * @return the proton message.
-     */
-    private MessageImpl iotHubMessageToProtonMessage(com.microsoft.azure.sdk.iot.device.Message message)
-    {
-        logger.LogInfo("Started converting IoT Hub message into AmpqsMessage, method name is %s ", logger.getMethodName());
-        MessageImpl outgoingMessage = (MessageImpl) Proton.message();
-        logger.LogInfo("Content of message is %s, method name is %s ", new String(message.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET), logger.getMethodName());
-        Properties properties = new Properties();
-        if (message.getMessageId() != null)
-        {
-            properties.setMessageId(message.getMessageId());
-        }
-
-        if (message.getCorrelationId() != null)
-        {
-            properties.setCorrelationId(message.getCorrelationId());
-        }
-
-        outgoingMessage.setProperties(properties);
-
-        // Codes_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
-        if (message.getProperties().length > 0)
-        {
-            Map<String, String> userProperties = new HashMap<>(message.getProperties().length);
-            for(MessageProperty messageProperty : message.getProperties())
-            {
-                if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(messageProperty.getName()))
-                {
-                    userProperties.put(messageProperty.getName(), messageProperty.getValue());
-                }
-
-            }
-
-            ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
-            outgoingMessage.setApplicationProperties(applicationProperties);
-        }
-
-        Binary binary = new Binary(message.getBytes());
-        Section section = new Data(binary);
-        outgoingMessage.setBody(section);
-        logger.LogInfo("Started converting IoT Hub message into AmpqsMessage, method name is %s ", logger.getMethodName());
-        return outgoingMessage;
     }
 }

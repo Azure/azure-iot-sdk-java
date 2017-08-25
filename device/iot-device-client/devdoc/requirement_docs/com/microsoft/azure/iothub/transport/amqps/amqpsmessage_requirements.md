@@ -24,7 +24,6 @@ public class AmqpsMessage extends MessageImpl
 }
 ```
 
-
 ### acknowledge
 
 ```java
@@ -38,3 +37,20 @@ public void acknowledge(ACK_TYPE ackType)
 **SRS_AMQPSMESSAGE_14_003: [**If the ACK_TYPE is REJECT, the function shall set a Rejected disposition on the private Delivery object.**]**
 
 **SRS_AMQPSMESSAGE_14_005: [**The function shall settle the delivery after setting the proper disposition.**]**
+
+
+### getAmqpsMessageType
+
+```java
+public MessageType getAmqpsMessageType();
+```
+
+**SRS_AMQPSMESSAGE_12_001: [**Getter for the MessageType.**]**
+
+### setAmqpsMessageType
+
+```java
+public void setAmqpsMessageType(MessageType amqpsMessageType)
+```
+
+**SRS_AMQPSMESSAGE_12_002: [**Setter for the MessageType.**]**

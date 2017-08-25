@@ -34,6 +34,7 @@ public final class MessageProperty {
         reservedPropertyNames.add("iothub-content-type");
         reservedPropertyNames.add("iothub-content-encoding");
         reservedPropertyNames.add("iothub-absolute-expiry-time");
+        reservedPropertyNames.add("IoThub-methodname");
 
         RESERVED_PROPERTY_NAMES = Collections.unmodifiableSet(reservedPropertyNames);
     }

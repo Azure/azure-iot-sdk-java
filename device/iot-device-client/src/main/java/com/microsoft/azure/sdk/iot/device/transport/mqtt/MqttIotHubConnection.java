@@ -4,12 +4,11 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodMessage;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 
@@ -198,7 +197,7 @@ public class MqttIotHubConnection
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_010: [If the message is null or empty,
             // the function shall return status code BAD_FORMAT.]
             if (message == null || message.getBytes() == null ||
-                    ((message.getMessageType() != MessageType.DeviceTwin && message.getMessageType() != MessageType.DeviceMethods) && message.getBytes().length == 0))
+                    ((message.getMessageType() != MessageType.DEVICE_TWIN && message.getMessageType() != MessageType.DEVICE_METHODS) && message.getBytes().length == 0))
             {
                 return IotHubStatusCode.BAD_FORMAT;
             }
@@ -219,15 +218,15 @@ public class MqttIotHubConnection
             try
             {
                 // Codes_SRS_MQTTIOTHUBCONNECTION_15_009: [The function shall send the message payload.]
-                if (message.getMessageType() == MessageType.DeviceMethods)
+                if (message.getMessageType() == MessageType.DEVICE_METHODS)
                 {
                     this.deviceMethod.start();
-                    this.deviceMethod.send((DeviceMethodMessage) message);
+                    this.deviceMethod.send((IotHubTransportMessage) message);
                 }
-                else if (message.getMessageType() == MessageType.DeviceTwin)
+                else if (message.getMessageType() == MessageType.DEVICE_TWIN)
                 {
                     this.deviceTwin.start();
-                    this.deviceTwin.send((DeviceTwinMessage) message);
+                    this.deviceTwin.send((IotHubTransportMessage) message);
                 }
                 else
                 {

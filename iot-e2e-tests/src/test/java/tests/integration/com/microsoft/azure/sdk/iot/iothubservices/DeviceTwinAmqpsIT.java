@@ -31,7 +31,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
 import static org.junit.Assert.*;
 
-public class DeviceTwinIT
+public class DeviceTwinAmqpsIT
 {
     // Max time to wait to see it on Hub
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 200; // 0.2 sec
@@ -168,8 +168,8 @@ public class DeviceTwinIT
         for (int i = 0 ; i < MAX_DEVICES; i++)
         {
             devicesUnderTest[i] = new DeviceState();
-            String deviceIdMqtt = "java-device-twin-e2e-test-mqtt".concat(UUID.randomUUID().toString());
-            devicesUnderTest[i].sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceIdMqtt, null, null);
+            String deviceIdAmqps = "java-device-twin-e2e-test-amqps".concat(UUID.randomUUID().toString());
+            devicesUnderTest[i].sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceIdAmqps, null, null);
             devicesUnderTest[i].sCDeviceForRegistryManager = registryManager.addDevice(devicesUnderTest[i].sCDeviceForRegistryManager);
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
             setUpTwin(devicesUnderTest[i]);
@@ -196,7 +196,7 @@ public class DeviceTwinIT
         if (deviceClient == null)
         {
             deviceState.dCDeviceForTwin = new DeviceExtension();
-            deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager), IotHubClientProtocol.MQTT);
+            deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager), IotHubClientProtocol.AMQPS);
             deviceClient.open();
             deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
             deviceState.deviceTwinStatus = STATUS.SUCCESS;
@@ -260,8 +260,8 @@ public class DeviceTwinIT
     public void setUpNewDevice() throws IOException , IotHubException, NoSuchAlgorithmException, URISyntaxException, InterruptedException
     {
         deviceUnderTest = new DeviceState();
-        String deviceIdMqtt = "java-device-twin-e2e-test-mqtt".concat(UUID.randomUUID().toString());
-        deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceIdMqtt, null, null);
+        String deviceIdAmqps = "java-device-twin-e2e-test-amqps".concat(UUID.randomUUID().toString());
+        deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceIdAmqps, null, null);
         deviceUnderTest.sCDeviceForRegistryManager = registryManager.addDevice(deviceUnderTest.sCDeviceForRegistryManager);
         setUpTwin(deviceUnderTest);
     }

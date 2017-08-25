@@ -46,6 +46,8 @@ public AmqpsTransport(DeviceClientConfig config, Boolean useWebSockets);
 
 **SRS_AMQPSTRANSPORT_15_002: [**The constructor shall set the transport state to CLOSED.**]**
 
+**SRS_AMQPSTRANSPORT_12_001: [**The constructor shall create device operation list with DeviceTelemetry, DeviceMethods and DeviceTwin objects.**]**
+
 
 ### open
 
@@ -60,6 +62,8 @@ public void open() throws IOException;
 **SRS_AMQPSTRANSPORT_15_005: [**The function shall add the transport to the list of listeners subscribed to the connection events.**]**
 
 **SRS_AMQPSTRANSPORT_15_006: [**If the connection was opened successfully, the transport state shall be set to OPEN.**]**
+
+**SRS_AMQPSTRANSPORT_12_004: [**The function shall throw IOException if connection open throws.**]**
 
 
 ### close
@@ -77,6 +81,8 @@ public void close() throws IOException;
 **SRS_AMQPSTRANSPORT_15_008: [**The function shall close an AMQPS connection with the IoT Hub given in the configuration.**]**
 
 **SRS_AMQPSTRANSPORT_15_009: [**The function shall set the transport state to CLOSED.**]**
+
+**SRS_AMQPSTRANSPORT_12_005: [**The function shall add a new outbound packet to the callback list.**]**
 
 
 ### addMessage
@@ -117,14 +123,13 @@ public void sendMessages() throws IOException;
 
 **SRS_AMQPSTRANSPORT_15_017: [**If the sent message hash is not valid, it is buffered to be sent in a subsequent attempt.**]**
 
-**SRS_AMQPSTRANSPORT_15_036: [**The function shall create a new Proton message from the IoTHub message.**]**
-
-**SRS_AMQPSTRANSPORT_15_038: [**The function shall add all user properties to the application properties of the Proton message.**]**
-
 **SRS_AMQPSTRANSPORT_15_037: [**The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.**]**
 
 **SRS_AMQPSTRANSPORT_15_039: [**If the message is expired, the function shall create a callback with the MESSAGE_EXPIRED status and add it to the callback list.**]**
 
+**SRS_AMQPSTRANSPORT_12_002: [**The function shall call device operation objects to convert the IoTHubMessage to Proton message.**]**
+
+**SRS_AMQPSTRANSPORT_12_003: [**The function throws IllegalStateException if none of the device operation object could handle the conversion.**]**
 
 ### invokeCallbacks
 
@@ -149,15 +154,17 @@ public void handleMessage() throws IOException;
 
 **SRS_AMQPSTRANSPORT_15_024: [**If no message was received from IotHub, the function shall return.**]**
 
-**SRS_AMQPSTRANSPORT_15_025: [**If no callback is defined, the list of received messages is cleared.**]**
-
 **SRS_AMQPSTRANSPORT_15_026: [**The function shall invoke the callback on the message.**]**
 
 **SRS_AMQPSTRANSPORT_15_027: [**The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.**]**
 
 **SRS_AMQPSTRANSPORT_15_028: [**If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.**]**
 
-**SRS_AMQPSTRANSPORT_34_028: [**The System properties saved in the Amqps message shall be saved within the Message instance sent as a part of the callback.**]**
+**SRS_AMQPSTRANSPORT_12_006: [**The function shall call device operation objects to convert the Proton message to IoTHubMessage.**]**
+
+**SRS_AMQPSTRANSPORT_12_007: [**The function throws IllegalStateException if none of the device operation object could handle the conversion.**]**
+
+**SRS_AMQPSTRANSPORT_12_008: [**The function shall return if there is no message callback defined.**]**
 
 
 ### messageSent

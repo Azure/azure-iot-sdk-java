@@ -3,13 +3,17 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodMessage;
 import com.microsoft.azure.sdk.iot.device.MessageType;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/* Unit tests for IotHubTransportMessage
+* 100% methods covered
+* 100% lines covered
+*/
 public class DeviceMethodMessageTest
 {
     /*
@@ -20,10 +24,10 @@ public class DeviceMethodMessageTest
     public void constructorSucceeds()
     {
         //act
-        DeviceMethodMessage testDMMessage = new DeviceMethodMessage(new byte[0]);
+        IotHubTransportMessage testDMMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
 
         //assert
-        assertTrue(testDMMessage.getMessageType() == MessageType.DeviceMethods);
+        assertTrue(testDMMessage.getMessageType() == MessageType.DEVICE_METHODS);
 
     }
 
@@ -34,7 +38,7 @@ public class DeviceMethodMessageTest
     public void setMethodNameSets()
     {
         //arrange
-        DeviceMethodMessage testDMMessage = new DeviceMethodMessage(new byte[0]);
+        IotHubTransportMessage testDMMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
 
         //act
         testDMMessage.setMethodName("TestName");
@@ -51,7 +55,7 @@ public class DeviceMethodMessageTest
     public void setMethodNameThrowsOnNull()
     {
         //arrange
-        DeviceMethodMessage testDMMessage = new DeviceMethodMessage(new byte[0]);
+        IotHubTransportMessage testDMMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
 
         //act
         testDMMessage.setMethodName(null);
@@ -65,7 +69,7 @@ public class DeviceMethodMessageTest
     public void getMethodNameGets()
     {
         //arrange
-        DeviceMethodMessage testDMMessage = new DeviceMethodMessage(new byte[0]);
+        IotHubTransportMessage testDMMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
         testDMMessage.setMethodName("TestName");
 
         //act
