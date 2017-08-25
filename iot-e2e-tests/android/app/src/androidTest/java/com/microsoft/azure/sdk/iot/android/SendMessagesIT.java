@@ -3,7 +3,7 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.iothub.azure.microsoft.com.android;
+package com.microsoft.azure.sdk.iot.android;
 
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.MediumTest;

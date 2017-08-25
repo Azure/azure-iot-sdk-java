@@ -61,8 +61,3 @@ repositories {
     mavenLocal()
     mavenCentral()
 }
-
-dependencies {
-    // Remote binary dependency
-    //compile 'com.microsoft.azure.sdk.iot:iot-service-client:1.8.24'
-}
