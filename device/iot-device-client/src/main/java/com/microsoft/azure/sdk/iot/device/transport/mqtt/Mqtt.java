@@ -4,14 +4,12 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.*;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -22,17 +20,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 abstract public class Mqtt implements MqttCallback
 {
-     /*
-     Variables which apply to all the concrete classes as well as to Mqtt and are to be instantiated only once
-     in lifetime.
-     */
-    private static MqttConnectionInfo info ;
-    static ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
-    static Object MQTT_LOCK;
-    
+    private MqttConnection mqttConnection;
     private DeviceClientConfig deviceClientConfig = null;
+    ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
+    Object mqttLock = null;
+
     // SAS token expiration check on retry
-    private boolean userSpecifiedSASTokenExpiredOnRetry = false; // by default set to false
+    private boolean userSpecifiedSASTokenExpiredOnRetry = false;
 
     /* Each property is separated by & and all system properties start with an encoded $ (except for iothub-ack) */
     final static char MESSAGE_PROPERTY_SEPARATOR = '&';
@@ -51,153 +45,23 @@ abstract public class Mqtt implements MqttCallback
     final static String USER_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".uid";
     private final static String IOTHUB_ACK = "iothub-ack";
 
-    /*
-      Inner class which holds the basic information related to Mqtt Client Async.
-     */
-    protected class MqttConnectionInfo
-    {
-        MqttAsyncClient mqttAsyncClient = null;
-        private MqttConnectOptions connectionOptions = null;
-
-        //mqtt connection options
-        private static final int KEEP_ALIVE_INTERVAL = 20;
-        private static final int MQTT_VERSION = 4;
-        private static final boolean SET_CLEAN_SESSION = false;
-        private static final int QOS = 1;
-        private static final int MAX_WAIT_TIME = 1000;
-
-        // paho mqtt only supports 10 messages in flight at the same time
-        private static final int MAX_IN_FLIGHT_COUNT = 10;
-
-        MqttConnectionInfo(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext) throws IOException
-        {
-            try
-            {
-                mqttAsyncClient = new MqttAsyncClient(serverURI, clientId, new MemoryPersistence());
-                mqttAsyncClient.setCallback(Mqtt.this);
-                connectionOptions = new MqttConnectOptions();
-                this.updateConnectionOptions(userName, password, iotHubSSLContext);
-            }
-            catch (MqttException e)
-            {
-                mqttAsyncClient = null;
-                connectionOptions = null;
-                throw new IOException("Error initializing MQTT connection:" + e.getMessage());
-            }
-        }
-
-        /**
-         * Generates the connection options for the mqtt broker connection.
-         *
-         * @param userName the user name for the mqtt broker connection.
-         * @param userPassword the user password for the mqtt broker connection.
-         */
-        private void updateConnectionOptions(String userName, String userPassword, IotHubSSLContext iotHubSSLContext)
-        {
-            this.connectionOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL);
-            this.connectionOptions.setCleanSession(SET_CLEAN_SESSION);
-            this.connectionOptions.setMqttVersion(MQTT_VERSION);
-            this.connectionOptions.setUserName(userName);
-            this.connectionOptions.setPassword(userPassword.toCharArray());
-            this.connectionOptions.setSocketFactory(iotHubSSLContext.getIotHubSSlContext().getSocketFactory());
-        }
-    }
-
-    private void setMqttInfo(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext) throws IOException
-    {
-        /*
-        **Codes_SRS_Mqtt_25_003: [**The constructor shall use the configuration to instantiate an instance of the inner class MqttConnectionInfo if not already created.**]**
-         */
-        /*
-        ** Codes_SRS_Mqtt_25_004: [**If an instance of the inner class MqttConnectionInfo is already created than it shall return doing nothing.**]**
-         */
-        if (Mqtt.info == null)
-        {
-            Mqtt.info = new MqttConnectionInfo(serverURI, clientId, userName, password, iotHubSSLContext);
-            Mqtt.allReceivedMessages = new ConcurrentLinkedQueue<>();
-            Mqtt.MQTT_LOCK = new Object();
-            this.userSpecifiedSASTokenExpiredOnRetry = false;
-        }
-    }
-
     /**
      * Constructor to instantiate mqtt broker connection.
      *
      */
-    public Mqtt()
+    public Mqtt(MqttConnection mqttConnection) throws IllegalArgumentException
     {
-        /*
-        ** Codes_SRS_Mqtt_25_001: [**The constructor shall instantiate MQTT lock for using base class.**]**
-        */
+        if (mqttConnection == null)
+        {
+            //Codes_SRS_Mqtt_25_002: [The constructor shall throw InvalidParameter Exception if mqttConnection is null .]
+            throw new IllegalArgumentException("Mqtt connection info cannot be null");
+        }
+
+        //Codes_SRS_Mqtt_25_003: [The constructor shall retrieve lock, queue from the provided connection information and save the connection.]
+        this.mqttConnection = mqttConnection;
+        this.allReceivedMessages = mqttConnection.getAllReceivedMessages();
+        this.mqttLock = mqttConnection.getMqttLock();
         this.userSpecifiedSASTokenExpiredOnRetry = false;
-        if (Mqtt.MQTT_LOCK == null)
-        {
-            Mqtt.MQTT_LOCK = new Object();
-        }
-    }
-
-    /**
-     * Constructor to instantiate mqtt broker connection.
-     *
-     * @param serverURI the server uri associated with this mqtt broker connection
-     * @param clientId the client Id associated with this mqtt broker connection.
-     * @param userName the user name for the mqtt broker connection.
-     * @param userPassword the user password for the mqtt broker connection.
-     * @param iotHubSSLContext the iothub SSL context
-     * @throws IOException if failed to set the mqtt information
-     */
-    public Mqtt(String serverURI, String clientId, String userName, String userPassword, IotHubSSLContext iotHubSSLContext) throws IOException
-    {
-        /*
-         ** Codes_SRS_Mqtt_25_002: [**The constructor shall throw InvalidParameter Exception if any of the parameters are null or empty .**]**
-         */
-        if (serverURI == null || clientId == null || userName == null || userPassword == null || iotHubSSLContext == null)
-        {
-            throw new InvalidParameterException();
-        }
-
-        else if (serverURI.length() == 0 || clientId.length() == 0 || userName.length() == 0 || userPassword.length() == 0)
-        {
-            throw new InvalidParameterException();
-        }
-
-        try
-        {
-            /*
-            **Codes_SRS_Mqtt_25_003: [**The constructor shall use the configuration to instantiate an instance of the inner class MqttConnectionInfo if not already created.**]**
-             */
-            setMqttInfo(serverURI, clientId, userName, userPassword, iotHubSSLContext);
-        }
-        catch (IOException e)
-        {
-            /*
-            **Codes_SRS_Mqtt_25_045: [**The constructor throws IOException if MqttException is thrown and doesn't instantiate this instance.**]**
-             */
-            Mqtt.info = null;
-            Mqtt.allReceivedMessages = null;
-            Mqtt.MQTT_LOCK = null;
-            throw new IOException(e.getMessage());
-        }
-    }
-
-    /**
-     * Method to restart mqtt broker connection.
-     */
-
-    public void restartBaseMqtt()
-    {
-        /*
-            As this is abstract class, if we ever want to restart application
-            in the current scope to create a new instance of this base class,
-            we have to unset all its static variables.
-        */
-
-        /*
-        ** Codes_SRS_Mqtt_25_046: [**restartBaseMqtt shall unset all the static variables.**]**
-         */
-        Mqtt.allReceivedMessages = null;
-        Mqtt.MQTT_LOCK = null;
-        Mqtt.info = null;
     }
 
     /**
@@ -207,11 +71,11 @@ abstract public class Mqtt implements MqttCallback
      */
     protected void connect() throws IOException
     {
-        synchronized (Mqtt.MQTT_LOCK)
+        synchronized (this.mqttLock)
         {
             try
             {
-                if (Mqtt.info == null)
+                if (this.mqttConnection == null)
                 {
                     /*
                     ** Codes_SRS_Mqtt_25_006: [**If the inner class MqttConnectionInfo has not been instantiated then the function shall throw IOException.**]**
@@ -222,12 +86,12 @@ abstract public class Mqtt implements MqttCallback
                 /*
                 **Codes_SRS_Mqtt_25_008: [**If the MQTT connection is already open, the function shall do nothing.**]**
                  */
-                if (!Mqtt.info.mqttAsyncClient.isConnected())
+                if (!this.mqttConnection.getMqttAsyncClient().isConnected())
                 {
                     /*
                     **Codes_SRS_Mqtt_25_005: [**The function shall establish an MQTT connection with an IoT Hub using the provided host name, user name, device ID, and sas token.**]**
                      */
-                    IMqttToken connectToken = Mqtt.info.mqttAsyncClient.connect(Mqtt.info.connectionOptions);
+                    IMqttToken connectToken = this.mqttConnection.getMqttAsyncClient().connect(Mqtt.this.mqttConnection.getConnectionOptions());
                     connectToken.waitForCompletion();
                 }
             }
@@ -254,15 +118,15 @@ abstract public class Mqtt implements MqttCallback
             /*
             **Codes_SRS_Mqtt_25_010: [**If the MQTT connection is closed, the function shall do nothing.**]**
             */
-            if (Mqtt.info.mqttAsyncClient.isConnected())
+            if (this.mqttConnection.getMqttAsyncClient() != null && this.mqttConnection.getMqttAsyncClient().isConnected())
             {
                 /*
                 ** Codes_SRS_Mqtt_25_009: [**The function shall close the MQTT connection.**]**
                 */
-                IMqttToken disconnectToken = Mqtt.info.mqttAsyncClient.disconnect();
+                IMqttToken disconnectToken = this.mqttConnection.getMqttAsyncClient().disconnect();
                 disconnectToken.waitForCompletion();
             }
-            Mqtt.info.mqttAsyncClient = null;
+            this.mqttConnection.setMqttAsyncClient(null);
         }
         catch (MqttException e)
         {
@@ -282,13 +146,12 @@ abstract public class Mqtt implements MqttCallback
      */
     protected void publish(String publishTopic, byte[] payload) throws IOException
     {
-        synchronized (Mqtt.MQTT_LOCK)
+        synchronized (this.mqttLock)
         {
             try
             {
-                if (Mqtt.info == null)
+                if (this.mqttConnection == null)
                 {
-                    System.out.println("Mqtt client should be initialised atleast once before using it");
                     throw new InvalidParameterException();
                 }
                 
@@ -300,7 +163,7 @@ abstract public class Mqtt implements MqttCallback
                     throw new IOException("Cannot publish when user supplied SAS token has expired");
                 }
 
-                if (!Mqtt.info.mqttAsyncClient.isConnected())
+                if (!this.mqttConnection.getMqttAsyncClient().isConnected())
                 {
                     /*
                     ** Codes_SRS_Mqtt_25_012: [**If the MQTT connection is closed, the function shall throw an IOException.**]**
@@ -316,7 +179,7 @@ abstract public class Mqtt implements MqttCallback
                     throw new IOException("Cannot publish on null or empty publish topic");
                 }
 
-                while (Mqtt.info.mqttAsyncClient.getPendingDeliveryTokens().length >= MqttConnectionInfo.MAX_IN_FLIGHT_COUNT)
+                while (this.mqttConnection.getMqttAsyncClient().getPendingDeliveryTokens().length >= MqttConnection.MAX_IN_FLIGHT_COUNT)
                 {
                     /*
                     **Codes_SRS_Mqtt_25_048: [**publish shall check for pending publish tokens by calling getPendingDeliveryTokens.
@@ -324,7 +187,7 @@ abstract public class Mqtt implements MqttCallback
                     */
                     Thread.sleep(10);
 
-                    if (!Mqtt.info.mqttAsyncClient.isConnected())
+                    if (!this.mqttConnection.getMqttAsyncClient().isConnected())
                     {
                     /*
                     ** Codes_SRS_Mqtt_25_012: [**If the MQTT connection is closed, the function shall throw an IOException.**]**
@@ -335,13 +198,13 @@ abstract public class Mqtt implements MqttCallback
 
                 MqttMessage mqttMessage = (payload.length == 0) ? new MqttMessage() : new MqttMessage(payload);
 
-                mqttMessage.setQos(MqttConnectionInfo.QOS);
+                mqttMessage.setQos(MqttConnection.QOS);
 
                 /*
                 **Codes_SRS_Mqtt_25_014: [**The function shall publish message payload on the publishTopic specified to the IoT Hub given in the configuration.**]**
                  */
 
-                IMqttDeliveryToken publishToken = Mqtt.info.mqttAsyncClient.publish(publishTopic, mqttMessage);
+                IMqttDeliveryToken publishToken = this.mqttConnection.getMqttAsyncClient().publish(publishTopic, mqttMessage);
 
             }
             catch (MqttException e)
@@ -370,11 +233,11 @@ abstract public class Mqtt implements MqttCallback
      */
     protected void subscribe(String topic) throws IOException
     {
-        synchronized (Mqtt.MQTT_LOCK)
+        synchronized (this.mqttLock)
         {
             try
             {
-                if (Mqtt.info == null)
+                if (this.mqttConnection == null)
                 {
                     throw new IOException("Mqtt client should be initialised atleast once before using it");
                 }
@@ -393,7 +256,7 @@ abstract public class Mqtt implements MqttCallback
                      */
                     throw new IOException("Cannot subscribe when user supplied SAS token has expired");
                 }
-                else if (!Mqtt.info.mqttAsyncClient.isConnected())
+                else if (!this.mqttConnection.getMqttAsyncClient().isConnected())
                 {
                     /*
                     **Codes_SRS_Mqtt_25_015: [**If the MQTT connection is closed, the function shall throw an IOexception with message.**]**
@@ -403,9 +266,9 @@ abstract public class Mqtt implements MqttCallback
                 /*
                 **Codes_SRS_Mqtt_25_017: [**The function shall subscribe to subscribeTopic specified to the IoT Hub given in the configuration.**]**
                  */
-                IMqttToken subToken = Mqtt.info.mqttAsyncClient.subscribe(topic, MqttConnectionInfo.QOS);
+                IMqttToken subToken = this.mqttConnection.getMqttAsyncClient().subscribe(topic, MqttConnection.QOS);
 
-                subToken.waitForCompletion(MqttConnectionInfo.MAX_WAIT_TIME);
+                subToken.waitForCompletion(MqttConnection.MAX_WAIT_TIME);
             }
             catch (MqttException e)
             {
@@ -425,11 +288,11 @@ abstract public class Mqtt implements MqttCallback
      */
     void unsubscribe(String topic) throws IOException
     {
-        synchronized (Mqtt.MQTT_LOCK)
+        synchronized (this.mqttLock)
         {
             try
             {
-                if (!Mqtt.info.mqttAsyncClient.isConnected())
+                if (!this.mqttConnection.getMqttAsyncClient().isConnected())
                 {
                     /*
                     **Codes_SRS_Mqtt_25_018: [**If the MQTT connection is closed, the function shall throw an IOException with message.**]**
@@ -448,7 +311,7 @@ abstract public class Mqtt implements MqttCallback
                 /*
                 **Codes_SRS_Mqtt_25_020: [**The function shall unsubscribe from subscribeTopic specified to the IoT Hub given in the configuration.**]**
                  */
-                IMqttToken subToken = Mqtt.info.mqttAsyncClient.unsubscribe(topic);
+                IMqttToken subToken = this.mqttConnection.getMqttAsyncClient().unsubscribe(topic);
                 subToken.waitForCompletion();
 
             }
@@ -464,11 +327,11 @@ abstract public class Mqtt implements MqttCallback
 
     protected boolean isConnected()
     {
-        if (Mqtt.info == null || Mqtt.info.mqttAsyncClient == null)
+        if (this.mqttConnection == null || this.mqttConnection.getMqttAsyncClient() == null)
         {
             throw new InvalidParameterException("Mqtt client should be initialised atleast once before using it");
         }
-        return Mqtt.info.mqttAsyncClient.isConnected();
+        return this.mqttConnection.getMqttAsyncClient().isConnected();
     }
 
     /**
@@ -479,9 +342,9 @@ abstract public class Mqtt implements MqttCallback
      */
     public Message receive() throws IOException
     {
-        synchronized (Mqtt.MQTT_LOCK)
+        synchronized (this.mqttLock)
         {
-            if (Mqtt.info == null)
+            if (this.mqttConnection == null)
             {
                 throw new InvalidParameterException("Mqtt client should be initialised at least once before using it");
             }
@@ -527,12 +390,12 @@ abstract public class Mqtt implements MqttCallback
     @Override
     public void connectionLost(Throwable throwable)
     {
-        synchronized (Mqtt.MQTT_LOCK)
+        synchronized (this.mqttLock)
         {
-            if (Mqtt.info != null && Mqtt.info.mqttAsyncClient != null)
+            if (this.mqttConnection != null && this.mqttConnection.getMqttAsyncClient() != null)
             {
                 int currentReconnectionAttempt = 0;
-                while (!Mqtt.info.mqttAsyncClient.isConnected())
+                while (!this.mqttConnection.getMqttAsyncClient().isConnected())
                 {
                     System.out.println("Lost connection to the server. Reconnecting " + currentReconnectionAttempt + " time.");
                     try
@@ -541,8 +404,7 @@ abstract public class Mqtt implements MqttCallback
                         /*
                         **Codes_SRS_Mqtt_99_050: [**The function shall check if SAS token has already expired.**]**
                         */
-                        String sasToken = new String(Mqtt.info.connectionOptions.getPassword());
-                        if (!IotHubSasToken.isSasTokenExpired(sasToken))
+                        if (!IotHubSasToken.isSasTokenExpired(new String(this.mqttConnection.getConnectionOptions().getPassword())))
                         {
                             connect(); // Try to reconnect
                         }
@@ -556,8 +418,8 @@ abstract public class Mqtt implements MqttCallback
                             /*
                             **Codes_SRS_Mqtt_99_052: [**The function shall generate a new SAS token.**]**
                             */
-                                sasToken = this.deviceClientConfig.getSharedAccessToken();
-                                Mqtt.info.connectionOptions.setPassword(sasToken.toString().toCharArray());
+                                String sasToken = this.deviceClientConfig.getSharedAccessToken();
+                                this.mqttConnection.getConnectionOptions().setPassword(sasToken.toCharArray());
                                 connect(); // Try to reconnect
                             }
                             else
@@ -609,7 +471,7 @@ abstract public class Mqtt implements MqttCallback
         /*
         **Codes_SRS_Mqtt_25_030: [**The payload of the message and the topic is added to the received messages queue .**]**
          */
-        Mqtt.allReceivedMessages.add(new MutablePair<>(topic, mqttMessage.getPayload()));
+        this.mqttConnection.getAllReceivedMessages().add(new MutablePair<>(topic, mqttMessage.getPayload()));
     }
 
     /**

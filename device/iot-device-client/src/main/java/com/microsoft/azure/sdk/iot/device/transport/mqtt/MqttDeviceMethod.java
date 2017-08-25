@@ -36,12 +36,12 @@ public class MqttDeviceMethod extends Mqtt
     private final int METHOD_TOKEN = 3;
     private final int REQID_TOKEN = 4;
 
-    public MqttDeviceMethod() throws IOException
+    public MqttDeviceMethod(MqttConnection mqttConnection) throws IOException
     {
         /*
         Codes_SRS_MqttDeviceMethod_25_001: [**The constructor shall instantiate super class without any parameters.**]**
          */
-        super();
+        super(mqttConnection);
         /*
         Codes_SRS_MqttDeviceMethod_25_002: [**The constructor shall create subscribe and response topics strings for device methods as per the spec.**]**
          */
@@ -161,7 +161,7 @@ public class MqttDeviceMethod extends Mqtt
     @Override
     public Message receive() throws IOException
     {
-        synchronized (Mqtt.MQTT_LOCK)
+        synchronized (this.mqttLock)
         {
             IotHubTransportMessage message = null;
 
