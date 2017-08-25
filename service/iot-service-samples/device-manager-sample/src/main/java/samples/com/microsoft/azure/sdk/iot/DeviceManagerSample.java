@@ -16,6 +16,7 @@ import java.net.URISyntaxException;
 public class DeviceManagerSample
 {
     /**
+     * A simple sample for doing CRUD operations
      * @param args
      * @throws IOException
      * @throws URISyntaxException

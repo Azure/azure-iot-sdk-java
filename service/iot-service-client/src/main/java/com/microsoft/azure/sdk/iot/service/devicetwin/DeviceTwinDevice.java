@@ -73,13 +73,13 @@ public class DeviceTwinDevice
         if (eTag == null || eTag.length() == 0)
         {
             /*
-            **Codes_SRS_DEVICETWINDEVICE_21_029: [** The setETag shall throw IllegalArgumentException if the input string is empty or null.**]**
+            **Codes_SRS_DEVICETWINDEVICE_21_029: [** The seteTag shall throw IllegalArgumentException if the input string is empty or null.**]**
              */
             throw new IllegalArgumentException("ETag cannot be null or empty");
         }
 
         /*
-        **Codes_SRS_DEVICETWINDEVICE_21_030: [** The setETag shall store the eTag.**]**
+        **Codes_SRS_DEVICETWINDEVICE_21_030: [** The seteTag shall store the eTag.**]**
          */
         this.eTag = eTag;
     }
@@ -92,7 +92,7 @@ public class DeviceTwinDevice
     public String getETag()
     {
         /*
-        **Codes_SRS_DEVICETWINDEVICE_21_031: [** The getETag shall return the stored eTag.**]**
+        **Codes_SRS_DEVICETWINDEVICE_21_031: [** The geteTag shall return the stored eTag.**]**
          */
         return this.eTag;
     }

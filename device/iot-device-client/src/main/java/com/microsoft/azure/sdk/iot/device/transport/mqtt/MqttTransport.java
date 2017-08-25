@@ -276,14 +276,14 @@ public final class MqttTransport implements IotHubTransport
                 throw new IllegalStateException("MQTT transport is closed.");
             }
 
-            MessageCallback callback = this.config.getMessageCallback();
-            Object context = this.config.getMessageContext();
+            MessageCallback callback = this.config.getDeviceTelemetryMessageCallback();
+            Object context = this.config.getDeviceTelemetryMessageContext();
 
             MessageCallback deviceTwinMessageCallback = this.config.getDeviceTwinMessageCallback();
             Object deviceTwinContext = this.config.getDeviceTwinMessageContext();
 
-            MessageCallback deviceMethodMessageCallback = this.config.getDeviceMethodMessageCallback();
-            Object deviceMethodContext = this.config.getDeviceMethodMessageContext();
+            MessageCallback deviceMethodMessageCallback = this.config.getDeviceMethodsMessageCallback();
+            Object deviceMethodContext = this.config.getDeviceMethodsMessageContext();
 
             if (callback == null && deviceTwinMessageCallback == null && deviceMethodMessageCallback == null)
             {
@@ -297,14 +297,14 @@ public final class MqttTransport implements IotHubTransport
             // the function shall invoke the callback on the message.]
             if (message != null)
             {
-                if (message.getMessageType() == MessageType.DeviceMethods)
+                if (message.getMessageType() == MessageType.DEVICE_METHODS)
                 {
                     if (deviceMethodMessageCallback != null)
                     {
                         deviceMethodMessageCallback.execute(message, deviceMethodContext);
                     }
                 }
-                else if (message.getMessageType() == MessageType.DeviceTwin)
+                else if (message.getMessageType() == MessageType.DEVICE_TWIN)
                 {
                     if (deviceTwinMessageCallback != null)
                     {

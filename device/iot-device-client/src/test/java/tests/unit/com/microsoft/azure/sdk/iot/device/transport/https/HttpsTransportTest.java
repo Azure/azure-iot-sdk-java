@@ -646,9 +646,9 @@ public class HttpsTransportTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getMessageCallback();
+                mockConfig.getDeviceTelemetryMessageCallback();
                 result = mockCallback;
-                mockConfig.getMessageContext();
+                mockConfig.getDeviceTelemetryMessageContext();
                 result = context;
                 mockConn.receiveMessage();
                 result = mockMessage;

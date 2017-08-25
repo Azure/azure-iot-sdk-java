@@ -4,12 +4,11 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodMessage;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 
@@ -29,6 +28,12 @@ public class MqttIotHubConnection
     private String iotHubUserPassword;
 
     //string constants
+    private static final String WS_SSL_PREFIX = "wss://";
+    private static final String WS_SSL_PORT_SUFFIX = ":443";
+
+    private static final String WEBSOCKET_RAW_PATH = "/$iothub/websocket";
+    private static final String WEBSOCKET_QUERY = "?iothub-no-client-cert=true";
+
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
 
@@ -111,8 +116,20 @@ public class MqttIotHubConnection
                 String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION, "UTF-8");
                 this.iotHubUserName = this.config.getIotHubHostname() + "/" + this.config.getDeviceId() + "/" + TWIN_API_VERSION + "/" + clientIdentifier;
 
-                this.deviceMessaging = new MqttMessaging(SSL_PREFIX + this.config.getIotHubHostname() + SSL_PORT_SUFFIX,
+                if (this.config.isUseWebsocket())
+                {
+                    //Codes_SRS_MQTTIOTHUBCONNECTION_25_018: [The function shall establish an MQTT WS connection with a server uri as wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true if websocket was enabled.]
+                    final String wsServerUri = WS_SSL_PREFIX + this.config.getIotHubHostname() + WEBSOCKET_RAW_PATH + WEBSOCKET_QUERY ;
+                    this.deviceMessaging = new MqttMessaging(wsServerUri,
                             this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword, this.config.getIotHubSSLContext());
+                }
+                else
+                {
+                    //Codes_SRS_MQTTIOTHUBCONNECTION_25_019: [The function shall establish an MQTT connection with a server uri as ssl://<hostName>:8883 if websocket was not enabled.]
+                    final String serverUri = SSL_PREFIX + this.config.getIotHubHostname() + SSL_PORT_SUFFIX;
+                    this.deviceMessaging = new MqttMessaging(serverUri,
+                            this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword, this.config.getIotHubSSLContext());
+                }
 
                 this.deviceMethod = new MqttDeviceMethod();
                 this.deviceTwin = new MqttDeviceTwin();
@@ -198,7 +215,7 @@ public class MqttIotHubConnection
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_010: [If the message is null or empty,
             // the function shall return status code BAD_FORMAT.]
             if (message == null || message.getBytes() == null ||
-                    ((message.getMessageType() != MessageType.DeviceTwin && message.getMessageType() != MessageType.DeviceMethods) && message.getBytes().length == 0))
+                    ((message.getMessageType() != MessageType.DEVICE_TWIN && message.getMessageType() != MessageType.DEVICE_METHODS) && message.getBytes().length == 0))
             {
                 return IotHubStatusCode.BAD_FORMAT;
             }
@@ -219,15 +236,15 @@ public class MqttIotHubConnection
             try
             {
                 // Codes_SRS_MQTTIOTHUBCONNECTION_15_009: [The function shall send the message payload.]
-                if (message.getMessageType() == MessageType.DeviceMethods)
+                if (message.getMessageType() == MessageType.DEVICE_METHODS)
                 {
                     this.deviceMethod.start();
-                    this.deviceMethod.send((DeviceMethodMessage) message);
+                    this.deviceMethod.send((IotHubTransportMessage) message);
                 }
-                else if (message.getMessageType() == MessageType.DeviceTwin)
+                else if (message.getMessageType() == MessageType.DEVICE_TWIN)
                 {
                     this.deviceTwin.start();
-                    this.deviceTwin.send((DeviceTwinMessage) message);
+                    this.deviceTwin.send((IotHubTransportMessage) message);
                 }
                 else
                 {

@@ -78,7 +78,7 @@ public class DeviceTwinDeviceTest
     }
 
     /*
-    **Tests_SRS_DEVICETWINDEVICE_21_030: [** The setETag shall store the eTag.**]**
+    **Tests_SRS_DEVICETWINDEVICE_21_030: [** The seteTag shall store the eTag.**]**
      */
     @Test
     public void setETagSets()
@@ -94,7 +94,7 @@ public class DeviceTwinDeviceTest
     }
 
     /*
-    **Tests_SRS_DEVICETWINDEVICE_21_029: [** The setETag shall throw IllegalArgumentException if the input string is empty or null.**]**
+    **Tests_SRS_DEVICETWINDEVICE_21_029: [** The seteTag shall throw IllegalArgumentException if the input string is empty or null.**]**
      */
     @Test (expected = IllegalArgumentException.class)
     public void setETagNullThrows()
@@ -117,7 +117,7 @@ public class DeviceTwinDeviceTest
     }
 
     /*
-    **Tests_SRS_DEVICETWINDEVICE_21_031: [** The getETag shall return the stored eTag.**]**
+    **Tests_SRS_DEVICETWINDEVICE_21_031: [** The geteTag shall return the stored eTag.**]**
      */
     @Test
     public void getETagGets()

@@ -4,12 +4,11 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.CustomLogger;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodMessage;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import org.apache.commons.lang3.tuple.Pair;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,7 +76,7 @@ public class MqttDeviceMethod extends Mqtt
         }
     }
 
-    public void send(final DeviceMethodMessage message) throws IOException
+    public void send(final IotHubTransportMessage message) throws IOException
     {
         if (message == null || message.getBytes() == null)
         {
@@ -95,7 +94,7 @@ public class MqttDeviceMethod extends Mqtt
             throw new IOException("Start device method before using send");
         }
 
-        if (message.getMessageType() != MessageType.DeviceMethods)
+        if (message.getMessageType() != MessageType.DEVICE_METHODS)
         {
             /*
             Codes_SRS_MqttDeviceMethod_25_017: [**send method shall return if the message is not of Type DeviceMethod.**]**
@@ -164,7 +163,7 @@ public class MqttDeviceMethod extends Mqtt
     {
         synchronized (Mqtt.MQTT_LOCK)
         {
-            DeviceMethodMessage message = null;
+            IotHubTransportMessage message = null;
 
             Pair<String, byte[]> messagePair = peekMessage();
 
@@ -190,13 +189,13 @@ public class MqttDeviceMethod extends Mqtt
 
                             if (data != null && data.length > 0)
                             {
-                                message = new DeviceMethodMessage(data);
+                                message = new IotHubTransportMessage(data, MessageType.DEVICE_METHODS);
 
                                 message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                             }
                             else
                             {
-                                message = new DeviceMethodMessage(new byte[0]);
+                                message = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
 
                                 message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                             }

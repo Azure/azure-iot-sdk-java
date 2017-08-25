@@ -5,9 +5,9 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
@@ -91,7 +91,7 @@ public class MqttDeviceTwin extends Mqtt
         }
     }
 
-    private String buildTopic(final DeviceTwinMessage message) throws IOException
+    private String buildTopic(final IotHubTransportMessage message) throws IOException
     {
         StringBuilder topic = new StringBuilder();
         switch (message.getDeviceOperationType())
@@ -192,7 +192,7 @@ public class MqttDeviceTwin extends Mqtt
         return topic.toString();
     }
 
-    public void send(final DeviceTwinMessage message) throws IOException
+    public void send(final IotHubTransportMessage message) throws IOException
     {
         if (message == null || message.getBytes() == null)
         {
@@ -207,10 +207,10 @@ public class MqttDeviceTwin extends Mqtt
             throw new IOException("Start device twin before using it");
         }
 
-        if (message.getMessageType() != MessageType.DeviceTwin)
+        if (message.getMessageType() != MessageType.DEVICE_TWIN)
         {
             /*
-            **Codes_SRS_MQTTDEVICETWIN_25_022: [**send method shall return if the message is not of Type DeviceTwin.**]**
+            **Codes_SRS_MQTTDEVICETWIN_25_022: [**send method shall return if the message is not of Type DEVICE_TWIN.**]**
              */
             return;
         }
@@ -307,7 +307,7 @@ public class MqttDeviceTwin extends Mqtt
     {
         synchronized (Mqtt.MQTT_LOCK)
         {
-            DeviceTwinMessage messsage = null;
+            IotHubTransportMessage messsage = null;
 
             // Codes_SRS_MQTTDEVICETWIN_25_035: [This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.]
             Pair<String, byte[]> messagePair = peekMessage();
@@ -334,7 +334,7 @@ public class MqttDeviceTwin extends Mqtt
                             /*
                             **Codes_SRS_MQTTDEVICETWIN_25_044: [**If the topic is of type response then this method shall set data and operation type as DEVICE_OPERATION_TWIN_GET_RESPONSE if data is not null**]**
                             */
-                                messsage = new DeviceTwinMessage(data);
+                                messsage = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
                                 messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                             }
                             else
@@ -343,7 +343,7 @@ public class MqttDeviceTwin extends Mqtt
                             /*
                             **Tests_SRS_MQTTDEVICETWIN_25_045: [**If the topic is of type response then this method shall set empty data and operation type as DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE if data is null or empty**]**
                             */
-                                messsage = new DeviceTwinMessage(new byte[0]); // empty body
+                                messsage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN); // empty body
                                 messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
 
                             }
@@ -405,7 +405,7 @@ public class MqttDeviceTwin extends Mqtt
                                 /*
                                 **Codes_SRS_MQTTDEVICETWIN_25_046: [**If the topic is of type patch for desired properties then this method shall set the data and operation type as DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE if data is not null or empty**]**
                                 */
-                                    messsage = new DeviceTwinMessage(data);
+                                    messsage = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
                                     messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
                                 }
                                 else

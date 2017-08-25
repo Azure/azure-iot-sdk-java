@@ -34,15 +34,17 @@ public final class MessageProperty {
         reservedPropertyNames.add("iothub-content-type");
         reservedPropertyNames.add("iothub-content-encoding");
         reservedPropertyNames.add("iothub-absolute-expiry-time");
+        reservedPropertyNames.add("IoThub-methodname");
 
         RESERVED_PROPERTY_NAMES = Collections.unmodifiableSet(reservedPropertyNames);
     }
 
     /** The property name. */
-    private final String name;
+    private String name;
     /** The property value. */
-    private final String value;
+    private String value;
     private CustomLogger logger;
+    
     /**
      * Constructor.
      *

@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 
 public final class DeviceMethod
 {
@@ -34,7 +35,7 @@ public final class DeviceMethod
                 IotHubStatusCode iotHubStatus = IotHubStatusCode.ERROR;
                 IotHubMessageResult result = IotHubMessageResult.ABANDON;
 
-                if (message.getMessageType() != MessageType.DeviceMethods)
+                if (message.getMessageType() != MessageType.DEVICE_METHODS)
                 {
                     /*
                     **Codes_SRS_DEVICEMETHOD_25_009: [**If the received message is not of type DeviceMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Abandon **]**
@@ -44,7 +45,7 @@ public final class DeviceMethod
                     return IotHubMessageResult.ABANDON;
                 }
 
-                DeviceMethodMessage methodMessage = (DeviceMethodMessage) message;
+                IotHubTransportMessage methodMessage = (IotHubTransportMessage) message;
 
                 switch (methodMessage.getDeviceOperationType())
                 {
@@ -72,11 +73,12 @@ public final class DeviceMethod
                                     **Codes_SRS_DEVICEMETHOD_25_015: [**User can provide null response message upon invoking the device method callback which will be serialized as is, before sending it to IotHub.**]**
                                      */
                                     MethodParser methodParserObject = new MethodParser(responseData.getResponseMessage());
-                                    DeviceMethodMessage responseMessage = new DeviceMethodMessage(methodParserObject.toJson().getBytes());
+                                    IotHubTransportMessage responseMessage = new IotHubTransportMessage(methodParserObject.toJson().getBytes(), MessageType.DEVICE_METHODS);
                                     /*
                                     **Codes_SRS_DEVICEMETHOD_25_012: [**The device method message sent to IotHub shall have same the request id as the invoking message.**]**
                                      */
                                     responseMessage.setRequestId(methodMessage.getRequestId());
+
                                     /*
                                     **Codes_SRS_DEVICEMETHOD_25_013: [**The device method message sent to IotHub shall have the status provided by the user as the message status.**]**
                                      */
@@ -170,9 +172,9 @@ public final class DeviceMethod
         this.deviceMethodStatusCallbackContext = deviceMethodStatusCallbackContext;
 
         /*
-        **Codes_SRS_DEVICEMETHOD_25_002: [**The constructor shall save the device method messages callback callback, by calling setDeviceMethodMessageCallback, where any further messages for device method shall be delivered.**]**
+        **Codes_SRS_DEVICEMETHOD_25_002: [**The constructor shall save the device method messages callback callback, by calling setDeviceMethodsMessageCallback, where any further messages for device method shall be delivered.**]**
          */
-        this.config.setDeviceMethodMessageCallback(new deviceMethodResponseCallback(), null);
+        this.config.setDeviceMethodsMessageCallback(new deviceMethodResponseCallback(), null);
     }
 
     /**
@@ -202,7 +204,7 @@ public final class DeviceMethod
             **Codes_SRS_DEVICEMETHOD_25_005: [**If not already subscribed then this method shall create a device method message with empty payload and set its type as DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST.**]**
             **Codes_SRS_DEVICEMETHOD_25_006: [**If not already subscribed then this method shall send the message using sendEventAsync.**]**
              */
-            DeviceMethodMessage subscribeMessage = new DeviceMethodMessage(new byte[0]);
+            IotHubTransportMessage subscribeMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
             subscribeMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
             this.deviceIO.sendEventAsync(subscribeMessage, new deviceMethodRequestMessageCallback(), null);
         }

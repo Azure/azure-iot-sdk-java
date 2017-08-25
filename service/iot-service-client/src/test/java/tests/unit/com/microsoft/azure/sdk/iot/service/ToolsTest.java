@@ -231,7 +231,7 @@ public class ToolsTest
     public void getValueFromJsonObject_input_key_null()
     {
         // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
+        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
         StringReader stringReader = new StringReader(jsonString);
         JsonReader jsonReader = Json.createReader(stringReader);
         JsonObject jsonObject = jsonReader.readObject();
@@ -248,7 +248,7 @@ public class ToolsTest
     public void getValueFromJsonObject_input_key_empty()
     {
         // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
+        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
         StringReader stringReader = new StringReader(jsonString);
         JsonReader jsonReader = Json.createReader(stringReader);
         JsonObject jsonObject = jsonReader.readObject();
@@ -267,7 +267,7 @@ public class ToolsTest
     public void getValueFromJsonObject_good_case()
     {
         // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
+        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
         StringReader stringReader = new StringReader(jsonString);
         JsonReader jsonReader = Json.createReader(stringReader);
         JsonObject jsonObject = jsonReader.readObject();
@@ -284,7 +284,7 @@ public class ToolsTest
     public void getValueFromJsonObject_value_null()
     {
         // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":null,\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
+        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":null,\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
         StringReader stringReader = new StringReader(jsonString);
         JsonReader jsonReader = Json.createReader(stringReader);
         JsonObject jsonObject = jsonReader.readObject();
@@ -314,7 +314,7 @@ public class ToolsTest
     public void getValueFromJsonString_good_case()
     {
         // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
+        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
         StringReader stringReader = new StringReader(jsonString);
         JsonReader jsonReader = Json.createReader(stringReader);
         JsonObject jsonObject = jsonReader.readObject();
@@ -332,7 +332,7 @@ public class ToolsTest
     public void getNumberValueFromJsonObject_input_object_null()
     {
         // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
+        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
         StringReader stringReader = new StringReader(jsonString);
         JsonReader jsonReader = Json.createReader(stringReader);
         JsonObject jsonObject = jsonReader.readObject();
@@ -349,7 +349,7 @@ public class ToolsTest
     public void getNumberValueFromJsonObject_input_key_null()
     {
         // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
+        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
         StringReader stringReader = new StringReader(jsonString);
         JsonReader jsonReader = Json.createReader(stringReader);
         JsonObject jsonObject = jsonReader.readObject();
@@ -366,7 +366,7 @@ public class ToolsTest
     public void getNumberValueFromJsonObject_input_key_empty()
     {
         // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
+        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
         StringReader stringReader = new StringReader(jsonString);
         JsonReader jsonReader = Json.createReader(stringReader);
         JsonObject jsonObject = jsonReader.readObject();
@@ -385,7 +385,7 @@ public class ToolsTest
     public void getNumberValueFromJsonObject_jsonvalue_null()
     {
         // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":null,\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
+        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":null,\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
         StringReader stringReader = new StringReader(jsonString);
         JsonReader jsonReader = Json.createReader(stringReader);
         JsonObject jsonObject = jsonReader.readObject();

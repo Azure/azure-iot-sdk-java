@@ -11,7 +11,9 @@ import com.google.gson.JsonObject;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Set of static functions to help the serializer.
@@ -230,16 +232,16 @@ public class ParserUtility
      * @return Date parsed from the string
      * @throws IllegalArgumentException if the date and time in the string is not in the correct format.
      */
-    protected static Date getDateTimeUtc(String dataTime) throws IllegalArgumentException
+    public static Date getDateTimeUtc(String dataTime) throws IllegalArgumentException
     {
         Date dateTimeUtc;
         /* Codes_SRS_PARSER_UTILITY_21_020: [The getDateTimeUtc shall parse the provide string using `UTC` timezone.] */
-        /* Codes_SRS_PARSER_UTILITY_21_021: [The getDateTimeUtc shall parse the provide string using the data format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`.] */
+        /* Codes_SRS_PARSER_UTILITY_21_021: [The getDateTimeUtc shall parse the provide string using the data format `yyyy-MM-dd'T'HH:mm:ss`.] */
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
         dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
 
         /* Codes_SRS_PARSER_UTILITY_21_022: [If the provide string is null, empty or contains an invalid data format, the getDateTimeUtc shall throw IllegalArgumentException.] */
-        if((dataTime == null) || dataTime.isEmpty() || (dataTime.charAt(dataTime.length()-1) != 'Z'))
+        if((dataTime == null) || dataTime.isEmpty())
         {
             throw new IllegalArgumentException("date is null, empty, or invalid");
         }
@@ -316,6 +318,27 @@ public class ParserUtility
     }
 
     /**
+     * Convert from a date object back into a string representation
+     * Expected format of returned string:
+     *      "2016-01-21T11:05:21"
+     *
+     * @param date the date to convert into a string
+     * @throws IllegalArgumentException if the provided date is null
+     * @return the date represented as a string
+     */
+    public static String getDateStringFromDate(Date date) throws IllegalArgumentException
+    {
+        if (date == null)
+        {
+            //Codes_SRS_PARSER_UTILITY_21_042: [If the provided date is null, an IllegalArgumentException shall be thrown.]
+            throw new IllegalArgumentException("The provided date cannot be null");
+        }
+
+        //Codes_SRS_PARSER_UTILITY_34_043: [The provided date shall be converted into this format: "yyyy-MM-dd'T'HH:mm:ss".]
+        return new SimpleDateFormat(DATEFORMAT).format(date);
+    }
+
+    /**
      * Helper to convert a provided map in to a JsonElement, including sub-maps.
      *
      * @param map is the map to serialize
@@ -356,5 +379,4 @@ public class ParserUtility
 
         return json;
     }
-
 }

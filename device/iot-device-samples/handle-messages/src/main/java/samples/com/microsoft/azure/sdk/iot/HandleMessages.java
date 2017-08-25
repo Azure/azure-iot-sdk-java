@@ -117,7 +117,7 @@ public class HandleMessages
                     "Expected 1 or 2 arguments but received %d.\n"
                      + "The program should be called with the following args: \n"
                      + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                     + "2. (mqtt | https | amqps | amqps_ws)\n",
+                     + "2. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n",
                      args.length);
             return;
         }
@@ -147,13 +147,17 @@ public class HandleMessages
             {
                 protocol = IotHubClientProtocol.AMQPS_WS;
             }
+            else if (protocolStr.equals("mqtt_ws"))
+            {
+                protocol = IotHubClientProtocol.MQTT_WS;
+            }
             else
             {
                 System.out.format(
-                      "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n"
+                      "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' or 'mqtt_ws' but received %s\n"
                             + "The program should be called with the following args: \n"
                             + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                            + "2. (mqtt | https | amqps | amqps_ws)\n",
+                            + "2. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n",
                            protocolStr);
                 return;
             }
@@ -191,7 +195,7 @@ public class HandleMessages
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
 
-        client.close();
+        client.closeNow();
 
         System.out.println("Shutting down...");
     }

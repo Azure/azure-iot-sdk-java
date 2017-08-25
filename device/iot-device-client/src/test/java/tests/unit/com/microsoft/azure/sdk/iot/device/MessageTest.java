@@ -302,7 +302,7 @@ public class MessageTest
     {
         //arrange
         Message msg = new Message();
-        MessageType type = MessageType.Telemetry;
+        MessageType type = MessageType.DEVICE_TELEMETRY;
         String messageId = "1234";
         String correlationId = "6789";
 
