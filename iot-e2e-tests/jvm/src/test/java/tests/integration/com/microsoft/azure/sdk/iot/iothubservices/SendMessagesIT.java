@@ -5,7 +5,6 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
-import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.Message;
@@ -17,7 +16,9 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
-import com.microsoft.azure.sdk.iot.common.*;
+import tests.integration.com.microsoft.azure.sdk.iot.EventCallback;
+import tests.integration.com.microsoft.azure.sdk.iot.Success;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -53,12 +54,14 @@ public class SendMessagesIT
 
     private static Device deviceHttps;
     private static Device deviceAmqps;
+    private static Device deviceAmqpsWs;
     private static Device deviceMqtt;
+    private static Device deviceMqttWs;
 
     private static Device[] deviceListAmqps = new Device[MAX_DEVICE_PARALLEL];
     private static final AtomicBoolean succeed = new AtomicBoolean();
 
-    protected static class TestDevice implements Runnable
+    protected static class testDevice implements Runnable
     {
         private DeviceClient client;
         private String messageString;
@@ -76,9 +79,9 @@ public class SendMessagesIT
         {
             for (int i = 0; i < this.numConnectionsPerDevice; i++) {
                 try {
-                    this.OpenConnection();
-                    this.SendMessages();
-                    this.CloseConnection();
+                    this.openConnection();
+                    this.sendMessages();
+                    this.closeConnection();
                 } catch (Exception e)
                 {
                     succeed.set(false);
@@ -87,7 +90,7 @@ public class SendMessagesIT
             latch.countDown();
         }
 
-        public TestDevice(Device deviceAmqps, IotHubClientProtocol protocol,
+        public testDevice(Device deviceAmqps, IotHubClientProtocol protocol,
                           Integer numConnectionsPerDevice, Integer numMessagesPerConnection,
                           Integer numKeys, Integer sendTimeout, CountDownLatch latch)
         {
@@ -105,13 +108,13 @@ public class SendMessagesIT
             messageString = "Java client " + deviceAmqps.getDeviceId() + " test e2e message over AMQP protocol";
         }
 
-        private void OpenConnection() throws URISyntaxException, IOException
+        private void openConnection() throws URISyntaxException, IOException
         {
             client = new DeviceClient(connString, protocol);
             client.open();
         }
 
-        public void SendMessages() {
+        public void sendMessages() {
             for (int i = 0; i < numMessagesPerConnection; ++i)
             {
                 try
@@ -149,7 +152,7 @@ public class SendMessagesIT
             }
         }
 
-        public void CloseConnection() throws IOException
+        public void closeConnection() throws IOException
         {
             client.closeNow();
         }
@@ -171,15 +174,21 @@ public class SendMessagesIT
         String uuid = UUID.randomUUID().toString();
         String deviceIdHttps = "java-device-client-e2e-test-https".concat("-" + uuid);
         String deviceIdAmqps = "java-device-client-e2e-test-amqps".concat("-" + uuid);
+        String deviceIdAmqpsWs = "java-device-client-e2e-test-amqpsws".concat("-" + uuid);
         String deviceIdMqtt = "java-device-client-e2e-test-mqtt".concat("-" + uuid);
+        String deviceIdMqttWs = "java-device-client-e2e-test-mqttws".concat("-" + uuid);
 
         deviceHttps = Device.createFromId(deviceIdHttps, null, null);
         deviceAmqps = Device.createFromId(deviceIdAmqps, null, null);
+        deviceAmqpsWs = Device.createFromId(deviceIdAmqpsWs, null, null);
         deviceMqtt = Device.createFromId(deviceIdMqtt, null, null);
+        deviceMqttWs = Device.createFromId(deviceIdMqttWs, null, null);
 
         registryManager.addDevice(deviceHttps);
         registryManager.addDevice(deviceAmqps);
+        registryManager.addDevice(deviceAmqpsWs);
         registryManager.addDevice(deviceMqtt);
+        registryManager.addDevice(deviceMqttWs);
 
         for (int i = 0; i < MAX_DEVICE_PARALLEL; i++) {
             deviceIdAmqps = "java-device-client-e2e-test-amqps".concat(i + "-" + uuid);
@@ -189,11 +198,13 @@ public class SendMessagesIT
     }
 
     @AfterClass
-    public static void TearDown() throws IOException, IotHubException
+    public static void tearDown() throws IOException, IotHubException
     {
         registryManager.removeDevice(deviceHttps.getDeviceId());
         registryManager.removeDevice(deviceAmqps.getDeviceId());
+        registryManager.removeDevice(deviceAmqpsWs.getDeviceId());
         registryManager.removeDevice(deviceMqtt.getDeviceId());
+        registryManager.removeDevice(deviceMqttWs.getDeviceId());
 
         for (int i = 0; i < MAX_DEVICE_PARALLEL; i++) {
             registryManager.removeDevice(deviceListAmqps[i].getDeviceId());
@@ -201,24 +212,130 @@ public class SendMessagesIT
     }
 
     @Test
-    public void SendMessagesOverHttps() throws URISyntaxException, IOException, InterruptedException {
+    public void sendMessagesOverHttps() throws URISyntaxException, IOException
+    {
         String messageString = "Java client e2e test message over Https protocol";
         Message msg = new Message(messageString);
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceHttps), IotHubClientProtocol.HTTPS);
-        SendMessagesCommon.SendMessage(client,NUM_MESSAGES_PER_CONNECTION,RETRY_MILLISECONDS,SEND_TIMEOUT_MILLISECONDS);
+        client.open();
+
+        for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; ++i)
+        {
+            try
+            {
+                Success messageSent = new Success();
+                EventCallback callback = new EventCallback();
+
+                client.sendEventAsync(msg, callback, messageSent);
+
+                Integer waitDuration = 0;
+                while(!messageSent.getResult())
+                {
+                    Thread.sleep(RETRY_MILLISECONDS);
+                    if ((waitDuration += RETRY_MILLISECONDS) > SEND_TIMEOUT_MILLISECONDS)
+                    {
+                        break;
+                    }
+                }
+
+                if (!messageSent.getResult())
+                {
+                    Assert.fail("Sending message over HTTPS protocol failed");
+                }
+            }
+            catch (Exception e)
+            {
+                Assert.fail("Sending message over HTTPS protocol failed");
+            }
+        }
+
+        client.closeNow();
     }
 
     @Test
-    public void SendMessagesOverAmqps() throws URISyntaxException, IOException, InterruptedException
+    public void sendMessagesOverAmqps() throws URISyntaxException, IOException, InterruptedException
     {
         String messageString = "Java client e2e test message over Amqps protocol";
         Message msg = new Message(messageString);
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqps), IotHubClientProtocol.AMQPS);
-        SendMessagesCommon.SendMessage(client,NUM_MESSAGES_PER_CONNECTION,RETRY_MILLISECONDS,SEND_TIMEOUT_MILLISECONDS);
+        client.open();
+
+        for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; ++i)
+        {
+            try
+            {
+                Success messageSent = new Success();
+                EventCallback callback = new EventCallback();
+                client.sendEventAsync(msg, callback, messageSent);
+
+                Integer waitDuration = 0;
+                while(!messageSent.getResult())
+                {
+                    Thread.sleep(RETRY_MILLISECONDS);
+                    if ((waitDuration += RETRY_MILLISECONDS) > SEND_TIMEOUT_MILLISECONDS)
+                    {
+                        break;
+                    }
+                }
+
+
+                if (!messageSent.getResult())
+                {
+                    Assert.fail("Sending message over AMQPS protocol failed");
+                }
+            }
+            catch (Exception e)
+            {
+                Assert.fail("Sending message over AMQPS protocol failed");
+            }
+        }
+
+        client.closeNow();
     }
 
     @Test
-    public void SendMessagesOverAmqps_multithreaded() throws URISyntaxException, IOException, InterruptedException
+    public void sendMessagesOverAmqpsWs() throws URISyntaxException, IOException, InterruptedException
+    {
+        String messageString = "Java client e2e test message over Amqps WS protocol";
+        Message msg = new Message(messageString);
+        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqps), IotHubClientProtocol.AMQPS_WS);
+        client.open();
+
+        for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; ++i)
+        {
+            try
+            {
+                Success messageSent = new Success();
+                EventCallback callback = new EventCallback();
+                client.sendEventAsync(msg, callback, messageSent);
+
+                Integer waitDuration = 0;
+                while(!messageSent.getResult())
+                {
+                    Thread.sleep(RETRY_MILLISECONDS);
+                    if ((waitDuration += RETRY_MILLISECONDS) > SEND_TIMEOUT_MILLISECONDS)
+                    {
+                        break;
+                    }
+                }
+
+
+                if (!messageSent.getResult())
+                {
+                    Assert.fail("Sending message over AMQPS WS protocol failed");
+                }
+            }
+            catch (Exception e)
+            {
+                Assert.fail("Sending message over AMQPS WS protocol failed");
+            }
+        }
+
+        client.closeNow();
+    }
+
+    @Test
+    public void sendMessagesOverAmqpsMultithreaded() throws URISyntaxException, IOException, InterruptedException
     {
         List<Thread> threads = new ArrayList<>(deviceListAmqps.length);
         CountDownLatch cdl = new CountDownLatch(deviceListAmqps.length);
@@ -227,7 +344,7 @@ public class SendMessagesIT
         for(Device deviceAmqps: deviceListAmqps)
         {
             Thread thread = new Thread(
-                    new TestDevice(
+                    new testDevice(
                             deviceAmqps,
                             IotHubClientProtocol.AMQPS,
                             NUM_CONNECTIONS_PER_DEVICE,
@@ -249,10 +366,82 @@ public class SendMessagesIT
     }
 
     @Test
-    public void SendMessagesOverMqtt() throws URISyntaxException, IOException, InterruptedException {
+    public void sendMessagesOverMqtt() throws URISyntaxException, IOException
+    {
         String messageString = "Java client e2e test message over Mqtt protocol";
         Message msg = new Message(messageString);
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqtt), IotHubClientProtocol.MQTT);
-        SendMessagesCommon.SendMessage(client,NUM_MESSAGES_PER_CONNECTION,RETRY_MILLISECONDS,SEND_TIMEOUT_MILLISECONDS);
+        client.open();
+
+        for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; ++i)
+        {
+            try
+            {
+                Success messageSent = new Success();
+                EventCallback callback = new EventCallback();
+                client.sendEventAsync(msg, callback, messageSent);
+
+                Integer waitDuration = 0;
+                while(!messageSent.getResult())
+                {
+                    Thread.sleep(RETRY_MILLISECONDS);
+                    if ((waitDuration += RETRY_MILLISECONDS) > SEND_TIMEOUT_MILLISECONDS)
+                    {
+                        break;
+                    }
+                }
+
+                if (!messageSent.getResult())
+                {
+                    Assert.fail("Sending message over MQTT protocol failed");
+                }
+            }
+            catch (Exception e)
+            {
+                Assert.fail("Sending message over MQTT protocol failed");
+            }
+        }
+
+        client.closeNow();
+    }
+
+    @Test
+    public void sendMessagesOverMqttWS() throws URISyntaxException, IOException
+    {
+        String messageString = "Java client e2e test message over Mqtt WS protocol";
+        Message msg = new Message(messageString);
+        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqtt), IotHubClientProtocol.MQTT_WS);
+        client.open();
+
+        for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; ++i)
+        {
+            try
+            {
+                Success messageSent = new Success();
+                EventCallback callback = new EventCallback();
+                client.sendEventAsync(msg, callback, messageSent);
+
+                Integer waitDuration = 0;
+                while(!messageSent.getResult())
+                {
+                    Thread.sleep(RETRY_MILLISECONDS);
+                    if ((waitDuration += RETRY_MILLISECONDS) > SEND_TIMEOUT_MILLISECONDS)
+                    {
+                        break;
+                    }
+                }
+
+                if (!messageSent.getResult())
+                {
+                    Assert.fail("Sending message over MQTT WS protocol failed");
+                }
+            }
+            catch (Exception e)
+            {
+                Assert.fail("Sending message over MQTT WS protocol failed");
+            }
+        }
+
+        client.closeNow();
     }
 }

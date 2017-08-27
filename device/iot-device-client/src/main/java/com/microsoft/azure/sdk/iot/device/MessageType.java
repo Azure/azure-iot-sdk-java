@@ -5,7 +5,8 @@ package com.microsoft.azure.sdk.iot.device;
 
 public enum MessageType
 {
-    Telemetry,
-    DeviceTwin,
-    DeviceMethods
+    UNKNOWN,
+    DEVICE_TELEMETRY,
+    DEVICE_TWIN,
+    DEVICE_METHODS
 }

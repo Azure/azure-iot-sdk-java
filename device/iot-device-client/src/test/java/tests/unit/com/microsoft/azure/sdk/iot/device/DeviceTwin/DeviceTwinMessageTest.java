@@ -5,13 +5,18 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwinMessage;
+import com.microsoft.azure.sdk.iot.device.MessageType;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+/* Unit tests for IotHubTransportMessage
+* 100% methods covered
+* 100% lines covered
+*/
 public class DeviceTwinMessageTest
 {
 
@@ -25,7 +30,7 @@ public class DeviceTwinMessageTest
         final byte[] actualData = {};
 
         //act
-        DeviceTwinMessage msg = new DeviceTwinMessage(actualData);
+        IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
 
         //assert
         String actualVersion = Deencapsulation.getField(msg, "version");
@@ -45,7 +50,7 @@ public class DeviceTwinMessageTest
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsIfDataIsNULL()
     {
-        DeviceTwinMessage msg = new DeviceTwinMessage(null);
+        IotHubTransportMessage msg = new IotHubTransportMessage(null, MessageType.DEVICE_TWIN);
 
     }
 
@@ -54,7 +59,7 @@ public class DeviceTwinMessageTest
     {
         //arrange
         final byte[] actualData = {};
-        DeviceTwinMessage msg = new DeviceTwinMessage(actualData);
+        IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
 
         //act
         String testVersion = msg.getVersion();
@@ -81,7 +86,7 @@ public class DeviceTwinMessageTest
     {
         //arrange
         final byte[] actualData = {};
-        DeviceTwinMessage msg = new DeviceTwinMessage(actualData);
+        IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
 
         //act
        msg.setVersion("12");
@@ -98,7 +103,7 @@ public class DeviceTwinMessageTest
     {
         //arrange
         final byte[] actualData = {};
-        DeviceTwinMessage msg = new DeviceTwinMessage(actualData);
+        IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
         msg.setVersion("12");
 
         //act
@@ -117,7 +122,7 @@ public class DeviceTwinMessageTest
     {
         //arrange
         final byte[] actualData = {};
-        DeviceTwinMessage msg = new DeviceTwinMessage(actualData);
+        IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
 
         //act
         msg.setRequestId("12");
@@ -135,7 +140,7 @@ public class DeviceTwinMessageTest
     {
         //arrange
         final byte[] actualData = {};
-        DeviceTwinMessage msg = new DeviceTwinMessage(actualData);
+        IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
         msg.setRequestId("12");
 
         //act
@@ -154,7 +159,7 @@ public class DeviceTwinMessageTest
     {
         //arrange
         final byte[] actualData = {};
-        DeviceTwinMessage msg = new DeviceTwinMessage(actualData);
+        IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
 
         //act
         msg.setStatus("12");
@@ -171,7 +176,7 @@ public class DeviceTwinMessageTest
     {
         //arrange
         final byte[] actualData = {};
-        DeviceTwinMessage msg = new DeviceTwinMessage(actualData);
+        IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
         msg.setStatus("12");
 
         //act
@@ -189,7 +194,7 @@ public class DeviceTwinMessageTest
     {
         //arrange
         final byte[] actualData = {};
-        DeviceTwinMessage msg = new DeviceTwinMessage(actualData);
+        IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
 
         //act
         msg.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
@@ -207,7 +212,7 @@ public class DeviceTwinMessageTest
     {
         //arrange
         final byte[] actualData = {};
-        DeviceTwinMessage msg = new DeviceTwinMessage(actualData);
+        IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
         msg.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
 
         //act

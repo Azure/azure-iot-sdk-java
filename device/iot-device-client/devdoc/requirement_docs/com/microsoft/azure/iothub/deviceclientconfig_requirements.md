@@ -20,6 +20,8 @@ public final class DeviceClientConfig
     public String getIotHubName();
     public String getDeviceId();
     public String getDeviceKey();
+    public boolean isUseWebsocket();
+    public void setUseWebsocket(boolean useWebsocket);
     public String getSharedAccessToken();
     public long getTokenValidSecs();
     public int getReadTimeoutMillis();
@@ -105,6 +107,21 @@ public String getSharedAccessToken();
 
 ** SRS_DEVICECLIENTCONFIG_25_018: [**The function shall return the SharedAccessToken given in the constructor.**] **
 
+### isUseWebsocket
+
+```java
+public boolean isUseWebsocket();
+```
+
+**SRS_DEVICECLIENTCONFIG_25_033: [**The function shall return true if websocket is enabled, false otherwise.**]**
+
+### setUseWebsocket
+
+```java
+public void setUseWebsocket(boolean useWebsocket);
+```
+
+**SRS_DEVICECLIENTCONFIG_25_034: [**The function shall save `useWebsocket`.**]**
 
 ### getMessageValidSecs
 

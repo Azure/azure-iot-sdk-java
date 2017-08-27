@@ -65,7 +65,7 @@ public class FileUploadSample
         }
 
         // File upload will always use HTTPS, DeviceClient will use this protocol only
-        //   for the other services like Telemetry, Device Method and Device Twin.
+        //   for the other services like Device Telemetry, Device Method and Device Twin.
         IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
         System.out.println("Successfully read input parameters.");

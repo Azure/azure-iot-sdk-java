@@ -95,7 +95,6 @@ public final class DeviceClient implements Closeable
     @Deprecated
     public static final Charset CONNECTION_STRING_CHARSET = StandardCharsets.UTF_8;
 
-
     private static final String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
     private static final String SET_SEND_INTERVAL = "SetSendInterval";
     private static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
@@ -164,6 +163,9 @@ public final class DeviceClient implements Closeable
                 RECEIVE_PERIOD_MILLIS = RECEIVE_PERIOD_MILLIS_AMQPS;
                 break;
             case MQTT:
+                RECEIVE_PERIOD_MILLIS = RECEIVE_PERIOD_MILLIS_MQTT;
+                break;
+            case MQTT_WS:
                 RECEIVE_PERIOD_MILLIS = RECEIVE_PERIOD_MILLIS_MQTT;
                 break;
             default:
@@ -780,27 +782,10 @@ public final class DeviceClient implements Closeable
                 //Codes_SRS_DEVICECLIENT_25_021: ["SetSASTokenExpiryTime" - Time in secs to specify SAS Token Expiry time.]
                 case SET_SAS_TOKEN_EXPIRY_TIME:
                 {
-                    //Codes__SRS_DEVICECLIENT_25_023: ["SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT.]
-                    if ((this.deviceIO.getProtocol() == IotHubClientProtocol.AMQPS) ||
-                            (this.deviceIO.getProtocol() == IotHubClientProtocol.AMQPS_WS) ||
-                            (this.deviceIO.getProtocol() == IotHubClientProtocol.HTTPS) ||
-                            (this.deviceIO.getProtocol() == IotHubClientProtocol.MQTT))
-                    {
-                        setOption_SetSASTokenExpiryTime(value);
-
-                    }
-                    else
-                    {
-                        logger.LogError("optionName is unknown = %s for %s, method name is %s ", optionName,
-                                this.deviceIO.getProtocol().toString(), logger.getMethodName());
-                        // Codes_SRS_DEVICECLIENT_02_015: [If optionName is null or not an option handled by the
-                        // client, then it shall throw IllegalArgumentException.]
-                        throw new IllegalArgumentException("optionName is unknown = " + optionName +
-                                " for " + this.deviceIO.getProtocol().toString());
-                    }
+                    //Codes__SRS_DEVICECLIENT_25_023: ["SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT/AMQPS_WS/MQTT_WS.]
+                    setOption_SetSASTokenExpiryTime(value);
                     break;
                 }
-
                 default:
                     throw new IllegalArgumentException("optionName is unknown = " + optionName);
             }

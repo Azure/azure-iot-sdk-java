@@ -99,7 +99,6 @@ public final class DeviceIO
     DeviceIO(DeviceClientConfig config, IotHubClientProtocol protocol,
                     long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
     {
-        long defaultReceivePeriodInMilliseconds;
         /* Codes_SRS_DEVICE_IO_21_002: [If the `config` is null, the constructor shall throw an IllegalArgumentException.] */
         if(config == null)
         {
@@ -120,15 +119,23 @@ public final class DeviceIO
         switch (protocol)
         {
             case HTTPS:
+                this.config.setUseWebsocket(false);
                 this.transport = new HttpsTransport(this.config);
                 break;
             case AMQPS:
-                this.transport = new AmqpsTransport(this.config, false);
+                this.config.setUseWebsocket(false);
+                this.transport = new AmqpsTransport(this.config);
                 break;
             case AMQPS_WS:
-                this.transport = new AmqpsTransport(this.config, true);
+                this.config.setUseWebsocket(true);
+                this.transport = new AmqpsTransport(this.config);
                 break;
             case MQTT:
+                this.config.setUseWebsocket(false);
+                this.transport = new MqttTransport(this.config);
+                break;
+            case MQTT_WS:
+                this.config.setUseWebsocket(true);
                 this.transport = new MqttTransport(this.config);
                 break;
             default:

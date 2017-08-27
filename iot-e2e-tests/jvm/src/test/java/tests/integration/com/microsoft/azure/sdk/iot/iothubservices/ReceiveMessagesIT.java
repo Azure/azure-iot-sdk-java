@@ -38,6 +38,7 @@ public class ReceiveMessagesIT
     private static Device deviceHttps;
     private static Device deviceAmqps;
     private static Device deviceMqtt;
+    private static Device deviceMqttWs;
     private static Device deviceAmqpsWS;
 
     private static ServiceClient serviceClient;
@@ -65,16 +66,19 @@ public class ReceiveMessagesIT
         String deviceIdHttps = "java-device-client-e2e-test-https".concat("-" + uuid);
         String deviceIdAmqps = "java-device-client-e2e-test-amqps".concat("-" + uuid);
         String deviceIdMqtt = "java-device-client-e2e-test-mqtt".concat("-" + uuid);
+        String deviceIdMqttWs = "java-device-client-e2e-test-mqttws".concat("-" + uuid);
         String deviceIdAmqpsWS = "java-device-client-e2e-test-amqpsws".concat("-" + uuid);
 
         deviceHttps = Device.createFromId(deviceIdHttps, null, null);
         deviceAmqps = Device.createFromId(deviceIdAmqps, null, null);
         deviceMqtt = Device.createFromId(deviceIdMqtt, null, null);
+        deviceMqttWs = Device.createFromId(deviceIdMqttWs, null, null);
         deviceAmqpsWS = Device.createFromId(deviceIdAmqpsWS, null, null);
 
         registryManager.addDevice(deviceHttps);
         registryManager.addDevice(deviceAmqps);
         registryManager.addDevice(deviceMqtt);
+        registryManager.addDevice(deviceMqttWs);
         registryManager.addDevice(deviceAmqpsWS);
 
         messageProperties = new HashMap<>(3);
@@ -87,17 +91,18 @@ public class ReceiveMessagesIT
     }
 
     @AfterClass
-    public static void TearDown() throws IOException, IotHubException
+    public static void tearDown() throws IOException, IotHubException
     {
         serviceClient.close();
         registryManager.removeDevice(deviceHttps.getDeviceId());
         registryManager.removeDevice(deviceAmqps.getDeviceId());
         registryManager.removeDevice(deviceMqtt.getDeviceId());
+        registryManager.removeDevice(deviceMqttWs.getDeviceId());
         registryManager.removeDevice(deviceAmqpsWS.getDeviceId());
     }
 
     @Test
-    public void ReceiveMessagesOverHttpsIncludingProperties() throws Exception
+    public void receiveMessagesOverHttpsIncludingProperties() throws Exception
     {
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceHttps), IotHubClientProtocol.HTTPS);
         client.setOption(SET_MINIMUM_POLLING_INTERVAL, ONE_SECOND_POLLING_INTERVAL);
@@ -115,7 +120,7 @@ public class ReceiveMessagesIT
     }
 
     @Test
-    public void ReceiveMessagesOverAmqpsIncludingProperties() throws Exception
+    public void receiveMessagesOverAmqpsIncludingProperties() throws Exception
     {
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqps), IotHubClientProtocol.AMQPS);
         client.open();
@@ -132,7 +137,7 @@ public class ReceiveMessagesIT
     }
 
     @Test
-    public void ReceiveMessagesOverMqttWithProperties() throws Exception
+    public void receiveMessagesOverMqttWithProperties() throws Exception
     {
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqtt), IotHubClientProtocol.MQTT);
         client.open();
@@ -149,7 +154,24 @@ public class ReceiveMessagesIT
     }
 
     @Test
-    public void ReceiveMessagesOverAmqpWSIncludingProperties() throws Exception
+    public void receiveMessagesOverMqttWsWithProperties() throws Exception
+    {
+        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqttWs), IotHubClientProtocol.MQTT_WS);
+        client.open();
+
+        Success messageReceived = new Success();
+        com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallbackMqtt();
+        client.setMessageCallback(callback, messageReceived);
+
+        sendMessageToDevice(deviceMqttWs.getDeviceId(), "MQTT_WS");
+        waitForMessageToBeReceived(messageReceived, "MQTT_WS");
+
+        Thread.sleep(200);
+        client.closeNow();
+    }
+
+    @Test
+    public void receiveMessagesOverAmqpWSIncludingProperties() throws Exception
     {
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqpsWS), IotHubClientProtocol.AMQPS_WS);
         client.open();

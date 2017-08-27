@@ -28,33 +28,35 @@ abstract public class Mqtt implements MqttCallback
      */
     private static MqttConnectionInfo info ;
     static ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
-    protected static Object MQTT_LOCK;
+    static Object MQTT_LOCK;
     
     private DeviceClientConfig deviceClientConfig = null;
     // SAS token expiration check on retry
     private boolean userSpecifiedSASTokenExpiredOnRetry = false; // by default set to false
 
     /* Each property is separated by & and all system properties start with an encoded $ (except for iothub-ack) */
-    protected final static char MESSAGE_PROPERTY_SEPARATOR = '&';
+    final static char MESSAGE_PROPERTY_SEPARATOR = '&';
     private final static String MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_ENCODED = "%24";
     private final static char MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED = '$';
-    protected final static char MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR = '=';
+    final static char MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR = '=';
     private final static int PROPERTY_KEY_INDEX = 0;
     private final static int PROPERTY_VALUE_INDEX = 1;
 
     /* The system property keys expected in a message */
     //This may be common with amqp as well
-    protected final static String ABSOLUTE_EXPIRY_TIME = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".exp";
-    protected final static String CORRELATION_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cid";
-    protected final static String MESSAGE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".mid";
-    protected final static String TO = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".to";
-    protected final static String USER_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".uid";
-    protected final static String IOTHUB_ACK = "iothub-ack";
+    private final static String ABSOLUTE_EXPIRY_TIME = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".exp";
+    final static String CORRELATION_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cid";
+    final static String MESSAGE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".mid";
+    final static String TO = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".to";
+    final static String USER_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".uid";
+    private final static String IOTHUB_ACK = "iothub-ack";
 
-    /* Inner class which holds the basic information related to Mqtt Client Async. */
+    /*
+      Inner class which holds the basic information related to Mqtt Client Async.
+     */
     protected class MqttConnectionInfo
     {
-        protected MqttAsyncClient mqttAsyncClient = null;
+        MqttAsyncClient mqttAsyncClient = null;
         private MqttConnectOptions connectionOptions = null;
 
         //mqtt connection options
@@ -127,11 +129,11 @@ abstract public class Mqtt implements MqttCallback
         /*
         ** Codes_SRS_Mqtt_25_001: [**The constructor shall instantiate MQTT lock for using base class.**]**
         */
+        this.userSpecifiedSASTokenExpiredOnRetry = false;
         if (Mqtt.MQTT_LOCK == null)
         {
             Mqtt.MQTT_LOCK = new Object();
         }
-        this.userSpecifiedSASTokenExpiredOnRetry = false;
     }
 
     /**
@@ -193,8 +195,8 @@ abstract public class Mqtt implements MqttCallback
         /*
         ** Codes_SRS_Mqtt_25_046: [**restartBaseMqtt shall unset all the static variables.**]**
          */
-        Mqtt.MQTT_LOCK = null;
         Mqtt.allReceivedMessages = null;
+        Mqtt.MQTT_LOCK = null;
         Mqtt.info = null;
     }
 
@@ -234,7 +236,7 @@ abstract public class Mqtt implements MqttCallback
                 /*
                 ** Codes_SRS_Mqtt_25_007: [**If an MQTT connection is unable to be established for any reason, the function shall throw an IOException.**]**
                  */
-                throw new IOException("Unable to connect to service" + e.getMessage());
+                throw new IOException("Unable to connect to service" + e.getCause());
             }
         }
 
@@ -402,6 +404,7 @@ abstract public class Mqtt implements MqttCallback
                 **Codes_SRS_Mqtt_25_017: [**The function shall subscribe to subscribeTopic specified to the IoT Hub given in the configuration.**]**
                  */
                 IMqttToken subToken = Mqtt.info.mqttAsyncClient.subscribe(topic, MqttConnectionInfo.QOS);
+
                 subToken.waitForCompletion(MqttConnectionInfo.MAX_WAIT_TIME);
             }
             catch (MqttException e)
@@ -566,8 +569,6 @@ abstract public class Mqtt implements MqttCallback
                             }
 
                         }
-
-
                     }
                     catch (IOException e)
                     {

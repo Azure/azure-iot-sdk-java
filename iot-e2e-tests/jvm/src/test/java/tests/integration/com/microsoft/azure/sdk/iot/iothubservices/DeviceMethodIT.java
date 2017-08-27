@@ -42,7 +42,7 @@ public class DeviceMethodIT
 
     private static final int MAX_DEVICES = 1;
 
-    private static String DEVICE_ID_NAME = "E2EJavaMethod";
+    private static String DEVICE_ID_NAME = "E2EJavaMethodMqtt";
 
     private static final Long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(200);
     private static final Long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toSeconds(5);

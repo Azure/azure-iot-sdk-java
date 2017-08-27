@@ -959,7 +959,6 @@ public class DeviceTwinIT
             {
                 DeviceTwinDevice d = sCDeviceTwin.getNextDeviceTwin(twinQuery);
 
-                assertNotNull(d.getVersion());
                 for (Pair dp : d.getDesiredProperties())
                 {
                     assertEquals(dp.getKey(), queryProperty);

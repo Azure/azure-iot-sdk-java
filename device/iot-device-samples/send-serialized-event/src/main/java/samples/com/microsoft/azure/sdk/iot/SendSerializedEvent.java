@@ -52,6 +52,8 @@ public class SendSerializedEvent {
                             protocol = IotHubClientProtocol.MQTT;
                         } else if (rawArguments[1].equals("amqps_ws")) {
                             protocol = IotHubClientProtocol.AMQPS_WS;
+                        } else if (rawArguments[1].equals("mqtt_ws")) {
+                            protocol = IotHubClientProtocol.AMQPS_WS;
                         } else {
                             throw new Exception("Invalid protocol: " + rawArguments[2]);
                         }
@@ -92,7 +94,7 @@ public class SendSerializedEvent {
         System.out.println(
                "The program should be called with the following args: \n"
                     + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                    + "2. (mqtt | https | amqps | amqps_ws)\n"
+                    + "2. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
                     + "3. [number of requests to send]");
      }
 
@@ -103,7 +105,7 @@ public class SendSerializedEvent {
      * @param args 
      * args[0] = IoT Hub connection string
      * args[1] = number of requests to send
-     * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
+     * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws' or 'mqtt_ws')
      */
     public static void main(String[] args)
             throws IOException, URISyntaxException {
@@ -153,7 +155,7 @@ public class SendSerializedEvent {
                 }
             }
 
-            client.close();
+            client.closeNow();
         } catch (Exception e) {
             System.out.println("Failure: " + e.toString());
         }

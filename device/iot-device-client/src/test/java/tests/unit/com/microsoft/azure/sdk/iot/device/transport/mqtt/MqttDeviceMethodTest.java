@@ -3,10 +3,10 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodMessage;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttDeviceMethod;
 import mockit.Deencapsulation;
@@ -170,7 +170,7 @@ public class MqttDeviceMethodTest
         //arrange
         final String actualSubscribeTopic = "$iothub/methods/POST/#";
         byte[] actualPayload = "TestMessage".getBytes();
-        DeviceMethodMessage testMessage = new DeviceMethodMessage(actualPayload);
+        IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
         final MqttDeviceMethod testMethod = new MqttDeviceMethod();
         testMethod.start();
@@ -195,7 +195,7 @@ public class MqttDeviceMethodTest
     public void sendSucceedsCallsPublish(@Mocked final Mqtt mockMqtt) throws IOException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
-        final DeviceMethodMessage testMessage = new DeviceMethodMessage(actualPayload);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SEND_RESPONSE);
         testMessage.setRequestId("ReqId");
         testMessage.setStatus("testStatus");
@@ -223,7 +223,7 @@ public class MqttDeviceMethodTest
     public void sendThrowsOnInvalidOperation(@Mocked final Mqtt mockMqtt) throws IOException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
-        final DeviceMethodMessage testMessage = new DeviceMethodMessage(actualPayload);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_UNKNOWN);
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
         testMethod.start();
@@ -239,7 +239,7 @@ public class MqttDeviceMethodTest
     public void sendThrowsIfNotStarted(@Mocked final Mqtt mockMqtt) throws IOException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
-        final DeviceMethodMessage testMessage = new DeviceMethodMessage(actualPayload);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
 
         //act
@@ -265,8 +265,8 @@ public class MqttDeviceMethodTest
     public void sendDoesNotSendOnDifferentMessageType(@Mocked final Mqtt mockMqtt) throws IOException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
-        final DeviceMethodMessage testMessage = new DeviceMethodMessage(actualPayload);
-        testMessage.setMessageType(MessageType.DeviceTwin);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
+        testMessage.setMessageType(MessageType.DEVICE_TWIN);
         final MqttDeviceMethod testMethod = new MqttDeviceMethod();
         testMethod.start();
 
@@ -293,8 +293,8 @@ public class MqttDeviceMethodTest
     public void sendThrowsOnNullRequestID() throws IOException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
-        final DeviceMethodMessage testMessage = new DeviceMethodMessage(actualPayload);
-        testMessage.setMessageType(MessageType.DeviceMethods);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
+        testMessage.setMessageType(MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SEND_RESPONSE);
         MqttDeviceMethod testMethod = new MqttDeviceMethod();
         testMethod.start();
@@ -310,7 +310,7 @@ public class MqttDeviceMethodTest
     public void sendThrowsOnSendingResponseWithoutReceivingMethodInvoke() throws IOException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
-        final DeviceMethodMessage testMessage = new DeviceMethodMessage(actualPayload);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SEND_RESPONSE);
         testMessage.setRequestId("ReqId");
         testMessage.setStatus("testStatus");
@@ -328,7 +328,7 @@ public class MqttDeviceMethodTest
     public void sendThrowsOnMismatchedRequestType() throws IOException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
-        final DeviceMethodMessage testMessage = new DeviceMethodMessage(actualPayload);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SEND_RESPONSE);
         testMessage.setRequestId("ReqId");
         testMessage.setStatus("testStatus");
@@ -363,11 +363,11 @@ public class MqttDeviceMethodTest
 
         //act
         Message testMessage = testMethod.receive();
-        DeviceMethodMessage testDMMessage = (DeviceMethodMessage) testMessage;
+        IotHubTransportMessage testDMMessage = (IotHubTransportMessage) testMessage;
 
         //assert
         assertNotNull(testMessage);
-        assertTrue(testMessage.getMessageType().equals(MessageType.DeviceMethods));
+        assertTrue(testMessage.getMessageType().equals(MessageType.DEVICE_METHODS));
         assertTrue(testDMMessage.getRequestId().equals(String.valueOf(10)));
         assertTrue(testDMMessage.getMethodName().equals("testMethod"));
         assertTrue(testDMMessage.getDeviceOperationType().equals(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST));
@@ -468,12 +468,12 @@ public class MqttDeviceMethodTest
 
         //act
         Message testMessage = testMethod.receive();
-        DeviceMethodMessage testDMMessage = (DeviceMethodMessage) testMessage;
+        IotHubTransportMessage testDMMessage = (IotHubTransportMessage) testMessage;
 
         //assert
         assertNotNull(testMessage);
         assertTrue(testMessage.getBytes().length == 0);
-        assertTrue(testMessage.getMessageType().equals(MessageType.DeviceMethods));
+        assertTrue(testMessage.getMessageType().equals(MessageType.DEVICE_METHODS));
         assertTrue(testDMMessage.getRequestId().equals(String.valueOf(10)));
         assertTrue(testDMMessage.getMethodName().equals("testMethod"));
         assertTrue(testDMMessage.getDeviceOperationType().equals(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST));

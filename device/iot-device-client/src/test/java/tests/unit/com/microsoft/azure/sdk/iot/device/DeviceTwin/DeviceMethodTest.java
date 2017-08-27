@@ -5,6 +5,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -15,6 +16,10 @@ import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEV
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST;
 import static org.junit.Assert.*;
 
+/* Unit tests for DeviceMethod
+* 100% methods covered
+* 93% lines covered
+*/
 public class DeviceMethodTest
 {
     @Mocked
@@ -33,7 +38,7 @@ public class DeviceMethodTest
     DeviceMethodCallback mockedDeviceMethodCB;
 
     /*
-    **Tests_SRS_DEVICEMETHOD_25_002: [**The constructor shall save the device method messages callback callback, by calling setDeviceMethodMessageCallback, where any further messages for device method shall be delivered.**]**
+    **Tests_SRS_DEVICEMETHOD_25_002: [**The constructor shall save the device method messages callback callback, by calling setDeviceMethodsMessageCallback, where any further messages for device method shall be delivered.**]**
     **Tests_SRS_DEVICEMETHOD_25_003: [**The constructor shall save all the parameters specified i.e client, config, deviceMethodStatusCallback, deviceMethodStatusCallbackContext.**]**
      */
     @Test
@@ -48,7 +53,7 @@ public class DeviceMethodTest
         new Verifications()
         {
             {
-                mockedConfig.setDeviceMethodMessageCallback((MessageCallback)any, any);
+                mockedConfig.setDeviceMethodsMessageCallback((MessageCallback)any, any);
                 times = 1;
             }
         };
@@ -97,7 +102,7 @@ public class DeviceMethodTest
     **Tests_SRS_DEVICEMETHOD_25_006: [**If not already subscribed then this method shall send the message using sendEventAsync.**]**
      */
     @Test
-    public void subscribeToMethodsSucceeds(@Mocked final DeviceMethodMessage mockedMessage) throws IllegalArgumentException
+    public void subscribeToMethodsSucceeds(@Mocked final IotHubTransportMessage mockedMessage) throws IllegalArgumentException
     {
         //arrange
         DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
@@ -105,7 +110,7 @@ public class DeviceMethodTest
         new NonStrictExpectations()
         {
             {
-                new DeviceMethodMessage((byte[]) any);
+                new IotHubTransportMessage((byte[]) any, MessageType.DEVICE_METHODS);
                 result = mockedMessage;
             }
         };
@@ -140,7 +145,7 @@ public class DeviceMethodTest
     }
 
     @Test
-    public void subscribeToMethodsDoesNotSubscribeIfAlreadySubscribed(@Mocked final DeviceMethodMessage mockedMessage) throws IllegalArgumentException
+    public void subscribeToMethodsDoesNotSubscribeIfAlreadySubscribed(@Mocked final IotHubTransportMessage mockedMessage) throws IllegalArgumentException
     {
         //arrange
         DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
@@ -150,7 +155,7 @@ public class DeviceMethodTest
         new NonStrictExpectations()
         {
             {
-                new DeviceMethodMessage((byte[]) any);
+                new IotHubTransportMessage((byte[]) any, MessageType.DEVICE_METHODS);
                 result = mockedMessage;
             }
         };
@@ -187,7 +192,7 @@ public class DeviceMethodTest
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes();
-        DeviceMethodMessage testMessage = new DeviceMethodMessage(testPayload);
+        IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
         final DeviceMethodData testUserData = new DeviceMethodData(100, "Some test message");
@@ -227,7 +232,7 @@ public class DeviceMethodTest
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes();
-        DeviceTwinMessage testMessage = new DeviceTwinMessage(testPayload);
+        IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, MessageType.DEVICE_TWIN);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
         final DeviceMethodData testUserData = new DeviceMethodData(100, "Some test message");
@@ -266,7 +271,7 @@ public class DeviceMethodTest
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes();
-        DeviceMethodMessage testMessage = new DeviceMethodMessage(testPayload);
+        IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
         final DeviceMethodData testUserData = null;
@@ -307,7 +312,7 @@ public class DeviceMethodTest
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes();
-        DeviceMethodMessage testMessage = new DeviceMethodMessage(testPayload);
+        IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
         final DeviceMethodData testUserData = new DeviceMethodData(100, null);
@@ -345,7 +350,7 @@ public class DeviceMethodTest
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes();
-        DeviceMethodMessage testMessage = new DeviceMethodMessage(testPayload);
+        IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
         MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);

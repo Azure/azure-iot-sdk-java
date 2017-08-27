@@ -31,12 +31,14 @@ public final class DeviceClientConfig
     private String pathToCertificate;
     private IotHubSSLContext iotHubSSLContext;
 
+    private boolean useWebsocket;
+
     /**
      * The callback to be invoked if a message of Device Method type received.
      */
-    private MessageCallback deviceMethodCallback;
+    private MessageCallback deviceMethodsMessageCallback;
     /** The context to be passed in to the device method type message callback. */
-    private Object deviceMethodMessageContext;
+    private Object deviceMethodsMessageContext;
 
     /**
      * The callback to be invoked if a message of Device Twin type received.
@@ -48,9 +50,9 @@ public final class DeviceClientConfig
     /**
      * The callback to be invoked if a message is received.
      */
-    private MessageCallback messageCallback;
+    private MessageCallback deviceTelemetryMessageCallback;
     /** The context to be passed in to the message callback. */
-    private Object messageContext;
+    private Object deviceTelemetryMessageContext;
 
     private CustomLogger logger;
 
@@ -75,10 +77,31 @@ public final class DeviceClientConfig
         // Codes_SRS_DEVICECLIENTCONFIG_21_033: [The constructor shall save the IoT Hub hostname, hubname,
         // device ID, device key, and device token, provided in the `iotHubConnectionString`.]
         this.iotHubConnectionString = iotHubConnectionString;
+        this.useWebsocket = false;
 
         this.logger = new CustomLogger(this.getClass());
         logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
                 this.iotHubConnectionString.getHostName(), this.iotHubConnectionString.getDeviceId(), logger.getMethodName());
+    }
+
+    /**
+     * Getter for Websocket
+     * @return true if set, false otherwise
+     */
+    public boolean isUseWebsocket()
+    {
+        //Codes_SRS_DEVICECLIENTCONFIG_25_033: [The function shall return the true if websocket is enabled, false otherwise.]
+        return this.useWebsocket;
+    }
+
+    /**
+     * Setter for Websocket
+     * @param useWebsocket true if to be set, false otherwise
+     */
+    public void setUseWebsocket(boolean useWebsocket)
+    {
+        //Codes_SRS_DEVICECLIENTCONFIG_25_034: [The function shall save useWebsocket.]
+        this.useWebsocket = useWebsocket;
     }
 
     /**
@@ -150,8 +173,8 @@ public final class DeviceClientConfig
             Object context)
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_006: [The function shall set the message callback, with its associated context.]
-        this.messageCallback = callback;
-        this.messageContext = context;
+        this.deviceTelemetryMessageCallback = callback;
+        this.deviceTelemetryMessageContext = context;
     }
 
     /**
@@ -252,10 +275,10 @@ public final class DeviceClientConfig
      *
      * @return the message callback.
      */
-    public MessageCallback getMessageCallback()
+    public MessageCallback getDeviceTelemetryMessageCallback()
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_010: [The function shall return the current message callback.]
-        return this.messageCallback;
+        return this.deviceTelemetryMessageCallback;
     }
 
     /**
@@ -263,10 +286,10 @@ public final class DeviceClientConfig
      *
      * @return the message context.
      */
-    public Object getMessageContext()
+    public Object getDeviceTelemetryMessageContext()
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_011: [The function shall return the current message context.]
-        return this.messageContext;
+        return this.deviceTelemetryMessageContext;
     }
 
     /**
@@ -275,17 +298,17 @@ public final class DeviceClientConfig
      * @param callback Callback for device method messages.
      * @param context is the context for the callback.
      */
-    public void setDeviceMethodMessageCallback(MessageCallback callback, Object context)
+    public void setDeviceMethodsMessageCallback(MessageCallback callback, Object context)
     {
         /*
         Codes_SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceMethod message callback.**] **
          */
-        this.deviceMethodCallback = callback;
+        this.deviceMethodsMessageCallback = callback;
 
         /*
         Codes_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DeviceMethod message context.**] **
          */
-        this.deviceMethodMessageContext = context;
+        this.deviceMethodsMessageContext = context;
     }
 
     /**
@@ -293,12 +316,12 @@ public final class DeviceClientConfig
      *
      * @return the device method message callback.
      */
-    public MessageCallback getDeviceMethodMessageCallback()
+    public MessageCallback getDeviceMethodsMessageCallback()
     {
         /*
         Codes_SRS_DEVICECLIENTCONFIG_25_021: [**The function shall return the current DeviceMethod message callback.**] **
          */
-        return this.deviceMethodCallback;
+        return this.deviceMethodsMessageCallback;
     }
 
     /**
@@ -306,12 +329,12 @@ public final class DeviceClientConfig
      *
      * @return the device method message context.
      */
-    public Object getDeviceMethodMessageContext()
+    public Object getDeviceMethodsMessageContext()
     {
         /*
         Codes_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DeviceMethod message context.**] **
          */
-        return this.deviceMethodMessageContext;
+        return this.deviceMethodsMessageContext;
     }
 
     /**

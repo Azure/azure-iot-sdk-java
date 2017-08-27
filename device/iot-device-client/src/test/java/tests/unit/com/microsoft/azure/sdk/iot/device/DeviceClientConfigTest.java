@@ -16,7 +16,9 @@ import java.net.URISyntaxException;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
-/** Unit tests for IoTHubClientConfig. */
+/** Unit tests for IoTHubClientConfig.
+ *  Coverage : 96% Method, 90% line
+ * */
 public class DeviceClientConfigTest
 {
     // Tests_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
@@ -207,7 +209,7 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
-        MessageCallback testCallback = config.getMessageCallback();
+        MessageCallback testCallback = config.getDeviceTelemetryMessageCallback();
 
         final MessageCallback expectedCallback = mockCallback;
         assertThat(testCallback, is(expectedCallback));
@@ -235,17 +237,17 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
-        Object testContext = config.getMessageContext();
+        Object testContext = config.getDeviceTelemetryMessageContext();
 
         final Object expectedContext = context;
         assertThat(testContext, is(expectedContext));
     }
 
     /*
-    **Tests_SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceTwin message callback.**] **
-    **Tests_SRS_DEVICECLIENTCONFIG_25_024: [**The function shall set the DeviceTwin message context.**] **
-    **Tests_SRS_DEVICECLIENTCONFIG_25_025: [**The function shall return the current DeviceTwin message callback.**] **
-    **Tests_SRS_DEVICECLIENTCONFIG_25_026: [**The function shall return the current DeviceTwin message context.**] **
+    **Tests_SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DEVICE_TWIN message callback.**] **
+    **Tests_SRS_DEVICECLIENTCONFIG_25_024: [**The function shall set the DEVICE_TWIN message context.**] **
+    **Tests_SRS_DEVICECLIENTCONFIG_25_025: [**The function shall return the current DEVICE_TWIN message callback.**] **
+    **Tests_SRS_DEVICECLIENTCONFIG_25_026: [**The function shall return the current DEVICE_TWIN message context.**] **
      */
     @Test
     public void getAndSetDeviceTwinMessageCallbackAndContextsMatch(
@@ -299,13 +301,13 @@ public class DeviceClientConfigTest
 
         DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
         Object context = new Object();
-        config.setDeviceMethodMessageCallback(mockCallback, context);
-        Object testContext = config.getDeviceMethodMessageContext();
+        config.setDeviceMethodsMessageCallback(mockCallback, context);
+        Object testContext = config.getDeviceMethodsMessageContext();
 
 
         final Object expectedContext = context;
         assertThat(testContext, is(expectedContext));
-        assertEquals(config.getDeviceMethodMessageCallback(), mockCallback);
+        assertEquals(config.getDeviceMethodsMessageCallback(), mockCallback);
     }
 
     @Test
@@ -327,8 +329,8 @@ public class DeviceClientConfigTest
 
         DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
         Object dMContext = new Object();
-        config.setDeviceMethodMessageCallback(mockCallback, dMContext);
-        Object testContextDM = config.getDeviceMethodMessageContext();
+        config.setDeviceMethodsMessageCallback(mockCallback, dMContext);
+        Object testContextDM = config.getDeviceMethodsMessageContext();
 
         Object dTcontext = new Object();
         config.setDeviceTwinMessageCallback(mockCallback, dTcontext);
@@ -341,7 +343,7 @@ public class DeviceClientConfigTest
 
         final Object expectedDMContext = dMContext;
         assertThat(testContextDM, is(expectedDMContext));
-        assertEquals(config.getDeviceMethodMessageCallback(), mockCallback);
+        assertEquals(config.getDeviceMethodsMessageCallback(), mockCallback);
     }
     // Tests_SRS_DEVICECLIENTCONFIG_11_012: [The function shall return 240000ms.]
     @Test
@@ -364,6 +366,48 @@ public class DeviceClientConfigTest
 
         final int expectedReadTimeoutMillis = 240000;
         assertThat(testReadTimeoutMillis, is(expectedReadTimeoutMillis));
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_25_034: [The function shall save useWebsocket.]
+    @Test
+    public void setWebsocketEnabledSets() throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+        final IotHubConnectionString iotHubConnectionString =
+                Deencapsulation.newInstance(IotHubConnectionString.class,
+                                            new Class[] {String.class, String.class, String.class, String.class},
+                                            iotHubHostname,
+                                            deviceId,
+                                            deviceKey,
+                                            sharedAccessToken);
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        config.setUseWebsocket(true);
+        assertTrue(config.isUseWebsocket());
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_25_033: [The function shall return the true if websocket is enabled, false otherwise.]
+    @Test
+    public void getWebsocketEnabledGets() throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+        final IotHubConnectionString iotHubConnectionString =
+                Deencapsulation.newInstance(IotHubConnectionString.class,
+                                            new Class[] {String.class, String.class, String.class, String.class},
+                                            iotHubHostname,
+                                            deviceId,
+                                            deviceKey,
+                                            sharedAccessToken);
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        config.setUseWebsocket(true);
+        assertTrue(config.isUseWebsocket());
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_11_013: [The function shall return 180s.]
