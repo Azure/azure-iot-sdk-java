@@ -211,3 +211,6 @@ target
 *.project
 *.classpath
 *.prefs
+/iot-e2e-tests/android/.gradle/3.3
+/iot-e2e-tests/android/app/build
+*.store
