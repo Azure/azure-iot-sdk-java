@@ -893,9 +893,10 @@ public class AmqpsIotHubConnectionTest {
                 result = mockDelivery;
                 Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, messageBytes, anyInt, anyInt, messageBytes);
                 result = mockAmqpsSendReturnValue;
-                mockAmqpsSendReturnValue.isDeliverySuccessful();
+
+                Deencapsulation.invoke(mockAmqpsSendReturnValue, "isDeliverySuccessful");
                 result = true;
-                mockAmqpsSendReturnValue.getDeliveryHash();
+                Deencapsulation.invoke(mockAmqpsSendReturnValue, "getDeliveryHash");
                 result = 42;
             }
         };
@@ -929,9 +930,9 @@ public class AmqpsIotHubConnectionTest {
 
                 Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, bytes, anyInt, anyInt, bytes);
                 result = mockAmqpsSendReturnValue;
-                mockAmqpsSendReturnValue.isDeliverySuccessful();
+                Deencapsulation.invoke(mockAmqpsSendReturnValue, "isDeliverySuccessful");
                 result = true;
-                mockAmqpsSendReturnValue.getDeliveryHash();
+                Deencapsulation.invoke(mockAmqpsSendReturnValue, "getDeliveryHash");
                 result = deliveryHash;
 
             }
