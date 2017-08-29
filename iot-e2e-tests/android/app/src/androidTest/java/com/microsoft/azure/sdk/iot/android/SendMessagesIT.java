@@ -7,12 +7,10 @@ package com.microsoft.azure.sdk.iot.android;
 
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.MediumTest;
-
 import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.Message;
-
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -21,9 +19,11 @@ import org.junit.runner.RunWith;
 
 @MediumTest
 @RunWith(AndroidJUnit4.class)
-public class SendMessagesIT {
+public class SendMessagesIT
+{
 
-    public SendMessagesIT() {
+    public SendMessagesIT()
+    {
     }
 
     //How much messages each device will send to the hub for each connection.
@@ -38,21 +38,23 @@ public class SendMessagesIT {
     //Device Connection String
     private String connString = "";
 
-
     @Test
-    public void SendMessagesOverAmqps() throws Exception {
+    public void SendMessagesOverAmqps() throws Exception
+    {
         DeviceClient client = new DeviceClient(connString, IotHubClientProtocol.AMQPS);
         SendMessagesCommon.SendMessage(client, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
     }
 
     @Test
     @Ignore
-    public void SendMessagesOverAmqps_multithreaded() throws Exception {
+    public void SendMessagesOverAmqps_multithreaded() throws Exception
+    {
         Assert.fail("Multithreaded messages over AMQPS protocol not suported");
     }
 
     @Test
-    public void SendMessagesOverMqtt() throws Exception {
+    public void SendMessagesOverMqtt() throws Exception
+    {
         String messageString = "Java client e2e test message over Mqtt protocol";
         Message msg = new Message(messageString);
         DeviceClient client = new DeviceClient(connString, IotHubClientProtocol.MQTT);
@@ -60,7 +62,8 @@ public class SendMessagesIT {
     }
 
     @Test
-    public void SendMessagesOverHttps() throws Exception {
+    public void SendMessagesOverHttps() throws Exception
+    {
         String messageString = "Java client e2e test message over Https protocol";
         Message msg = new Message(messageString);
         DeviceClient client = new DeviceClient(connString, IotHubClientProtocol.HTTPS);
