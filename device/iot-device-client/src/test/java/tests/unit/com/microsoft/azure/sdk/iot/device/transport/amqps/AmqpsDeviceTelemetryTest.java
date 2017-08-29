@@ -153,7 +153,7 @@ public class AmqpsDeviceTelemetryTest
             int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 
         //assert
-        assertEquals(true, deliverySuccessful);
+        assertTrue(deliverySuccessful);
         assertTrue(deliveryHash > 0);
     }
 
@@ -351,7 +351,7 @@ public class AmqpsDeviceTelemetryTest
         AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "convertToProton", mockMessage);
 
         //assert
-        assertEquals(null, amqpsConvertToProtonReturnValue);
+        assertNull(amqpsConvertToProtonReturnValue);
     }
 
     /*

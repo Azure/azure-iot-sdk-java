@@ -14,6 +14,7 @@ class AmqpsConvertToProtonReturnValue
     AmqpsConvertToProtonReturnValue(MessageImpl messageImpl, MessageType messageType);
     MessageImpl getMessageImpl();
     MessageType getMessageType();
+}
 ```
 
 ### AmqpsConvertToProtonReturnValue

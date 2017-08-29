@@ -14,6 +14,7 @@ class AmqpsSendReturnValue
     AmqpsSendReturnValue(boolean deliverySuccessful, int deliveryHash);
     boolean isDeliverySuccessful();
     int getDeliveryHash();
+}
 ```
 
 ### AmqpsSendReturnValue
@@ -21,7 +22,6 @@ class AmqpsSendReturnValue
 ```java
 AmqpsSendReturnValue(boolean deliverySuccessful, int deliveryHash);
 ```
-
 
 **SRS_AMQPSSENDRETURNVALUE_12_001: [**The constructor shall initialize deliverySuccessful and deliveryHash private member variables with the given arguments.**]**
 

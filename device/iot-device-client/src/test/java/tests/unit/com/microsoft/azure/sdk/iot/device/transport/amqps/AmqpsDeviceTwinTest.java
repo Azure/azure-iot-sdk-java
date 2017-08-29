@@ -165,7 +165,7 @@ public class AmqpsDeviceTwinTest
         int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 
         //assert
-        assertEquals(true, deliverySuccessful);
+        assertTrue(deliverySuccessful);
         assertNotEquals(-1, deliveryHash);
     }
 
@@ -186,7 +186,7 @@ public class AmqpsDeviceTwinTest
         int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 
         //assert
-        assertEquals(false, deliverySuccessful);
+        assertFalse(deliverySuccessful);
         assertEquals(-1, deliveryHash);
     }
 

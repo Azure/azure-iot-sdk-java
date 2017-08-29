@@ -15,6 +15,7 @@ class AmqpsConvertFromProtonReturnValue
     Message getMessage()
     MessageCallback getMessageCallback()
     Object getMessageContext()
+}
 ```
 
 ### AmqpsConvertFromProtonReturnValue

@@ -42,9 +42,9 @@ public class AmqpsSendReturnValueTest
         //arrange
         boolean isDeliverySuccessful = true;
         int deliveryHash = 42;
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.newInstance(AmqpsSendReturnValue.class, isDeliverySuccessful, deliveryHash);
 
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.newInstance(AmqpsSendReturnValue.class, isDeliverySuccessful, deliveryHash);
         boolean actualIsDeliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
         int actualDeliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 
