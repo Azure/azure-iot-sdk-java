@@ -5,6 +5,8 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
+import com.microsoft.azure.sdk.iot.common.EventCallback;
+import com.microsoft.azure.sdk.iot.common.Success;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.Message;
@@ -16,8 +18,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
-import tests.integration.com.microsoft.azure.sdk.iot.EventCallback;
-import tests.integration.com.microsoft.azure.sdk.iot.Success;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
