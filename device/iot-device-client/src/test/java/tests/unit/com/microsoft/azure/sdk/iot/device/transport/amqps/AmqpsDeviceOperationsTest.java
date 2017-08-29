@@ -418,7 +418,8 @@ public class AmqpsDeviceOperationsTest
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
 
         //assert
-        assertTrue(amqpsSendReturnValue.getDeliveryHash() != -1);
+        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
+        assertTrue(deliveryHash != -1);
         new Verifications()
         {
             {
@@ -464,7 +465,8 @@ public class AmqpsDeviceOperationsTest
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
 
         //assert
-        assertTrue(amqpsSendReturnValue.getDeliveryHash() == -1);
+        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
+        assertTrue(deliveryHash == -1);
         new Verifications()
         {
             {

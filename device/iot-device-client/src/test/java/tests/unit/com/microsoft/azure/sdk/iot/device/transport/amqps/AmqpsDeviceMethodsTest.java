@@ -129,10 +129,12 @@ public class AmqpsDeviceMethodsTest
 
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceMethods, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_METHODS, bytes, 0, 1, bytes);
+        boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
+        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 
         //assert
-        assertEquals(true, amqpsSendReturnValue.isDeliverySuccessful());
-        assertNotEquals(amqpsSendReturnValue.getDeliveryHash(), -1);
+        assertEquals(true, deliverySuccessful);
+        assertNotEquals(-1, deliveryHash);
     }
 
     // Codes_SRS_AMQPSDEVICEMETHODS_12_011: [The function shall return with AmqpsSendReturnValue with false success and -1 delivery hash.]
@@ -148,10 +150,12 @@ public class AmqpsDeviceMethodsTest
 
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceMethods, "sendMessageAndGetDeliveryHash",MessageType.DEVICE_TWIN, bytes, 0, 1, bytes);
+        boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
+        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 
         //assert
-        assertEquals(false, amqpsSendReturnValue.isDeliverySuccessful());
-        assertEquals(-1, amqpsSendReturnValue.getDeliveryHash());
+        assertEquals(false, deliverySuccessful);
+        assertEquals(-1, deliveryHash);
     }
 
     // Codes_SRS_AMQPSDEVICEMETHODS_12_012: [The function shall call the super function.]

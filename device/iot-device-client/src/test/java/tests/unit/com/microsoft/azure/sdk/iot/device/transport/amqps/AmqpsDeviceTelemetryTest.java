@@ -124,10 +124,13 @@ public class AmqpsDeviceTelemetryTest
 
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_METHODS, msgData, offset, length, deliveryTag);
+        boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
+        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
+
 
         //assert
-        assertEquals(amqpsSendReturnValue.isDeliverySuccessful(), false);
-        assertEquals(amqpsSendReturnValue.getDeliveryHash(), -1);
+        assertEquals(false, deliverySuccessful);
+        assertEquals(-1, deliveryHash);
     }
 
     /*
@@ -146,10 +149,12 @@ public class AmqpsDeviceTelemetryTest
 
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
+            boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
+            int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 
         //assert
-        assertEquals(amqpsSendReturnValue.isDeliverySuccessful(), true);
-        assertTrue(amqpsSendReturnValue.getDeliveryHash() > 0);
+        assertTrue(deliverySuccessful);
+        assertTrue(deliveryHash > 0);
     }
 
     /*
@@ -175,7 +180,7 @@ public class AmqpsDeviceTelemetryTest
         AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
 
         //assert
-        assertEquals(amqpsConvertFromProtonReturnValue , null);
+        assertEquals(null, amqpsConvertFromProtonReturnValue);
     }
 
     // Codes_SRS_AMQPSDEVICETELEMETRY_12_025: [The function shall create a new empty buffer for message body if the proton message body is null.]
@@ -346,7 +351,7 @@ public class AmqpsDeviceTelemetryTest
         AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "convertToProton", mockMessage);
 
         //assert
-        assertEquals(amqpsConvertToProtonReturnValue , null);
+        assertNull(amqpsConvertToProtonReturnValue);
     }
 
     /*
