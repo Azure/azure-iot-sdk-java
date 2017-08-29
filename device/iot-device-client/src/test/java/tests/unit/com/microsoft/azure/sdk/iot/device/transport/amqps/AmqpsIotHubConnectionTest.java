@@ -37,7 +37,7 @@ import static org.junit.Assert.assertTrue;
 
 /* Unit tests for AmqpsIotHubConnection
 * 100% methods covered
-* 99% lines covered (Thread is not mockable...)
+* 93% lines covered (Thread is not mockable...)
 */
 public class AmqpsIotHubConnectionTest {
 

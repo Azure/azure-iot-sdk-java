@@ -78,8 +78,22 @@ public class AmqpsDeviceMethodsTest
     **Tests_SRS_AMQPSDEVICEMETHODS_12_005: [**The constructor shall insert the given deviceId argument to the sender and receiver link address.**]**
     **Tests_SRS_AMQPSDEVICEMETHODS_12_006: [**The constructor shall add API version key to the amqpProperties.**]**     */
     @Test
-    public void constructorInitializesAllMembers()
+    public void constructorInitializesAllMembers(
+            @Mocked final UUID mockUUID
+    )
     {
+        // arrange
+        final String uuidStr = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+        new NonStrictExpectations()
+        {
+            {
+                UUID.randomUUID();
+                result = mockUUID;
+                mockUUID.toString();
+                result = uuidStr;
+            }
+        };
+
         //arrange
         String deviceId = "deviceId";
 
@@ -108,6 +122,9 @@ public class AmqpsDeviceMethodsTest
 
         assertTrue(senderLinkTag.startsWith(SENDER_LINK_TAG_PREFIX));
         assertTrue(receiverLinkTag.startsWith(RECEIVER_LINK_TAG_PREFIX));
+
+        assertTrue(senderLinkTag.endsWith(uuidStr));
+        assertTrue(receiverLinkTag.endsWith(uuidStr));
 
         assertTrue(senderLinkAddress.contains(deviceId));
         assertTrue(receiverLinkAddress.contains(deviceId));
