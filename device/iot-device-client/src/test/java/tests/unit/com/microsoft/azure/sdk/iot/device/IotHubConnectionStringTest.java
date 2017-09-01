@@ -16,6 +16,8 @@ import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for Iothub connection string.
+ * Methods: 100%
+ * Lines: 97%
  */
 public class IotHubConnectionStringTest 
 {
@@ -581,5 +583,42 @@ public class IotHubConnectionStringTest
         Object iotHubConnectionString = Deencapsulation.newInstance(Class.forName(IOTHUB_CONNECTION_STRING_CLASS),
                 new Class[]{String.class, String.class, String.class, String.class},
                 VALID_HOSTNAME, "test;device", null, EXPIRED_SHARED_ACCESS_TOKEN);
+    }
+
+    //Tests_SRS_IOTHUB_CONNECTIONSTRING_34_038: [This function shall set the value of this object's shared access token to the provided value.]
+    @Test
+    public void sharedAccessTokenSetterWorks() throws ClassNotFoundException
+    {
+        //arrange
+        String expectedToken = "new token";
+        final String connString =
+                "HostName=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey;CredentialScope=Device;" +
+                        "DeviceId=" + VALID_DEVICEID + ";SharedAccessSignature=" + VALID_SHARED_ACCESS_TOKEN + ";";
+
+        Object iotHubConnectionString = Deencapsulation.newInstance(Class.forName(IOTHUB_CONNECTION_STRING_CLASS),
+                new Class[] {String.class}, connString);
+
+        //act
+        Deencapsulation.invoke(iotHubConnectionString, "setSharedAccessToken", expectedToken);
+
+        //assert
+        String actualToken = Deencapsulation.getField(iotHubConnectionString, "sharedAccessToken");
+        assertEquals(expectedToken, actualToken);
+    }
+
+    //Tests_SRS_IOTHUB_CONNECTIONSTRING_34_037: [If the provided shared access token is null or empty, an IllegalArgumentException shall be thrown.]
+    @Test (expected = IllegalArgumentException.class)
+    public void sharedAccessTokenCannotBeSetEmpty() throws ClassNotFoundException
+    {
+        //arrange
+        final String connString =
+                "HostName=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey;CredentialScope=Device;" +
+                        "DeviceId=" + VALID_DEVICEID + ";SharedAccessSignature=" + VALID_SHARED_ACCESS_TOKEN + ";";
+
+        Object iotHubConnectionString = Deencapsulation.newInstance(Class.forName(IOTHUB_CONNECTION_STRING_CLASS),
+                new Class[] {String.class}, connString);
+
+        //act
+        Deencapsulation.invoke(iotHubConnectionString, "setSharedAccessToken", "");
     }
 }

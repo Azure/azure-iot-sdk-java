@@ -39,6 +39,7 @@ public class MqttIotHubConnectionTest
     final int qos = 1;
     final String publishTopic = "devices/test-deviceId/messages/events/";
     final String subscribeTopic = "devices/test-deviceId/messages/devicebound/#";
+    final String expectedToken = "someToken";
 
     @Mocked
     protected DeviceClientConfig mockConfig;
@@ -241,14 +242,14 @@ public class MqttIotHubConnectionTest
     @Test
     public void openEstablishesConnectionUsingCorrectConfig(@Mocked final MqttDeviceMethod mockDeviceMethod) throws IOException
     {
+        final String expectedSasToken = "someToken";
         baseExpectations();
-        openExpectations();
 
         new Expectations()
         {
             {
-                new MqttDeviceMethod();
-                result = mockDeviceMethod;
+                mockConfig.getSharedAccessToken(); result = expectedSasToken;
+                new MqttDeviceMethod(); result = mockDeviceMethod;
             }
         };
 
@@ -260,7 +261,6 @@ public class MqttIotHubConnectionTest
         String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION, "UTF-8");
         assertEquals(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "/" + clientIdentifier, actualIotHubUserName);
 
-        String expectedSasToken = mockToken.toString();
         String actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
 
         assertEquals(expectedSasToken, actualUserPassword);
@@ -310,10 +310,9 @@ public class MqttIotHubConnectionTest
         String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION, "UTF-8");
         assertEquals(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "/" + clientIdentifier, actualIotHubUserName);
 
-        String expectedSasToken = mockToken.toString();
         String actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
 
-        assertEquals(expectedSasToken, actualUserPassword);
+        assertEquals(expectedToken, actualUserPassword);
 
         State expectedState = State.OPEN;
         State actualState =  Deencapsulation.getField(connection, "state");
@@ -345,8 +344,8 @@ public class MqttIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                new IotHubSasToken(mockConfig, anyLong);
-                result = mockToken;
+                mockConfig.getSharedAccessToken();
+                result = mockToken.toString();
                 new MqttMessaging(sslPrefix + iotHubHostName + sslPortSuffix, deviceId, anyString, anyString, mockIotHubSSLContext);
                 result = new IOException(anyString);
             }
@@ -378,8 +377,8 @@ public class MqttIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                new IotHubSasToken(mockConfig, anyLong);
-                result = mockToken;
+                mockConfig.getSharedAccessToken();
+                result = mockToken.toString();
                 new MqttMessaging(anyString, anyString, anyString, anyString, mockIotHubSSLContext);
                 result = mockDeviceMessaging;
                 new MqttDeviceMethod();
@@ -413,8 +412,8 @@ public class MqttIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                new IotHubSasToken(mockConfig, anyLong);
-                result = mockToken;
+                mockConfig.getSharedAccessToken();
+                result = mockToken.toString();
                 new MqttMessaging(sslPrefix + iotHubHostName + sslPortSuffix, deviceId, anyString, anyString, mockIotHubSSLContext);
                 result = mockDeviceMessaging;
                 new MqttDeviceMethod();
@@ -1001,8 +1000,8 @@ public class MqttIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                new IotHubSasToken(mockConfig, anyLong);
-                result = mockToken;
+                mockConfig.getSharedAccessToken();
+                result = expectedToken;
                 new MqttMessaging(anyString, deviceId, anyString, anyString, mockIotHubSSLContext);
                 result = mockDeviceMessaging;
                 Deencapsulation.invoke(mockDeviceMessaging, "setDeviceClientConfig", mockConfig);

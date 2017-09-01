@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
+
 /**
  * Configuration settings for an IoT Hub client. Validates all user-defined
  * settings.
@@ -22,6 +24,9 @@ public final class DeviceClientConfig
     private static final int DEFAULT_READ_TIMEOUT_MILLIS = 240000;
     /** The default value for messageLockTimeoutSecs. */
     private static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
+
+    private static final long MILLISECONDS_PER_SECOND = 1000L;
+    private static final long MINIMUM_EXPIRATION_TIME_OFFSET = 1L;
 
     /* information in the connection string that unique identify the device */
     private final IotHubConnectionString iotHubConnectionString;
@@ -90,7 +95,7 @@ public final class DeviceClientConfig
      */
     public boolean isUseWebsocket()
     {
-        //Codes_SRS_DEVICECLIENTCONFIG_25_033: [The function shall return the true if websocket is enabled, false otherwise.]
+        //Codes_SRS_DEVICECLIENTCONFIG_25_037: [The function shall return the true if websocket is enabled, false otherwise.]
         return this.useWebsocket;
     }
 
@@ -100,7 +105,7 @@ public final class DeviceClientConfig
      */
     public void setUseWebsocket(boolean useWebsocket)
     {
-        //Codes_SRS_DEVICECLIENTCONFIG_25_034: [The function shall save useWebsocket.]
+        //Codes_SRS_DEVICECLIENTCONFIG_25_038: [The function shall save useWebsocket.]
         this.useWebsocket = useWebsocket;
     }
 
@@ -224,8 +229,21 @@ public final class DeviceClientConfig
      *
      * @return the shared access signature.
      */
-    public String getSharedAccessToken()
+    public String getSharedAccessToken() throws SecurityException
     {
+        String currentToken = this.iotHubConnectionString.getSharedAccessToken();
+
+        if (currentToken == null || (this.getDeviceKey() != null && IotHubSasToken.isSasTokenExpired(currentToken)))
+        {
+            Long expiryTime = (System.currentTimeMillis() / MILLISECONDS_PER_SECOND) + this.getTokenValidSecs() + MINIMUM_EXPIRATION_TIME_OFFSET;
+            IotHubSasToken generatedSasToken = new IotHubSasToken(this, expiryTime);
+
+            //Codes_SRS_DEVICECLIENTCONFIG_34_036: [If this function generates the returned SharedAccessToken from a device key, the previous SharedAccessToken shall be overwritten with the generated value.]
+            this.iotHubConnectionString.setSharedAccessToken(generatedSasToken.toString());
+
+            return generatedSasToken.toString();
+        }
+
         // Codes_SRS_DEVICECLIENTCONFIG_25_018: [**The function shall return the SharedAccessToken given in the constructor.**] **
         return this.iotHubConnectionString.getSharedAccessToken();
     }
@@ -381,7 +399,6 @@ public final class DeviceClientConfig
         return this.deviceTwinMessageContext;
     }
 
-
     /**
      * Getter for the timeout, in seconds, for the lock that the client has on a
      * received message.
@@ -394,6 +411,17 @@ public final class DeviceClientConfig
         return DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS;
     }
 
+    /**
+     * Tells if the config needs to get a new sas token. If a device key is present in config, no token refresh is needed.
+     * @return if the config needs a new sas token.
+     */
+    public boolean needsToRenewSasToken()
+    {
+        //Codes_SRS_DEVICECLIENTCONFIG_34_035: [If the saved sas token has expired and there is no device key present, this function shall return true.]
+        String token = this.getSharedAccessToken();
+        return (token != null && IotHubSasToken.isSasTokenExpired(token) && this.getDeviceKey() == null);
+    }
+
     @SuppressWarnings("unused")
     protected DeviceClientConfig()
     {
@@ -401,5 +429,4 @@ public final class DeviceClientConfig
         this.pathToCertificate = null;
         this.iotHubSSLContext = null;
     }
-
 }

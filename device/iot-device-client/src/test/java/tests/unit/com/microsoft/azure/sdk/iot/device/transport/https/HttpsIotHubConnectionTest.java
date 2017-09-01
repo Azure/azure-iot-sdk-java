@@ -7,19 +7,25 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.net.*;
 import com.microsoft.azure.sdk.iot.device.transport.https.*;
+import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
-/** Unit tests for HttpsIotHubConnection. */
+/**
+ * Unit tests for HttpsIotHubConnection.
+ * Methods: 100%
+ * Lines: 97%
+ */
 public class HttpsIotHubConnectionTest
 {
     @Mocked
@@ -31,13 +37,28 @@ public class HttpsIotHubConnectionTest
     @Mocked
     HttpsSingleMessage mockMsg;
     @Mocked
-    IotHubSasToken mockToken;
-    @Mocked
     HttpsRequest mockRequest;
     @Mocked
     HttpsResponse mockResponse;
     @Mocked
     IotHubStatusCode mockStatus;
+    @Mocked IotHubSasToken mockSasToken;
+
+    private static final String testSasToken = "SharedAccessSignature sr=test&sig=test&se=0";
+
+    @Before
+    public void setup()
+    {
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getSharedAccessToken();
+                result=testSasToken;
+                mockSasToken.isSasTokenExpired(testSasToken);
+                result = false;
+            }
+        };
+    }
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_002: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2016-02-03'.] 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_001: [The constructor shall save the client configuration.]
@@ -204,7 +225,7 @@ public class HttpsIotHubConnectionTest
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_007: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
     @Test
-    public void sendEventSetsAuthToSasToken(@Mocked final IotHubEventUri mockUri) throws IOException
+    public void sendEventSetsAuthToSasToken(@Mocked final IotHubEventUri mockUri, @Mocked final IotHubSasToken mockToken) throws IOException
     {
         final String iotHubHostname = "test-iothubname";
         final String deviceId = "test-device-key";
@@ -219,9 +240,9 @@ public class HttpsIotHubConnectionTest
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
-                new IotHubSasToken(mockConfig, anyLong);
-                result = mockToken;
                 mockToken.toString();
+                result = tokenStr;
+                mockConfig.getSharedAccessToken();
                 result = tokenStr;
             }
         };
@@ -344,7 +365,7 @@ public class HttpsIotHubConnectionTest
         conn.sendEvent(mockMsg);
     }
 
-    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_041: [The function shall send a request to the URL https://[iotHubHostname]/devices/[deviceId]/[path]?api-version=2016-02-03.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_21_041: [The function shall send a request to the URL https://[iotHubHostname]/devices/[deviceId]/[path]?api-version=2016-02-03.]
     @Test
     public void sendHttpsMessageHasCorrectUrl(
             @Mocked final IotHubUri mockUri) throws IOException
@@ -380,7 +401,7 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_042: [The function shall send a `httpsMethod` request.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_21_042: [The function shall send a `httpsMethod` request.]
     @Test
     public void sendHttpsMessageSendsPostRequest(
             @Mocked final IotHubUri mockUri) throws IOException
@@ -399,7 +420,7 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_043: [The function shall set the request body to the message body.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_21_043: [The function shall set the request body to the message body.]
     @Test
     public void sendHttpsMessageSendsMessageBody(
             @Mocked final IotHubUri mockUri) throws IOException
@@ -427,7 +448,7 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_044: [The function shall write each message property as a request header.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_21_044: [The function shall write each message property as a request header.]
     @Test
     public void sendHttpsMessageSendsMessageProperties(
             @Mocked final IotHubUri mockUri,
@@ -464,7 +485,7 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_045: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_21_045: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
     @Test
     public void sendHttpsMessageSetsReadTimeout(@Mocked final IotHubUri mockUri) throws IOException
     {
@@ -491,7 +512,7 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    //Codes_SRS_HTTPSIOTHUBCONNECTION_21_046: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_21_046: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
     @Test
     public void sendHttpsMessageSetsIotHubSSLContext(@Mocked final IotHubUri mockUri,
                                               @Mocked final IotHubSSLContext mockContext) throws IOException
@@ -518,9 +539,9 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_047: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_21_047: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
     @Test
-    public void sendHttpsMessageSetsAuthToSasToken(@Mocked final IotHubUri mockUri) throws IOException
+    public void sendHttpsMessageSetsAuthToSasToken(@Mocked final IotHubUri mockUri, @Mocked final IotHubSasToken mockToken) throws IOException
     {
         final String iotHubHostname = "test-iothubname";
         final String deviceId = "test-device-key";
@@ -537,9 +558,9 @@ public class HttpsIotHubConnectionTest
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
-                new IotHubSasToken(mockConfig, anyLong);
-                result = mockToken;
                 mockToken.toString();
+                result = tokenStr;
+                mockConfig.getSharedAccessToken();
                 result = tokenStr;
             }
         };
@@ -557,7 +578,7 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_048: [The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/[path]'.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_21_048: [The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/[path]'.]
     @Test
     public void sendHttpsMessageSetsIotHubToToPath(@Mocked final IotHubUri mockUri) throws IOException
     {
@@ -588,7 +609,7 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_049: [The function shall set the header field 'content-type' to be the message content type.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_21_049: [The function shall set the header field 'content-type' to be the message content type.]
     @Test
     public void sendHttpsMessageSetsContentTypeCorrectly(@Mocked final IotHubUri mockUri) throws IOException
     {
@@ -620,7 +641,7 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_050: [The function shall return a ResponseMessage with the status and payload.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_21_050: [The function shall return a ResponseMessage with the status and payload.]
     @Test
     public void sendHttpsMessageReturnsCorrectResponse(@Mocked final IotHubUri mockUri) throws IOException
     {
@@ -651,7 +672,7 @@ public class HttpsIotHubConnectionTest
         assertThat(testResponse.getBytes(), is(body));
     }
 
-    // Codes_SRS_HTTPSIOTHUBCONNECTION_21_051: [If the IoT Hub could not be reached, the function shall throw an IOException.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_21_051: [If the IoT Hub could not be reached, the function shall throw an IOException.]
     @Test(expected = IOException.class)
     public void sendHttpsMessageThrowsIOExceptionIfRequestFails(@Mocked final IotHubUri mockUri) throws IOException
     {
@@ -745,7 +766,7 @@ public class HttpsIotHubConnectionTest
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_016: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
     @Test
-    public void receiveMessageSetsAuthToSasToken(@Mocked final IotHubMessageUri mockUri) throws IOException
+    public void receiveMessageSetsAuthToSasToken(@Mocked final IotHubMessageUri mockUri, @Mocked final IotHubSasToken mockToken) throws IOException
     {
         final String iotHubHostname = "test-iothubname";
         final String deviceId = "test-device-key";
@@ -760,9 +781,9 @@ public class HttpsIotHubConnectionTest
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
-                new IotHubSasToken(mockConfig, anyLong);
-                result = mockToken;
                 mockToken.toString();
+                result = tokenStr;
+                mockConfig.getSharedAccessToken();
                 result = tokenStr;
             }
         };
@@ -1080,6 +1101,7 @@ public class HttpsIotHubConnectionTest
         final String deviceId = "test-device-id";
         final String abandonUri = "test-abandon-uri";
         final String eTag = "test-etag";
+
         new NonStrictExpectations()
         {
             {
@@ -1353,7 +1375,7 @@ public class HttpsIotHubConnectionTest
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_034: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
     @Test
-    public void sendMessageResultSetsAuthToSasToken(@Mocked final IotHubRejectUri mockUri) throws IOException
+    public void sendMessageResultSetsAuthToSasToken(@Mocked final IotHubRejectUri mockUri, @Mocked final IotHubSasToken mockToken) throws IOException
     {
         final String eTag = "test-etag";
         final String iotHubHostname = "test-iothubname";
@@ -1377,9 +1399,9 @@ public class HttpsIotHubConnectionTest
                 result = deviceId;
                 mockConfig.getDeviceKey();
                 result = deviceKey;
-                new IotHubSasToken(mockConfig, anyLong);
-                result = mockToken;
                 mockToken.toString();
+                result = tokenStr;
+                mockConfig.getSharedAccessToken();
                 result = tokenStr;
             }
         };
@@ -1536,5 +1558,158 @@ public class HttpsIotHubConnectionTest
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
         conn.receiveMessage();
         conn.sendMessageResult(IotHubMessageResult.REJECT);
+    }
+
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_052: [If the SAS token used by this has expired, the function shall return a ResponseMessage object with the IotHubStatusCode UNAUTHORIZED.]
+    @Test
+    public void sendMessageReturnsSASTokenExpiredIfSASTokenIsExpired() throws IOException
+    {
+        //arrange
+        HttpsIotHubConnection httpsIotHubConnection = new HttpsIotHubConnection(mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockSasToken.isSasTokenExpired(testSasToken);
+                result = true;
+            }
+        };
+
+        //act
+        ResponseMessage message = httpsIotHubConnection.sendEvent(mockMsg);
+
+        //assert
+        assertEquals(IotHubStatusCode.UNAUTHORIZED, message.getStatus());
+    }
+
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_053: [If the SAS token used by this has expired, the function shall return a ResponseMessage object with the IotHubStatusCode UNAUTHORIZED.]
+    @Test
+    public void sendHttpsMessageReturnsUnauthorizedIfSASTokenIsExpired() throws IOException
+    {
+        //arrange
+        HttpsIotHubConnection httpsIotHubConnection = new HttpsIotHubConnection(mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockSasToken.isSasTokenExpired(testSasToken);
+                result = true;
+            }
+        };
+
+        //act
+        ResponseMessage message = httpsIotHubConnection.sendHttpsMessage(mockMsg, HttpsMethod.GET, "some_path");
+
+        //assert
+        assertEquals(IotHubStatusCode.UNAUTHORIZED, message.getStatus());
+    }
+
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_054: [If the SAS token used by this has expired, the function shall return a Message object with a body of "Your sas token has expired".]
+    @Test
+    public void receiveMessageReturnsUnauthorizedIfSASTokenIsExpired() throws IOException
+    {
+        //arrange
+        HttpsIotHubConnection httpsIotHubConnection = new HttpsIotHubConnection(mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockSasToken.isSasTokenExpired(testSasToken);
+                result = true;
+            }
+        };
+
+        //act
+        Message message = httpsIotHubConnection.receiveMessage();
+
+        //assert
+        assertTrue(Arrays.equals("Your sas token has expired".getBytes(), message.getBytes()));
+    }
+
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_055: [This function shall retrieve a sas token from its config to use in the https request header.]
+    @Test
+    public void sendEventRetrievesSasTokenFromConfig() throws IOException
+    {
+        //arrange
+        HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
+
+        //act
+        connection.sendEvent(mockMsg);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockConfig.getSharedAccessToken();
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_056: [This function shall retrieve a sas token from its config to use in the https request header.]
+    @Test
+    public void sendHttpsMessageRetrievesSasTokenFromConfig() throws IOException
+    {
+        //arrange
+        HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
+
+        //act
+        connection.sendHttpsMessage(mockMsg, HttpsMethod.GET, "somepath");
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockConfig.getSharedAccessToken();
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_057: [This function shall retrieve a sas token from its config to use in the https request header.]
+    @Test
+    public void receiveMessageRetrievesSasTokenFromConfig() throws IOException
+    {
+        //arrange
+        HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
+
+        //act
+        connection.receiveMessage();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockConfig.getSharedAccessToken();
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_058: [If the saved SAS token for this connection has expired and cannot be renewed, this function shall throw a SecurityException.]
+    @Test (expected = SecurityException.class)
+    public void sendMessageResultThrowsSecurityExceptionWhenSASTokenHasExpired(@Mocked final IotHubEventUri mockUri) throws IOException
+    {
+        //arrange
+        final String sasToken = "SharedAccessSignature sr=hostname&sig=Signature&se=0";
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getIotHubHostname();
+                result = "test.iothub";
+                mockConfig.getDeviceId();
+                result = "test-device-id";
+                mockConfig.getSharedAccessToken();
+                result = sasToken;
+                IotHubSasToken.isSasTokenExpired(sasToken);
+                result = true;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(conn, "messageEtag", "test-etag");
+
+        //act
+        conn.sendMessageResult(IotHubMessageResult.COMPLETE);
     }
 }

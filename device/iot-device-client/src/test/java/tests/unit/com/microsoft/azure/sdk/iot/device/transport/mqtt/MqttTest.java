@@ -38,7 +38,8 @@ public class MqttTest {
     final String mockParseTopic = "devices/deviceID/messages/devicebound/%24.mid=69ea4caf-d83e-454b-81f2-caafda4c81c8&%24.exp=0&%24.to=%2Fdevices%2FdeviceID%2Fmessages%2FdeviceBound&%24.cid=169c34b3-99b0-49f9-b0f6-8fa9d2c99345&iothub-ack=full&property1=value1";
     final byte[] expectedPayload = {0x61, 0x62, 0x63};
     static Message expectedMessage;
-
+    private static final String expectedNonExpiredSasToken = "SharedAccessSignature sr=hostname&sig=Signature&se="+ Long.MAX_VALUE;
+    private static final String expectedExpiredSasToken = "SharedAccessSignature sr=hostname&sig=Signature&se=0";
 
     @Mocked
     private MqttAsyncClient mockMqttAsyncClient;
@@ -63,9 +64,6 @@ public class MqttTest {
 
     @Mocked
     IotHubSSLContext mockIotHubSSLContext;
-
-    @Mocked
-    protected IotHubSasToken mockSASToken;
 
     @Mocked
     protected DeviceClientConfig mockDeviceClientConfig;
@@ -1375,8 +1373,9 @@ public class MqttTest {
                     mockMqttAsyncClient.isConnected();
                     result = false;
 
-                    IotHubSasToken.isSasTokenExpired(new String(mockMqttConnectionOptions.getPassword()));
-                    result = false;
+                    IotHubSasToken.isSasTokenExpired(expectedNonExpiredSasToken);
+                    mockMqttConnectionOptions.getPassword();
+                    result = expectedNonExpiredSasToken.toCharArray();
 
                     mockMqttAsyncClient.isConnected();
                     result = false;
@@ -1406,7 +1405,7 @@ public class MqttTest {
             testCleanUp(mockMqtt);
         }
     }
-    
+
     /*
      **Tests_SRS_Mqtt_99_050: [**The function shall check if SAS token has already expired.**]**
     */
@@ -1458,21 +1457,18 @@ public class MqttTest {
                     mockMqttAsyncClient.isConnected();
                     result = false;
                     mockMqttConnectionOptions.getPassword();
-                    result = anyString.toCharArray();
-                    IotHubSasToken.isSasTokenExpired(anyString);
-                    result = true; // SAS token has expired
+                    result = expectedExpiredSasToken.toCharArray();
+                    IotHubSasToken.isSasTokenExpired(expectedExpiredSasToken);
                     mockDeviceClientConfig.getDeviceKey();
                     result = anyString;
-                    mockDeviceClientConfig.getTokenValidSecs();
-                    result = anyLong;
                 }
             };
 
             new NonStrictExpectations()
             {
                 {
-                    new IotHubSasToken((DeviceClientConfig)any, anyLong);
-                    result = mockSASToken;
+                    mockDeviceClientConfig.getSharedAccessToken();
+                    result = expectedExpiredSasToken;
                 }
             };
 
@@ -1518,8 +1514,8 @@ public class MqttTest {
     @Test(expected = IOException.class)
     public void connectionLostAttemptsToReconnectWithUserSuppliedSASTokenAlreadyExpired() throws IOException, MqttException
     {
-        final byte[] payload = {0x61, 0x62, 0x63};
         //arrange
+        final byte[] payload = {0x61, 0x62, 0x63};
         Mqtt mockMqtt = null;
         Throwable t = new Throwable();
 
@@ -1545,13 +1541,12 @@ public class MqttTest {
                     mockMqttAsyncClient.isConnected();
                     result = false;
 
-                    IotHubSasToken.isSasTokenExpired(new String(mockMqttConnectionOptions.getPassword()));
+                    IotHubSasToken.isSasTokenExpired(expectedExpiredSasToken);
                     result = true; // User specified SAS token has expired
 
-                    mockDeviceClientConfig.getDeviceKey();
-                    result = null;
-
-                }
+                    mockMqttConnectionOptions.getPassword();
+                    result = expectedExpiredSasToken.toCharArray();
+               }
             };
 
             //act
@@ -1559,9 +1554,7 @@ public class MqttTest {
             Deencapsulation.invoke(mockMqtt, "setDeviceClientConfig", mockDeviceClientConfig);
             mockMqtt.connectionLost(t);
             Deencapsulation.invoke(mockMqtt, "publish", mockParseTopic, payload);
-
         }
-
         finally
         {
             testCleanUp(mockMqtt);
@@ -1599,30 +1592,36 @@ public class MqttTest {
 
                     mockMqttAsyncClient.isConnected();
                     result = false;
-                
-                    IotHubSasToken.isSasTokenExpired(new String(mockMqttConnectionOptions.getPassword()));
-                    result = false;
+
+                    IotHubSasToken.isSasTokenExpired(expectedNonExpiredSasToken);
+
+                    mockMqttConnectionOptions.getPassword();
+                    result = expectedNonExpiredSasToken.toCharArray();
 
                     mockMqttAsyncClient.isConnected();
                     result = false;
+
                     mockMqttAsyncClient.connect(mockMqttConnectionOptions);
                     result = mockMqttException;
 
                     mockMqttAsyncClient.isConnected();
                     result = false;
-                    
-                    IotHubSasToken.isSasTokenExpired(new String(mockMqttConnectionOptions.getPassword()));
-                    result = false;
+
+                    IotHubSasToken.isSasTokenExpired(expectedNonExpiredSasToken);
+
+                    mockMqttConnectionOptions.getPassword();
+                    result = expectedNonExpiredSasToken.toCharArray();
 
                     mockMqttAsyncClient.isConnected();
                     result = false;
+
                     mockMqttAsyncClient.connect(mockMqttConnectionOptions);
                     result = mockMqttToken;
+
                     mockMqttToken.waitForCompletion();
 
                     mockMqttAsyncClient.isConnected();
                     result = true;
-
                 }
             };
 

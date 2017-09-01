@@ -36,6 +36,10 @@ public final class HttpsTransport implements IotHubTransport
 
     private HttpsTransportState state;
 
+    /** Connection state change callback */
+    private IotHubConnectionStateCallback stateCallback;
+    private Object stateCallbackContext;
+
     /** The underlying HTTPS connection. */
     private HttpsIotHubConnection connection;
 
@@ -215,6 +219,12 @@ public final class HttpsTransport implements IotHubTransport
             throw new IllegalStateException(e);
         }
 
+        if (this.config.needsToRenewSasToken())
+        {
+            //Codes_SRS_HTTPSTRANSPORT_34_034: [If the sas token saved in this config has expired and the config has no device key saved, this function shall trigger a connection status callback with status SAS_TOKEN_EXPIRED.]
+            this.invokeConnectionStateCallback(IotHubConnectionState.SAS_TOKEN_EXPIRED);
+        }
+
         // Codes_SRS_HTTPSTRANSPORT_11_008: [The request shall be sent to the IoT Hub given in the configuration from the constructor.]
         // Codes_SRS_HTTPSTRANSPORT_11_005: [The function shall configure a valid HTTPS request and send it to the IoT Hub.]
         // Codes_SRS_HTTPSTRANSPORT_11_014: [If the send request fails while in progress, the function shall throw an IOException.]
@@ -290,9 +300,16 @@ public final class HttpsTransport implements IotHubTransport
         MessageCallback callback =
                 this.config.getDeviceTelemetryMessageCallback();
         Object context = this.config.getDeviceTelemetryMessageContext();
+
         if (callback == null)
         {
             return;
+        }
+
+        if (this.config.needsToRenewSasToken())
+        {
+            //Codes_SRS_HTTPSTRANSPORT_34_038: [If the sas token saved in this config has expired and the config has no device key saved, this function shall trigger a connection status callback with status SAS_TOKEN_EXPIRED.]
+            this.invokeConnectionStateCallback(IotHubConnectionState.SAS_TOKEN_EXPIRED);
         }
 
         // Codes_SRS_HTTPSTRANSPORT_11_009: [The function shall poll the IoT Hub for messages.]
@@ -306,7 +323,15 @@ public final class HttpsTransport implements IotHubTransport
 
             // Codes_SRS_HTTPSTRANSPORT_11_011: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
             // Codes_SRS_HTTPSTRANSPORT_11_020: [If the response from sending the IoT Hub message result does not have status code OK_EMPTY, the function shall throw an IOException.] 
-            this.connection.sendMessageResult(result);
+
+            try
+            {
+                this.connection.sendMessageResult(result);
+            }
+            catch (SecurityException sasTokenExpiredException)
+            {
+                this.invokeConnectionStateCallback(IotHubConnectionState.SAS_TOKEN_EXPIRED);
+            }
         }
     }
 
@@ -325,16 +350,33 @@ public final class HttpsTransport implements IotHubTransport
 
     /**
      * Registers a callback to be executed whenever the https connection is lost or established.
-     * 
+     *
      * @param callback the callback to be called.
-     * @param callbackContext a context to be passed to the callback. Can be
-     * {@code null} if no callback is provided.
-     * @throws UnsupportedOperationException to report that this functionality is not available
-     * because HTTPS is stateless.
+     * @param callbackContext a context to be passed to the callback. Can be null
+     * @throws IllegalArgumentException if the provided callback is null
      */
-    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) {
-        //HTTPS is stateless and therefore does not support the registration of connection state callbacks
-        throw new UnsupportedOperationException();
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
+    {
+        //Codes_SRS_HTTPSTRANSPORT_34_041: [If the provided callback is null, an IllegalArgumentException shall be thrown.]
+        if (callback == null)
+        {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+
+        // Codes_SRS_HTTPSTRANSPORT_34_040: [This function shall register the connection state callback with the provided callback and context.]
+        this.stateCallback = callback;
+        this.stateCallbackContext = callbackContext;
+    }
+
+    /**
+     * Triggers the callbacks notifying the user that the sas token in this transport has expired
+     */
+    void invokeConnectionStateCallback(IotHubConnectionState statusCode)
+    {
+        if (this.stateCallback != null)
+        {
+            this.stateCallback.execute(statusCode, this.stateCallbackContext);
+        }
     }
 
     /**

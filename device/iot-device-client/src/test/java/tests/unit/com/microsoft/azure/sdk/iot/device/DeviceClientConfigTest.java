@@ -7,8 +7,11 @@ import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.MessageCallback;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import mockit.Deencapsulation;
 import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
@@ -16,9 +19,11 @@ import java.net.URISyntaxException;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
-/** Unit tests for IoTHubClientConfig.
- *  Coverage : 96% Method, 90% line
- * */
+/**
+ * Unit tests for deviceClientConfig.
+ * Methods: 96%
+ * Lines: 90%
+ */
 public class DeviceClientConfigTest
 {
     // Tests_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
@@ -368,7 +373,7 @@ public class DeviceClientConfigTest
         assertThat(testReadTimeoutMillis, is(expectedReadTimeoutMillis));
     }
 
-    //Tests_SRS_DEVICECLIENTCONFIG_25_034: [The function shall save useWebsocket.]
+    //Tests_SRS_DEVICECLIENTCONFIG_25_038: [The function shall save useWebsocket.]
     @Test
     public void setWebsocketEnabledSets() throws URISyntaxException
     {
@@ -389,7 +394,7 @@ public class DeviceClientConfigTest
         assertTrue(config.isUseWebsocket());
     }
 
-    //Tests_SRS_DEVICECLIENTCONFIG_25_033: [The function shall return the true if websocket is enabled, false otherwise.]
+    //Tests_SRS_DEVICECLIENTCONFIG_25_037: [The function shall return the true if websocket is enabled, false otherwise.]
     @Test
     public void getWebsocketEnabledGets() throws URISyntaxException
     {
@@ -662,4 +667,126 @@ public class DeviceClientConfigTest
         new DeviceClientConfig(null);
     }
 
+    //Tests_SRS_DEVICECLIENTCONFIG_34_035: [If the saved sas token has expired and there is no device key present, this function shall return true.]
+    @Test
+    public void needsToRenewSasTokenReturnsTrueWhenSASTokenExpired(@Mocked final IotHubConnectionString mockIotHubConnectionString)
+    {
+        //arrange
+        final String expiredSasToken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + 0L;;
+
+        new NonStrictExpectations()
+        {
+            {
+                mockIotHubConnectionString.getSharedAccessToken();
+                result = expiredSasToken;
+            }
+        };
+
+        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
+
+        //act
+        boolean needsToRenewToken = config.needsToRenewSasToken();
+
+        //assert
+        assertTrue(needsToRenewToken);
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_34_035: [If the saved sas token has expired and there is no device key present, this function shall return true.]
+    @Test
+    public void needsToRenewSasTokenReturnsFalseWhenSASTokenNotExpired(@Mocked final IotHubConnectionString mockIotHubConnectionString)
+    {
+        //arrange
+        final String nonExpiredSasToken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + Long.MAX_VALUE;
+
+        new NonStrictExpectations()
+        {
+            {
+                mockIotHubConnectionString.getSharedAccessToken();
+                result = nonExpiredSasToken;
+            }
+        };
+
+        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
+
+        //act
+        boolean needsToRenewToken = config.needsToRenewSasToken();
+
+        //assert
+        assertFalse(needsToRenewToken);
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_34_035: [If the saved sas token has expired and there is no device key present, this function shall return true.]
+    @Test
+    public void needsToRenewSasTokenReturnsFalseWhenSASTokenExpiredButDeviceKeyPresent(
+            @Mocked final IotHubConnectionString mockIotHubConnectionString,
+            @Mocked final IotHubSasToken mockSasToken)
+    {
+        //arrange
+        final String expiredSasToken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + 0L;
+        final DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
+
+        Deencapsulation.setField(mockSasToken, "sasToken", expiredSasToken);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockIotHubConnectionString.getSharedAccessKey();
+                result = "some key";
+                mockIotHubConnectionString.getSharedAccessToken();
+                result = expiredSasToken;
+                mockIotHubConnectionString.getHostName();
+                result = "someHost";
+                new IotHubSasToken(config, anyLong);
+                result = mockSasToken;
+                IotHubSasToken.isSasTokenExpired(expiredSasToken);
+                result = true;
+            }
+        };
+
+        //act
+        boolean needsToRenewToken = config.needsToRenewSasToken();
+
+        //assert
+        assertFalse(needsToRenewToken);
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_34_036: [If this function generates the returned SharedAccessToken from a device key, the previous SharedAccessToken shall be overwritten with the generated value.]
+    @Test
+    public void getSharedAccessTokenOverwritesOldTokenIfGeneratedByDeviceKey(
+            @Mocked final IotHubConnectionString mockIotHubConnectionString,
+            @Mocked final IotHubSasToken mockSasToken)
+    {
+        //arrange
+        final String expiredSasToken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + 0L;
+        final DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
+        final String expectedSasTokenString = "some new sas token";
+        final String deviceKey = "some device key";
+
+        new NonStrictExpectations()
+        {
+            {
+                mockIotHubConnectionString.getSharedAccessKey();
+                result = deviceKey;
+                mockSasToken.toString();
+                result = expectedSasTokenString;
+                new IotHubSasToken(config, anyLong);
+                result = mockSasToken;
+            }
+        };
+
+        //act
+        String actualSharedAccessToken = config.getSharedAccessToken();
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockIotHubConnectionString, "setSharedAccessToken", new Class[] {String.class}, expectedSasTokenString);
+                times = 1;
+            }
+        };
+
+        assertNotEquals(expiredSasToken, actualSharedAccessToken);
+        assertEquals(expectedSasTokenString, actualSharedAccessToken);
+    }
 }

@@ -26,6 +26,8 @@ public final class HttpsTransport implements IotHubTransport
     public void handleMessage() throws IOException;
 
     public boolean isEmpty();
+
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
 }
 ```
 
@@ -109,6 +111,8 @@ public void sendMessages() throws IOException;
 
 **SRS_HTTPSTRANSPORT_11_029: [**If the transport is closed, the function shall throw an IllegalStateException.**]**
 
+**SRS_HTTPSTRANSPORT_34_034: [**If the sas token saved in this config has expired and the config has no device key saved, this function shall trigger a connection status callback with status SAS_TOKEN_EXPIRED.**]**
+
 
 ### invokeCallbacks
 
@@ -141,6 +145,8 @@ public void handleMessage() throws IOException;
 
 **SRS_HTTPSTRANSPORT_11_033: [**If the transport is closed, the function shall throw an IllegalStateException.**]**
 
+**SRS_HTTPSTRANSPORT_34_038: [**If the sas token saved in this config has expired and the config has no device key saved, this function shall trigger a connection status callback with status SAS_TOKEN_EXPIRED.**]**
+
 
 ### isEmpty
 
@@ -149,3 +155,14 @@ public boolean isEmpty();
 ```
 
 **SRS_HTTPSTRANSPORT_11_015: [**The function shall return true if the waiting list, in progress list, and callback list are all empty, and false otherwise.**]**
+
+
+### registerConnectionStateCallback
+
+```java
+public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
+```
+
+**SRS_HTTPSTRANSPORT_34_040: [**This function shall register the connection state callback with the provided callback and context.**]**
+
+**SRS_HTTPSTRANSPORT_34_041: [**If the provided callback is null, an IllegalArgumentException shall be thrown.**]**

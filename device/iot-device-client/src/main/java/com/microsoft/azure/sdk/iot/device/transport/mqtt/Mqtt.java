@@ -541,7 +541,8 @@ abstract public class Mqtt implements MqttCallback
                         /*
                         **Codes_SRS_Mqtt_99_050: [**The function shall check if SAS token has already expired.**]**
                         */
-                        if (!IotHubSasToken.isSasTokenExpired(new String(Mqtt.info.connectionOptions.getPassword())))
+                        String sasToken = new String(Mqtt.info.connectionOptions.getPassword());
+                        if (!IotHubSasToken.isSasTokenExpired(sasToken))
                         {
                             connect(); // Try to reconnect
                         }
@@ -555,7 +556,7 @@ abstract public class Mqtt implements MqttCallback
                             /*
                             **Codes_SRS_Mqtt_99_052: [**The function shall generate a new SAS token.**]**
                             */
-                                IotHubSasToken sasToken = new IotHubSasToken(this.deviceClientConfig , System.currentTimeMillis() / 1000L + deviceClientConfig .getTokenValidSecs() + 1L);
+                                sasToken = this.deviceClientConfig.getSharedAccessToken();
                                 Mqtt.info.connectionOptions.setPassword(sasToken.toString().toCharArray());
                                 connect(); // Try to reconnect
                             }
