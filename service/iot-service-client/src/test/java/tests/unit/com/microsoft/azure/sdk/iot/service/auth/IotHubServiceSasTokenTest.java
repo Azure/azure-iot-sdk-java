@@ -69,7 +69,7 @@ public class IotHubServiceSasTokenTest
             {
                 urlEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
                 system.currentTimeMillis();
-                Base64.decodeBase64(sharedAccessKey.getBytes(charset));
+                Base64.decodeBase64Local(sharedAccessKey.getBytes(charset));
                 byte[] body = { 1 };
                 secretKeySpec = new SecretKeySpec(body, cryptoProvider);
                 mac.getInstance(cryptoProvider);

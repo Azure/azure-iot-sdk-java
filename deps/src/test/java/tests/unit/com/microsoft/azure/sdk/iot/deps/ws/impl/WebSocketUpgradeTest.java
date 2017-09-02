@@ -102,7 +102,7 @@ public class WebSocketUpgradeTest
                 String keyBase64 = line.substring(19);
                 if (keyBase64.length() == 24)
                 {
-                    byte[] decoded = Base64.decodeBase64(keyBase64.getBytes());
+                    byte[] decoded = Base64.decodeBase64Local(keyBase64.getBytes());
                     if (decoded.length == 16)
                     {
                         isWebSocketKeyHeaderOk = true;
@@ -211,7 +211,7 @@ public class WebSocketUpgradeTest
                 String keyBase64 = line.substring(19);
                 if (keyBase64.length() == 24)
                 {
-                    byte[] decoded = Base64.decodeBase64(keyBase64.getBytes());
+                    byte[] decoded = Base64.decodeBase64Local(keyBase64.getBytes());
                     if (decoded.length == 16)
                     {
                         isWebSocketKeyHeaderOk = true;
@@ -301,7 +301,7 @@ public class WebSocketUpgradeTest
                 String keyBase64 = line.substring(19);
                 if (keyBase64.length() == 24)
                 {
-                    byte[] decoded = Base64.decodeBase64(keyBase64.getBytes());
+                    byte[] decoded = Base64.decodeBase64Local(keyBase64.getBytes());
                     if (decoded.length == 16)
                     {
                         isWebSocketKeyHeaderOk = true;
@@ -396,7 +396,7 @@ public class WebSocketUpgradeTest
                 String keyBase64 = line.substring(19);
                 if (keyBase64.length() == 24)
                 {
-                    byte[] decoded = Base64.decodeBase64(keyBase64.getBytes());
+                    byte[] decoded = Base64.decodeBase64Local(keyBase64.getBytes());
                     if (decoded.length == 16)
                     {
                         isWebSocketKeyHeaderOk = true;
@@ -477,7 +477,7 @@ public class WebSocketUpgradeTest
         try
         {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
-            String serverKey = Base64.encodeBase64String(messageDigest.digest((keyBase64 + RFC_GUID).getBytes())).trim();
+            String serverKey = Base64.encodeBase64StringLocal(messageDigest.digest((keyBase64 + RFC_GUID).getBytes())).trim();
 
             String responseStr = "HTTP/1.1 101 Switching Protocols\n" +
                     "Upgrade: websocket\n" +
@@ -511,7 +511,7 @@ public class WebSocketUpgradeTest
         try
         {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
-            String serverKey = Base64.encodeBase64String(messageDigest.digest((keyBase64 + RFC_GUID).getBytes())).trim();
+            String serverKey = Base64.encodeBase64StringLocal(messageDigest.digest((keyBase64 + RFC_GUID).getBytes())).trim();
 
             String responseStr = "HTTP/1.1 101 Switching Protocols\n" +
                     "Upgrade: websocket\n" +
@@ -565,7 +565,7 @@ public class WebSocketUpgradeTest
         try
         {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
-            String serverKey = Base64.encodeBase64String(messageDigest.digest((keyBase64 + RFC_GUID).getBytes())).trim();
+            String serverKey = Base64.encodeBase64StringLocal(messageDigest.digest((keyBase64 + RFC_GUID).getBytes())).trim();
 
             String responseStr = "Upgrade: websocket\n" +
                     "Server: XXXYYYZZZ\n" +
@@ -596,7 +596,7 @@ public class WebSocketUpgradeTest
         try
         {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
-            String serverKey = Base64.encodeBase64String(messageDigest.digest((keyBase64 + RFC_GUID).getBytes())).trim();
+            String serverKey = Base64.encodeBase64StringLocal(messageDigest.digest((keyBase64 + RFC_GUID).getBytes())).trim();
 
             String responseStr = "HTTP/1.1 101 Switching Protocols\n" +
                     "Server: XXXYYYZZZ\n" +
@@ -627,7 +627,7 @@ public class WebSocketUpgradeTest
         try
         {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
-            String serverKey = Base64.encodeBase64String(messageDigest.digest((keyBase64 + RFC_GUID).getBytes())).trim();
+            String serverKey = Base64.encodeBase64StringLocal(messageDigest.digest((keyBase64 + RFC_GUID).getBytes())).trim();
 
             String responseStr = "HTTP/1.1 101 Switching Protocols\n" +
                     "Upgrade: websocket\n" +
@@ -658,7 +658,7 @@ public class WebSocketUpgradeTest
         try
         {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
-            String serverKey = Base64.encodeBase64String(messageDigest.digest((keyBase64 + RFC_GUID).getBytes())).trim();
+            String serverKey = Base64.encodeBase64StringLocal(messageDigest.digest((keyBase64 + RFC_GUID).getBytes())).trim();
 
             String responseStr = "HTTP/1.1 101 Switching Protocols\n" +
                     "Upgrade: websocket\n" +

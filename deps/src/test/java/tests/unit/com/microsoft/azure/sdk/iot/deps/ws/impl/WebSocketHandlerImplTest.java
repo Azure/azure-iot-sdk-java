@@ -23,8 +23,6 @@ package com.microsoft.azure.sdk.iot.deps.ws.impl;
 
 import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler;
 import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHeader;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketHandlerImpl;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketUpgrade;
 import org.junit.Test;
 
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
@@ -100,7 +98,7 @@ public class WebSocketHandlerImplTest
                 String keyBase64 = line.substring(19);
                 if (keyBase64.length() == 24)
                 {
-                    byte[] decoded = Base64.decodeBase64(keyBase64.getBytes());
+                    byte[] decoded = Base64.decodeBase64Local(keyBase64.getBytes());
 
                     if (decoded.length == 16)
                     {

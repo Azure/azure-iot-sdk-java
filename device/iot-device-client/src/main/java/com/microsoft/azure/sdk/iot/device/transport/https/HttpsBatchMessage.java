@@ -149,7 +149,7 @@ public final class HttpsBatchMessage implements HttpsMessage
         StringBuilder jsonMsg = new StringBuilder("{");
         // Codes_SRS_HTTPSBATCHMESSAGE_11_003: [The JSON object shall have the field "body" set to the raw message encoded in Base64.]
         jsonMsg.append("\"body\":");
-        jsonMsg.append("\"").append(Base64.encodeBase64String(msg.getBody())).append("\",");
+        jsonMsg.append("\"").append(Base64.encodeBase64StringLocal(msg.getBody())).append("\",");
         // Codes_SRS_HTTPSBATCHMESSAGE_11_004: [The JSON object shall have the field "base64Encoded" set to true and always encode the body for a batch message.]
         jsonMsg.append("\"base64Encoded\":");
         jsonMsg.append(true);
