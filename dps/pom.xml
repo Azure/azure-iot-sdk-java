@@ -1,0 +1,20 @@
+<!--
+  ~  Copyright (c) Microsoft. All rights reserved.
+  ~  Licensed under the MIT license. See LICENSE file in the project root for full license information.
+  -->
+
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.microsoft.azure.sdk.iot.dps</groupId>
+    <artifactId>dps</artifactId>
+    <name>IoT Hub Java DPS Client</name>
+    <version>0.0.1</version>
+    <packaging>pom</packaging>
+    <description>The Microsoft Azure IoT DPS Device SDK for Java</description>
+    <url>http://azure.github.io/azure-iot-sdk-java/</url>
+    <modules>
+        <module>dps-device-client</module>
+        <module>dps-service-client</module>
+        <module>dps-samples</module>
+    </modules>
+</project>
