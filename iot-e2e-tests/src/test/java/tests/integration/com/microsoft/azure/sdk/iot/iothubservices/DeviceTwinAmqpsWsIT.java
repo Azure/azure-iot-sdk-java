@@ -951,6 +951,7 @@ public class DeviceTwinAmqpsWsIT
         // Query multiple devices having same property
         final String where = "is_defined(properties.desired." + queryProperty + ")";
         SqlQuery sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, where, null);
+        Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
         Query twinQuery = sCDeviceTwin.queryTwin(sqlQuery.getQuery(), PAGE_SIZE);
 
         for (int i = 0; i < MAX_DEVICES; i++)
