@@ -3,7 +3,7 @@
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-service-client</artifactId>
     <name>Iot Hub Java Service SDK</name>
-    <version>1.9.24</version>
+    <version>1.9.25</version>
     <description>The Microsoft Azure IoT Service SDK for Java</description>
     <developers>
         <developer>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-deps</artifactId>
-            <version>0.1.2</version>
+            <version>0.1.3</version>
         </dependency>
         <dependency>
             <groupId>org.jmockit</groupId>
