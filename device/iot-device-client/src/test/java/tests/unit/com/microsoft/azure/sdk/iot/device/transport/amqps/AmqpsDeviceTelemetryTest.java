@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.*;
@@ -82,8 +83,22 @@ public class AmqpsDeviceTelemetryTest
     **Tests_SRS_AMQPSDEVICETELEMETRY_12_005: [**The constructor shall insert the given deviceId argument to the sender and receiver link address.**]**
     */
     @Test
-    public void constructorInitializesAllMembers()
+    public void constructorInitializesAllMembers(
+            @Mocked final UUID mockUUID
+    )
     {
+        // arrange
+        final String uuidStr = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+        new NonStrictExpectations()
+        {
+            {
+                UUID.randomUUID();
+                result = mockUUID;
+                mockUUID.toString();
+                result = uuidStr;
+            }
+        };
+
         //act
         AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId);
         String SENDER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsDeviceTelemetry, "SENDER_LINK_ENDPOINT_PATH");
@@ -105,6 +120,9 @@ public class AmqpsDeviceTelemetryTest
         assertTrue(senderLinkTag.startsWith(SENDER_LINK_TAG_PREFIX));
         assertTrue(receiverLinkTag.startsWith(RECEIVER_LINK_TAG_PREFIX));
 
+        assertTrue(senderLinkTag.endsWith(uuidStr));
+        assertTrue(receiverLinkTag.endsWith(uuidStr));
+
         assertTrue(senderLinkAddress.contains(deviceId));
         assertTrue(receiverLinkAddress.contains(deviceId));
     }
@@ -124,10 +142,13 @@ public class AmqpsDeviceTelemetryTest
 
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_METHODS, msgData, offset, length, deliveryTag);
+        boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
+        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
+
 
         //assert
-        assertEquals(amqpsSendReturnValue.isDeliverySuccessful(), false);
-        assertEquals(amqpsSendReturnValue.getDeliveryHash(), -1);
+        assertEquals(false, deliverySuccessful);
+        assertEquals(-1, deliveryHash);
     }
 
     /*
@@ -146,10 +167,12 @@ public class AmqpsDeviceTelemetryTest
 
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
+            boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
+            int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 
         //assert
-        assertEquals(amqpsSendReturnValue.isDeliverySuccessful(), true);
-        assertTrue(amqpsSendReturnValue.getDeliveryHash() > 0);
+        assertTrue(deliverySuccessful);
+        assertTrue(deliveryHash > 0);
     }
 
     /*
@@ -175,7 +198,7 @@ public class AmqpsDeviceTelemetryTest
         AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
 
         //assert
-        assertEquals(amqpsConvertFromProtonReturnValue , null);
+        assertEquals(null, amqpsConvertFromProtonReturnValue);
     }
 
     // Codes_SRS_AMQPSDEVICETELEMETRY_12_025: [The function shall create a new empty buffer for message body if the proton message body is null.]
@@ -346,7 +369,7 @@ public class AmqpsDeviceTelemetryTest
         AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "convertToProton", mockMessage);
 
         //assert
-        assertEquals(amqpsConvertToProtonReturnValue , null);
+        assertNull(amqpsConvertToProtonReturnValue);
     }
 
     /*

@@ -172,7 +172,7 @@ public class LongHaulIT
             while (System.currentTimeMillis() < endTime)
             {
                 Success messageSent = new Success();
-                EventCallback callback = new EventCallback();
+                EventCallback callback = new EventCallback(IotHubStatusCode.OK_EMPTY);
 
                 client.sendEventAsync(msg, callback, messageSent);
 
@@ -223,7 +223,7 @@ public class LongHaulIT
             while (System.currentTimeMillis() < endTime)
             {
                 Success messageSent = new Success();
-                EventCallback callback = new EventCallback();
+                EventCallback callback = new EventCallback(IotHubStatusCode.OK_EMPTY);
                 client.sendEventAsync(msg, callback, messageSent);
 
                 Integer waitDuration = 0;
@@ -272,7 +272,7 @@ public class LongHaulIT
             while (System.currentTimeMillis() < endTime)
             {
                 Success messageSent = new Success();
-                EventCallback callback = new EventCallback();
+                EventCallback callback = new EventCallback(IotHubStatusCode.OK_EMPTY);
                 client.sendEventAsync(msg, callback, messageSent);
 
                 Integer waitDuration = 0;

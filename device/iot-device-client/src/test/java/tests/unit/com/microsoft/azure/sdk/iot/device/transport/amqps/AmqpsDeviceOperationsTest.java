@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -80,8 +81,22 @@ public class AmqpsDeviceOperationsTest
     **Tests_SRS_AMQPSDEVICEOPERATIONS_12_005: [**The constructor shall initialize sender and receiver link objects to null.**]**
     */
     @Test
-    public void constructorInitializesAllMembers()
+    public void constructorInitializesAllMembers(
+            @Mocked final UUID mockUUID
+    )
     {
+        // arrange
+        final String uuidStr = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+        new NonStrictExpectations()
+        {
+            {
+                UUID.randomUUID();
+                result = mockUUID;
+                mockUUID.toString();
+                result = uuidStr;
+            }
+        };
+
         //act
         AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
 
@@ -101,8 +116,8 @@ public class AmqpsDeviceOperationsTest
 
         assertTrue(propertiesMap.get(Symbol.getSymbol(VERSION_IDENTIFIER_KEY)).equals(TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION));
 
-        assertTrue(senderLinkTag.length() == 36);
-        assertTrue(receiverLinkTag.length() == 36);
+        assertTrue(senderLinkTag.endsWith(uuidStr));
+        assertTrue(receiverLinkTag.endsWith(uuidStr));
 
         assertTrue(senderLinkEndpointPath.equals(""));
         assertTrue(receiverLinkEndpointPath.equals(""));
@@ -286,8 +301,10 @@ public class AmqpsDeviceOperationsTest
     {
         //arrange
         final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
-        final String senderLinkTag = Deencapsulation.invoke(amqpsDeviceOperations, "getSenderLinkTag");
-        final String senderLinkAddress = Deencapsulation.invoke(amqpsDeviceOperations, "getSenderLinkAddress");
+        final String senderLinkTag = "senderLinkTag";
+        Deencapsulation.setField(amqpsDeviceOperations, "senderLinkTag",senderLinkTag);
+        final String senderLinkAddress = "senderLinkAddress";
+        Deencapsulation.setField(amqpsDeviceOperations, "senderLinkAddress", senderLinkAddress);
 
         new NonStrictExpectations()
         {
@@ -307,6 +324,7 @@ public class AmqpsDeviceOperationsTest
         {
             {
                 mockTarget.setAddress(senderLinkAddress);
+                times = 1;
                 mockLink.setTarget(mockTarget);
                 times = 1;
                 mockLink.setSenderSettleMode(SenderSettleMode.UNSETTLED);
@@ -324,8 +342,10 @@ public class AmqpsDeviceOperationsTest
     {
         //arrange
         final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
-        final String receiverLinkTag = Deencapsulation.invoke(amqpsDeviceOperations, "getReceiverLinkTag");
-        final String receiverLinkAddress = Deencapsulation.invoke(amqpsDeviceOperations, "getReceiverLinkAddress");
+        final String receiverLinkTag = "receiverLinkTag";
+        Deencapsulation.setField(amqpsDeviceOperations, "receiverLinkTag", receiverLinkTag);
+        final String receiverLinkAddress = "receiverLinkAddress";
+        Deencapsulation.setField(amqpsDeviceOperations, "receiverLinkAddress", receiverLinkAddress);
 
         new NonStrictExpectations()
         {
@@ -418,7 +438,8 @@ public class AmqpsDeviceOperationsTest
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
 
         //assert
-        assertTrue(amqpsSendReturnValue.getDeliveryHash() != -1);
+        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
+        assertTrue(deliveryHash != -1);
         new Verifications()
         {
             {
@@ -464,7 +485,8 @@ public class AmqpsDeviceOperationsTest
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
 
         //assert
-        assertTrue(amqpsSendReturnValue.getDeliveryHash() == -1);
+        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
+        assertTrue(deliveryHash == -1);
         new Verifications()
         {
             {

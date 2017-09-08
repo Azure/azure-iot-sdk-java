@@ -13,7 +13,6 @@ import static org.junit.Assert.*;
 
 public class TopicParserTest
 {
-
     /*
     Tests_SRS_TopicParser_25_001: [**The constructor shall spilt the topic by "/" and save the tokens.**]**
      */

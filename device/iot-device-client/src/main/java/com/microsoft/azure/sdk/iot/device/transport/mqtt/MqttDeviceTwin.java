@@ -49,12 +49,12 @@ public class MqttDeviceTwin extends Mqtt
     private final int DESIRED_TOKEN = 4;
     private final int PATCH_VERSION_TOKEN = 5;
 
-    public MqttDeviceTwin() throws IOException
+    public MqttDeviceTwin(MqttConnection mqttConnection) throws IOException
     {
         /*
         **Codes_SRS_MQTTDEVICETWIN_25_001: [**The constructor shall instantiate super class without any parameters.**]**
          */
-        super();
+        super(mqttConnection);
         /*
         **Codes_SRS_MQTTDEVICETWIN_25_002: [**The constructor shall construct device twin response subscribeTopic.**]**
          */
@@ -305,7 +305,7 @@ public class MqttDeviceTwin extends Mqtt
     @Override
     public Message receive() throws IOException
     {
-        synchronized (Mqtt.MQTT_LOCK)
+        synchronized (this.mqttLock)
         {
             IotHubTransportMessage messsage = null;
 

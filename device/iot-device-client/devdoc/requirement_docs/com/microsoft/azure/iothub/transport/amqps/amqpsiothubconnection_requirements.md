@@ -61,8 +61,6 @@ public void open() throws IOException
 
 **SRS_AMQPSIOTHUBCONNECTION_15_007: [**If the AMQPS connection is already open, the function shall do nothing.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_15_008: [**The function shall create a new sasToken valid for the duration specified in config to be used for the communication with IoTHub.**]**
-
 **SRS_AMQPSIOTHUBCONNECTION_15_009: [**The function shall trigger the Reactor (Proton) to begin running.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_15_010: [**The function shall wait for the reactor to be ready and for enough link credit to become available.**]**

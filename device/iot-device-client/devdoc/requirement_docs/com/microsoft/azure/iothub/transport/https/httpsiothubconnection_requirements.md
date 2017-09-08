@@ -16,7 +16,7 @@ public class HttpsIotHubConnection
     public ResponseMessage sendEvent(HttpsMessage msg) throws IOException;
     public ResponseMessage sendHttpsMessage(HttpsMessage httpsMessage, HttpsMethod httpsMethod, String httpsPath) throws IOException;
 
-    public Message receiveMessage() throws IOException;
+    public Message receiveMessage() throws IOException, SecurityException;
     public void sendMessageResult(IotHubMessageResult result) throws IOException;
 }
 ```
@@ -59,6 +59,9 @@ public ResponseMessage sendEvent(HttpsMessage msg) throws IOException;
 
 **SRS_HTTPSIOTHUBCONNECTION_11_012: [**If the IoT Hub could not be reached, the function shall throw an IOException.**]**
 
+**SRS_HTTPSIOTHUBCONNECTION_34_052: [**If the SAS token used by this has expired, the function shall return a ResponseMessage object with the IotHubStatusCode UNAUTHORIZED.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_34_055: [**This function shall retrieve a sas token from its config to use in the https request header.**]**
 
 ### sendHttpsMessage
 
@@ -88,6 +91,10 @@ public ResponseMessage sendHttpsMessage(HttpsMessage httpsMessage, HttpsMethod h
 
 **SRS_HTTPSIOTHUBCONNECTION_21_051: [**If the IoT Hub could not be reached, the function shall throw an IOException.**]**
 
+**SRS_HTTPSIOTHUBCONNECTION_34_053: [**If the SAS token used by this has expired, the function shall return a ResponseMessage object with the IotHubStatusCode UNAUTHORIZED.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_34_056: [**This function shall retrieve a sas token from its config to use in the https request header.**]**
+
 
 ### receiveMessage
 
@@ -116,6 +123,10 @@ public Message receiveMessage() throws IOException;
 **SRS_HTTPSIOTHUBCONNECTION_11_021: [**If a response with IoT Hub status code OK is not received, the function shall return null.**]**
 
 **SRS_HTTPSIOTHUBCONNECTION_11_023: [**If the IoT Hub could not be reached, the function shall throw an IOException.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_34_054: [**If the SAS token used by this has expired, the function shall return a Message object with a body of "Your sas token has expired".**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_34_057: [**This function shall retrieve a sas token from its config to use in the https request header.**]**
 
 
 ### sendMessageResult
@@ -155,3 +166,5 @@ public void sendMessageResult(IotHubMessageResult result) throws IOException;
 **SRS_HTTPSIOTHUBCONNECTION_11_038: [**If the IoT Hub status code in the response is not OK_EMPTY, the function shall throw an IOException.**]**
 
 **SRS_HTTPSIOTHUBCONNECTION_11_039: [**If the function is called before receiveMessage() returns a message, the function shall throw an IllegalStateException.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_34_058: [**If the saved SAS token for this connection has expired and cannot be renewed, this function shall throw a SecurityException.**]**

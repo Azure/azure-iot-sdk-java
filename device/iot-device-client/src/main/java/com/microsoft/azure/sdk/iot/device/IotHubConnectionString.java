@@ -197,6 +197,23 @@ public class IotHubConnectionString
         return this.sharedAccessToken;
     }
 
+    /**
+     * Setter for the shared access token
+     * @param sharedAccessToken the new token value to set
+     * @throws IllegalArgumentException if the provided value is null or empty
+     */
+    void setSharedAccessToken(String sharedAccessToken) throws IllegalArgumentException
+    {
+        if (sharedAccessToken == null || sharedAccessToken.isEmpty())
+        {
+            //Codes_SRS_IOTHUB_CONNECTIONSTRING_34_037: [If the provided shared access token is null or empty, an IllegalArgumentException shall be thrown.]
+            throw new IllegalArgumentException("Shared access token cannot be set to null or empty");
+        }
+
+        //Codes_SRS_IOTHUB_CONNECTIONSTRING_34_038: [This function shall set the value of this object's shared access token to the provided value.]
+        this.sharedAccessToken = sharedAccessToken;
+    }
+
 
     private static void validateTerms(String hostName, String deviceId,
                                String sharedAccessKey, String sharedAccessToken)

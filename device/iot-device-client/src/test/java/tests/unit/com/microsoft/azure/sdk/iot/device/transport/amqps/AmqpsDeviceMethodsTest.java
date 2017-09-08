@@ -78,8 +78,22 @@ public class AmqpsDeviceMethodsTest
     **Tests_SRS_AMQPSDEVICEMETHODS_12_005: [**The constructor shall insert the given deviceId argument to the sender and receiver link address.**]**
     **Tests_SRS_AMQPSDEVICEMETHODS_12_006: [**The constructor shall add API version key to the amqpProperties.**]**     */
     @Test
-    public void constructorInitializesAllMembers()
+    public void constructorInitializesAllMembers(
+            @Mocked final UUID mockUUID
+    )
     {
+        // arrange
+        final String uuidStr = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+        new NonStrictExpectations()
+        {
+            {
+                UUID.randomUUID();
+                result = mockUUID;
+                mockUUID.toString();
+                result = uuidStr;
+            }
+        };
+
         //arrange
         String deviceId = "deviceId";
 
@@ -109,6 +123,9 @@ public class AmqpsDeviceMethodsTest
         assertTrue(senderLinkTag.startsWith(SENDER_LINK_TAG_PREFIX));
         assertTrue(receiverLinkTag.startsWith(RECEIVER_LINK_TAG_PREFIX));
 
+        assertTrue(senderLinkTag.endsWith(uuidStr));
+        assertTrue(receiverLinkTag.endsWith(uuidStr));
+
         assertTrue(senderLinkAddress.contains(deviceId));
         assertTrue(receiverLinkAddress.contains(deviceId));
 
@@ -129,10 +146,12 @@ public class AmqpsDeviceMethodsTest
 
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceMethods, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_METHODS, bytes, 0, 1, bytes);
+        boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
+        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 
         //assert
-        assertEquals(true, amqpsSendReturnValue.isDeliverySuccessful());
-        assertNotEquals(amqpsSendReturnValue.getDeliveryHash(), -1);
+        assertEquals(true, deliverySuccessful);
+        assertNotEquals(-1, deliveryHash);
     }
 
     // Codes_SRS_AMQPSDEVICEMETHODS_12_011: [The function shall return with AmqpsSendReturnValue with false success and -1 delivery hash.]
@@ -148,10 +167,12 @@ public class AmqpsDeviceMethodsTest
 
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceMethods, "sendMessageAndGetDeliveryHash",MessageType.DEVICE_TWIN, bytes, 0, 1, bytes);
+        boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
+        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 
         //assert
-        assertEquals(false, amqpsSendReturnValue.isDeliverySuccessful());
-        assertEquals(-1, amqpsSendReturnValue.getDeliveryHash());
+        assertEquals(false, deliverySuccessful);
+        assertEquals(-1, deliveryHash);
     }
 
     // Codes_SRS_AMQPSDEVICEMETHODS_12_012: [The function shall call the super function.]

@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 
@@ -15,7 +14,7 @@ public class MqttMessaging extends Mqtt
     private String publishTopic;
     private String parseTopic;
 
-    public MqttMessaging(String serverURI, String deviceId, String userName, String password, IotHubSSLContext context) throws IOException
+    public MqttMessaging(MqttConnection mqttConnection, String deviceId) throws IOException
     {
         /*
         **Codes_SRS_MqttMessaging_25_001: [**The constructor shall throw InvalidParameter Exception if any of the parameters are null or empty .**]**
@@ -23,7 +22,12 @@ public class MqttMessaging extends Mqtt
         /*
         **Codes_SRS_MqttMessaging_25_002: [**The constructor shall use the configuration to instantiate super class and passing the parameters.**]**
          */
-        super(serverURI, deviceId, userName, password, context);
+        super(mqttConnection);
+
+        if (deviceId == null || deviceId.isEmpty())
+        {
+            throw new IllegalArgumentException("Device id cannot be null or empty");
+        }
         /*
         **Codes_SRS_MqttMessaging_25_003: [**The constructor construct publishTopic and subscribeTopic from deviceId.**]**
          */
@@ -47,24 +51,10 @@ public class MqttMessaging extends Mqtt
 
     public void stop() throws IOException
     {
-       try
-       {
-           /*
-           **Codes_SRS_MqttMessaging_25_022: [**stop method shall be call disconnect to tear down a connection to IOT Hub with the given configuration.**]**
-            */
-
-           this.disconnect();
-       }
-       finally
-       {
-            /*
-            As MQTT connection is controlled by this class, it is important to restart
-            base class on exit from this class.
-            */
-           this.restartBaseMqtt();
-       }
-
-
+       /*
+       **Codes_SRS_MqttMessaging_25_022: [**stop method shall be call disconnect to tear down a connection to IOT Hub with the given configuration.**]**
+       */
+       this.disconnect();
     }
 
     public void send(Message message) throws IOException

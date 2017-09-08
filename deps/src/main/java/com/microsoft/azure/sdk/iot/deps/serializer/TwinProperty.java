@@ -300,7 +300,7 @@ public class TwinProperty
                 }
                 else
                 {
-                    diffField.put(entry.getKey(), val.value.toString());
+                    diffField.put(entry.getKey(), val.value);
                 }
             }
         }
@@ -383,7 +383,7 @@ public class TwinProperty
                             }
                             if (property.get(item.getKey()).metadata.update(lastUpdated, lastUpdatedVersion))
                             {
-                                diff.put(item.getKey(), item.getValue().toString());
+                                diff.put(item.getKey(), item.getValue());
                             }
                         }
                     }
@@ -420,13 +420,13 @@ public class TwinProperty
                         else if (!property.get(entry.getKey()).value.equals(entry.getValue()))
                         {
                             property.put(entry.getKey(), new Property(entry.getValue(), null));
-                            diff.put(entry.getKey(), entry.getValue().toString());
+                            diff.put(entry.getKey(), entry.getValue());
                         }
                     }
                     else if (entry.getValue() != null)
                     {
                         property.put(entry.getKey(), new Property(entry.getValue(), null));
-                        diff.put(entry.getKey(), entry.getValue().toString());
+                        diff.put(entry.getKey(), entry.getValue());
                     }
                 }
             }

@@ -23,6 +23,8 @@ public class IotHubConnectionString
     public String getDeviceId();
     public String getSharedAccessKey();
     public String getSharedAccessToken();
+    
+    void setSharedAccessToken(String sharedAccessToken) throws IllegalArgumentException;
 }
 ```
 
@@ -96,3 +98,13 @@ public IotHubConnectionString(String hostName, String deviceId,
     public String getSharedAccessToken()
 ```
 **SRS_IOTHUB_CONNECTIONSTRING_21_034: [**The getSharedAccessToken shall return the stored shared access token.**]**  
+
+
+### setSharedAccessToken
+```java
+    void setSharedAccessToken(String sharedAccessToken) throws IllegalArgumentException;
+```
+
+**SRS_IOTHUB_CONNECTIONSTRING_34_037: [**If the provided shared access token is null or empty, an IllegalArgumentException shall be thrown.**]**
+
+**SRS_IOTHUB_CONNECTIONSTRING_34_038: [**This function shall set the value of this object's shared access token to the provided value.**]**

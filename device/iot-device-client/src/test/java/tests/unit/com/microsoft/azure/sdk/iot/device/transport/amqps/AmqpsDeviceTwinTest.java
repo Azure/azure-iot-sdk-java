@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
 
 /* Unit tests for AmqpsDeviceTwin
 * 100% methods covered
-* 100% lines covered
+* 98% lines covered
 */
 public class AmqpsDeviceTwinTest
 {
@@ -74,10 +74,22 @@ public class AmqpsDeviceTwinTest
     // Tests_SRS_AMQPSDEVICETWIN_12_007: [The constructor shall generate a UUID amd add it as a correlation ID to the amqpProperties.]
     // Tests_SRS_AMQPSDEVICETWIN_12_009: [The constructor shall create a HashMap for correlationId list.]
     @Test
-    public void constructorInitializesAllMembers()
+    public void constructorInitializesAllMembers(
+            @Mocked final UUID mockUUID
+    )
     {
         //arrange
         String deviceId = "deviceId";
+        final String uuidStr = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+        new NonStrictExpectations()
+        {
+            {
+                UUID.randomUUID();
+                result = mockUUID;
+                mockUUID.toString();
+                result = uuidStr;
+            }
+        };
 
         //act
         AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
@@ -104,6 +116,9 @@ public class AmqpsDeviceTwinTest
 
         assertTrue(senderLinkTag.startsWith(SENDER_LINK_TAG_PREFIX));
         assertTrue(receiverLinkTag.startsWith(RECEIVER_LINK_TAG_PREFIX));
+
+        assertTrue(senderLinkTag.endsWith(uuidStr));
+        assertTrue(receiverLinkTag.endsWith(uuidStr));
 
         assertTrue(senderLinkAddress.contains(deviceId));
         assertTrue(receiverLinkAddress.contains(deviceId));
@@ -161,10 +176,12 @@ public class AmqpsDeviceTwinTest
 
 
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TWIN, bytes, 0, 1, bytes);
+        boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
+        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 
         //assert
-        assertEquals(true, amqpsSendReturnValue.isDeliverySuccessful());
-        assertNotEquals(amqpsSendReturnValue.getDeliveryHash(), -1);
+        assertTrue(deliverySuccessful);
+        assertNotEquals(-1, deliveryHash);
     }
 
     // Tests_SRS_AMQPSDEVICETWIN_12_011: [The function shall return with AmqpsSendReturnValue with false success and -1 delivery hash.]
@@ -180,10 +197,12 @@ public class AmqpsDeviceTwinTest
 
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_METHODS, bytes, 0, 1, bytes);
+        boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
+        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 
         //assert
-        assertEquals(false, amqpsSendReturnValue.isDeliverySuccessful());
-        assertEquals(-1, amqpsSendReturnValue.getDeliveryHash());
+        assertFalse(deliverySuccessful);
+        assertEquals(-1, deliveryHash);
     }
 
     // Tests_SRS_AMQPSDEVICETWIN_12_012: [The function shall call the super function.]
