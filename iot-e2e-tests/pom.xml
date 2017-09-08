@@ -5,7 +5,7 @@
     <groupId>com.microsoft.azure.sdk.iot</groupId>
 	<artifactId>iot-e2e-tests</artifactId>
 	<name>IoT Hub Java SDK tests</name>
-	<version>0.9.13</version>
+	<version>0.10.13</version>
 	<description>Test suite fot the Microsoft Azure IoT Device SDK for Java</description> 
     <packaging>pom</packaging>
     <developers>
@@ -25,8 +25,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.3</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
         </plugins>

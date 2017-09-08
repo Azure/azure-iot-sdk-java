@@ -5,7 +5,7 @@
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-e2e-common</artifactId>
     <name>IoT Hub Java SDK common</name>
-    <version>0.9.13</version>
+    <version>0.10.13</version>
     <description>Test suite fot the Microsoft Azure IoT Device SDK for Java</description>
     <developers>
         <developer>
