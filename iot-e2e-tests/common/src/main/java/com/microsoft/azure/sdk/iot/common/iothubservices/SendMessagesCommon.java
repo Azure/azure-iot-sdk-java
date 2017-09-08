@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.common.iothubservices;
 import com.microsoft.azure.sdk.iot.common.EventCallback;
 import com.microsoft.azure.sdk.iot.common.Success;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import org.junit.Assert;
 
@@ -36,7 +37,7 @@ public class SendMessagesCommon
             try
             {
                 Success messageSent = new Success();
-                EventCallback callback = new EventCallback();
+                EventCallback callback = new EventCallback(IotHubStatusCode.OK_EMPTY);
                 client.sendEventAsync(msg, callback, messageSent);
 
                 Integer waitDuration = 0;
