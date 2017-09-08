@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
 
 /* Unit tests for AmqpsDeviceTwin
 * 100% methods covered
-* 100% lines covered
+* 98% lines covered
 */
 public class AmqpsDeviceTwinTest
 {
@@ -74,10 +74,22 @@ public class AmqpsDeviceTwinTest
     // Tests_SRS_AMQPSDEVICETWIN_12_007: [The constructor shall generate a UUID amd add it as a correlation ID to the amqpProperties.]
     // Tests_SRS_AMQPSDEVICETWIN_12_009: [The constructor shall create a HashMap for correlationId list.]
     @Test
-    public void constructorInitializesAllMembers()
+    public void constructorInitializesAllMembers(
+            @Mocked final UUID mockUUID
+    )
     {
         //arrange
         String deviceId = "deviceId";
+        final String uuidStr = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+        new NonStrictExpectations()
+        {
+            {
+                UUID.randomUUID();
+                result = mockUUID;
+                mockUUID.toString();
+                result = uuidStr;
+            }
+        };
 
         //act
         AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
@@ -104,6 +116,9 @@ public class AmqpsDeviceTwinTest
 
         assertTrue(senderLinkTag.startsWith(SENDER_LINK_TAG_PREFIX));
         assertTrue(receiverLinkTag.startsWith(RECEIVER_LINK_TAG_PREFIX));
+
+        assertTrue(senderLinkTag.endsWith(uuidStr));
+        assertTrue(receiverLinkTag.endsWith(uuidStr));
 
         assertTrue(senderLinkAddress.contains(deviceId));
         assertTrue(receiverLinkAddress.contains(deviceId));

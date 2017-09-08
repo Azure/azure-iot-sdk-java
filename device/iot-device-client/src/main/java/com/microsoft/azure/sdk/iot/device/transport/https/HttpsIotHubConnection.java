@@ -72,8 +72,6 @@ public class HttpsIotHubConnection
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_002: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2016-02-03'.]
             IotHubEventUri iotHubEventUri = new IotHubEventUri(iotHubHostname, deviceId);
             URL eventUrl = new URL(HTTPS_HEAD_TAG + iotHubEventUri.toString());
-            IotHubSasToken sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
-                    this.config.getTokenValidSecs() + 1L);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_003: [The function shall send a POST request.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_004: [The function shall set the request body to the message body.]
@@ -92,16 +90,25 @@ public class HttpsIotHubConnection
                 request.setHeaderField(systemProperty, systemProperties.get(systemProperty));
             }
 
+            //Codes_SRS_HTTPSIOTHUBCONNECTION_25_040: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
+            request.setSSLContext(this.config.getIotHubSSLContext());
+
+            //Codes_SRS_HTTPSIOTHUBCONNECTION_34_055: [This function shall retrieve a sas token from its config to use in the https request header.]
+            String sasToken = this.config.getSharedAccessToken();
+            if (IotHubSasToken.isSasTokenExpired(sasToken))
+            {
+                //Codes_SRS_HTTPSIOTHUBCONNECTION_34_052: [If the SAS token used by this has expired, the function shall return a ResponseMessage object with the IotHubStatusCode UNAUTHORIZED.]
+                return new ResponseMessage("Your sas token has expired".getBytes(), IotHubStatusCode.UNAUTHORIZED);
+            }
+
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_006: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
             request.setReadTimeoutMillis(readTimeoutMillis).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_007: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
-                            setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG, sasToken.toString()).
+                            setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG, sasToken).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_008: [The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/messages/events'.]
                             setHeaderField(HTTPS_PROPERTY_IOTHUB_TO_TAG, iotHubEventUri.getPath()).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_009: [The function shall set the header field 'content-type' to be the message content type.]
                             setHeaderField(HTTPS_PROPERTY_CONTENT_TYPE_TAG, msg.getContentType());
-            //Codes_SRS_HTTPSIOTHUBCONNECTION_25_040: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
-            request.setSSLContext(this.config.getIotHubSSLContext());
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_012: [If the IoT Hub could not be reached, the function shall throw an IOException.]
             HttpsResponse response = request.send();
@@ -136,8 +143,6 @@ public class HttpsIotHubConnection
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_041: [The function shall send a request to the URL https://[iotHubHostname]/devices/[deviceId]/[path]?api-version=2016-02-03.]
             IotHubUri iotHubUri = new IotHubUri(iotHubHostname, deviceId, httpsPath);
             URL messageUrl = new URL(HTTPS_HEAD_TAG + iotHubUri.toString());
-            IotHubSasToken sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
-                    this.config.getTokenValidSecs() + 1L);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_042: [The function shall send a `httpsMethod` request.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_043: [The function shall set the request body to the message body.]
@@ -149,10 +154,19 @@ public class HttpsIotHubConnection
                 request.setHeaderField(property.getName(),
                         property.getValue());
             }
+
+            //Codes_SRS_HTTPSIOTHUBCONNECTION_34_056: [This function shall retrieve a sas token from its config to use in the https request header.]
+            String sasToken = this.config.getSharedAccessToken();
+            if (IotHubSasToken.isSasTokenExpired(sasToken))
+            {
+                //Codes_SRS_HTTPSIOTHUBCONNECTION_34_053: [If the SAS token used by this has expired, the function shall return a ResponseMessage object with the IotHubStatusCode UNAUTHORIZED.]
+                return new ResponseMessage("Your sas token has expired".getBytes(), IotHubStatusCode.UNAUTHORIZED);
+            }
+
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_045: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
             request.setReadTimeoutMillis(readTimeoutMillis).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_21_047: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
-                            setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG, sasToken.toString()).
+                            setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG, sasToken).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_21_048: [The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/[path]'.]
                             setHeaderField(HTTPS_PROPERTY_IOTHUB_TO_TAG, iotHubUri.getPath()).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_21_049: [The function shall set the header field 'content-type' to be the message content type.]
@@ -191,8 +205,13 @@ public class HttpsIotHubConnection
             IotHubMessageUri messageUri = new IotHubMessageUri(iotHubHostname, deviceId);
             URL messageUrl = new URL(HTTPS_HEAD_TAG + messageUri.toString());
 
-            IotHubSasToken sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
-                    this.config.getTokenValidSecs() + 1L);
+            //Codes_SRS_HTTPSIOTHUBCONNECTION_34_057: [This function shall retrieve a sas token from its config to use in the https request header.]
+            String sasToken = this.config.getSharedAccessToken();
+            if (IotHubSasToken.isSasTokenExpired(sasToken))
+            {
+                //Codes_SRS_HTTPSIOTHUBCONNECTION_34_054: [If the SAS token used by this has expired, the function shall return a Message object with a body of "Your sas token has expired".]
+                return new Message("Your sas token has expired".getBytes());
+            }
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_014: [The function shall send a GET request.]
             HttpsRequest request =
@@ -201,7 +220,7 @@ public class HttpsIotHubConnection
                                     setReadTimeoutMillis(readTimeoutMillis).
                             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_016: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
                                     setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG,
-                                    sasToken.toString()).
+                                    sasToken).
                             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_017: [The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/messages/devicebound'.]
                                     setHeaderField(HTTPS_PROPERTY_IOTHUB_TO_TAG,
                                     messageUri.getPath()).
@@ -241,9 +260,10 @@ public class HttpsIotHubConnection
      * @throws IllegalStateException if {@code sendMessageResult} is called before
      * {@link #receiveMessage()} is called.
      * @throws IOException if the IoT Hub could not be reached.
+     * @throws SecurityException if the sas token saved in config has expired and cannot be renewed
      */
     public void sendMessageResult(IotHubMessageResult result)
-            throws IOException
+            throws IOException, SecurityException
     {
         synchronized (HTTPS_CONNECTION_LOCK)
         {
@@ -313,13 +333,17 @@ public class HttpsIotHubConnection
                             "Invalid message result specified.");
             }
 
-            IotHubSasToken sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
-                                    this.config.getTokenValidSecs() + 1L);
+            String sasToken = this.config.getSharedAccessToken();
+            if (IotHubSasToken.isSasTokenExpired(sasToken))
+            {
+                //Codes_SRS_HTTPSIOTHUBCONNECTION_34_058: [If the saved SAS token for this connection has expired and cannot be renewed, this function shall throw a SecurityException.]
+                throw new SecurityException("Your SAS token has expired");
+            }
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_033: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
             request.setReadTimeoutMillis(readTimeoutMillis).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_034: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
-                            setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG, sasToken.toString()).
+                            setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG, sasToken).
                     setHeaderField(HTTPS_PROPERTY_IOTHUB_TO_TAG, resultPath).
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_035: [The function shall set the header field 'if-match' to be the e-tag saved when receiveMessage() was previously called.]
                             setHeaderField(HTTPS_PROPERTY_IF_MATCH_TAG, this.messageEtag);

@@ -43,7 +43,7 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_003: [The constructor shall concatenate a sender specific prefix to the sender link tag's current value.]
         this.senderLinkTag = SENDER_LINK_TAG_PREFIX + senderLinkTag;
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_004: [The constructor shall concatenate a receiver specific prefix to the receiver link tag's current value.]
-        this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX + senderLinkTag;
+        this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX + receiverLinkTag;
 
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_005: [The constructor shall insert the given deviceId argument to the sender and receiver link address.]
         this.senderLinkAddress = String.format(senderLinkEndpointPath, deviceId);

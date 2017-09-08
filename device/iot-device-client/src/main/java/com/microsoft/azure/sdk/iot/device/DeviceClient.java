@@ -126,8 +126,7 @@ public final class DeviceClient implements Closeable
      * @throws URISyntaxException if the IoT hub hostname does not conform to
      * RFC 3986.
      */
-    public DeviceClient(String connString, IotHubClientProtocol protocol)
-            throws URISyntaxException
+    public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException
     {
         /* Codes_SRS_DEVICECLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.] */
         if ((connString == null) || connString.isEmpty())
@@ -149,7 +148,9 @@ public final class DeviceClient implements Closeable
 
         /* Codes_SRS_DEVICECLIENT_34_046: [**If The provided connection string contains an expired SAS token, throw a SecurityException.**] */
         if (this.config.getSharedAccessToken() != null && IotHubSasToken.isSasTokenExpired(this.config.getSharedAccessToken()))
+        {
             throw new SecurityException("Your SasToken is expired");
+        }
 
         switch (protocol)
         {

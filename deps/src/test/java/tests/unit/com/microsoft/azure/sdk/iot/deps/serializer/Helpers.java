@@ -41,6 +41,21 @@ public class Helpers
      * @param <k> it the key type, normally a String.
      * @param <v> is the value type, normally an Object.
      */
+    protected static <k,v> void assertMap(Map<k, v> actual, Map<k, v> expected)
+    {
+        assertMap(actual, expected, null);
+    }
+
+    /**
+     * Test helper, will throw if the actual map do not fits the expected one. This helper will
+     *              test maps and sub-maps.
+     *
+     * @param actual is the resulted map.
+     * @param expected is the expected result map.
+     * @param <k> it the key type, normally a String.
+     * @param <v> is the value type, normally an Object.
+     * @param message is the string with the error message.
+     */
     protected static <k,v> void assertMap(Map<k, v> actual, Map<k, v> expected, String message)
     {
         if(expected == null)

@@ -49,6 +49,7 @@ public final class DeviceClientConfig
     public MessageCallback getDeviceTwinMessageCallback();
     public Object getDeviceTwinMessageContext();
 
+    public boolean needsToRenewSasToken();
 }
 ```
 
@@ -107,21 +108,7 @@ public String getSharedAccessToken();
 
 ** SRS_DEVICECLIENTCONFIG_25_018: [**The function shall return the SharedAccessToken given in the constructor.**] **
 
-### isUseWebsocket
-
-```java
-public boolean isUseWebsocket();
-```
-
-**SRS_DEVICECLIENTCONFIG_25_033: [**The function shall return true if websocket is enabled, false otherwise.**]**
-
-### setUseWebsocket
-
-```java
-public void setUseWebsocket(boolean useWebsocket);
-```
-
-**SRS_DEVICECLIENTCONFIG_25_034: [**The function shall save `useWebsocket`.**]**
+** SRS_DEVICECLIENTCONFIG_34_036: [**If this function generates the returned SharedAccessToken from a device key, the previous SharedAccessToken shall be overwritten with the generated value.**] **
 
 ### getMessageValidSecs
 
@@ -288,3 +275,28 @@ public Object getDeviceTwinMessageContext();
 ```
 
 ** SRS_DEVICECLIENTCONFIG_25_026: [**The function shall return the current DeviceTwin message context.**] **
+
+
+### needsToRenewSasToken
+
+```java
+public boolean needsToRenewSasToken();
+```
+
+** SRS_DEVICECLIENTCONFIG_34_035: [**If the saved sas token has expired and there is no device key present, this function shall return true.**] **
+
+### isUseWebsocket
+
+```java
+public boolean isUseWebsocket();
+```
+
+**SRS_DEVICECLIENTCONFIG_25_037: [**The function shall return true if websocket is enabled, false otherwise.**]**
+
+### setUseWebsocket
+
+```java
+public void setUseWebsocket(boolean useWebsocket);
+```
+
+**SRS_DEVICECLIENTCONFIG_25_038: [**The function shall save `useWebsocket`.**]**

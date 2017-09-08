@@ -37,7 +37,7 @@ import static org.junit.Assert.assertTrue;
 
 /* Unit tests for AmqpsIotHubConnection
 * 100% methods covered
-* 99% lines covered (Thread is not mockable...)
+* 93% lines covered (Thread is not mockable...)
 */
 public class AmqpsIotHubConnectionTest {
 
@@ -538,7 +538,6 @@ public class AmqpsIotHubConnectionTest {
         };
     }
 
-
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_008: [The function shall create a new sasToken valid for the duration
     // specified in config to be used for the communication with IoTHub.]
     @Test
@@ -555,7 +554,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                new IotHubSasToken(mockConfig, anyLong);
+                mockConfig.getSharedAccessToken();
                 times = 1;
             }
         };
@@ -583,6 +582,7 @@ public class AmqpsIotHubConnectionTest {
         // act
         connection.open();
     }
+
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
     @Test
     public void openTriggersProtonReactor(@Mocked final Reactor mockedReactor) throws IOException, InterruptedException
@@ -609,8 +609,6 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                new IotHubSasToken(mockConfig, anyLong);
-                times = 1;
                 new IotHubReactor((Reactor)any);
                 times = 1;
                 mockOpenLock.waitLock(anyLong);

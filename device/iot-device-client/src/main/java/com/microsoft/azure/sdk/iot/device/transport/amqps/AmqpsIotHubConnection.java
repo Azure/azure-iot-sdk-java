@@ -256,12 +256,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     private void openAsync() throws IOException
     {
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_008: [The function shall create a new sasToken valid for the duration
-        // specified in config to be used for the communication with IoTHub.]
-        this.sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
-                this.config.getTokenValidSecs() + 1L).toString();
-				
-        logger.LogInfo("SAS Token is created successfully, method name is %s ", logger.getMethodName());
+        this.sasToken = this.config.getSharedAccessToken();
 
         if (this.reactor == null)
         {
@@ -505,7 +500,6 @@ public final class AmqpsIotHubConnection extends BaseHandler
         if(this.useWebSockets)
         {
             event.getReactor().connectionToHost(this.config.getIotHubHostname(), AMQP_WEB_SOCKET_PORT, this);
-
         }
         else
         {

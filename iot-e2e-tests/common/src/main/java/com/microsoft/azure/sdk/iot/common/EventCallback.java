@@ -8,10 +8,16 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 
 public class EventCallback implements IotHubEventCallback
 {
+    private IotHubStatusCode expectedStatusCode;
+    public EventCallback(IotHubStatusCode expectedStatusCode)
+    {
+        this.expectedStatusCode = expectedStatusCode;
+    }
+
     public void execute(IotHubStatusCode status, Object context)
     {
         Success success = (Success) context;
-        if (status.equals(IotHubStatusCode.OK_EMPTY))
+        if (status.equals(expectedStatusCode))
         {
             success.setResult(true);
         } else

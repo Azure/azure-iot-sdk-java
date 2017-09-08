@@ -83,7 +83,7 @@ public final class IotHubServiceSasToken
 
             // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_004: [The constructor shall create a key from the shared access key signing with HmacSHA256]
             // Get an hmac_sha1 key from the raw key bytes
-            byte[] keyBytes = Base64.decodeBase64(this.keyValue.getBytes("UTF-8"));
+            byte[] keyBytes = Base64.decodeBase64Local(this.keyValue.getBytes("UTF-8"));
             SecretKeySpec signingKey = new SecretKeySpec(keyBytes, "HmacSHA256");
 
             // Get an hmac_sha1 Mac instance and initialize with the signing key
@@ -95,7 +95,7 @@ public final class IotHubServiceSasToken
             byte[] rawHmac = mac.doFinal(toSign.getBytes("UTF-8"));
             // Convert raw bytes to Hex
             String signature = URLEncoder.encode(
-                    Base64.encodeBase64String(rawHmac), "UTF-8");
+                    Base64.encodeBase64StringLocal(rawHmac), "UTF-8");
 
             // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_006: [The constructor shall concatenate the target uri, the signature, the expiry time and the key name using the format: "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s"]
             String token = String.format(TOKEN_FORMAT, targetUri, signature, this.expiryTime, this.keyName);

@@ -54,8 +54,9 @@ public class AmqpsDeviceOperations
         this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION);
 
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_002: [The constructor shall initialize sender and receiver tags with UUID string.]
-        this.senderLinkTag = UUID.randomUUID().toString();
-        this.receiverLinkTag = UUID.randomUUID().toString();
+        String uuidStr = UUID.randomUUID().toString();
+        this.senderLinkTag = uuidStr;
+        this.receiverLinkTag = uuidStr;
 
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_003: [The constructor shall initialize sender and receiver endpoint path members to empty string.]
         this.senderLinkEndpointPath = "";

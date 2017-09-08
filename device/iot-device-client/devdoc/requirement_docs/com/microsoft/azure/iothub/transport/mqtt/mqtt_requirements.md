@@ -11,8 +11,7 @@ An MQTT is an abtract class defining all the operations that can be performed ov
 ```java
 public final class Mqtt implements MqttCallback
 {
-    public Mqtt(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext) throws IOException;
-    public Mqtt() throws IOException;
+    public Mqtt(MqttConnection mqttConnection) throws IllegalArgumentException
 
     Pair<String, byte[]> peekMessage() throws IOException;
 
@@ -39,32 +38,12 @@ public final class Mqtt implements MqttCallback
 ### Mqtt
 
 ```java
-public Mqtt();
-```
-**SRS_Mqtt_25_001: [**The constructor shall instantiate MQTT lock for using base class.**]**
-
-### Mqtt
-
-```java
-public Mqtt(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext);
+public Mqtt(MqttConnection mqttConnection) throws IllegalArgumentException
 ```
 
-**SRS_Mqtt_25_002: [**The constructor shall throw InvalidParameter Exception if any of the parameters are null or empty .**]**
+**SRS_Mqtt_25_002: [**The constructor shall throw InvalidParameter Exception if mqttConnection is null .**]**
 
-**SRS_Mqtt_25_003: [**The constructor shall use the configuration to instantiate an instance of the inner class MqttConnectionInfo if not already created.**]**
-
-**SRS_Mqtt_25_004: [**If an instance of the inner class MqttConnectionInfo is already created than it shall return doing nothing.**]**
-
-**SRS_Mqtt_25_045: [**The constructor throws IOException if MqttException is thrown and doesn't instantiate this instance.**]**
-
-
-### restartBaseMqtt
-
-```java
-public restartBaseMqtt();
-```
-**SRS_Mqtt_25_046: [**restartBaseMqtt shall unset all the static variables.**]**
-
+**SRS_Mqtt_25_003: [**The constructor shall retrieve lock, queue from the provided connection information and save the connection.**]**
 
 ### connect
 

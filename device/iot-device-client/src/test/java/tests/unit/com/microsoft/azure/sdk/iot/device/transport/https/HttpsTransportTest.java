@@ -19,10 +19,13 @@ import java.util.Map;
 import java.util.Queue;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
-/** Unit tests for HttpsTransport. */
+/**
+ * Unit tests for HttpsTransport.
+ * Methods: 100%
+ * Lines: 92%
+ */
 public class HttpsTransportTest
 {
     @Mocked
@@ -618,9 +621,7 @@ public class HttpsTransportTest
 
     // Tests_SRS_HTTPSTRANSPORT_11_009: [The function shall poll the IoT Hub for messages.]
     @Test
-    public void handleMessagePollsForMessages(
-            @Mocked final IotHubStatusCode mockStatus)
-            throws URISyntaxException, IOException
+    public void handleMessagePollsForMessages() throws URISyntaxException, IOException
     {
         HttpsTransport transport = new HttpsTransport(mockConfig);
         transport.open();
@@ -637,7 +638,6 @@ public class HttpsTransportTest
     // Tests_SRS_HTTPSTRANSPORT_11_010: [If a message is found and a message callback is registered, the function shall invoke the callback on the message.]
     @Test
     public void handleMessageInvokesCallback(
-            @Mocked final IotHubStatusCode mockStatus,
             @Mocked final MessageCallback mockCallback,
             @Mocked final Message mockMessage)
             throws URISyntaxException, IOException
@@ -669,10 +669,7 @@ public class HttpsTransportTest
 
     // Tests_SRS_HTTPSTRANSPORT_11_011: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
     @Test
-    public void handleMessageSendsMessageResult(
-            @Mocked final IotHubStatusCode mockStatus,
-            @Mocked final MessageCallback mockCallback,
-            @Mocked final Message mockMessage)
+    public void handleMessageSendsMessageResult(@Mocked final MessageCallback mockCallback)
             throws URISyntaxException, IOException
     {
         final IotHubMessageResult messageResult =
@@ -700,10 +697,7 @@ public class HttpsTransportTest
 
     // Tests_SRS_HTTPSTRANSPORT_11_020: [If the response from sending the IoT Hub message result does not have status code OK_EMPTY, the function shall throw an IOException.]
     @Test(expected = IOException.class)
-    public void handleMessageThrowsIOExceptionIfSendResultFails(
-            @Mocked final IotHubStatusCode mockStatus,
-            @Mocked final MessageCallback mockCallback,
-            @Mocked final Message mockMessage)
+    public void handleMessageThrowsIOExceptionIfSendResultFails()
             throws URISyntaxException, IOException
     {
         new NonStrictExpectations()
@@ -762,8 +756,7 @@ public class HttpsTransportTest
             @Mocked final Message mockMsg,
             @Mocked final HttpsSingleMessage mockHttpsMsg,
             @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final HttpsBatchMessage mockBatch,
-            @Mocked final IotHubStatusCode mockStatus)
+            @Mocked final HttpsBatchMessage mockBatch)
             throws URISyntaxException, IOException, IotHubSizeExceededException
     {
         final Map<String, Object> context = new HashMap<>();
@@ -821,5 +814,199 @@ public class HttpsTransportTest
 
         final boolean expectedIsEmpty = true;
         assertThat(testIsEmpty, is(expectedIsEmpty));
+    }
+
+    @Test
+    public void connectionEstablishedNotifyAllConnectionStateCallbacks(@Mocked final IotHubConnectionStateCallback mockConnectionStateCallback, @Mocked final HttpsIotHubConnection mockConnection) throws IOException
+    {
+        //arrange
+        HttpsTransport transport = new HttpsTransport(mockConfig);
+        transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
+        transport.open();
+
+        //act
+        Deencapsulation.invoke(transport, "invokeConnectionStateCallback", new Class[] {IotHubConnectionState.class}, IotHubConnectionState.SAS_TOKEN_EXPIRED);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockConnectionStateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, null);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSTRANSPORT_34_034: [If the sas token saved in this config has expired and the config has no device key saved, this function shall trigger a connection status callback with status SAS_TOKEN_EXPIRED.]
+    @Test
+    public void testSasTokenExpiredTriggersConnectionStatusCallbackOnSend(
+            @Mocked final IotHubConnectionStateCallback mockConnectionStateCallback,
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubEventCallback mockCallback) throws IOException
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.needsToRenewSasToken();
+                result = true;
+                mockConfig.getSharedAccessToken();
+                result = "SharedAccessSignature sr=someResource&sig=someSignature&se=0";
+            }
+        };
+
+        HttpsTransport transport = new HttpsTransport(mockConfig);
+        transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
+        transport.open();
+        final Map<String, Object> context = new HashMap<>();
+        transport.addMessage(mockMsg, mockCallback, context);
+
+        //act
+        transport.sendMessages();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockConnectionStateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, null);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSTRANSPORT_34_034: [If the sas token saved in this config has expired and the config has no device key saved, this function shall trigger a connection status callback with status SAS_TOKEN_EXPIRED.]
+    @Test
+    public void testSendMessagesDoesNotTriggerSASTokenExpiredConnectionStatusCallbackIfDeviceKeyIsPresent(
+            @Mocked final IotHubConnectionStateCallback mockConnectionStateCallback,
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubEventCallback mockCallback) throws IOException
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getSharedAccessToken();
+                result = "SharedAccessSignature sr=someResource&sig=someSignature&se=0";
+                mockConfig.getDeviceKey();
+                result = "non-null, fake key";
+            }
+        };
+
+        HttpsTransport transport = new HttpsTransport(mockConfig);
+        transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
+        transport.open();
+        final Map<String, Object> context = new HashMap<>();
+        transport.addMessage(mockMsg, mockCallback, context);
+
+        //act
+        transport.sendMessages();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockConnectionStateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, null);
+                times = 0;
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSTRANSPORT_34_038: [If the sas token saved in this config has expired and the config has no device key saved, this function shall trigger a connection status callback with status SAS_TOKEN_EXPIRED.]
+    @Test
+    public void testSasTokenExpiredTriggersConnectionStatusCallbackOnHandleMessage(@Mocked final IotHubConnectionStateCallback mockConnectionStateCallback) throws IOException
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getSharedAccessToken();
+                result = "SharedAccessSignature sr=someResource&sig=someSignature&se=0";
+                mockConfig.needsToRenewSasToken();
+                result = true;
+            }
+        };
+
+        HttpsTransport transport = new HttpsTransport(mockConfig);
+        transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
+        transport.open();
+
+        //act
+        transport.handleMessage();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockConnectionStateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, null);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSTRANSPORT_34_038: [If the sas token saved in this config has expired and the config has no device key saved, this function shall trigger a connection status callback with status SAS_TOKEN_EXPIRED.]
+    @Test
+    public void testHandleMessageDoesNotTriggerSASTokenExpiredConnectionStatusCallbackOnHandleMessageIfDeviceKeyIsPresent(
+            @Mocked final IotHubConnectionStateCallback mockConnectionStateCallback)
+            throws IOException
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getSharedAccessToken();
+                result = "SharedAccessSignature sr=someResource&sig=someSignature&se=0";
+                mockConfig.getDeviceKey();
+                result = "non-null, fake key";
+            }
+        };
+
+        HttpsTransport transport = new HttpsTransport(mockConfig);
+        transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
+        transport.open();
+
+        //act
+        transport.handleMessage();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockConnectionStateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, null);
+                times = 0;
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSTRANSPORT_34_040: [This function shall register the connection state callback with the provided callback and context.]
+    @Test
+    public void registerStateCallbackRegistersStateCallback(
+            @Mocked final IotHubConnectionStateCallback mockConnectionStateCallback)
+            throws IOException
+    {
+        //arrange
+        HttpsTransport transport = new HttpsTransport(mockConfig);
+        Object callbackContext = new Object();
+
+        //act
+        transport.registerConnectionStateCallback(mockConnectionStateCallback, callbackContext);
+
+        //assert
+        IotHubConnectionStateCallback stateCallback = Deencapsulation.getField(transport, "stateCallback");
+        Object stateCallbackContext = Deencapsulation.getField(transport, "stateCallbackContext");
+
+        assertNotNull(stateCallback);
+        assertNotNull(stateCallbackContext);
+    }
+
+    //Codes_SRS_HTTPSTRANSPORT_34_041: [If the provided callback is null, an IllegalArgumentException shall be thrown.]
+    @Test (expected = IllegalArgumentException.class)
+    public void RegisterStateCallbackThrowsForNullCallback() throws IOException
+    {
+        //arrange
+        HttpsTransport transport = new HttpsTransport(mockConfig);
+        Object callbackContext = new Object();
+
+        //act
+        transport.registerConnectionStateCallback(null, callbackContext);
     }
 }
