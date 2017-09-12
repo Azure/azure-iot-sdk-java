@@ -23,12 +23,12 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-device-client</artifactId>
-            <version>1.4.33</version>
+            <version>1.4.34</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-service-client</artifactId>
-            <version>1.9.24</version>
+            <version>1.9.25</version>
             <scope>test</scope>
         </dependency>
         <!-- test dependencies -->
