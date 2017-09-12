@@ -20,7 +20,8 @@ public class EventCallback implements IotHubEventCallback
         if (status.equals(expectedStatusCode))
         {
             success.setResult(true);
-        } else
+        }
+        else
         {
             success.setResult(false);
         }
