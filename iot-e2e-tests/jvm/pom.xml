@@ -53,7 +53,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-e2e-common</artifactId>
-            <version>0.9.13</version>
+            <version>0.10.14</version>
         </dependency>
     </dependencies>
     <build>
