@@ -15,6 +15,7 @@
     <modules>
         <module>dps-device-client</module>
         <module>dps-service-client</module>
+        <module>dps-security-client</module>
         <module>dps-samples</module>
     </modules>
 </project>

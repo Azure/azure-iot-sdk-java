@@ -1,15 +1,17 @@
 <!--
+  ~
   ~  Copyright (c) Microsoft. All rights reserved.
   ~  Licensed under the MIT license. See LICENSE file in the project root for full license information.
+  ~
   -->
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.dps</groupId>
-    <artifactId>dps-samples</artifactId>
-    <name>IoT Hub Java DPS Samples</name>
+    <artifactId>dps-security-client</artifactId>
+    <name>IoT Hub Java DPS Security Client</name>
     <version>0.0.1</version>
-    <packaging>pom</packaging>
-    <description>The Microsoft Azure IoT DPS Samples for Device and Service SDK for Java</description>
+    <packaging>jar</packaging>
+    <description>The Microsoft Azure IoT DPS Service SDK for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
     <developers>
         <developer>
@@ -32,20 +34,20 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <modules>
-        <module>dps-dice-sample</module>
-        <module>dps-tpm-sample</module>
-    </modules>
     <dependencies>
         <dependency>
-            <groupId>com.microsoft.azure.sdk.iot.dps</groupId>
-            <artifactId>dps-device-client</artifactId>
-            <version>0.0.1</version>
+            <groupId>com.microsoft.msr</groupId>
+            <artifactId>riot</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.microsoft.azure.sdk.iot.dps</groupId>
-            <artifactId>dps-security-client</artifactId>
-            <version>0.0.1</version>
+            <groupId>com.github.microsoft</groupId>
+            <artifactId>TSS.Java</artifactId>
+            <version>0.2.0</version>
+            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
     <build>
