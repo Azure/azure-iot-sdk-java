@@ -13,6 +13,7 @@ The DeviceTwinDevice is the Object representing the device tags and properties f
 ```java
 public class DeviceTwinDevice 
 {
+    public DeviceTwinDevice();
     public DeviceTwinDevice(String deviceId) throws IllegalArgumentException;
 
     public String getDeviceId();
@@ -49,6 +50,7 @@ public class DeviceTwinDevice
 ### DeviceTwinDevice
 
 ```java
+public DeviceTwinDevice();
 public DeviceTwinDevice(String deviceId) throws IllegalArgumentException;
 ```
 **SRS_DEVICETWINDEVICE_25_002: [** The constructor shall throw IllegalArgumentException if the input string is empty or null.**]**

@@ -589,15 +589,6 @@ public class AmqpsIotHubConnectionTest {
     {
         baseExpectations();
 
-        new NonStrictExpectations()
-        {
-            {
-                mockIotHubReactor.run();
-                times = 1;
-                mockOpenLock.waitLock(anyLong);
-            }
-        };
-
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
         AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);

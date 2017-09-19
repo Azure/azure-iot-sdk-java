@@ -51,7 +51,7 @@ public class JobResultTest
     final static String DATEFORMAT_JSON = "MMM d, yyyy h:mm:ss a";
 
 
-    private void JobsResponseParserExpectations(String json, TwinParser twinParser, MethodParser methodParser, Date date, MethodParser methodParserResponse)
+    private void JobsResponseParserExpectations(String json, TwinParser twinParser, MethodParser methodParser, Date date, MethodParser methodParserResponse, String jobTypeStr)
     {
         new NonStrictExpectations()
         {
@@ -74,7 +74,7 @@ public class JobResultTest
                 mockedJobsResponseParser.getMaxExecutionTimeInSeconds();
                 result = MAX_EXECUTION_TIME_IN_SECONDS;
                 mockedJobsResponseParser.getType();
-                result = "scheduleUpdateTwin";
+                result = jobTypeStr;
                 mockedJobsResponseParser.getJobsStatus();
                 result = "enqueued";
                 mockedJobsResponseParser.getCloudToDeviceMethod();
@@ -127,7 +127,7 @@ public class JobResultTest
         twinParser.setETag(ETAG);
         twinParser.resetTags(tags);
 
-        JobsResponseParserExpectations(json, twinParser, null, new Date(), null);
+        JobsResponseParserExpectations(json, twinParser, null, new Date(), null, "scheduleUpdateTwin");
 
         //act
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
@@ -178,7 +178,7 @@ public class JobResultTest
         twinParser.setETag(ETAG);
         twinParser.resetTags(tags);
 
-        JobsResponseParserExpectations(json, twinParser, null, now, null);
+        JobsResponseParserExpectations(json, twinParser, null, now, null, "scheduleUpdateTwin");
 
         //act
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
@@ -217,7 +217,7 @@ public class JobResultTest
         twinParser.setETag(ETAG);
         twinParser.resetDesiredProperty(desired);
 
-        JobsResponseParserExpectations(json, twinParser, null, now, null);
+        JobsResponseParserExpectations(json, twinParser, null, now, null, "scheduleUpdateTwin");
 
         //act
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
@@ -256,7 +256,7 @@ public class JobResultTest
         twinParser.setETag(ETAG);
         twinParser.resetTags(tags);
 
-        JobsResponseParserExpectations(json, twinParser, null, now, null);
+        JobsResponseParserExpectations(json, twinParser, null, now, null, "scheduleUpdateTwin");
 
         //act
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
@@ -295,7 +295,7 @@ public class JobResultTest
         MethodParser methodParser = new MethodParser("methodName", null, null, new HashMap<String, Object>());
         MethodParser methodParserResponse = mockedMethodParser;
 
-        JobsResponseParserExpectations(json, null, methodParser, now, methodParserResponse);
+        JobsResponseParserExpectations(json, null, methodParser, now, methodParserResponse, "scheduleUpdateTwin");
         new NonStrictExpectations()
         {
             {
@@ -351,7 +351,7 @@ public class JobResultTest
         MethodParser methodParser = new MethodParser("methodName", null, null, new HashMap<String, Object>());
         MethodParser methodParserResponse = mockedMethodParser;
 
-        JobsResponseParserExpectations(json, null, methodParser, now, methodParserResponse);
+        JobsResponseParserExpectations(json, null, methodParser, now, methodParserResponse, "scheduleUpdateTwin");
         new NonStrictExpectations()
         {
             {
@@ -453,7 +453,7 @@ public class JobResultTest
         twinParser.setETag(ETAG);
         twinParser.resetTags(tags);
 
-        JobsResponseParserExpectations(json, twinParser, null, now, null);
+        JobsResponseParserExpectations(json, twinParser, null, now, null, "scheduleUpdateTwin");
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
 
         //act
@@ -463,4 +463,81 @@ public class JobResultTest
         assertThat(prettyPrint, is(expectedPrettyPrint));
     }
 
+    /* Tests_SRS_JOBRESULT_21_020: [The toString shall return a String with a pretty print json that represents this class.] */
+    @Test
+    public void  toStringReturnJobTypeUnknown() throws IOException
+    {
+        //arrange
+        final String json = "validJson";
+        final Date now = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT_JSON);
+        String nowString = dateFormat.format(now);
+        final String expectedPrettyPrint =
+                "{\n" +
+                        "  \"jobId\": \"validJobId\",\n" +
+                        "  \"queryCondition\": \"DeviceId IN ['validDevice']\",\n" +
+                        "  \"createdTime\": \"" + nowString + "\",\n" +
+                        "  \"startTime\": \"" + nowString + "\",\n" +
+                        "  \"lastUpdatedDateTime\": \"" + nowString + "\",\n" +
+                        "  \"endTime\": \"" + nowString + "\",\n" +
+                        "  \"maxExecutionTimeInSeconds\": 100,\n" +
+                        "  \"jobType\": \"unknown\",\n" +
+                        "  \"jobStatus\": \"enqueued\",\n" +
+                        "  \"updateTwin\": {\n" +
+                        "    \"deviceId\": \"validDeviceId\",\n" +
+                        "    \"eTag\": \"validETag\",\n" +
+                        "    \"tag\": {\n" +
+                        "      \"tag1\": \"val1\"\n" +
+                        "    },\n" +
+                        "    \"desiredProperties\": {},\n" +
+                        "    \"twinParser\": {\n" +
+                        "      \"tags\": {\n" +
+                        "        \"tags\": {}\n" +
+                        "      },\n" +
+                        "      \"properties\": {\n" +
+                        "        \"desired\": {\n" +
+                        "          \"lock\": {},\n" +
+                        "          \"property\": {},\n" +
+                        "          \"reportMetadata\": false\n" +
+                        "        },\n" +
+                        "        \"reported\": {\n" +
+                        "          \"lock\": {},\n" +
+                        "          \"property\": {},\n" +
+                        "          \"reportMetadata\": false\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"manager\": {}\n" +
+                        "    }\n" +
+                        "  },\n" +
+                        "  \"failureReason\": \"This is a valid failure reason\",\n" +
+                        "  \"statusMessage\": \"This is a valid status message\",\n" +
+                        "  \"jobStatistics\": {\n" +
+                        "    \"deviceCount\": 0,\n" +
+                        "    \"failedCount\": 0,\n" +
+                        "    \"succeededCount\": 0,\n" +
+                        "    \"runningCount\": 0,\n" +
+                        "    \"pendingCount\": 0\n" +
+                        "  },\n" +
+                        "  \"deviceId\": \"validDeviceId\",\n" +
+                        "  \"parentJobId\": \"validParentJobId\"\n" +
+                        "}";
+
+        Map<String, Object> tags = new HashMap<>();
+        tags.put("tag1", "val1");
+
+        TwinParser twinParser = new TwinParser();
+        twinParser.enableTags();
+        twinParser.setDeviceId(DEVICE_ID);
+        twinParser.setETag(ETAG);
+        twinParser.resetTags(tags);
+
+        JobsResponseParserExpectations(json, twinParser, null, now, null, "unknown");
+        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
+
+        //act
+        String prettyPrint = jobResult.toString();
+
+        //assert
+        assertThat(prettyPrint, is(expectedPrettyPrint));
+    }
 }

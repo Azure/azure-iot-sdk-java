@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.service.jobs;
 public enum JobType
 {
     // List of possible jobs
+    unknown,
     scheduleDeviceMethod,
     scheduleUpdateTwin
 }
