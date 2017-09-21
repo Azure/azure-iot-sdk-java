@@ -115,10 +115,33 @@ public interface DPSSecurityClient
                     "Epn3o0WC4zxe9Z2etciefC7IpJ5OCBRLbf1wbWsaY71k5h+3zvDyny67G7fyUIhz\r\n" +
                     "ksLi4xaNmjICq44Y3ekQEe5+NauQrz4wlHrQMz2nZQ/1/I6eYs9HRCwBXbsdtTLS\r\n" +
                     "R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\r\n" +
-                    "-----END CERTIFICATE-----\r\n";
+                    "-----END CERTIFICATE-----\r\n" +
+                    // Fiddler cert --- plz remove before checking in.
+                    "-----BEGIN CERTIFICATE-----\n" +
+                    "MIIDsjCCApqgAwIBAgIQIS6rMKAd5pBNCw0850QVEDANBgkqhkiG9w0BAQsFADBn\n" +
+                    "MSswKQYDVQQLDCJDcmVhdGVkIGJ5IGh0dHA6Ly93d3cuZmlkZGxlcjIuY29tMRUw\n" +
+                    "EwYDVQQKDAxET19OT1RfVFJVU1QxITAfBgNVBAMMGERPX05PVF9UUlVTVF9GaWRk\n" +
+                    "bGVyUm9vdDAeFw0xNTA4MDQxNjI2MjRaFw0yMTA4MDMxNjI2MjRaMGcxKzApBgNV\n" +
+                    "BAsMIkNyZWF0ZWQgYnkgaHR0cDovL3d3dy5maWRkbGVyMi5jb20xFTATBgNVBAoM\n" +
+                    "DERPX05PVF9UUlVTVDEhMB8GA1UEAwwYRE9fTk9UX1RSVVNUX0ZpZGRsZXJSb290\n" +
+                    "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyhpWnT9mzDQnfpGvyD6w\n" +
+                    "yGf8J4g4ZhM8/NWHHG+u49rgEwhJupnvEJzrz/Ky/NExraWMV7Th0dy6V0kVsOI4\n" +
+                    "30OF2RbxI0aJ3TcxcVA0vdX9gs9bXRQpQH4LaU9esWihsI0FMgiK4wld47FaQIu+\n" +
+                    "1QU4ZxXMBWV8f7G4kLJW//0+iTYvlhwsbokEg9/V+QlVQOLztfn1UdDaspZcUHSl\n" +
+                    "UaYna6hpYfPVszgSrHBRUnz6dXlNd8jTyRQITEos9o4in4RzkDP5uU5BuU3hzx4p\n" +
+                    "Y3oAUbolqAckaLxGiP7/KXuoUBoWysRE5x9r8p78cOzlDkPfYZbRRGAsR+FDMkPJ\n" +
+                    "KwIDAQABo1owWDATBgNVHSUEDDAKBggrBgEFBQcDATASBgNVHRMBAf8ECDAGAQH/\n" +
+                    "AgEAMB0GA1UdDgQWBBRbPNU0ViUPjAnRYSBa/UEflJiUmzAOBgNVHQ8BAf8EBAMC\n" +
+                    "AQYwDQYJKoZIhvcNAQELBQADggEBAGosrYCVxqxO7pHoST6w9jDeZxW8dsuLvExY\n" +
+                    "OgXcQE1BpQy5WeTfRZVOAPdaLBXxgu8Jpb5WKXCpnwxepcj3v4iImPtUlKAmKO+a\n" +
+                    "4eIBMhZuTEOIRiym+BL+gG0QnF8UyGEEUY5L5Fu3bvEc4bA8gxvxBIMaIbGuZxHX\n" +
+                    "6+kv+GxFNlzdgTYwZmOQaizDy1oy9G33eaiINxMTPx3kMPxdP/Nh8sSDDvuDlGqn\n" +
+                    "ZkheTII9hWVEwEiEMPabDBvfJp9hI4yiedaHIgXSRy0hGSzmUbMp17vFu/VFDKuL\n" +
+                    "jaXIH9KZVpSxbxQIIM0YQKVjrODfL/MdkMSNxS9C5GkQeftIulw=\n" +
+                    "-----END CERTIFICATE-----";
 
     void setSecurityType(SecurityType type);
     SecurityType getSecurityType();
-    String getRegistrationId();
+    String getRegistrationId() throws SecurityException;
     SSLContext getSSLContext() throws SecurityException;
 }

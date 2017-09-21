@@ -11,8 +11,8 @@ import java.security.cert.Certificate;
 
 public class DPSAuthorization
 {
-    private String sasToken;
-    private SSLContext sslContext;
+    private String sasToken = null;
+    private SSLContext sslContext = null;
 
     public DPSAuthorization()
     {

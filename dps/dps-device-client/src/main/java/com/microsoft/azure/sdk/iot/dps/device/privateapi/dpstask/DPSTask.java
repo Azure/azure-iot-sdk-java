@@ -30,23 +30,18 @@ public class DPSTask implements Callable
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1000000;
     private static final int MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE = 10000;
 
-    private DPSSecurityClient dpsSecurityClient;
-    private DPSTransport dpsTransport;
-    private DPSConfig dpsConfig;
+    private DPSSecurityClient dpsSecurityClient = null;
+    private DPSTransport dpsTransport = null;
+    private DPSConfig dpsConfig = null;
 
-    private DpsStatusCallback dpsStatusCallback;
-    private Object dpsStatusCallbackContext;
+    private DpsStatusCallback dpsStatusCallback = null;
+    private Object dpsStatusCallbackContext = null;
 
-    private DPSRegistrationCallback dpsRegistrationCallback;
-    private Object dpsRegistrationCallbackContext;
+    private DPSRegistrationCallback dpsRegistrationCallback = null;
+    private Object dpsRegistrationCallbackContext = null;
 
-    private DPSAuthorization dpsAuthorization;
-    private DPSDeviceStatus dpsStatus;
-
-    private FutureTask<DPSResponseParser> futureRegisterTask;
-    private FutureTask<DPSResponseParser> futureStatusTask;
-    private DPSRegisterTask dpsRegisterTask;
-    private DPSStatusTask dpsStatusTask;
+    private DPSAuthorization dpsAuthorization = null;
+    private DPSDeviceStatus dpsStatus = null;
 
     private ExecutorService executor;
 
@@ -109,14 +104,14 @@ public class DPSTask implements Callable
     {
         try
         {
-            this.dpsRegisterTask = new DPSRegisterTask(this.dpsConfig, dpsSecurityClient, dpsTransport, dpsAuthorization);
-            this.futureRegisterTask = new FutureTask<DPSResponseParser>(this.dpsRegisterTask);
-            executor.submit(this.futureRegisterTask);
+            DPSRegisterTask dpsRegisterTask = new DPSRegisterTask(this.dpsConfig, dpsSecurityClient, dpsTransport, dpsAuthorization);
+            FutureTask<DPSResponseParser> futureRegisterTask = new FutureTask<DPSResponseParser>(dpsRegisterTask);
+            executor.submit(futureRegisterTask);
             this.dpsStatus = DPSDeviceStatus.DPS_DEVICE_STATUS_READY_TO_AUTHENTICATE;
             invokeStatusCallback(this.dpsStatus, null);
 
             DPSResponseParser dpsAuthenticationResponseParser = null;
-            dpsAuthenticationResponseParser = this.futureRegisterTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
+            dpsAuthenticationResponseParser = futureRegisterTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
 
             if (dpsAuthenticationResponseParser == null)
             {
@@ -150,10 +145,10 @@ public class DPSTask implements Callable
                     DPSResponseParser dpsStatusResponseParser = null;
                     do
                     {
-                        this.dpsStatusTask = new DPSStatusTask(dpsSecurityClient, dpsTransport, dpsAuthenticationResponseParser.getOperationId(), this.dpsAuthorization);
-                        this.futureStatusTask = new FutureTask<DPSResponseParser>(this.dpsStatusTask);
-                        executor.submit(this.futureStatusTask);
-                        dpsStatusResponseParser = this.futureStatusTask.get();
+                        DPSStatusTask dpsStatusTask = new DPSStatusTask(dpsSecurityClient, dpsTransport, dpsAuthenticationResponseParser.getOperationId(), this.dpsAuthorization);
+                        FutureTask<DPSResponseParser> futureStatusTask = new FutureTask<DPSResponseParser>(dpsStatusTask);
+                        executor.submit(futureStatusTask);
+                        dpsStatusResponseParser = futureStatusTask.get();
                         if (DPSStatus.fromString(dpsStatusResponseParser.getStatus()) != DPSStatus.ASSIGNED)
                         {
                             this.dpsStatus = DPS_DEVICE_STATUS_ASSIGNING;

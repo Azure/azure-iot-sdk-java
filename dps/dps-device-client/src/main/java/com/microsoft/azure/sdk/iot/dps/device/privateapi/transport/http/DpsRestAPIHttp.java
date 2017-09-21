@@ -25,6 +25,7 @@ public class DpsRestAPIHttp extends DPSTransport
 {
     private String scopeId;
     private String hostName;
+    //private HttpRequest nonceHttpRequest = null;
 
     /**
      *  Values for Http header
@@ -80,7 +81,15 @@ public class DpsRestAPIHttp extends DPSTransport
         try
         {
         /* Codes_SRS_DEVICE_OPERATIONS_21_008: [The request shall create a new HttpRequest with the provided `url`, http `method`, and `payload`.] */
-            request = new HttpRequest(url, method, payload);
+            /*if (this.nonceHttpRequest == null)*/
+            {
+                request = new HttpRequest(url, method, payload);
+            }
+            /*else*/
+            {
+/*                request = this.nonceHttpRequest;
+                request.updateBody(payload);*/
+            }
         }
         catch (IOException e)
         {
@@ -118,6 +127,7 @@ public class DpsRestAPIHttp extends DPSTransport
 
         /* Codes_SRS_DEVICE_OPERATIONS_21_015: [The request shall send the created request and get the response.] */
             response = request.send();
+            request.disconnect();
             DPSExceptionManager.verifyHttpResponse(response);
         }
         catch (IOException e)
@@ -139,10 +149,19 @@ public class DpsRestAPIHttp extends DPSTransport
             String url = new DPSGenerateUrl(this.hostName, this.scopeId, HTTPS).generateRegisterUrl(registrationId);
             HttpRequest httpRequest = prepareRequest(new URL(url), HttpMethod.PUT, payload, DEFAULT_HTTP_TIMEOUT_MS, null, SDKUtils.getUserAgentString());
             httpRequest.setSSLContext(sslContext);
-            HttpResponse httpResponse = sendRequest(httpRequest);
+            byte[] response = null;
+            try
+            {
+                HttpResponse httpResponse = this.sendRequest(httpRequest);
+            }
+            catch (DPSHubException e)
+            {
+                //this.nonceHttpRequest = httpRequest;
+                response = e.getMessage().getBytes();
+            }
             if (dpsRestResponseCallback != null)
             {
-                dpsRestResponseCallback.run(httpResponse.getBody(), dpsAuthorizationCallbackContext);
+                dpsRestResponseCallback.run(response, dpsAuthorizationCallbackContext);
             }
             else
             {
@@ -168,7 +187,24 @@ public class DpsRestAPIHttp extends DPSTransport
                 headersMap = new HashMap<>();
                 headersMap.put(AUTHORIZATION, authorization);
             }
-            HttpRequest httpRequest = prepareRequest(new URL(url), HttpMethod.PUT, payload, DEFAULT_HTTP_TIMEOUT_MS, headersMap, SDKUtils.getUserAgentString());
+            HttpRequest httpRequest = null;
+            /*if (this.nonceHttpRequest != null)
+            {
+                httpRequest = this.nonceHttpRequest;
+                httpRequest.updateBody(payload);
+                if (headersMap != null)
+                {
+                    //SRS_DEVICE_OPERATIONS_25_019: [The request shall add to the HTTP header all the additional custom headers set for this request.]
+                    for (Map.Entry<String, String> header : headersMap.entrySet())
+                    {
+                        //httpRequest.setHeaderField(header.getKey(), header.getValue());
+                    }
+                }
+            }
+            else*/
+            {
+                httpRequest = prepareRequest(new URL(url), HttpMethod.PUT, payload, DEFAULT_HTTP_TIMEOUT_MS, headersMap, SDKUtils.getUserAgentString());
+            }
             httpRequest.setSSLContext(sslContext);
             HttpResponse httpResponse = sendRequest(httpRequest);
             if (dpsRestResponseCallback != null)

@@ -88,7 +88,7 @@ public class DPSSecurityClientTPMEmulator extends DPSSecurityClientKey
         return cpResp.outPublic;
     }
 
-    static void ClearPersistent(Tpm tpm, TPM_HANDLE hPers, String keyRole)
+    private void ClearPersistent(Tpm tpm, TPM_HANDLE hPers, String keyRole)
     {
         tpm._allowErrors().ReadPublic(hPers);
         TPM_RC	rc = tpm._getLastResponseCode();
@@ -107,7 +107,7 @@ public class DPSSecurityClientTPMEmulator extends DPSSecurityClientKey
     }
 
     // NOTE: For now only HMAC signing is supported.
-    static byte[] SignData(Tpm tpm, TPMT_PUBLIC idKeyPub, byte[] tokenData)
+    private byte[] SignData(Tpm tpm, TPMT_PUBLIC idKeyPub, byte[] tokenData)
     {
         TPM_ALG_ID	idKeyHashAlg = ((TPMS_SCHEME_HMAC)((TPMS_KEYEDHASH_PARMS)idKeyPub.parameters).scheme).hashAlg;
         int 		MaxInputBuffer = TpmHelpers.getTpmProperty(tpm, TPM_PT.INPUT_BUFFER);
@@ -135,6 +135,8 @@ public class DPSSecurityClientTPMEmulator extends DPSSecurityClientKey
     public DPSSecurityClientTPMEmulator()
     {
         tpm = TpmFactory.localTpmSimulator();
+        ClearPersistent(tpm, EK_PersHandle, "EK");
+        ClearPersistent(tpm, SRK_PersHandle, "SRK");
         ekPub = CreatePersistentPrimary(tpm, EK_PersHandle, TPM_RH.OWNER, EK_Template, "EK");
         srkPub = CreatePersistentPrimary(tpm, SRK_PersHandle, TPM_RH.OWNER, SRK_Template, "SRK");
         this.setSecurityType(SecurityType.Key);
@@ -252,12 +254,14 @@ public class DPSSecurityClientTPMEmulator extends DPSSecurityClientKey
     @Override
     public byte[] getDeviceEk()
     {
-        return ((TPM2B_PUBLIC_KEY_RSA)ekPub.unique).buffer;
+        return (new TPM2B_PUBLIC(ekPub)).toTpm();
+        //return ((TPM2B_PUBLIC_KEY_RSA)ekPub.unique).buffer;
     }
 
     @Override
     public byte[] getDeviceSRK()
     {
-        return ((TPM2B_PUBLIC_KEY_RSA)srkPub.unique).buffer;
+        return (new TPM2B_PUBLIC(srkPub)).toTpm();
+        //return ((TPM2B_PUBLIC_KEY_RSA)srkPub.unique).buffer;
     }
 }

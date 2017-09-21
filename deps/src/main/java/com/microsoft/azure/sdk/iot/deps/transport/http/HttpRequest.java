@@ -35,7 +35,13 @@ public class HttpRequest
         // Codes_SRS_HTTPREQUEST_25_003: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
         // Codes_SRS_HTTPREQUEST_25_004: [If an IOException occurs in setting up the HTTPS connection, the function shall throw an IOException.]
         this.connection = new HttpConnection(url, method);
+
         // Codes_SRS_HTTPREQUEST_25_002: [The function shall write the body to the connection.]
+        this.connection.writeOutput(body);
+    }
+
+    public void updateBody(byte[] body)
+    {
         this.connection.writeOutput(body);
     }
 
@@ -126,6 +132,11 @@ public class HttpRequest
         //Codes_SRS_HTTPSREQUEST_25_016: [The function shall set the SSL context for the IotHub.]
         this.connection.setSSLContext(sslContext);
         return this;
+    }
+
+    public void disconnect() throws IOException
+    {
+        this.connection.disconnect();
     }
 
     protected HttpRequest()

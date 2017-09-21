@@ -16,6 +16,7 @@ public class DPSExceptionManager
     public static void verifyHttpResponse(HttpResponse httpResponse) throws DPSHubException
     {
         int responseStatus = httpResponse.getStatus();
+        System.out.println("DPS responded with status : " + responseStatus);
 
         String errorMessage = ErrorMessageParser.bestErrorMessage(new String(httpResponse.getErrorReason(), StandardCharsets.UTF_8));
 

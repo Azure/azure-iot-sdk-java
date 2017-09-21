@@ -105,6 +105,19 @@ public class HttpConnection
         this.connection.connect();
     }
 
+    public void disconnect() throws IOException
+    {
+/*        if (this.connection.getDoInput())
+        {
+            this.connection.setDoInput(false);
+        }
+        if (this.connection.getDoOutput())
+        {
+            this.connection.setDoOutput(false);
+        }*/
+        this.connection.disconnect();
+    }
+
     /**
      * Sets the request method (i.e. POST).
      *
@@ -150,6 +163,7 @@ public class HttpConnection
         // Codes_SRS_HTTPCONNECTION_25_010: [The function shall set the given request header field.]
         this.connection.setRequestProperty(field, value);
     }
+
 
     /**
      * Sets the read timeout in milliseconds. The read timeout is the number of

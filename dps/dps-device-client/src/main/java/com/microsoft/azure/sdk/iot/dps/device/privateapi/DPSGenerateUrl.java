@@ -9,8 +9,11 @@ package com.microsoft.azure.sdk.iot.dps.device.privateapi;
 import com.microsoft.azure.sdk.iot.dps.device.DPSTransportProtocol;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 public class DPSGenerateUrl
 {
@@ -27,7 +30,6 @@ public class DPSGenerateUrl
      */
     private static final String URL_HTTPS = "https:" + SLASH + SLASH;
     private static final String REGISTRATIONS = "registrations";
-    private static final String REGISTRATION = "registration";
     private static final String REGISTER_ME = "register";
     private static final String OPERATIONS = "operations";
     private static final String API_VERSION_STRING = "api-version";
@@ -103,18 +105,17 @@ public class DPSGenerateUrl
         return requestUrl.toString();
     }
 
-    public String generateSasTokenUrl(String registrationId) throws MalformedURLException
+    public String generateSasTokenUrl(String registrationId) throws UnsupportedEncodingException
     {
-        // idscope/registration/registrationid/
+        // idscope/registrations/registrationid/
         StringBuilder sasTokenUrl = new StringBuilder();
         sasTokenUrl.append(scope);
         sasTokenUrl.append(SLASH);
-        sasTokenUrl.append(REGISTRATION);
+        sasTokenUrl.append(REGISTRATIONS);
         sasTokenUrl.append(SLASH);
         sasTokenUrl.append(registrationId);
-        sasTokenUrl.append(SLASH);
-        URL url = new URL(sasTokenUrl.toString());
-        return url.toString();
+        //sasTokenUrl.append(SLASH);
+        return URLEncoder.encode(sasTokenUrl.toString(), StandardCharsets.UTF_8.displayName());
     }
 
     public String generateRegisterUrl(String registrationId) throws IOException

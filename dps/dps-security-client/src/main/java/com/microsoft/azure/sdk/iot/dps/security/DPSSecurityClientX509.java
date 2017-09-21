@@ -44,9 +44,9 @@ public abstract class DPSSecurityClientX509 implements DPSSecurityClient
     }
 
     @Override
-    public String getRegistrationId()
+    public String getRegistrationId() throws SecurityException
     {
-       return this.getDeviceCommonName();
+        return this.getDeviceCommonName();
     }
 
     @Override
