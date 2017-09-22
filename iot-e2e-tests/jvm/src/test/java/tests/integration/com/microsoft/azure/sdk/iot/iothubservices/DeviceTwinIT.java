@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.microsoft.azure.sdk.iot.deps.util.*;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -14,15 +15,18 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.Base64;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -50,8 +54,16 @@ public class DeviceTwinIT
     //Default Page Size for Query
     private static final Integer PAGE_SIZE = 2;
 
-    private static final String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
+    private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
+
+    private static final String PUBLIC_KEY_CERTIFICATE_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_CERT_BASE64";
+    private static final String PRIVATE_KEY_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_PRIVATE_KEY_BASE64";
+    private static final String X509_THUMBPRINT_ENV_VAR_NAME = "IOTHUB_E2E_X509_THUMBPRINT";
+
+    private static String publicKeyCert;
+    private static String privateKey;
+    private static String x509Thumbprint;
 
     // Constants used in for Testing
     private static final String PROPERTY_KEY = "Key";
@@ -66,9 +78,11 @@ public class DeviceTwinIT
     // States of SDK
     private static RegistryManager registryManager;
     private static DeviceClient deviceClient;
+    private static DeviceClient x509DeviceClient;
     private static RawTwinQuery scRawTwinQueryClient;
     private static DeviceTwin sCDeviceTwin;
     private static DeviceState deviceUnderTest = null;
+    private static DeviceState x509DeviceUnderTest = null;
     private static DeviceState[] devicesUnderTest;
 
     private enum STATUS
@@ -189,10 +203,6 @@ public class DeviceTwinIT
     private void setUpTwin(DeviceState deviceState) throws IOException, URISyntaxException, IotHubException, InterruptedException
     {
         // set up twin on DeviceClient
-        /*
-            Because of the bug in device client on MQTT, we cannot have multiple device client open
-            in the main thread at the same time. Hence restricting to use single device client.
-         */
         if (deviceClient == null)
         {
             deviceState.dCDeviceForTwin = new DeviceExtension();
@@ -201,6 +211,25 @@ public class DeviceTwinIT
             deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
             deviceState.deviceTwinStatus = STATUS.SUCCESS;
         }
+        // set up twin on ServiceClient
+        if (sCDeviceTwin != null)
+        {
+            deviceState.sCDeviceForTwin = new DeviceTwinDevice(deviceState.sCDeviceForRegistryManager.getDeviceId());
+            sCDeviceTwin.getTwin(deviceState.sCDeviceForTwin);
+            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        }
+    }
+
+    private void setUpTwinForX509(DeviceState deviceState) throws IOException, URISyntaxException, IotHubException, InterruptedException
+    {
+        // set up twin on DeviceClient
+        deviceState.dCDeviceForTwin = new DeviceExtension();
+        String connString = DeviceConnectionString.get(iotHubConnectionString, x509DeviceUnderTest.sCDeviceForRegistryManager);
+        x509DeviceClient = new DeviceClient(connString, IotHubClientProtocol.MQTT, publicKeyCert, false, privateKey, false);
+        x509DeviceClient.open();
+        x509DeviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
+        deviceState.deviceTwinStatus = STATUS.SUCCESS;
+
         // set up twin on ServiceClient
         if (sCDeviceTwin != null)
         {
@@ -226,22 +255,26 @@ public class DeviceTwinIT
             deviceClient.closeNow();
             deviceClient = null;
         }
+        if (x509DeviceClient != null)
+        {
+            x509DeviceClient.closeNow();
+            x509DeviceClient = null;
+        }
     }
 
     @BeforeClass
     public static void setUp() throws IOException
     {
-        Map<String, String> env = System.getenv();
-        for (String envName : env.keySet())
-        {
-            if (envName.equals(iotHubonnectionStringEnvVarName))
-            {
-                iotHubConnectionString = env.get(envName);
-            }
-        }
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        String privateKeyBase64Encoded = Tools.retrieveEnvironmentVariableValue(PRIVATE_KEY_BASE64_ENCODED_ENV_VAR_NAME);
+        String publicKeyCertBase64Encoded = Tools.retrieveEnvironmentVariableValue(PUBLIC_KEY_CERTIFICATE_BASE64_ENCODED_ENV_VAR_NAME);
+        x509Thumbprint = Tools.retrieveEnvironmentVariableValue(X509_THUMBPRINT_ENV_VAR_NAME);
 
-        assertNotNull(iotHubConnectionString);
-        assertFalse(iotHubConnectionString.isEmpty());
+        byte[] publicCertBytes = com.microsoft.azure.sdk.iot.deps.util.Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes());
+        publicKeyCert = new String(publicCertBytes);
+
+        byte[] privateKeyBytes = com.microsoft.azure.sdk.iot.deps.util.Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes());
+        privateKey = new String(privateKeyBytes);
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
@@ -254,6 +287,7 @@ public class DeviceTwinIT
         registryManager = null;
         sCDeviceTwin = null;
         deviceClient = null;
+        x509DeviceClient = null;
     }
 
     @Before
@@ -1092,5 +1126,76 @@ public class DeviceTwinIT
             executor.shutdownNow();
         }
         removeMultipleDevices();
+    }
+
+    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testUpdateDesiredUpdatesWithX509() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    {
+        //arrange
+        setUpX509Device();
+
+        // Add desired properties for the device
+        Set<Pair> desiredProperties = new HashSet<>();
+        desiredProperties.add(new Pair(PROPERTY_KEY, PROPERTY_VALUE));
+        x509DeviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
+        sCDeviceTwin.updateTwin(x509DeviceUnderTest.sCDeviceForTwin);
+        x509DeviceUnderTest.sCDeviceForTwin.clearTwin();
+
+        // Update desired properties on multiple devices
+        sCDeviceTwin.getTwin(x509DeviceUnderTest.sCDeviceForTwin);
+        Set<Pair> updatedDesiredProperties = x509DeviceUnderTest.sCDeviceForTwin.getDesiredProperties();
+        for (Pair dp : updatedDesiredProperties)
+        {
+            dp.setValue(PROPERTY_VALUE_UPDATE);
+        }
+        x509DeviceUnderTest.sCDeviceForTwin.setDesiredProperties(updatedDesiredProperties);
+        sCDeviceTwin.updateTwin(x509DeviceUnderTest.sCDeviceForTwin);
+        x509DeviceUnderTest.sCDeviceForTwin.clearTwin();
+
+        // Read updates on multiple devices
+        sCDeviceTwin.getTwin(x509DeviceUnderTest.sCDeviceForTwin);
+
+        for (Pair dp : x509DeviceUnderTest.sCDeviceForTwin.getDesiredProperties())
+        {
+            assertEquals(dp.getKey(), PROPERTY_KEY);
+            assertEquals(dp.getValue(), PROPERTY_VALUE_UPDATE);
+        }
+
+        tearDownTwin(x509DeviceUnderTest);
+        registryManager.removeDevice(x509DeviceUnderTest.sCDeviceForRegistryManager.getDeviceId());
+    }
+
+    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testSendReportedPropertiesWithX509() throws IOException, IotHubException, InterruptedException, URISyntaxException
+    {
+        //arrange
+        setUpX509Device();
+
+        // act
+        // send max_prop RP all at once
+        x509DeviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
+        x509DeviceClient.sendReportedProperties(x509DeviceUnderTest.dCDeviceForTwin.getReportedProp());
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        // assert
+        assertEquals(x509DeviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+
+        // verify if they are received by SC
+        Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
+        int actualReportedPropFound = readReportedProperties(x509DeviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE);
+        assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
+
+        tearDownTwin(x509DeviceUnderTest);
+        registryManager.removeDevice(x509DeviceUnderTest.sCDeviceForRegistryManager.getDeviceId());
+    }
+
+    private void setUpX509Device() throws IOException, IotHubException, URISyntaxException, InterruptedException
+    {
+        x509DeviceUnderTest = new DeviceState();
+        String deviceIdMqttX509 = "java-device-twin-e2e-test-mqtt-x509".concat(UUID.randomUUID().toString());
+        x509DeviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createDevice(deviceIdMqttX509, AuthenticationType.SELF_SIGNED);
+        x509DeviceUnderTest.sCDeviceForRegistryManager.setThumbprint(x509Thumbprint, x509Thumbprint);
+        x509DeviceUnderTest.sCDeviceForRegistryManager = registryManager.addDevice(x509DeviceUnderTest.sCDeviceForRegistryManager);
+        setUpTwinForX509(x509DeviceUnderTest);
     }
 }

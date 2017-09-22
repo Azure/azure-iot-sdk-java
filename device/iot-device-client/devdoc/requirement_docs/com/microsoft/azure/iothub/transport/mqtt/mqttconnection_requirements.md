@@ -28,7 +28,7 @@ public class MqttConnection
 MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext iotHubSSLContext) throws IOException
 ```
 
-**SRS_MQTTCONNECTION_25_001: [**The constructor shall throw IllegalArgumentException if any of the input parameters are null .**]**
+**SRS_MQTTCONNECTION_25_001: [**The constructor shall throw IllegalArgumentException if any of the input parameters are null other than password.**]**
 
 **SRS_MQTTCONNECTION_25_002: [**The constructor shall throw IllegalArgumentException if serverUri, clientId, userName, password are empty.**]**
 

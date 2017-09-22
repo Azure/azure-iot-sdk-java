@@ -59,10 +59,6 @@ public DeviceIO(DeviceClientConfig config, IotHubClientProtocol protocol,
 public void open() throws IOException
 ```
 **SRS_DEVICE_IO_21_007: [**If the client is already open, the open shall do nothing.**]**  
-**SRS_DEVICE_IO_21_008: [**The open shall create default IotHubSSL context if no certificate input was provided by user and save it by calling setIotHubSSLContext.**]**  
-**SRS_DEVICE_IO_21_009: [**The open shall create IotHubSSL context with the certificate path if input was provided by user and save it by calling setIotHubSSLContext.**]**  
-**SRS_DEVICE_IO_21_010: [**The open shall create IotHubSSL context with the certificate String if input was provided by user and save it by calling setIotHubSSLContext.**]**  
-**SRS_DEVICE_IO_21_011: [**If an exception is thrown when creating a SSL context then open shall throw IOException to the user indicating the failure**]**  
 **SRS_DEVICE_IO_21_012: [**The open shall open the transport to communicate with an IoT Hub.**]**  
 **SRS_DEVICE_IO_21_013: [**The open shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.**]**  
 **SRS_DEVICE_IO_21_014: [**The open shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.**]**  

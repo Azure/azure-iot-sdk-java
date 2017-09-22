@@ -8,6 +8,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
@@ -59,6 +60,38 @@ public class DeviceTestManager
         this.connectionString = registryManager.getDeviceConnectionString(deviceOnServiceClient);
         this.protocol = protocol;
         deviceEmulator = new DeviceEmulator(this.connectionString, this.protocol);
+
+        /* Enable DeviceMethod on the device client using the callbacks from the DeviceEmulator */
+        deviceEmulator.enableDeviceMethod();
+
+        /* Enable DeviceTwin on the device client using the callbacks from the DeviceEmulator */
+        deviceEmulator.enableDeviceTwin();
+
+        deviceThread = new Thread(deviceEmulator);
+        deviceThread.start();
+
+        /* Wait until the device complete the connection with the IoTHub. */
+        waitIotHub(1, OPEN_CONNECTION_TIMEOUT_IN_SECONDS);
+    }
+
+    public DeviceTestManager(RegistryManager registryManager, String deviceName, IotHubClientProtocol protocol, String publicKeyCert, String privateKey, String x509Thumbprint)
+            throws NoSuchAlgorithmException, IotHubException, IOException, URISyntaxException, InterruptedException
+    {
+        /* Create unique device name */
+        String deviceId = deviceName.concat("-" + DEVICE_NAME_UUID);
+
+        /* Create device on the service */
+        deviceOnServiceClient = Device.createDevice(deviceId, AuthenticationType.SELF_SIGNED);
+        deviceOnServiceClient.setThumbprint(x509Thumbprint, x509Thumbprint);
+
+        /* Add device to the IoTHub */
+        this.registryManager = registryManager;
+        deviceOnServiceClient = registryManager.addDevice(deviceOnServiceClient);
+
+        /* Create a emulator for the device client, and connect it to the IoTHub */
+        this.connectionString = registryManager.getDeviceConnectionString(deviceOnServiceClient);
+        this.protocol = protocol;
+        deviceEmulator = new DeviceEmulator(this.connectionString, this.protocol, publicKeyCert, privateKey);
 
         /* Enable DeviceMethod on the device client using the callbacks from the DeviceEmulator */
         deviceEmulator.enableDeviceMethod();

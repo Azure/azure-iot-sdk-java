@@ -32,6 +32,8 @@ public MqttIotHubConnection(DeviceClientConfig config)
 
 **SRS_MQTTIOTHUBCONNECTION_15_003: [**The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.**]**
 
+**SRS_MQTTIOTHUBCONNECTION_34_020: [**If the config has no shared access token, device key, or x509 certificates, this constructor shall throw an IllegalArgumentException.**]**
+
 
 ### open
 
@@ -50,6 +52,9 @@ public void open() throws IOException, IllegalArgumentException;
 **SRS_MQTTIOTHUBCONNECTION_15_006: [**If the MQTT connection is already open, the function shall do nothing.**]**
 
 **SRS_MQTTIOTHUBCONNECTION_99_017: [**The function shall set DeviceClientConfig object needed for SAS token renewal.**]**
+
+**SRS_MQTTIOTHUBCONNECTION_34_027: [**If this function is called while using websockets and x509 authentication, an UnsupportedOperation shall be thrown.**]**
+
 
 ### close
 

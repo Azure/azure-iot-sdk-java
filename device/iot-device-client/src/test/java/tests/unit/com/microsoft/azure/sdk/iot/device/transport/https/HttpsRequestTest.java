@@ -3,7 +3,6 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
-import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
@@ -12,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import mockit.*;
 import org.junit.Test;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
@@ -628,7 +628,7 @@ public class HttpsRequestTest
     //Tests_SRS_HTTPSREQUEST_25_016: [The function shall set the SSL context for the IotHub.]
     @Test
     public void setSSLContextSetsSSLContext(@Mocked final HttpsConnection mockConn,
-                                            @Mocked final IotHubSSLContext mockedContext) throws IOException
+                                            @Mocked final SSLContext mockedContext) throws IOException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final byte[] body = new byte[0];
@@ -647,15 +647,14 @@ public class HttpsRequestTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockConn, "setSSLContext", mockedContext.getIotHubSSlContext());
+                Deencapsulation.invoke(mockConn, "setSSLContext", mockedContext);
             }
         };
     }
 
     //Tests_SRS_HTTPSREQUEST_25_015: [**The function shall throw IllegalArgumentException if parameter is null .**]**
     @Test (expected = IllegalArgumentException.class)
-    public void setSSLContextThrowsOnNull(@Mocked final HttpsConnection mockConn,
-                                            @Mocked final IotHubSSLContext mockedContext) throws IOException
+    public void setSSLContextThrowsOnNull(@Mocked final HttpsConnection mockConn) throws IOException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final byte[] body = new byte[0];

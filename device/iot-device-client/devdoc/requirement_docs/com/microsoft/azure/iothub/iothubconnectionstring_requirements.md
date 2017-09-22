@@ -25,6 +25,8 @@ public class IotHubConnectionString
     public String getSharedAccessToken();
     
     void setSharedAccessToken(String sharedAccessToken) throws IllegalArgumentException;
+    
+    public boolean isUsingX509();
 }
 ```
 
@@ -33,7 +35,7 @@ public class IotHubConnectionString
 **SRS_IOTHUB_CONNECTIONSTRING_21_002: [**A valid `hostName` shall be a valid URI.**]**  
 **SRS_IOTHUB_CONNECTIONSTRING_21_003: [**A valid `hostName` shall contain at least one `.`.**]**  
 **SRS_IOTHUB_CONNECTIONSTRING_21_004: [**A valid `deviceId` shall not be null or empty.**]**  
-**SRS_IOTHUB_CONNECTIONSTRING_21_005: [**A valid connectionString shall contain a `sharedAccessToken` or a `sharedAccessKey`.**]**  
+**SRS_IOTHUB_CONNECTIONSTRING_21_005: [**A valid connectionString shall contain a `sharedAccessToken` or a `sharedAccessKey` unless using x509 Authentication.**]**  
 **SRS_IOTHUB_CONNECTIONSTRING_21_006: [**If provided, the `sharedAccessToken` shall not be null or empty.**]**  
 **SRS_IOTHUB_CONNECTIONSTRING_21_007: [**If provided, the `sharedAccessKey` shall not be null or empty.**]**  
 **SRS_IOTHUB_CONNECTIONSTRING_21_008: [**A valid connectionString shall not contain both `sharedAccessToken` and `sharedAccessKey` at the same time.**]**  
@@ -108,3 +110,10 @@ public IotHubConnectionString(String hostName, String deviceId,
 **SRS_IOTHUB_CONNECTIONSTRING_34_037: [**If the provided shared access token is null or empty, an IllegalArgumentException shall be thrown.**]**
 
 **SRS_IOTHUB_CONNECTIONSTRING_34_038: [**This function shall set the value of this object's shared access token to the provided value.**]**
+
+### isUsingX509
+```java
+public boolean isUsingX509();
+```
+
+**SRS_IOTHUB_CONNECTIONSTRING_34_039: [**If the connection string passed in the constructor contains the string 'x509=true' then this function shall return true.**]**

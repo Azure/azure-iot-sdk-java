@@ -66,6 +66,23 @@ public class DeviceEmulator  implements Runnable
         deviceClient.open();
     }
 
+    /**
+     * CONSTRUCTOR
+     * Creates a new instance of the device emulator, and connect it to the IoTHub using the provided connectionString, protocol, and x509 keys.
+     *
+     * @param connectionString is the string that identify the device in the IoTHub
+     * @param protocol is the desired protocol for the transport layer (HTTPS, AMQPS, MQTT, or AMQPS_WS)
+     * @throws URISyntaxException if the DeviceClient cannot resolve the URI.
+     * @throws IOException if the DeviceClient cannot open the connection with the IoTHub.
+     * @throws InterruptedException if the thread had issue to wait for the open connection.
+     */
+    DeviceEmulator(String connectionString, IotHubClientProtocol protocol, String publicKeyCert, String privateKey) throws URISyntaxException, IOException, InterruptedException
+    {
+        this.deviceClient = new DeviceClient(connectionString, protocol, publicKeyCert, false, privateKey, false);
+        clearStatistics();
+        deviceClient.open();
+    }
+
     @Override
     public void run()
     {

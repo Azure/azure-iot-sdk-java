@@ -290,18 +290,6 @@ public class IotHubTransportMessageTest
         assertEquals(methodNameStr, methodName);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
     /* Tests_SRS_IOTHUBTRANSPORTMESSAGE_21_002: [The setIotHubMethod shall store the iotHubMethod. This function do not evaluates this parameter.] */
     /* Tests_SRS_IOTHUBTRANSPORTMESSAGE_21_004: [The getIotHubMethod shall return the stored iotHubMethod.] */
     @Test

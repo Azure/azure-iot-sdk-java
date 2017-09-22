@@ -170,6 +170,7 @@ public class AmqpsDeviceOperations
 
     /**
      * Sends the given message and returns with the delivery hash
+     * @param messageType The type of message
      * @param msgData The binary array of the bytes to send
      * @param offset The start offset to copy the bytes from
      * @param length The number of bytes to be send related to the offset

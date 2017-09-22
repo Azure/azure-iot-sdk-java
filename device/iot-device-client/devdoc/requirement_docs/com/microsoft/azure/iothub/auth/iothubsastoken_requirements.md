@@ -13,7 +13,7 @@ Grants device access to an IoT Hub for the specified amount of time.
 public final class IotHubSasToken
 {
   public static final String TOKEN_FORMAT = "SharedAccessSignature sig=%s&se=%s&sr=%s";
-  public IotHubSasToken(DeviceClientConfig config, long expiryTime);
+  IotHubSasToken(DeviceClientConfig config, long expiryTime);
   @Override public String toString();
 }
 ```

@@ -3,7 +3,6 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.auth.Signature;
@@ -19,7 +18,12 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-/** Unit tests for IotHubSasToken. */
+/**
+ * Unit tests for IotHubSasToken.
+ * Code Coverage:
+ * Methods: 77%
+ * Lines: 82%
+ */
 public class IotHubSasTokenTest
 {
     @Mocked Signature mockSig;
@@ -45,7 +49,12 @@ public class IotHubSasTokenTest
             }
         };
 
-        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString), expiryTime);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                expiryTime);
         String tokenStr = token.toString();
 
         // assert that sig, se and sr exist in the token in any order.
@@ -76,7 +85,12 @@ public class IotHubSasTokenTest
             }
         };
 
-        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString), expiryTime);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                expiryTime);
         String tokenStr = token.toString();
         // extract the value assigned to se.
         int expiryTimeKeyIdx = tokenStr.indexOf("se=");
@@ -117,8 +131,13 @@ public class IotHubSasTokenTest
             }
         };
 
-        IotHubSasToken token =
-                new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString), expiryTime);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                expiryTime);
+
         String tokenStr = token.toString();
         // extract the value assigned to sig.
         int signatureKeyIdx = tokenStr.indexOf("sig=");
@@ -153,8 +172,12 @@ public class IotHubSasTokenTest
 
         long expiryTimeBaseInSecs = System.currentTimeMillis() / 1000L + token_valid_secs + 1L;
 
-        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString),
-                                                                expiryTimeBaseInSecs);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                expiryTimeBaseInSecs);
 
         String tokenStr = token.toString();
         // extract the value assigned to se.
@@ -184,7 +207,12 @@ public class IotHubSasTokenTest
                         null,
                         sastoken);
 
-        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString), 0);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                0);
         String tokenStr = token.toString();
         assertTrue(tokenStr.equals(sastoken));
     }
@@ -203,7 +231,12 @@ public class IotHubSasTokenTest
                         null,
                         sastoken);
 
-        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString), 0);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                0);
     }
 
     // Tests_SRS_IOTHUBSASTOKEN_25_008: [**The required format for the SAS Token shall be verified and IllegalArgumentException is thrown if unmatched.**]**
@@ -220,7 +253,12 @@ public class IotHubSasTokenTest
                         null,
                         sastoken);
 
-        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString), 0);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                0);
     }
 
     // Tests_SRS_IOTHUBSASTOKEN_25_008: [**The required format for the SAS Token shall be verified and IllegalArgumentException is thrown if unmatched.**]**
@@ -237,7 +275,12 @@ public class IotHubSasTokenTest
                         null,
                         sastoken);
 
-        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString), 0);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                0);
     }
 
     // Tests_SRS_IOTHUBSASTOKEN_25_008: [**The required format for the SAS Token shall be verified and IllegalArgumentException is thrown if unmatched.**]**
@@ -254,7 +297,12 @@ public class IotHubSasTokenTest
                         null,
                         sastoken);
 
-        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString), 0);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                0);
     }
 
     // Tests_SRS_IOTHUBSASTOKEN_34_009: [**The SAS Token shall be checked to see if it has expired and a SecurityException will be thrown if it is expired.**]**
@@ -273,7 +321,12 @@ public class IotHubSasTokenTest
             }
         };
 
-        new IotHubSasToken(new DeviceClientConfig(mockIotHubConnectionString), 0);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                mockIotHubConnectionString.getHostName(),
+                mockIotHubConnectionString.getDeviceId(),
+                mockIotHubConnectionString.getSharedAccessKey(),
+                mockIotHubConnectionString.getSharedAccessToken(),
+                0);
     }
 
     // Tests_SRS_IOTHUBSASTOKEN_34_009: [**The SAS Token shall be checked to see if it has expired and a SecurityException will be thrown if it is expired.**]**
@@ -292,7 +345,12 @@ public class IotHubSasTokenTest
             }
         };
 
-        new IotHubSasToken(new DeviceClientConfig(mockIotHubConnectionString), 0);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                mockIotHubConnectionString.getHostName(),
+                mockIotHubConnectionString.getDeviceId(),
+                mockIotHubConnectionString.getSharedAccessKey(),
+                mockIotHubConnectionString.getSharedAccessToken(),
+                0);
     }
 
     // Tests_SRS_IOTHUBSASTOKEN_11_001: [**The SAS token shall have the format `SharedAccessSignature sig=<signature >&se=<expiryTime>&sr=<resourceURI>`. The params can be in any order.**]**
@@ -310,7 +368,12 @@ public class IotHubSasTokenTest
                         null,
                         sastoken);
 
-        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString), 0);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                0);
         String tokenStr = token.toString();
         assertTrue(tokenStr.equals(sastoken));
     }
@@ -330,7 +393,12 @@ public class IotHubSasTokenTest
                         null,
                         sastoken);
 
-        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString), 0);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                0);
         String tokenStr = token.toString();
         assertTrue(tokenStr.equals(sastoken));
     }
@@ -348,7 +416,12 @@ public class IotHubSasTokenTest
                         null,
                         sastoken);
 
-        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString), 0);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                0);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -364,7 +437,12 @@ public class IotHubSasTokenTest
                         null,
                         sastoken);
 
-        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString), 0);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                0);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -380,6 +458,11 @@ public class IotHubSasTokenTest
                         null,
                         sastoken);
 
-        IotHubSasToken token = new IotHubSasToken(new DeviceClientConfig(iotHubConnectionString), 0);
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                0);
     }
 }

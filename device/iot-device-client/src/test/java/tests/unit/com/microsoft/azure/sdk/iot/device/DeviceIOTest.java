@@ -16,10 +16,8 @@ import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.junit.Test;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -30,7 +28,7 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for DeviceIO.
- * Coverage : 100% method, 99% line
+ * Coverage : 100% method, 98% line
  */
 public class DeviceIOTest
 {
@@ -101,20 +99,12 @@ public class DeviceIOTest
     private void openDeviceIO(
             final Object deviceIO,
             final IotHubTransport transport,
-            final DeviceClientConfig config,
-            final IotHubSSLContext iotHubSSLContext,
             final Executors executors,
             final ScheduledExecutorService scheduledExecutorService) throws IOException
     {
         new NonStrictExpectations()
         {
             {
-                config.getPathToCertificate();
-                result = null;
-                config.getUserCertificateString();
-                result = null;
-                Deencapsulation.newInstance(IotHubSSLContext.class);
-                result = iotHubSSLContext;
                 new IotHubSendTask(transport);
                 result = mockIotHubSendTask;
                 new IotHubReceiveTask(transport);
@@ -338,13 +328,12 @@ public class DeviceIOTest
 
     /* Tests_SRS_DEVICE_IO_21_007: [If the client is already open, the open shall do nothing.] */
     @Test
-    public void openDoesNothingIfCalledTwiceSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void openDoesNothingIfCalledTwiceSuccess()
             throws URISyntaxException, IOException
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "open");
@@ -355,8 +344,7 @@ public class DeviceIOTest
 
     /* Tests_SRS_DEVICE_IO_21_008: [The open shall create default IotHubSSL context if no certificate input was provided by user and save it by calling setIotHubSSLContext.] */
     @Test
-    public void openAmqpCreateSSLContextSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void openAmqpCreateSSLContextSuccess()
             throws URISyntaxException, IOException
     {
         // arrange
@@ -366,17 +354,6 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getPathToCertificate();
-                result = null;
-                times = 1;
-                mockConfig.getUserCertificateString();
-                result = null;
-                times = 1;
-                Deencapsulation.newInstance(IotHubSSLContext.class);
-                result = mockIotHubSSLContext;
-                times = 1;
-                mockConfig.setIotHubSSLContext(mockIotHubSSLContext);
-                times = 1;
                 mockAmqpsTransport.open();
                 times = 1;
             }
@@ -384,230 +361,6 @@ public class DeviceIOTest
 
         // act
         Deencapsulation.invoke(deviceIO, "open");
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_008: [The open shall create default IotHubSSL context if no certificate input was provided by user and save it by calling setIotHubSSLContext.] */
-    @Test
-    public void openHttpCreateSSLContextSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final Object deviceIO = newDeviceIOHttps();
-
-        // assert
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getPathToCertificate();
-                result = null;
-                times = 1;
-                mockConfig.getUserCertificateString();
-                result = null;
-                times = 1;
-                Deencapsulation.newInstance(IotHubSSLContext.class);
-                result = mockIotHubSSLContext;
-                times = 1;
-                mockConfig.setIotHubSSLContext(mockIotHubSSLContext);
-                times = 1;
-                mockHttpsTransport.open();
-                times = 1;
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(deviceIO, "open");
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_011: [If an exception is thrown when creating a SSL context then Open shall throw IOException to the user indicating the failure] */
-    @Test
-    public void openCreatesSSLContextThrowsIfDefaultCertThrows(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final Object deviceIO = newDeviceIOAmqp();
-
-        // assert
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getPathToCertificate();
-                result = null;
-                times = 1;
-                mockConfig.getUserCertificateString();
-                result = null;
-                times = 1;
-                Deencapsulation.newInstance(IotHubSSLContext.class);
-                result = new CertificateException();
-                times = 1;
-            }
-        };
-
-        // act
-        try
-        {
-            Deencapsulation.invoke(deviceIO, "open");
-            assert true;
-        }
-        catch (Exception expected)
-        {
-            // Don't do anything. Expected exception.
-        }
-
-        // assert
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_009: [The open shall create IotHubSSL context with the certificate path if input was provided by user and save it by calling setIotHubSSLContext.] */
-    @Test
-    public void openCreatesSSLContextWithCertificatePathProvidedSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final String pathToCert = "test/path";
-        final Object deviceIO = newDeviceIOAmqp();
-
-        // assert
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getPathToCertificate();
-                result = pathToCert;
-                times = 3;
-                Deencapsulation.newInstance(IotHubSSLContext.class, pathToCert, true);
-                result = mockIotHubSSLContext;
-                times = 1;
-                mockConfig.setIotHubSSLContext(mockIotHubSSLContext);
-                times = 1;
-                mockAmqpsTransport.open();
-                times = 1;
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(deviceIO, "open");
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_011: [If an exception is thrown when creating a SSL context then Open shall throw IOException to the user indicating the failure] */
-    @Test
-    public void openCreatesSSLContextWithCertificatePathProvidedThrowsIfInvalidCertPathThrows(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final String pathToCert = "test/path";
-        final Object deviceIO = newDeviceIOAmqp();
-
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getPathToCertificate();
-                result = pathToCert;
-                times = 3;
-                Deencapsulation.newInstance(IotHubSSLContext.class, pathToCert, true);
-                result = new FileNotFoundException();
-                times = 1;
-            }
-        };
-
-        // act
-        try
-        {
-            Deencapsulation.invoke(deviceIO, "open");
-            assert true;
-        }
-        catch (Exception expected)
-        {
-            // Don't do anything. Expected exception.
-        }
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockAmqpsTransport.open();
-                times = 0;
-            }
-        };
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_010: [The open shall create IotHubSSL context with the certificate String if input was provided by user and save it by calling setIotHubSSLContext.] */
-    @Test
-    public void openCreatesSSLContextWithCertificateProvidedSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final String userCert = "test/path";
-        final Object deviceIO = newDeviceIOAmqp();
-
-        // assert
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getPathToCertificate();
-                result = null;
-                times = 2;
-                mockConfig.getUserCertificateString();
-                result = userCert;
-                times = 2;
-                Deencapsulation.newInstance(IotHubSSLContext.class, userCert, false);
-                result = mockIotHubSSLContext;
-                times = 1;
-                mockConfig.setIotHubSSLContext(mockIotHubSSLContext);
-                times = 1;
-                mockAmqpsTransport.open();
-                times = 1;
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(deviceIO, "open");
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_011: [If an exception is thrown when creating a SSL context then Open shall throw IOException to the user indicating the failure] */
-    @Test
-    public void openCreatesSSLContextWithCertificateProvidedInvalidThrowsThrows(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final String userCert = "test/path";
-        final Object deviceIO = newDeviceIOAmqp();
-        mockConfig.setUserCertificateString(userCert);
-
-        // assert
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getPathToCertificate();
-                result = null;
-                times = 2;
-                mockConfig.getUserCertificateString();
-                result = userCert;
-                times = 2;
-                Deencapsulation.newInstance(IotHubSSLContext.class, userCert, false);
-                result = new IllegalArgumentException();
-                times = 1;
-            }
-        };
-
-        // act
-        try
-        {
-            Deencapsulation.invoke(deviceIO, "open");
-            assert true;
-        }
-        catch (Exception expected)
-        {
-            // Don't do anything. Expected exception.
-        }
-
-        // assert
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     /* Tests_SRS_DEVICE_IO_21_012: [The open shall open the transport to communicate with an IoT Hub.] */
@@ -615,8 +368,7 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.] */
     /* Tests_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `OPEN`.] */
     @Test
-    public void openSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void openSuccess()
             throws URISyntaxException, IOException
     {
         // arrange
@@ -626,17 +378,6 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getPathToCertificate();
-                result = null;
-                times = 1;
-                mockConfig.getUserCertificateString();
-                result = null;
-                times = 1;
-                Deencapsulation.newInstance(IotHubSSLContext.class);
-                result = mockIotHubSSLContext;
-                times = 1;
-                mockConfig.setIotHubSSLContext(mockIotHubSSLContext);
-                times = 1;
                 mockAmqpsTransport.open();
                 times = 1;
                 new IotHubSendTask(mockAmqpsTransport);
@@ -668,8 +409,7 @@ public class DeviceIOTest
 
     /* Tests_SRS_DEVICE_IO_21_015: [If an error occurs in opening the transport, the open shall throw an IOException.] */
     @Test
-    public void openThrowsIOExceptionIfTransportOpenThrows(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void openThrowsIOExceptionIfTransportOpenThrows()
             throws URISyntaxException, IOException
     {
         // arrange
@@ -679,12 +419,6 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getPathToCertificate();
-                result = null;
-                mockConfig.getUserCertificateString();
-                result = null;
-                Deencapsulation.newInstance(IotHubSSLContext.class);
-                result = mockIotHubSSLContext;
                 mockAmqpsTransport.open();
                 result = new IOException();
                 times = 1;
@@ -709,13 +443,12 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_017: [The close shall finish all ongoing tasks.] */
     /* Tests_SRS_DEVICE_IO_21_018: [The close shall cancel all recurring tasks.] */
     @Test
-    public void closeWaitsForTaskShutdownToFinishSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void closeWaitsForTaskShutdownToFinishSuccess()
             throws URISyntaxException, IOException
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "close");
@@ -732,13 +465,12 @@ public class DeviceIOTest
 
     /* Tests_SRS_DEVICE_IO_21_019: [The close shall close the transport.] */
     @Test
-    public void closeClosesTransportSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void closeClosesTransportSuccess()
             throws URISyntaxException, IOException
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "close");
@@ -770,13 +502,12 @@ public class DeviceIOTest
 
     /* Tests_SRS_DEVICE_IO_21_020: [If the client is already closed, the close shall do nothing.] */
     @Test
-    public void closeDoesNothingOnClosedClientSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void closeDoesNothingOnClosedClientSuccess()
             throws URISyntaxException, IOException
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
 
@@ -789,13 +520,12 @@ public class DeviceIOTest
 
     /* Tests_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
     @Test
-    public void closeChangeStateToClosedSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void closeChangeStateToClosedSuccess()
             throws URISyntaxException, IOException
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "close");
@@ -807,7 +537,6 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_022: [The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.] */
     @Test
     public void sendEventAsyncAddsMessageToTransportSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext,
             @Mocked final Message mockMsg,
             @Mocked final IotHubEventCallback mockCallback)
             throws URISyntaxException, IOException
@@ -815,7 +544,7 @@ public class DeviceIOTest
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context);
@@ -833,14 +562,13 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_023: [If the message given is null, the sendEventAsync shall throw an IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void sendEventAsyncRejectsNullMessageThrows(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext,
             @Mocked final IotHubEventCallback mockCallback)
             throws URISyntaxException, IOException
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync", 
@@ -866,7 +594,6 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
     @Test (expected = IllegalStateException.class)
     public void sendEventAsyncClientAlreadyClosedThrows(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext,
             @Mocked final Message mockMsg,
             @Mocked final IotHubEventCallback mockCallback)
             throws URISyntaxException, IOException
@@ -874,7 +601,7 @@ public class DeviceIOTest
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
 
@@ -885,7 +612,6 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_040: [The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.] */
     @Test
     public void sendEventAsyncAddsMessageWithResponseToTransportSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext,
             @Mocked final Message mockMsg,
             @Mocked final IotHubResponseCallback mockCallback)
             throws URISyntaxException, IOException
@@ -893,7 +619,7 @@ public class DeviceIOTest
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context);
@@ -911,14 +637,13 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_041: [If the message given is null, the sendEventAsync shall throw an IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void sendEventAsyncRejectsNullMessageWithResponseThrows(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext,
             @Mocked final IotHubResponseCallback mockCallback)
             throws URISyntaxException, IOException
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync",
@@ -944,7 +669,6 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_042: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
     @Test (expected = IllegalStateException.class)
     public void sendEventAsyncWithResponseClientAlreadyClosedThrows(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext,
             @Mocked final Message mockMsg,
             @Mocked final IotHubResponseCallback mockCallback)
             throws URISyntaxException, IOException
@@ -952,7 +676,7 @@ public class DeviceIOTest
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
 
@@ -962,13 +686,12 @@ public class DeviceIOTest
 
     /* Tests_SRS_DEVICE_IO_21_025: [The getProtocol shall return the protocol for transport.] */
     @Test
-    public void getTransportProtocolSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void getTransportProtocolSuccess()
             throws URISyntaxException, IOException
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
 
         // act
         IotHubClientProtocol actualProtocol = Deencapsulation.invoke(deviceIO, "getProtocol") ;
@@ -1011,8 +734,7 @@ public class DeviceIOTest
 
      /* Tests_SRS_DEVICE_IO_21_028: [If the task scheduler already exists, the setReceivePeriodInMilliseconds shall change the `scheduleAtFixedRate` for the receiveTask to the new value.] */
     @Test
-    public void setReceivePeriodInMillisecondsTransportOpenedSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void setReceivePeriodInMillisecondsTransportOpenedSuccess()
             throws URISyntaxException, IOException, InterruptedException
     {
         // arrange
@@ -1023,12 +745,6 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getPathToCertificate();
-                result = null;
-                mockConfig.getUserCertificateString();
-                result = null;
-                Deencapsulation.newInstance(IotHubSSLContext.class);
-                result = mockIotHubSSLContext;
                 new IotHubSendTask(mockAmqpsTransport);
                 result = mockIotHubSendTask;
                 new IotHubReceiveTask(mockAmqpsTransport);
@@ -1063,13 +779,12 @@ public class DeviceIOTest
 
     /* Tests_SRS_DEVICE_IO_21_029: [If the `receiveTask` is null, the setReceivePeriodInMilliseconds shall throw IOException.] */
     @Test (expected = IOException.class)
-    public void setReceivePeriodInMillisecondsNullReceiveTaskThrows(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void setReceivePeriodInMillisecondsNullReceiveTaskThrows()
             throws URISyntaxException, IOException, InterruptedException
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
         Deencapsulation.setField(deviceIO, "receiveTask", null);
 
         // act
@@ -1136,8 +851,7 @@ public class DeviceIOTest
 
     /* Tests_SRS_DEVICE_IO_21_034: [If the task scheduler already exists, the setSendPeriodInMilliseconds shall change the `scheduleAtFixedRate` for the sendTask to the new value.] */
     @Test
-    public void setSendPeriodInMillisecondsTransportOpenedSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void setSendPeriodInMillisecondsTransportOpenedSuccess()
             throws URISyntaxException, IOException, InterruptedException
     {
         // arrange
@@ -1148,12 +862,6 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getPathToCertificate();
-                result = null;
-                mockConfig.getUserCertificateString();
-                result = null;
-                Deencapsulation.newInstance(IotHubSSLContext.class);
-                result = mockIotHubSSLContext;
                 new IotHubSendTask(mockAmqpsTransport);
                 result = mockIotHubSendTask;
                 new IotHubReceiveTask(mockAmqpsTransport);
@@ -1188,13 +896,12 @@ public class DeviceIOTest
 
     /* Tests_SRS_DEVICE_IO_21_035: [If the `sendTask` is null, the setSendPeriodInMilliseconds shall throw IOException.] */
     @Test (expected = IOException.class)
-    public void setSendPeriodInMillisecondsNullSendTaskThrows(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void setSendPeriodInMillisecondsNullSendTaskThrows()
             throws URISyntaxException, IOException, InterruptedException
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
         Deencapsulation.setField(deviceIO, "sendTask", null);
 
         // act
@@ -1227,13 +934,12 @@ public class DeviceIOTest
 
     /* Tests_SRS_DEVICE_IO_21_031: [The isOpen shall return the connection state, true if connection is open, false if it is closed.] */
     @Test
-    public void isOpenOpenedSuccess(
-            @Mocked final IotHubSSLContext mockIotHubSSLContext)
+    public void isOpenOpenedSuccess()
             throws URISyntaxException, IOException
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockConfig, mockIotHubSSLContext, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
 
         // act
         boolean isOpen = Deencapsulation.invoke(deviceIO, "isOpen" );

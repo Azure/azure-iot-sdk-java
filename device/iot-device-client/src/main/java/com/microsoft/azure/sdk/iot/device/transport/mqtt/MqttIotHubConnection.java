@@ -11,9 +11,9 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URLEncoder;
-
 
 public class MqttIotHubConnection
 {
@@ -72,11 +72,15 @@ public class MqttIotHubConnection
             {
                 throw new IllegalArgumentException("hubName cannot be null or empty.");
             }
-            if (config.getDeviceKey() == null || config.getDeviceKey().length() == 0)
+            if (config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
             {
-                if(config.getSharedAccessToken() == null || config.getSharedAccessToken().length() == 0)
+                if (config.getIotHubConnectionString().getSharedAccessKey() == null || config.getIotHubConnectionString().getSharedAccessKey().isEmpty())
                 {
-                    throw new IllegalArgumentException("Both deviceKey and shared access signature cannot be null or empty.");
+                    if(config.getSasTokenAuthentication().getCurrentSasToken() == null || config.getSasTokenAuthentication().getCurrentSasToken().isEmpty())
+                    {
+                        //Codes_SRS_MQTTIOTHUBCONNECTION_34_020: [If the config has no shared access token, device key, or x509 certificates, this constructor shall throw an IllegalArgumentException.]
+                        throw new IllegalArgumentException("Must have a deviceKey, a shared access token, or x509 certificate saved.");
+                    }
                 }
             }
 
@@ -110,7 +114,24 @@ public class MqttIotHubConnection
             // with an IoT Hub using the provided host name, user name, device ID, and sas token.]
             try
             {
-                this.iotHubUserPassword = this.config.getSharedAccessToken();
+                SSLContext sslContext = null;
+                if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
+                {
+                    this.iotHubUserPassword = this.config.getSasTokenAuthentication().getRenewedSasToken();
+                    sslContext = this.config.getSasTokenAuthentication().getSSLContext();
+                }
+                else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+                {
+                    if (this.config.isUseWebsocket())
+                    {
+                        //Codes_SRS_MQTTIOTHUBCONNECTION_34_027: [If this function is called while using websockets and x509 authentication, an UnsupportedOperation shall be thrown.]
+                        throw new UnsupportedOperationException("X509 authentication is not supported over MQTT_WS");
+                    }
+
+                    this.iotHubUserPassword = null;
+                    sslContext = this.config.getX509Authentication().getSSLContext();
+                }
+
                 String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION, "UTF-8");
                 this.iotHubUserName = this.config.getIotHubHostname() + "/" + this.config.getDeviceId() + "/" + TWIN_API_VERSION + "/" + clientIdentifier;
 
@@ -119,14 +140,14 @@ public class MqttIotHubConnection
                     //Codes_SRS_MQTTIOTHUBCONNECTION_25_018: [The function shall establish an MQTT WS connection with a server uri as wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true if websocket was enabled.]
                     final String wsServerUri = WS_SSL_PREFIX + this.config.getIotHubHostname() + WEBSOCKET_RAW_PATH + WEBSOCKET_QUERY ;
                     mqttConnection = new MqttConnection(wsServerUri,
-                            this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword, this.config.getIotHubSSLContext().getIotHubSSlContext());
+                            this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword, sslContext);
                 }
                 else
                 {
                     //Codes_SRS_MQTTIOTHUBCONNECTION_25_019: [The function shall establish an MQTT connection with a server uri as ssl://<hostName>:8883 if websocket was not enabled.]
                     final String serverUri = SSL_PREFIX + this.config.getIotHubHostname() + SSL_PORT_SUFFIX;
                     mqttConnection = new MqttConnection(serverUri,
-                            this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword, this.config.getIotHubSSLContext().getIotHubSSlContext());
+                            this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword, sslContext);
                 }
 
                 this.deviceMessaging = new MqttMessaging(mqttConnection, this.config.getDeviceId());
@@ -191,12 +212,12 @@ public class MqttIotHubConnection
 
             this.state = State.CLOSED;
         }
- 
+
         catch (Exception e)
         {
             this.state = State.CLOSED;
         }
-       
+
     }
 
     /**
@@ -296,8 +317,6 @@ public class MqttIotHubConnection
         {
             message = deviceMessaging.receive();
         }
-
         return message;
     }
-
 }

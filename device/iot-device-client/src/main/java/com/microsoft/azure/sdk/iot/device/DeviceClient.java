@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 
 import java.io.Closeable;
@@ -17,6 +16,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
+
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
 
 /**
  * <p>
@@ -122,36 +124,82 @@ public final class DeviceClient implements Closeable
      * @throws IllegalArgumentException if any of {@code connString} or
      * {@code protocol} are {@code null}; or if {@code connString} is missing
      * one of the following attributes:{@code HostName}, {@code DeviceId}, or
-     * {@code SharedAccessKey}.
-     * @throws URISyntaxException if the IoT hub hostname does not conform to
-     * RFC 3986.
+     * {@code SharedAccessKey} or if the IoT hub hostname does not conform to
+     * RFC 3986 or if the provided {@code connString} is for an x509 authenticated device
+     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      */
     public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException
     {
-        /* Codes_SRS_DEVICECLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.] */
-        if ((connString == null) || connString.isEmpty())
+        //Codes_SRS_DEVICECLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.]
+        //Codes_SRS_DEVICECLIENT_21_005: [If protocol is null, the function shall throw an IllegalArgumentException.]
+        commonConstructorVerification(connString, protocol);
+
+        //Codes_SRS_DEVICECLIENT_21_001: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
+        //Codes_SRS_DEVICECLIENT_34_055: [If the provided connection string contains an expired SAS token, a SecurityException shall be thrown.]
+        IotHubConnectionString iotHubConnectionString = new IotHubConnectionString(connString);
+        this.config = new DeviceClientConfig(iotHubConnectionString);
+
+        //Codes_SRS_DEVICECLIENT_21_002: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
+        //Codes_SRS_DEVICECLIENT_21_003: [The constructor shall save the connection configuration using the object DeviceClientConfig.]
+        commonConstructorSetup(protocol);
+    }
+
+    /**
+     * Constructor that uses x509 authentication for communicating with IotHub
+     *
+     * @param connString the connection string for the x509 device to connect as (format: "HostName=...;DeviceId=...;x509=true")
+     * @param protocol the protocol to use when communicating with IotHub
+     * @param publicKeyCertificate the PEM formatted public key certificate or the path to a PEM formatted public key certificate file
+     * @param isCertificatePath if the provided publicKeyCertificate is a path to a file containing the PEM formatted public key certificate
+     * @param privateKey the PEM formatted private key or the path to a PEM formatted private key file
+     * @param isPrivateKeyPath if the provided privateKey is a path to a file containing the PEM formatted private key
+     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
+     */
+    public DeviceClient(String connString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws URISyntaxException
+    {
+        //Codes_SRS_DEVICECLIENT_34_061: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.]
+        //Codes_SRS_DEVICECLIENT_34_062: [If protocol is null, the function shall throw an IllegalArgumentException.]
+        commonConstructorVerification(connString, protocol);
+
+        //Codes_SRS_DEVICECLIENT_34_058: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
+        //Codes_SRS_DEVICECLIENT_34_063: [This function shall save the provided certificate and key within its config.]
+        IotHubConnectionString iotHubConnectionString = new IotHubConnectionString(connString);
+        this.config = new DeviceClientConfig(iotHubConnectionString, publicKeyCertificate, isCertificatePath, privateKey, isPrivateKeyPath);
+
+        //Codes_SRS_DEVICECLIENT_34_059: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
+        //Codes_SRS_DEVICECLIENT_34_060: [The constructor shall save the connection configuration using the object DeviceClientConfig.]
+        commonConstructorSetup(protocol);
+    }
+
+    /**
+     * Throws an IllegalArgumentException if either of the arguments is null or if the connString is empty.
+     * @param connString the connection string
+     * @param protocol the transport protocol
+     */
+    private void commonConstructorVerification(String connString, IotHubClientProtocol protocol)
+    {
+        if (connString == null || connString.isEmpty())
         {
-            throw new IllegalArgumentException("IoT Hub connection string cannot be null.");
+            throw new IllegalArgumentException("Connection string cannot be null or empty");
         }
 
-        /* Codes_SRS_DEVICECLIENT_21_005: [If protocol is null, the function shall throw an IllegalArgumentException.] */
         if (protocol == null)
         {
             throw new IllegalArgumentException("Protocol cannot be null.");
         }
+    }
 
-        /* Codes_SRS_DEVICECLIENT_21_001: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.] */
-        IotHubConnectionString iotHubConnectionString = new IotHubConnectionString(connString);
-
-        /* Codes_SRS_DEVICECLIENT_21_003: [The constructor shall save the connection configuration using the object DeviceClientConfig.] */
-        this.config = new DeviceClientConfig(iotHubConnectionString);
-
-        /* Codes_SRS_DEVICECLIENT_34_046: [**If The provided connection string contains an expired SAS token, throw a SecurityException.**] */
-        if (this.config.getSharedAccessToken() != null && IotHubSasToken.isSasTokenExpired(this.config.getSharedAccessToken()))
-        {
-            throw new SecurityException("Your SasToken is expired");
-        }
-
+    /**
+     * Handles logic common to all constructors of DeviceClient. Sets the receive period based on the protocol, creates the config instance,
+     * creates the deviceIO instance, and creates the logger instance
+     * @param protocol The protocol the device client will communicate in
+     * @throws IOException if any exception occurs when creating the authentication layer for this client
+     * @throws IllegalArgumentException if the connection string is null, empty, or invalid, if the protocol is null, if the connection string is for x509 when x509 is not allowed
+     * @throws SecurityException if the provided connection string contains an expired sas token
+     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
+     */
+    private void commonConstructorSetup(IotHubClientProtocol protocol) throws IllegalArgumentException, SecurityException, URISyntaxException
+    {
         switch (protocol)
         {
             case HTTPS:
@@ -175,7 +223,6 @@ public final class DeviceClient implements Closeable
                         "Invalid client protocol specified.");
         }
 
-        /* Codes_SRS_DEVICECLIENT_21_002: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.] */
         this.deviceIO = new DeviceIO(this.config, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS);
 
         this.logger = new CustomLogger(this.getClass());
@@ -186,14 +233,15 @@ public final class DeviceClient implements Closeable
      * Starts asynchronously sending and receiving messages from an IoT Hub. If
      * the client is already open, the function shall do nothing.
      *
-     * @throws IOException if a connection to an IoT Hub is cannot be
-     * established.
+     * @throws IOException if a connection to an IoT Hub cannot be established.
      */
     public void open() throws IOException
     {
         /* Codes_SRS_DEVICECLIENT_34_044: [If the SAS token has expired before this call, throw a Security Exception] */
-        if (this.config.getSharedAccessToken() != null && IotHubSasToken.isSasTokenExpired(this.config.getSharedAccessToken()))
+        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isRenewalNecessary())
+        {
             throw new SecurityException("Your SasToken is expired");
+        }
 
         /* Codes_SRS_DEVICECLIENT_21_006: [The open shall open the deviceIO connection.] */
         /* Codes_SRS_DEVICECLIENT_21_007: [If the opening a connection via deviceIO is not successful, the open shall throw IOException.] */
@@ -215,8 +263,8 @@ public final class DeviceClient implements Closeable
     public void close() throws IOException
     {
 
-     // Codes_SRS_DEVICECLIENT_11_040: [The function shall finish all ongoing tasks.]
-     // Codes_SRS_DEVICECLIENT_11_041: [The function shall cancel all recurring tasks.]
+        // Codes_SRS_DEVICECLIENT_11_040: [The function shall finish all ongoing tasks.]
+        // Codes_SRS_DEVICECLIENT_11_041: [The function shall cancel all recurring tasks.]
         while (!this.deviceIO.isEmpty())
         {
             // Don't do anything, can be infinite.
@@ -268,9 +316,7 @@ public final class DeviceClient implements Closeable
      * @throws IllegalStateException if the client has not been opened yet or is
      * already closed.
      */
-    public void sendEventAsync(Message message,
-            IotHubEventCallback callback,
-            Object callbackContext)
+    public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext)
     {
         /* Codes_SRS_DEVICECLIENT_21_010: [The sendEventAsync shall asynchronously send the message using the deviceIO connection.] */
         /* Codes_SRS_DEVICECLIENT_21_011: [If starting to send via deviceIO is not successful, the sendEventAsync shall bypass the threw exception.] */
@@ -321,7 +367,7 @@ public final class DeviceClient implements Closeable
      */
 
     public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
-                            PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+                                PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
             throws IOException
     {
         if (!this.deviceIO.isOpen())
@@ -344,7 +390,7 @@ public final class DeviceClient implements Closeable
             **Codes_SRS_DEVICECLIENT_25_025: [**The function shall create a new instance of class Device Twin and request all twin properties by calling getDeviceTwin**]**
              */
             deviceTwin = new DeviceTwin(this.deviceIO, this.config, deviceTwinStatusCallback, deviceTwinStatusCallbackContext,
-                                        genericPropertyCallBack, genericPropertyCallBackContext);
+                    genericPropertyCallBack, genericPropertyCallBackContext);
             deviceTwin.getDeviceTwin();
         }
         else
@@ -488,8 +534,7 @@ public final class DeviceClient implements Closeable
      * @throws IOException if the client cannot create a instance of the FileUpload or the transport.
      */
     public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
-                                  IotHubEventCallback callback,
-                                  Object callbackContext)
+                                  IotHubEventCallback callback, Object callbackContext)
             throws IllegalArgumentException, IOException
     {
         /* Codes_SRS_DEVICECLIENT_21_044: [The uploadToBlobAsync shall asynchronously upload the stream in `inputStream` to the blob in `destinationBlobName`.] */
@@ -514,20 +559,6 @@ public final class DeviceClient implements Closeable
 
         /* Codes_SRS_DEVICECLIENT_21_047: [If the `destinationBlobName` is null, empty or not valid, the uploadToBlobAsync shall throw IllegalArgumentException.] */
         ParserUtility.validateBlobName(destinationBlobName);
-
-        try
-        {
-            /* Codes_SRS_DEVICECLIENT_21_053: [If the `config` do not have a valid IotHubSSLContext, the uploadToBlobAsync shall create and set one.] */
-            if(config.getIotHubSSLContext() == null)
-            {
-                IotHubSSLContext iotHubSSLContext = new IotHubSSLContext(config.getPathToCertificate(), config.getUserCertificateString());
-                config.setIotHubSSLContext(iotHubSSLContext);
-            }
-        }
-        catch (Exception e)
-        {
-            throw new IOException(e.getCause());
-        }
 
         /* Codes_SRS_DEVICECLIENT_21_048: [If there is no instance of the FileUpload, the uploadToBlobAsync shall create a new instance of the FileUpload.] */
         if(this.fileUpload == null)
@@ -626,19 +657,32 @@ public final class DeviceClient implements Closeable
         {
             if (value != null)
             {
-                this.config.setPathToCert((String) value);
+                if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
+                {
+                    this.config.getSasTokenAuthentication().setPathToIotHubTrustedCert((String) value);
+                }
+                else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+                {
+                    this.config.getX509Authentication().setPathToIotHubTrustedCert((String) value);
+                }
             }
             else
             {
                 throw new IllegalArgumentException("value cannot be null");
             }
         }
-
     }
 
     private void setOption_SetSASTokenExpiryTime(Object value)
     {
         logger.LogInfo("Setting SASTokenExpiryTime as %s seconds, method name is %s ", value, logger.getMethodName());
+
+        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
+        {
+            //Codes_SRS_DEVICECLIENT_34_065: [""SetSASTokenExpiryTime" if this option is called when not using sas token authentication, an IllegalStateException shall be thrown.]
+            throw new IllegalStateException("Cannot set sas token validity time when not using sas token authentication");
+        }
+
         if (value != null)
         {
             //**Codes_SRS_DEVICECLIENT_25_022: [**"SetSASTokenExpiryTime" should have value type long**.]**
@@ -663,7 +707,7 @@ public final class DeviceClient implements Closeable
                      *                                  2. If transport is already open
                      *                                 after updating expiry time
                     */
-                    if (this.config.getDeviceKey() != null)
+                    if (this.config.getIotHubConnectionString().getSharedAccessKey() != null)
                     {
                         restart = true;
                         this.deviceIO.close();
@@ -671,13 +715,11 @@ public final class DeviceClient implements Closeable
                 }
                 catch (IOException e)
                 {
-
                     throw new IOError(e);
                 }
-
             }
 
-            this.config.setTokenValidSecs(validTimeInSeconds);
+            this.config.getSasTokenAuthentication().setTokenValidSecs(validTimeInSeconds);
 
             if (restart)
             {
@@ -719,6 +761,7 @@ public final class DeviceClient implements Closeable
      *
      * @param optionName the option name to modify
      * @param value an object of the appropriate type for the option's value
+     * @throws IllegalArgumentException if the provided optionName is null
      */
     public void setOption(String optionName, Object value)
     {
@@ -763,11 +806,10 @@ public final class DeviceClient implements Closeable
                 {
                     // Codes_SRS_DEVICECLIENT_25_020: ["SetCertificatePath" is available only for AMQP.]
 
-                    if ((this.deviceIO.getProtocol() == IotHubClientProtocol.AMQPS) ||
-                        (this.deviceIO.getProtocol() == IotHubClientProtocol.AMQPS_WS))
+                    if ((this.deviceIO.getProtocol() == AMQPS) ||
+                            (this.deviceIO.getProtocol() == AMQPS_WS))
                     {
                         setOption_SetCertificatePath(value);
-
                     }
                     else
                     {
@@ -788,16 +830,16 @@ public final class DeviceClient implements Closeable
                     break;
                 }
                 default:
+                {
                     throw new IllegalArgumentException("optionName is unknown = " + optionName);
+                }
             }
-
         }
-
     }
 
     /**
      * Registers a callback to be executed whenever the connection to the device is lost or established.
-     * 
+     *
      * @param callback the callback to be called.
      * @param callbackContext a context to be passed to the callback. Can be
      * {@code null} if no callback is provided.
