@@ -139,7 +139,7 @@ public String getDeviceConnectionString(Device device);
 ```
 **SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_085: [** The function shall return a connectionString for the input device **]**
 
-**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_086: [** The function shall throw IllegalArgumentException if the input device is null, or if deviceId or primary key are empty or null **]**
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_086: [** The function shall throw IllegalArgumentException if the input device is null, if deviceId is null, or primary key and primary thumbprint are empty or null **]**
 
 ### updateDevice
 

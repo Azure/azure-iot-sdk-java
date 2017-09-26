@@ -3,7 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubX509Authentication;
 
 /**
  * Configuration settings for an IoT Hub client. Validates all user-defined
@@ -11,32 +12,18 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
  */
 public final class DeviceClientConfig
 {
-    /**
-     * The number of seconds after which the generated SAS token for a message
-     * will become invalid. We also use the expiry time, which is computed as
-     * {@code currentTime() + DEVICE_KEY_VALID_LENGTH}, as a salt when generating our
-     * SAS token. Use {@link #getTokenValidSecs()} instead in case the field becomes
-     * configurable later on.
-     */
-    private long tokenValidSecs = 3600;
-
     /** The default value for readTimeoutMillis. */
     private static final int DEFAULT_READ_TIMEOUT_MILLIS = 240000;
     /** The default value for messageLockTimeoutSecs. */
     private static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
 
-    private static final long MILLISECONDS_PER_SECOND = 1000L;
-    private static final long MINIMUM_EXPIRATION_TIME_OFFSET = 1L;
+    private boolean useWebsocket;
+
+    private IotHubX509Authentication x509Authentication;
+    private IotHubSasTokenAuthentication sasTokenAuthentication;
 
     /* information in the connection string that unique identify the device */
-    private final IotHubConnectionString iotHubConnectionString;
-
-    /* Certificates related to IotHub */
-    private String userCertificateString;
-    private String pathToCertificate;
-    private IotHubSSLContext iotHubSSLContext;
-
-    private boolean useWebsocket;
+    private IotHubConnectionString iotHubConnectionString;
 
     /**
      * The callback to be invoked if a message of Device Method type received.
@@ -61,6 +48,14 @@ public final class DeviceClientConfig
 
     private CustomLogger logger;
 
+    public enum AuthType
+    {
+        X509_CERTIFICATE,
+        SAS_TOKEN
+    }
+
+    private AuthType authenticationType;
+
     /**
      * Constructor
      *
@@ -70,23 +65,104 @@ public final class DeviceClientConfig
      * @throws IllegalArgumentException if the IoT Hub hostname does not contain
      * a valid IoT Hub name as its prefix.
      */
-    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString)
+    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString) throws IllegalArgumentException
     {
         // Codes_SRS_DEVICECLIENTCONFIG_21_034: [If the provided `iotHubConnectionString` is null,
         // the constructor shall throw IllegalArgumentException.]
         if(iotHubConnectionString == null)
         {
-            throw new IllegalArgumentException("connection string is null");
+            throw new IllegalArgumentException("connection string cannot be null");
         }
 
-        // Codes_SRS_DEVICECLIENTCONFIG_21_033: [The constructor shall save the IoT Hub hostname, hubname,
-        // device ID, device key, and device token, provided in the `iotHubConnectionString`.]
-        this.iotHubConnectionString = iotHubConnectionString;
+        if (iotHubConnectionString.isUsingX509())
+        {
+            //Codes_SRS_DEVICECLIENTCONFIG_34_076: [If the provided `iotHubConnectionString` uses x509 authentication, the constructor shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("Cannot use this constructor for x509 connection strings. Use constructor that takes public key certificate and private key instead");
+        }
+
         this.useWebsocket = false;
+
+        //Codes_SRS_DEVICECLIENTCONFIG_34_046: [If the provided `iotHubConnectionString` does not use x509 authentication, it shall be saved to a new IotHubSasTokenAuthentication object and the authentication type of this shall be set to SASToken.]
+        this.authenticationType = AuthType.SAS_TOKEN;
+        this.iotHubConnectionString = iotHubConnectionString;
+
+        this.sasTokenAuthentication = new IotHubSasTokenAuthentication(
+                this.iotHubConnectionString.getHostName(),
+                this.iotHubConnectionString.getDeviceId(),
+                this.iotHubConnectionString.getSharedAccessKey(),
+                this.iotHubConnectionString.getSharedAccessToken());
 
         this.logger = new CustomLogger(this.getClass());
         logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
-                this.iotHubConnectionString.getHostName(), this.iotHubConnectionString.getDeviceId(), logger.getMethodName());
+                iotHubConnectionString.getHostName(), iotHubConnectionString.getDeviceId(), logger.getMethodName());
+    }
+
+    /**
+     * Constructor for device configs that use x509 authentication
+     *
+     * @param iotHubConnectionString The connection string for the device. (format: "HostName=...;DeviceId=...;x509=true")
+     * @param publicKeyCertificate The PEM encoded public key certificate or the path to the PEM encoded public key certificate file
+     * @param isPathForPublic If the provided publicKeyCertificate is a path to the actual public key certificate
+     * @param privateKey The PEM encoded private key or the path to the PEM encoded private key file
+     * @param isPathForPrivate If the provided privateKey is a path to the actual private key
+     */
+    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate)
+    {
+        if(iotHubConnectionString == null)
+        {
+            //Codes_SRS_DEVICECLIENTCONFIG_34_069: [If the provided connection string is null or does not use x509 auth, and IllegalArgumentException shall be thrown.]
+            throw new IllegalArgumentException("connection string cannot be null");
+        }
+
+        if (!iotHubConnectionString.isUsingX509())
+        {
+            //Codes_SRS_DEVICECLIENTCONFIG_34_069: [If the provided connection string is null or does not use x509 auth, and IllegalArgumentException shall be thrown.]
+            throw new IllegalArgumentException("Cannot use this constructor for connection strings that don't use x509 authentication.");
+        }
+
+        this.authenticationType = AuthType.X509_CERTIFICATE;
+        this.useWebsocket = false;
+        this.iotHubConnectionString = iotHubConnectionString;
+
+        //Codes_SRS_DEVICECLIENTCONFIG_34_069: [This function shall generate a new SSLContext and set this to using X509 authentication.]
+        this.x509Authentication = new IotHubX509Authentication(publicKeyCertificate, isPathForPublic, privateKey, isPathForPrivate);
+
+        this.logger = new CustomLogger(this.getClass());
+        logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
+                iotHubConnectionString.getHostName(), iotHubConnectionString.getDeviceId(), logger.getMethodName());
+    }
+
+    /**
+     * Getter for X509Authentication
+     *
+     * @return The value of X509Authentication
+     */
+    public IotHubX509Authentication getX509Authentication()
+    {
+        // Codes_SRS_DEVICECLIENTCONFIG_34_077: [This function shall return the saved IotHubX509Authentication object.]
+        return this.x509Authentication;
+    }
+
+    /**
+     * Getter for SasTokenAuthentication
+     *
+     * @return The value of SasTokenAuthentication
+     */
+    public IotHubSasTokenAuthentication getSasTokenAuthentication()
+    {
+        // Codes_SRS_DEVICECLIENTCONFIG_34_078: [This function shall return the saved IotHubSasTokenAuthentication object.]
+        return this.sasTokenAuthentication;
+    }
+
+    /**
+     * Getter for IotHubConnectionString
+     *
+     * @return The value of IotHubConnectionString
+     */
+    public IotHubConnectionString getIotHubConnectionString()
+    {
+        // Codes_SRS_DEVICECLIENTCONFIG_34_079: [This function shall return the saved IotHubConnectionString object.]
+        return this.iotHubConnectionString;
     }
 
     /**
@@ -110,72 +186,12 @@ public final class DeviceClientConfig
     }
 
     /**
-     * Setter for the IotHub SSL Context
-     * @param iotHubSSLContext IotHubSSLContext to be set
-     */
-    public void setIotHubSSLContext(IotHubSSLContext iotHubSSLContext)
-    {
-        //Codes_SRS_DEVICECLIENTCONFIG_25_031: [**The function shall set IotHub SSL Context**] **
-        this.iotHubSSLContext = iotHubSSLContext;
-    }
-
-    /**
-     * Getter for the IotHubSSLContext
-     * @return IotHubSSLContext for this IotHub
-     */
-    public IotHubSSLContext getIotHubSSLContext()
-    {
-        //Codes_SRS_DEVICECLIENTCONFIG_25_032: [**The function shall return the IotHubSSLContext.**] **
-        return iotHubSSLContext;
-    }
-
-    /**
-     * Setter for the providing trusted certificate.
-     * @param pathToCertificate path to the certificate for one way authentication.
-     */
-    public void setPathToCert(String pathToCertificate)
-    {
-        //Codes_SRS_DEVICECLIENTCONFIG_25_028: [**The function shall set the path to the certificate**] **
-        this.pathToCertificate = pathToCertificate;
-    }
-
-    /**
-     * Getter for the path to the certificate.
-     * @return the path to certificate.
-     */
-    public String getPathToCertificate()
-    {
-        //Codes_SRS_DEVICECLIENTCONFIG_25_027: [**The function shall return the value of the path to the certificate.**] **
-        return this.pathToCertificate;
-    }
-
-    /**
-     * Setter for the user trusted certificate
-     * @param userCertificateString valid user trusted certificate string
-     */
-    public void setUserCertificateString(String userCertificateString)
-    {
-        //Codes_SRS_DEVICECLIENTCONFIG_25_029: [**The function shall set user certificate String**] **
-        this.userCertificateString = userCertificateString;
-    }
-
-    /**
-     * Getter for the user trusted certificate
-     * @return user trusted certificate as string
-     */
-    public String getUserCertificateString()
-    {
-        //Codes_SRS_DEVICECLIENTCONFIG_25_030: [**The function shall return the value of the user certificate string.**] **
-        return userCertificateString;
-    }
-
-    /**
      * Setter for the message callback. Can be {@code null}.
      * @param callback the message callback. Can be {@code null}.
      * @param context the context to be passed in to the callback.
      */
     public void setMessageCallback(MessageCallback callback,
-            Object context)
+                                   Object context)
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_006: [The function shall set the message callback, with its associated context.]
         this.deviceTelemetryMessageCallback = callback;
@@ -211,68 +227,6 @@ public final class DeviceClientConfig
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_003: [The function shall return the device ID given in the constructor.]
         return this.iotHubConnectionString.getDeviceId();
-    }
-
-    /**
-     * Getter for the device key.
-     *
-     * @return the device key.
-     */
-    public String getDeviceKey()
-    {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_004: [The function shall return the device key given in the constructor.]
-        return this.iotHubConnectionString.getSharedAccessKey();
-    }
-
-    /**
-     * Getter for the shared access signature.
-     *
-     * @return the shared access signature.
-     */
-    public String getSharedAccessToken() throws SecurityException
-    {
-        String currentToken = this.iotHubConnectionString.getSharedAccessToken();
-
-        if (currentToken == null || (this.getDeviceKey() != null && IotHubSasToken.isSasTokenExpired(currentToken)))
-        {
-            Long expiryTime = (System.currentTimeMillis() / MILLISECONDS_PER_SECOND) + this.getTokenValidSecs() + MINIMUM_EXPIRATION_TIME_OFFSET;
-            IotHubSasToken generatedSasToken = new IotHubSasToken(this, expiryTime);
-
-            //Codes_SRS_DEVICECLIENTCONFIG_34_036: [If this function generates the returned SharedAccessToken from a device key, the previous SharedAccessToken shall be overwritten with the generated value.]
-            this.iotHubConnectionString.setSharedAccessToken(generatedSasToken.toString());
-
-            return generatedSasToken.toString();
-        }
-
-        // Codes_SRS_DEVICECLIENTCONFIG_25_018: [**The function shall return the SharedAccessToken given in the constructor.**] **
-        return this.iotHubConnectionString.getSharedAccessToken();
-    }
-
-    /**
-     * Getter for the number of seconds a SAS token should be valid for. A
-     * message that arrives at an IoT Hub in time of length greater than this
-     * value will be rejected by the IoT Hub.
-     *
-     * @return the number of seconds a message in transit to an IoT Hub is valid
-     * for.
-     */
-    public long getTokenValidSecs()
-    {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_005: [The function shall return the value of tokenValidSecs.]
-        return this.tokenValidSecs;
-    }
-
-    /**
-     * Setter for the number of seconds a SAS token should be valid for. A
-     * message that arrives at an IoT Hub in time of length greater than this
-     * value will be rejected by the IoT Hub.
-     *
-     * @param expiryTime is the token valid time in seconds.
-     */
-    public void setTokenValidSecs(long expiryTime)
-    {
-        // Codes_SRS_DEVICECLIENTCONFIG_25_008: [The function shall set the value of tokenValidSecs.]
-        this.tokenValidSecs = expiryTime;
     }
 
     /**
@@ -411,22 +365,30 @@ public final class DeviceClientConfig
         return DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS;
     }
 
-    /**
-     * Tells if the config needs to get a new sas token. If a device key is present in config, no token refresh is needed.
-     * @return if the config needs a new sas token.
+    /*
+     * Getter for AuthenticationType
+     *
+     * @return The value of AuthenticationType
      */
-    public boolean needsToRenewSasToken()
+    public AuthType getAuthenticationType()
     {
-        //Codes_SRS_DEVICECLIENTCONFIG_34_035: [If the saved sas token has expired and there is no device key present, this function shall return true.]
-        String token = this.getSharedAccessToken();
-        return (token != null && IotHubSasToken.isSasTokenExpired(token) && this.getDeviceKey() == null);
+        //Codes_SRS_DEVICECLIENTCONFIG_34_039: [This function shall return the type of authentication that the config is set up to use.]
+        return authenticationType;
     }
 
     @SuppressWarnings("unused")
     protected DeviceClientConfig()
     {
+        this.sasTokenAuthentication = null;
+        this.x509Authentication = null;
         this.iotHubConnectionString = null;
-        this.pathToCertificate = null;
-        this.iotHubSSLContext = null;
+        this.deviceMethodsMessageCallback = null;
+        this.deviceTelemetryMessageCallback = null;
+        this.deviceTwinMessageCallback = null;
+        this.deviceMethodsMessageContext = null;
+        this.deviceTelemetryMessageContext = null;
+        this.deviceTwinMessageContext = null;
+        this.logger = null;
+        this.useWebsocket = false;
     }
 }

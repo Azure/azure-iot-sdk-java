@@ -8,7 +8,6 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
@@ -25,6 +24,7 @@ import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
 import org.junit.Test;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.ArrayList;
@@ -70,16 +70,11 @@ public class AmqpsIotHubConnectionTest {
     protected IotHubUri mockIotHubUri;
 
     @Mocked
-    protected IotHubSasToken mockToken;
-
-    @Mocked
     protected Message mockProtonMessage;
 
     @Mocked
     protected AmqpsMessage mockAmqpsMessage;
 
-    @Mocked
-    protected IotHubSasToken mockSasToken;
 
     @Mocked
     protected Sender mockSender;
@@ -118,7 +113,7 @@ public class AmqpsIotHubConnectionTest {
     protected SslDomain mockSslDomain;
 
     @Mocked
-    protected IotHubSSLContext mockIotHubSSLContext;
+    protected SSLContext mockSSLContext;
 
     @Mocked
     protected WebSocketImpl mockWebSocket;
@@ -150,6 +145,9 @@ public class AmqpsIotHubConnectionTest {
     @Mocked
     AmqpsSendReturnValue mockAmqpsSendReturnValue;
 
+    @Mocked
+    IotHubConnectionString mockConnectionString;
+
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
     // any of the parameters of the configuration is null or empty.]
     @Test(expected = IllegalArgumentException.class)
@@ -174,7 +172,9 @@ public class AmqpsIotHubConnectionTest {
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getDeviceKey();
+                mockConfig.getIotHubConnectionString();
+                result = mockConnectionString;
+                mockConnectionString.getSharedAccessKey();
                 result = deviceKey;
             }
         };
@@ -195,7 +195,7 @@ public class AmqpsIotHubConnectionTest {
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getDeviceKey();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = deviceKey;
             }
         };
@@ -217,7 +217,7 @@ public class AmqpsIotHubConnectionTest {
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getDeviceKey();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = deviceKey;
                 mockConfig.isUseWebsocket();
                 result = false;
@@ -243,7 +243,7 @@ public class AmqpsIotHubConnectionTest {
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getDeviceKey();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = deviceKey;
                 mockConfig.isUseWebsocket();
                 result = false;
@@ -269,7 +269,7 @@ public class AmqpsIotHubConnectionTest {
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = "";
-                mockConfig.getDeviceKey();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = deviceKey;
                 mockConfig.isUseWebsocket();
                 result = false;
@@ -295,7 +295,7 @@ public class AmqpsIotHubConnectionTest {
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = null;
-                mockConfig.getDeviceKey();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = deviceKey;
                 mockConfig.isUseWebsocket();
                 result = false;
@@ -305,58 +305,6 @@ public class AmqpsIotHubConnectionTest {
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
         new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
-    }
-
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
-    // any of the parameters of the configuration is null or empty.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfUserNameIsEmpty() throws IOException
-    {
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getIotHubHostname();
-                result = hostName;
-                mockConfig.getIotHubName();
-                result = hubName;
-                mockConfig.getDeviceId();
-                result = deviceId;
-                mockConfig.getDeviceKey();
-                result = "";
-                mockConfig.isUseWebsocket();
-                result = false;
-            }
-        };
-
-        ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
-        amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
-    }
-
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
-    // any of the parameters of the configuration is null or empty.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfUserNameIsNull() throws IOException
-    {
-        new NonStrictExpectations() {
-            {
-                mockConfig.getIotHubHostname();
-                result = hostName;
-                mockConfig.getIotHubName();
-                result = hubName;
-                mockConfig.getDeviceId();
-                result = deviceId;
-                mockConfig.getDeviceKey();
-                result = null;
-                mockConfig.isUseWebsocket();
-                result = false;
-            }
-        };
-
-        ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
-        amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
-
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -372,7 +320,7 @@ public class AmqpsIotHubConnectionTest {
                 result = "";
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getDeviceKey();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = deviceKey;
                 mockConfig.isUseWebsocket();
                 result = false;
@@ -397,7 +345,7 @@ public class AmqpsIotHubConnectionTest {
                 result = null;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getDeviceKey();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = deviceKey;
                 mockConfig.isUseWebsocket();
                 result = false;
@@ -532,7 +480,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                new IotHubSasToken(mockConfig, anyLong);
+                Deencapsulation.invoke(mockConfig, "getSasTokenAuthentication");
                 times = 0;
             }
         };
@@ -554,7 +502,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockConfig.getSharedAccessToken();
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 times = 1;
             }
         };
@@ -588,15 +536,6 @@ public class AmqpsIotHubConnectionTest {
     public void openTriggersProtonReactor(@Mocked final Reactor mockedReactor) throws IOException, InterruptedException
     {
         baseExpectations();
-
-        new NonStrictExpectations()
-        {
-            {
-                mockIotHubReactor.run();
-                times = 1;
-                mockOpenLock.waitLock(anyLong);
-            }
-        };
 
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
@@ -1105,7 +1044,8 @@ public class AmqpsIotHubConnectionTest {
                 mockTransport.sasl();
                 result = mockSasl;
                 mockSasl.plain(anyString, anyString);
-                mockSslDomain.setSslContext(mockIotHubSSLContext.getIotHubSSlContext());
+                mockSslDomain.setSslContext(mockSSLContext);
+
                 mockSslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 mockTransport.ssl(mockSslDomain);
             }
@@ -1128,7 +1068,7 @@ public class AmqpsIotHubConnectionTest {
                 times = 1;
                 mockSasl.plain(anyString, anyString);
                 times = 1;
-                mockSslDomain.setSslContext(mockIotHubSSLContext.getIotHubSSlContext());
+                mockSslDomain.setSslContext((SSLContext) any);
                 times = 1;
                 mockSslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 times = 1;
@@ -1161,7 +1101,8 @@ public class AmqpsIotHubConnectionTest {
                 mockTransportInternal.sasl();
                 result = mockSasl;
                 mockSasl.plain(anyString, anyString);
-                mockSslDomain.setSslContext(mockIotHubSSLContext.getIotHubSSlContext());
+                mockSslDomain.setSslContext(mockSSLContext);
+
                 mockSslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 mockTransportInternal.ssl(mockSslDomain);
             }
@@ -1190,7 +1131,7 @@ public class AmqpsIotHubConnectionTest {
                 times = 1;
                 mockSasl.plain(deviceId + "@sas." + hubName, anyString);
                 times = 1;
-                mockSslDomain.setSslContext(mockIotHubSSLContext.getIotHubSSlContext());
+                mockSslDomain.setSslContext((SSLContext) any);
                 times = 1;
                 mockSslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 times = 1;
@@ -1809,17 +1750,97 @@ public class AmqpsIotHubConnectionTest {
     {
         new NonStrictExpectations() {
             {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getIotHubHostname();
                 result = hostName;
                 mockConfig.getIotHubName();
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getDeviceKey();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = deviceKey;
                 mockConfig.isUseWebsocket();
                 result = false;
             }
         };
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
+    // any of the parameters of the configuration is null or empty.]
+    @Test(expected = IllegalArgumentException.class)
+    public void constructorThrowsIllegalArgumentExceptionIfDeviceKeyIsEmpty() throws IOException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getIotHubHostname();
+                result = hostName;
+                mockConfig.getIotHubName();
+                result = hubName;
+                mockConfig.getDeviceId();
+                result = deviceId;
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
+                result = "";
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockConfig.isUseWebsocket();
+                result = false;
+            }
+        };
+
+        ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
+        amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
+        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
+    // any of the parameters of the configuration is null or empty.]
+    @Test(expected = IllegalArgumentException.class)
+    public void constructorThrowsIllegalArgumentExceptionIfDeviceKeyIsNull() throws IOException
+    {
+        new NonStrictExpectations() {
+            {
+                mockConfig.getIotHubHostname();
+                result = hostName;
+                mockConfig.getIotHubName();
+                result = hubName;
+                mockConfig.getDeviceId();
+                result = deviceId;
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
+                result = null;
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockConfig.isUseWebsocket();
+                result = false;
+            }
+        };
+
+        ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
+        amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
+        new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
+
+    }
+
+    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_043: [If the config is not using sas token authentication, this function shall throw an IOException.]
+    @Test (expected = IOException.class)
+    public void openThrowsIfNotUsingSasTokenAuth() throws IOException, InterruptedException
+    {
+        //arrange
+        baseExpectations();
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+            }
+        };
+
+        ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
+        amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
+
+        //act
+        connection.open();
     }
 }

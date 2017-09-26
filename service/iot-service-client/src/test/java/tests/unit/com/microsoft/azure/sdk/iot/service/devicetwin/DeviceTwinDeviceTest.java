@@ -6,6 +6,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
+import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import mockit.Deencapsulation;
@@ -28,12 +29,35 @@ public class DeviceTwinDeviceTest
     **Tests_SRS_DEVICETWINDEVICE_25_003: [** The constructor shall create a new instance of twin object for this device and store the device id.**]**
      */
     @Test
-    public void constructorCreatesNewDevice()
+    public void constructorCreatesNewDeviceGroup()
     {
         //act
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        DeviceTwinDevice testDevice = new DeviceTwinDevice();
 
         //assert
+        assertNotNull(testDevice);
+        Map<String, Object> tagsMap = Deencapsulation.getField(testDevice, "tag");
+        assertNull(tagsMap);
+        Map<String, Object> repPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
+        assertNull(repPropMap);
+        Map<String, Object> desPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
+        assertNull(desPropMap);
+    }
+
+    /*
+    **Tests_SRS_DEVICETWINDEVICE_25_003: [** The constructor shall create a new instance of twin object for this device and store the device id.**]**
+     */
+    @Test
+    public void constructorCreatesNewDevice()
+    {
+        //arrange
+        final String deviceId = "testDevice";
+
+        //act
+        DeviceTwinDevice testDevice = new DeviceTwinDevice(deviceId);
+
+        //assert
+        assertEquals(deviceId, Deencapsulation.getField(testDevice, "deviceId"));
         assertNotNull(testDevice);
         Map<String, Object> tagsMap = Deencapsulation.getField(testDevice, "tag");
         assertNull(tagsMap);

@@ -45,13 +45,13 @@ public class MqttConnection
      */
     MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext iotHubSSLContext) throws IOException
     {
-        if (serverURI == null || clientId == null || userName == null || password == null || iotHubSSLContext == null)
+        if (serverURI == null || clientId == null || userName == null || iotHubSSLContext == null)
         {
-            //Codes_SRS_MQTTCONNECTION_25_001: [The constructor shall throw InvalidParameter Exception if any of the input parameters are null .]
+            //Codes_SRS_MQTTCONNECTION_25_001: [The constructor shall throw InvalidParameter Exception if any of the input parameters are null other than password.]
             throw new IllegalArgumentException();
         }
 
-        else if (serverURI.length() == 0 || clientId.length() == 0 || userName.length() == 0 || password.length() == 0)
+        else if (serverURI.isEmpty() || clientId.isEmpty() || userName.isEmpty())
         {
             //Codes_SRS_MQTTCONNECTION_25_002: [The constructor shall throw InvalidParameter Exception if serverUri, clientId, userName, password are empty.]
             throw new IllegalArgumentException();
@@ -88,8 +88,12 @@ public class MqttConnection
         this.connectionOptions.setCleanSession(SET_CLEAN_SESSION);
         this.connectionOptions.setMqttVersion(MQTT_VERSION);
         this.connectionOptions.setUserName(userName);
-        this.connectionOptions.setPassword(userPassword.toCharArray());
         this.connectionOptions.setSocketFactory(iotHubSSLContext.getSocketFactory());
+
+        if (userPassword != null && !userPassword.isEmpty())
+        {
+            this.connectionOptions.setPassword(userPassword.toCharArray());
+        }
     }
 
     /**

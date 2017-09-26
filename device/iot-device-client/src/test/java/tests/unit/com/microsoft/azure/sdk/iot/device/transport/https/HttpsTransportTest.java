@@ -848,9 +848,11 @@ public class HttpsTransportTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.needsToRenewSasToken();
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockConfig.getSasTokenAuthentication().isRenewalNecessary();
                 result = true;
-                mockConfig.getSharedAccessToken();
+                mockConfig.getIotHubConnectionString().getSharedAccessToken();
                 result = "SharedAccessSignature sr=someResource&sig=someSignature&se=0";
             }
         };
@@ -885,9 +887,9 @@ public class HttpsTransportTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getSharedAccessToken();
+                mockConfig.getIotHubConnectionString().getSharedAccessToken();
                 result = "SharedAccessSignature sr=someResource&sig=someSignature&se=0";
-                mockConfig.getDeviceKey();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = "non-null, fake key";
             }
         };
@@ -919,9 +921,11 @@ public class HttpsTransportTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getSharedAccessToken();
+                mockConfig.getIotHubConnectionString().getSharedAccessToken();
                 result = "SharedAccessSignature sr=someResource&sig=someSignature&se=0";
-                mockConfig.needsToRenewSasToken();
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockConfig.getSasTokenAuthentication().isRenewalNecessary();
                 result = true;
             }
         };
@@ -953,9 +957,9 @@ public class HttpsTransportTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getSharedAccessToken();
+                mockConfig.getIotHubConnectionString().getSharedAccessToken();
                 result = "SharedAccessSignature sr=someResource&sig=someSignature&se=0";
-                mockConfig.getDeviceKey();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = "non-null, fake key";
             }
         };

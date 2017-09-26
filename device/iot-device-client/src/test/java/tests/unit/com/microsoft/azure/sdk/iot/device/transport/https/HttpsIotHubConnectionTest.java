@@ -4,7 +4,6 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.net.*;
 import com.microsoft.azure.sdk.iot.device.transport.https.*;
 import mockit.Deencapsulation;
@@ -14,6 +13,7 @@ import mockit.Verifications;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
@@ -42,7 +42,6 @@ public class HttpsIotHubConnectionTest
     HttpsResponse mockResponse;
     @Mocked
     IotHubStatusCode mockStatus;
-    @Mocked IotHubSasToken mockSasToken;
 
     private static final String testSasToken = "SharedAccessSignature sr=test&sig=test&se=0";
 
@@ -52,10 +51,10 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getSharedAccessToken();
+                mockConfig.getSasTokenAuthentication().getCurrentSasToken();
                 result=testSasToken;
-                mockSasToken.isSasTokenExpired(testSasToken);
-                result = false;
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken();
+                result=testSasToken;
             }
         };
     }
@@ -183,6 +182,8 @@ public class HttpsIotHubConnectionTest
             {
                 mockConfig.getReadTimeoutMillis();
                 result = readTimeoutMillis;
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
 
@@ -201,12 +202,14 @@ public class HttpsIotHubConnectionTest
     //Tests_SRS_HTTPSIOTHUBCONNECTION_25_040: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
     @Test
     public void sendEventSetsIotHubSSLContext(@Mocked final IotHubEventUri mockUri,
-                                              @Mocked final IotHubSSLContext mockContext) throws IOException
+                                              @Mocked final SSLContext mockContext) throws IOException
     {
         new NonStrictExpectations()
         {
             {
-                mockConfig.getIotHubSSLContext();
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockConfig.getSasTokenAuthentication().getSSLContext();
                 result = mockContext;
             }
         };
@@ -225,7 +228,7 @@ public class HttpsIotHubConnectionTest
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_007: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
     @Test
-    public void sendEventSetsAuthToSasToken(@Mocked final IotHubEventUri mockUri, @Mocked final IotHubSasToken mockToken) throws IOException
+    public void sendEventSetsAuthToSasToken(@Mocked final IotHubEventUri mockUri) throws IOException
     {
         final String iotHubHostname = "test-iothubname";
         final String deviceId = "test-device-key";
@@ -234,16 +237,18 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getIotHubHostname();
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getDeviceKey();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = deviceKey;
-                mockToken.toString();
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 result = tokenStr;
-                mockConfig.getSharedAccessToken();
-                result = tokenStr;
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
 
@@ -274,6 +279,8 @@ public class HttpsIotHubConnectionTest
                 result = mockRequest;
                 mockUri.getPath();
                 result = path;
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
 
@@ -304,6 +311,8 @@ public class HttpsIotHubConnectionTest
                 result = mockRequest;
                 mockMsg.getContentType();
                 result = contentType;
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
 
@@ -515,14 +524,16 @@ public class HttpsIotHubConnectionTest
     //Tests_SRS_HTTPSIOTHUBCONNECTION_21_046: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
     @Test
     public void sendHttpsMessageSetsIotHubSSLContext(@Mocked final IotHubUri mockUri,
-                                              @Mocked final IotHubSSLContext mockContext) throws IOException
+                                              @Mocked final SSLContext mockContext) throws IOException
     {
         final String uriPath = "/files";
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         new NonStrictExpectations()
         {
             {
-                mockConfig.getIotHubSSLContext();
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockConfig.getSasTokenAuthentication().getSSLContext();
                 result = mockContext;
             }
         };
@@ -541,7 +552,7 @@ public class HttpsIotHubConnectionTest
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_21_047: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
     @Test
-    public void sendHttpsMessageSetsAuthToSasToken(@Mocked final IotHubUri mockUri, @Mocked final IotHubSasToken mockToken) throws IOException
+    public void sendHttpsMessageSetsAuthToSasToken(@Mocked final IotHubUri mockUri) throws IOException
     {
         final String iotHubHostname = "test-iothubname";
         final String deviceId = "test-device-key";
@@ -552,15 +563,15 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getIotHubHostname();
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getDeviceKey();
-                result = deviceKey;
-                mockToken.toString();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = tokenStr;
-                mockConfig.getSharedAccessToken();
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 result = tokenStr;
             }
         };
@@ -766,7 +777,7 @@ public class HttpsIotHubConnectionTest
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_016: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
     @Test
-    public void receiveMessageSetsAuthToSasToken(@Mocked final IotHubMessageUri mockUri, @Mocked final IotHubSasToken mockToken) throws IOException
+    public void receiveMessageSetsAuthToSasToken(@Mocked final IotHubMessageUri mockUri) throws IOException
     {
         final String iotHubHostname = "test-iothubname";
         final String deviceId = "test-device-key";
@@ -775,15 +786,15 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getIotHubHostname();
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getDeviceKey();
-                result = deviceKey;
-                mockToken.toString();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = tokenStr;
-                mockConfig.getSharedAccessToken();
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 result = tokenStr;
             }
         };
@@ -858,12 +869,14 @@ public class HttpsIotHubConnectionTest
     //Tests_SRS_HTTPSIOTHUBCONNECTION_25_041: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
     @Test
     public void receiveMessageSetsIotHubSSLContext(@Mocked final IotHubMessageUri mockUri,
-                                                   @Mocked final IotHubSSLContext mockContext) throws IOException
+                                                   @Mocked final SSLContext mockContext) throws IOException
     {
         new NonStrictExpectations()
         {
             {
-                mockConfig.getIotHubSSLContext();
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockConfig.getSasTokenAuthentication().getSSLContext();
                 result = mockContext;
             }
         };
@@ -1375,7 +1388,7 @@ public class HttpsIotHubConnectionTest
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_034: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
     @Test
-    public void sendMessageResultSetsAuthToSasToken(@Mocked final IotHubRejectUri mockUri, @Mocked final IotHubSasToken mockToken) throws IOException
+    public void sendMessageResultSetsAuthToSasToken(@Mocked final IotHubRejectUri mockUri) throws IOException
     {
         final String eTag = "test-etag";
         final String iotHubHostname = "test-iothubname";
@@ -1385,6 +1398,8 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockResponse.getStatus();
                 returns(200, 204);
                 IotHubStatusCode.getIotHubStatusCode(200);
@@ -1397,11 +1412,9 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getDeviceKey();
-                result = deviceKey;
-                mockToken.toString();
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = tokenStr;
-                mockConfig.getSharedAccessToken();
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 result = tokenStr;
             }
         };
@@ -1456,13 +1469,15 @@ public class HttpsIotHubConnectionTest
     //Tests_SRS_HTTPSIOTHUBCONNECTION_25_042: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
     @Test
     public void sendMessageResultSetsIotHubSSLContext(@Mocked final IotHubRejectUri mockUri,
-                                                      @Mocked final IotHubSSLContext mockedContext) throws IOException
+                                                      @Mocked final SSLContext mockedContext) throws IOException
     {
         final String eTag = "test-etag";
         final int readTimeoutMillis = 23;
         new NonStrictExpectations()
         {
             {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockResponse.getStatus();
                 returns(200, 204);
                 IotHubStatusCode.getIotHubStatusCode(200);
@@ -1473,7 +1488,7 @@ public class HttpsIotHubConnectionTest
                 result = eTag;
                 mockConfig.getReadTimeoutMillis();
                 result = readTimeoutMillis;
-                mockConfig.getIotHubSSLContext();
+                mockConfig.getSasTokenAuthentication().getSSLContext();
                 result = mockedContext;
             }
         };
@@ -1570,8 +1585,11 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockSasToken.isSasTokenExpired(testSasToken);
+                mockConfig.getSasTokenAuthentication().isRenewalNecessary();
+
                 result = true;
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
 
@@ -1592,7 +1610,10 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockSasToken.isSasTokenExpired(testSasToken);
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockConfig.getSasTokenAuthentication().isRenewalNecessary();
+
                 result = true;
             }
         };
@@ -1614,7 +1635,9 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockSasToken.isSasTokenExpired(testSasToken);
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockConfig.getSasTokenAuthentication().isRenewalNecessary();
                 result = true;
             }
         };
@@ -1633,6 +1656,14 @@ public class HttpsIotHubConnectionTest
         //arrange
         HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
 
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+            }
+        };
+
         //act
         connection.sendEvent(mockMsg);
 
@@ -1640,7 +1671,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockConfig.getSharedAccessToken();
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 times = 1;
             }
         };
@@ -1651,6 +1682,13 @@ public class HttpsIotHubConnectionTest
     public void sendHttpsMessageRetrievesSasTokenFromConfig() throws IOException
     {
         //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+            }
+        };
         HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
 
         //act
@@ -1660,7 +1698,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockConfig.getSharedAccessToken();
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 times = 1;
             }
         };
@@ -1671,6 +1709,13 @@ public class HttpsIotHubConnectionTest
     public void receiveMessageRetrievesSasTokenFromConfig() throws IOException
     {
         //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+            }
+        };
         HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
 
         //act
@@ -1680,7 +1725,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockConfig.getSharedAccessToken();
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 times = 1;
             }
         };
@@ -1699,9 +1744,9 @@ public class HttpsIotHubConnectionTest
                 result = "test.iothub";
                 mockConfig.getDeviceId();
                 result = "test-device-id";
-                mockConfig.getSharedAccessToken();
-                result = sasToken;
-                IotHubSasToken.isSasTokenExpired(sasToken);
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockConfig.getSasTokenAuthentication().isRenewalNecessary();
                 result = true;
             }
         };

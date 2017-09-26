@@ -3,9 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
-import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -122,15 +122,15 @@ public class HttpsRequest
         return this;
     }
 
-    public HttpsRequest setSSLContext(IotHubSSLContext iotHubSSLContext)
+    public HttpsRequest setSSLContext(SSLContext sslContext)
     {
-        if (iotHubSSLContext == null)
+        if (sslContext == null)
         {
             //Codes_SRS_HTTPSREQUEST_25_015: [The function shall throw IllegalArgumentException if parameter is null .]
             throw new IllegalArgumentException("Context cannot be null");
         }
         //Codes_SRS_HTTPSREQUEST_25_016: [The function shall set the SSL context for the IotHub.]
-        this.connection.setSSLContext(iotHubSSLContext.getIotHubSSlContext());
+        this.connection.setSSLContext(sslContext);
         return this;
     }
 

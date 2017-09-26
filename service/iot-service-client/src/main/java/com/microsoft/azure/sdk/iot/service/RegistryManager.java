@@ -303,14 +303,13 @@ public class RegistryManager
      */
     public String getDeviceConnectionString(Device device)
     {
-
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_086: [The function shall throw IllegalArgumentException if the input device is null, or if deviceId or primary key are empty or null]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_086: [The function shall throw IllegalArgumentException if the input device is null, if deviceId is null, or primary key and primary thumbprint are empty or null.]
         if (device == null)
         {
             throw new IllegalArgumentException("device cannot be null");
         }
 
-        if(Tools.isNullOrEmpty(device.getDeviceId()) || Tools.isNullOrEmpty(device.getPrimaryKey()))
+        if(Tools.isNullOrEmpty(device.getDeviceId()) || (Tools.isNullOrEmpty(device.getPrimaryKey())) && Tools.isNullOrEmpty(device.getPrimaryThumbprint()))
         {
             throw new IllegalArgumentException("device is not valid");
         }
@@ -319,7 +318,15 @@ public class RegistryManager
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(String.format("HostName=%s;", iotHubConnectionString.getHostName()));
         stringBuilder.append(String.format("DeviceId=%s;", device.getDeviceId()));
-        stringBuilder.append(String.format("SharedAccessKey=%s", device.getPrimaryKey()));
+        if (device.getPrimaryKey() == null)
+        {
+            //self signed or CA signed
+            stringBuilder.append("x509=true");
+        }
+        else
+        {
+            stringBuilder.append(String.format("SharedAccessKey=%s", device.getPrimaryKey()));
+        }
         return stringBuilder.toString();
     }
 

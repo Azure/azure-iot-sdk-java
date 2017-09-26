@@ -61,6 +61,8 @@ public void open() throws IOException
 
 **SRS_AMQPSIOTHUBCONNECTION_15_007: [**If the AMQPS connection is already open, the function shall do nothing.**]**
 
+**SRS_AMQPSIOTHUBCONNECTION_34_043: [**If the config is not using sas token authentication, this function shall throw an IOException.**]**
+
 **SRS_AMQPSIOTHUBCONNECTION_15_009: [**The function shall trigger the Reactor (Proton) to begin running.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_15_010: [**The function shall wait for the reactor to be ready and for enough link credit to become available.**]**

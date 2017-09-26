@@ -27,12 +27,29 @@ public class DeviceTwinDevice
 
     /**
      * Constructor to create instance for a device
+     */
+    public DeviceTwinDevice()
+    {
+        /*
+        **Codes_SRS_DEVICETWINDEVICE_25_003: [** The constructor shall create a new instance of twin object for this device and store the device id.**]**
+         */
+        this.deviceId = null;
+        this.eTag = null;
+        this.version = null;
+        this.twinParser = new TwinParser();
+        this.twinParser.enableTags();
+    }
+
+    /**
+     * Constructor to create instance for a device
      *
      * @param deviceId Device ID for this device
      * @throws IllegalArgumentException This exception is thrown if the device id is null or empty
      */
     public DeviceTwinDevice(String deviceId) throws IllegalArgumentException
     {
+        this();
+
         if (deviceId == null || deviceId.length() == 0)
         {
             /*
@@ -40,14 +57,7 @@ public class DeviceTwinDevice
              */
             throw new IllegalArgumentException("Device ID cannot be null or empty");
         }
-        /*
-        **Codes_SRS_DEVICETWINDEVICE_25_003: [** The constructor shall create a new instance of twin object for this device and store the device id.**]**
-         */
         this.deviceId = deviceId;
-        this.eTag = null;
-        this.version = null;
-        this.twinParser = new TwinParser();
-        this.twinParser.enableTags();
     }
 
     /**
