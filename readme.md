@@ -1,17 +1,39 @@
 # Microsoft Azure IoT SDKs for Java
 This repository contains the following:
-* **Azure IoT Hub Device SDK**: to connect client devices to Azure IoT Hub (supports Java 7+ and Android API 17+)
-* **Azure IoT Hub Service SDK**: enables developing back-end applications for Azure IoT (supports Java 7+)
+* **Azure IoT Hub device SDK for Java**: to connect client devices to Azure IoT Hub (supports Java 7+ and Android API 17+)
+* **Azure IoT Hub service SDK for Java**: enables developing back-end applications for Azure IoT (supports Java 7+)
+
+The API reference documentation for the device SDK is [here][java-api-reference-device].
+
+The API reference documentation for the service SDK is [here][java-api-reference-service].
 
 To find SDKs in other languages for Azure IoT, please refer o the [azure-iot-sdks][azure-iot-sdks] repository
 
 ## Developing applications for Azure IoT
 Visit [Azure IoT Dev Center](http://azure.com/iotdev) to learn more about developing applications for Azure IoT.
 
+## Key features and roadmap
+
+:white_check_mark: feature available  :large_blue_diamond: feature in-progress  :large_orange_diamond: feature planned  :x: no support planned
+
+| Feature                                               | https                  | mqtt                   | mqtt-ws                | amqp                   | amqp-ws                | Description                                                                                                                                                                                                                                                                                                                                                                                        |
+|-------------------------------------------------------|------------------------|------------------------|------------------------|------------------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Authentication                                        | :white_check_mark:     | :white_check_mark:     | :white_check_mark:     | :white_check_mark:     | :white_check_mark:     | Connect your device to IoT Hub securely with [supported authentication](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-deployment), including private key and SASToken.  X-509 is not supported on Java SDK yet.                                                                                                                                                                  |
+| Retry policies                                        | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | Retry policy for unsuccessful device-to-cloud messages have three options: no try, exponential backoff with jitter (default) and custom.                                                                                                                                                                                                                                                           |
+| Connection status reporting                           | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: |                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Devices multiplexing over single connection           | :large_orange_diamond: | :x:                    | :x:                    | :large_orange_diamond: | :large_orange_diamond: |                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Connection Pooling - Specifying number of connections | :white_check_mark:     | :x:                    | :x:                    | :white_check_mark:     | :white_check_mark:     | Send device-to-cloud messages to IoT Hub with custom properties.  You can also choose to batch send at most 256 KBs (not available over MQTT and AMQP).  Send device-to-cloud messages with system properties in backlog.  Click [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-messages-d2c) for detailed information on the IoT Hub features.                            |
+| Send D2C message                                      | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: |                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Receive C2D messages                                  | :white_check_mark:     | :white_check_mark:     | :large_orange_diamond: | :white_check_mark:     | :white_check_mark:     | Receive cloud-to-device messages and read associated custom and system properties from IoT Hub, with the option to complete/reject/abandon C2D messages (not available over MQTT and MQTT-websocket).  Click [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-messages-c2d) for detailed information on the IoT Hub features.                                                |
+| Upload file to Blob                                   | :large_orange_diamond: | :x:                    | :x:                    | :x:                    | :x:                    | A device can initiate a file upload and notifies IoT Hub when the upload is complete.  Click [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload) for detailed information on the IoT Hub features.                                                                                                                                                                 |
+| Device Twins                                          | :x:                    | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | IoT Hub persists a device twin for each device that you connect to IoT Hub.  The device can perform operations like get twin tags, subscribe to desired properties.  Send reported properties version and desired properties version are in backlog.  Click [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins) for detailed information on the IoT Hub features. |
+| Direct Methods                                        | :x:                    | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | IoT Hub gives you the ability to invoke direct methods on devices from the cloud.  The SDK supports handler for method specific and generic operation.  Click [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-direct-methods) for detailed information on the IoT Hub features.                                                                                             |
+| Error reporting (TBD)                                 | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | Error reporting for exceeding quota, authentication error, throttling error, and device not found error.                                                                                                                                                                                                                                                                                           |
+| SDK Options                                           | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | Set SDK options for proxy settings, client version string, polling time, specify TrustedCert for IoT hub, Network interface selection, C2D keep alive.                                                                                                                                                                                                                                             |
+| Device Provisioning Service                           | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: |                                                                                                                                                                                                                                                                                                                                                                                                    |
+
 ## How to use the Azure IoT SDKs for Java
 Devices and data sources in an IoT solution can range from a simple network-connected sensor to a powerful, standalone computing device. Devices may have limited processing capability, memory, communication bandwidth, and communication protocol support. The IoT device SDKs enable you to implement client applications for a wide variety of devices.
-The API reference documentation for the device SDK is [here][java-api-reference-device].
-The API reference documentation for the service SDK is [here][java-api-reference-service].
 * On Linux and Windows:
    * **Using Maven**: the simplest way to use the Azure IoT SDKs for Java to develop apps is to leverage Maven packages:
       * [Device SDK][device-maven]
@@ -26,6 +48,21 @@ The API reference documentation for the service SDK is [here][java-api-reference
 Whithin the repository, you can find various types of simple samples that can help you get started.
 * [Device SDK Samples](./device/iot-device-samples/)
 * [Service SDK Samples](./service/iot-service-samples)
+
+## OS platforms and hardware compatibility
+[ATTN:CONTENT REQUIRED - this whole section is copied from the C SDK, please check requirements.]
+The IoT Hub device SDK for Java can be used with a broad range of OS platforms and devices:
+[INCLUDE A LIST OF PLATFORMS SUPPORTED BY JAVA OUT OF BOX]
+
+The minimum requirements are for the device platform to support the following:
+
+- **Being capable of establishing an IP connection**: only IP-capable devices can communicate directly with Azure IoT Hub.
+- **Support TLS**: required to establish a secure communication channel with Azure IoT Hub.
+- **Support SHA-256** (optional): necessary to generate the secure token for authenticating the device with the service. Different authentication methods are available and not all require SHA-256.
+- **Have a Real Time Clock or implement code to connect to an NTP server**: necessary for both establishing the TLS connection and generating the secure token for authentication.
+- **Having at least 64KB of RAM**: the memory footprint of the SDK depends on the SDK and protocol used as well as the platform targeted. The smallest footprint is achieved targeting microcontrollers.
+
+You can find an exhaustive list of the OS platforms the various SDKs have been tested against in the [Azure Certified for IoT device catalog](https://catalog.azureiotsuite.com/). Note that you might still be able to use the SDKs on OS and hardware platforms that are not listed on this page: all the SDKs are open sourced and designed to be portable. If you have suggestions, feedback or issues to report, refer to the Contribution and Support sections below.
 
 ## Contribution, feedback and issues
 If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](.github/CONTRIBUTING.md).
@@ -42,6 +79,35 @@ Here is what you can expect Microsoft Support to be able to help with:
 
 ## Read more
 * [Azure IoT Hub documentation][iot-hub-documentation]
+* [Prepare your development environment to use the Azure IoT device SDK for Java][devbox-setup]
+* [Setup IoT Hub][setup-iothub]
+* [Java SDKs API reference][java-api-reference]
+
+## SDK folder structure
+[ATTN:CONTENT REQUIRED - please provide descriptions and check those provided (they were largely based on the descriptions in the c SDK)]
+
+### /deps
+
+### /device
+
+Contains Azure IoT Hub client components that provide the raw messaging capabilities of the library. Refer to the API documentation and samples for information on how to use it.
+
+   * build/Windows: Contains  batch file that is used to generate the library binaries.
+   * iot-device-client: contains the client library for Java.
+   * iot-device-samples: contains simple samples.
+
+
+### /doc
+
+This folder contains application development guides and device setup instructions.
+
+### /iot-e2e-tests
+
+### /jenkins
+
+### /service
+
+Contains libraries that enable interactions with the IoT Hub service to perform operations such as sending messages to devices and managing the device identity registry.
 
 # Long Term Support
 
@@ -81,3 +147,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 [device-android]: ./doc/java-devbox-setup.md#installiotandroid
 [java-api-reference-device]: https://azure.github.io/azure-iot-sdk-java/device/
 [java-api-reference-service]: https://azure.github.io/azure-iot-sdk-java/service/
+[devbox-setup]: doc/java-devbox-setup.md
+[java-api-reference]: https://azure.github.io/azure-iot-sdk-java/
+[setup-iothub]: https://aka.ms/howtocreateazureiothub
+
