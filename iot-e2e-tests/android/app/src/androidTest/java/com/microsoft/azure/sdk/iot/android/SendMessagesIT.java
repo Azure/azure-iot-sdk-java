@@ -10,7 +10,6 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
-
 import com.microsoft.azure.sdk.iot.common.EventCallback;
 import com.microsoft.azure.sdk.iot.common.Success;
 import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
@@ -22,24 +21,20 @@ import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 
 
 @MediumTest
@@ -89,18 +84,25 @@ public class SendMessagesIT
     private String connString = "";
 
     @BeforeClass
-    public static void setUp()  throws Exception {
+    public static void setUp() throws Exception
+    {
         {
             Bundle extras = InstrumentationRegistry.getArguments();
 
-            if ( extras != null ) {
-                if ( extras.containsKey ( "iotHubConnectionString" ) ) {
-                    iotHubConnectionString = extras.getString("iotHubConnectionString");
-                    Log.d("Test Log","connString "+iotHubConnectionString);
-                } else {
+            if (extras != null)
+            {
+                if (extras.containsKey("IOTHUB_CONNECTION_STRING"))
+                {
+                    iotHubConnectionString = extras.getString("IOTHUB_CONNECTION_STRING");
+                    Log.d("Test Log", "connString " + iotHubConnectionString);
+                }
+                else
+                {
                     System.out.println("No connString in extras");
                 }
-            } else {
+            }
+            else
+            {
                 System.out.println("No extras");
             }
         }
@@ -124,7 +126,8 @@ public class SendMessagesIT
         registryManager.addDevice(deviceMqtt);
         registryManager.addDevice(deviceMqttWs);
 
-        for (int i = 0; i < MAX_DEVICE_PARALLEL; i++) {
+        for (int i = 0; i < MAX_DEVICE_PARALLEL; i++)
+        {
             deviceIdAmqps = "java-device-client-e2e-test-amqps".concat(i + "-" + uuid);
             deviceListAmqps[i] = Device.createFromId(deviceIdAmqps, null, null);
             registryManager.addDevice(deviceListAmqps[i]);
@@ -142,7 +145,8 @@ public class SendMessagesIT
         registryManager.removeDevice(deviceMqtt.getDeviceId());
         registryManager.removeDevice(deviceMqttWs.getDeviceId());
 
-        for (int i = 0; i < MAX_DEVICE_PARALLEL; i++) {
+        for (int i = 0; i < MAX_DEVICE_PARALLEL; i++)
+        {
             registryManager.removeDevice(deviceListAmqps[i].getDeviceId());
         }
     }
@@ -163,8 +167,10 @@ public class SendMessagesIT
         @Override
         public void run()
         {
-            for (int i = 0; i < this.numConnectionsPerDevice; i++) {
-                try {
+            for (int i = 0; i < this.numConnectionsPerDevice; i++)
+            {
+                try
+                {
                     this.openConnection();
                     this.sendMessages();
                     this.closeConnection();
@@ -200,15 +206,17 @@ public class SendMessagesIT
             client.open();
         }
 
-        public void sendMessages() {
+        public void sendMessages()
+        {
             for (int i = 0; i < numMessagesPerConnection; ++i)
             {
                 try
                 {
                     Message msgSend = new Message(messageString);
                     msgSend.setProperty("messageCount", Integer.toString(i));
-                    for (int j = 0; j < numKeys; j++) {
-                        msgSend.setProperty("key"+j, "value"+j);
+                    for (int j = 0; j < numKeys; j++)
+                    {
+                        msgSend.setProperty("key" + j, "value" + j);
                     }
                     msgSend.setExpiryTime(5000);
 
@@ -217,7 +225,7 @@ public class SendMessagesIT
                     client.sendEventAsync(msgSend, callback, messageSent);
 
                     Integer waitDuration = 0;
-                    while(!messageSent.getResult())
+                    while (!messageSent.getResult())
                     {
                         Thread.sleep(RETRY_MILLISECONDS);
                         if ((waitDuration += RETRY_MILLISECONDS) > sendTimeout)
@@ -230,8 +238,7 @@ public class SendMessagesIT
                     {
                         Assert.fail("Sending message over AMQPS protocol failed");
                     }
-                }
-                catch (Exception e)
+                } catch (Exception e)
                 {
                     Assert.fail("Sending message over AMQPS protocol throws " + e);
                 }
@@ -243,6 +250,7 @@ public class SendMessagesIT
             client.closeNow();
         }
     }
+
     @Test
     public void SendMessagesOverAmqps() throws Exception
     {
@@ -259,17 +267,17 @@ public class SendMessagesIT
         CountDownLatch cdl = new CountDownLatch(deviceListAmqps.length);
 
         Integer count = 0;
-        for(Device deviceAmqps: deviceListAmqps)
+        for (Device deviceAmqps : deviceListAmqps)
         {
             Thread thread = new Thread(
-                new testDevice(
-                    deviceAmqps,
-                    IotHubClientProtocol.AMQPS,
-                    NUM_CONNECTIONS_PER_DEVICE,
-                    NUM_MESSAGES_PER_CONNECTION,
-                    NUM_KEYS_PER_MESSAGE,
-                    SEND_TIMEOUT_MILLISECONDS,
-                    cdl));
+                    new testDevice(
+                            deviceAmqps,
+                            IotHubClientProtocol.AMQPS,
+                            NUM_CONNECTIONS_PER_DEVICE,
+                            NUM_MESSAGES_PER_CONNECTION,
+                            NUM_KEYS_PER_MESSAGE,
+                            SEND_TIMEOUT_MILLISECONDS,
+                            cdl));
             thread.start();
             threads.add(thread);
             count++;
@@ -277,7 +285,7 @@ public class SendMessagesIT
 
         cdl.await();
 
-        if(!succeed.get())
+        if (!succeed.get())
         {
             Assert.fail("Sending message over AMQP protocol in parallel failed");
         }

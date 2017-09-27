@@ -60,12 +60,6 @@ cd %build-root%
 
 REM -- Java SDK --
 cd %build-root%
-call mvn install -DskipITs=false
-if errorlevel 1 goto :eof
-cd %build-root%
-
-REM -- Android Test Build --
-cd %build-root%\iot-e2e-tests\android
-call buildAndRunTests
+call mvn install -DskipITs=false -DskipAndroidTests
 if errorlevel 1 goto :eof
 cd %build-root%
