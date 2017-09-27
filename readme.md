@@ -33,11 +33,17 @@ Visit [Azure IoT Dev Center](http://azure.com/iotdev) to learn more about develo
 | Device Provisioning Service                           | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: |                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 ## How to use the Azure IoT SDKs for Java
+[ATTN:CONTENT REQUIRED - doc/java-devbox-setup.md does not use the recursive switch in its clone instructions. Please update that doc or remove it from the instructinos here.]
+
 Devices and data sources in an IoT solution can range from a simple network-connected sensor to a powerful, standalone computing device. Devices may have limited processing capability, memory, communication bandwidth, and communication protocol support. The IoT device SDKs enable you to implement client applications for a wide variety of devices.
 * On Linux and Windows:
    * **Using Maven**: the simplest way to use the Azure IoT SDKs for Java to develop apps is to leverage Maven packages:
       * [Device SDK][device-maven]
       * [Service SDK][service-maven]
+   * **Clone the repository**: The repository is using [GitHub Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) for its dependencies. In order to automatically clone these submodules, you need to use the --recursive option as described here:
+   ```
+    git clone --recursive https://github.com/Azure/azure-iot-sdk-java.git  
+   ```
    * **Working with the SDKs code**: if you are working with the SDKs code to modify it or contribute changes, then you can clone the repository and build the libraries:
       * [Build Device SDK from code][device-code]
       * [Build Service SDK from code][service-code]
@@ -91,11 +97,6 @@ Here is what you can expect Microsoft Support to be able to help with:
 ### /device
 
 Contains Azure IoT Hub client components that provide the raw messaging capabilities of the library. Refer to the API documentation and samples for information on how to use it.
-
-   * build/Windows: Contains  batch file that is used to generate the library binaries.
-   * iot-device-client: contains the client library for Java.
-   * iot-device-samples: contains simple samples.
-
 
 ### /doc
 
