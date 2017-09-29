@@ -5,6 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
@@ -13,12 +14,14 @@ import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -32,7 +35,15 @@ public class ReceiveMessagesIT
     private final static String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
     private final static Long ONE_SECOND_POLLING_INTERVAL = 1000L;
 
-    private static String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
+    private static final String PUBLIC_KEY_CERTIFICATE_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_CERT_BASE64";
+    private static final String PRIVATE_KEY_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_PRIVATE_KEY_BASE64";
+    private static final String X509_THUMBPRINT_ENV_VAR_NAME = "IOTHUB_E2E_X509_THUMBPRINT";
+
+    private static String publicKeyCert;
+    private static String privateKey;
+    private static String x509Thumbprint;
+
+    private static String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
     private static RegistryManager registryManager;
     private static Device deviceHttps;
@@ -40,6 +51,7 @@ public class ReceiveMessagesIT
     private static Device deviceMqtt;
     private static Device deviceMqttWs;
     private static Device deviceAmqpsWS;
+    private static Device deviceMqttX509;
 
     private static ServiceClient serviceClient;
 
@@ -52,15 +64,17 @@ public class ReceiveMessagesIT
     @BeforeClass
     public static void setUp() throws Exception
     {
-        Map<String, String> env = System.getenv();
-        for (String envName : env.keySet())
-        {
-            if (envName.equals(iotHubonnectionStringEnvVarName.toString()))
-            {
-                iotHubConnectionString = env.get(envName);
-            }
-        }
-        
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        String privateKeyBase64Encoded = Tools.retrieveEnvironmentVariableValue(PRIVATE_KEY_BASE64_ENCODED_ENV_VAR_NAME);
+        String publicKeyCertBase64Encoded = Tools.retrieveEnvironmentVariableValue(PUBLIC_KEY_CERTIFICATE_BASE64_ENCODED_ENV_VAR_NAME);
+        x509Thumbprint = Tools.retrieveEnvironmentVariableValue(X509_THUMBPRINT_ENV_VAR_NAME);
+
+        byte[] publicCertBytes = Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes());
+        publicKeyCert = new String(publicCertBytes);
+
+        byte[] privateKeyBytes = Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes());
+        privateKey = new String(privateKeyBytes);
+
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         String uuid = UUID.randomUUID().toString();
         String deviceIdHttps = "java-device-client-e2e-test-https".concat("-" + uuid);
@@ -68,18 +82,23 @@ public class ReceiveMessagesIT
         String deviceIdMqtt = "java-device-client-e2e-test-mqtt".concat("-" + uuid);
         String deviceIdMqttWs = "java-device-client-e2e-test-mqttws".concat("-" + uuid);
         String deviceIdAmqpsWS = "java-device-client-e2e-test-amqpsws".concat("-" + uuid);
+        String deviceIdMqttX509 = "java-device-client-e2e-test-mqtt-x509".concat("-" + uuid);
 
         deviceHttps = Device.createFromId(deviceIdHttps, null, null);
         deviceAmqps = Device.createFromId(deviceIdAmqps, null, null);
         deviceMqtt = Device.createFromId(deviceIdMqtt, null, null);
         deviceMqttWs = Device.createFromId(deviceIdMqttWs, null, null);
         deviceAmqpsWS = Device.createFromId(deviceIdAmqpsWS, null, null);
+        deviceMqttX509 = Device.createDevice(deviceIdMqttX509, AuthenticationType.SELF_SIGNED);
+
+        deviceMqttX509.setThumbprint(x509Thumbprint, x509Thumbprint);
 
         registryManager.addDevice(deviceHttps);
         registryManager.addDevice(deviceAmqps);
         registryManager.addDevice(deviceMqtt);
         registryManager.addDevice(deviceMqttWs);
         registryManager.addDevice(deviceAmqpsWS);
+        registryManager.addDevice(deviceMqttX509);
 
         messageProperties = new HashMap<>(3);
         messageProperties.put("name1", "value1");
@@ -99,6 +118,8 @@ public class ReceiveMessagesIT
         registryManager.removeDevice(deviceMqtt.getDeviceId());
         registryManager.removeDevice(deviceMqttWs.getDeviceId());
         registryManager.removeDevice(deviceAmqpsWS.getDeviceId());
+        registryManager.removeDevice(deviceMqttX509.getDeviceId());
+        registryManager.close();
     }
 
     @Test
@@ -182,6 +203,23 @@ public class ReceiveMessagesIT
 
         sendMessageToDevice(deviceAmqpsWS.getDeviceId(), "AMQPS_WS");
         waitForMessageToBeReceived(messageReceived, "AMQPS_WS");
+
+        Thread.sleep(200);
+        client.closeNow();
+    }
+
+    @Test
+    public void receiveMessagesOverMQTTIncludingPropertiesUsingX509Auth() throws Exception
+    {
+        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqttX509), IotHubClientProtocol.MQTT, publicKeyCert, false, privateKey, false);
+        client.open();
+
+        Success messageReceived = new Success();
+        com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallbackMqtt();
+        client.setMessageCallback(callback, messageReceived);
+
+        sendMessageToDevice(deviceMqttX509.getDeviceId(),"MQTT");
+        waitForMessageToBeReceived(messageReceived, "MQTT");
 
         Thread.sleep(200);
         client.closeNow();

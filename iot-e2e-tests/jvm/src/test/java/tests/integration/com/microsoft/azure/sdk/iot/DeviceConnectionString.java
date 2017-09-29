@@ -6,6 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 
 public class DeviceConnectionString
 {
@@ -26,7 +27,16 @@ public class DeviceConnectionString
 
         stringBuilder.append(hostName);
         stringBuilder.append(String.format("DeviceId=%s", device.getDeviceId()));
-        stringBuilder.append(String.format(";SharedAccessKey=%s", device.getPrimaryKey()));
+
+        if (device.getAuthenticationType() == AuthenticationType.SAS)
+        {
+            stringBuilder.append(String.format(";SharedAccessKey=%s", device.getPrimaryKey()));
+        }
+        else
+        {
+            stringBuilder.append(";x509=true");
+        }
+
         return stringBuilder.toString();
     }
 }

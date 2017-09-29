@@ -136,7 +136,7 @@ public class MqttConnectionTest
         //assert
     }
 
-    //Tests_SRS_MQTTCONNECTION_25_001: [The constructor shall throw InvalidParameter Exception if any of the input parameters are null .]
+    //Tests_SRS_MQTTCONNECTION_25_001: [The constructor shall throw InvalidParameter Exception if any of the input parameters are null other than password.]
     @Test (expected = IllegalArgumentException.class)
     public void constructorWithNullServerUriThrows() throws Exception
     {
@@ -153,12 +153,6 @@ public class MqttConnectionTest
     public void constructorWithNullUserNameThrows() throws Exception
     {
         final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, null, PASSWORD, mockIotHubSSLContext);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithNullPasswordThrows() throws Exception
-    {
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, USER_NAME, null, mockIotHubSSLContext);
     }
 
     //Tests_SRS_MQTTCONNECTION_25_002: [The constructor shall throw InvalidParameter Exception if SERVER_URI, CLIENT_ID, USER_NAME, PASSWORD are empty.]
@@ -178,12 +172,6 @@ public class MqttConnectionTest
     public void constructorWithEmptyUserNameThrows() throws Exception
     {
         final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, "", PASSWORD, mockIotHubSSLContext);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithEmptyPasswordThrows() throws Exception
-    {
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, USER_NAME, "", mockIotHubSSLContext);
     }
 
     @Test (expected = IllegalArgumentException.class)

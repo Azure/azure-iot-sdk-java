@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 
 import java.util.HashMap;
@@ -65,35 +64,40 @@ public final class IotHubSasToken
      * Constructor. Generates a SAS token that grants access to an IoT Hub for
      * the specified amount of time.
      *
-     * @param config the device client config.
-     * @param expiryTime the time, as a UNIX timestamp, after which the token
-     * will become invalid.
+     * @param hostname the hostname of the hub the token is for
+     * @param deviceId The id of the device the token is for
+     * @param deviceKey The device key for connecting the device to the hub with. May be null if sharedAccessToken is not.
+     * @param sharedAccessToken The sas token for connecting the device to the hub with. May be null if deviceKey is not.
+     * @param expiryTime the time, as a UNIX timestamp, after which the token will become invalid
      */
-    public IotHubSasToken(DeviceClientConfig config, long expiryTime)
+    IotHubSasToken(String hostname, String deviceId, String deviceKey, String sharedAccessToken, long expiryTime)
     {
         // Codes_SRS_IOTHUBSASTOKEN_25_005: [**If device key is provided then the signature shall be correctly computed and set.**]**
-        if (config.getDeviceKey() != null) {
+        if (deviceKey != null) {
             // Tests_SRS_IOTHUBSASTOKEN_11_002: [**The constructor shall save all input parameters to member variables.**]
-            this.scope = IotHubUri.getResourceUri(config.getIotHubHostname(), config.getDeviceId());
+            this.scope = IotHubUri.getResourceUri(hostname, deviceId);
             this.expiryTime = expiryTime;
 
-            Signature sig = new Signature(this.scope, this.expiryTime, config.getDeviceKey());
+            Signature sig = new Signature(this.scope, this.expiryTime, deviceKey);
             this.signature = sig.toString();
         }
         // Codes_SRS_IOTHUBSASTOKEN_25_007: [**If device key is not provided in config then the SASToken from config shall be used.**]**
-        else if(config.getSharedAccessToken() != null)
+        else if(sharedAccessToken != null)
         {
-            this.sasToken = config.getSharedAccessToken();
+            this.sasToken = sharedAccessToken;
             this.expiryTime = getExpiryTimeFromToken(this.sasToken);
 
             // Codes_SRS_IOTHUBSASTOKEN_25_008: [**The required format for the SAS Token shall be verified and IllegalArgumentException is thrown if unmatched.**]**
             if (!isSasFormat())
+            {
                 throw new IllegalArgumentException("SasToken format is invalid");
+            }
 
             // Codes_SRS_IOTHUBSASTOKEN_34_009: [**The SAS Token shall be verified as not expired and SecurityException will be thrown if it is expired.**]**
-            if (isSasTokenExpired(this.sasToken))
+            if (isExpired(this.sasToken))
+            {
                 throw new SecurityException("Your SasToken has expired");
-
+            }
         }
         else
         {
@@ -114,9 +118,13 @@ public final class IotHubSasToken
         if (this.sasToken != null)
         {
             if(isSasFormat())
+            {
                 return this.sasToken;
+            }
             else
+            {
                 throw new IllegalArgumentException("SasToken format is invalid");
+            }
         }
         else if(this.signature != null && this.expiryTime != 0L && this.scope!= null)
         {
@@ -124,8 +132,11 @@ public final class IotHubSasToken
             return buildSasToken();
         }
         else
+        {
             return null;
+        }
     }
+
     private boolean isSasFormat()
     {
         /*
@@ -141,7 +152,9 @@ public final class IotHubSasToken
                 if(fieldValues.containsKey(ExpiryTimeFieldKey)
                         && fieldValues.containsKey(SignatureFieldKey)
                         && fieldValues.containsKey(ResourceURIFieldKey))
+                {
                     return true;
+                }
             }
         }
         return false;
@@ -154,7 +167,7 @@ public final class IotHubSasToken
      * @return a boolean true if the SasToken is still valid,
      * or false if it is expired.
      */
-    public static boolean isSasTokenExpired(String sasToken)
+    public static boolean isExpired(String sasToken)
     {
         //expiry time is measured in seconds since Unix Epoch
         Long currentTime = System.currentTimeMillis() / 1000;
@@ -168,7 +181,7 @@ public final class IotHubSasToken
      * @return a boolean true if the SasToken is still valid,
      * or false if it is expired.
      */
-    public boolean isSasTokenExpired()
+    boolean isExpired()
     {
         return (System.currentTimeMillis() / 1000) >= this.expiryTime ;
     }
@@ -179,7 +192,7 @@ public final class IotHubSasToken
      * @param sasToken the token to return the expiry time
      * @return a long with the expiry time in seconds.
      */
-    public static Long getExpiryTimeFromToken(String sasToken)
+    private static Long getExpiryTimeFromToken(String sasToken)
     {
         Map<String, String> fieldValues = extractFieldValues(sasToken);
         return Long.parseLong(fieldValues.get(ExpiryTimeFieldKey));

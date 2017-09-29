@@ -97,7 +97,7 @@ public final class DeviceIO
      * {@code protocol} are {@code null}.
      */
     DeviceIO(DeviceClientConfig config, IotHubClientProtocol protocol,
-                    long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
+             long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
     {
         /* Codes_SRS_DEVICE_IO_21_002: [If the `config` is null, the constructor shall throw an IllegalArgumentException.] */
         if(config == null)
@@ -160,7 +160,7 @@ public final class DeviceIO
      * Starts asynchronously sending and receiving messages from an IoT Hub. If
      * the client is already open, the function shall do nothing.
      *
-     * @throws IOException if a connection to an IoT Hub is cannot be established.
+     * @throws IOException if a connection to an IoT Hub cannot be established.
      */
     public void open() throws IOException
     {
@@ -169,50 +169,6 @@ public final class DeviceIO
         {
             return;
         }
-
-        if (this.config.getPathToCertificate() == null && this.config.getUserCertificateString() == null)
-        {
-            try
-            {
-                /* Codes_SRS_DEVICE_IO_21_008: [The open shall create default IotHubSSL context if no certificate input was provided by user and save it by calling setIotHubSSLContext.] */
-                IotHubSSLContext iotHubSSLContext = new IotHubSSLContext();
-                this.config.setIotHubSSLContext(iotHubSSLContext);
-            }
-            catch (Exception e)
-            {
-                /* Codes_SRS_DEVICE_IO_21_011: [If an exception is thrown when creating a SSL context then Open shall throw IOException to the user indicating the failure] */
-                throw new IOException(e.getCause());
-            }
-        }
-        else if (this.config.getPathToCertificate() != null)
-        {
-            try
-            {
-                /* Codes_SRS_DEVICE_IO_21_009: [The open shall create IotHubSSL context with the certificate path if input was provided by user and save it by calling setIotHubSSLContext.] */
-                IotHubSSLContext iotHubSSLContext = new IotHubSSLContext(this.config.getPathToCertificate(), true);
-                this.config.setIotHubSSLContext(iotHubSSLContext);
-            }
-            catch (Exception e)
-            {
-                /* Codes_SRS_DEVICE_IO_21_011: [If an exception is thrown when creating a SSL context then open shall throw IOException to the user indicating the failure] */
-                throw new IOException(e.getCause());
-            }
-        }
-        else
-        {
-            try
-            {
-                /* Codes_SRS_DEVICE_IO_21_010: [The open shall create IotHubSSL context with the certificate String if input was provided by user and save it by calling setIotHubSSLContext.] */
-                IotHubSSLContext iotHubSSLContext = new IotHubSSLContext(this.config.getUserCertificateString(), false);
-                this.config.setIotHubSSLContext(iotHubSSLContext);
-            }
-            catch (Exception e)
-            {
-                /* Codes_SRS_DEVICE_IO_21_011: [If an exception is thrown when creating a SSL context then open shall throw IOException to the user indicating the failure] */
-                throw new IOException(e.getCause());
-            }
-        }
-
 
         /* Codes_SRS_DEVICE_IO_21_012: [The open shall open the transport to communicate with an IoT Hub.] */
         /* Codes_SRS_DEVICE_IO_21_015: [If an error occurs in opening the transport, the open shall throw an IOException.] */
@@ -456,7 +412,7 @@ public final class DeviceIO
 
     /**
      * Registers a callback with the configured transport to be executed whenever the connection to the device is lost or established.
-     * 
+     *
      * @param callback the callback to be called.
      * @param callbackContext a context to be passed to the callback. Can be
      * {@code null} if no callback is provided.

@@ -3,14 +3,12 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttDeviceTwin;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttMessaging;
-
 import mockit.*;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -1052,7 +1050,10 @@ public class MqttTest {
                 mockMqttAsyncClient.isConnected();
                 result = false;
 
-                IotHubSasToken.isSasTokenExpired(anyString);
+                mockDeviceClientConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+
+                IotHubSasToken.isExpired(anyString);
                 result = false;
 
                 mockMqttAsyncClient.isConnected();
@@ -1071,6 +1072,7 @@ public class MqttTest {
         try
         {
             mockMqtt = instantiateMqtt(true);
+            Deencapsulation.invoke(mockMqtt, "setDeviceClientConfig", mockDeviceClientConfig);
             mockMqtt.connectionLost(t);
         }
         catch (Exception e)
@@ -1094,7 +1096,6 @@ public class MqttTest {
     /*
     **Tests_SRS_Mqtt_25_029: [**The function shall notify all its concrete classes by calling abstract method onReconnectComplete at the exit of the function**]**
     */
-
     @Test
     public void connectionLostAttemptsToReconnectWithUserSuppliedSharedKeyBasedSASTokenAlreadyExpired() throws IOException, MqttException
     {
@@ -1108,26 +1109,18 @@ public class MqttTest {
             {
                 mockMqttAsyncClient.isConnected();
                 result = false;
+                mockDeviceClientConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockMqttConnectionOptions.getPassword();
                 result = EXPECTED_EXPIRED_SAS_TOKEN.toCharArray();
-                IotHubSasToken.isSasTokenExpired(EXPECTED_EXPIRED_SAS_TOKEN);
+                IotHubSasToken.isExpired(EXPECTED_EXPIRED_SAS_TOKEN);
                 result = true; // SAS token has expired
-                mockDeviceClientConfig.getDeviceKey();
+                mockDeviceClientConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = anyString;
-            }
-        };
 
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceClientConfig.getSharedAccessToken();
+                mockDeviceClientConfig.getSasTokenAuthentication().getRenewedSasToken();
                 result = EXPECTED_EXPIRED_SAS_TOKEN;
-            }
-        };
 
-        new StrictExpectations()
-        {
-            {
                 mockMqttConnectionOptions.setPassword((char[])any);
                 mockMqttAsyncClient.isConnected();
                 result = false;
@@ -1143,7 +1136,7 @@ public class MqttTest {
         try
         {
             mockMqtt = instantiateMqtt(true);
-            Deencapsulation.invoke(mockMqtt, "setDeviceClientConfig", mockDeviceClientConfig);
+            Deencapsulation.setField(mockMqtt, "deviceClientConfig", mockDeviceClientConfig);
             mockMqtt.connectionLost(t);
         }
         catch (Exception e)
@@ -1173,10 +1166,13 @@ public class MqttTest {
                 mockMqttAsyncClient.isConnected();
                 result = false;
 
-                IotHubSasToken.isSasTokenExpired(anyString);
+                mockDeviceClientConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+
+                IotHubSasToken.isExpired(anyString);
                 result = true; // User specified SAS token has expired
 
-                mockDeviceClientConfig.getDeviceKey();
+                mockDeviceClientConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = null;
             }
         };
@@ -1214,7 +1210,10 @@ public class MqttTest {
                 mockMqttAsyncClient.isConnected();
                 result = false;
 
-                IotHubSasToken.isSasTokenExpired(anyString);
+                mockDeviceClientConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+
+                IotHubSasToken.isExpired(anyString);
                 result = false;
 
                 mockMqttAsyncClient.isConnected();
@@ -1223,10 +1222,14 @@ public class MqttTest {
                 mockMqttAsyncClient.connect(mockMqttConnectionOptions);
                 result = mockMqttException;
 
+
                 mockMqttAsyncClient.isConnected();
                 result = false;
 
-                IotHubSasToken.isSasTokenExpired(anyString);
+                mockDeviceClientConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+
+                IotHubSasToken.isExpired(anyString);
                 result = false;
 
                 mockMqttAsyncClient.isConnected();
@@ -1245,6 +1248,7 @@ public class MqttTest {
         try
         {
             mockMqtt = instantiateMqtt(true);
+            Deencapsulation.invoke(mockMqtt, "setDeviceClientConfig", mockDeviceClientConfig);
             mockMqtt.connectionLost(t);
         }
         catch (Exception e)
@@ -1256,7 +1260,7 @@ public class MqttTest {
 
     // Tests_SRS_Mqtt_34_021: [If the call peekMessage returns null then this method shall do nothing and return null]
     @Test
-    public void receiveReturnsNullMessageIfTopicNotFound(@Mocked final IotHubSSLContext iotHubSSLContext) throws IOException, MqttException
+    public void receiveReturnsNullMessageIfTopicNotFound() throws IOException, MqttException
     {
         //can't be initialized to null, so set it as a default message
         baseConstructorExpectations();

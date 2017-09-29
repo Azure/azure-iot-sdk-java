@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device;
+package com.microsoft.azure.sdk.iot.device.auth;
 
 import java.io.*;
 import java.security.cert.Certificate;
@@ -208,5 +208,4 @@ public class IotHubCertificateManager
         //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_008: [*This method shall save the cert provided by the user a s valid cert to be used to communicate with IotHub.**]**
         this.validCert = cert;
     }
-
 }

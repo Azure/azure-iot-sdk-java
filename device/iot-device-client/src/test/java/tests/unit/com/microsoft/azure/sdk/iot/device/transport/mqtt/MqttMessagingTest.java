@@ -4,7 +4,6 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
@@ -18,7 +17,7 @@ import java.io.IOException;
 import static org.junit.Assert.assertNotNull;
 
 /* Unit tests for MqttMessaging
- * Code coverage: 100% methods, 94% lines
+ * Code coverage: 100% methods, 78% lines
  */
 public class MqttMessagingTest
 {
@@ -30,9 +29,6 @@ public class MqttMessagingTest
 
     @Mocked
     private Message mockMessage;
-
-    @Mocked
-    private IotHubSSLContext mockIotHubSSLContext;
 
     @Mocked
     private MqttConnection mockedMqttConnection;

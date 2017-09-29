@@ -12,6 +12,7 @@ Allows a single logical or physical device to connect to an IoT Hub.
 public final class DeviceClient
 {
     public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException;
+    public DeviceClient(String connString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate) throws IOException, IllegalArgumentException;
 
     public void open() throws IOException;
     public void close() throws IOException;
@@ -50,7 +51,24 @@ public DeviceClient(String connString, IotHubClientProtocol protocol) throws URI
 
 **SRS_DEVICECLIENT_21_005: [**If protocol is null, the function shall throw an IllegalArgumentException.**]**  
 
-**SRS_DEVICECLIENT_34_046: [**If The provided connection string contains an expired SAS token, throw a SecurityException.**]**
+**SRS_DEVICECLIENT_34_055: [**If the provided connection string contains an expired SAS token, a SecurityException shall be thrown.**]**
+
+```java
+public DeviceClient(String connString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate) throws IOException, IllegalArgumentException;
+```
+
+**SRS_DEVICECLIENT_34_058: [**The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.**]**  
+
+**SRS_DEVICECLIENT_34_059: [**The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.**]**  
+
+**SRS_DEVICECLIENT_34_060: [**The constructor shall save the connection configuration using the object DeviceClientConfig.**]**  
+
+**SRS_DEVICECLIENT_34_061: [**If the connection string is null or empty, the function shall throw an IllegalArgumentException.**]**  
+
+**SRS_DEVICECLIENT_34_062: [**If protocol is null, the function shall throw an IllegalArgumentException.**]**  
+
+**SRS_DEVICECLIENT_34_063: [**This function shall save the provided certificate and key within its config.**]**
+
 
 ### open
 
@@ -153,6 +171,9 @@ Options handled by the client:
                                     2. If transport is already open
                                after updating expiry time**.]**
 
+**SRS_DEVICECLIENT_34_065: [**""SetSASTokenExpiryTime" if this option is called when not using sas token authentication, an IllegalStateException shall be thrown.**]**
+
+
 ### startDeviceTwin
 
 ```java
@@ -226,8 +247,6 @@ public void uploadToBlobAsync(String destinationBlobName, InputStream inputStrea
 
 **SRS_DEVICECLIENT_21_052: [**If the `streamLength` is negative, the uploadToBlobAsync shall throw IllegalArgumentException.**]**  
 
-**SRS_DEVICECLIENT_21_053: [**If the `config` do not have a valid IotHubSSLContext, the uploadToBlobAsync shall create and set one.**]**  
-
 **SRS_DEVICECLIENT_21_047: [**If the `destinationBlobName` is null, empty, or not valid, the uploadToBlobAsync shall throw IllegalArgumentException.**]**  
 
 **SRS_DEVICECLIENT_21_048: [**If there is no instance of the FileUpload, the uploadToBlobAsync shall create a new instance of the FileUpload.**]**  
@@ -248,3 +267,18 @@ public void registerConnectionStateCallback(IotHubConnectionStateCallback callba
 **SRS_DEVICECLIENT_99_002: [**The registerConnectionStateCallback shall register the callback even if the client is not open.**]**
 **SRS_DEVICECLIENT_99_003: [**If the callback is null the method shall throw an IllegalArgument exception.**]**
 
+
+### setPrivateKey
+```java
+public void setPrivateKey(String privateKey, boolean isPath);
+```
+
+**SRS_DEVICECLIENT_34_057: [**This method shall save the provided private key in config.**]**
+
+    
+### setPublicKeyCertificate
+```java
+public void setPublicKeyCertificate(String publicKeyCertificate, boolean isPath);
+```
+
+**SRS_DEVICECLIENT_34_056: [**This method shall save the provided public key certificate in config.**]**

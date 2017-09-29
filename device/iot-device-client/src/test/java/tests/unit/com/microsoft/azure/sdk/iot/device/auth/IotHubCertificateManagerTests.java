@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package tests.unit.com.microsoft.azure.sdk.iot.device;
+package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.device.IotHubCertificateManager;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubCertificateManager;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -17,6 +17,12 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+/**
+ * Unit tests for IotHubCertificateManager
+ * Code Coverage:
+ * Methods: 100%
+ * Lines: 100%
+ */
 public class IotHubCertificateManagerTests
 {
 

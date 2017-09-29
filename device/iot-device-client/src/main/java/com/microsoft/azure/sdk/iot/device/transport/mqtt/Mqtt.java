@@ -154,7 +154,7 @@ abstract public class Mqtt implements MqttCallback
                 {
                     throw new InvalidParameterException();
                 }
-                
+
                 if (this.userSpecifiedSASTokenExpiredOnRetry)
                 {
                     /*
@@ -401,36 +401,43 @@ abstract public class Mqtt implements MqttCallback
                     try
                     {
                         currentReconnectionAttempt++;
-                        /*
-                        **Codes_SRS_Mqtt_99_050: [**The function shall check if SAS token has already expired.**]**
-                        */
-                        if (!IotHubSasToken.isSasTokenExpired(new String(this.mqttConnection.getConnectionOptions().getPassword())))
-                        {
-                            connect(); // Try to reconnect
-                        }
-                        else
+                        if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
                         {
                             /*
-                            **Codes_SRS_Mqtt_99_051: [**The function shall check if SAS token in based on user supplied SharedAccessKey.**]**
+                            **Codes_SRS_Mqtt_99_050: [**The function shall check if SAS token has already expired.**]**
                             */
-                            if (this.deviceClientConfig.getDeviceKey() != null)
+                            if (!IotHubSasToken.isExpired(new String(this.mqttConnection.getConnectionOptions().getPassword())))
                             {
-                            /*
-                            **Codes_SRS_Mqtt_99_052: [**The function shall generate a new SAS token.**]**
-                            */
-                                String sasToken = this.deviceClientConfig.getSharedAccessToken();
-                                this.mqttConnection.getConnectionOptions().setPassword(sasToken.toCharArray());
                                 connect(); // Try to reconnect
                             }
                             else
                             {
-                            /*
-                            **Codes_SRS_Mqtt_99_053: [**The function shall set user supplied SAS token expiration flag to true .**]**
-                            */
-                                this.userSpecifiedSASTokenExpiredOnRetry  = true;
-                                return; // no reconnect exit now
-                            }
+                                /*
+                                **Codes_SRS_Mqtt_99_050: [**The function shall check if SAS token has already expired.**]**
+                                */
+                                if (this.deviceClientConfig.getIotHubConnectionString().getSharedAccessKey() != null)
+                                {
+                                   /*
+                                    **Codes_SRS_Mqtt_99_052: [**The function shall generate a new SAS token.**]**
+                                    */
+                                    String sasToken = this.deviceClientConfig.getSasTokenAuthentication().getRenewedSasToken();
+                                    this.mqttConnection.getConnectionOptions().setPassword(sasToken.toCharArray());
 
+                                    connect(); // Try to reconnect
+                                }
+                                else
+                                {
+                                    /*
+                                    **Codes_SRS_Mqtt_99_053: [**The function shall set user supplied SAS token expiration flag to true .**]**
+                                    */
+                                    this.userSpecifiedSASTokenExpiredOnRetry  = true;
+                                    return; // no reconnect exit now
+                                }
+                            }
+                        }
+                        else if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+                        {
+                            connect(); // Try to reconnect
                         }
                     }
                     catch (IOException e)
@@ -464,7 +471,6 @@ abstract public class Mqtt implements MqttCallback
      * @param topic the topic on which message arrived.
      * @param mqttMessage  the message arrived on the Mqtt broker.
      */
-
     @Override
     public void messageArrived(String topic, MqttMessage mqttMessage)
     {
@@ -478,7 +484,6 @@ abstract public class Mqtt implements MqttCallback
      * Event fired when the message arrived on the MQTT broker.
      * @param iMqttDeliveryToken the MqttDeliveryToken for which the message was successfully sent.
      */
-
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
     {
@@ -592,7 +597,7 @@ abstract public class Mqtt implements MqttCallback
             }
         }
     }
-    
+
     /**
      * Set device client configuration used for SAS token validation.
      * @param deviceConfig is the device client configuration to be set

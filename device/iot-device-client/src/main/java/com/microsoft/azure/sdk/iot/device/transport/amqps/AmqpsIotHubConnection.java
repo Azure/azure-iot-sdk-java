@@ -7,7 +7,6 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import org.apache.qpid.proton.Proton;
@@ -94,16 +93,21 @@ public final class AmqpsIotHubConnection extends BaseHandler
         {
             throw new IllegalArgumentException("deviceID cannot be null or empty.");
         }
-        if(config.getIotHubName() == null || config.getIotHubName().length() == 0)
+        if (config.getIotHubName() == null || config.getIotHubName().length() == 0)
         {
             throw new IllegalArgumentException("hubName cannot be null or empty.");
         }
-        if(config.getDeviceKey() == null || config.getDeviceKey().length() == 0)
+        if (config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
-            if(config.getSharedAccessToken() == null || config.getSharedAccessToken().length() == 0)
-
-                 throw new IllegalArgumentException("Both deviceKey and shared access signature cannot be null or empty.");
+            if (config.getIotHubConnectionString().getSharedAccessKey() == null || config.getIotHubConnectionString().getSharedAccessKey().isEmpty())
+            {
+                if(config.getSasTokenAuthentication().getCurrentSasToken() == null || config.getSasTokenAuthentication().getCurrentSasToken().isEmpty())
+                {
+                    throw new IllegalArgumentException("Both deviceKey and shared access signature cannot be null or empty.");
+                }
+            }
         }
+
         if (amqpsDeviceOperationsList == null)
         {
             throw new IllegalArgumentException("amqpsDeviceOperationsList cannot be null or empty.");
@@ -163,7 +167,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      * Opens the {@link AmqpsIotHubConnection}.
      * <p>
      *     If the current connection is not open, this method
-     *     will create a new {@link IotHubSasToken}. This method will
+     *     will create a new SasToken. This method will
      *     start the {@link Reactor}, set the connection to open and make it ready for sending.
      * </p>
      *
@@ -256,7 +260,15 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     private void openAsync() throws IOException
     {
-        this.sasToken = this.config.getSharedAccessToken();
+        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
+        {
+            this.sasToken = this.config.getSasTokenAuthentication().getRenewedSasToken();
+        }
+        else
+        {
+            //Codes_SRS_AMQPSIOTHUBCONNECTION_34_043: [If the config is not using sas token authentication, this function shall throw an IOException.]
+            throw new IOException("AMQPS operations do not support using x509 authentication");
+        }
 
         if (this.reactor == null)
         {
@@ -473,8 +485,15 @@ public final class AmqpsIotHubConnection extends BaseHandler
             Sasl sasl = transport.sasl();
             sasl.plain(this.userName, this.sasToken);
 
-            SslDomain domain = makeDomain();
-            transport.ssl(domain);
+            try
+            {
+                SslDomain domain = makeDomain();
+                transport.ssl(domain);
+            }
+            catch (IOException e)
+            {
+                logger.LogDebug("onConnectionBound has thrown exception while creating ssl context: %s", e.getMessage());
+            }
         }
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
@@ -780,15 +799,20 @@ public final class AmqpsIotHubConnection extends BaseHandler
      * Create Proton SslDomain object from Address using the given Ssl mode
      * @return the created Ssl domain
      */
-    private SslDomain makeDomain()
+    private SslDomain makeDomain() throws IOException
     {
         SslDomain domain = Proton.sslDomain();
+        domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
+        domain.init(SslDomain.Mode.CLIENT);
+
         /*
         Codes_SRS_AMQPSIOTHUBCONNECTION_25_049: [**The event handler shall set the SSL Context to IOTHub SSL context containing valid certificates.**]**
          */
-        domain.setSslContext(this.config.getIotHubSSLContext().getIotHubSSlContext());
-        domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
-        domain.init(SslDomain.Mode.CLIENT);
+        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
+        {
+            domain.setSslContext(this.config.getSasTokenAuthentication().getSSLContext());
+        }
+
         return domain;
     }
 
