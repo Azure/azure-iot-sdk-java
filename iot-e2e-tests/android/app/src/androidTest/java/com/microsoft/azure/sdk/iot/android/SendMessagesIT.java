@@ -67,6 +67,8 @@ public class SendMessagesIT
 
     private static Device[] deviceListAmqps = new Device[MAX_DEVICE_PARALLEL];
 
+    private static String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
+
     private static String iotHubConnectionString = null;
 
     //How much messages each device will send to the hub for each connection.
@@ -91,9 +93,9 @@ public class SendMessagesIT
 
             if (extras != null)
             {
-                if (extras.containsKey("IOTHUB_CONNECTION_STRING"))
+                if (extras.containsKey(iotHubonnectionStringEnvVarName)
                 {
-                    iotHubConnectionString = extras.getString("IOTHUB_CONNECTION_STRING");
+                    iotHubConnectionString = extras.getString(iotHubonnectionStringEnvVarName);
                     Log.d("Test Log", "connString " + iotHubConnectionString);
                 }
                 else

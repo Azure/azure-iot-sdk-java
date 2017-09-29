@@ -60,6 +60,6 @@ cd %build-root%
 
 REM -- Java SDK --
 cd %build-root%
-call mvn install -DskipITs=false -DskipAndroidTests
+call mvn install -DskipITs=false
 if errorlevel 1 goto :eof
 cd %build-root%
