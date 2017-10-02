@@ -63,6 +63,9 @@ public ResponseMessage sendEvent(HttpsMessage msg) throws IOException;
 
 **SRS_HTTPSIOTHUBCONNECTION_34_055: [**This function shall retrieve a sas token from its config to use in the https request header.**]**
 
+**SRS_HTTPSIOTHUBCONNECTION_34_059: [**If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.**]**
+
+
 ### sendHttpsMessage
 
 ```Java
@@ -94,6 +97,8 @@ public ResponseMessage sendHttpsMessage(HttpsMessage httpsMessage, HttpsMethod h
 **SRS_HTTPSIOTHUBCONNECTION_34_053: [**If the SAS token used by this has expired, the function shall return a ResponseMessage object with the IotHubStatusCode UNAUTHORIZED.**]**
 
 **SRS_HTTPSIOTHUBCONNECTION_34_056: [**This function shall retrieve a sas token from its config to use in the https request header.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_34_060: [**If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.**]**
 
 
 ### receiveMessage
@@ -127,6 +132,8 @@ public Message receiveMessage() throws IOException;
 **SRS_HTTPSIOTHUBCONNECTION_34_054: [**If the SAS token used by this has expired, the function shall return a Message object with a body of "Your sas token has expired".**]**
 
 **SRS_HTTPSIOTHUBCONNECTION_34_057: [**This function shall retrieve a sas token from its config to use in the https request header.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_34_061: [**If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.**]**
 
 
 ### sendMessageResult
@@ -168,3 +175,6 @@ public void sendMessageResult(IotHubMessageResult result) throws IOException;
 **SRS_HTTPSIOTHUBCONNECTION_11_039: [**If the function is called before receiveMessage() returns a message, the function shall throw an IllegalStateException.**]**
 
 **SRS_HTTPSIOTHUBCONNECTION_34_058: [**If the saved SAS token for this connection has expired and cannot be renewed, this function shall throw a SecurityException.**]**
+
+**SRS_HTTPSIOTHUBCONNECTION_34_062: [**If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.**]**
+
