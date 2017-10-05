@@ -153,7 +153,7 @@ public class DeviceTwinTest
                                                 7. Key as If-Match and value as '*'  **]**
      **Tests_SRS_DEVICETWIN_25_009: [** The function shall send the created request and get the response **]**
      **Tests_SRS_DEVICETWIN_25_011: [** The function shall deserialize the payload by calling updateTwin Api on the twin object **]**
-     **Tests_SRS_DEVICETWIN_25_012: [** The function shall set tags, desired property map, reported property map on the user device **]**
+     **Tests_SRS_DEVICETWIN_25_012: [** The function shall set eTag, tags, desired property map, reported property map on the user device **]**
      */
     @Test
     public void getTwinSucceeds(@Mocked DeviceTwinDevice mockedDevice) throws Exception
@@ -190,8 +190,10 @@ public class DeviceTwinTest
                 mockedTwinParser.updateTwin(anyString);
                 times = 1;
                 Deencapsulation.invoke(mockedDevice, "getTwinParser");
-                times = 4;
+                times = 5;
                 mockedTwinParser.getTagsMap();
+                times = 1;
+                Deencapsulation.invoke(mockedDevice, "setETag", anyString);
                 times = 1;
                 Deencapsulation.invoke(mockedDevice, "setTags", testMap);
                 times = 1;
@@ -1236,6 +1238,7 @@ public class DeviceTwinTest
     {
         //arrange
         final Integer version = 15;
+        final String etag = "validEtag";
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
         final String expectedString = "testJsonAsNext";
@@ -1259,6 +1262,8 @@ public class DeviceTwinTest
                 result = "testDeviceID";
                 mockedTwinParser.getVersion();
                 result = version;
+                mockedTwinParser.getETag();
+                result = etag;
                 mockedTwinParser.getTagsMap();
                 result = tags;
                 mockedTwinParser.getDesiredPropertyMap();
@@ -1287,6 +1292,7 @@ public class DeviceTwinTest
         assertNotNull(result.getDesiredProperties());
 
         assertEquals(version, result.getVersion());
+        assertEquals(etag, result.getETag());
         assetEqualSetAndMap(result.getTags(), tags);
         assetEqualSetAndMap(result.getDesiredProperties(), dp);
         assetEqualSetAndMap(result.getReportedProperties(), rp);

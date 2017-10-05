@@ -142,6 +142,10 @@ public URL getUrlQuery(String jobType, String jobStatus) throws MalformedURLExce
 ```
 **SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_022: [** The function shall create a URL object from the given jobId using the following format: `https:[hostname]/jobs/v2/query?jobType=<>&jobStatus=<>&api-version=2016-11-14` **]**
 
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_024: [** If the jobType is null or empty, the function shall not include the jobType in the URL **]**
+
+**SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_025: [** If the jobStatus is null or empty, the function shall not include the jobStatus in the URL **]**
+
 
 ### getUrlJobsCancel
 

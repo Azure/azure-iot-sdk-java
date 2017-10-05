@@ -98,8 +98,9 @@ public class DeviceTwin
         device.getTwinParser().updateTwin(twin);
 
         /*
-        **Codes_SRS_DEVICETWIN_25_012: [** The function shall set tags, desired property map, reported property map on the user device **]**
+        **Codes_SRS_DEVICETWIN_25_012: [** The function shall set eTag, tags, desired property map, reported property map on the user device **]**
          */
+        device.setETag(device.getTwinParser().getETag());
         device.setTags(device.getTwinParser().getTagsMap());
         device.setDesiredProperties(device.getTwinParser().getDesiredPropertyMap());
         device.setReportedProperties(device.getTwinParser().getReportedPropertyMap());
@@ -455,6 +456,7 @@ public class DeviceTwin
 
             DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(twinParser.getDeviceId());
             deviceTwinDevice.setVersion(twinParser.getVersion());
+            deviceTwinDevice.setETag(twinParser.getETag());
             deviceTwinDevice.setTags(twinParser.getTagsMap());
             deviceTwinDevice.setDesiredProperties(twinParser.getDesiredPropertyMap());
             deviceTwinDevice.setReportedProperties(twinParser.getReportedPropertyMap());
