@@ -25,7 +25,7 @@ public class MqttConnection
     private MqttCallback mqttCallback;
 
     //mqtt connection options
-    private static final int KEEP_ALIVE_INTERVAL = 20;
+    private static final int KEEP_ALIVE_INTERVAL = 230;
     private static final int MQTT_VERSION = 4;
     private static final boolean SET_CLEAN_SESSION = false;
     static final int QOS = 1;
