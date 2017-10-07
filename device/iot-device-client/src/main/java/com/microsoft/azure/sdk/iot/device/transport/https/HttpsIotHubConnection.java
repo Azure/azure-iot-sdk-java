@@ -107,7 +107,8 @@ public class HttpsIotHubConnection
             }
             else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
             {
-                throw new UnsupportedOperationException("X509 authentication for Https connection is not supported");
+                //Codes_SRS_HTTPSIOTHUBCONNECTION_34_059: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]
+                sslContext = this.config.getX509Authentication().getSSLContext();
             }
 
             //Codes_SRS_HTTPSIOTHUBCONNECTION_25_040: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
@@ -182,7 +183,8 @@ public class HttpsIotHubConnection
             }
             else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
             {
-                throw new UnsupportedOperationException("X509 authentication for Https connection is not supported");
+                //Codes_SRS_HTTPSIOTHUBCONNECTION_34_060: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]
+                sslContext = this.config.getX509Authentication().getSSLContext();
             }
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_045: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
@@ -254,7 +256,8 @@ public class HttpsIotHubConnection
             }
             else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
             {
-                throw new UnsupportedOperationException("X509 authentication for Https connection is not supported");
+                //Codes_SRS_HTTPSIOTHUBCONNECTION_34_061: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]
+                sslContext = this.config.getX509Authentication().getSSLContext();
             }
 
             //Codes_SRS_HTTPSIOTHUBCONNECTION_25_041: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
@@ -379,7 +382,8 @@ public class HttpsIotHubConnection
             }
             else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
             {
-                throw new UnsupportedOperationException("X509 authentication for Https connection is not supported");
+                //Codes_SRS_HTTPSIOTHUBCONNECTION_34_062: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]
+                sslContext = this.config.getX509Authentication().getSSLContext();
             }
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_033: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]

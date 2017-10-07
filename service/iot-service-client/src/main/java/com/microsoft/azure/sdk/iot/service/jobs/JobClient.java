@@ -432,12 +432,6 @@ public class JobClient
      */
     public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus, Integer pageSize) throws IOException, IotHubException
     {
-        if (jobType == null || jobStatus == null)
-        {
-            //Codes_SRS_JOBCLIENT_25_041: [If the input parameters are null, the queryJobResponse shall throw IllegalArgumentException.]
-            throw new IllegalArgumentException("jobType and jobStatus cannot be null");
-        }
-
         if (pageSize <= 0)
         {
             //Codes_SRS_JOBCLIENT_25_042: [If the pageSize is null, zero or negative, the queryJobResponse shall throw IllegalArgumentException.]
@@ -448,7 +442,9 @@ public class JobClient
         Query jobResponseQuery = new Query(pageSize, QueryType.JOB_RESPONSE);
 
         //Codes_SRS_JOBCLIENT_25_045: [The queryDeviceJob shall send a query request on the query object using Query URL, HTTP GET method and wait for the response by calling sendQueryRequest.]
-        jobResponseQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlQuery(jobType.toString(), jobStatus.toString()), HttpMethod.GET, MAX_TIMEOUT);
+        String jobTypeString = (jobType == null) ? null : jobType.toString();
+        String jobStatusString = (jobStatus == null) ? null : jobStatus.toString();
+        jobResponseQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlQuery(jobTypeString, jobStatusString), HttpMethod.GET, MAX_TIMEOUT);
         return jobResponseQuery;
     }
     /**
