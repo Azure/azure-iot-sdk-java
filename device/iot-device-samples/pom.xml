@@ -20,6 +20,8 @@
         <module>device-twin-sample</module>
         <module>device-method-sample</module>
         <module>file-upload-sample</module>
+        <module>send-event-x509</module>
+        <module>send-receive-x509-sample</module>
     </modules>
     <dependencies>
         <dependency>
