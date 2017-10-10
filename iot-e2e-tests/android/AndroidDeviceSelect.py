@@ -42,8 +42,9 @@ def killAvd():
             writeToFile(device)
             break
     if not hasRealDevice:
-        for device in deviceList:
-            os.popen("adb -s " + device.split()[0] + " emu kill")
+        for emulator in deviceList:
+            os.popen("adb -s " + emulator.split()[0] + " emu kill")
+            time.sleep(30)
     startAvd()
 
 

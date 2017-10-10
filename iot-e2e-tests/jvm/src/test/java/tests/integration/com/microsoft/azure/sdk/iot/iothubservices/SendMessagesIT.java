@@ -5,6 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
+import com.microsoft.azure.sdk.iot.ConnectionStatusCallback;
 import com.microsoft.azure.sdk.iot.common.EventCallback;
 import com.microsoft.azure.sdk.iot.common.Success;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
@@ -18,7 +19,6 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import tests.integration.com.microsoft.azure.sdk.iot.ConnectionStatusCallback;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon.sendMessages;
 import static junit.framework.TestCase.fail;
-import static tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenGenerator.generateSasTokenForIotDevice;
+import static com.microsoft.azure.sdk.iot.common.helpers.SasTokenGenerator.generateSasTokenForIotDevice;
 
 public class SendMessagesIT
 {
