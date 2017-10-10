@@ -1977,27 +1977,34 @@ public class JobClientTest
         };
     }
 
-    //Tests_SRS_JOBCLIENT_25_041: [If the input parameters are null, empty, or invalid, the queryJobResponse shall throw IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
-    public void queryJobResponseThrowsOnNullType() throws IotHubException, IOException
+    @Test
+    public void queryJobResponseWithoutJobTypeAndJobJobStausSucceeds(@Mocked Query mockedQuery) throws IotHubException, IOException
     {
         //arrange
         final String connectionString = "testString";
         JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
 
-        //act
-        testJobClient.queryJobResponse(null, JOB_STATUS_DEFAULT);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void queryJobResponseThrowsOnNullStatus() throws IotHubException, IOException
-    {
-        //arrange
-        final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {Integer.class, QueryType.class}, anyInt, QueryType.JOB_RESPONSE);
+                result = mockedQuery;
+            }
+        };
 
         //act
-        testJobClient.queryJobResponse(JOB_TYPE_DEFAULT, null);
+        testJobClient.queryJobResponse(null, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {Integer.class, QueryType.class}, anyInt, QueryType.JOB_RESPONSE);
+                times = 1;
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.GET, any);
+                times = 1;
+            }
+        };
     }
 
     //Tests_SRS_JOBCLIENT_25_042: [If the pageSize is null, zero or negative, the queryJobResponse shall throw IllegalArgumentException.]

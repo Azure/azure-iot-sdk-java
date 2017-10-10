@@ -76,6 +76,7 @@ public class SendMessagesIT
     private static Device deviceMqtt;
     private static Device deviceMqttWs;
     private static Device deviceMqttX509;
+    private static Device deviceHttpsX509;
 
     private static Device[] deviceListAmqps = new Device[MAX_DEVICE_PARALLEL];
     private static final AtomicBoolean succeed = new AtomicBoolean();
@@ -204,6 +205,7 @@ public class SendMessagesIT
         String deviceIdMqtt = "java-device-client-e2e-test-mqtt".concat("-" + uuid);
         String deviceIdMqttWs = "java-device-client-e2e-test-mqttws".concat("-" + uuid);
         String deviceIdMqttX509 = "java-device-client-e2e-test-mqtt-X509".concat("-" + uuid);
+        String deviceIdHttpsX509 = "java-device-client-e2e-test-https-X509".concat("-" + uuid);
 
         deviceHttps = Device.createFromId(deviceIdHttps, null, null);
         deviceAmqps = Device.createFromId(deviceIdAmqps, null, null);
@@ -211,8 +213,10 @@ public class SendMessagesIT
         deviceMqtt = Device.createFromId(deviceIdMqtt, null, null);
         deviceMqttWs = Device.createFromId(deviceIdMqttWs, null, null);
         deviceMqttX509 = Device.createDevice(deviceIdMqttX509, AuthenticationType.SELF_SIGNED);
+        deviceHttpsX509 = Device.createDevice(deviceIdHttpsX509, AuthenticationType.SELF_SIGNED);
 
         deviceMqttX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        deviceHttpsX509.setThumbprint(x509Thumbprint, x509Thumbprint);
 
         registryManager.addDevice(deviceHttps);
         registryManager.addDevice(deviceAmqps);
@@ -220,6 +224,7 @@ public class SendMessagesIT
         registryManager.addDevice(deviceMqtt);
         registryManager.addDevice(deviceMqttWs);
         registryManager.addDevice(deviceMqttX509);
+        registryManager.addDevice(deviceHttpsX509);
 
         for (int i = 0; i < MAX_DEVICE_PARALLEL; i++) {
             deviceIdAmqps = "java-device-client-e2e-test-amqps".concat(i + "-" + uuid);
@@ -239,6 +244,7 @@ public class SendMessagesIT
         registryManager.removeDevice(deviceMqtt.getDeviceId());
         registryManager.removeDevice(deviceMqttWs.getDeviceId());
         registryManager.removeDevice(deviceMqttX509.getDeviceId());
+        registryManager.removeDevice(deviceHttpsX509.getDeviceId());
 
         for (int i = 0; i < MAX_DEVICE_PARALLEL; i++) {
             registryManager.removeDevice(deviceListAmqps[i].getDeviceId());
@@ -248,39 +254,36 @@ public class SendMessagesIT
     @Test
     public void sendMessagesOverHttps() throws IOException, URISyntaxException, InterruptedException
     {
-        String messageString = "Java client e2e test message over Https protocol";
-        Message msg = new Message(messageString);
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceHttps), IotHubClientProtocol.HTTPS);
         client.open();
-
         sendMessages(client, IotHubClientProtocol.HTTPS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        client.closeNow();
+    }
 
+    @Test
+    public void sendMessagesOverHttpsWithX509() throws IOException, URISyntaxException, InterruptedException
+    {
+        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceHttpsX509), IotHubClientProtocol.HTTPS, publicKeyCert, false, privateKey, false);
+        client.open();
+        sendMessages(client, IotHubClientProtocol.HTTPS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
         client.closeNow();
     }
 
     @Test
     public void sendMessagesOverAmqps() throws IOException, URISyntaxException, InterruptedException
     {
-        String messageString = "Java client e2e test message over Amqps protocol";
-        Message msg = new Message(messageString);
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqps), IotHubClientProtocol.AMQPS);
         client.open();
-
         sendMessages(client, IotHubClientProtocol.AMQPS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-
         client.closeNow();
     }
 
     @Test
     public void sendMessagesOverAmqpsWs() throws IOException, InterruptedException, URISyntaxException
     {
-        String messageString = "Java client e2e test message over Amqps WS protocol";
-        Message msg = new Message(messageString);
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqps), IotHubClientProtocol.AMQPS_WS);
         client.open();
-
         sendMessages(client, IotHubClientProtocol.AMQPS_WS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-
         client.closeNow();
     }
 
@@ -320,37 +323,25 @@ public class SendMessagesIT
     {
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqtt), IotHubClientProtocol.MQTT);
         client.open();
-
         sendMessages(client, IotHubClientProtocol.MQTT, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-
         client.closeNow();
     }
 
     @Test
     public void sendMessagesOverMqttWS() throws IOException, URISyntaxException, InterruptedException
     {
-        String messageString = "Java client e2e test message over Mqtt WS protocol";
-        Message msg = new Message(messageString);
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqtt), IotHubClientProtocol.MQTT_WS);
         client.open();
-
         sendMessages(client, IotHubClientProtocol.MQTT_WS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-
         client.closeNow();
     }
 
     @Test
     public void sendMessagesOverMqttWithX509() throws IOException, URISyntaxException, InterruptedException
     {
-        String messageString = "Java client e2e test message over Mqtt protocol using x509 auth";
-
-        Message msg = new Message(messageString);
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqttX509), IotHubClientProtocol.MQTT, publicKeyCert, false, privateKey, false);
-
         client.open();
-
         sendMessages(client, IotHubClientProtocol.MQTT, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-
         client.closeNow();
     }
 

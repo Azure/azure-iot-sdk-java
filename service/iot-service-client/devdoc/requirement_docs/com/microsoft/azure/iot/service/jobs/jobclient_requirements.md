@@ -146,7 +146,6 @@ public synchronized Query queryDeviceJob(String sqlQuery) throws IotHubException
 public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus, Integer pageSize) throws IOException, IotHubException;
 public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus) throws IotHubException, IOException;
 ```
-**SRS_JOBCLIENT_25_041: [**If the input parameters are null, the queryJobResponse shall throw IllegalArgumentException.**]** 
 **SRS_JOBCLIENT_25_042: [**If the pageSize is null, zero or negative, the queryJobResponse shall throw IllegalArgumentException.**]** 
 **SRS_JOBCLIENT_25_043: [**If the pageSize is not specified, default pageSize of 100 shall be used.**]** 
 **SRS_JOBCLIENT_25_044: [**The queryDeviceJob shall create a query object for the type `JOB_RESPONSE`.**]**  

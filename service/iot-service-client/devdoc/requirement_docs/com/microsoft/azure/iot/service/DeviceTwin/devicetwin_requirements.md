@@ -78,7 +78,7 @@ public void getTwin(DeviceTwinDevice device) throws IotHubException, IOException
 
 **SRS_DEVICETWIN_25_011: [** The function shall deserialize the payload by calling updateTwin Api on the twinParser object **]**
 
-**SRS_DEVICETWIN_25_012: [** The function shall set tags, desired property map, reported property map on the user device **]**
+**SRS_DEVICETWIN_25_012: [** The function shall set eTag, tags, desired property map, reported property map on the user device **]**
 
 ### updateTwin
 

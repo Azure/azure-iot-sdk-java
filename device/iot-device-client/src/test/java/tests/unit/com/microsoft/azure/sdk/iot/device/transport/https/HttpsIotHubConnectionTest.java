@@ -1757,4 +1757,124 @@ public class HttpsIotHubConnectionTest
         //act
         conn.sendMessageResult(IotHubMessageResult.COMPLETE);
     }
+
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_059: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]
+    @Test
+    public void sendEventPullsSSLContextFromAppropriateConfigAuthObject() throws IOException
+    {
+        //arrange
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+            }
+        };
+
+        //act
+        conn.sendEvent(mockMsg);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockConfig.getX509Authentication().getSSLContext();
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_060: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]
+    @Test
+    public void sendHttpsMessagePullsSSLContextFromAppropriateConfigAuthObject() throws IOException
+    {
+        //arrange
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        final String uriPath = "/files";
+        final HttpsMethod expectedMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+            }
+        };
+
+        //act
+        conn.sendHttpsMessage(mockMsg, expectedMethod, uriPath);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockConfig.getX509Authentication().getSSLContext();
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_061: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]
+    @Test
+    public void receiveMessagePullsSSLContextFromAppropriateConfigAuthObject() throws IOException
+    {
+        //arrange
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+            }
+        };
+
+        //act
+        conn.receiveMessage();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockConfig.getX509Authentication().getSSLContext();
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_062: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]
+    @Test
+    public void sendMessageResultPullsSSLContextFromAppropriateConfigAuthObject() throws IOException
+    {
+        //arrange
+        final String eTag = "test-etag";
+        new NonStrictExpectations()
+        {
+            {
+                mockResponse.getStatus();
+                returns(200, 204);
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
+                IotHubStatusCode.getIotHubStatusCode(204);
+                result = IotHubStatusCode.OK_EMPTY;
+                mockResponse.getHeaderField(withMatch("(?i)etag"));
+                result = eTag;
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.receiveMessage();
+
+        //act
+        conn.sendMessageResult(IotHubMessageResult.REJECT);
+
+        new Verifications()
+        {
+            {
+                mockConfig.getX509Authentication().getSSLContext();
+                times = 2; //receiveMessage calls this once, but so should sendMessageResult
+            }
+        };
+    }
 }

@@ -185,15 +185,23 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         stringBuilder.append(URL_PATH_QUERY);
         stringBuilder.append(URL_SEPARATOR_1);
 
-        stringBuilder.append(URL_PATH_JOB_TYPE);
-        stringBuilder.append(VALUE_PAIR_SEPARATOR);
-        stringBuilder.append(jobType);
-        stringBuilder.append(URL_SEPARATOR_2);
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_024: [** If the jobType is null or empty, the function shall not include the jobType in the URL **]**
+        if(!Tools.isNullOrEmpty(jobType))
+        {
+            stringBuilder.append(URL_PATH_JOB_TYPE);
+            stringBuilder.append(VALUE_PAIR_SEPARATOR);
+            stringBuilder.append(jobType);
+            stringBuilder.append(URL_SEPARATOR_2);
+        }
 
-        stringBuilder.append(URL_PATH_JOB_STATUS);
-        stringBuilder.append(VALUE_PAIR_SEPARATOR);
-        stringBuilder.append(jobStatus);
-        stringBuilder.append(URL_SEPARATOR_2);
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_025: [** If the jobStatus is null or empty, the function shall not include the jobStatus in the URL **]**
+        if(!Tools.isNullOrEmpty(jobStatus))
+        {
+            stringBuilder.append(URL_PATH_JOB_STATUS);
+            stringBuilder.append(VALUE_PAIR_SEPARATOR);
+            stringBuilder.append(jobStatus);
+            stringBuilder.append(URL_SEPARATOR_2);
+        }
 
         stringBuilder.append(URL_API_VERSION);
         return new URL(stringBuilder.toString());
