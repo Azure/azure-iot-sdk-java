@@ -68,6 +68,7 @@ public class AmqpsMessage extends MessageImpl
 
     /**
      * Gets the AmqpsMessageMessageType
+     * @return The type of the message
      */
     public MessageType getAmqpsMessageType()
     {

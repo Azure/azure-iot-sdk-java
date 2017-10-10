@@ -23,7 +23,7 @@ public class SasTokenGenerator
     private static final int EPOCH_YEAR = 1970;
 
     private static final String URI_SEPARATOR = "/";
-    private static final String DEVICE_PATH = "device";
+    private static final String DEVICE_PATH = "devices";
 
     /**
      * Creates HMAC_SHA256 SAS token for the specified device using its device key
@@ -48,8 +48,8 @@ public class SasTokenGenerator
         String signature = getSignature(deviceUri, tokenExpirationTime, devicePrimaryKey);
 
         //Codes_SRS_SAS_TOKEN_GENERATOR_34_001: [This method shall return the created Sas token in the format "HostName=<hostname>;DeviceId=<deviceId>;SharedAccessSignature=SharedAccessSignature sr=<deviceUri>&sig=<signature>&se=<tokenExpirationTime>".]
-        String token = String.format("HostName=%s;DeviceId=%s;SharedAccessSignature=SharedAccessSignature sr=%s&sig=%s&se=%s", hostname, deviceId, deviceUri, signature,
-                String.valueOf(tokenExpirationTime));
+        String token = String.format("HostName=%s;DeviceId=%s;SharedAccessSignature=SharedAccessSignature sig=%s&se=%s&sr=%s", hostname, deviceId, signature,
+                String.valueOf(tokenExpirationTime), deviceUri);
 
         return token;
     }

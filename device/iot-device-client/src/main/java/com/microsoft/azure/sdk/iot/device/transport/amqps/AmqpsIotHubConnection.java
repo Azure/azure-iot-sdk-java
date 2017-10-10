@@ -74,6 +74,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      * Constructor to set up connection parameters using the {@link DeviceClientConfig}.
      *
      * @param config The {@link DeviceClientConfig} corresponding to the device associated with this {@link com.microsoft.azure.sdk.iot.device.DeviceClient}.
+     * @param amqpsDeviceOperationsList the list of device operations to run
      * @throws IOException if failed connecting to iothub.
      */
     public AmqpsIotHubConnection(DeviceClientConfig config, ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList) throws IOException
@@ -316,6 +317,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
     /**
      * Creates a binary message using the given content and messageId. Sends the created message using the sender link.
      * @param message The message to be sent.
+     * @param messageType the type of the message being sent
+     * @throws IOException if send message fails
      * @return An {@link Integer} representing the hash of the message, or -1 if the connection is closed.
      */
     public Integer sendMessage(Message message, MessageType messageType) throws IOException

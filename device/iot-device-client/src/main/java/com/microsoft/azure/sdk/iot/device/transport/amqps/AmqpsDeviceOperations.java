@@ -268,6 +268,7 @@ public class AmqpsDeviceOperations
      * @param amqpsMessage The Proton message to convert
      * @param deviceClientConfig The device client configuration
      * @return the converted message
+     * @throws IOException
      */
     protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws IOException
     {
@@ -279,6 +280,7 @@ public class AmqpsDeviceOperations
      * Prototype (empty) function for operation specific implementations to convert IoTHubMessage to Proton message
      * @param message The IoTHubMessage to convert
      * @return the converted message
+     * @throws IOException
      */
     protected AmqpsConvertToProtonReturnValue convertToProton(Message message) throws IOException
     {
@@ -290,6 +292,7 @@ public class AmqpsDeviceOperations
      * Prototype (empty) function for protected converter function
      * @param protonMsg The Proton message to convert
      * @return the converted message
+     * @throws IOException
      */
     protected Message protonMessageToIoTHubMessage(MessageImpl protonMsg) throws IOException
     {
@@ -301,6 +304,7 @@ public class AmqpsDeviceOperations
      * Prototype (empty) function for protected converter function
      * @param message The IoTHubMessage to convert
      * @return the converted message
+     * @throws IOException
      */
     protected MessageImpl iotHubMessageToProtonMessage(com.microsoft.azure.sdk.iot.device.Message message) throws IOException
     {

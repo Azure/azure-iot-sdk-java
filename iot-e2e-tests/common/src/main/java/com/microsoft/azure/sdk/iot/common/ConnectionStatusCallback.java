@@ -3,7 +3,7 @@
 *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
 */
 
-package tests.integration.com.microsoft.azure.sdk.iot;
+package com.microsoft.azure.sdk.iot.common;
 
 import com.microsoft.azure.sdk.iot.common.Success;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionState;
@@ -28,5 +28,4 @@ public class ConnectionStatusCallback implements IotHubConnectionStateCallback
             ((Success) context).setResult(true);
         }
     }
-
 }

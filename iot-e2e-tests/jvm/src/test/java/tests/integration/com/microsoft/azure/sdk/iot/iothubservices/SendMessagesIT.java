@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.EventCallback;
 import com.microsoft.azure.sdk.iot.common.Success;
+import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.Device;
@@ -18,7 +19,6 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import tests.integration.com.microsoft.azure.sdk.iot.ConnectionStatusCallback;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
@@ -82,8 +82,8 @@ public class SendMessagesIT
     private static final AtomicBoolean succeed = new AtomicBoolean();
 
     //Some tests below involve creating a short-lived sas token to test how expired tokens are handled
-    private static final long SECONDS_FOR_SAS_TOKEN_TO_LIVE = 4;
-    private static final long MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE = 6000;
+    private static final long SECONDS_FOR_SAS_TOKEN_TO_LIVE = 3;
+    private static final long MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE = 5000;
     private static final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 1;
 
     protected static class testDevice implements Runnable
@@ -380,59 +380,64 @@ public class SendMessagesIT
     public void tokenExpiredAfterOpenButBeforeSendHTTPS() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
     {
         String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, deviceHttps.getDeviceId(), deviceHttps.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
-
         DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, IotHubClientProtocol.HTTPS);
         client.open();
 
         //Force the SAS token to expire before sending messages
         Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
-
-        sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.HTTPS.toString());
-
+        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.HTTPS.toString(), NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
         client.closeNow();
     }
 
-    /**
-     * Send some messages that wait for callbacks to signify that the SAS token in the client config has expired.
-     *
-     * @param client the client to send the messages from
-     * @param protocol the protocol the client is using
-     */
-    private void sendMessagesExpectingSASTokenExpiration(DeviceClient client, String protocol)
+    @Test
+    public void tokenExpiredAfterOpenButBeforeSendMqtt() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
     {
-        for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; ++i)
-        {
-            try
-            {
-                Message messageToSend = new Message("Test message expecting SAS Token Expired callback for protocol: " + protocol);
-                Success messageSent = new Success();
-                Success statusUpdated = new Success();
+        String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, deviceMqtt.getDeviceId(), deviceMqtt.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
+        DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, IotHubClientProtocol.MQTT);
+        client.open();
 
-                ConnectionStatusCallback stateCallback = new ConnectionStatusCallback(IotHubConnectionState.SAS_TOKEN_EXPIRED);
-                EventCallback messageCallback = new EventCallback(IotHubStatusCode.UNAUTHORIZED);
+        //Force the SAS token to expire before sending messages
+        Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
+        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.MQTT.toString(), NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        client.closeNow();
+    }
 
-                client.registerConnectionStateCallback(stateCallback, statusUpdated);
-                client.sendEventAsync(messageToSend, messageCallback, messageSent);
+    @Test
+    public void tokenExpiredAfterOpenButBeforeSendMqttWs() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
+    {
+        String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, deviceMqttWs.getDeviceId(), deviceMqttWs.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
+        DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, IotHubClientProtocol.MQTT_WS);
+        client.open();
 
-                Integer waitDuration = 0;
-                while(!messageSent.getResult() || !statusUpdated.getResult())
-                {
-                    Thread.sleep(RETRY_MILLISECONDS);
-                    if ((waitDuration += RETRY_MILLISECONDS) > SEND_TIMEOUT_MILLISECONDS)
-                    {
-                        break;
-                    }
-                }
+        //Force the SAS token to expire before sending messages
+        Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
+        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.MQTT_WS.toString(), NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        client.closeNow();
+    }
 
-                if (!messageSent.getResult() || !statusUpdated.getResult())
-                {
-                    Assert.fail("Sending message over " + protocol + " protocol failed");
-                }
-            }
-            catch (Exception e)
-            {
-                Assert.fail("Sending message over " + protocol + " protocol failed");
-            }
-        }
+    @Test
+    public void tokenExpiredAfterOpenButBeforeSendAmqps() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
+    {
+        String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, deviceAmqps.getDeviceId(), deviceAmqps.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
+        DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, IotHubClientProtocol.AMQPS);
+        client.open();
+
+        //Force the SAS token to expire before sending messages
+        Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
+        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.AMQPS.toString(), NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        client.closeNow();
+    }
+
+    @Test
+    public void tokenExpiredAfterOpenButBeforeSendAmqpsWS() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
+    {
+        String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, deviceAmqpsWs.getDeviceId(), deviceAmqpsWs.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
+        DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, IotHubClientProtocol.AMQPS_WS);
+        client.open();
+
+        //Force the SAS token to expire before sending messages
+        Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
+        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.AMQPS_WS.toString(), NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        client.closeNow();
     }
 }

@@ -280,18 +280,34 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                         throw new IllegalStateException("No handler found for message conversion!");
                     }
 
-                    // Codes_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
-                    Integer sendHash = connection.sendMessage(amqpsConvertToProtonReturnValue.getMessageImpl(), amqpsConvertToProtonReturnValue.getMessageType());
-
-                    // Codes_SRS_AMQPSTRANSPORT_15_016: [If the sent message hash is valid, it shall be added to the in progress map.]
-                    if (sendHash != -1)
+                    if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isRenewalNecessary())
                     {
-                        this.inProgressMessages.put(sendHash, packet);
+                        //Codes_SRS_AMQPSTRANSPORT_34_041: [If the config is using sas token authentication and its sas token has expired and cannot be renewed, the message shall not be sent, an UNAUTHORIZED message callback shall be added to the callback queue and SAS_TOKEN_EXPIRED state callback shall be fired.]
+                        failedMessages.add(packet);
+                        logger.LogInfo("Creating a callback for the message with expired sas token with UNAUTHORIZED status, method name is %s ", logger.getMethodName());
+                        IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.UNAUTHORIZED, packet.getCallback(), packet.getContext());
+                        this.callbackList.add(callbackPacket);
+
+                        if (this.stateCallback != null)
+                        {
+                            this.stateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, this.stateCallbackContext);
+                        }
                     }
-                    // Codes_SRS_AMQPSTRANSPORT_15_017: [If the sent message hash is not valid, it shall be buffered to be sent in a subsequent attempt.]
                     else
                     {
-                        failedMessages.add(packet);
+                        // Codes_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
+                        Integer sendHash = connection.sendMessage(amqpsConvertToProtonReturnValue.getMessageImpl(), amqpsConvertToProtonReturnValue.getMessageType());
+
+                        // Codes_SRS_AMQPSTRANSPORT_15_016: [If the sent message hash is valid, it shall be added to the in progress map.]
+                        if (sendHash != -1)
+                        {
+                            this.inProgressMessages.put(sendHash, packet);
+                        }
+                        // Codes_SRS_AMQPSTRANSPORT_15_017: [If the sent message hash is not valid, it shall be buffered to be sent in a subsequent attempt.]
+                        else
+                        {
+                            failedMessages.add(packet);
+                        }
                     }
                 }
             }
@@ -499,7 +515,14 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
      * @param callbackContext a context to be passed to the callback. Can be
      * {@code null} if no callback is provided.
      */
-    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) {
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
+    {
+        //Codes_SRS_AMQPSTRANSPORT_34_042: If the provided callback is null, an IllegalArgumentException shall be thrown.]
+        if (callback == null)
+        {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+
         // Codes_SRS_AMQPSTRANSPORT_99_003: [The registerConnectionStateCallback shall register the connection state callback.]
         this.stateCallback = callback;
         this.stateCallbackContext = callbackContext;

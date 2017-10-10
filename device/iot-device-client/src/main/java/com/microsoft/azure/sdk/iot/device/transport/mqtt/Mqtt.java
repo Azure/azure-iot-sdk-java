@@ -47,7 +47,7 @@ abstract public class Mqtt implements MqttCallback
 
     /**
      * Constructor to instantiate mqtt broker connection.
-     *
+     * @param mqttConnection the connection to use
      */
     public Mqtt(MqttConnection mqttConnection) throws IllegalArgumentException
     {

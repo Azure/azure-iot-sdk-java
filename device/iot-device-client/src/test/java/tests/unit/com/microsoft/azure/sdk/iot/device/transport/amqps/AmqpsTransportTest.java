@@ -4,6 +4,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.State;
@@ -81,6 +82,8 @@ public class AmqpsTransportTest
     @Mocked
     DeviceClientConfig mockDeviceClientConfig;
 
+    @Mocked
+    IotHubSasTokenAuthentication mockSasTokenAuthentication;
 
     // Tests_SRS_AMQPSTRANSPORT_15_001: [The constructor shall save the input parameters into instance variables.]
     @Test
@@ -656,6 +659,76 @@ public class AmqpsTransportTest
                 times = 2;
                 mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY);
                 times = 2;
+            }
+        };
+    }
+
+    //Tests_SRS_AMQPSTRANSPORT_34_041: [If the config is using sas token authentication and its sas token has expired and cannot be renewed, the message shall not be sent, an UNAUTHORIZED message callback shall be added to the callback queue and SAS_TOKEN_EXPIRED state callback shall be fired.]
+    @Test
+    public void sendMessagesWithExpiredSasTokenSendsCallbacks(
+            @Mocked final Message mockMessage,
+            @Mocked final IotHubEventCallback mockCallback,
+            @Mocked final IotHubOutboundPacket mockPacket)
+            throws IOException
+    {
+        //arrange
+        final Map<String, Object> context = new HashMap<>();
+        final byte[] messageBytes = new byte[] {1, 2};
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMessage, mockCallback, context);
+                result = mockPacket;
+                mockPacket.getMessage();
+                result = mockMessage;
+                mockMessage.getBytes();
+                result = messageBytes;
+                mockMessage.getMessageType();
+                result = MessageType.DEVICE_TELEMETRY;
+                mockConfig.getDeviceId();
+                result = "deviceId";
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "convertToProton", mockMessage);
+                result = mockAmqpsConvertToProtonReturnValue;
+                Deencapsulation.invoke(mockAmqpsConvertToProtonReturnValue, "getMessageImpl");
+                result = mockAmqpsMessage;
+                Deencapsulation.invoke(mockAmqpsConvertToProtonReturnValue, "getMessageType");
+                result = MessageType.DEVICE_TELEMETRY;
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockConfig.getSasTokenAuthentication();
+                result = mockSasTokenAuthentication;
+                mockSasTokenAuthentication.isRenewalNecessary();
+                result = true;
+                new IotHubCallbackPacket(IotHubStatusCode.UNAUTHORIZED, (IotHubEventCallback) any, any);
+                result = mockIotHubCallbackPacket;
+                mockIotHubCallbackPacket.getStatus();
+                result = IotHubStatusCode.UNAUTHORIZED;
+            }
+        };
+
+        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+
+        Deencapsulation.setField(transport, "stateCallback", mockConnectionStateCallback);
+        transport.open();
+        transport.addMessage(mockMessage, mockCallback, context);
+
+        //act
+        transport.sendMessages();
+
+        //assert
+        Queue<IotHubCallbackPacket> callbackList = Deencapsulation.getField(transport, "callbackList");
+        assertEquals(1, callbackList.size());
+        assertEquals(mockIotHubCallbackPacket.getStatus(), callbackList.remove().getStatus());
+
+        new Verifications()
+        {
+            {
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY);
+                times = 0;
+                mockConnectionStateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, any);
+                times = 1;
             }
         };
     }
@@ -1438,6 +1511,18 @@ public class AmqpsTransportTest
             }
         };
     }
+
+    // Tests_SRS_AMQPSTRANSPORT_34_042: If the provided callback is null, an IllegalArgumentException shall be thrown.]
+    @Test (expected = IllegalArgumentException.class)
+    public void registerConnectionStatusCallbackThrowsForNullCallback() throws IOException
+    {
+        //arrange
+        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+
+        //act
+        transport.registerConnectionStateCallback(null, null);
+    }
+
 
     // Tests_SRS_AMQPSTRANSPORT_99_002: [All registered connection state callbacks are notified that the connection has been established.]
     // Tests_SRS_AMQPSTRANSPORT_99_003: [RegisterConnectionStateCallback shall register the connection state callback.]
