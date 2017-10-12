@@ -10,19 +10,29 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
+
 import com.microsoft.azure.sdk.iot.ConnectionStatusCallback;
 import com.microsoft.azure.sdk.iot.common.EventCallback;
 import com.microsoft.azure.sdk.iot.common.Success;
 import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionState;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.junit.*;
+
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -32,6 +42,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.SasTokenGenerator.generateSasTokenForIotDevice;
 import static com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon.sendMessages;
@@ -106,7 +118,6 @@ public class SendMessagesIT
         Bundle bundle = InstrumentationRegistry.getArguments();
         String privateKeyBase64Encoded = "";
         String publicKeyCertBase64Encoded = "";
-        Log.d("Test Log", "Logs start");
         if (bundle != null)
         {
             iotHubConnectionString = retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME, bundle);
@@ -126,11 +137,11 @@ public class SendMessagesIT
         Log.d("Test Log", "x509Thumbprint:" + x509Thumbprint);
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
-//        byte[] publicCertBytes = Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes());
-//        publicKeyCert = new String(publicCertBytes);
-//
-//        byte[] privateKeyBytes = Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes());
-//        privateKey = new String(privateKeyBytes);
+        byte[] publicCertBytes = Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes());
+        publicKeyCert = new String(publicCertBytes);
+
+        byte[] privateKeyBytes = Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes());
+        privateKey = new String(privateKeyBytes);
 
         String uuid = UUID.randomUUID().toString();
         String deviceIdHttps = "java-device-client-e2e-test-https".concat("-" + uuid);
