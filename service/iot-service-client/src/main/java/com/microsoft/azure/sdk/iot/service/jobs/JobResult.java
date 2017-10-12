@@ -155,7 +155,8 @@ public class JobResult
         TwinParser twinParser = jobsResponseParser.getUpdateTwin();
         if(twinParser != null)
         {
-            this.updateTwin = new DeviceTwinDevice(twinParser.getDeviceId());
+            this.updateTwin = twinParser.getDeviceId() == null || twinParser.getDeviceId().isEmpty() ?
+                new DeviceTwinDevice() : new DeviceTwinDevice(twinParser.getDeviceId());
             this.updateTwin.setETag(twinParser.getETag());
             try
             {
