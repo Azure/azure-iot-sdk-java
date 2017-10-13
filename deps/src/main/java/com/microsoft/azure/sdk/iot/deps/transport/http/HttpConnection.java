@@ -105,18 +105,18 @@ public class HttpConnection
         this.connection.connect();
     }
 
-    public void disconnect() throws IOException
+/*    public void disconnect() throws IOException
     {
-/*        if (this.connection.getDoInput())
+*//*        if (this.connection.getDoInput())
         {
             this.connection.setDoInput(false);
         }
         if (this.connection.getDoOutput())
         {
             this.connection.setDoOutput(false);
-        }*/
+        }*//*
         this.connection.disconnect();
-    }
+    }*/
 
     /**
      * Sets the request method (i.e. POST).

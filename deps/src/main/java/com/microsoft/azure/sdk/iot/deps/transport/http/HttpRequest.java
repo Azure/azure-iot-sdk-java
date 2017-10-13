@@ -134,10 +134,10 @@ public class HttpRequest
         return this;
     }
 
-    public void disconnect() throws IOException
+/*    public void disconnect() throws IOException
     {
         this.connection.disconnect();
-    }
+    }*/
 
     protected HttpRequest()
     {

@@ -3,8 +3,8 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.dps.device.*;
-import com.microsoft.azure.sdk.iot.dps.device.privateapi.exceptions.DPSClientException;
+import com.microsoft.azure.sdk.iot.provisioning.device.*;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.dps.security.DPSHsmType;
 
 import java.io.IOException;
@@ -25,21 +25,21 @@ public class DPSDiceSample
     private static final String dpsUri = "global.azure-devices-provisioning.net";
     //private static final String dpsUri = "global.df.azure-devices-provisioning-int.net";
     //private static final String dpsUri = "10.83.117.151";
-    private static final DPSTransportProtocol dpsTransportProtocol = DPSTransportProtocol.HTTPS;
+    private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
 
-    private static DPSRegistrationInfo dpsRegistrationInfoClient = new DPSRegistrationInfo();
+    private static ProvisioningDeviceClientRegistrationInfo provisioningDeviceClientRegistrationInfoClient = new ProvisioningDeviceClientRegistrationInfo();
     private static final int MAX_TIME_TO_WAIT_FOR_DPS_REGISTRATION = 1000; // in milli seconds
 
     static class DPSStatus
     {
-        DPSDeviceStatus status;
+        ProvisioningDeviceClientStatus status;
         String reason;
     }
 
-    static class DPSStatusCallbackImpl implements DpsStatusCallback
+    static class ProvisioningDeviceClientStatusCallbackImpl implements ProvisioningDeviceClientStatusCallback
     {
         @Override
-        public void run(DPSDeviceStatus status, String reason, Object context)
+        public void run(ProvisioningDeviceClientStatus status, String reason, Object context)
         {
             System.out.println("DPS status " + status );
             if (reason != null)
@@ -55,14 +55,14 @@ public class DPSDiceSample
         }
     }
 
-    static class DPSRegistrationCallbackImpl implements DPSRegistrationCallback
+    static class ProvisioningDeviceClientRegistrationCallbackImpl implements ProvisioningDeviceClientRegistrationCallback
     {
         @Override
-        public void run(DPSRegistrationInfo dpsRegistrationInfo, Object context)
+        public void run(ProvisioningDeviceClientRegistrationInfo provisioningDeviceClientRegistrationInfo, Object context)
         {
-            if (context instanceof DPSRegistrationInfo)
+            if (context instanceof ProvisioningDeviceClientRegistrationInfo)
             {
-                dpsRegistrationInfoClient = dpsRegistrationInfo;
+                provisioningDeviceClientRegistrationInfoClient = provisioningDeviceClientRegistrationInfo;
             }
             else
             {
@@ -76,19 +76,19 @@ public class DPSDiceSample
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
-        DpsDeviceClient dpsDeviceClient = null;
+        ProvisioningDeviceClient provisioningDeviceClient = null;
         try
         {
             DPSStatus dpsStatus = new DPSStatus();
-            DPSConfig dpsConfig = new DPSConfig(dpsUri, scopeId, dpsTransportProtocol, DPSHsmType.DICE_EMULATOR);
+            ProvisioningDeviceClientConfig provisioningDeviceClientConfig = new ProvisioningDeviceClientConfig(dpsUri, scopeId, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, DPSHsmType.DICE_EMULATOR);
 
-            dpsDeviceClient = new DpsDeviceClient(dpsConfig, new DPSStatusCallbackImpl(), dpsStatus);
+            provisioningDeviceClient = new ProvisioningDeviceClient(provisioningDeviceClientConfig, new ProvisioningDeviceClientStatusCallbackImpl(), dpsStatus);
 
-            dpsDeviceClient.registerDevice(new DPSRegistrationCallbackImpl(), dpsRegistrationInfoClient);
+            provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningDeviceClientRegistrationInfoClient);
 
-            while (dpsStatus.status != DPSDeviceStatus.DPS_DEVICE_STATUS_ASSIGNED)
+            while (dpsStatus.status != ProvisioningDeviceClientStatus.DPS_DEVICE_STATUS_ASSIGNED)
             {
-                if (dpsStatus.status == DPSDeviceStatus.DPS_DEVICE_STATUS_ERROR)
+                if (dpsStatus.status == ProvisioningDeviceClientStatus.DPS_DEVICE_STATUS_ERROR)
                 {
                     System.out.println("Dps error, bailing out");
                     break;
@@ -97,19 +97,19 @@ public class DPSDiceSample
                 Thread.sleep(MAX_TIME_TO_WAIT_FOR_DPS_REGISTRATION);
             }
 
-            if (dpsRegistrationInfoClient.getDpsStatus() == DPSDeviceStatus.DPS_DEVICE_STATUS_ASSIGNED)
+            if (provisioningDeviceClientRegistrationInfoClient.getDpsStatus() == ProvisioningDeviceClientStatus.DPS_DEVICE_STATUS_ASSIGNED)
             {
-                System.out.println("IotHUb Uri : " + dpsRegistrationInfoClient.getIothubUri());
-                System.out.println("Device ID : " + dpsRegistrationInfoClient.getDeviceId());
+                System.out.println("IotHUb Uri : " + provisioningDeviceClientRegistrationInfoClient.getIothubUri());
+                System.out.println("Device ID : " + provisioningDeviceClientRegistrationInfoClient.getDeviceId());
                 // connect to iothub
             }
         }
-        catch (DPSClientException | InterruptedException e)
+        catch (ProvisioningDeviceClientException | InterruptedException e)
         {
             System.out.println("DPS threw a exception" + e.getMessage());
-            if (dpsDeviceClient != null)
+            if (provisioningDeviceClient != null)
             {
-                dpsDeviceClient.close();
+                provisioningDeviceClient.close();
             }
         }
 
@@ -117,9 +117,9 @@ public class DPSDiceSample
 
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
-        if (dpsDeviceClient != null)
+        if (provisioningDeviceClient != null)
         {
-            dpsDeviceClient.close();
+            provisioningDeviceClient.close();
         }
 
         System.out.println("Shutting down...");

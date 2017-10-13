@@ -13,7 +13,7 @@
     <description>The Microsoft Azure IoT DPS Device SDK for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
     <modules>
-        <module>dps-device-client</module>
+        <module>provisioning-device-client</module>
         <module>dps-service-client</module>
         <module>dps-security-client</module>
         <module>dps-samples</module>
