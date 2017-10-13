@@ -12,19 +12,15 @@ import java.net.URISyntaxException;
 import java.util.Scanner;
 
 /**
- * Device Twin Sample for an IoT Hub. Default protocol is to use
- * MQTT transport.
+ * DPSDiceSample for an Provisioning.
  */
 public class DPSDiceSample
 {
     //private static final String scopeId = "[Your scope ID here]";
-    //private static final String scopeId = "0ne00000026";
     private static final String scopeId = "0ne00000020";
-    //private static final String scopeId = "0ne00000014";
     //private static final String dpsUri = "[Your DPS HUB here]";
     private static final String dpsUri = "global.azure-devices-provisioning.net";
     //private static final String dpsUri = "global.df.azure-devices-provisioning-int.net";
-    //private static final String dpsUri = "10.83.117.151";
     private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
 
     private static ProvisioningDeviceClientRegistrationInfo provisioningDeviceClientRegistrationInfoClient = new ProvisioningDeviceClientRegistrationInfo();
