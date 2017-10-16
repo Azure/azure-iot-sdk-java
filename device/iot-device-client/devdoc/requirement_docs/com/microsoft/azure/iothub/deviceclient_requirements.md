@@ -249,6 +249,8 @@ public void uploadToBlobAsync(String destinationBlobName, InputStream inputStrea
 
 **SRS_DEVICECLIENT_21_047: [**If the `destinationBlobName` is null, empty, or not valid, the uploadToBlobAsync shall throw IllegalArgumentException.**]**  
 
+**SRS_DEVICECLIENT_34_066: [**If this function is called when the device client is using x509 authentication, an UnsupportedOperationException shall be thrown.**]**  
+
 **SRS_DEVICECLIENT_21_048: [**If there is no instance of the FileUpload, the uploadToBlobAsync shall create a new instance of the FileUpload.**]**  
 
 **SRS_DEVICECLIENT_21_049: [**If uploadToBlobAsync failed to create a new instance of the FileUpload, it shall bypass the exception.**]**  

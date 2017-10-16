@@ -77,6 +77,7 @@ public class SendMessagesIT
     private static Device deviceMqttWs;
     private static Device deviceMqttX509;
     private static Device deviceHttpsX509;
+    private static Device deviceAmqpsX509;
 
     private static Device[] deviceListAmqps = new Device[MAX_DEVICE_PARALLEL];
     private static final AtomicBoolean succeed = new AtomicBoolean();
@@ -206,6 +207,7 @@ public class SendMessagesIT
         String deviceIdMqttWs = "java-device-client-e2e-test-mqttws".concat("-" + uuid);
         String deviceIdMqttX509 = "java-device-client-e2e-test-mqtt-X509".concat("-" + uuid);
         String deviceIdHttpsX509 = "java-device-client-e2e-test-https-X509".concat("-" + uuid);
+        String deviceIdAmqpsX509 = "java-device-client-e2e-test-amqps-X509".concat("-" + uuid);
 
         deviceHttps = Device.createFromId(deviceIdHttps, null, null);
         deviceAmqps = Device.createFromId(deviceIdAmqps, null, null);
@@ -214,9 +216,11 @@ public class SendMessagesIT
         deviceMqttWs = Device.createFromId(deviceIdMqttWs, null, null);
         deviceMqttX509 = Device.createDevice(deviceIdMqttX509, AuthenticationType.SELF_SIGNED);
         deviceHttpsX509 = Device.createDevice(deviceIdHttpsX509, AuthenticationType.SELF_SIGNED);
+        deviceAmqpsX509 = Device.createDevice(deviceIdAmqpsX509, AuthenticationType.SELF_SIGNED);
 
         deviceMqttX509.setThumbprint(x509Thumbprint, x509Thumbprint);
         deviceHttpsX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        deviceAmqpsX509.setThumbprint(x509Thumbprint,x509Thumbprint);
 
         registryManager.addDevice(deviceHttps);
         registryManager.addDevice(deviceAmqps);
@@ -225,6 +229,7 @@ public class SendMessagesIT
         registryManager.addDevice(deviceMqttWs);
         registryManager.addDevice(deviceMqttX509);
         registryManager.addDevice(deviceHttpsX509);
+        registryManager.addDevice(deviceAmqpsX509);
 
         for (int i = 0; i < MAX_DEVICE_PARALLEL; i++) {
             deviceIdAmqps = "java-device-client-e2e-test-amqps".concat(i + "-" + uuid);
@@ -245,6 +250,7 @@ public class SendMessagesIT
         registryManager.removeDevice(deviceMqttWs.getDeviceId());
         registryManager.removeDevice(deviceMqttX509.getDeviceId());
         registryManager.removeDevice(deviceHttpsX509.getDeviceId());
+        registryManager.removeDevice(deviceAmqpsX509.getDeviceId());
 
         for (int i = 0; i < MAX_DEVICE_PARALLEL; i++) {
             registryManager.removeDevice(deviceListAmqps[i].getDeviceId());
@@ -342,6 +348,15 @@ public class SendMessagesIT
         DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqttX509), IotHubClientProtocol.MQTT, publicKeyCert, false, privateKey, false);
         client.open();
         sendMessages(client, IotHubClientProtocol.MQTT, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        client.closeNow();
+    }
+
+    @Test
+    public void sendMessagesOverAmqpsWithX509() throws IOException, URISyntaxException, InterruptedException
+    {
+        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqpsX509), IotHubClientProtocol.AMQPS, publicKeyCert, false, privateKey, false);
+        client.open();
+        sendMessages(client, IotHubClientProtocol.AMQPS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
         client.closeNow();
     }
 

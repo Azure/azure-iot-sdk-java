@@ -15,6 +15,7 @@ import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
+import org.apache.qpid.proton.amqp.UnsignedLong;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
@@ -468,6 +469,24 @@ public class AmqpReceiveHandlerTest
             public Symbol[] getRemoteDesiredCapabilities()
             {
                 return new Symbol[0];
+            }
+
+            @Override
+            public void setMaxMessageSize(UnsignedLong unsignedLong)
+            {
+
+            }
+
+            @Override
+            public UnsignedLong getMaxMessageSize()
+            {
+                return null;
+            }
+
+            @Override
+            public UnsignedLong getRemoteMaxMessageSize()
+            {
+                return null;
             }
 
             @Override

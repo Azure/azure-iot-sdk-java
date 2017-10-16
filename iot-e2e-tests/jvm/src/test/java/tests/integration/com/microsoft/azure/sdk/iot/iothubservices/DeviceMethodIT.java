@@ -59,7 +59,7 @@ public class DeviceMethodIT
     private static final String PAYLOAD_STRING = "This is a valid payload";
 
     private static List<DeviceTestManager> devices = new LinkedList<>();
-    private static DeviceTestManager x509Device;
+    private static DeviceTestManager x509DeviceMQTT;
 
     private static final int NUMBER_INVOKES_PARALLEL = 10;
 
@@ -86,8 +86,7 @@ public class DeviceMethodIT
             devices.add(new DeviceTestManager(registryManager, DEVICE_ID_NAME.concat("-" + i), IotHubClientProtocol.MQTT));
         }
 
-        x509Device = new DeviceTestManager(registryManager, DEVICE_ID_NAME.concat("-x509"), IotHubClientProtocol.MQTT, publicKeyCert, privateKey, x509Thumbprint);
-
+        x509DeviceMQTT = new DeviceTestManager(registryManager, DEVICE_ID_NAME.concat("mqtt-x509"), IotHubClientProtocol.MQTT, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     @Before
@@ -98,7 +97,7 @@ public class DeviceMethodIT
             device.clearDevice();
         }
 
-        x509Device.clearDevice();
+        x509DeviceMQTT.clearDevice();
     }
 
     protected static class RunnableInvoke implements Runnable
@@ -162,9 +161,9 @@ public class DeviceMethodIT
             device.stop();
         }
 
-        if (x509Device != null)
+        if (x509DeviceMQTT != null)
         {
-            x509Device.stop();
+            x509DeviceMQTT.stop();
         }
     }
 
@@ -397,16 +396,16 @@ public class DeviceMethodIT
     }
 
     @Test
-    public void invokeMethodUsingX509Succeed() throws IOException, InterruptedException, IotHubException
+    public void invokeMethodUsingMQTTX509Succeed() throws IOException, InterruptedException, IotHubException
     {
         // Act
-        MethodResult result = methodServiceClient.invoke(x509Device.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
-        x509Device.waitIotHub(1, 10);
+        MethodResult result = methodServiceClient.invoke(x509DeviceMQTT.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        x509DeviceMQTT.waitIotHub(1, 10);
 
         // Assert
         assertNotNull(result);
         assertEquals((long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
         assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload());
-        assertEquals(0, x509Device.getStatusError());
+        assertEquals(0, x509DeviceMQTT.getStatusError());
     }
 }

@@ -22,6 +22,7 @@ import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
+import org.apache.qpid.proton.reactor.ReactorOptions;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
@@ -37,7 +38,7 @@ import static org.junit.Assert.assertTrue;
 
 /* Unit tests for AmqpsIotHubConnection
 * 100% methods covered
-* 93% lines covered (Thread is not mockable...)
+* 94% lines covered (Thread is not mockable...)
 */
 public class AmqpsIotHubConnectionTest {
 
@@ -74,7 +75,6 @@ public class AmqpsIotHubConnectionTest {
 
     @Mocked
     protected AmqpsMessage mockAmqpsMessage;
-
 
     @Mocked
     protected Sender mockSender;
@@ -147,6 +147,9 @@ public class AmqpsIotHubConnectionTest {
 
     @Mocked
     IotHubConnectionString mockConnectionString;
+
+    @Mocked
+    ReactorOptions mockedReactorOptions;
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
     // any of the parameters of the configuration is null or empty.]
@@ -522,7 +525,7 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
-                new IotHubReactor((Reactor) any);
+                Deencapsulation.newInstance(IotHubReactor.class, new Class[] {Reactor.class}, any);
                 result = new IOException();
             }
         };
@@ -537,6 +540,14 @@ public class AmqpsIotHubConnectionTest {
     {
         baseExpectations();
 
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+            }
+        };
+
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
         AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
@@ -548,7 +559,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                new IotHubReactor((Reactor)any);
+                Deencapsulation.newInstance(IotHubReactor.class, new Class[] {Reactor.class}, any);
                 times = 1;
                 mockOpenLock.waitLock(anyLong);
                 times = 1;
@@ -1819,20 +1830,21 @@ public class AmqpsIotHubConnectionTest {
         ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
         new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
-
     }
 
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_043: [If the config is not using sas token authentication, this function shall throw an IOException.]
-    @Test (expected = IOException.class)
-    public void openThrowsIfNotUsingSasTokenAuth() throws IOException, InterruptedException
+    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_052: [If the config is not using sas token authentication, then the created iotHubReactor shall omit the Sasl.]
+    @Test
+    public void openWhenNotUsingSasTokenAuthenticationTriggersProtonReactorWithoutSasl(@Mocked final Reactor mockedReactor) throws IOException, InterruptedException
     {
-        //arrange
         baseExpectations();
+
         new NonStrictExpectations()
         {
             {
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                new ReactorOptions();
+                result = mockedReactorOptions;
             }
         };
 
@@ -1840,7 +1852,60 @@ public class AmqpsIotHubConnectionTest {
         amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
         AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
 
-        //act
+        Deencapsulation.setField(connection, "openLock", mockOpenLock);
+
         connection.open();
+
+        new Verifications()
+        {
+            {
+                mockedReactorOptions.setEnableSaslByDefault(false);
+                times = 1;
+                Proton.reactor((ReactorOptions) any, (Handler) any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_053: [If the config is using x509 Authentication, the created Proton reactor shall not have SASL enabled by default.]
+    @Test
+    public void constructorCreatesProtonWithSaslDisabledByDefaultIfUsingX509() throws IOException
+    {
+        //arrange
+        new NonStrictExpectations() {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                mockConfig.getIotHubHostname();
+                result = hostName;
+                mockConfig.getIotHubName();
+                result = hubName;
+                mockConfig.getDeviceId();
+                result = deviceId;
+                mockConfig.getIotHubConnectionString().getSharedAccessKey();
+                result = deviceKey;
+                mockConfig.isUseWebsocket();
+                result = false;
+                new ReactorOptions();
+                result = mockedReactorOptions;
+            }
+        };
+
+        ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
+        amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
+
+        //act
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedReactorOptions.setEnableSaslByDefault(false);
+                times = 1;
+                Proton.reactor(mockedReactorOptions, connection);
+                times = 1;
+            }
+        };
     }
 }

@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.Base64;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -220,12 +219,12 @@ public class DeviceTwinIT
         }
     }
 
-    private void setUpTwinForX509(DeviceState deviceState) throws IOException, URISyntaxException, IotHubException, InterruptedException
+    private void setUpTwinForX509(DeviceState deviceState, IotHubClientProtocol protocol) throws IOException, URISyntaxException, IotHubException, InterruptedException
     {
         // set up twin on DeviceClient
         deviceState.dCDeviceForTwin = new DeviceExtension();
         String connString = DeviceConnectionString.get(iotHubConnectionString, x509DeviceUnderTest.sCDeviceForRegistryManager);
-        x509DeviceClient = new DeviceClient(connString, IotHubClientProtocol.MQTT, publicKeyCert, false, privateKey, false);
+        x509DeviceClient = new DeviceClient(connString, protocol, publicKeyCert, false, privateKey, false);
         x509DeviceClient.open();
         x509DeviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
         deviceState.deviceTwinStatus = STATUS.SUCCESS;
@@ -1129,10 +1128,10 @@ public class DeviceTwinIT
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testUpdateDesiredUpdatesWithX509() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    public void testUpdateDesiredUpdatesMQTTWithX509() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
     {
         //arrange
-        setUpX509Device();
+        setUpX509Device(IotHubClientProtocol.MQTT);
 
         // Add desired properties for the device
         Set<Pair> desiredProperties = new HashSet<>();
@@ -1166,10 +1165,10 @@ public class DeviceTwinIT
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testSendReportedPropertiesWithX509() throws IOException, IotHubException, InterruptedException, URISyntaxException
+    public void testSendReportedPropertiesMQTTWithX509() throws IOException, IotHubException, InterruptedException, URISyntaxException
     {
         //arrange
-        setUpX509Device();
+        setUpX509Device(IotHubClientProtocol.MQTT);
 
         // act
         // send max_prop RP all at once
@@ -1189,13 +1188,13 @@ public class DeviceTwinIT
         registryManager.removeDevice(x509DeviceUnderTest.sCDeviceForRegistryManager.getDeviceId());
     }
 
-    private void setUpX509Device() throws IOException, IotHubException, URISyntaxException, InterruptedException
+    private void setUpX509Device(IotHubClientProtocol protocol) throws IOException, IotHubException, URISyntaxException, InterruptedException
     {
         x509DeviceUnderTest = new DeviceState();
-        String deviceIdMqttX509 = "java-device-twin-e2e-test-mqtt-x509".concat(UUID.randomUUID().toString());
-        x509DeviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createDevice(deviceIdMqttX509, AuthenticationType.SELF_SIGNED);
+        String deviceIdX509 = "java-device-twin-e2e-test-" + protocol + "-x509".concat(UUID.randomUUID().toString());
+        x509DeviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createDevice(deviceIdX509, AuthenticationType.SELF_SIGNED);
         x509DeviceUnderTest.sCDeviceForRegistryManager.setThumbprint(x509Thumbprint, x509Thumbprint);
         x509DeviceUnderTest.sCDeviceForRegistryManager = registryManager.addDevice(x509DeviceUnderTest.sCDeviceForRegistryManager);
-        setUpTwinForX509(x509DeviceUnderTest);
+        setUpTwinForX509(x509DeviceUnderTest, protocol);
     }
 }
