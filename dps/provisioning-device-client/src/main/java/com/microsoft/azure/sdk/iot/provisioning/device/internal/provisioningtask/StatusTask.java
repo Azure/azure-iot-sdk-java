@@ -8,8 +8,8 @@
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask;
 
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientAuthorization;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.dps.security.DPSSecurityClient;
@@ -19,13 +19,13 @@ import java.util.concurrent.Callable;
 
 public class StatusTask implements Callable
 {
-    private static final int WAIT_FOR_STATUS_RESPONSE = 100;
+    private static final int MAX_WAIT_FOR_STATUS_RESPONSE = 100;
     private ProvisioningDeviceClientContract provisioningDeviceClientContract;
     private DPSSecurityClient dpsSecurityClient;
     private String operationId;
-    private ProvisioningDeviceClientAuthorization provisioningDeviceClientAuthorization;
+    private Authorization authorization;
 
-    class ResponseCallbackImpl implements ResponseCallback
+    private class ResponseCallbackImpl implements ResponseCallback
     {
         @Override
         public void run(byte[] responseData, Object context) throws ProvisioningDeviceClientException
@@ -33,8 +33,8 @@ public class StatusTask implements Callable
             if (context instanceof ResponseData)
             {
                 ResponseData data = (ResponseData) context;
-                data.responseData = responseData;
-                data.dpsRegistrationState = ContractState.DPS_REGISTRATION_RECEIVED;
+                data.setResponseData(responseData);
+                data.setContractState(ContractState.DPS_REGISTRATION_RECEIVED);
             }
             else
             {
@@ -43,45 +43,78 @@ public class StatusTask implements Callable
         }
     }
 
-    StatusTask(DPSSecurityClient dpsSecurityClient, ProvisioningDeviceClientContract provisioningDeviceClientContract, String operationId, ProvisioningDeviceClientAuthorization provisioningDeviceClientAuthorization) throws ProvisioningDeviceClientException
+    /**
+     * Task to query Status information from the service
+     * @param dpsSecurityClient security client for the HSM on which this device is registering on. Cannot be {@code null}
+     * @param provisioningDeviceClientContract Contract of the transport with the lower layers. Cannot be {@code null}
+     * @param operationId Id retrieved from the service.  Cannot be {@code null} or empty
+     * @param authorization Object holding auth info.  Cannot be {@code null}
+     * @throws ProvisioningDeviceClientException
+     */
+    StatusTask(DPSSecurityClient dpsSecurityClient, ProvisioningDeviceClientContract provisioningDeviceClientContract,
+               String operationId, Authorization authorization) throws ProvisioningDeviceClientException
     {
+        //SRS_StatusTask_25_002: [ Constructor shall throw ProvisioningDeviceClientException if operationId , dpsSecurityClient, authorization or provisioningDeviceClientContract is null. ]
         if (provisioningDeviceClientContract == null)
         {
-            throw new ProvisioningDeviceClientException("transport cannot be null");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("provisioningDeviceClientContract cannot be null"));
         }
 
         if (dpsSecurityClient == null)
         {
-            throw new ProvisioningDeviceClientException("security client cannot be null");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("security client cannot be null"));
         }
 
+        if (operationId == null || operationId.isEmpty())
+        {
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("operationId cannot be null or empty"));
+        }
+
+        if (authorization == null)
+        {
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("authorization cannot be null"));
+        }
+
+        //SRS_StatusTask_25_001: [ Constructor shall save operationId , dpsSecurityClient, provisioningDeviceClientContract and authorization. ]
         this.dpsSecurityClient = dpsSecurityClient;
         this.provisioningDeviceClientContract = provisioningDeviceClientContract;
         this.operationId = operationId;
-        this.provisioningDeviceClientAuthorization = provisioningDeviceClientAuthorization;
+        this.authorization = authorization;
     }
 
-    public ResponseParser getRegistrationStatus(String operationId, ProvisioningDeviceClientAuthorization provisioningDeviceClientAuthorization) throws ProvisioningDeviceClientException
+    private ResponseParser getRegistrationStatus(String operationId, Authorization authorization) throws ProvisioningDeviceClientException
     {
         try
         {
+            //SRS_StatusTask_25_003: [ This method shall throw ProvisioningDeviceClientException if registration id is null or empty. ]
             String registrationId = this.dpsSecurityClient.getRegistrationId();
-            ResponseParser responseParser = null;
-
-            SSLContext sslContext = provisioningDeviceClientAuthorization.getSslContext();
-            ResponseData responseData = new ResponseData();
-            provisioningDeviceClientContract.getRegistrationStatus(operationId, registrationId, provisioningDeviceClientAuthorization.getSasToken(), provisioningDeviceClientAuthorization.getSslContext(), new ResponseCallbackImpl(), responseData);
-            while (responseData.responseData == null || responseData.dpsRegistrationState != ContractState.DPS_REGISTRATION_RECEIVED)
+            if (registrationId == null || registrationId.isEmpty())
             {
-                Thread.sleep(WAIT_FOR_STATUS_RESPONSE);
+                throw new ProvisioningDeviceSecurityException("registrationId cannot be null or empty");
             }
-            if (responseData.responseData != null && responseData.dpsRegistrationState == ContractState.DPS_REGISTRATION_RECEIVED)
+
+            //SRS_StatusTask_25_004: [ This method shall retrieve the SSL context from Authorization and throw ProvisioningDeviceClientException if it is null. ]
+            SSLContext sslContext = authorization.getSslContext();
+            if (sslContext == null)
             {
-                responseParser = ResponseParser.createFromJson(new String(responseData.responseData));
-                return responseParser;
+                throw new ProvisioningDeviceSecurityException("SSL context cannot be null");
+            }
+            //SRS_StatusTask_25_005: [ This method shall trigger getRegistrationStatus on the contract API and wait for response and return it. ]
+            ResponseData responseData = new ResponseData();
+            provisioningDeviceClientContract.getRegistrationStatus(operationId, registrationId,
+                                                                   authorization.getSasToken(), authorization.getSslContext(),
+                                                                   new ResponseCallbackImpl(), responseData);
+            if (responseData.getResponseData() == null || responseData.getContractState() != ContractState.DPS_REGISTRATION_RECEIVED)
+            {
+                Thread.sleep(MAX_WAIT_FOR_STATUS_RESPONSE);
+            }
+            if (responseData.getResponseData() != null && responseData.getContractState() == ContractState.DPS_REGISTRATION_RECEIVED)
+            {
+                return ResponseParser.createFromJson(new String(responseData.getResponseData()));
             }
             else
             {
+                //SRS_StatusTask_25_006: [ This method shall throw ProvisioningDeviceClientException if null response or no response is received in maximum time of 90 seconds. ]
                 throw new ProvisioningDeviceClientException("Did not receive DPS Status information");
             }
         }
@@ -91,11 +124,15 @@ public class StatusTask implements Callable
         }
     }
 
+    /**
+     * Implementation of callable for this task. This task queries for status
+     * with the service
+     * @return ResponseParser object holding the information received from service
+     * @throws Exception If any of the underlying calls fail
+     */
     @Override
     public ResponseParser call() throws Exception
     {
-        // To edit later to move all the DPS operations here from transport and replace with transport send, receive....
-       return this.getRegistrationStatus(this.operationId, this.provisioningDeviceClientAuthorization);
-       // for tpm remember to extract sastoken out of auth key provided by service
+       return this.getRegistrationStatus(this.operationId, this.authorization);
     }
 }

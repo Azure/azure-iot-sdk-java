@@ -10,23 +10,16 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.dps.security.DPSHsmType;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Scanner;
 
 /**
- * Device Twin Sample for an IoT Hub. Default protocol is to use
- * MQTT transport.
+ * TPM sample
  */
 public class DPSTpmSample
 {
     //private static final String scopeId = "[Your scope ID here]";
-    //private static final String scopeId = "0ne00000020";
     private static final String scopeId = "0NE3F78B3C0";
     //private static final String dpsUri = "[Your DPS HUB here]";
-    //private static final String dpsUri = "global.azure-devices-provisioning.net";
-    //private static final String dpsUri = "global.df.azure-devices-provisioning-int.net";
     private static final String dpsUri = "dpspp9.azure-devices-provisioning-int.net";
     private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
 
@@ -36,24 +29,25 @@ public class DPSTpmSample
     static class DPSStatus
     {
         ProvisioningDeviceClientStatus status;
-        String reason;
+        Exception reason;
     }
 
     static class ProvisioningDeviceClientStatusCallbackImpl implements ProvisioningDeviceClientStatusCallback
     {
         @Override
-        public void run(ProvisioningDeviceClientStatus status, String reason, Object context)
+        public void run(ProvisioningDeviceClientStatus status, Exception exception, Object context)
         {
             System.out.println("DPS status " + status );
-            if (reason != null)
+            if (exception != null)
             {
-                System.out.println("because " + reason);
+                exception.printStackTrace();
+                /*System.out.println("because " + exception);*/
             }
             if (context instanceof DPSStatus)
             {
                 DPSStatus dpsStatus = (DPSStatus) context;
                 dpsStatus.status = status;
-                dpsStatus.reason = reason;
+                dpsStatus.reason = exception;
             }
         }
     }
@@ -75,7 +69,6 @@ public class DPSTpmSample
     }
 
     public static void main(String[] args)
-            throws IOException, URISyntaxException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -126,6 +119,5 @@ public class DPSTpmSample
         }
 
         System.out.println("Shutting down...");
-
     }
 }

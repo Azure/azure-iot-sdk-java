@@ -29,24 +29,25 @@ public class DPSDiceSample
     static class DPSStatus
     {
         ProvisioningDeviceClientStatus status;
-        String reason;
+        Exception reason;
     }
 
     static class ProvisioningDeviceClientStatusCallbackImpl implements ProvisioningDeviceClientStatusCallback
     {
         @Override
-        public void run(ProvisioningDeviceClientStatus status, String reason, Object context)
+        public void run(ProvisioningDeviceClientStatus status, Exception exception, Object context)
         {
             System.out.println("DPS status " + status );
-            if (reason != null)
+            if (exception != null)
             {
-                System.out.println("because " + reason);
+                exception.printStackTrace();
+                //System.out.println("because " + exception);
             }
             if (context instanceof DPSStatus)
             {
                 DPSStatus dpsStatus = (DPSStatus) context;
                 dpsStatus.status = status;
-                dpsStatus.reason = reason;
+                dpsStatus.reason = exception;
             }
         }
     }

@@ -13,4 +13,14 @@ public class ProvisioningDeviceClientAuthenticationException extends Provisionin
     {
         super(message);
     }
+
+    public ProvisioningDeviceClientAuthenticationException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+
+    public ProvisioningDeviceClientAuthenticationException(Throwable cause)
+    {
+        super(cause);
+    }
 }

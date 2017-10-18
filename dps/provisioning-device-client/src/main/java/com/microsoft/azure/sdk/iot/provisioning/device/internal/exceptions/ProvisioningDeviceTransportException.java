@@ -13,4 +13,14 @@ public class ProvisioningDeviceTransportException extends ProvisioningDeviceClie
     {
         super(message);
     }
+
+    public ProvisioningDeviceTransportException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+
+    public ProvisioningDeviceTransportException(Throwable cause)
+    {
+        super(cause);
+    }
 }

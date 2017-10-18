@@ -168,7 +168,7 @@ public class ContractAPIHttpTest
                 ProvisioningDeviceClientExceptionManager.verifyHttpResponse(mockedHttpResponse);
                 result = new ProvisioningDeviceHubException("test Exception");
                 mockedHttpResponse.getStatus();
-                result = 404;
+                result = 401;
             }
         };
 

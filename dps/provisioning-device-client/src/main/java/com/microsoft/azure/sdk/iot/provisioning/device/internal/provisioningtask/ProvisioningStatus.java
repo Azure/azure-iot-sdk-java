@@ -10,26 +10,39 @@ package com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtas
 public enum ProvisioningStatus
 {
     UNASSIGNED("unassigned"),
-    FAILED("failed"),
-    BLACKLISTED("blacklisted"),
     ASSIGNING("assigning"),
-    ASSIGNED("assigned");
+    ASSIGNED("assigned"),
+    FAILED("failed"),
+    DISABLED("disabled");
 
     private String status;
+
+    /**
+     * Constructor to create an enum
+     * @param status status for which enum is to be created
+     */
     ProvisioningStatus(String status)
     {
+        //SRS_ProvisioningStatus_25_001: [ Constructor to create an enum ]
         this.status = status;
     }
 
-    public static ProvisioningStatus fromString(String type)
+    /**
+     * returns the enum corresponding to the provided status
+     * @param status the status for which enum is requested
+     * @return enum for the status
+     */
+    static ProvisioningStatus fromString(String status)
     {
         for (ProvisioningStatus provisioningStatus : ProvisioningStatus.values())
         {
-            if (provisioningStatus.status.equalsIgnoreCase(type))
+            if (provisioningStatus.status.equalsIgnoreCase(status))
             {
+                //SRS_ProvisioningStatus_25_002: [ This method shall return the enum corresponding to the status. ]
                 return provisioningStatus;
             }
         }
+        //SRS_ProvisioningStatus_25_003: [ If none of the enum's match the status it shall return null. ]
         return null;
     }
 }

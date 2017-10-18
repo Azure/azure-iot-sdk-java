@@ -9,5 +9,5 @@ package com.microsoft.azure.sdk.iot.provisioning.device;
 
 public interface ProvisioningDeviceClientStatusCallback
 {
-    void run(ProvisioningDeviceClientStatus status, String reason, Object context);
+    void run(ProvisioningDeviceClientStatus status, Exception exception, Object context);
 }

@@ -13,4 +13,14 @@ public class ProvisioningDeviceSecurityException extends ProvisioningDeviceClien
     {
         super(message);
     }
+
+    public ProvisioningDeviceSecurityException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+
+    public ProvisioningDeviceSecurityException(Throwable cause)
+    {
+        super(cause);
+    }
 }

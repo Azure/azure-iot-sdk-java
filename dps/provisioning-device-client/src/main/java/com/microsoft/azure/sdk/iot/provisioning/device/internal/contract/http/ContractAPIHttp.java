@@ -38,7 +38,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
     private static final String ACCEPT_CHARSET = "charset=utf-8";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final Integer DEFAULT_HTTP_TIMEOUT_MS = Integer.MAX_VALUE;
-    private static final Integer ACCEPTABLE_NONCE_HTTP_STATUS = 404;
+    private static final Integer ACCEPTABLE_NONCE_HTTP_STATUS = 401;
 
     /**
      * Constructor for Contract API HTTP
@@ -51,12 +51,12 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         //SRS_ContractAPIHttp_25_002: [The constructor shall throw ProvisioningDeviceClientException if either scopeId and hostName are null or empty.]
         if (scopeId == null || scopeId.isEmpty())
         {
-            throw new ProvisioningDeviceClientException("scope id cannot be null or empty");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("scope id cannot be null or empty"));
         }
 
         if (hostName == null || hostName.isEmpty())
         {
-            throw new ProvisioningDeviceClientException("host name cannot be null or empty");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("host name cannot be null or empty"));
         }
 
         //SRS_ContractAPIHttp_25_001: [The constructor shall save the scope id and hostname.]
@@ -128,7 +128,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         }
         catch (IOException e)
         {
-            throw new ProvisioningDeviceConnectionException(e.getMessage());
+            throw new ProvisioningDeviceConnectionException(e);
         }
     }
 
@@ -148,17 +148,17 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         //SRS_ContractAPIHttp_25_003: [If either registrationId, sslcontext or responseCallback is null or if registrationId is empty then this method shall throw ProvisioningDeviceClientException.]
         if (registrationId == null || registrationId.isEmpty())
         {
-            throw new ProvisioningDeviceClientException("registration Id cannot be null or empty");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("registration Id cannot be null or empty"));
         }
 
         if (sslContext == null)
         {
-            throw new ProvisioningDeviceClientException("sslContext cannot be null");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("sslContext cannot be null"));
         }
 
         if (responseCallback == null)
         {
-            throw new ProvisioningDeviceClientException("responseCallback cannot be null");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("responseCallback cannot be null"));
         }
 
         try
@@ -195,7 +195,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         }
         catch (IOException e)
         {
-            throw new ProvisioningDeviceTransportException(e.getMessage());
+            throw new ProvisioningDeviceTransportException(e);
         }
 
         throw new ProvisioningDeviceTransportException("Service did not return any authorization request");
@@ -218,17 +218,17 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         //SRS_ContractAPIHttp_25_011: [If either registrationId, sslcontext or responseCallback is null or if registrationId is empty then this method shall throw ProvisioningDeviceClientException.]
         if (registrationId == null || registrationId.isEmpty())
         {
-            throw new ProvisioningDeviceClientException("registration Id cannot be null or empty");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("registration Id cannot be null or empty"));
         }
 
         if (sslContext == null)
         {
-            throw new ProvisioningDeviceClientException("sslContext cannot be null");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("sslContext cannot be null"));
         }
 
         if (responseCallback == null)
         {
-            throw new ProvisioningDeviceClientException("responseCallback cannot be null");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("responseCallback cannot be null"));
         }
 
         try
@@ -253,7 +253,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         }
         catch (IOException e)
         {
-            throw new ProvisioningDeviceTransportException(e.getMessage());
+            throw new ProvisioningDeviceTransportException(e);
         }
     }
 
@@ -274,22 +274,22 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         //SRS_ContractAPIHttp_25_018: [If either operationId, registrationId, sslcontext or responseCallback is null or if operationId, registrationId is empty then this method shall throw ProvisioningDeviceClientException.]
         if (operationId == null || operationId.isEmpty())
         {
-            throw new ProvisioningDeviceClientException("operationId cannot be null or empty");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("operationId cannot be null or empty"));
         }
 
         if (registrationId == null || registrationId.isEmpty())
         {
-            throw new ProvisioningDeviceClientException("registration Id cannot be null or empty");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("registration Id cannot be null or empty"));
         }
 
         if (sslContext == null)
         {
-            throw new ProvisioningDeviceClientException("sslContext cannot be null");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("sslContext cannot be null"));
         }
 
         if (responseCallback == null)
         {
-            throw new ProvisioningDeviceClientException("responseCallback cannot be null");
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("responseCallback cannot be null"));
         }
 
         try
@@ -314,7 +314,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         }
         catch (IOException e)
         {
-            throw new ProvisioningDeviceTransportException(e.getMessage());
+            throw new ProvisioningDeviceTransportException(e);
         }
     }
 }

@@ -13,4 +13,14 @@ public class ProvisioningDeviceHubException extends ProvisioningDeviceClientExce
     {
         super(message);
     }
+
+    public ProvisioningDeviceHubException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+
+    public ProvisioningDeviceHubException(Throwable cause)
+    {
+        super(cause);
+    }
 }
