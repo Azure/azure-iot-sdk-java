@@ -1015,7 +1015,43 @@ public class TwinParser
 
         if(map != null)
         {
-            validateMap(map, 0, (MAX_MAP_LEVEL + 1), true);
+            boolean propertiesLevel = false;
+            boolean containsTagsOrProperties = false;
+            for (Map.Entry<String, Object> entry : map.entrySet())
+            {
+                if (entry.getKey().equals(PROPERTIES_TAG))
+                {
+                    properties.validate((Map<String, Object>) entry.getValue());
+                    propertiesLevel = true;
+                    containsTagsOrProperties = true;
+                }
+                else if ((entry.getKey().equals(DESIRED_TAG)) || (entry.getKey().equals(REPORTED_TAG)))
+                {
+                    if (!propertiesLevel)
+                    {
+                        properties.validate(map);
+                        containsTagsOrProperties = true;
+                    }
+                    else
+                    {
+                        throw new IllegalArgumentException("Invalid Entry");
+                    }
+                    break;
+                }
+                else if (entry.getKey().equals(TAGS_TAG))
+                {
+                    if(tags != null)
+                    {
+                        tags.validate((Map<String, Object>) entry.getValue());
+                    }
+                    propertiesLevel = true;
+                    containsTagsOrProperties = true;
+                }
+            }
+            if(!containsTagsOrProperties)
+            {
+                throw new IllegalArgumentException("Json do not contains twin information");
+            }
         }
     }
 

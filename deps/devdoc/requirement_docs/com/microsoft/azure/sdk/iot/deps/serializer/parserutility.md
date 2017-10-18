@@ -16,18 +16,20 @@ Set of static functions to help the serializer.
  */
 class ParserUtility
 {
-    protected static void validateStringUTF8(String str) throws IllegalArgumentException;
-    protected static void validateObject(object val) throws IllegalArgumentException;
-    protected static void validateBoolean(Boolean condition) throws IllegalArgumentException;
-    protected static void validateKey(String key, boolean isMetadata) throws IllegalArgumentException;
-    protected static void validateId(String id) throws IllegalArgumentException;
+    public static void validateStringUTF8(String str) throws IllegalArgumentException;
+    public static void validateObject(object val) throws IllegalArgumentException;
+    public static void validateBoolean(Boolean condition) throws IllegalArgumentException;
+    public static void validateKey(String key, boolean isMetadata) throws IllegalArgumentException;
+    public static void validateMap(Map<String, Object> map, int maxLevel, boolean allowMetadata) throws IllegalArgumentException;
+    public static void validateId(String id) throws IllegalArgumentException;
+    public static void validateHostName(String hostName) throws IllegalArgumentException;
     
     public static void validateBlobName(String blobName) throws IllegalArgumentException;
     protected static void validateQuery(String query) throws IllegalArgumentException;
     
-    protected static Date getDateTimeUtc(String dataTime) throws IllegalArgumentException;
-    protected static Date getDateTimeOffset(String dataTime) throws IllegalArgumentException;
-    public static String getDateStringFromDate(Date date)
+    public static Date getDateTimeUtc(String dataTime) throws IllegalArgumentException;
+    public static Date stringToDateTimeOffset(String dataTime) throws IllegalArgumentException;
+    public static String dateTimeUtcToString(Date date);
     protected static JsonElement mapToJsonElement(Map<String, Object> map);
 }
 ```
@@ -109,6 +111,28 @@ protected static void validateKey(String key, boolean isMetadata) throws Illegal
 **SRS_PARSER_UTILITY_21_018: [**If `isMetadata` is `true`, the validateKey shall accept the character `$` as valid. **]**  
 **SRS_PARSER_UTILITY_21_019: [**If `isMetadata` is `false`, the validateKey shall not accept the character `$` as valid. **]**  
 
+### validateMap
+```java
+/**
+ * Helper to validate if the provided map in terms of maximum 
+ * levels and optionally if the keys ar not metadata.
+ * 
+ * @param map the {@code Map} to be validate. It can be {@code null}, and it will succeed in this case.
+ * @param maxLevel the max number of level allowed in the map.
+ * @param allowMetadata the {@code boolean} that indicates if the key can contain metadata `$` or not.
+ * @throws IllegalArgumentException If the Map contains more than maxLevel levels or do not allow metadata 
+ *                                  but contains metadata key.
+ */
+public static void validateMap(Map<String, Object> map, int maxLevel, boolean allowMetadata) throws IllegalArgumentException
+```
+**SRS_PARSER_UTILITY_21_046: [**The validateMap shall throws IllegalArgumentException if the maxLevel is `0` or negative.**]**  
+**SRS_PARSER_UTILITY_21_047: [**The validateMap shall do nothing if the map is a valid Map.**]**  
+**SRS_PARSER_UTILITY_21_048: [**The validateMap shall do nothing if the map is null.**]**  
+**SRS_PARSER_UTILITY_21_049: [**The validateMap shall throws IllegalArgumentException if any key in the map is null, empty, contains more than 128 characters, or illegal characters (`$`,`.`, space).**]**  
+**SRS_PARSER_UTILITY_21_050: [**If `isMetadata` is `true`, the validateMap shall accept the character `$` in the key.**]**  
+**SRS_PARSER_UTILITY_21_051: [**The validateMap shall throws IllegalArgumentException if any value is null, or contains illegal type (array or invalid class).**]**  
+**SRS_PARSER_UTILITY_21_052: [**The validateMap shall throws IllegalArgumentException if the provided map contains more than maxLevel levels.**]**  
+
 ### validateId
 ```java
 /**
@@ -127,6 +151,23 @@ protected static void validateId(String id) throws IllegalArgumentException
 **SRS_PARSER_UTILITY_21_028: [**The validateId shall throw IllegalArgumentException if the provided string contains more than 128 characters.**]**  
 **SRS_PARSER_UTILITY_21_029: [**The validateId shall throw IllegalArgumentException if the provided string contains an illegal character.**]**  
 **SRS_PARSER_UTILITY_21_030: [**The validateId shall do nothing if the string is a valid ID.**]**  
+
+### validateHostName
+```java
+/**
+ * Validate if a provided host name is valid using the follow criteria.
+ * A case-sensitive string (up to 128 char long)
+ *   of ASCII 7-bit alphanumeric chars
+ *   + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+ * Contains at least one separator '.'
+ *
+ * @param hostName is the host name to test
+ * @throws IllegalArgumentException if the provided host name do not fits the criteria
+ */
+public static void validateHostName(String hostName) throws IllegalArgumentException
+```
+**SRS_PARSER_UTILITY_21_044: [**The validateHostName shall throw IllegalArgumentException if the provided string is not a valid host name.**]**  
+**SRS_PARSER_UTILITY_21_045: [**The validateHostName shall do nothing if the string is a valid host name.**]**  
 
 ### getDateTimeUtc
 ```java
@@ -147,7 +188,7 @@ protected static Date getDateTimeUtc(String dataTime) throws IllegalArgumentExce
 **SRS_PARSER_UTILITY_21_040: [**If the provide string contains more than 3 digits for milliseconds, the getDateTimeUtc shall reduce the milliseconds to 3 digits.**]**  
 **SRS_PARSER_UTILITY_21_041: [**The getDateTimeUtc shall accept date without milliseconds.**]**  
 
-### getDateTimeOffset
+### stringToDateTimeOffset
 ```java
 /**
  * Helper to convert the provided string in a offset Date.
@@ -158,11 +199,26 @@ protected static Date getDateTimeUtc(String dataTime) throws IllegalArgumentExce
  * @return Date parsed from the string
  * @throws IllegalArgumentException if the date and time in the string is not in the correct format.
  */
-protected static Date getDateTimeOffset(String dataTime) throws IllegalArgumentException
+protected static Date stringToDateTimeOffset(String dataTime) throws IllegalArgumentException
 ```
-**SRS_PARSER_UTILITY_21_023: [**The getDateTimeOffset shall parse the provide string using `UTC` timezone.**]**  
-**SRS_PARSER_UTILITY_21_024: [**The getDateTimeOffset shall parse the provide string using the data format `2016-06-01T21:22:41+00:00`.**]**  
-**SRS_PARSER_UTILITY_21_025: [**If the provide string is null, empty or contains an invalid data format, the getDateTimeOffset shall throw IllegalArgumentException.**]**
+**SRS_PARSER_UTILITY_21_023: [**The stringToDateTimeOffset shall parse the provide string using `UTC` timezone.**]**  
+**SRS_PARSER_UTILITY_21_024: [**The stringToDateTimeOffset shall parse the provide string using the data format `2016-06-01T21:22:41+00:00`.**]**  
+**SRS_PARSER_UTILITY_21_025: [**If the provide string is null, empty or contains an invalid data format, the stringToDateTimeOffset shall throw IllegalArgumentException.**]**
+
+### dateTimeUtcToString
+```java
+/**
+ * Helper to convert the provided Date UTC into String.
+ * Expected result:
+ *      "2016-06-01T21:22:43.799Z"
+ *
+ * @param date is the {@code Date} with the date and time
+ * @return the {@code String} with the date and time using the UTC format.
+ */
+public static String dateTimeUtcToString(Date date)
+```
+**SRS_PARSER_UTILITY_21_053: [**The dateTimeUtcToString shall throws IllegalArgumentException if the provided Date is null.**]**  
+**SRS_PARSER_UTILITY_21_054: [**The dateTimeUtcToString shall serialize the provide Date using `UTC` timezone.**]**  
 
 ```java
 /**
@@ -174,6 +230,7 @@ protected static Date getDateTimeOffset(String dataTime) throws IllegalArgumentE
  * @return the date represented as a string
  */
 public static String getSimpleDateStringFromDate(Date date) throws IllegalArgumentException
+```
 **SRS_PARSER_UTILITY_34_042: [**If the provided date is null, an IllegalArgumentException shall be thrown.**]**
 **SRS_PARSER_UTILITY_34_043: [**The provided date shall be converted into this format: "yyyy-MM-dd'T'HH:mm:ss".**]**
 
