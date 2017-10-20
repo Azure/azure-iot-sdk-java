@@ -16,3 +16,8 @@ Microsoft Azure IoT Hub Java Android tests run instrumented tests to check iot s
 ## How to see android logs
 
 - adb logcat
+
+
+## Add local.properties
+add sdk location to the file in below format
+sdk.dir=C\:\\AndroidSdk
