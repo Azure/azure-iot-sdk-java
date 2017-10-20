@@ -3,6 +3,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.DiagnosticPropertyData;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.MessageType;
@@ -291,12 +292,14 @@ public class MessageTest
     // Tests_SRS_MESSAGE_34_048: [The function shall set the message's message type.]
     // Tests_SRS_MESSAGE_34_046: [The function shall set the message's correlation ID to the provided value.]
     // Tests_SRS_MESSAGE_34_044: [The function shall set the message's message ID to the provided value.]
+    // Tests_SRS_MESSAGE_34_050: [The function shall set the message's diagnosticPropertyData value.]
     // Tests_SRS_MESSAGE_34_049: [The function shall return the message's message type.]
     // Tests_SRS_MESSAGE_34_045: [The function shall return the message's correlation ID.]
     // Tests_SRS_MESSAGE_34_043: [The function shall return the message's message Id.]
     // Tests_SRS_MESSAGE_34_039: [The function shall return the message's DeliveryAcknowledgement.]
     // Tests_SRS_MESSAGE_34_037: [The function shall return the message's user ID.]
     // Tests_SRS_MESSAGE_34_041: [The function shall return the message's To value.]
+    // Tests_SRS_MESSAGE_34_051: [The function shall return the message's diagnosticPropertyData value.]
     @Test
     public void testPropertyGettersAndSetters()
     {
@@ -305,16 +308,21 @@ public class MessageTest
         MessageType type = MessageType.DEVICE_TELEMETRY;
         String messageId = "1234";
         String correlationId = "6789";
+        String diagnosticId = "diag";
+        String diagnosticCreationTimeUtc = "0000000000.000";
+        DiagnosticPropertyData diagnosticPropertyData = new DiagnosticPropertyData(diagnosticId, diagnosticCreationTimeUtc);
 
         //act
         msg.setMessageType(type);
         msg.setCorrelationId(correlationId);
         msg.setMessageId(messageId);
+        msg.setDiagnosticPropertyData(diagnosticPropertyData);
 
         //assert
         assertEquals(type, msg.getMessageType());
         assertEquals(correlationId, msg.getCorrelationId());
         assertEquals(messageId, msg.getMessageId());
+        assertEquals(diagnosticPropertyData,msg.getDiagnosticPropertyData());
         assertNull(msg.getTo());
         assertNull(msg.getUserId());
         assertNull(msg.getDeliveryAcknowledgement());

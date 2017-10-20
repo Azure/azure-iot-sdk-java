@@ -43,6 +43,8 @@ abstract public class Mqtt implements MqttCallback
     final static String MESSAGE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".mid";
     final static String TO = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".to";
     final static String USER_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".uid";
+    final static String DIAGNOSTIC_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".diagid";
+    final static String DIAGNOSTIC_CONTEXT = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".diagctx";
     private final static String IOTHUB_ACK = "iothub-ack";
 
     /**
