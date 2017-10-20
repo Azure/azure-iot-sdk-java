@@ -88,7 +88,7 @@ public class SendMessagesIT
 
     private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static final String PUBLIC_KEY_CERTIFICATE_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_CERT_BASE64";
-    private static final String PRIVATE_KEY_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_PRIVATE_KEY_BASE64";
+    private static final String PRIVATE_KEY_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_PK_BASE64";
     private static final String X509_THUMBPRINT_ENV_VAR_NAME = "IOTHUB_E2E_X509_THUMBPRINT";
 
     private static String iotHubConnectionString = "HostName=iot-sdks-gate.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=Uv5mwn8l804P7joOowkZDJbilC0QF9yCsuqObeuqgtw=";
