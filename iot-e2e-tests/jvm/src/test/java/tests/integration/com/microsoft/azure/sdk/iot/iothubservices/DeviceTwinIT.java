@@ -992,6 +992,7 @@ public class DeviceTwinIT
             if (sCDeviceTwin.hasNextDeviceTwin(twinQuery))
             {
                 DeviceTwinDevice d = sCDeviceTwin.getNextDeviceTwin(twinQuery);
+                assertNotNull(d.getVersion());
 
                 for (Pair dp : d.getDesiredProperties())
                 {
