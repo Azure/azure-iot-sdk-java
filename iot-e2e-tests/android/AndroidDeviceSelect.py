@@ -22,7 +22,8 @@ def startAvd():
 
 
 def writeToFile(deviceName):
-    os.popen("echo " + deviceName + ">device_udid.txt").read()
+    #os.popen("echo " + deviceName + ">device_udid.txt").read()
+	os.popen("setx ANDROID_DEVICE_NAME "+deviceName).read()
 
 def getDeviceList():
     res = os.popen("adb devices").read()
