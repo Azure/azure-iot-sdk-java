@@ -71,7 +71,7 @@ public QueryResponse sendQueryRequest(IotHubConnectionString iotHubConnectionStr
 
 **SRS_QUERY_25_009: [**The method shall use the provided HTTP Method and send request to IotHub with the serialized body over the provided URL.**]**
 
-**SRS_QUERY_25_010: [**The method shall read the continuation token (`x-ms-continuation`) and reponse type (`x-ms-item-type`) from the HTTP Headers and save it.**]**
+**SRS_QUERY_25_010: [**The method shall read the continuation token (`x-ms-continuation`) and response type (`x-ms-item-type`) from the HTTP Headers and save it.**]**
 
 **SRS_QUERY_25_011: [**If the request type and response does not match then the method shall throw IOException.**]**
 

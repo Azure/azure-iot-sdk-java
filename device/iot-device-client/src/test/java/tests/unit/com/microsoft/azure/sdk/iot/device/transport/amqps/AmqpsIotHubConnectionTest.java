@@ -1854,15 +1854,18 @@ public class AmqpsIotHubConnectionTest {
 
         Deencapsulation.setField(connection, "openLock", mockOpenLock);
 
+        //wiping the reactor causes it to be created again on open()
+        Deencapsulation.setField(connection, "reactor", null);
+
         connection.open();
 
         new Verifications()
         {
             {
                 mockedReactorOptions.setEnableSaslByDefault(false);
-                times = 1;
+                times = 2;
                 Proton.reactor((ReactorOptions) any, (Handler) any);
-                times = 1;
+                times = 2;
             }
         };
     }
