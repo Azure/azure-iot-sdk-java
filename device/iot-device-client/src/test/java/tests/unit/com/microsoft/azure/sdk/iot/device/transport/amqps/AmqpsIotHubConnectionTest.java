@@ -31,6 +31,7 @@ import java.nio.BufferOverflowException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
@@ -1845,6 +1846,13 @@ public class AmqpsIotHubConnectionTest {
                 result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
                 new ReactorOptions();
                 result = mockedReactorOptions;
+
+                Proton.reactor((ReactorOptions) any, (Handler) any);
+                result = mockedReactor;
+
+                mockIotHubReactor.run();
+
+                mockExecutorService.submit((Runnable) any);
             }
         };
 
