@@ -18,7 +18,7 @@
         <module>service</module>
         <module>deps</module>
         <module>iot-e2e-tests</module>
-        <module>dps</module>
+        <module>provisioning</module>
     </modules>
     <build>
         <plugins>

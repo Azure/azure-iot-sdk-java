@@ -1,0 +1,21 @@
+<!--
+  ~  Copyright (c) Microsoft. All rights reserved.
+  ~  Licensed under the MIT license. See LICENSE file in the project root for full license information.
+  -->
+
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
+    <artifactId>provisioning</artifactId>
+    <name>Provisioning Client</name>
+    <version>0.0.1</version>
+    <packaging>pom</packaging>
+    <description>The Microsoft Azure IoT Provisioning Client SDK for Java</description>
+    <url>http://azure.github.io/azure-iot-sdk-java/</url>
+    <modules>
+        <module>provisioning-device-client</module>
+        <module>provisioning-service-client</module>
+        <module>security</module>
+        <module>provisioning-samples</module>
+    </modules>
+</project>
