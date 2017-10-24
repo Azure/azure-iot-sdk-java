@@ -29,9 +29,16 @@ public class DeviceTwin
     public synchronized Query queryTwin(String sqlQuery, Integer pageSize) throws IotHubException, IOException;
     public synchronized Query queryTwin(String sqlQuery) throws IotHubException, IOException;
 
+    public synchronized QueryCollection queryTwinCollection(String sqlQuery) throws IotHubException, IOException;
+    public synchronized QueryCollection queryTwinCollection(String sqlQuery, Integer pageSize) throws IotHubException, IOException;
+    
     public synchronized boolean hasNextDeviceTwin(Query query) throws IotHubException, IOException;
     public synchronized String getNextDeviceTwin(Query query) throws IOException, IotHubException, NoSuchElementException;
 
+    public synchronized boolean hasNext(QueryCollection deviceTwinQueryCollection);
+    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(QueryCollection deviceTwinQueryCollection) throws IOException, IotHubException;
+    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(QueryCollection deviceTwinQueryCollection, QueryOptions options) throws IOException, IotHubException;
+    
     public Job scheduleUpdateTwin(String queryCondition,
                                   DeviceTwinDevice updateTwin,
                                   Date startTimeUtc,
@@ -220,6 +227,7 @@ public void replaceTags(DeviceTwinDevice device) throws IotHubException, IOExcep
 
 **SRS_DEVICETWIN_25_052: [** If the pageSize if not provided then a default pageSize of 100 is used for the query.**]**
 
+
 ### hasNextDeviceTwin
 
 ```java
@@ -267,3 +275,51 @@ public Job scheduleUpdateTwin(String queryCondition,
 
 **SRS_DEVICETWIN_21_068: [** The scheduleUpdateTwin shall return the created instance of the Job class **]**
 
+
+### queryTwinCollection
+
+```java
+public synchronized QueryCollection queryTwinCollection(String sqlQuery) throws IotHubException, IOException;
+```
+
+**SRS_DEVICETWIN_34_069: [**This function shall return the results of calling queryTwinCollection(sqlQuery, DEFAULT_PAGE_SIZE).**]**
+
+
+```java
+public synchronized QueryCollection queryTwinCollection(String sqlQuery, Integer pageSize) throws IotHubException, IOException;
+```
+
+**SRS_DEVICETWIN_34_070: [**This function shall return a new QueryCollection object of type TWIN with the provided sql query and page size.**]**
+
+
+### hasNext
+
+```java
+public synchronized boolean hasNext(QueryCollection deviceTwinQueryCollection);
+```
+
+**SRS_DEVICETWIN_34_080: [**If the provided deviceTwinQueryCollection is null, an IllegalArgumentException shall be thrown.**]**
+
+**SRS_DEVICETWIN_34_071: [**This function shall return if the provided deviceTwinQueryCollection has next.**]**
+
+
+### next
+
+```java
+public synchronized QueryCollectionResponse<DeviceTwinDevice> next(QueryCollection deviceTwinQueryCollection) throws IOException, IotHubException, NoSuchElementException;
+```
+
+**SRS_DEVICETWIN_34_075: [**This function shall call getNextDeviceTwinCollection(deviceTwinQueryCollection, queryOptions) where queryOptions has the deviceTwinQueryCollection's current page size.**]**
+
+
+```java
+public synchronized QueryCollectionResponse<DeviceTwinDevice> next(QueryCollection deviceTwinQueryCollection, QueryOptions options) throws IOException, IotHubException, NoSuchElementException;
+```
+
+**SRS_DEVICETWIN_34_076: [**If the provided deviceTwinQueryCollection is null, an IllegalArgumentException shall be thrown.**]**
+
+**SRS_DEVICETWIN_34_077: [**If the provided deviceTwinQueryCollection has no next set to give, this function shall return null.**]**
+
+**SRS_DEVICETWIN_34_078: [**If the provided deviceTwinQueryCollection has a next set to give, this function shall retrieve that set from deviceTwinQueryCollection, cast its contents to DeviceTwinDevice objects, and return it in a QueryCollectionResponse object.**]**
+
+**SRS_DEVICETWIN_34_079: [**The returned QueryCollectionResponse object shall contain the continuation token needed to retrieve the next set with.**]**

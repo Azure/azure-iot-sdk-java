@@ -5,7 +5,9 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
@@ -18,6 +20,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -36,8 +39,17 @@ import static org.junit.Assert.assertNotNull;
  */
 public class DeviceMethodAmqpsIT
 {
-    private static String iotHubConnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
+    private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
+
+    private static final String PUBLIC_KEY_CERTIFICATE_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_CERT_BASE64";
+    private static final String PRIVATE_KEY_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_PRIVATE_KEY_BASE64";
+    private static final String X509_THUMBPRINT_ENV_VAR_NAME = "IOTHUB_E2E_X509_THUMBPRINT";
+
+    private static String publicKeyCert;
+    private static String privateKey;
+    private static String x509Thumbprint;
+
     private static DeviceMethod methodServiceClient;
 
     private static final int MAX_DEVICES = 1;
@@ -49,26 +61,23 @@ public class DeviceMethodAmqpsIT
     private static final String PAYLOAD_STRING = "This is a valid payload";
 
     private static List<DeviceTestManager> devices = new LinkedList<>();
+    private static DeviceTestManager x509Device;
 
     private static final int NUMBER_INVOKES_PARALLEL = 10;
 
     @BeforeClass
     public static void setUp() throws NoSuchAlgorithmException, IotHubException, IOException, URISyntaxException, InterruptedException
     {
-        Map<String, String> env = System.getenv();
-        for (String envName : env.keySet())
-        {
-            if (envName.equals(iotHubConnectionStringEnvVarName.toString()))
-            {
-                iotHubConnectionString = env.get(envName);
-                break;
-            }
-        }
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        String privateKeyBase64Encoded = Tools.retrieveEnvironmentVariableValue(PRIVATE_KEY_BASE64_ENCODED_ENV_VAR_NAME);
+        String publicKeyCertBase64Encoded = Tools.retrieveEnvironmentVariableValue(PUBLIC_KEY_CERTIFICATE_BASE64_ENCODED_ENV_VAR_NAME);
+        x509Thumbprint = Tools.retrieveEnvironmentVariableValue(X509_THUMBPRINT_ENV_VAR_NAME);
 
-        if ((iotHubConnectionString == null) || iotHubConnectionString.isEmpty())
-        {
-            throw new IllegalArgumentException("Environment variable is not set: " + iotHubConnectionStringEnvVarName);
-        }
+        byte[] publicCertBytes = Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes());
+        publicKeyCert = new String(publicCertBytes);
+
+        byte[] privateKeyBytes = Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes());
+        privateKey = new String(privateKeyBytes);
 
         methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
 
@@ -78,6 +87,8 @@ public class DeviceMethodAmqpsIT
         {
             devices.add(new DeviceTestManager(registryManager, DEVICE_ID_NAME.concat("-" + i), IotHubClientProtocol.AMQPS));
         }
+
+        x509Device = new DeviceTestManager(registryManager, DEVICE_ID_NAME.concat("-x509"), IotHubClientProtocol.AMQPS, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     @Before
@@ -87,6 +98,8 @@ public class DeviceMethodAmqpsIT
         {
             device.clearDevice();
         }
+
+        x509Device.clearDevice();
     }
 
     protected static class RunnableInvoke implements Runnable
@@ -149,6 +162,8 @@ public class DeviceMethodAmqpsIT
         {
             device.stop();
         }
+
+        x509Device.stop();
     }
 
     @Test
@@ -377,5 +392,22 @@ public class DeviceMethodAmqpsIT
             // Don't do anything, expected throw.
         }
         deviceTestManger.restartDevice();
+    }
+
+    @Test
+    public void invokeMethodSucceedWithX509() throws Exception
+    {
+        // Arrange
+        DeviceTestManager deviceTestManger = x509Device;
+
+        // Act
+        MethodResult result = methodServiceClient.invoke(deviceTestManger.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        deviceTestManger.waitIotHub(1, 10);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals((long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
+        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload());
+        assertEquals(0, deviceTestManger.getStatusError());
     }
 }

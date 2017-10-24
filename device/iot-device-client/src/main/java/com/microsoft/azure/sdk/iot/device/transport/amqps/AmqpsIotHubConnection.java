@@ -18,6 +18,7 @@ import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
+import org.apache.qpid.proton.reactor.ReactorOptions;
 
 import java.io.IOException;
 import java.nio.BufferOverflowException;
@@ -74,10 +75,10 @@ public final class AmqpsIotHubConnection extends BaseHandler
      * Constructor to set up connection parameters using the {@link DeviceClientConfig}.
      *
      * @param config The {@link DeviceClientConfig} corresponding to the device associated with this {@link com.microsoft.azure.sdk.iot.device.DeviceClient}.
+     * @param amqpsDeviceOperationsList the list of device operations to run
      * @throws IOException if failed connecting to iothub.
      */
     public AmqpsIotHubConnection(DeviceClientConfig config, ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList) throws IOException
-
     {
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
         // any of the parameters of the configuration is null or empty.]
@@ -152,9 +153,9 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // Codes_SRS_AMQPSIOTHUBCONNECTION_12_002: [The constructor shall create a Proton reactor.]
         try
         {
-            reactor = Proton.reactor(this);
-
-        } catch (IOException e)
+            this.reactor = createReactor();
+        }
+        catch (IOException e)
         {
             // Codes_SRS_AMQPSIOTHUBCONNECTION_12_003: [The constructor shall throw IOException if the Proton reactor creation failed.]
             logger.LogError(e);
@@ -181,6 +182,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             try
             {
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_34_052: [If the config is not using sas token authentication, then the created iotHubReactor shall omit the Sasl.]
                 openAsync();
             }
             catch(Exception e)
@@ -260,19 +262,18 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     private void openAsync() throws IOException
     {
-        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
+        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+        {
+            this.sasToken = null;
+        }
+        else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
             this.sasToken = this.config.getSasTokenAuthentication().getRenewedSasToken();
-        }
-        else
-        {
-            //Codes_SRS_AMQPSIOTHUBCONNECTION_34_043: [If the config is not using sas token authentication, this function shall throw an IOException.]
-            throw new IOException("AMQPS operations do not support using x509 authentication");
         }
 
         if (this.reactor == null)
         {
-            this.reactor = Proton.reactor(this);
+            this.reactor = createReactor();
         }
 
         if (executorService == null)
@@ -316,6 +317,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
     /**
      * Creates a binary message using the given content and messageId. Sends the created message using the sender link.
      * @param message The message to be sent.
+     * @param messageType the type of the message being sent
+     * @throws IOException if send message fails
      * @return An {@link Integer} representing the hash of the message, or -1 if the connection is closed.
      */
     public Integer sendMessage(Message message, MessageType messageType) throws IOException
@@ -481,9 +484,12 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 ((TransportInternal)transport).addTransportLayer(webSocket);
             }
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_031: [The event handler shall set the SASL_PLAIN authentication on the transport using the given user name and sas token.]
-            Sasl sasl = transport.sasl();
-            sasl.plain(this.userName, this.sasToken);
+            if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.X509_CERTIFICATE)
+            {
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_031: [The event handler shall set the SASL_PLAIN authentication on the transport using the given user name and sas token.]
+                Sasl sasl = transport.sasl();
+                sasl.plain(this.userName, this.sasToken);
+            }
 
             try
             {
@@ -741,7 +747,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         startReconnect();
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
-
+    
     /**
      * Subscribe a listener to the list of listeners.
      * @param listener the listener to be subscribed.
@@ -812,6 +818,10 @@ public final class AmqpsIotHubConnection extends BaseHandler
         {
             domain.setSslContext(this.config.getSasTokenAuthentication().getSSLContext());
         }
+        else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+        {
+            domain.setSslContext(this.config.getX509Authentication().getSSLContext());
+        }
 
         return domain;
     }
@@ -835,5 +845,19 @@ public final class AmqpsIotHubConnection extends BaseHandler
             return null;
         }
     }
-}
 
+    private Reactor createReactor() throws IOException
+    {
+        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+        {
+            //Codes_SRS_AMQPSIOTHUBCONNECTION_34_053: [If the config is using x509 Authentication, the created Proton reactor shall not have SASL enabled by default.]
+            ReactorOptions options = new ReactorOptions();
+            options.setEnableSaslByDefault(false);
+            return Proton.reactor(options, this);
+        }
+        else
+        {
+            return Proton.reactor(this);
+        }
+    }
+}

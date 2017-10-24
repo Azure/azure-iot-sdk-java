@@ -200,7 +200,7 @@ public class Query
 
         this.responseContinuationToken = null;
         Map<String, String> headers = httpResponse.getHeaderFields();
-        //Codes_SRS_QUERY_25_010: [The method shall read the continuation token (x-ms-continuation) and reponse type (x-ms-item-type) from the HTTP Headers and save it.]
+        //Codes_SRS_QUERY_25_010: [The method shall read the continuation token (x-ms-continuation) and response type (x-ms-item-type) from the HTTP Headers and save it.]
         for (Map.Entry<String, String> header : headers.entrySet())
         {
             switch (header.getKey())

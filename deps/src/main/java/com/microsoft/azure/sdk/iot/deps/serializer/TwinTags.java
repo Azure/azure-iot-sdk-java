@@ -18,6 +18,10 @@ import java.util.Map;
  */
 public class TwinTags
 {
+    private static final String VERSION_TAG = "$version";
+    private static final String METADATA_TAG = "$metadata";
+    private static final int MAX_PROPERTY_LEVEL = 5;
+    private static final int MAX_METADATA_LEVEL = MAX_PROPERTY_LEVEL + 2;
 
     private Map<String, Object> tags;
 
@@ -144,6 +148,31 @@ public class TwinTags
         if(diffMap != null && onTagsCallback != null)
         {
             onTagsCallback.execute(diffMap);
+        }
+    }
+
+    protected void validate(Map<String, Object> tagsMap)
+    {
+        if(tagsMap == null)
+        {
+            throw new IllegalArgumentException("property cannot be null");
+        }
+        for (Map.Entry<String, Object> entry : tagsMap.entrySet())
+        {
+            if(entry.getKey().equals(METADATA_TAG))
+            {
+                if(entry.getValue() instanceof Map)
+                {
+                    ParserUtility.validateMap((Map<String, Object>)entry.getValue(), MAX_METADATA_LEVEL, true);
+                }
+            }
+            else if(!entry.getKey().equals(VERSION_TAG))
+            {
+                if(entry.getValue() instanceof Map)
+                {
+                    ParserUtility.validateMap((Map<String, Object>)entry.getValue(), MAX_PROPERTY_LEVEL, false);
+                }
+            }
         }
     }
 

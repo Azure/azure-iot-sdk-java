@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.internal.LinkedTreeMap;
 
 import java.util.Map;
 
@@ -136,11 +135,30 @@ public class TwinProperties
         {
             if(entry.getKey().equals(DESIRED_TAG))
             {
-                desired.update((LinkedTreeMap<String, Object>) entry.getValue(), onDesiredCallback);
+                desired.update((Map<String, Object>) entry.getValue(), onDesiredCallback);
             }
             else if(entry.getKey().equals(REPORTED_TAG))
             {
-                reported.update((LinkedTreeMap<String, Object>) entry.getValue(), onReportedCallback);
+                reported.update((Map<String, Object>) entry.getValue(), onReportedCallback);
+            }
+            else
+            {
+                throw new IllegalArgumentException("Invalid Property");
+            }
+        }
+    }
+
+    protected void validate(Map<String, Object> jsonTree) throws IllegalArgumentException
+    {
+        for(Map.Entry<String, Object> entry : jsonTree.entrySet())
+        {
+            if(entry.getKey().equals(DESIRED_TAG))
+            {
+                desired.validate((Map<String, Object>) entry.getValue());
+            }
+            else if(entry.getKey().equals(REPORTED_TAG))
+            {
+                reported.validate((Map<String, Object>) entry.getValue());
             }
             else
             {

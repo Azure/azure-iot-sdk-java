@@ -692,7 +692,7 @@ public class TwinParserTest {
 
     /* Tests_SRS_TWINPARSER_21_158: [A valid `value` shall contains less than 5 levels of sub-maps.] */
     @Test (expected = IllegalArgumentException.class)
-    public void updateDesiredProperty_6levelsFailed()
+    public void updateDesiredProperty6levelsFailed()
     {
         // Arrange
         TwinParser twinParser = new TwinParser();
@@ -3471,7 +3471,7 @@ public class TwinParserTest {
     /* Tests_SRS_TWINPARSER_21_039: [The updateTwin shall fill the fields the properties in the TwinParser class with the keys and values provided in the json string.] */
     /* Tests_SRS_TWINPARSER_21_040: [The updateTwin shall not change fields that is not reported in the json string.] */
     @Test
-    public void updateTwinJsonEmptyClassWithMetadataNoUpdateVersion_And5LevelsTagsSucceed()
+    public void updateTwinJsonEmptyClassWithMetadataNoUpdateVersionAnd5LevelsTagsSucceed()
     {
         // Arrange
         OnDesiredCallback onDesiredCallback = new OnDesiredCallback();
@@ -3578,7 +3578,7 @@ public class TwinParserTest {
     }
 
     @Test
-    public void updateTwinJson_And6LevelsTagsFailed() throws IOException
+    public void updateTwinJsonAnd6LevelsTagsFailed() throws IOException
     {
         // Arrange
         OnDesiredCallback onDesiredCallback = new OnDesiredCallback();
@@ -3675,6 +3675,120 @@ public class TwinParserTest {
         assertNull(onReportedCallback.diff);
         assertNull(onTagsCallback.diff);
         assertTwin(twinParser, oldPropertiesValues, oldPropertiesValues, oldTagsValues);
+    }
+
+    /* Tests_SRS_TWINPARSER_21_039: [The updateTwin shall fill the fields the properties in the TwinParser class with the keys and values provided in the json string.] */
+    /* Tests_SRS_TWINPARSER_21_157: [A valid `value` can contains sub-maps.] */
+    /* Tests_SRS_TWINPARSER_21_158: [A valid `value` shall contains less than 5 levels of sub-maps.] */
+    @Test
+    public void updateTwinJsonEmptyClassWith5LevelsAndFullMetadataAndVersionSucceed()
+    {
+        // Arrange
+        OnDesiredCallback onDesiredCallback = new OnDesiredCallback();
+        OnReportedCallback onReportedCallback = new OnReportedCallback();
+        TwinParser twinParser = new TwinParser(onDesiredCallback, onReportedCallback);
+        twinParser.enableMetadata();
+
+        String json =
+                "{\n" +
+                "   \"properties\":{\n"+
+                "       \"desired\":{\n" +
+                "           \"key1\":\"value1\",\n" +
+                "           \"key2\":1234.0,\n" +
+                "           \"level1\":{\n" +
+                "               \"level2\":{\n" +
+                "                   \"level3\":{\n" +
+                "                       \"level4\":{\n" +
+                "                           \"level5\":\"value On level5\"\n" +
+                "                       }\n" +
+                "                   }\n" +
+                "               }\n" +
+                "           },\n" +
+                "           \"$metadata\":{\n" +
+                "               \"key1\":{\n" +
+                "                   \"$lastUpdated\":\"2017-02-09T08:13:12.3456Z\",\n" +
+                "                   \"$lastUpdatedVersion\":3\n" +
+                "               },\n" +
+                "               \"key2\":{\n" +
+                "                   \"$lastUpdated\":\"2017-02-09T08:13:12.3457Z\",\n" +
+                "                   \"$lastUpdatedVersion\":5\n" +
+                "               },\n" +
+                "               \"level1\":{\n" +
+                "                   \"$lastUpdated\":\"2017-02-09T08:13:12.3458Z\",\n" +
+                "                   \"$lastUpdatedVersion\":3,\n" +
+                "                   \"level2\":{\n" +
+                "                       \"$lastUpdated\":\"2017-02-09T08:13:12.3458Z\",\n" +
+                "                       \"$lastUpdatedVersion\":3,\n" +
+                "                       \"level3\":{\n" +
+                "                           \"$lastUpdated\":\"2017-02-09T08:13:12.3458Z\",\n" +
+                "                           \"$lastUpdatedVersion\":3,\n" +
+                "                           \"level4\":{\n" +
+                "                               \"$lastUpdated\":\"2017-02-09T08:13:12.3458Z\",\n" +
+                "                               \"$lastUpdatedVersion\":3,\n" +
+                "                               \"level5\":{\n" +
+                "                                   \"$lastUpdated\":\"2017-02-09T08:13:12.3458Z\",\n" +
+                "                                   \"$lastUpdatedVersion\":3\n" +
+                "                               }\n" +
+                "                           }\n" +
+                "                       }\n" +
+                "                   }\n" +
+                "               }\n" +
+                "           },\n" +
+                "           \"$version\":5\n" +
+                "       },\n" +
+                "       \"reported\":{\n" +
+                "           \"key1\":\"value1\",\n" +
+                "           \"$metadata\":{\n" +
+                "               \"key1\":{\n" +
+                "                   \"$lastUpdated\":\"2017-02-09T08:13:12.3456Z\",\n" +
+                "                   \"$lastUpdatedVersion\":3\n" +
+                "               }\n" +
+                "           },\n" +
+                "           \"$version\":5\n" +
+                "       }\n" +
+                "   }\n" +
+                "}";
+
+        // Act
+        twinParser.updateTwin(json);
+
+        // Assert
+        Map<String, Object> expectedDesiredProperty = new HashMap<String, Object>()
+        {
+            {
+                put("key1", "value1");
+                put("key2", 1234.0);
+                put("level1", new HashMap<String, Object>()
+                {
+                    {
+                        put("level2", new HashMap<String, Object>()
+                        {
+                            {
+                                put("level3", new HashMap<String, Object>()
+                                {
+                                    {
+                                        put("level4", new HashMap<String, Object>()
+                                        {
+                                            {
+                                                put("level5", "value On level5");
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        };
+        Map<String, Object> expectedReportedProperty = new HashMap<String, Object>()
+        {
+            {
+                put("key1", "value1");
+            }
+        };
+        Helpers.assertMap(twinParser.getDesiredPropertyMap(), expectedDesiredProperty);
+        Helpers.assertMap(twinParser.getReportedPropertyMap(), expectedReportedProperty);
     }
 
     /* Tests_SRS_TWINPARSER_21_039: [The updateTwin shall fill the fields the properties in the TwinParser class with the keys and values provided in the json string.] */
@@ -4035,9 +4149,13 @@ public class TwinParserTest {
         // Arrange
         TwinParser twinParser = new TwinParser();
 
-        String json = "{\"bar properties\":{" +
-                "\"desired\":{\"key3\":null,\"key1\":\"value4\"}," +
-                "\"reported\":{\"key1\":null,\"key5\":null,\"key7\":null}}}";
+        String json =
+                "{\n" +
+                "   \"bar properties\":{\n" +
+                "       \"desired\":{\"key3\":null,\"key1\":\"value4\"},\n" +
+                "       \"reported\":{\"key1\":null,\"key5\":null,\"key7\":null}\n" +
+                "   }\n" +
+                "}";
 
         // Act
         twinParser.updateTwin(json);

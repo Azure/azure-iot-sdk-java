@@ -28,6 +28,9 @@ public class TwinProperty
     private static final String LAST_UPDATE_TAG = "$lastUpdated";
     private static final String LAST_UPDATE_VERSION_TAG = "$lastUpdatedVersion";
 
+    private static final int MAX_PROPERTY_LEVEL = 5;
+    private static final int MAX_METADATA_LEVEL = MAX_PROPERTY_LEVEL + 2;
+
     private Object lock = new Object();
 
     private class Property
@@ -151,6 +154,31 @@ public class TwinProperty
         return updatedJsonElement;
     }
 
+    protected void validate(Map<String, Object> property) throws IllegalArgumentException
+    {
+        if(property == null)
+        {
+            throw new IllegalArgumentException("property cannot be null");
+        }
+        for (Map.Entry<String, Object> entry : property.entrySet())
+        {
+            if(entry.getKey().equals(METADATA_TAG))
+            {
+                if(entry.getValue() instanceof Map)
+                {
+                    ParserUtility.validateMap((Map<String, Object>)entry.getValue(), MAX_METADATA_LEVEL, true);
+                }
+            }
+            else if(!entry.getKey().equals(VERSION_TAG))
+            {
+                if(entry.getValue() instanceof Map)
+                {
+                    ParserUtility.validateMap((Map<String, Object>)entry.getValue(), MAX_PROPERTY_LEVEL, false);
+                }
+            }
+        }
+    }
+
     protected Integer getVersion()
     {
         /* Codes_SRS_TWINPARSER_21_048: [The getDesiredPropertyVersion shall return the desired property version.] */
@@ -265,7 +293,7 @@ public class TwinProperty
         return ParserUtility.mapToJsonElement(diffMap);
     }
 
-    protected void update(LinkedTreeMap<String, Object> jsonTree,
+    protected void update(Map<String, Object> jsonTree,
                        TwinChangedCallback onCallback) throws IllegalArgumentException
     {
         Map<String, Object> diffField = new HashMap<>();
@@ -326,13 +354,13 @@ public class TwinProperty
 
     protected void update(String json, TwinChangedCallback onCallback) throws IllegalArgumentException
     {
-        LinkedTreeMap<String, Object> newValues;
+        Map   <String, Object> newValues;
         try
         {
             /* Codes_SRS_TWINPARSER_21_095: [If the provided json have any duplicated `key`, the updateReportedProperty shall throws IllegalArgumentException.] */
             /* Codes_SRS_TWINPARSER_21_096: [If the provided json have any duplicated `key`, the updateDesiredProperty shall throws IllegalArgumentException.] */
             Gson gson = new GsonBuilder().create();
-            newValues = (LinkedTreeMap<String, Object>) gson.fromJson(json, LinkedTreeMap.class);
+            newValues = (Map<String, Object>) gson.fromJson(json, Map.class);
         }
         catch (Exception e)
         {
@@ -341,7 +369,7 @@ public class TwinProperty
         update(newValues, onCallback);
     }
 
-    private void updateVersion(LinkedTreeMap<String, Object> jsonTree)
+    private void updateVersion(Map<String, Object> jsonTree)
     {
         for (Map.Entry<String, Object> entry : jsonTree.entrySet())
         {
@@ -353,24 +381,24 @@ public class TwinProperty
         }
     }
 
-    private Map<String, Object>  updateMetadata(LinkedTreeMap<String, Object> jsonTree)
+    private Map<String, Object> updateMetadata(Map<String, Object> jsonTree)
     {
         Map<String, Object> diff = new HashMap<>();
         for (Map.Entry<String, Object> entry : jsonTree.entrySet())
         {
             if(entry.getKey().equals(METADATA_TAG))
             {
-                LinkedTreeMap<String, Object> metadataTree = (LinkedTreeMap<String, Object>)entry.getValue();
-                for (LinkedTreeMap.Entry<String, Object> item : metadataTree.entrySet())
+                Map<String, Object> metadataTree = (Map<String, Object>)entry.getValue();
+                for (Map.Entry<String, Object> item : metadataTree.entrySet())
                 {
                     synchronized (lock)
                     {
                         if (property.containsKey(item.getKey()))
                         {
-                            LinkedTreeMap<String, Object> itemTree = (LinkedTreeMap<String, Object>) item.getValue();
+                            Map<String, Object> itemTree = (Map<String, Object>) item.getValue();
                             String lastUpdated = null;
                             Integer lastUpdatedVersion = null;
-                            for (LinkedTreeMap.Entry<String, Object> metadataItem : itemTree.entrySet())
+                            for (Map.Entry<String, Object> metadataItem : itemTree.entrySet())
                             {
                                 if (metadataItem.getKey().equals(LAST_UPDATE_TAG))
                                 {
@@ -394,7 +422,7 @@ public class TwinProperty
         return diff;
     }
 
-    private Map<String, Object> updateFields(LinkedTreeMap<String, Object> jsonTree) throws IllegalArgumentException
+    private Map<String, Object> updateFields(Map<String, Object> jsonTree) throws IllegalArgumentException
     {
         Map<String, Object> diff = new HashMap<>();
 

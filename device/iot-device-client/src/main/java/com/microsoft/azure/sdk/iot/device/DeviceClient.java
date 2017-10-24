@@ -532,6 +532,7 @@ public final class DeviceClient implements Closeable
      * @throws IllegalArgumentException if the provided blob name, or the file path is {@code null},
      *          empty or not valid, or if the callback is {@code null}.
      * @throws IOException if the client cannot create a instance of the FileUpload or the transport.
+     * @throws UnsupportedOperationException if this method is called when using x509 authentication
      */
     public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
                                   IotHubEventCallback callback, Object callbackContext)
@@ -559,6 +560,12 @@ public final class DeviceClient implements Closeable
 
         /* Codes_SRS_DEVICECLIENT_21_047: [If the `destinationBlobName` is null, empty or not valid, the uploadToBlobAsync shall throw IllegalArgumentException.] */
         ParserUtility.validateBlobName(destinationBlobName);
+
+        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+        {
+            //Codes_SRS_DEVICECLIENT_34_066: [If this function is called when the device client is using x509 authentication, an UnsupportedOperationException shall be thrown.]
+            throw new UnsupportedOperationException("File Upload does not support x509 authentication");
+        }
 
         /* Codes_SRS_DEVICECLIENT_21_048: [If there is no instance of the FileUpload, the uploadToBlobAsync shall create a new instance of the FileUpload.] */
         if(this.fileUpload == null)

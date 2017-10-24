@@ -109,7 +109,7 @@ public class FileUploadNotificationParser
         this.enqueuedTimeUtc = fileUploadNotificationParser.enqueuedTimeUtc;
         this.blobSizeInBytes = fileUploadNotificationParser.blobSizeInBytes;
         this.enqueuedTimeUtcDate = ParserUtility.getDateTimeUtc(this.enqueuedTimeUtc);
-        this.lastUpdatedTimeDate = ParserUtility.getDateTimeOffset(this.lastUpdatedTime);
+        this.lastUpdatedTimeDate = ParserUtility.stringToDateTimeOffset(this.lastUpdatedTime);
     }
 
     /**

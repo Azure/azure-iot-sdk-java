@@ -14,7 +14,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
 	public AmqpsIotHubConnection(DeviceClientConfig config, Boolean useWebSockets);
 	public void open() throws IOException;
 	public void close();
-    public Integer sendMessage(Message message)
+    public Integer sendMessage(Message message);
     public Boolean sendMessageResult(AmqpsMessage message, IotHubMessageResult result);
 	
 	public void onConnectionInit(Event event);
@@ -52,6 +52,8 @@ public AmqpsIotHubConnection(DeviceClientConfig config, Boolean useWebSockets);
 
 **SRS_AMQPSIOTHUBCONNECTION_12_003: [**The constructor shall throw IOException if the Proton reactor creation failed.**]**
 
+**SRS_AMQPSIOTHUBCONNECTION_34_053: [**If the config is using x509 Authentication, the created Proton reactor shall not have SASL enabled by default.**]**
+
 
 ### open
 
@@ -61,13 +63,13 @@ public void open() throws IOException
 
 **SRS_AMQPSIOTHUBCONNECTION_15_007: [**If the AMQPS connection is already open, the function shall do nothing.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_34_043: [**If the config is not using sas token authentication, this function shall throw an IOException.**]**
-
 **SRS_AMQPSIOTHUBCONNECTION_15_009: [**The function shall trigger the Reactor (Proton) to begin running.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_15_010: [**The function shall wait for the reactor to be ready and for enough link credit to become available.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_15_011: [**If any exception is thrown while attempting to trigger the reactor, the function shall close the connection and throw an IOException.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_052: [**If the config is not using sas token authentication, then the created iotHubReactor shall omit the Sasl.**]**
 
 
 ### close

@@ -225,6 +225,23 @@ public class ReceiveMessagesIT
         client.closeNow();
     }
 
+    @Test
+    public void receiveMessagesOverAMQPSIncludingPropertiesUsingX509Auth() throws Exception
+    {
+        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqttX509), IotHubClientProtocol.AMQPS, publicKeyCert, false, privateKey, false);
+        client.open();
+
+        Success messageReceived = new Success();
+        com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallbackMqtt();
+        client.setMessageCallback(callback, messageReceived);
+
+        sendMessageToDevice(deviceMqttX509.getDeviceId(),"AMQPS");
+        waitForMessageToBeReceived(messageReceived, "AMQPS");
+
+        Thread.sleep(200);
+        client.closeNow();
+    }
+
     private static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
         public IotHubMessageResult execute(Message msg, Object context)

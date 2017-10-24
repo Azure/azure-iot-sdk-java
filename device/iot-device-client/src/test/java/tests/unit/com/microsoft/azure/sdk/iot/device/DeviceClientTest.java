@@ -2331,4 +2331,31 @@ public class DeviceClientTest
         // act
         client.setOption("SetSASTokenExpiryTime", 25L);
     }
+
+    //Tests_SRS_DEVICECLIENT_34_066: [If this function is called when the device client is using x509 authentication, an UnsupportedOperationException shall be thrown.]
+    @Test (expected = UnsupportedOperationException.class)
+    public void uploadToBlobUsingX509ThrowsUnsupportedOperationException(@Mocked final InputStream mockInputStream,
+                                                                         @Mocked final IotHubEventCallback mockedStatusCB,
+                                                                         @Mocked final PropertyCallBack mockedPropertyCB) throws URISyntaxException, IOException
+    {
+        // arrange
+        final String publicKeyCert = "someCert";
+        final String privateKey = "someKey";
+        final String connString = "HostName=iothub.device.com;DeviceId=testdevice;x509=true";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        final String destinationBlobName = "valid/blob/name.txt";
+        final long streamLength = 100;
+        DeviceClient client = new DeviceClient(connString, protocol, publicKeyCert, false, privateKey, false);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+            }
+        };
+
+        // act
+        client.uploadToBlobAsync(destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
+    }
 }

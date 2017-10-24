@@ -47,5 +47,5 @@ repositories {
 
 dependencies {
     // Remote binary dependency
-    compile 'com.microsoft.azure.sdk.iot:iot-device-client:1.4.34'
+    compile 'com.microsoft.azure.sdk.iot:iot-device-client:1.5.37'
 }

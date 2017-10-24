@@ -26,6 +26,8 @@ public final class MqttTransport implements IotHubTransport
     public void handleMessage() throws IllegalStateException;
 
     public boolean isEmpty();
+    
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
 }
 ```
 
@@ -101,6 +103,10 @@ public void sendMessages() throws IllegalStateException;
 
 **SRS_MQTTTRANSPORT_15_012: [**If the MQTT connection is closed, the function shall throw an IllegalStateException.**]**
 
+**SRS_MQTTTRANSPORT_34_023: [**If the config is using sas token auth and its token has expired, the message shall not be sent, but shall be added to the callback list with IotHubStatusCode UNAUTHORIZED.**]**
+
+**SRS_MQTTTRANSPORT_34_024: [**If the config is using sas token auth, its token has expired, and the connection status callback is not null, the connection status callback will be fired with SAS_TOKEN_EXPIRED.**]**
+
 
 ### invokeCallbacks
 
@@ -135,3 +141,13 @@ public boolean isEmpty();
 ```
 
 **SRS_MQTTTRANSPORT_15_019: [**The function shall return true if the waiting list, in progress list, and callback list are all empty, and false otherwise.**]**
+
+
+### registerConnectionStateCallback
+```java
+public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
+```
+
+**SRS_MQTTTRANSPORT_34_025: [**If the provided callback is null, an IllegalArgumentException shall be thrown.**]**
+
+**SRS_MQTTTRANSPORT_34_026: [**This function shall register the connection state callback.**]**
