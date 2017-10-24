@@ -11,7 +11,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
 
-import com.microsoft.azure.sdk.iot.ConnectionStatusCallback;
+import com.microsoft.azure.sdk.iot.common.ConnectionStatusCallback;
 import com.microsoft.azure.sdk.iot.common.EventCallback;
 import com.microsoft.azure.sdk.iot.common.Success;
 import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;

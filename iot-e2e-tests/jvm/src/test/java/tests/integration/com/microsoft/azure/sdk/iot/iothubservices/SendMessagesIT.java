@@ -5,7 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
-import com.microsoft.azure.sdk.iot.ConnectionStatusCallback;
+import com.microsoft.azure.sdk.iot.common.ConnectionStatusCallback;
 import com.microsoft.azure.sdk.iot.common.EventCallback;
 import com.microsoft.azure.sdk.iot.common.Success;
 import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
