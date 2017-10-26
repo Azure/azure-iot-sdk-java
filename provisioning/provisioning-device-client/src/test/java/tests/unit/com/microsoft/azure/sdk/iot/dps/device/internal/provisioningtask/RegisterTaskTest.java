@@ -8,9 +8,9 @@
 package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.provisioningtask;
 
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
-import com.microsoft.azure.sdk.iot.dps.security.SecurityClient;
-import com.microsoft.azure.sdk.iot.dps.security.SecurityClientKey;
-import com.microsoft.azure.sdk.iot.dps.security.SecurityClientX509;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientKey;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientX509;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;

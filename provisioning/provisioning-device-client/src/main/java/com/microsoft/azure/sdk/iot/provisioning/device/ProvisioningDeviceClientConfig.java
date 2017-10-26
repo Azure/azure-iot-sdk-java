@@ -7,8 +7,8 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device;
 
-import com.microsoft.azure.sdk.iot.dps.security.HsmType;
-import com.microsoft.azure.sdk.iot.dps.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.HsmType;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 
 public class ProvisioningDeviceClientConfig

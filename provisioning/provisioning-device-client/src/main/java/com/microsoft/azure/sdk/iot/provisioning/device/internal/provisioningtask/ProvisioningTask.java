@@ -12,7 +12,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientS
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientRegistrationCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
-import com.microsoft.azure.sdk.iot.dps.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientAuthenticationException;

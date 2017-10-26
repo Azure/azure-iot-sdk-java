@@ -7,7 +7,7 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 
-import com.microsoft.azure.sdk.iot.dps.security.SecurityClientKey;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientKey;
 import tss.*;
 import tss.tpm.*;
 

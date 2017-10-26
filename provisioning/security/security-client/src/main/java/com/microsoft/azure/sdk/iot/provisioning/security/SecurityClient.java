@@ -5,7 +5,7 @@
  *
  */
 
-package com.microsoft.azure.sdk.iot.dps.security;
+package com.microsoft.azure.sdk.iot.provisioning.security;
 
 import javax.net.ssl.SSLContext;
 

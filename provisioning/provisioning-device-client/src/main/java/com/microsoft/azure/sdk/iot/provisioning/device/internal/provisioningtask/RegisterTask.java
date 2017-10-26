@@ -7,8 +7,8 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask;
 
-import com.microsoft.azure.sdk.iot.dps.security.SecurityClient;
-import com.microsoft.azure.sdk.iot.dps.security.SecurityClientX509;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientX509;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientAuthenticationException;
@@ -20,7 +20,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientC
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
-import com.microsoft.azure.sdk.iot.dps.security.SecurityClientKey;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientKey;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
