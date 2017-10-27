@@ -7,6 +7,7 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityClientTPMEmulator;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
@@ -67,7 +68,7 @@ public class ProvisioningTpmSample
         }
     }
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws ProvisioningDeviceConnectionException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
