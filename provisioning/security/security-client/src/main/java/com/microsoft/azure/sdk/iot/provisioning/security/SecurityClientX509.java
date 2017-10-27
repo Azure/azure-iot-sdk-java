@@ -7,19 +7,18 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.security;
 
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+
 import javax.net.ssl.*;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.util.Collection;
 import java.util.UUID;
 
-public abstract class SecurityClientX509 implements SecurityClient
+public abstract class SecurityClientX509 extends SecurityClient
 {
+    private static final String ALIAS_CERT_ALIAS = "ALIAS_CERT";
     private HsmType HsmType;
 
     abstract public String getDeviceCommonName();
@@ -28,98 +27,78 @@ public abstract class SecurityClientX509 implements SecurityClient
     abstract public Certificate getDeviceSignerCert();
 
     @Override
-    public String getRegistrationId() throws SecurityException
+    public String getRegistrationId() throws SecurityClientException
     {
         return this.getDeviceCommonName();
     }
 
     @Override
-    public SSLContext getSSLContext() throws SecurityException
+    public SSLContext getSSLContext() throws SecurityClientException
     {
-        SSLContext sslContext = null;
         try
         {
-            sslContext = this.generateSSLContext(this.getAliasCert(), this.getAliasKey(), this.getDeviceSignerCert());
+            return this.generateSSLContext(this.getAliasCert(), this.getAliasKey(), this.getDeviceSignerCert());
         }
         catch (NoSuchProviderException | UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException | IOException | CertificateException e)
         {
-            throw new SecurityException(e.getMessage());
+            throw new SecurityClientException(e);
         }
-
-        return sslContext;
     }
 
-    private SSLContext generateSSLContext(Certificate aliasCertificate, Key privateKey, Certificate rootCert) throws NoSuchProviderException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
+    private TrustManager getDefaultX509TrustManager(KeyStore keyStore) throws NoSuchAlgorithmException, KeyStoreException, SecurityClientException
     {
-        String password = UUID.randomUUID().toString();
-        if (aliasCertificate == null || privateKey == null)
-        {
-            throw new IOException("cert cannot be null");
-        }
-
-        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-        // create keystore
-        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        keyStore.load(null);
-
-        // load cert and private key to key store
-        keyStore.setKeyEntry("DPSAlias", privateKey, password.toCharArray(), new Certificate[] {aliasCertificate});
-        /*if (keyStore.containsAlias("DPSSignerCert"));
-        {
-            keyStore.deleteEntry("DPSSignerCert");
-        }*/
-        //keyStore.setCertificateEntry("DPSSignerCert", signerCert);
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        Collection<? extends Certificate> serverCert;
-        try (InputStream certStreamArray = new ByteArrayInputStream(this.DEFAULT_TRUSTED_CERT.getBytes()))
-        {
-            serverCert =  certFactory.generateCertificates(certStreamArray);
-        }
-        for (Certificate c : serverCert)
-        {
-            keyStore.setCertificateEntry("trustedDPSCert-" + UUID.randomUUID(), c);
-        }
-
         // obtain X509 trust manager
         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         trustManagerFactory.init(keyStore);
-        X509TrustManager x509TrustManager = null;
         for (TrustManager trustManager : trustManagerFactory.getTrustManagers())
         {
             if (trustManager instanceof X509TrustManager)
             {
-                x509TrustManager = (X509TrustManager) trustManager;
-                break;
+                return trustManager;
             }
         }
 
-        if (x509TrustManager == null)
-        {
-            throw new NullPointerException();
-        }
+        throw new SecurityClientException("Could not retrieve X509 trust manager");
+    }
 
-       // x509TrustManager.checkClientTrusted(new X509Certificate[] { (X509Certificate) serverCert}, "DHE_DSS");
-
+    private KeyManager getDefaultX509KeyManager(KeyStore keyStore, String password) throws NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException, SecurityClientException
+    {
         // create key manager factory and obtain x509 key manager
+
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         keyManagerFactory.init(keyStore, password.toCharArray());
 
-        X509KeyManager x509KeyManager = null;
         for (KeyManager keyManager : keyManagerFactory.getKeyManagers())
         {
             if (keyManager instanceof X509KeyManager)
             {
-                x509KeyManager = (X509KeyManager) keyManager;
-                break;
+                return keyManager;
             }
         }
 
-        if (x509KeyManager == null)
+        throw new SecurityClientException("Could not retrieve X509 Key Manager");
+    }
+
+    private SSLContext generateSSLContext(Certificate aliasCertificate, Key privateKey, Certificate signerCertificate) throws NoSuchProviderException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException, SecurityClientException
+    {
+        if (aliasCertificate == null || privateKey == null || signerCertificate == null)
         {
-            throw new NullPointerException();
+            throw new IllegalArgumentException("cert or private key cannot be null");
         }
 
-        sslContext.init(new KeyManager[] {x509KeyManager}, new TrustManager[] {x509TrustManager}, new SecureRandom());
+        String password = UUID.randomUUID().toString();
+        SSLContext sslContext = SSLContext.getInstance(DEFAULT_TLS_PROTOCOL);
+        // Load Trusted certs to keystore and retrieve it.
+
+        KeyStore keyStore = this.getKeyStoreWithTrustedCerts();
+
+        // Load Alias cert and private key to key store
+        keyStore.setKeyEntry(ALIAS_CERT_ALIAS, privateKey, password.toCharArray(), new Certificate[] {aliasCertificate});
+
+        //TODO : determine if signer cert is also suppose to be set on SSL context
+        //keyStore.setCertificateEntry("DPSSignerCert", signerCert);
+
+        sslContext.init(new KeyManager[] {this.getDefaultX509KeyManager(keyStore, password)}, new TrustManager[] {this.getDefaultX509TrustManager(keyStore)}, new SecureRandom());
         return sslContext;
     }
 }

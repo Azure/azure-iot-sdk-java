@@ -11,6 +11,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 import org.apache.commons.codec.binary.Base32;
 
 import java.io.InputStream;
@@ -21,7 +23,7 @@ import java.security.cert.CertificateFactory;
 import java.util.Collection;
 import java.util.UUID;
 
-public abstract class SecurityClientKey implements SecurityClient
+public abstract class SecurityClientKey extends SecurityClient
 {
     private HsmType HsmType;
 
@@ -31,7 +33,7 @@ public abstract class SecurityClientKey implements SecurityClient
     abstract public byte[] signData(byte[] data);
 
     @Override
-    public String getRegistrationId() throws SecurityException
+    public String getRegistrationId() throws SecurityClientException
     {
         /*
         1. get ek
@@ -64,22 +66,10 @@ public abstract class SecurityClientKey implements SecurityClient
 
     private SSLContext generateSSLContext() throws NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException, KeyManagementException
     {
-        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+        SSLContext sslContext = SSLContext.getInstance(DEFAULT_TLS_PROTOCOL);
+
         // create keystore
-        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        keyStore.load(null);
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-
-        Collection<? extends Certificate> trustedCert;
-
-        try (InputStream certStreamArray = new ByteArrayInputStream(this.DEFAULT_TRUSTED_CERT.getBytes()))
-        {
-            trustedCert =  certFactory.generateCertificates(certStreamArray);
-        }
-        for (Certificate c : trustedCert)
-        {
-            keyStore.setCertificateEntry("trustedDPSCert-" + UUID.randomUUID(), c);
-        }
+        KeyStore keyStore = this.getKeyStoreWithTrustedCerts();
 
         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         trustManagerFactory.init(keyStore);
@@ -88,7 +78,7 @@ public abstract class SecurityClientKey implements SecurityClient
     }
 
     @Override
-    public SSLContext getSSLContext() throws SecurityException
+    public SSLContext getSSLContext() throws SecurityClientException
     {
         try
         {
@@ -96,7 +86,7 @@ public abstract class SecurityClientKey implements SecurityClient
         }
         catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException | KeyManagementException e)
         {
-            throw new SecurityException(e.getMessage());
+            throw new SecurityClientException(e);
         }
     }
 }

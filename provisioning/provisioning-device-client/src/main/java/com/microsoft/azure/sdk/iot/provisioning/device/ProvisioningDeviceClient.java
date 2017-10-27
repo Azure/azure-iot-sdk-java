@@ -7,6 +7,7 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device;
 
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ProvisioningTask;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
@@ -64,7 +65,7 @@ public class ProvisioningDeviceClient
         executor.submit(this.provisioningTask);
     }
 
-    public void close()
+    public void close() throws ProvisioningDeviceConnectionException
     {
         if (provisioningTask != null)
         {

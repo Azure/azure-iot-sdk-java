@@ -7,11 +7,27 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.security;
 
-import javax.net.ssl.SSLContext;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 
-public interface SecurityClient
+import javax.net.ssl.SSLContext;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.util.Collection;
+import java.util.UUID;
+
+public abstract class SecurityClient
 {
-    String DEFAULT_TRUSTED_CERT =
+    static final String DEFAULT_TLS_PROTOCOL = "TLSv1.2";
+    private static final String DEFAULT_CERT_INSTANCE = "X.509";
+    private static final String TRUSTED_CERT_ALIAS = "TRUSTED_CERT_";
+    private static final String DEFAULT_TRUSTED_CERT =
                     /*D-TRUST Root Class 3 CA 2 2009*/
                     "-----BEGIN CERTIFICATE-----\r\n" +
                     "MIIEMzCCAxugAwIBAgIDCYPzMA0GCSqGSIb3DQEBCwUAME0xCzAJBgNVBAYTAkRF\r\n" +
@@ -140,6 +156,27 @@ public interface SecurityClient
                     "jaXIH9KZVpSxbxQIIM0YQKVjrODfL/MdkMSNxS9C5GkQeftIulw=\n" +
                     "-----END CERTIFICATE-----";
 
-    String getRegistrationId() throws SecurityException;
-    SSLContext getSSLContext() throws SecurityException;
+    abstract public String getRegistrationId() throws SecurityClientException;
+    abstract public SSLContext getSSLContext() throws SecurityClientException;
+
+    KeyStore getKeyStoreWithTrustedCerts() throws NoSuchAlgorithmException, IOException, CertificateException, KeyStoreException
+    {
+        // create keystore
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keyStore.load(null);
+
+        CertificateFactory certFactory = CertificateFactory.getInstance(DEFAULT_CERT_INSTANCE);
+        Collection<? extends Certificate> serverCert;
+        try (InputStream certStreamArray = new ByteArrayInputStream(DEFAULT_TRUSTED_CERT.getBytes()))
+        {
+            serverCert =  certFactory.generateCertificates(certStreamArray);
+        }
+
+        for (Certificate c : serverCert)
+        {
+            keyStore.setCertificateEntry(TRUSTED_CERT_ALIAS + UUID.randomUUID(), c);
+        }
+
+        return keyStore;
+    }
 }
