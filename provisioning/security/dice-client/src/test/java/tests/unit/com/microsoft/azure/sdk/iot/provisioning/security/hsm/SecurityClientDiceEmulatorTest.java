@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityClientDiceE
 import com.microsoft.msr.RiotEmulator.RIoT;
 import mockit.Deencapsulation;
 import mockit.Mocked;
-import mockit.Verifications;
 import org.junit.Test;
 
 import java.security.Key;

@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http.Co
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceTransportException;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.RequestData;
 
 import javax.net.ssl.SSLContext;
 
@@ -51,7 +52,7 @@ public abstract class ProvisioningDeviceClientContract
         }
     }
 
-    public abstract void requestNonceForTPM(byte[] payload, String registrationId, SSLContext sslContext, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException, ProvisioningDeviceTransportException, ProvisioningDeviceHubException;
-    public abstract void authenticateWithProvisioningService(byte[] payload, String registrationId, SSLContext sslContext, String authorization, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException, ProvisioningDeviceTransportException, ProvisioningDeviceHubException;
-    public abstract void getRegistrationStatus(String operationId, String registrationId, String dpsAuthorization, SSLContext sslContext, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException, ProvisioningDeviceTransportException, ProvisioningDeviceHubException;
+    public abstract void requestNonceForTPM(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException, ProvisioningDeviceTransportException, ProvisioningDeviceHubException;
+    public abstract void authenticateWithProvisioningService(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException, ProvisioningDeviceTransportException, ProvisioningDeviceHubException;
+    public abstract void getRegistrationStatus(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException, ProvisioningDeviceTransportException, ProvisioningDeviceHubException;
 }

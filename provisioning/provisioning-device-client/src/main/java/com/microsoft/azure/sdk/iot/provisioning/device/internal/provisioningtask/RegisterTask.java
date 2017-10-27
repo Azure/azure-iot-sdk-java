@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientX509;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientAuthenticationException;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegisterRequestParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegisterResponseTPMParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
@@ -45,13 +44,15 @@ public class RegisterTask implements Callable
     private class ResponseCallbackImpl implements ResponseCallback
     {
         @Override
-        public void run(byte[] responseData, Object context) throws ProvisioningDeviceClientException
+        public void run(ResponseData responseData, Object context) throws ProvisioningDeviceClientException
         {
             if (context instanceof ResponseData)
             {
+
                 ResponseData data = (ResponseData) context;
-                data.setResponseData(responseData);
-                data.setContractState(DPS_REGISTRATION_RECEIVED);
+                data.setResponseData(responseData.getResponseData());
+                data.setContractState(responseData.getContractState());
+                data.setWaitForStatusInMS(responseData.getWaitForStatusInMS());
             }
             else
             {
@@ -111,9 +112,6 @@ public class RegisterTask implements Callable
 
         try
         {
-            //SRS_RegisterTask_25_005: [ If the provided security client is for X509 then, this method shall build the required Json input using parser. ]
-            byte[] payload = new RegisterRequestParser(registrationId).toJson().getBytes();
-
             SecurityClientX509 dpsSecurityClientX509 = (SecurityClientX509) securityClient;
 
             //SRS_RegisterTask_25_004: [ If the provided security client is for X509 then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
@@ -125,9 +123,11 @@ public class RegisterTask implements Callable
             }
             authorization.setSslContext(sslContext);
 
+            RequestData requestData = new RequestData(null, null, registrationId, null, sslContext, null);
+
             //SRS_RegisterTask_25_006: [ If the provided security client is for X509 then, this method shall trigger authenticateWithProvisioningService on the contract API and wait for response and return it. ]
             ResponseData dpsRegistrationData = new ResponseData();
-            this.provisioningDeviceClientContract.authenticateWithProvisioningService(payload, registrationId, sslContext, null, responseCallback, dpsRegistrationData);
+            this.provisioningDeviceClientContract.authenticateWithProvisioningService(requestData, responseCallback, dpsRegistrationData);
 
             if (dpsRegistrationData.getResponseData() == null || dpsRegistrationData.getContractState() != DPS_REGISTRATION_RECEIVED)
             {
@@ -178,7 +178,7 @@ public class RegisterTask implements Callable
 
     private ResponseParser processWithNonce(ResponseData responseDataForNonce,
                                             SecurityClientKey dpsSecurityClientKey,
-                                            byte[] payload)
+                                            RequestData requestData)
             throws IOException, InterruptedException, ProvisioningDeviceClientException
     {
 
@@ -197,12 +197,11 @@ public class RegisterTask implements Callable
             3. Encode the token to Base64 format and UrlEncode it to generate the signature. ]*/
 
             String sasToken = this.constructSasToken(dpsSecurityClientKey.getRegistrationId(), DEFAULT_EXPIRY_TIME_IN_SECS);
+            requestData.setSasToken(sasToken);
 
             //SRS_RegisterTask_25_016: [ If the provided security client is for Key then, this method shall trigger authenticateWithProvisioningService on the contract API using the sasToken generated and wait for response and return it. ]
             ResponseData responseDataForSasTokenAuth = new ResponseData();
-            this.provisioningDeviceClientContract.authenticateWithProvisioningService(payload, dpsSecurityClientKey.getRegistrationId(),
-                                                                                      authorization.getSslContext(),
-                                                                                      sasToken, responseCallback,
+            this.provisioningDeviceClientContract.authenticateWithProvisioningService(requestData, responseCallback,
                                                                                       responseDataForSasTokenAuth);
             if (responseDataForSasTokenAuth.getResponseData() == null ||
                     responseDataForSasTokenAuth.getContractState() != DPS_REGISTRATION_RECEIVED)
@@ -245,11 +244,6 @@ public class RegisterTask implements Callable
                 throw new ProvisioningDeviceSecurityException(new IllegalArgumentException("Ek or SRK cannot be null"));
             }
 
-            //SRS_RegisterTask_25_010: [ If the provided security client is for Key then, this method shall build the required Json input with base 64 encoded endorsement key, storage root key and on failure pass the exception back to the user. ]
-            String base64EncodedEk = new String(Base64.encodeBase64Local(dpsSecurityClientKey.getDeviceEk()));
-            String base64EncodedSrk = new String(Base64.encodeBase64Local(dpsSecurityClientKey.getDeviceSRK()));
-            byte[] payload = new RegisterRequestParser(registrationId, base64EncodedEk, base64EncodedSrk).toJson().getBytes();
-
             //SRS_RegisterTask_25_009: [ If the provided security client is for Key then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
             SSLContext sslContext = dpsSecurityClientKey.getSSLContext();
             if (sslContext == null)
@@ -258,9 +252,11 @@ public class RegisterTask implements Callable
             }
             authorization.setSslContext(sslContext);
 
+            RequestData requestData = new RequestData(dpsSecurityClientKey.getDeviceEk(), dpsSecurityClientKey.getDeviceSRK(), registrationId, null, sslContext, null);
+
             //SRS_RegisterTask_25_011: [ If the provided security client is for Key then, this method shall trigger requestNonceForTPM on the contract API and wait for Authentication Key and decode it from Base64. Also this method shall pass the exception back to the user if it fails. ]
             ResponseData nonceResponseData = new ResponseData();
-            this.provisioningDeviceClientContract.requestNonceForTPM(payload, registrationId, sslContext, responseCallback, nonceResponseData);
+            this.provisioningDeviceClientContract.requestNonceForTPM(requestData, responseCallback, nonceResponseData);
 
             if (nonceResponseData.getResponseData() == null || nonceResponseData.getContractState() != DPS_REGISTRATION_RECEIVED)
             {
@@ -269,7 +265,7 @@ public class RegisterTask implements Callable
 
             if (nonceResponseData.getResponseData() != null && nonceResponseData.getContractState() == DPS_REGISTRATION_RECEIVED)
             {
-                return processWithNonce(nonceResponseData, dpsSecurityClientKey, payload);
+                return processWithNonce(nonceResponseData, dpsSecurityClientKey, requestData);
             }
             else
             {

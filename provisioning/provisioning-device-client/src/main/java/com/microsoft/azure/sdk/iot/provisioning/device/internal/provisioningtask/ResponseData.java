@@ -11,6 +11,7 @@ public class ResponseData
 {
     private byte[] responseData;
     private ContractState contractState;
+    private long waitForStatusInMS;
 
     /**
      * Constructor to create null data and Unknown contract state
@@ -20,6 +21,20 @@ public class ResponseData
         //SRS_ResponseData_25_001: [ Constructor shall create null responseData and set the contractState to DPS_REGISTRATION_UNKNOWN. ]
         this.responseData = null;
         this.contractState = ContractState.DPS_REGISTRATION_UNKNOWN;
+        this.waitForStatusInMS = 0L;
+    }
+
+    /**
+     * Contrautor for Response Data
+     * @param responseData response data value. Can be {@code null}
+     * @param contractState contract state value. Can be {@code null}
+     * @param waitForStatusInMS Maximum time to wait before query status. Can be {@code null}
+     */
+    public ResponseData(byte[] responseData, ContractState contractState, long waitForStatusInMS)
+    {
+        this.responseData = responseData;
+        this.contractState = contractState;
+        this.waitForStatusInMS = waitForStatusInMS;
     }
 
     /**
@@ -36,7 +51,7 @@ public class ResponseData
      * Setter for Response data
      * @param responseData Value of response data to be set
      */
-    void setResponseData(byte[] responseData)
+    public void setResponseData(byte[] responseData)
     {
         //SRS_ResponseData_25_002: [ This method shall save the value of responseData. ]
         this.responseData = responseData;
@@ -56,9 +71,27 @@ public class ResponseData
      * Setter for the contract state
      * @param contractState Sets the value of Contract state
      */
-    void setContractState(ContractState contractState)
+    public void setContractState(ContractState contractState)
     {
         //SRS_ResponseData_25_004: [ This method shall save the value of contractState. ]
         this.contractState = contractState;
+    }
+
+    /**
+     * Getter for the Maximum Time in MilliSeconds
+     * @return Maximum time value.
+     */
+    long getWaitForStatusInMS()
+    {
+        return waitForStatusInMS;
+    }
+
+    /**
+     * Setter for Maximum Time in MilliSeconds
+     * @param waitForStatusInMS Maximum time value. Can be {@code null}
+     */
+    public void setWaitForStatusInMS(long waitForStatusInMS)
+    {
+        this.waitForStatusInMS = waitForStatusInMS;
     }
 }

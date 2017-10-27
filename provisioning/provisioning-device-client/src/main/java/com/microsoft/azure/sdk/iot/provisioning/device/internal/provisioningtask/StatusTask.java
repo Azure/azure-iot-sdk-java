@@ -28,13 +28,14 @@ public class StatusTask implements Callable
     private class ResponseCallbackImpl implements ResponseCallback
     {
         @Override
-        public void run(byte[] responseData, Object context) throws ProvisioningDeviceClientException
+        public void run(ResponseData responseData, Object context) throws ProvisioningDeviceClientException
         {
             if (context instanceof ResponseData)
             {
                 ResponseData data = (ResponseData) context;
-                data.setResponseData(responseData);
-                data.setContractState(ContractState.DPS_REGISTRATION_RECEIVED);
+                data.setResponseData(responseData.getResponseData());
+                data.setContractState(responseData.getContractState());
+                data.setWaitForStatusInMS(responseData.getWaitForStatusInMS());
             }
             else
             {
@@ -99,11 +100,11 @@ public class StatusTask implements Callable
             {
                 throw new ProvisioningDeviceSecurityException("SSL context cannot be null");
             }
+
+            RequestData requestData = new RequestData(null, null, registrationId, operationId, authorization.getSslContext(), authorization.getSasToken());
             //SRS_StatusTask_25_005: [ This method shall trigger getRegistrationStatus on the contract API and wait for response and return it. ]
             ResponseData responseData = new ResponseData();
-            provisioningDeviceClientContract.getRegistrationStatus(operationId, registrationId,
-                                                                   authorization.getSasToken(), authorization.getSslContext(),
-                                                                   new ResponseCallbackImpl(), responseData);
+            provisioningDeviceClientContract.getRegistrationStatus(requestData, new ResponseCallbackImpl(), responseData);
             if (responseData.getResponseData() == null || responseData.getContractState() != ContractState.DPS_REGISTRATION_RECEIVED)
             {
                 Thread.sleep(MAX_WAIT_FOR_STATUS_RESPONSE);

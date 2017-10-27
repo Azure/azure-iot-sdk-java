@@ -7,6 +7,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.provisioningtask;
 
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
@@ -62,6 +63,8 @@ public class StatusTaskTest
     ResponseCallback mockedResponseCallback;
     @Mocked
     ResponseData mockedResponseData;
+    @Mocked
+    RequestData mockedRequestData;
 
     //SRS_StatusTask_25_001: [ Constructor shall save operationId , dpsSecurityClient, provisioningDeviceClientContract and authorization. ]
     @Test
@@ -168,8 +171,7 @@ public class StatusTaskTest
         new Verifications()
         {
             {
-                mockedProvisioningDeviceClientContract.getRegistrationStatus(TEST_OPERATION_ID, TEST_REGISTRATION_ID,
-                                                                             anyString, mockedSslContext,
+                mockedProvisioningDeviceClientContract.getRegistrationStatus((RequestData) any,
                                                                              (ResponseCallback)any, any);
                 times = 1;
             }
@@ -260,8 +262,7 @@ public class StatusTaskTest
                 result = TEST_REGISTRATION_ID;
                 Deencapsulation.invoke(mockedAuthorization, "getSslContext");
                 result = mockedSslContext;
-                mockedProvisioningDeviceClientContract.getRegistrationStatus(TEST_OPERATION_ID, TEST_REGISTRATION_ID,
-                                                                             anyString, mockedSslContext,
+                mockedProvisioningDeviceClientContract.getRegistrationStatus((RequestData) any,
                                                                              (ResponseCallback)any, any);
                 result = new IOException("testException");
             }

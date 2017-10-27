@@ -10,12 +10,17 @@ package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegisterRequestParser;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ContractState;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.RequestData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ResponseData;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -127,24 +132,32 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
 
     /**
      * Requests hub to provide a device key to begin authentication over HTTP (Only for TPM)
-     * @param payload payload used to send over this transport (Http)
-     * @param registrationId A non {@code null} or empty value unique for registration
-     * @param sslContext A non {@code null} value for SSL Context
      * @param responseCallback A non {@code null} value for the callback
      * @param dpsAuthorizationCallbackContext An object for context. Can be {@code null}
+     * @param requestData A non {@code null} value with all the required request data
      * @throws ProvisioningDeviceClientException If any of the parameters are invalid ({@code null} or empty)
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
      * @throws ProvisioningDeviceHubException If hub responds back with status other than <300
      */
-    public synchronized void requestNonceForTPM(byte[] payload, String registrationId, SSLContext sslContext, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException
+    public synchronized void requestNonceForTPM(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException
     {
         //SRS_ContractAPIHttp_25_003: [If either registrationId, sslcontext or responseCallback is null or if registrationId is empty then this method shall throw ProvisioningDeviceClientException.]
-        if (registrationId == null || registrationId.isEmpty())
+        if (requestData.getRegistrationId() == null || requestData.getRegistrationId().isEmpty())
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("registration Id cannot be null or empty"));
         }
 
-        if (sslContext == null)
+        if (requestData.getEndorsementKey() == null)
+        {
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("Endorsement key cannot be null or empty"));
+        }
+
+        if (requestData.getStorageRootKey() == null)
+        {
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("Storage root key cannot be null or empty"));
+        }
+
+        if (requestData.getSslContext() == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("sslContext cannot be null"));
         }
@@ -157,11 +170,15 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         try
         {
             //SRS_ContractAPIHttp_25_004: [This method shall retrieve the Url by calling 'generateRegisterUrl' on an object for UrlPathBuilder.]
-            String url = new UrlPathBuilder(this.hostName, this.scopeId, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(registrationId);
+            String url = new UrlPathBuilder(this.hostName, this.scopeId, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(requestData.getRegistrationId());
+            String base64EncodedEk = new String(Base64.encodeBase64Local(requestData.getEndorsementKey()));
+            String base64EncodedSrk = new String(Base64.encodeBase64Local(requestData.getStorageRootKey()));
+            //SRS_ContractAPIHttp_25_025: [ This method shall build the required Json input using parser. ]
+            byte[] payload = new RegisterRequestParser(requestData.getRegistrationId(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
             //SRS_ContractAPIHttp_25_005: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8".]
             HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.PUT, payload, DEFAULT_HTTP_TIMEOUT_MS, null, SDKUtils.getUserAgentString());
             //SRS_ContractAPIHttp_25_006: [This method shall set the SSLContext for the Http Request.]
-            httpRequest.setSSLContext(sslContext);
+            httpRequest.setSSLContext(requestData.getSslContext());
             byte[] response = null;
             HttpResponse httpResponse = null;
             try
@@ -176,7 +193,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
                 if (httpResponse.getStatus() == ACCEPTABLE_NONCE_HTTP_STATUS)
                 {
                     response = e.getMessage().getBytes();
-                    responseCallback.run(response, dpsAuthorizationCallbackContext);
+                    responseCallback.run(new ResponseData(response, ContractState.DPS_REGISTRATION_RECEIVED, 0), dpsAuthorizationCallbackContext);
                     return;
                 }
                 else
@@ -196,25 +213,22 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
 
     /**
      * Requests hub to authenticate this connection and start the registration process over HTTP
-     * @param payload payload used to send over this transport (Http)
-     * @param registrationId A non {@code null} or empty value unique for registration
-     * @param authorization Value set for authorization can be {@code null}
-     * @param sslContext A non {@code null} value for SSL Context
+     * @param requestData A non {@code null} value with all the required request data
      * @param responseCallback A non {@code null} value for the callback
      * @param dpsAuthorizationCallbackContext An object for context. Can be {@code null}
      * @throws ProvisioningDeviceClientException If any of the parameters are invalid ({@code null} or empty)
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
      * @throws ProvisioningDeviceHubException If hub responds back with status other than <300
      */
-    public synchronized void authenticateWithProvisioningService(byte[] payload, String registrationId, SSLContext sslContext, String authorization, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException
+    public synchronized void authenticateWithProvisioningService(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException
     {
         //SRS_ContractAPIHttp_25_011: [If either registrationId, sslcontext or responseCallback is null or if registrationId is empty then this method shall throw ProvisioningDeviceClientException.]
-        if (registrationId == null || registrationId.isEmpty())
+        if (requestData.getRegistrationId() == null || requestData.getRegistrationId().isEmpty())
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("registration Id cannot be null or empty"));
         }
 
-        if (sslContext == null)
+        if (requestData.getSslContext() == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("sslContext cannot be null"));
         }
@@ -227,22 +241,36 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         try
         {
             //SRS_ContractAPIHttp_25_012: [This method shall retrieve the Url by calling 'generateRegisterUrl' on an object for UrlPathBuilder.]
-            String url = new UrlPathBuilder(this.hostName, this.scopeId, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(registrationId);
+            String url = new UrlPathBuilder(this.hostName, this.scopeId, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(requestData.getRegistrationId());
             Map<String, String> headersMap = null;
-            if(authorization != null)
+            if(requestData.getSasToken() != null)
             {
                 headersMap = new HashMap<>();
-                headersMap.put(AUTHORIZATION, authorization);
+                headersMap.put(AUTHORIZATION, requestData.getSasToken());
             }
+            //SRS_ContractAPIHttp_25_026: [ This method shall build the required Json input using parser. ]
+            byte[] payload = null;
+            if (requestData.getEndorsementKey() != null && requestData.getStorageRootKey() != null)
+            {
+                //SRS_ContractAPIHttp_25_027: [ This method shall base 64 encoded endorsement key, storage root key. ]
+                String base64EncodedEk = new String(Base64.encodeBase64Local(requestData.getEndorsementKey()));
+                String base64EncodedSrk = new String(Base64.encodeBase64Local(requestData.getStorageRootKey()));
+                payload = new RegisterRequestParser(requestData.getRegistrationId(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
+            }
+            else
+            {
+                payload = new RegisterRequestParser(requestData.getRegistrationId()).toJson().getBytes();
+            }
+
             //SRS_ContractAPIHttp_25_013: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8" 4. Authorization: specified sas token as authorization if a non null value is given.]
             HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.PUT, payload, DEFAULT_HTTP_TIMEOUT_MS, headersMap, SDKUtils.getUserAgentString());
             //SRS_ContractAPIHttp_25_014: [This method shall set the SSLContext for the Http Request.]
-            httpRequest.setSSLContext(sslContext);
+            httpRequest.setSSLContext(requestData.getSslContext());
             //SRS_ContractAPIHttp_25_015: [This method shall send http request and verify the status by calling 'ProvisioningDeviceClientExceptionManager.verifyHttpResponse'.]
             //SRS_ContractAPIHttp_25_017: [If service return any other status other than <300 then this method shall throw ProvisioningDeviceHubException.]
             HttpResponse httpResponse = this.sendRequest(httpRequest);
             //SRS_ContractAPIHttp_25_016: [If service return a status as < 300 then this method shall trigger the callback to the user with the response message.]
-            responseCallback.run(httpResponse.getBody(), dpsAuthorizationCallbackContext);
+            responseCallback.run(new ResponseData(httpResponse.getBody(), ContractState.DPS_REGISTRATION_RECEIVED, 0), dpsAuthorizationCallbackContext);
         }
         catch (IOException e)
         {
@@ -252,30 +280,27 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
 
     /**
      * Gets the registration status over HTTP
-     * @param operationId A non {@code null} value for the operation
-     * @param registrationId A non {@code null} or empty value unique for registration
-     * @param dpsAuthorization Value set for authorization can be {@code null}
-     * @param sslContext A non {@code null} value for SSL Context
+     * @param requestData A non {@code null} value with all the request data
      * @param responseCallback A non {@code null} value for the callback
      * @param dpsAuthorizationCallbackContext An object for context. Can be {@code null}
      * @throws ProvisioningDeviceClientException If any of the parameters are invalid ({@code null} or empty)
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
      * @throws ProvisioningDeviceHubException If hub responds back with status other than <300
      */
-    public synchronized void getRegistrationStatus(String operationId, String registrationId, String dpsAuthorization, SSLContext sslContext, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException
+    public synchronized void getRegistrationStatus(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException
     {
         //SRS_ContractAPIHttp_25_018: [If either operationId, registrationId, sslcontext or responseCallback is null or if operationId, registrationId is empty then this method shall throw ProvisioningDeviceClientException.]
-        if (operationId == null || operationId.isEmpty())
+        if (requestData.getOperationId() == null || requestData.getOperationId().isEmpty())
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("operationId cannot be null or empty"));
         }
 
-        if (registrationId == null || registrationId.isEmpty())
+        if (requestData.getRegistrationId() == null || requestData.getRegistrationId().isEmpty())
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("registration Id cannot be null or empty"));
         }
 
-        if (sslContext == null)
+        if (requestData.getSslContext() == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("sslContext cannot be null"));
         }
@@ -288,22 +313,22 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         try
         {
             //SRS_ContractAPIHttp_25_019: [This method shall retrieve the Url by calling generateRequestUrl on an object for UrlPathBuilder.]
-            String url = new UrlPathBuilder(this.hostName, this.scopeId, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRequestUrl(registrationId, operationId);
+            String url = new UrlPathBuilder(this.hostName, this.scopeId, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRequestUrl(requestData.getRegistrationId(), requestData.getOperationId());
             Map<String, String> headersMap = null;
-            if (dpsAuthorization != null)
+            if (requestData.getSasToken() != null)
             {
                 headersMap = new HashMap<>();
-                headersMap.put(AUTHORIZATION, dpsAuthorization);
+                headersMap.put(AUTHORIZATION, requestData.getSasToken());
             }
             //SRS_ContractAPIHttp_25_020: [This method shall prepare the GET request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8" 4. Authorization: specified sas token as authorization if a non null value is given.]
             HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.GET, new byte[0], DEFAULT_HTTP_TIMEOUT_MS, headersMap, SDKUtils.getUserAgentString());
             //SRS_ContractAPIHttp_25_021: [This method shall set the SSLContext for the Http Request.]
-            httpRequest.setSSLContext(sslContext);
+            httpRequest.setSSLContext(requestData.getSslContext());
             //SRS_ContractAPIHttp_25_022: [This method shall send http request and verify the status by calling 'ProvisioningDeviceClientExceptionManager.verifyHttpResponse'.]
             //SRS_ContractAPIHttp_25_024: [If service return any other status other than < 300 then this method shall throw ProvisioningDeviceHubException.]
             HttpResponse httpResponse = this.sendRequest(httpRequest);
             //SRS_ContractAPIHttp_25_023: [If service return a status as < 300 then this method shall trigger the callback to the user with the response message.]
-            responseCallback.run(httpResponse.getBody(), dpsAuthorizationCallbackContext);
+            responseCallback.run(new ResponseData(httpResponse.getBody(),ContractState.DPS_REGISTRATION_RECEIVED, 0), dpsAuthorizationCallbackContext);
         }
         catch (IOException e)
         {

@@ -8,6 +8,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.provisioningtask;
 
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientX509;
@@ -78,6 +79,8 @@ public class RegisterTaskTest
     ResponseCallback mockedResponseCallback;
     @Mocked
     ResponseData mockedResponseData;
+    @Mocked
+    RequestData mockedRequestData;
 
     //SRS_RegisterTask_25_001: [ Constructor shall save provisioningDeviceClientConfig , securityClient, provisioningDeviceClientContract and authorization.]
     @Test
@@ -178,8 +181,7 @@ public class RegisterTaskTest
             {
                 Deencapsulation.invoke(mockedAuthorization, "setSslContext", mockedSslContext);
                 times = 1;
-                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((byte[])any, anyString,
-                                                                                           mockedSslContext, null,
+                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);
                 times = 1;
             }
@@ -220,31 +222,7 @@ public class RegisterTaskTest
 
     }
 
-    //SRS_RegisterTask_25_005: [ If the provided security client is for X509 then, this method shall build the required Json input using parser. ]
-    @Test(expected = JsonException.class)
-    public void authenticateWithX509ThrowsOnParserFailure() throws Exception
-    {
-        //arrange
-        RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientX509, mockedProvisioningDeviceClientContract,
-                                                                mockedAuthorization);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedDpsSecurityClientX509.getRegistrationId();
-                result = TEST_REGISTRATION_ID;
-                mockedRegisterRequestParser.toJson();
-                result = new JsonException("test");
-
-            }
-        };
-        //act
-        registerTask.call();
-    }
-
     //SRS_RegisterTask_25_004: [ If the provided security client is for X509 then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
-
     @Test (expected = ProvisioningDeviceSecurityException.class)
     public void authenticateWithX509ThrowsOnNullSSLContext() throws Exception
     {
@@ -286,8 +264,7 @@ public class RegisterTaskTest
                 result = "testJson";
                 mockedDpsSecurityClientX509.getSSLContext();
                 result = mockedSslContext;
-                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((byte[])any, anyString,
-                                                                                           mockedSslContext, null,
+                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);
                 result = new ProvisioningDeviceTransportException("test transport exception");
             }
@@ -413,14 +390,12 @@ public class RegisterTaskTest
                 times = 1;
                 Deencapsulation.invoke(mockedAuthorization, "setSasToken", anyString);
                 times = 1;
-                mockedProvisioningDeviceClientContract.requestNonceForTPM((byte[])any, anyString,
-                                                                          mockedSslContext,
-                                                                          (ResponseCallback)any, any);
+                mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any,
+                        (ResponseCallback)any, any);
                 times = 1;
                 mockedDpsSecurityClientKey.importKey((byte[])any);
                 times = 1;
-                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((byte[])any, anyString,
-                                                                                           mockedSslContext, anyString,
+                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);
                 times = 1;
             }
@@ -491,32 +466,6 @@ public class RegisterTaskTest
         registerTask.call();
     }
 
-    //SRS_RegisterTask_25_010: [ If the provided security client is for Key then, this method shall build the required Json input with base 64 encoded endorsement key, storage root key and on failure pass the exception back to the user. ]
-    @Test (expected = JsonException.class)
-    public void authenticateWithSasTokenNonceThrowsOnParserFailure() throws Exception
-    {
-        //arrange
-        RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
-                                                                mockedAuthorization);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedDpsSecurityClientKey.getRegistrationId();
-                result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
-                result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
-                result = TEST_SRK.getBytes();
-                mockedRegisterRequestParser.toJson();
-                result = new JsonException("testException");
-            }
-        };
-        //act
-        registerTask.call();
-    }
-
     //SRS_RegisterTask_25_009: [ If the provided security client is for Key then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
     @Test (expected = ProvisioningDeviceSecurityException.class)
     public void authenticateWithSasTokenNonceThrowsOnNullSSLContext() throws Exception
@@ -567,9 +516,8 @@ public class RegisterTaskTest
                 result = "testJson";
                 mockedDpsSecurityClientKey.getSSLContext();
                 result = mockedSslContext;
-                mockedProvisioningDeviceClientContract.requestNonceForTPM((byte[])any, anyString,
-                                                                          mockedSslContext,
-                                                                          (ResponseCallback)any, any);
+                mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any,
+                        (ResponseCallback)any, any);
                 result = new ProvisioningDeviceHubException("test exception");
             }
         };
@@ -1022,8 +970,7 @@ public class RegisterTaskTest
                 result = "testUrl";
                 mockedDpsSecurityClientKey.signData((byte[])any);
                 result = "testToken".getBytes();
-                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((byte[])any, anyString,
-                                                                                           mockedSslContext, null,
+                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);
                 result = new ProvisioningDeviceTransportException("test transport exception");
             }
@@ -1054,9 +1001,7 @@ public class RegisterTaskTest
                 result = "testJson";
                 mockedDpsSecurityClientKey.getSSLContext();
                 result = mockedSslContext;
-                mockedProvisioningDeviceClientContract.requestNonceForTPM((byte[]) any, anyString,
-                                                                          mockedSslContext, (ResponseCallback)any,
-                                                                          any);
+                mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any, (ResponseCallback)any, any);
             }
         };
 
@@ -1087,8 +1032,7 @@ public class RegisterTaskTest
                 result = "testUrl";
                 mockedDpsSecurityClientKey.signData((byte[])any);
                 result = "testToken".getBytes();
-                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((byte[])any, anyString,
-                                                                                           mockedSslContext, null,
+                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);
             }
         };

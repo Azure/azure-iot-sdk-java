@@ -17,7 +17,8 @@ import java.util.Scanner;
 public class ProvisioningDiceSample
 {
     //private static final String scopeId = "[Your scope ID here]";
-    private static final String scopeId = "0ne00000020";
+    //private static final String scopeId = "0ne00000020";
+    private static final String scopeId = "0ne0000009C";
     //private static final String dpsUri = "[Your DPS HUB here]";
     private static final String dpsUri = "global.azure-devices-provisioning.net";
     //private static final String dpsUri = "global.df.azure-devices-provisioning-int.net";
@@ -41,7 +42,6 @@ public class ProvisioningDiceSample
             if (exception != null)
             {
                 exception.printStackTrace();
-                //System.out.println("because " + exception);
             }
             if (context instanceof DPSStatus)
             {
@@ -76,6 +76,10 @@ public class ProvisioningDiceSample
         ProvisioningDeviceClient provisioningDeviceClient = null;
         try
         {
+            SecurityClientDiceEmulator securityClient = new SecurityClientDiceEmulator();
+            System.out.println(securityClient.getAliasCertPem());
+
+
             DPSStatus dpsStatus = new DPSStatus();
             ProvisioningDeviceClientConfig provisioningDeviceClientConfig = new ProvisioningDeviceClientConfig(dpsUri, scopeId, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, new SecurityClientDiceEmulator());
 

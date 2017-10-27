@@ -15,6 +15,8 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPath
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http.ContractAPIHttp;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.RequestData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ResponseData;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -32,7 +34,7 @@ import static org.junit.Assert.assertEquals;
 
 /*
  * Unit tests for ContractAPIHttp
- * Code coverage : 100% methods, 98% lines
+ * Code coverage : 100% methods, 100% lines
  */
 @RunWith(JMockit.class)
 public class ContractAPIHttpTest
@@ -42,6 +44,8 @@ public class ContractAPIHttpTest
     private static final String TEST_REGISTRATION_ID = "testRegistrationId";
     private static final String TEST_OPERATION_ID = "testOperationId";
     private static final String TEST_SAS_TOKEN = "testSasToken";
+    private static final byte[] TEST_EK = "testEK".getBytes();
+    private static final byte[] TEST_SRK = "testSRK".getBytes();
 
     @Mocked
     HttpRequest mockedHttpRequest;
@@ -63,6 +67,9 @@ public class ContractAPIHttpTest
 
     @Mocked
     ProvisioningDeviceClientExceptionManager mockedProvisioningDeviceClientExceptionManager;
+
+    @Mocked
+    RequestData mockedRequestData;
 
 
     private void prepareRequestExpectations() throws IOException
@@ -163,6 +170,14 @@ public class ContractAPIHttpTest
         new NonStrictExpectations()
         {
             {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getEndorsementKey();
+                result = TEST_EK;
+                mockedRequestData.getStorageRootKey();
+                result = TEST_SRK;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
                 ProvisioningDeviceClientExceptionManager.verifyHttpResponse(mockedHttpResponse);
@@ -173,7 +188,7 @@ public class ContractAPIHttpTest
         };
 
         //act
-        contractAPIHttp.requestNonceForTPM(expectedPayload, TEST_REGISTRATION_ID, mockedSslContext, mockedResponseCallback, null);
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         prepareRequestVerifications(HttpMethod.PUT, 0);
@@ -187,7 +202,7 @@ public class ContractAPIHttpTest
                 times = 1;
                 mockedHttpRequest.setSSLContext(mockedSslContext);
                 times = 1;
-                mockedResponseCallback.run((byte[]) any, null);
+                mockedResponseCallback.run((ResponseData) any, null);
                 times = 1;
 
             }
@@ -201,8 +216,21 @@ public class ContractAPIHttpTest
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getRegistrationId();
+                result = null;
+                mockedRequestData.getEndorsementKey();
+                result = TEST_EK;
+                mockedRequestData.getStorageRootKey();
+                result = TEST_SRK;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+            }
+        };
         //act
-        contractAPIHttp.requestNonceForTPM(expectedPayload, null, mockedSslContext, mockedResponseCallback, null);
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -211,8 +239,67 @@ public class ContractAPIHttpTest
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getRegistrationId();
+                result = "";
+                mockedRequestData.getEndorsementKey();
+                result = TEST_EK;
+                mockedRequestData.getStorageRootKey();
+                result = TEST_SRK;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+            }
+        };
         //act
-        contractAPIHttp.requestNonceForTPM(expectedPayload, "", mockedSslContext, mockedResponseCallback, null);
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
+    }
+
+    @Test (expected = ProvisioningDeviceClientException.class)
+    public void requestNonceWithDPSTPMThrowsOnNullEk() throws ProvisioningDeviceClientException
+    {
+        //arrange
+        final byte[] expectedPayload = "testByte".getBytes();
+        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getEndorsementKey();
+                result = null;
+                mockedRequestData.getStorageRootKey();
+                result = TEST_SRK;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+            }
+        };
+        //act
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
+    }
+
+    @Test (expected = ProvisioningDeviceClientException.class)
+    public void requestNonceWithDPSTPMThrowsOnNullSRk() throws ProvisioningDeviceClientException
+    {
+        //arrange
+        final byte[] expectedPayload = "testByte".getBytes();
+        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getEndorsementKey();
+                result = TEST_EK;
+                mockedRequestData.getStorageRootKey();
+                result = null;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+            }
+        };
+        //act
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -221,8 +308,21 @@ public class ContractAPIHttpTest
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getEndorsementKey();
+                result = TEST_EK;
+                mockedRequestData.getStorageRootKey();
+                result = TEST_SRK;
+                mockedRequestData.getSslContext();
+                result = null;
+            }
+        };
         //act
-        contractAPIHttp.requestNonceForTPM(expectedPayload, TEST_REGISTRATION_ID, null, mockedResponseCallback, null);
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -231,8 +331,21 @@ public class ContractAPIHttpTest
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getEndorsementKey();
+                result = TEST_EK;
+                mockedRequestData.getStorageRootKey();
+                result = TEST_SRK;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+            }
+        };
         //act
-        contractAPIHttp.requestNonceForTPM(expectedPayload, TEST_REGISTRATION_ID, mockedSslContext, null, null);
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, null, null);
     }
 
     //SRS_ContractAPIHttp_25_009: [If service return any other status other than 404 then this method shall throw ProvisioningDeviceTransportException in case of 202 or ProvisioningDeviceHubException on any other status.]
@@ -242,9 +355,18 @@ public class ContractAPIHttpTest
         final byte[] expectedPayload = "testByte".getBytes();
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
         prepareRequestExpectations();
+
         new NonStrictExpectations()
         {
             {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getEndorsementKey();
+                result = TEST_EK;
+                mockedRequestData.getStorageRootKey();
+                result = TEST_SRK;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
                 ProvisioningDeviceClientExceptionManager.verifyHttpResponse(mockedHttpResponse);
@@ -257,7 +379,7 @@ public class ContractAPIHttpTest
         //act
         try
         {
-            contractAPIHttp.requestNonceForTPM(expectedPayload, TEST_REGISTRATION_ID, mockedSslContext, mockedResponseCallback, null);
+            contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
         }
         finally
         {
@@ -265,7 +387,7 @@ public class ContractAPIHttpTest
             new Verifications()
             {
                 {
-                    mockedResponseCallback.run((byte[])any, any);
+                    mockedResponseCallback.run((ResponseData) any, any);
                     times = 0;
                 }
             };
@@ -282,6 +404,14 @@ public class ContractAPIHttpTest
         new NonStrictExpectations()
         {
             {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getEndorsementKey();
+                result = TEST_EK;
+                mockedRequestData.getStorageRootKey();
+                result = TEST_SRK;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
                 ProvisioningDeviceClientExceptionManager.verifyHttpResponse(mockedHttpResponse);
@@ -293,7 +423,7 @@ public class ContractAPIHttpTest
         //act
         try
         {
-            contractAPIHttp.requestNonceForTPM(expectedPayload, TEST_REGISTRATION_ID, mockedSslContext, mockedResponseCallback, null);
+            contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
         }
         finally
         {
@@ -301,7 +431,7 @@ public class ContractAPIHttpTest
             new Verifications()
             {
                 {
-                    mockedResponseCallback.run((byte[])any, any);
+                    mockedResponseCallback.run((ResponseData) any, any);
                     times = 0;
                 }
             };
@@ -316,6 +446,14 @@ public class ContractAPIHttpTest
         new NonStrictExpectations()
         {
             {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getEndorsementKey();
+                result = TEST_EK;
+                mockedRequestData.getStorageRootKey();
+                result = TEST_SRK;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
                 new UrlPathBuilder(TEST_HOST_NAME, TEST_SCOPE_ID, ProvisioningDeviceClientTransportProtocol.HTTPS);
                 result = new IOException("test IOException");
             }
@@ -324,7 +462,7 @@ public class ContractAPIHttpTest
         //act
         try
         {
-            contractAPIHttp.requestNonceForTPM(expectedPayload, TEST_REGISTRATION_ID, mockedSslContext, mockedResponseCallback, null);
+            contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
         }
         finally
         {
@@ -332,7 +470,7 @@ public class ContractAPIHttpTest
             new Verifications()
             {
                 {
-                    mockedResponseCallback.run((byte[])any, any);
+                    mockedResponseCallback.run((ResponseData) any, any);
                     times = 0;
                 }
             };
@@ -355,11 +493,17 @@ public class ContractAPIHttpTest
             {
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
             }
         };
 
         //act
-        contractAPIHttp.authenticateWithProvisioningService(expectedPayload, TEST_REGISTRATION_ID, mockedSslContext, null, mockedResponseCallback, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         prepareRequestVerifications(HttpMethod.PUT, 0);
@@ -373,7 +517,55 @@ public class ContractAPIHttpTest
                 times = 1;
                 mockedHttpRequest.setSSLContext(mockedSslContext);
                 times = 1;
-                mockedResponseCallback.run((byte[]) any, null);
+                mockedResponseCallback.run((ResponseData) any, null);
+                times = 1;
+
+            }
+        };
+    }
+
+    //SRS_ContractAPIHttp_25_026: [ This method shall build the required Json input using parser. ]
+    @Test
+    public void authenticateWithDPSForTPMSucceeds() throws IOException, ProvisioningDeviceClientException
+    {
+        //arrange
+        final byte[] expectedPayload = "testByte".getBytes();
+        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        prepareRequestExpectations();
+        new NonStrictExpectations()
+        {
+            {
+                mockedHttpRequest.send();
+                result = mockedHttpResponse;
+                mockedRequestData.getEndorsementKey();
+                result = TEST_EK;
+                mockedRequestData.getStorageRootKey();
+                result = TEST_SRK;
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
+            }
+        };
+
+        //act
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
+
+        //assert
+        prepareRequestVerifications(HttpMethod.PUT, 0);
+
+        new Verifications()
+        {
+            {
+                new UrlPathBuilder(TEST_HOST_NAME, TEST_SCOPE_ID, ProvisioningDeviceClientTransportProtocol.HTTPS);
+                times = 1;
+                mockedUrlPathBuilder.generateRegisterUrl(TEST_REGISTRATION_ID);
+                times = 1;
+                mockedHttpRequest.setSSLContext(mockedSslContext);
+                times = 1;
+                mockedResponseCallback.run((ResponseData) any, null);
                 times = 1;
 
             }
@@ -392,13 +584,19 @@ public class ContractAPIHttpTest
             {
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
                 ProvisioningDeviceClientExceptionManager.verifyHttpResponse(mockedHttpResponse);
                 result = new ProvisioningDeviceHubException("test Exception");
             }
         };
 
         //act
-        contractAPIHttp.authenticateWithProvisioningService(expectedPayload, TEST_REGISTRATION_ID, mockedSslContext, null, mockedResponseCallback, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         prepareRequestVerifications(HttpMethod.PUT, 0);
@@ -412,7 +610,7 @@ public class ContractAPIHttpTest
                 times = 1;
                 mockedHttpRequest.setSSLContext(mockedSslContext);
                 times = 1;
-                mockedResponseCallback.run((byte[]) any, null);
+                mockedResponseCallback.run((ResponseData) any, null);
                 times = 0;
 
             }
@@ -429,13 +627,19 @@ public class ContractAPIHttpTest
         new NonStrictExpectations()
         {
             {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = TEST_SAS_TOKEN;
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
             }
         };
 
         //act
-        contractAPIHttp.authenticateWithProvisioningService(expectedPayload, TEST_REGISTRATION_ID, mockedSslContext, TEST_SAS_TOKEN, mockedResponseCallback, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         prepareRequestVerifications(HttpMethod.PUT, 1);
@@ -449,7 +653,7 @@ public class ContractAPIHttpTest
                 times = 1;
                 mockedHttpRequest.setSSLContext(mockedSslContext);
                 times = 1;
-                mockedResponseCallback.run((byte[]) any, null);
+                mockedResponseCallback.run((ResponseData) any, null);
                 times = 1;
 
             }
@@ -463,8 +667,19 @@ public class ContractAPIHttpTest
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getRegistrationId();
+                result = null;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
+            }
+        };
         //act
-        contractAPIHttp.authenticateWithProvisioningService(expectedPayload, null, mockedSslContext, null, mockedResponseCallback, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
     }
 
@@ -474,8 +689,19 @@ public class ContractAPIHttpTest
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getRegistrationId();
+                result = "";
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
+            }
+        };
         //act
-        contractAPIHttp.authenticateWithProvisioningService(expectedPayload, "", mockedSslContext, null, mockedResponseCallback, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -484,8 +710,19 @@ public class ContractAPIHttpTest
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = null;
+                mockedRequestData.getSasToken();
+                result = null;
+            }
+        };
         //act
-        contractAPIHttp.authenticateWithProvisioningService(expectedPayload, TEST_REGISTRATION_ID, null, null, mockedResponseCallback, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -494,8 +731,19 @@ public class ContractAPIHttpTest
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
+            }
+        };
         //act
-        contractAPIHttp.authenticateWithProvisioningService(expectedPayload, TEST_REGISTRATION_ID, mockedSslContext, null, null, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, null, null);
 
     }
 
@@ -507,6 +755,12 @@ public class ContractAPIHttpTest
         new NonStrictExpectations()
         {
             {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
                 new UrlPathBuilder(TEST_HOST_NAME, TEST_SCOPE_ID, ProvisioningDeviceClientTransportProtocol.HTTPS);
                 result = new IOException("test IOException");
             }
@@ -515,7 +769,7 @@ public class ContractAPIHttpTest
         //act
         try
         {
-            contractAPIHttp.authenticateWithProvisioningService(expectedPayload, TEST_REGISTRATION_ID, mockedSslContext, TEST_SAS_TOKEN, mockedResponseCallback, null);
+            contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
         }
         finally
         {
@@ -523,7 +777,7 @@ public class ContractAPIHttpTest
             new Verifications()
             {
                 {
-                    mockedResponseCallback.run((byte[])any, any);
+                    mockedResponseCallback.run((ResponseData) any, any);
                     times = 0;
                 }
             };
@@ -544,13 +798,21 @@ public class ContractAPIHttpTest
         new NonStrictExpectations()
         {
             {
+                mockedRequestData.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = TEST_SAS_TOKEN;
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
             }
         };
 
         //act
-        contractAPIHttp.getRegistrationStatus(TEST_OPERATION_ID, TEST_REGISTRATION_ID, TEST_SAS_TOKEN, mockedSslContext, mockedResponseCallback, null);
+        contractAPIHttp.getRegistrationStatus(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         prepareRequestVerifications(HttpMethod.GET, 1);
@@ -564,7 +826,7 @@ public class ContractAPIHttpTest
                 times = 1;
                 mockedHttpRequest.setSSLContext(mockedSslContext);
                 times = 1;
-                mockedResponseCallback.run((byte[]) any, null);
+                mockedResponseCallback.run((ResponseData) any, null);
                 times = 1;
             }
         };
@@ -579,13 +841,21 @@ public class ContractAPIHttpTest
         new NonStrictExpectations()
         {
             {
+                mockedRequestData.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
             }
         };
 
         //act
-        contractAPIHttp.getRegistrationStatus(TEST_OPERATION_ID, TEST_REGISTRATION_ID, null, mockedSslContext, mockedResponseCallback, null);
+        contractAPIHttp.getRegistrationStatus(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         prepareRequestVerifications(HttpMethod.GET, 0);
@@ -599,7 +869,7 @@ public class ContractAPIHttpTest
                 times = 1;
                 mockedHttpRequest.setSSLContext(mockedSslContext);
                 times = 1;
-                mockedResponseCallback.run((byte[]) any, null);
+                mockedResponseCallback.run((ResponseData) any, null);
                 times = 1;
             }
         };
@@ -615,6 +885,14 @@ public class ContractAPIHttpTest
         new NonStrictExpectations()
         {
             {
+                mockedRequestData.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
                 ProvisioningDeviceClientExceptionManager.verifyHttpResponse(mockedHttpResponse);
@@ -625,7 +903,7 @@ public class ContractAPIHttpTest
         //act
         try
         {
-            contractAPIHttp.getRegistrationStatus(TEST_OPERATION_ID, TEST_REGISTRATION_ID, null, mockedSslContext, mockedResponseCallback, null);
+            contractAPIHttp.getRegistrationStatus(mockedRequestData, mockedResponseCallback, null);
         }
         finally
         {
@@ -641,7 +919,7 @@ public class ContractAPIHttpTest
                     times = 1;
                     mockedHttpRequest.setSSLContext(mockedSslContext);
                     times = 1;
-                    mockedResponseCallback.run((byte[]) any, null);
+                    mockedResponseCallback.run((ResponseData) any, null);
                     times = 0;
                 }
             };
@@ -654,9 +932,22 @@ public class ContractAPIHttpTest
     {
         //arrange
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getOperationId();
+                result = null;
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
+            }
+        };
 
         //act
-        contractAPIHttp.getRegistrationStatus(null, TEST_REGISTRATION_ID, null, mockedSslContext, mockedResponseCallback, null);
+        contractAPIHttp.getRegistrationStatus(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -664,9 +955,22 @@ public class ContractAPIHttpTest
     {
         //arrange
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getOperationId();
+                result = "";
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
+            }
+        };
 
         //act
-        contractAPIHttp.getRegistrationStatus("", TEST_REGISTRATION_ID, null, mockedSslContext, mockedResponseCallback, null);
+        contractAPIHttp.getRegistrationStatus(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -675,8 +979,21 @@ public class ContractAPIHttpTest
         //arrange
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
 
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedRequestData.getRegistrationId();
+                result = null;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
+            }
+        };
         //act
-        contractAPIHttp.getRegistrationStatus(TEST_OPERATION_ID, null, null, mockedSslContext, mockedResponseCallback, null);
+        contractAPIHttp.getRegistrationStatus(mockedRequestData, mockedResponseCallback, null);
 
     }
 
@@ -686,8 +1003,22 @@ public class ContractAPIHttpTest
         //arrange
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
 
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedRequestData.getRegistrationId();
+                result = "";
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
+            }
+        };
+
         //act
-        contractAPIHttp.getRegistrationStatus(TEST_OPERATION_ID, "", null, mockedSslContext, mockedResponseCallback, null);
+        contractAPIHttp.getRegistrationStatus(mockedRequestData, mockedResponseCallback, null);
     }
 
 
@@ -697,8 +1028,21 @@ public class ContractAPIHttpTest
         //arrange
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
 
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = null;
+                mockedRequestData.getSasToken();
+                result = null;
+            }
+        };
         //act
-        contractAPIHttp.getRegistrationStatus(TEST_OPERATION_ID, TEST_REGISTRATION_ID, null, null, mockedResponseCallback, null);
+        contractAPIHttp.getRegistrationStatus(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -706,9 +1050,22 @@ public class ContractAPIHttpTest
     {
         //arrange
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = null;
+            }
+        };
 
         //act
-        contractAPIHttp.getRegistrationStatus(TEST_OPERATION_ID, TEST_REGISTRATION_ID, null, mockedSslContext, null, null);
+        contractAPIHttp.getRegistrationStatus(mockedRequestData, null, null);
     }
 
     @Test (expected = ProvisioningDeviceTransportException.class)
@@ -718,6 +1075,14 @@ public class ContractAPIHttpTest
         new NonStrictExpectations()
         {
             {
+                mockedRequestData.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = TEST_SAS_TOKEN;
                 new UrlPathBuilder(TEST_HOST_NAME, TEST_SCOPE_ID, ProvisioningDeviceClientTransportProtocol.HTTPS);
                 result = new IOException("test IOException");
             }
@@ -726,7 +1091,7 @@ public class ContractAPIHttpTest
         //act
         try
         {
-            contractAPIHttp.getRegistrationStatus(TEST_OPERATION_ID, TEST_REGISTRATION_ID, TEST_SAS_TOKEN, mockedSslContext, mockedResponseCallback, null);
+            contractAPIHttp.getRegistrationStatus(mockedRequestData, mockedResponseCallback, null);
         }
         finally
         {
@@ -734,7 +1099,7 @@ public class ContractAPIHttpTest
             new Verifications()
             {
                 {
-                    mockedResponseCallback.run((byte[])any, any);
+                    mockedResponseCallback.run((ResponseData) any, any);
                     times = 0;
                 }
             };
