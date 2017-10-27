@@ -20,6 +20,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPath
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientKey;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -123,7 +124,7 @@ public class RegisterTask implements Callable
             }
             authorization.setSslContext(sslContext);
 
-            RequestData requestData = new RequestData(null, null, registrationId, null, sslContext, null);
+            RequestData requestData = new RequestData( registrationId,  sslContext, null);
 
             //SRS_RegisterTask_25_006: [ If the provided security client is for X509 then, this method shall trigger authenticateWithProvisioningService on the contract API and wait for response and return it. ]
             ResponseData dpsRegistrationData = new ResponseData();
@@ -144,7 +145,7 @@ public class RegisterTask implements Callable
                 throw new ProvisioningDeviceClientException("Did not receive DPS registration successfully");
             }
         }
-        catch (InterruptedException e)
+        catch (InterruptedException | SecurityClientException e)
         {
             throw new ProvisioningDeviceClientException(e);
         }
@@ -196,7 +197,16 @@ public class RegisterTask implements Callable
             2. Sign the HSM with the string of format <tokenScope>/n<expiryTime> and receive a token
             3. Encode the token to Base64 format and UrlEncode it to generate the signature. ]*/
 
-            String sasToken = this.constructSasToken(dpsSecurityClientKey.getRegistrationId(), DEFAULT_EXPIRY_TIME_IN_SECS);
+            String sasToken = null;
+            try
+            {
+                sasToken = this.constructSasToken(dpsSecurityClientKey.getRegistrationId(), DEFAULT_EXPIRY_TIME_IN_SECS);
+            }
+            catch (SecurityClientException e)
+            {
+                throw new ProvisioningDeviceSecurityException(e);
+            }
+
             requestData.setSasToken(sasToken);
 
             //SRS_RegisterTask_25_016: [ If the provided security client is for Key then, this method shall trigger authenticateWithProvisioningService on the contract API using the sasToken generated and wait for response and return it. ]
@@ -252,7 +262,7 @@ public class RegisterTask implements Callable
             }
             authorization.setSslContext(sslContext);
 
-            RequestData requestData = new RequestData(dpsSecurityClientKey.getDeviceEk(), dpsSecurityClientKey.getDeviceSRK(), registrationId, null, sslContext, null);
+            RequestData requestData = new RequestData(dpsSecurityClientKey.getDeviceEk(), dpsSecurityClientKey.getDeviceSRK(), registrationId, sslContext, null);
 
             //SRS_RegisterTask_25_011: [ If the provided security client is for Key then, this method shall trigger requestNonceForTPM on the contract API and wait for Authentication Key and decode it from Base64. Also this method shall pass the exception back to the user if it fails. ]
             ResponseData nonceResponseData = new ResponseData();
@@ -273,7 +283,7 @@ public class RegisterTask implements Callable
                 throw new ProvisioningDeviceClientException("Did not receive DPS registration nonce successfully");
             }
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException | InterruptedException | SecurityClientException e)
         {
             throw new ProvisioningDeviceClientException(e);
         }
@@ -281,17 +291,24 @@ public class RegisterTask implements Callable
 
     private ResponseParser authenticateWithDPS() throws ProvisioningDeviceClientException
     {
-        if (this.securityClient instanceof SecurityClientX509)
+        try
         {
-            return this.authenticateWithX509(this.securityClient.getRegistrationId());
+            if (this.securityClient instanceof SecurityClientX509)
+            {
+                return this.authenticateWithX509(this.securityClient.getRegistrationId());
+            }
+            else if (this.securityClient instanceof SecurityClientKey)
+            {
+                return this.authenticateWithSasToken(this.securityClient.getRegistrationId());
+            }
+            else
+            {
+                throw new ProvisioningDeviceSecurityException("Unknown Security client received");
+            }
         }
-        else if (this.securityClient instanceof SecurityClientKey)
+        catch (SecurityClientException e)
         {
-            return this.authenticateWithSasToken(this.securityClient.getRegistrationId());
-        }
-        else
-        {
-            throw new ProvisioningDeviceSecurityException("Unknown Security client received");
+            throw new ProvisioningDeviceSecurityException(e);
         }
     }
 

@@ -10,6 +10,7 @@ package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http.ContractAPIHttp;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceTransportException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.RequestData;
@@ -52,7 +53,9 @@ public abstract class ProvisioningDeviceClientContract
         }
     }
 
-    public abstract void requestNonceForTPM(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException, ProvisioningDeviceTransportException, ProvisioningDeviceHubException;
-    public abstract void authenticateWithProvisioningService(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException, ProvisioningDeviceTransportException, ProvisioningDeviceHubException;
-    public abstract void getRegistrationStatus(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException, ProvisioningDeviceTransportException, ProvisioningDeviceHubException;
+    public abstract void open(RequestData requestData) throws ProvisioningDeviceConnectionException;
+    public abstract void requestNonceForTPM(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException;
+    public abstract void authenticateWithProvisioningService(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException;
+    public abstract void getRegistrationStatus(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException;
+    public abstract void close() throws ProvisioningDeviceConnectionException;
 }

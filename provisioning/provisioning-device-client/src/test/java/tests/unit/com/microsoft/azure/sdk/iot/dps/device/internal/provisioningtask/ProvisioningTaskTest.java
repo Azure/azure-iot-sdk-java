@@ -69,6 +69,8 @@ public class ProvisioningTaskTest
     OperationRegistrationStatusParser mockedOperationRegistrationStatusParser;
     @Mocked
     Future<?> mockedFuture;
+    @Mocked
+    RequestData mockedRequestData;
 
     //SRS_provisioningtask_25_001: [ Constructor shall save provisioningDeviceClientConfig , securityClient, provisioningDeviceClientContract, provisioningDeviceClientStatusCallback, dpsStatusCallbackContext.]
     //SRS_ProvisioningTask_25_015: [ Constructor shall start the executor with a fixed thread pool of size 2.]
@@ -248,6 +250,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 1;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -334,6 +340,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 1;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -394,6 +404,10 @@ public class ProvisioningTaskTest
                 mockedProvisioningDeviceClientStatusCallback.run(DPS_DEVICE_STATUS_ASSIGNED, null, null);
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
+                times = 1;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
                 times = 1;
             }
         };
@@ -456,6 +470,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 1;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -516,6 +534,10 @@ public class ProvisioningTaskTest
                 mockedProvisioningDeviceClientStatusCallback.run(DPS_DEVICE_STATUS_ERROR, (Exception) any, null);
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
+                times = 1;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
                 times = 1;
             }
         };
@@ -617,6 +639,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 1;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -715,6 +741,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 1;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -812,6 +842,10 @@ public class ProvisioningTaskTest
                 mockedProvisioningDeviceClientStatusCallback.run(DPS_DEVICE_STATUS_ERROR, (Exception) any, null);
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
+                times = 1;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
                 times = 1;
             }
         };
@@ -915,6 +949,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 1;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -1017,6 +1055,10 @@ public class ProvisioningTaskTest
                 mockedProvisioningDeviceClientStatusCallback.run(DPS_DEVICE_STATUS_ERROR, (Exception) any, null);
                 times = 0;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
+                times = 1;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
                 times = 1;
             }
         };
@@ -1122,6 +1164,10 @@ public class ProvisioningTaskTest
                 times = 0;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 1;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -1225,6 +1271,10 @@ public class ProvisioningTaskTest
                 times = 0;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 1;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -1327,6 +1377,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 0;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -1388,6 +1442,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 0;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -1451,6 +1509,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 0;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -1516,6 +1578,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 0;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -1564,6 +1630,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 0;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -1603,6 +1673,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 0;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -1651,6 +1725,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 0;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -1694,6 +1772,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 0;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -1734,6 +1816,10 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationInfo)any, null);
                 times = 0;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
             }
         };
     }
@@ -1760,6 +1846,8 @@ public class ProvisioningTaskTest
         new Verifications()
         {
             {
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
                 mockedExecutorService.shutdownNow();
                 times = 1;
             }
@@ -1787,6 +1875,8 @@ public class ProvisioningTaskTest
         new Verifications()
         {
             {
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
                 mockedExecutorService.shutdownNow();
                 times = 0;
             }

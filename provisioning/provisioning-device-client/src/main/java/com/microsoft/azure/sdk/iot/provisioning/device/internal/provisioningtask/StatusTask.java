@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 
 import javax.net.ssl.SSLContext;
 import java.util.concurrent.Callable;
@@ -101,7 +102,7 @@ public class StatusTask implements Callable
                 throw new ProvisioningDeviceSecurityException("SSL context cannot be null");
             }
 
-            RequestData requestData = new RequestData(null, null, registrationId, operationId, authorization.getSslContext(), authorization.getSasToken());
+            RequestData requestData = new RequestData( registrationId, operationId, authorization.getSslContext(), authorization.getSasToken());
             //SRS_StatusTask_25_005: [ This method shall trigger getRegistrationStatus on the contract API and wait for response and return it. ]
             ResponseData responseData = new ResponseData();
             provisioningDeviceClientContract.getRegistrationStatus(requestData, new ResponseCallbackImpl(), responseData);
@@ -119,9 +120,9 @@ public class StatusTask implements Callable
                 throw new ProvisioningDeviceClientException("Did not receive DPS Status information");
             }
         }
-        catch (InterruptedException e)
+        catch (InterruptedException | SecurityClientException e)
         {
-            throw new ProvisioningDeviceClientException(e.getMessage());
+            throw new ProvisioningDeviceClientException(e);
         }
     }
 

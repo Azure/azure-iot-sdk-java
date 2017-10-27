@@ -45,6 +45,18 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
     private static final Integer DEFAULT_HTTP_TIMEOUT_MS = Integer.MAX_VALUE;
     private static final Integer ACCEPTABLE_NONCE_HTTP_STATUS = 401;
 
+    @Override
+    public void open(RequestData requestData) throws ProvisioningDeviceConnectionException
+    {
+        // dummy call for Http
+    }
+
+    @Override
+    public void close() throws ProvisioningDeviceConnectionException
+    {
+        // dummy call for Http
+    }
+
     /**
      * Constructor for Contract API HTTP
      * @param scopeId scope id used with the service Cannot be {@code null} or empty.
@@ -149,12 +161,12 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
 
         if (requestData.getEndorsementKey() == null)
         {
-            throw new ProvisioningDeviceClientException(new IllegalArgumentException("Endorsement key cannot be null or empty"));
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("Endorsement key cannot be null"));
         }
 
         if (requestData.getStorageRootKey() == null)
         {
-            throw new ProvisioningDeviceClientException(new IllegalArgumentException("Storage root key cannot be null or empty"));
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("Storage root key cannot be null"));
         }
 
         if (requestData.getSslContext() == null)

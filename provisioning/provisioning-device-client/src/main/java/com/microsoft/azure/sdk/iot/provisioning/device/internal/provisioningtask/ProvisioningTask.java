@@ -9,6 +9,7 @@ package com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtas
 
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatusCallback;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientRegistrationCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
@@ -17,6 +18,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientS
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientAuthenticationException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientX509;
 
 import java.util.concurrent.*;
 
@@ -260,6 +262,8 @@ public class ProvisioningTask implements Callable
     {
         try
         {
+            //SRS_provisioningtask_25_015: [ This method shall invoke open call on the contract.]
+            provisioningDeviceClientContract.open(new RequestData(securityClient.getRegistrationId(), securityClient.getSSLContext(), securityClient instanceof SecurityClientX509));
             //SRS_provisioningtask_25_007: [ This method shall invoke Register task and status task to execute the state machine of the service as per below rules.]
             /*
             Service State Machine Rules
@@ -283,13 +287,15 @@ public class ProvisioningTask implements Callable
             invokeStatusCallback(this.dpsStatus, null);
 
             this.executeStateMachineForStatus(ProvisioningStatus.fromString(registrationResponseParser.getStatus()), registrationResponseParser);
+            this.close();
         }
         catch (ExecutionException | TimeoutException | ProvisioningDeviceClientException e)
         {
             //SRS_provisioningtask_25_006: [ This method shall invoke the status callback, if any of the task fail or throw any exception. ]
             this.dpsStatus = DPS_DEVICE_STATUS_ERROR;
             invokeStatusCallback(this.dpsStatus, e);
-
+            //SRS_provisioningtask_25_015: [ This method shall invoke close call on the contract and close the threads started.]
+            this.close();
         }
         return null;
     }
@@ -297,8 +303,9 @@ public class ProvisioningTask implements Callable
     /**
      * This method shall shutdown the existing threads if not already done so.
      */
-    public void close()
+    public void close() throws ProvisioningDeviceConnectionException
     {
+        provisioningDeviceClientContract.close();
         //SRS_provisioningtask_25_014: [ This method shall shutdown the executors if they have not already shutdown. ]
         if (executor != null && !executor.isShutdown())
         {
