@@ -11,7 +11,7 @@ public class DeviceMethodData
     public DeviceMethodData(int status, String responseMessage)
     {
         /*
-        **Codes_SRS_DEVICEMETHODDATA_25_001: [**The constructor shall save the status and reponse message provided by user.**]**
+        **Codes_SRS_DEVICEMETHODDATA_25_001: [**The constructor shall save the status and response message provided by user.**]**
          */
         this.status = status;
         this.responseMessage = responseMessage;

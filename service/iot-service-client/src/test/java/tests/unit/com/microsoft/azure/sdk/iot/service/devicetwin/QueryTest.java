@@ -514,7 +514,7 @@ public class QueryTest
         assertEquals(testResponseToken, Deencapsulation.getField(testQuery, "responseContinuationToken"));
     }
 
-    //Tests_SRS_QUERY_25_010: [The method shall read the continuation token (x-ms-continuation) and reponse type (x-ms-item-type) from the HTTP Headers and save it.]
+    //Tests_SRS_QUERY_25_010: [The method shall read the continuation token (x-ms-continuation) and response type (x-ms-item-type) from the HTTP Headers and save it.]
     @Test
     public void sendQueryRequestSetsResContinuationTokenOnlyIfFound() throws IotHubException, IOException
     {
@@ -613,7 +613,7 @@ public class QueryTest
         Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
     }
 
-    //Tests_SRS_QUERY_25_012: [If the reponse type is Unknown or not found then this method shall throw IOException.]
+    //Tests_SRS_QUERY_25_012: [If the response type is Unknown or not found then this method shall throw IOException.]
     @Test (expected = IOException.class)
     public void sendQueryRequestThrowsIfTypeUnknown() throws IotHubException, IOException
     {

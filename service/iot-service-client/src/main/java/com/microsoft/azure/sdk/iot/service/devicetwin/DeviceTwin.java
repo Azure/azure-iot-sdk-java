@@ -14,10 +14,10 @@ import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class DeviceTwin
 {
@@ -408,6 +408,33 @@ public class DeviceTwin
     }
 
     /**
+     * Create a QueryCollection object that can be used to query whole pages of results at a time. QueryCollection objects
+     * also allow you to provide a continuation token for the query to pick up from
+     *
+     * @param sqlQuery the sql query to run
+     * @return the created QueryCollection object that can be used to query the service
+     */
+    public synchronized QueryCollection queryTwinCollection(String sqlQuery) throws MalformedURLException
+    {
+        //Codes_SRS_DEVICETWIN_34_069: [This function shall return the results of calling queryTwinCollection(sqlQuery, DEFAULT_PAGE_SIZE).]
+        return this.queryTwinCollection(sqlQuery, DEFAULT_PAGE_SIZE);
+    }
+
+    /**
+     * Create a QueryCollection object that can be used to query whole pages of results at a time. QueryCollection objects
+     * also allow you to provide a continuation token for the query to pick up from
+     *
+     * @param sqlQuery the sql query to run
+     * @param pageSize the number of results to return at a time
+     * @return the created QueryCollection object that can be used to query the service
+     */
+    public synchronized QueryCollection queryTwinCollection(String sqlQuery, Integer pageSize) throws MalformedURLException
+    {
+        //Codes_SRS_DEVICETWIN_34_070: [This function shall return a new QueryCollection object of type TWIN with the provided sql query and page size.]
+        return new QueryCollection(sqlQuery, pageSize, QueryType.TWIN, this.iotHubConnectionString, this.iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, USE_DEFAULT_TIMEOUT);
+    }
+
+    /**
      * Returns the availability of next twin element upon query. If non was found,
      * Query is sent over again and response is updated accordingly until no response
      * for the query was found.
@@ -450,24 +477,93 @@ public class DeviceTwin
         {
             //Codes_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinParser and provide the response on DeviceTwinDevice.]
             String twinJson = (String) nextObject;
-            TwinParser twinParser = new TwinParser();
-            twinParser.enableTags();
-            twinParser.updateTwin(twinJson);
-
-            DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(twinParser.getDeviceId());
-            deviceTwinDevice.setVersion(twinParser.getVersion());
-            deviceTwinDevice.setETag(twinParser.getETag());
-            deviceTwinDevice.setTags(twinParser.getTagsMap());
-            deviceTwinDevice.setDesiredProperties(twinParser.getDesiredPropertyMap());
-            deviceTwinDevice.setReportedProperties(twinParser.getReportedPropertyMap());
-
-            return deviceTwinDevice;
+            return jsonToDeviceTwinDevice(twinJson);
         }
         else
         {
             //Codes_SRS_DEVICETWIN_25_060: [ If the next element from the query response is an object other than String, then this method shall throw IOException ]
             throw new IOException("Received a response that could not be parsed");
         }
+    }
+
+    /**
+     * Returns if the provided deviceTwinQueryCollection has a next page to query.
+     * @param deviceTwinQueryCollection the query to check
+     * @return True if the provided deviceTwinQueryCollection has a next page to query, false otherwise
+     * @throws IllegalArgumentException if the provided deviceTwinQueryCollection is null
+     */
+    public synchronized boolean hasNext(QueryCollection deviceTwinQueryCollection)
+    {
+        if (deviceTwinQueryCollection == null)
+        {
+            //Codes_SRS_DEVICETWIN_34_080: [If the provided deviceTwinQueryCollection is null, an IllegalArgumentException shall be thrown.]
+            throw new IllegalArgumentException("deviceTwinQueryCollection cannot be null");
+        }
+
+        //Codes_SRS_DEVICETWIN_34_071: [This function shall return if the provided deviceTwinQueryCollection has next.]
+        return deviceTwinQueryCollection.hasNext();
+    }
+
+    /**
+     * Returns the next DeviceTwinDevice collection for the given query alongside the continuation token needed for querying the next page.
+     *
+     * <p>This function shall update a local continuation token continuously to continue the query so you don't need to re-supply the returned
+     * continuation token.</p>
+     *
+     * @param deviceTwinQueryCollection the query to run
+     * @return The page of query results and the continuation token for the next page of results. Return value shall be {@code null} if there is no next collection
+     * @throws IotHubException If an IotHubException occurs when querying the service.
+     * @throws IOException If an IotHubException occurs when querying the service or if the results of that query don't match expectations.
+     */
+    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(QueryCollection deviceTwinQueryCollection) throws IOException, IotHubException
+    {
+        //Codes_SRS_DEVICETWIN_34_075: [This function shall call next(deviceTwinQueryCollection, queryOptions) where queryOptions has the deviceTwinQueryCollection's current page size.]
+        QueryOptions options = new QueryOptions();
+        options.setPageSize(deviceTwinQueryCollection.getPageSize());
+        return this.next(deviceTwinQueryCollection, options);
+    }
+
+    /**
+     * Returns the next DeviceTwinDevice collection for the given query alongside the continuation token needed for querying the next page.
+     *
+     * <p>This function shall update a local continuation token continuously to continue the query so you don't need to re-supply the returned
+     * continuation token unless you want to continue the query from a different starting point. To do that, set your new continuation token in the query options object.</p>
+     *
+     * <p>The provided option's page size shall override any previously saved page size.</p>
+     *
+     * @param deviceTwinQueryCollection the query to run
+     * @param options the query options to run the query with. If the continuation token in these options is null, the internally saved continuation token shall be used.
+     *                The page size set in the options will override any previously set page size.
+     * @return The page of query results and the continuation token for the next page of results. Return value shall be {@code null} if there is no next collection.
+     * @throws IotHubException If an IotHubException occurs when querying the service.
+     * @throws IOException If an IotHubException occurs when querying the service or if the results of that query don't match expectations.
+     */
+    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(QueryCollection deviceTwinQueryCollection, QueryOptions options) throws IOException, IotHubException
+    {
+        if (deviceTwinQueryCollection == null)
+        {
+            //Codes_SRS_DEVICETWIN_34_076: [If the provided deviceTwinQueryCollection is null, an IllegalArgumentException shall be thrown.]
+            throw new IllegalArgumentException("Query cannot be null");
+        }
+
+        if (!this.hasNext(deviceTwinQueryCollection))
+        {
+            //Codes_SRS_DEVICETWIN_34_077: [If the provided deviceTwinQueryCollection has no next set to give, this function shall return null.]
+            return null;
+        }
+
+        QueryCollectionResponse<String> queryResults = deviceTwinQueryCollection.next(options);
+        Iterator<String> jsonCollectionIterator = queryResults.getCollection().iterator();
+        Collection<DeviceTwinDevice> deviceTwinDeviceList = new ArrayList<>();
+
+        //Codes_SRS_DEVICETWIN_34_078: [If the provided deviceTwinQueryCollection has a next set to give, this function shall retrieve that set from deviceTwinQueryCollection, cast its contents to DeviceTwinDevice objects, and return it in a QueryCollectionResponse object.]
+        while (jsonCollectionIterator.hasNext())
+        {
+            deviceTwinDeviceList.add(jsonToDeviceTwinDevice(jsonCollectionIterator.next()));
+        }
+
+        //Codes_SRS_DEVICETWIN_34_079: [The returned QueryCollectionResponse object shall contain the continuation token needed to retrieve the next set with.]
+        return new QueryCollectionResponse<DeviceTwinDevice>(deviceTwinDeviceList, queryResults.getContinuationToken());
     }
 
     /**
@@ -514,5 +610,21 @@ public class DeviceTwin
 
         // Codes_SRS_DEVICETWIN_21_068: [The scheduleUpdateTwin shall return the created instance of the Job class ]
         return job;
+    }
+
+    private DeviceTwinDevice jsonToDeviceTwinDevice(String json) throws IOException
+    {
+        TwinParser twinParser = new TwinParser();
+        twinParser.enableTags();
+        twinParser.updateTwin(json);
+
+        DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(twinParser.getDeviceId());
+        deviceTwinDevice.setVersion(twinParser.getVersion());
+        deviceTwinDevice.setETag(twinParser.getETag());
+        deviceTwinDevice.setTags(twinParser.getTagsMap());
+        deviceTwinDevice.setDesiredProperties(twinParser.getDesiredPropertyMap());
+        deviceTwinDevice.setReportedProperties(twinParser.getReportedPropertyMap());
+
+        return deviceTwinDevice;
     }
 }

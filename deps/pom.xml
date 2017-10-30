@@ -16,7 +16,7 @@
 
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-deps</artifactId>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
     <packaging>jar</packaging>
 
     <properties>

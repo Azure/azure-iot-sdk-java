@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 public class DeviceMethodDataTest
 {
     /*
-    **Tests_SRS_DEVICEMETHODDATA_25_001: [**The constructor shall save the status and reponse message provided by user.**]**
+    **Tests_SRS_DEVICEMETHODDATA_25_001: [**The constructor shall save the status and response message provided by user.**]**
      */
     @Test
     public void constructorSucceeds()

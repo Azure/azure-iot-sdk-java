@@ -2,7 +2,7 @@
 
 ## Overview
 
-DeviceMethodData is exposed to user as a utility to help perform DeviceMethod operations like setting status, response message in reponse to device method invocation.
+DeviceMethodData is exposed to user as a utility to help perform DeviceMethod operations like setting status, response message in response to device method invocation.
 
 ## References
 
@@ -28,7 +28,7 @@ public class DeviceMethodData
 public DeviceMethodData(int status, String responseMessage) throws IllegalArgumentException;
 ```
 
-**SRS_DEVICEMETHODDATA_25_001: [**The constructor shall save the status and reponse message provided by user.**]**
+**SRS_DEVICEMETHODDATA_25_001: [**The constructor shall save the status and response message provided by user.**]**
 
 
 ### getStatus
