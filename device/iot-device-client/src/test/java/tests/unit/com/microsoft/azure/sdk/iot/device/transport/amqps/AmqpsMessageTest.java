@@ -4,6 +4,7 @@
  */
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsMessage;
 import mockit.Mocked;
@@ -17,14 +18,18 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-/* Unit tests for AmqpsMessage
+/**
+*  Unit tests for AmqpsMessage
 * 100% methods covered
-* 100% lines covered
+* 95% lines covered
 */
-public class AmqpsMessageTest {
-
+public class AmqpsMessageTest
+{
     @Mocked
     protected Delivery mockDelivery;
+
+    @Mocked
+    protected DeviceClientConfig mockDeviceClientConfig;
 
     // Tests_SRS_AMQPSMESSAGE_14_001: [If the ACK_TYPE is COMPLETE, the function shall set an Accepted disposition on the private Delivery object.]
     @Test
@@ -119,5 +124,20 @@ public class AmqpsMessageTest {
 
         //assert
         assertTrue(message.getAmqpsMessageType() == messageType);
+    }
+
+    // Tests_SRS_AMQPSMESSAGE_12_003: [Getter for the deviceClientConfig.]
+    // Tests_SRS_AMQPSMESSAGE_12_004: [Setter for the deviceClientConfig.]
+    @Test
+    public void getSetDeviceClientConfig()
+    {
+        //arrange
+        AmqpsMessage message = new AmqpsMessage();
+
+        //act
+        message.setDeviceClientConfig(mockDeviceClientConfig);
+
+        //assert
+        assertTrue(message.getDeviceClientConfig() == mockDeviceClientConfig);
     }
 }

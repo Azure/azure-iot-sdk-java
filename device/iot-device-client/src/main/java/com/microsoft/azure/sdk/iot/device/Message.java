@@ -110,6 +110,11 @@ public class Message
     /// </summary>
     private MessageType messageType;
 
+    /// <summary>
+    /// [Optional] Used to specify the sender device client for multiplexing scenarios
+    /// </summary>
+    private IotHubConnectionString iotHubConnectionString;
+
     private String deliveryAcknowledgement;
 
     /**
@@ -450,4 +455,25 @@ public class Message
         // Codes_SRS_MESSAGE_34_037: [The function shall return the message's user ID.]
         return this.userId;
     }
+
+    /**
+     * Getter for the iotHubConnectionString property
+     * @return the iotHubConnectionString value
+     */
+    public IotHubConnectionString getIotHubConnectionString()
+    {
+        // Codes_SRS_MESSAGE_12_001: [The function shall return the message's iotHubConnectionString object.]
+        return iotHubConnectionString;
+    }
+
+    /**
+     * Setter for the iotHubConnectionString type
+     * @param iotHubConnectionString The iotHubConnectionString value to set
+     */
+    public void setIotHubConnectionString(IotHubConnectionString iotHubConnectionString)
+    {
+        // Codes_SRS_MESSAGE_12_002: [The function shall set the message's iotHubConnectionString object to the provided value.]
+        this.iotHubConnectionString = iotHubConnectionString;
+    }
+
 }

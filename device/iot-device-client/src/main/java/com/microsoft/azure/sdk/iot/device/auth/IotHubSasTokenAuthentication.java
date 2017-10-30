@@ -55,7 +55,7 @@ public class IotHubSasTokenAuthentication
         this.sslContextNeedsUpdate = false;
 
         //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_002: [This constructor shall save the provided connection string.]
-        this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, tokenValidSecs);
+        this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, calculateExpiryTime(this.tokenValidSecs));
     }
 
     /**
@@ -68,12 +68,16 @@ public class IotHubSasTokenAuthentication
         if (this.deviceKey != null && this.sasToken.isExpired())
         {
             //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_004: [If the saved sas token has expired and there is a device key present, the saved sas token shall be renewed.]
-            Long expiryTime = (System.currentTimeMillis() / MILLISECONDS_PER_SECOND) + this.tokenValidSecs + MINIMUM_EXPIRATION_TIME_OFFSET;
-            this.sasToken = new IotHubSasToken(this.hostname, this.deviceId, this.deviceKey, null, expiryTime);
+            this.sasToken = new IotHubSasToken(this.hostname, this.deviceId, this.deviceKey, null, calculateExpiryTime(this.tokenValidSecs));
         }
 
         //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_005: [This function shall return the saved sas token.]
         return this.sasToken.toString();
+    }
+
+    private Long calculateExpiryTime(long validInSecs)
+    {
+        return (System.currentTimeMillis() / MILLISECONDS_PER_SECOND) + validInSecs + MINIMUM_EXPIRATION_TIME_OFFSET;
     }
 
     /**
@@ -108,6 +112,15 @@ public class IotHubSasTokenAuthentication
         {
             throw new IOException(e.getMessage());
         }
+    }
+
+    /**
+     * Getter for TokenValidSecs
+     */
+    public long getTokenValidSecs()
+    {
+        // Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_12_001: [This function shall return the tokenValidSecs as the number of seconds the current sas token valid for.]
+        return tokenValidSecs;
     }
 
     /**

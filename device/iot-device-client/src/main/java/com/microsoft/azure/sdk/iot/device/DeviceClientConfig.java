@@ -51,7 +51,8 @@ public final class DeviceClientConfig
     public enum AuthType
     {
         X509_CERTIFICATE,
-        SAS_TOKEN
+        SAS_TOKEN,
+        CBS
     }
 
     private AuthType authenticationType;
@@ -62,10 +63,12 @@ public final class DeviceClientConfig
      * @param iotHubConnectionString is the string with the hostname, deviceId, and
      *                               deviceKey or token, which identify the device in
      *                               the Azure IotHub.
+     * @param authType is the authentication type to be used
+     *
      * @throws IllegalArgumentException if the IoT Hub hostname does not contain
      * a valid IoT Hub name as its prefix.
      */
-    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString) throws IllegalArgumentException
+    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, AuthType authType) throws IllegalArgumentException
     {
         // Codes_SRS_DEVICECLIENTCONFIG_21_034: [If the provided `iotHubConnectionString` is null,
         // the constructor shall throw IllegalArgumentException.]
@@ -80,10 +83,16 @@ public final class DeviceClientConfig
             throw new IllegalArgumentException("Cannot use this constructor for x509 connection strings. Use constructor that takes public key certificate and private key instead");
         }
 
+        if (authType == AuthType.X509_CERTIFICATE)
+        {
+            // Codes_SRS_DEVICECLIENTCONFIG_12_002: [If the authentication type is X509 the constructor shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("Cannot use this constructor for x509 authentication type. Use constructor that takes public key certificate and private key instead");
+        }
+
         this.useWebsocket = false;
 
-        //Codes_SRS_DEVICECLIENTCONFIG_34_046: [If the provided `iotHubConnectionString` does not use x509 authentication, it shall be saved to a new IotHubSasTokenAuthentication object and the authentication type of this shall be set to SASToken.]
-        this.authenticationType = AuthType.SAS_TOKEN;
+        // Codes_SRS_DEVICECLIENTCONFIG_12_001: [The constructor shall set the authentication type to the given authType value.]
+        this.authenticationType = authType;
         this.iotHubConnectionString = iotHubConnectionString;
 
         this.sasTokenAuthentication = new IotHubSasTokenAuthentication(
@@ -365,7 +374,7 @@ public final class DeviceClientConfig
         return DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS;
     }
 
-    /*
+    /**
      * Getter for AuthenticationType
      *
      * @return The value of AuthenticationType

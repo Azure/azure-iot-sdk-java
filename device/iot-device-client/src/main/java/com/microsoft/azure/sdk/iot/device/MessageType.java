@@ -3,10 +3,14 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+/**
+ * The IoTHub message type
+ */
 public enum MessageType
 {
     UNKNOWN,
+    CBS_AUTHENTICATION,
     DEVICE_TELEMETRY,
-    DEVICE_TWIN,
-    DEVICE_METHODS
+    DEVICE_METHODS,
+    DEVICE_TWIN
 }

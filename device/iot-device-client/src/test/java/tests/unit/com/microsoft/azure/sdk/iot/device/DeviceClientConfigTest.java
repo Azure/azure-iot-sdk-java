@@ -20,6 +20,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -59,7 +60,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         String testIotHubHostname = config.getIotHubHostname();
 
         final String expectedIotHubHostname = iotHubHostname;
@@ -84,7 +85,7 @@ public class DeviceClientConfigTest
                         sharedAccessToken);
         final String expectedIotHubName = "test";
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         final String testIotHubName = config.getIotHubName();
 
         assertThat(testIotHubName, is(expectedIotHubName));
@@ -106,7 +107,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         String testDeviceId = config.getDeviceId();
 
         final String expectedDeviceId = deviceId;
@@ -129,7 +130,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         String testDeviceKey = config.getIotHubConnectionString().getSharedAccessKey();
 
         final String expectedDeviceKey = deviceKey;
@@ -155,7 +156,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
         MessageCallback testCallback = config.getDeviceTelemetryMessageCallback();
@@ -183,7 +184,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
         Object testContext = config.getDeviceTelemetryMessageContext();
@@ -215,7 +216,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         Object context = new Object();
         config.setDeviceTwinMessageCallback(mockCallback, context);
         Object testContext = config.getDeviceTwinMessageContext();
@@ -248,7 +249,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         Object context = new Object();
         config.setDeviceMethodsMessageCallback(mockCallback, context);
         Object testContext = config.getDeviceMethodsMessageContext();
@@ -276,7 +277,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         Object dMContext = new Object();
         config.setDeviceMethodsMessageCallback(mockCallback, dMContext);
         Object testContextDM = config.getDeviceMethodsMessageContext();
@@ -310,7 +311,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         int testReadTimeoutMillis = config.getReadTimeoutMillis();
 
         final int expectedReadTimeoutMillis = 240000;
@@ -333,7 +334,7 @@ public class DeviceClientConfigTest
                                             deviceKey,
                                             sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         config.setUseWebsocket(true);
         assertTrue(config.isUseWebsocket());
     }
@@ -354,7 +355,7 @@ public class DeviceClientConfigTest
                                             deviceKey,
                                             sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         config.setUseWebsocket(true);
         assertTrue(config.isUseWebsocket());
     }
@@ -376,7 +377,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         int testMessageLockTimeoutSecs = config.getMessageLockTimeoutSecs();
 
         final int expectedMessageLockTimeoutSecs = 180;
@@ -388,9 +389,8 @@ public class DeviceClientConfigTest
     // the constructor shall throw IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
     public void constructorFailsNullConnectionString()
-            throws URISyntaxException, IOException
     {
-        new DeviceClientConfig(null);
+        DeviceClientConfig config = new DeviceClientConfig(null, DeviceClientConfig.AuthType.SAS_TOKEN);
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_039: [This function shall return the type of authentication that the config is set up to use.]
@@ -398,7 +398,7 @@ public class DeviceClientConfigTest
     public void getAuthenticationTypeWorks(@Mocked final IotHubConnectionString mockIotHubConnectionString) throws IOException
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
 
         DeviceClientConfig.AuthType expectedAuthType = DeviceClientConfig.AuthType.X509_CERTIFICATE;
         Deencapsulation.setField(config, "authenticationType", expectedAuthType);
@@ -410,9 +410,11 @@ public class DeviceClientConfigTest
         assertEquals(expectedAuthType, actualAuthType);
     }
 
+    // Tests_SRS_DEVICECLIENTCONFIG_12_001: [The constructor shall set the authentication type to the given authType value.]
+
     //Tests_SRS_DEVICECLIENTCONFIG_34_046: [If the provided `iotHubConnectionString` does not use x509 authentication, it shall be saved to a new IotHubSasTokenAuthentication object and the authentication type of this shall be set to SASToken.]
     @Test
-    public void constructorUsingSASTokenSetsTypeCorrectly(@Mocked final IotHubConnectionString mockIotHubConnectionString) throws URISyntaxException, IOException
+    public void constructorSetsAuthType(@Mocked final IotHubConnectionString mockIotHubConnectionString) throws URISyntaxException, IOException
     {
         //arrange
         new NonStrictExpectations()
@@ -424,11 +426,11 @@ public class DeviceClientConfigTest
         };
 
         //act
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.CBS);
 
         //assert
         DeviceClientConfig.AuthType actualAuthType = Deencapsulation.getField(config, "authenticationType");
-        assertEquals(DeviceClientConfig.AuthType.SAS_TOKEN, actualAuthType);
+        assertEquals(DeviceClientConfig.AuthType.CBS, actualAuthType);
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_069: [If the provided connection string is null or does not use x509 auth, and IllegalArgumentException shall be thrown.]
@@ -456,6 +458,14 @@ public class DeviceClientConfigTest
         new DeviceClientConfig(mockIotHubConnectionString, "", false, "", false);
     }
 
+    // Tests_SRS_DEVICECLIENTCONFIG_12_002: [If the authentication type is X509 the constructor shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorWithX509AuthThrows(@Mocked final IotHubConnectionString mockIotHubConnectionString) throws IOException
+    {
+        //act
+        new DeviceClientConfig(null, DeviceClientConfig.AuthType.X509_CERTIFICATE);
+    }
+
     //Tests_SRS_DEVICECLIENTCONFIG_34_076: [If the provided `iotHubConnectionString` uses x509 authentication, the constructor shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
     public void constructorForSasTokenRejectsX509ConnectionStrings(@Mocked final IotHubConnectionString mockIotHubConnectionString)
@@ -470,7 +480,7 @@ public class DeviceClientConfigTest
         };
 
         //act
-        new DeviceClientConfig(mockIotHubConnectionString);
+        Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.X509_CERTIFICATE);
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_34_077: [This function shall return the saved IotHubX509Authentication object.]
@@ -508,7 +518,7 @@ public class DeviceClientConfigTest
                 result = false;
             }
         };
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         Deencapsulation.setField(config, "sasTokenAuthentication", mockSasTokenAuthentication);
 
         //act
@@ -530,7 +540,7 @@ public class DeviceClientConfigTest
                 result = false;
             }
         };
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.X509_CERTIFICATE);
 
         //act
         IotHubConnectionString actualConnString = config.getIotHubConnectionString();

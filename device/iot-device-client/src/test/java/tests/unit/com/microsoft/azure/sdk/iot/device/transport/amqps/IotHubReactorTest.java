@@ -15,7 +15,7 @@ import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
 
-/*
+/**
 * Unit tests for IotHubReactor.java
 * 100% methods covered
 * 100% lines covered

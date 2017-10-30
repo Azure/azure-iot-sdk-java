@@ -54,3 +54,19 @@ public void setAmqpsMessageType(MessageType amqpsMessageType)
 ```
 
 **SRS_AMQPSMESSAGE_12_002: [**Setter for the MessageType.**]**
+
+### getDeviceClientConfig
+
+```java
+public DeviceClientConfig getDeviceClientConfig();
+```
+
+**SRS_AMQPSMESSAGE_12_003: [**Getter for the deviceClientConfig.**]**
+
+### setDeviceClientConfig
+
+```java
+public void setDeviceClientConfig(DeviceClientConfig deviceClientConfig);
+```
+
+**SRS_AMQPSMESSAGE_12_004: [**Setter for the deviceClientConfig.**]**

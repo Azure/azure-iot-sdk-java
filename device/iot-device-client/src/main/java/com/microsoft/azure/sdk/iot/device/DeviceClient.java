@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.device;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 
 import java.io.Closeable;
 import java.io.IOError;
@@ -112,6 +113,61 @@ public final class DeviceClient implements Closeable
     protected long RECEIVE_PERIOD_MILLIS;
     private CustomLogger logger;
 
+    private IoTHubConnectionType ioTHubConnectionType = IoTHubConnectionType.UNKNOWN;
+
+    private TransportClient transportClient;
+
+    /**
+     * Constructor that takes a connection string and a transport client as an argument.
+     *
+     * @param connString the connection string. The connection string is a set
+     * of key-value pairs that are separated by ';', with the keys and values
+     * separated by '='. It should contain values for the following keys:
+     * {@code HostName}, {@code DeviceId}, and {@code SharedAccessKey}.
+     *
+     * @param transportClient the transport client to use by the device client.
+     *
+     * @throws IllegalArgumentException if {@code connString}
+     * or if {@code connString} is missing one of the following
+     * attributes:{@code HostName}, {@code DeviceId}, or
+     * {@code SharedAccessKey} or if the IoT hub hostname does not conform to
+     * RFC 3986 or if the provided {@code connString} is for an x509 authenticated device
+     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
+     */
+    public DeviceClient(String connString, TransportClient transportClient) throws URISyntaxException
+    {
+        // Codes_SRS_DEVICECLIENT_12_008: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.]
+        if ((connString == null) || connString.isEmpty())
+        {
+            throw new IllegalArgumentException("IoT Hub connection string cannot be null.");
+        }
+
+        // Codes_SRS_DEVICECLIENT_12_018: [If the tranportClient is null, the function shall throw an IllegalArgumentException.]
+        if (transportClient == null)
+        {
+            throw new IllegalArgumentException("Transport client cannot be null.");
+        }
+
+        // Codes_SRS_DEVICECLIENT_12_010: [The constructor shall set the connection type to USE_TRANSPORTCLIENT.]
+        this.ioTHubConnectionType = IoTHubConnectionType.USE_TRANSPORTCLIENT;
+
+        // Codes_SRS_DEVICECLIENT_12_016: [The constructor shall save the transportClient parameter.]
+        this.transportClient = transportClient;
+
+        // Codes_SRS_DEVICECLIENT_12_009: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
+        IotHubConnectionString iotHubConnectionString = new IotHubConnectionString(connString);
+        this.config = new DeviceClientConfig(iotHubConnectionString, DeviceClientConfig.AuthType.CBS);
+
+        // Codes_SRS_DEVICECLIENT_12_011: [The constructor shall set the deviceIO to null.]
+        this.deviceIO = null;
+
+        // Codes_SRS_DEVICECLIENT_12_017: [The constructor shall register the device client with the transport client.]
+        this.transportClient.registerDeviceClient(this);
+
+        this.logger = new CustomLogger(this.getClass());
+        logger.LogInfo("DeviceClient object is created successfully, method name is %s ", logger.getMethodName());
+    }
+
     /**
      * Constructor that takes a connection string as an argument.
      *
@@ -137,10 +193,11 @@ public final class DeviceClient implements Closeable
         //Codes_SRS_DEVICECLIENT_21_001: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
         //Codes_SRS_DEVICECLIENT_34_055: [If the provided connection string contains an expired SAS token, a SecurityException shall be thrown.]
         IotHubConnectionString iotHubConnectionString = new IotHubConnectionString(connString);
-        this.config = new DeviceClientConfig(iotHubConnectionString);
+        this.config = new DeviceClientConfig(iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
 
         //Codes_SRS_DEVICECLIENT_21_002: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
         //Codes_SRS_DEVICECLIENT_21_003: [The constructor shall save the connection configuration using the object DeviceClientConfig.]
+        //Codes_SRS_DEVICECLIENT_12_012: [The constructor shall set the connection type to SINGLE_CLIENT.]
         commonConstructorSetup(protocol);
     }
 
@@ -168,6 +225,7 @@ public final class DeviceClient implements Closeable
 
         //Codes_SRS_DEVICECLIENT_34_059: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
         //Codes_SRS_DEVICECLIENT_34_060: [The constructor shall save the connection configuration using the object DeviceClientConfig.]
+        //Codes_SRS_DEVICECLIENT_12_013: [The constructor shall set the connection type to SINGLE_CLIENT.]
         commonConstructorSetup(protocol);
     }
 
@@ -223,6 +281,8 @@ public final class DeviceClient implements Closeable
                         "Invalid client protocol specified.");
         }
 
+        this.ioTHubConnectionType = IoTHubConnectionType.SINGLE_CLIENT;
+        this.transportClient = null;
         this.deviceIO = new DeviceIO(this.config, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS);
 
         this.logger = new CustomLogger(this.getClass());
@@ -237,15 +297,31 @@ public final class DeviceClient implements Closeable
      */
     public void open() throws IOException
     {
-        /* Codes_SRS_DEVICECLIENT_34_044: [If the SAS token has expired before this call, throw a Security Exception] */
-        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isRenewalNecessary())
+        if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
         {
-            throw new SecurityException("Your SasToken is expired");
+            if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.CLOSED)
+            {
+                // Codes_SRS_DEVICECLIENT_12_007: [If the client has been initialized to use TransportClient and the TransportClient is not opened yet the function shall throw an IOException.]
+                throw new IOException("Calling open() when using the TransportClient is not supported. Use TransportClient.open() instead.");
+            }
+            else
+            {
+                // Codes_SRS_DEVICECLIENT_12_019: [If the client has been initialized to use TransportClient and the TransportClient is already opened the function shall do nothing.]
+                logger.LogInfo("Connection already opened by TransportClient.");
+            }
         }
+        else
+        {
+            /* Codes_SRS_DEVICECLIENT_34_044: [If the SAS token has expired before this call, throw a Security Exception] */
+            if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isRenewalNecessary())
+            {
+                throw new SecurityException("Your SasToken is expired");
+            }
 
-        /* Codes_SRS_DEVICECLIENT_21_006: [The open shall open the deviceIO connection.] */
-        /* Codes_SRS_DEVICECLIENT_21_007: [If the opening a connection via deviceIO is not successful, the open shall throw IOException.] */
-        this.deviceIO.open();
+            /* Codes_SRS_DEVICECLIENT_21_006: [The open shall open the deviceIO connection.] */
+            /* Codes_SRS_DEVICECLIENT_21_007: [If the opening a connection via deviceIO is not successful, the open shall throw IOException.] */
+            this.deviceIO.open();
+        }
 
         logger.LogInfo("Connection opened with success, method name is %s ", logger.getMethodName());
     }
@@ -253,7 +329,7 @@ public final class DeviceClient implements Closeable
     /**
      * Completes all current outstanding requests and closes the IoT Hub client.
      * Must be called to terminate the background thread that is sending data to
-     * IoT Hub. After {@code close()} is called, the IoT Hub client is no longer
+     * IoT Hub. After {@code closeNow()} is called, the IoT Hub client is no longer
      * usable. If the client is already closed, the function shall do nothing.
      * @deprecated : As of release 1.1.25 this call is replaced by {@link #closeNow()}
      *
@@ -262,17 +338,32 @@ public final class DeviceClient implements Closeable
     @Deprecated
     public void close() throws IOException
     {
-
-        // Codes_SRS_DEVICECLIENT_11_040: [The function shall finish all ongoing tasks.]
-        // Codes_SRS_DEVICECLIENT_11_041: [The function shall cancel all recurring tasks.]
-        while (!this.deviceIO.isEmpty())
+        if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
         {
-            // Don't do anything, can be infinite.
+            if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.OPENED)
+            {
+                // Codes_SRS_DEVICECLIENT_12_006: [If the client has been initialized to use TransportClient and the TransportClient is already opened the function shall throw an IOException.]
+                throw new IOException("Calling closeNow() when using TransportClient is not supported. Use TransportClient.closeNow() instead.");
+            }
+            else
+            {
+                // Codes_SRS_DEVICECLIENT_12_020: [If the client has been initialized to use TransportClient and the TransportClient is not opened yet the function shall do nothing.]
+                logger.LogInfo("Connection already closed by TransportClient.");
+            }
         }
+        else
+        {
+            // Codes_SRS_DEVICECLIENT_11_040: [The function shall finish all ongoing tasks.]
+            // Codes_SRS_DEVICECLIENT_11_041: [The function shall cancel all recurring tasks.]
+            while (!this.deviceIO.isEmpty())
+            {
+                // Don't do anything, can be infinite.
+            }
 
-        /* Codes_SRS_DEVICECLIENT_21_042: [The close shall close the deviceIO connection.] */
-        /* Codes_SRS_DEVICECLIENT_21_043: [If the closing a connection via deviceIO is not successful, the close shall throw IOException.] */
-        this.deviceIO.close();
+            /* Codes_SRS_DEVICECLIENT_21_042: [The closeNow shall closeNow the deviceIO connection.] */
+            /* Codes_SRS_DEVICECLIENT_21_043: [If the closing a connection via deviceIO is not successful, the closeNow shall throw IOException.] */
+            this.deviceIO.close();
+        }
 
         logger.LogInfo("Connection closed with success, method name is %s ", logger.getMethodName());
     }
@@ -290,14 +381,27 @@ public final class DeviceClient implements Closeable
      */
     public void closeNow() throws IOException
     {
-        /* Codes_SRS_DEVICECLIENT_21_008: [The closeNow shall close the deviceIO connection.] */
-        /* Codes_SRS_DEVICECLIENT_21_009: [If the closing a connection via deviceIO is not successful, the closeNow shall throw IOException.] */
-        this.deviceIO.close();
-
-        /* Codes_SRS_DEVICECLIENT_21_054: [If the fileUpload is not null, the closeNow shall call closeNow on fileUpload.] */
-        if(fileUpload != null)
+        if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
         {
-            fileUpload.closeNow();
+            if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.OPENED)
+            {
+                // Codes_SRS_DEVICECLIENT_12_005: [If the client has been initialized to use TransportClient and the TransportClient is already opened the function shall throw an IOException.]
+                throw new IOException("Calling closeNow() when using TransportClient is not supported. Use TransportClient.closeNow() instead.");
+            }
+            else
+            {
+                // Codes_SRS_DEVICECLIENT_12_021: [If the client has been initialized to use TransportClient and the TransportClient is not opened yet the function shall do nothing.]
+                logger.LogInfo("Connection already closed by TransportClient.");
+            }
+        }
+        else
+        {
+            /* Codes_SRS_DEVICECLIENT_21_008: [The closeNow shall closeNow the deviceIO connection.] */
+            /* Codes_SRS_DEVICECLIENT_21_009: [If the closing a connection via deviceIO is not successful, the closeNow shall throw IOException.] */
+            this.deviceIO.close();
+
+            /* Codes_SRS_DEVICECLIENT_21_054: [If the fileUpload is not null, the closeNow shall call closeNow on fileUpload.] */
+            closeFileUpload();
         }
 
         logger.LogInfo("Connection closed with success, method name is %s ", logger.getMethodName());
@@ -320,7 +424,8 @@ public final class DeviceClient implements Closeable
     {
         /* Codes_SRS_DEVICECLIENT_21_010: [The sendEventAsync shall asynchronously send the message using the deviceIO connection.] */
         /* Codes_SRS_DEVICECLIENT_21_011: [If starting to send via deviceIO is not successful, the sendEventAsync shall bypass the threw exception.] */
-        deviceIO.sendEventAsync(message, callback, callbackContext);
+        /* Codes_SRS_DEVICECLIENT_12_001: [The function shall call deviceIO.sendEventAsync with the client's config parameter to enable multiplexing.] */
+        deviceIO.sendEventAsync(message, callback, callbackContext, this.config.getIotHubConnectionString());
 
         logger.LogInfo("Message with messageid %s along with callback and callbackcontext is added to the queue, method name is %s ", message.getMessageId(), logger.getMethodName());
     }
@@ -377,6 +482,7 @@ public final class DeviceClient implements Closeable
              */
             throw new IOException("Open the client connection before using it.");
         }
+
         if (deviceTwinStatusCallback == null || genericPropertyCallBack == null)
         {
             /*
@@ -541,19 +647,19 @@ public final class DeviceClient implements Closeable
         /* Codes_SRS_DEVICECLIENT_21_044: [The uploadToBlobAsync shall asynchronously upload the stream in `inputStream` to the blob in `destinationBlobName`.] */
 
         /* Codes_SRS_DEVICECLIENT_21_045: [If the `callback` is null, the uploadToBlobAsync shall throw IllegalArgumentException.] */
-        if(callback == null)
+        if (callback == null)
         {
             throw new IllegalArgumentException("Callback is null");
         }
 
         /* Codes_SRS_DEVICECLIENT_21_046: [If the `inputStream` is null, the uploadToBlobAsync shall throw IllegalArgumentException.] */
-        if(inputStream == null)
+        if (inputStream == null)
         {
             throw new IllegalArgumentException("The input stream cannot be null.");
         }
 
         /* Codes_SRS_DEVICECLIENT_21_052: [If the `streamLength` is negative, the uploadToBlobAsync shall throw IllegalArgumentException.] */
-        if(streamLength < 0)
+        if (streamLength < 0)
         {
             throw new IllegalArgumentException("Invalid stream size.");
         }
@@ -568,7 +674,7 @@ public final class DeviceClient implements Closeable
         }
 
         /* Codes_SRS_DEVICECLIENT_21_048: [If there is no instance of the FileUpload, the uploadToBlobAsync shall create a new instance of the FileUpload.] */
-        if(this.fileUpload == null)
+        if (this.fileUpload == null)
         {
             /* Codes_SRS_DEVICECLIENT_21_049: [If uploadToBlobAsync failed to create a new instance of the FileUpload, it shall bypass the exception.] */
             this.fileUpload = new FileUpload(this.config);
@@ -582,43 +688,33 @@ public final class DeviceClient implements Closeable
     @SuppressWarnings("unused")
     protected DeviceClient()
     {
+        // Codes_SRS_DEVICECLIENT_12_028: [The constructor shall shall set the config, deviceIO and tranportClient to null.]
         this.config = null;
         this.deviceIO = null;
+        this.transportClient = null;
     }
 
     private void setOption_SetMinimumPollingInterval(Object value)
     {
         logger.LogInfo("Setting MinimumPollingInterval as %s milliseconds, method name is %s ", value, logger.getMethodName());
 
-        if (this.deviceIO.isOpen())
+        if (value != null)
         {
-            throw new IllegalStateException("setOption " + SET_MINIMUM_POLLING_INTERVAL +
-                    "only works when the transport is closed");
-        }
-        else
-        {
-            if (value != null)
+            // Codes_SRS_DEVICECLIENT_02_018: ["SetMinimumPollingInterval" needs to have type long].
+            if (value instanceof Long)
             {
-                // Codes_SRS_DEVICECLIENT_02_018: ["SetMinimumPollingInterval" needs to have type long].
-                if (value instanceof Long)
+                try
                 {
-                    try
-                    {
-                        this.deviceIO.setReceivePeriodInMilliseconds((long) value);
-                    }
-                    catch (IOException e)
-                    {
-                        throw new IOError(e);
-                    }
+                    this.deviceIO.setReceivePeriodInMilliseconds((long) value);
                 }
-                else
+                catch (IOException e)
                 {
-                    throw new IllegalArgumentException("value is not long = " + value);
+                    throw new IOError(e);
                 }
             }
             else
             {
-                throw new IllegalArgumentException("value cannot be null");
+                throw new IllegalArgumentException("value is not long = " + value);
             }
         }
     }
@@ -646,36 +742,22 @@ public final class DeviceClient implements Closeable
                 throw new IllegalArgumentException("value is not long = " + value);
             }
         }
-        else
-        {
-            throw new IllegalArgumentException("value cannot be null");
-        }
     }
 
     private void setOption_SetCertificatePath(Object value)
     {
         logger.LogInfo("Setting CertificatePath as %s, method name is %s ", value, logger.getMethodName());
-        if (this.deviceIO.isOpen())
+
+        if (value != null)
         {
-            throw new IllegalStateException("setOption " + SET_CERTIFICATE_PATH +
-                    " only works when the transport is closed");
-        }
-        else
-        {
-            if (value != null)
+            if ((this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN) ||
+                (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.CBS))
             {
-                if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
-                {
-                    this.config.getSasTokenAuthentication().setPathToIotHubTrustedCert((String) value);
-                }
-                else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
-                {
-                    this.config.getX509Authentication().setPathToIotHubTrustedCert((String) value);
-                }
+                this.config.getSasTokenAuthentication().setPathToIotHubTrustedCert((String) value);
             }
-            else
+            else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
             {
-                throw new IllegalArgumentException("value cannot be null");
+                this.config.getX509Authentication().setPathToIotHubTrustedCert((String) value);
             }
         }
     }
@@ -684,7 +766,8 @@ public final class DeviceClient implements Closeable
     {
         logger.LogInfo("Setting SASTokenExpiryTime as %s seconds, method name is %s ", value, logger.getMethodName());
 
-        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
+        if ((this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN) &&
+                ((this.config.getAuthenticationType() != DeviceClientConfig.AuthType.CBS)))
         {
             //Codes_SRS_DEVICECLIENT_34_065: [""SetSASTokenExpiryTime" if this option is called when not using sas token authentication, an IllegalStateException shall be thrown.]
             throw new IllegalStateException("Cannot set sas token validity time when not using sas token authentication");
@@ -704,45 +787,62 @@ public final class DeviceClient implements Closeable
                 throw new IllegalArgumentException("value is not long = " + value);
             }
 
+            this.config.getSasTokenAuthentication().setTokenValidSecs(validTimeInSeconds);
+
             boolean restart = false;
-            if (this.deviceIO.isOpen())
+
+            if (deviceIO != null)
             {
-                try
+                if (this.deviceIO.isOpen())
                 {
+                    try
+                    {
                     /* Codes_SRS_DEVICECLIENT_25_024: [**"SetSASTokenExpiryTime" shall restart the transport
                      *                                  1. If the device currently uses device key and
                      *                                  2. If transport is already open
                      *                                 after updating expiry time
                     */
-                    if (this.config.getIotHubConnectionString().getSharedAccessKey() != null)
+                        if (this.config.getIotHubConnectionString().getSharedAccessKey() != null)
+                        {
+                            restart = true;
+                            if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
+                            {
+                                // Codes_SRS_DEVICECLIENT_12_025: [If the client configured to use TransportClient the function shall use transport client closeNow() and open() for restart.]
+                                this.transportClient.closeNow();
+                            }
+                            else
+                            {
+                                this.deviceIO.close();
+                            }
+                        }
+                    } 
+                    catch (IOException e)
                     {
-                        restart = true;
-                        this.deviceIO.close();
+                        // Codes_SRS_DEVICECLIENT_12_027: [The function shall throw IOError if either the deviceIO or the tranportClient's open() or closeNow() throws.]
+                        throw new IOError(e);
                     }
                 }
-                catch (IOException e)
+
+                if (restart)
                 {
-                    throw new IOError(e);
+                    try
+                    {
+                        if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
+                        {
+                            // Codes_SRS_DEVICECLIENT_12_025: [If the client configured to use TransportClient the function shall use transport client closeNow() and open() for restart.]
+                            this.transportClient.open();
+                        }
+                        else
+                        {
+                            this.deviceIO.open();
+                        }
+                    } 
+                    catch (IOException e)
+                    {
+                        throw new IOError(e);
+                    }
                 }
             }
-
-            this.config.getSasTokenAuthentication().setTokenValidSecs(validTimeInSeconds);
-
-            if (restart)
-            {
-                try
-                {
-                    this.deviceIO.open();
-                }
-                catch (IOException e)
-                {
-                    throw new IOError(e);
-                }
-            }
-        }
-        else
-        {
-            throw new IllegalArgumentException("value should be in secs");
         }
     }
 
@@ -772,10 +872,15 @@ public final class DeviceClient implements Closeable
      */
     public void setOption(String optionName, Object value)
     {
-        // Codes_SRS_DEVICECLIENT_02_015: [If optionName is null or not an option handled by the client, then
-        // it shall throw IllegalArgumentException.]
         if (optionName == null)
         {
+            // Codes_SRS_DEVICECLIENT_02_015: [If optionName is null or not an option handled by the client, then
+            // it shall throw IllegalArgumentException.]
+            throw new IllegalArgumentException("optionName is null");
+        }
+        else if (value == null)
+        {
+            // Codes_SRS_DEVICECLIENT_12_026: [The function shall trow IllegalArgumentException if the value is null.]
             throw new IllegalArgumentException("optionName is null");
         }
         else
@@ -785,55 +890,114 @@ public final class DeviceClient implements Closeable
                 // Codes_SRS_DEVICECLIENT_02_016: ["SetMinimumPollingInterval" - time in milliseconds between 2 consecutive polls.]
                 case SET_MINIMUM_POLLING_INTERVAL:
                 {
-                    // Codes_SRS_DEVICECLIENT_02_017: [Option "SetMinimumPollingInterval" is available only for HTTP.]
-                    if (this.deviceIO.getProtocol() == IotHubClientProtocol.HTTPS)
+                    // Tests_SRS_DEVICECLIENT_12_023: [If the client configured to use TransportClient the SetMinimumPollingInterval shall throw IOException.]
+                    if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
                     {
-                        setOption_SetMinimumPollingInterval(value);
+                        throw new IllegalStateException("setOption " + SET_MINIMUM_POLLING_INTERVAL +
+                                "only works with HTTP protocol");
                     }
                     else
                     {
-                        logger.LogError("optionName is unknown = %s for %s, method name is %s ", optionName,
-                                this.deviceIO.getProtocol().toString(), logger.getMethodName());
-                        // Codes_SRS_DEVICECLIENT_02_015: [If optionName is null or not an option
-                        // handled by the client, then it shall throw IllegalArgumentException.]
-                        throw new IllegalArgumentException("optionName is unknown = " + optionName
-                                + " for " + this.deviceIO.getProtocol().toString());
-
+                        if (this.deviceIO.isOpen())
+                        {
+                            throw new IllegalStateException("setOption " + SET_MINIMUM_POLLING_INTERVAL +
+                                    "only works when the transport is closed");
+                        }
+                        else
+                        {
+                            // Codes_SRS_DEVICECLIENT_02_017: [Option "SetMinimumPollingInterval" is available only for HTTP.]
+                            if (this.deviceIO.getProtocol() == IotHubClientProtocol.HTTPS)
+                            {
+                                setOption_SetMinimumPollingInterval(value);
+                            }
+                            else
+                            {
+                                logger.LogError("optionName is unknown = %s for %s, method name is %s ", optionName, this.deviceIO.getProtocol().toString(), logger.getMethodName());
+                                // Codes_SRS_DEVICECLIENT_02_015: [If optionName is null or not an option
+                                // handled by the client, then it shall throw IllegalArgumentException.]
+                                throw new IllegalArgumentException("optionName is unknown = " + optionName + " for " + this.deviceIO.getProtocol().toString());
+                            }
+                        }
                     }
                     break;
                 }
                 // Codes_SRS_DEVICECLIENT_21_040: ["SetSendInterval" - time in milliseconds between 2 consecutive message sends.]
                 case SET_SEND_INTERVAL:
                 {
-                    setOption_SetSendInterval(value);
+                    if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
+                    {
+                        // Codes_SRS_DEVICECLIENT_12_022: [If the client configured to use TransportClient the SetSendInterval shall throw IllegalStateException.]
+                        throw new IllegalStateException("Setting send interval is not supported for single client if using TransportClient. " +
+                                "Use TransportClient.setSendInterval() instead.");
+                    }
+                    else
+                    {
+                        setOption_SetSendInterval(value);
+                    }
                     break;
                 }
                 // Codes_SRS_DEVICECLIENT_25_019: ["SetCertificatePath" - path to the certificate to verify peer.]
                 case SET_CERTIFICATE_PATH:
                 {
-                    // Codes_SRS_DEVICECLIENT_25_020: ["SetCertificatePath" is available only for AMQP.]
-
-                    if ((this.deviceIO.getProtocol() == AMQPS) ||
-                            (this.deviceIO.getProtocol() == AMQPS_WS))
+                    if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
                     {
-                        setOption_SetCertificatePath(value);
+                        if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.OPENED)
+                        {
+                            // Codes_SRS_DEVICECLIENT_12_029: [*SetCertificatePath" shall throw if the transportClient or deviceIO already open, otherwise set the path on the config.]
+                            throw new IllegalStateException("setOption " + SET_CERTIFICATE_PATH + " only works when the transport is closed");
+                        }
+                        else
+                        {
+                            // Codes_SRS_DEVICECLIENT_12_030: [*SetCertificatePath" shall udate the config on transportClient if tranportClient used.]
+                            setOption_SetCertificatePath(value);
+                        }
                     }
                     else
                     {
-                        logger.LogError("optionName is unknown = %s for %s, method name is %s ", optionName,
-                                this.deviceIO.getProtocol().toString(), logger.getMethodName());
-                        // Codes_SRS_DEVICECLIENT_02_015: [If optionName is null or not an option handled by the
-                        // client, then it shall throw IllegalArgumentException.]
-                        throw new IllegalArgumentException("optionName is unknown = " + optionName +
-                                " for " + this.deviceIO.getProtocol().toString());
+                        if ((this.deviceIO != null) && (this.deviceIO.isOpen()))
+                        {
+                            // Codes_SRS_DEVICECLIENT_12_029: [*SetCertificatePath" shall throw if the transportClient or deviceIO already open, otherwise set the path on the config.]
+                            throw new IllegalStateException("setOption " + SET_CERTIFICATE_PATH + " only works when the transport is closed");
+                        }
+                        else
+                        {
+                            // Codes_SRS_DEVICECLIENT_25_020: ["SetCertificatePath" is available only for AMQP.]
+                            if ((this.deviceIO.getProtocol() == AMQPS) || (this.deviceIO.getProtocol() == AMQPS_WS))
+                            {
+                                // Codes_SRS_DEVICECLIENT_12_030: [*SetCertificatePath" shall udate the config on transportClient if tranportClient used.]
+                                setOption_SetCertificatePath(value);
+                            }
+                            else
+                            {
+                                logger.LogError("optionName is unknown = %s for %s, method name is %s ", optionName, this.deviceIO.getProtocol().toString(), logger.getMethodName());
+                                // Codes_SRS_DEVICECLIENT_02_015: [If optionName is null or not an option handled by the
+                                // client, then it shall throw IllegalArgumentException.]
+                                throw new IllegalArgumentException("optionName is unknown = " + optionName + " for " + this.deviceIO.getProtocol().toString());
+                            }
+                        }
                     }
                     break;
                 }
                 //Codes_SRS_DEVICECLIENT_25_021: ["SetSASTokenExpiryTime" - Time in secs to specify SAS Token Expiry time.]
                 case SET_SAS_TOKEN_EXPIRY_TIME:
                 {
-                    //Codes__SRS_DEVICECLIENT_25_023: ["SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT/AMQPS_WS/MQTT_WS.]
-                    setOption_SetSASTokenExpiryTime(value);
+                    if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
+                    {
+                        if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.OPENED)
+                        {
+                            throw new IllegalStateException("setOption " + SET_SAS_TOKEN_EXPIRY_TIME + " with TransportClient only works when the transport client is closed");
+                        }
+                        else
+                        {
+                            //Codes__SRS_DEVICECLIENT_25_023: ["SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT/AMQPS_WS/MQTT_WS.]
+                            setOption_SetSASTokenExpiryTime(value);
+                        }
+                    }
+                    else
+                    {
+                        //Codes__SRS_DEVICECLIENT_25_023: ["SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT/AMQPS_WS/MQTT_WS.]
+                        setOption_SetSASTokenExpiryTime(value);
+                    }
                     break;
                 }
                 default:
@@ -851,14 +1015,62 @@ public final class DeviceClient implements Closeable
      * @param callbackContext a context to be passed to the callback. Can be
      * {@code null} if no callback is provided.
      */
-    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) {
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
+    {
         //Codes_SRS_DEVICECLIENT_99_003: [If the callback is null the method shall throw an IllegalArgument exception.]
-        if (null == callback) {
-            throw new IllegalArgumentException();
+        if (null == callback) 
+        {
+            throw new IllegalArgumentException("Callback object cannot be null");
         }
 
         //Codes_SRS_DEVICECLIENT_99_001: [The registerConnectionStateCallback shall register the callback with the Device IO even if the not open.]
         //Codes_SRS_DEVICECLIENT_99_002: [The registerConnectionStateCallback shall register the callback even if the client is not open.]
         this.deviceIO.registerConnectionStateCallback(callback, callbackContext);
+    }
+
+    /**
+     * Closes FileUpload object if it is initialized.
+     *
+     * @throws IOException if file upload closeNow failed.
+     */
+    void closeFileUpload() throws IOException
+    {
+        if (this.fileUpload != null)
+        {
+            this.fileUpload.closeNow();
+        }
+    }
+
+    /**
+     * Getter for the device client config.
+     *
+     * @return the value of the config.
+     */
+    public DeviceClientConfig getConfig()
+    {
+        // Codes_SRS_DEVICECLIENT_12_002: [The function shall return with he current value of client config.]
+        return this.config;
+    }
+
+    /**
+     * Getter for the underlying DeviceIO for multiplexing scenarios.
+     *
+     * @return the value of the underlying DeviceIO.
+     */
+    DeviceIO getDeviceIO()
+    {
+        // Codes_SRS_DEVICECLIENT_12_003: [The function shall return with he current value of the client's underlying DeviceIO.]
+        return this.deviceIO;
+    }
+
+    /**
+     * Setter for the underlying DeviceIO for multiplexing scenarios.
+     *
+     * @param deviceIO is the DeviceIO to set.
+     */
+    void setDeviceIO(DeviceIO deviceIO)
+    {
+        // Codes_SRS_DEVICECLIENT_12_004: [The function shall set the client's underlying DeviceIO to the value of the given deviceIO parameter.]
+        this.deviceIO = deviceIO;
     }
 }

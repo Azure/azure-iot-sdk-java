@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -86,6 +87,12 @@ public final class MqttTransport implements IotHubTransport
         this.mqttIotHubConnection.open();
 
         this.state = State.OPEN;
+    }
+
+    @Override
+    public void multiplexOpen(List<DeviceClient> deviceClientList)
+    {
+        return;
     }
 
     /**

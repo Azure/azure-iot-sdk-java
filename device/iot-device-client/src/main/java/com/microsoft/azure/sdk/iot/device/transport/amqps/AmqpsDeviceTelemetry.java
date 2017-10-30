@@ -10,6 +10,8 @@ import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.amqp.messaging.Section;
+import org.apache.qpid.proton.engine.Link;
+import org.apache.qpid.proton.engine.Session;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
 import java.io.IOException;
@@ -25,31 +27,72 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
     private final String SENDER_LINK_TAG_PREFIX = "sender_link_telemetry-";
     private final String RECEIVER_LINK_TAG_PREFIX = "receiver_link_telemetry-";
 
+    private DeviceClientConfig deviceClientConfig;
+
     /**
      * This constructor creates an instance of AmqpsDeviceTelemetry class and initializes member variables
      */
-    AmqpsDeviceTelemetry(String deviceId) throws IllegalArgumentException
+    AmqpsDeviceTelemetry(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
     {
-        // Codes_SRS_AMQPSDEVICETELEMETRY_12_001: [The constructor shall throw IllegalArgumentException if the deviceId argument is null or empty.]
-        if ((deviceId == null) || (deviceId.isEmpty()))
+        // Codes_SRS_AMQPSDEVICETELEMETRY_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig argument is null.]
+        if (deviceClientConfig == null)
         {
             throw new IllegalArgumentException("The deviceId cannot be null or empty.");
         }
+
+        this.deviceClientConfig = deviceClientConfig;
 
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_002: [The constructor shall set the sender and receiver endpoint path to IoTHub specific values.]
         this.senderLinkEndpointPath = SENDER_LINK_ENDPOINT_PATH;
         this.receiverLinkEndpointPath = RECEIVER_LINK_ENDPOINT_PATH;
 
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_003: [The constructor shall concatenate a sender specific prefix to the sender link tag's current value.]
-        this.senderLinkTag = SENDER_LINK_TAG_PREFIX + senderLinkTag;
+        this.senderLinkTag = SENDER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "-" + senderLinkTag;
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_004: [The constructor shall concatenate a receiver specific prefix to the receiver link tag's current value.]
-        this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX + receiverLinkTag;
+        this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "-" + receiverLinkTag;
 
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_005: [The constructor shall insert the given deviceId argument to the sender and receiver link address.]
-        this.senderLinkAddress = String.format(senderLinkEndpointPath, deviceId);
-        this.receiverLinkAddress = String.format(receiverLinkEndpointPath, deviceId);
+        this.senderLinkAddress = String.format(senderLinkEndpointPath, this.deviceClientConfig.getDeviceId());
+        this.receiverLinkAddress = String.format(receiverLinkEndpointPath, this.deviceClientConfig.getDeviceId());
     }
 
+    /**
+     * Identify if the given link is owned by the operation
+     *
+     * @return true if the link is owned by the operation, false otherwise
+     */
+    @Override
+    protected Boolean isLinkFound(String linkName)
+    {
+        // Codes_SRS_AMQPSDEVICETELEMETRY_12_026: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
+        if (linkName.equals(this.getSenderLinkTag()))
+        {
+            this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.OPENED;
+            return true;
+        }
+
+        // Codes_SRS_AMQPSDEVICETELEMETRY_12_027: [The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.]
+        if (linkName.equals(this.getReceiverLinkTag()))
+        {
+            this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.OPENED;
+            return true;
+        }
+
+        // Codes_SRS_AMQPSDEVICETELEMETRY_12_028: [The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.]
+        return false;
+    }
+
+    /**
+     * Sends the given message and returns with the delivery hash if the message type is telemetry
+     *
+     * @param msgData The binary array of the bytes to send
+     * @param offset The start offset to copy the bytes from
+     * @param length The number of bytes to be send related to the offset
+     * @param deliveryTag The unique identfier of the delivery
+     * @return delivery tag
+     * @throws IllegalStateException if sender link has not been initialized
+     * @throws IllegalArgumentException if deliveryTag's length is 0
+     */
     @Override
     protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
     {
@@ -65,6 +108,15 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
         }
     }
 
+    /**
+     * Read the message from Proton if the link name matches
+     * Set the message type to telemetry
+     *
+     * @param linkName The receiver link's name to read from
+     * @return the received message
+     * @throws IllegalArgumentException if linkName argument is empty
+     * @throws IOException if Proton throws
+     */
     @Override
     protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, IOException
     {
@@ -74,21 +126,31 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
         {
             // Codes_SRS_AMQPSDEVICETELEMETRY_12_021: [The function shall set the MessageType to DEVICE_TELEMETRY if the super function returned not null.]
             amqpsMessage.setAmqpsMessageType(MessageType.DEVICE_TELEMETRY);
+            amqpsMessage.setDeviceClientConfig(this.deviceClientConfig);
         }
 
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_022: [The function shall return the super function return value.]
         return amqpsMessage;
     }
 
+    /**
+     * Convert Proton message to IoTHubMessage if the message type is telemetry
+     *
+     * @param amqpsMessage The Proton message to convert
+     * @param deviceClientConfig The device client configuration
+     * @return the converted message
+     */
     @Override
     protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig)
     {
-        if ((amqpsMessage.getAmqpsMessageType() == null) || (amqpsMessage.getAmqpsMessageType() == MessageType.DEVICE_TELEMETRY))
+        if (((amqpsMessage.getAmqpsMessageType() == null) || (amqpsMessage.getAmqpsMessageType() == MessageType.DEVICE_TELEMETRY)) &&
+            (this.deviceClientConfig.getDeviceId() == deviceClientConfig.getDeviceId()))
         {
             // Codes_SRS_AMQPSDEVICETELEMETRY_12_009: [The function shall create a new IoTHubMessage using the Proton message body.]
             // Codes_SRS_AMQPSDEVICETELEMETRY_12_010: [**The function shall copy the correlationId, messageId, To and userId properties to the IotHubMessage properties.]
             // Codes_SRS_AMQPSDEVICETELEMETRY_12_011: [The function shall copy the Proton application properties to IoTHubMessage properties excluding the reserved property names.]
             Message message = protonMessageToIoTHubMessage(amqpsMessage);
+            message.setIotHubConnectionString(this.deviceClientConfig.getIotHubConnectionString());
 
             MessageCallback messageCallback = deviceClientConfig.getDeviceTelemetryMessageCallback();
             Object messageContext = deviceClientConfig.getDeviceTelemetryMessageContext();
@@ -104,6 +166,13 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
         }
     }
 
+    /**
+     * Convert IoTHubMessage to Proton message
+     * Set the message type to telemetry
+     *
+     * @param message The IoTHubMessage to convert
+     * @return the converted message
+     */
     @Override
     protected AmqpsConvertToProtonReturnValue convertToProton(Message message)
     {

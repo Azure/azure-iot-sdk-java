@@ -42,6 +42,8 @@ public class IotHubSasTokenAuthenticationTest
     private static String expectedDeviceKey = "deviceKey";
     private static String expectedSasToken = "sasToken";
     private static long expectedExpiryTime = 3600;
+    private static final long MILLISECONDS_PER_SECOND = 1000L;
+    private static final long MINIMUM_EXPIRATION_TIME_OFFSET = 1L;
 
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_004: [If the saved sas token has expired and there is a device key present, the saved sas token shall be renewed.]
     @Test
@@ -51,10 +53,11 @@ public class IotHubSasTokenAuthenticationTest
         new Expectations()
         {
             {
-                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class}, expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken, expectedExpiryTime);
-                result = mockSasToken;
                 Deencapsulation.invoke(mockSasToken, "isExpired");
                 result = true;
+                Long expiryTime = (System.currentTimeMillis() / MILLISECONDS_PER_SECOND) + expectedExpiryTime + MINIMUM_EXPIRATION_TIME_OFFSET;
+                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class}, expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken, expiryTime);
+                result = mockSasToken;
             }
         };
 
@@ -75,7 +78,8 @@ public class IotHubSasTokenAuthenticationTest
         new Expectations()
         {
             {
-                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class}, expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken, expectedExpiryTime);
+                Long expiryTime = (System.currentTimeMillis() / MILLISECONDS_PER_SECOND) + expectedExpiryTime + MINIMUM_EXPIRATION_TIME_OFFSET;
+                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class}, expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken, expiryTime);
                 result = mockSasToken;
                 Deencapsulation.invoke(mockSasToken, "isExpired");
                 result = false;
@@ -105,6 +109,23 @@ public class IotHubSasTokenAuthenticationTest
         //assert
         assertEquals(mockSSLContext, actualSSLContext);
     }
+
+    // Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_12_001: [This function shall return the tokenValidSecs as the number of seconds the current sas token valid for.]
+    @Test
+    public void getTokenValidSecs()
+    {
+        //arrange
+        long newTokenValidSecs = 5000L;
+        IotHubSasTokenAuthentication sasAuth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
+        sasAuth.setTokenValidSecs(newTokenValidSecs);
+
+        //act
+        long actualTokenValidSecs = sasAuth.getTokenValidSecs();
+
+        //assert
+        assertEquals(newTokenValidSecs, actualTokenValidSecs);
+    }
+
 
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_012: [This function shall save the provided tokenValidSecs as the number of seconds that created sas tokens are valid for.]
     @Test

@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.messaging.Rejected;
@@ -28,6 +29,8 @@ public class AmqpsMessage extends MessageImpl
         ABANDON,
         REJECT
     }
+
+    private DeviceClientConfig deviceClientConfig;
 
     /**
      * Sends acknowledgement of this message using the provided ACK_TYPE.
@@ -58,7 +61,7 @@ public class AmqpsMessage extends MessageImpl
     }
 
     /**
-     * Sets this AmqpsMessage Delivery Object
+     * Set this AmqpsMessage Delivery Object
      * @param _delivery the new Delivery
      */
     public void setDelivery(Delivery _delivery)
@@ -67,7 +70,7 @@ public class AmqpsMessage extends MessageImpl
     }
 
     /**
-     * Gets the AmqpsMessageMessageType
+     * Get the AmqpsMessageMessageType
      * @return The type of the message
      */
     public MessageType getAmqpsMessageType()
@@ -77,12 +80,35 @@ public class AmqpsMessage extends MessageImpl
     }
 
     /**
-     * Sets the AmqpsMessageMessageType
+     * Set the AmqpsMessageMessageType
+     *
      * @param amqpsMessageType the new AmqpsMessageMessageType
      */
     public void setAmqpsMessageType(MessageType amqpsMessageType)
     {
         // Codes_SRS_AMQPSMESSAGE_12_002: [Setter for the MessageType.]
         this.amqpsMessageType = amqpsMessageType;
+    }
+
+    /**
+     * Get the deviceClientConfig
+     *
+     * @return The type of the message
+     */
+    public DeviceClientConfig getDeviceClientConfig()
+    {
+        // Codes_SRS_AMQPSMESSAGE_12_003: [Getter for the deviceClientConfig.]
+        return deviceClientConfig;
+    }
+
+    /**
+     * Set the deviceClientConfig
+     *
+     * @param deviceClientConfig the new deviceClientConfig
+     */
+    public void setDeviceClientConfig(DeviceClientConfig deviceClientConfig)
+    {
+        // Codes_SRS_AMQPSMESSAGE_12_004: [Setter for the deviceClientConfig.]
+        this.deviceClientConfig = deviceClientConfig;
     }
 }

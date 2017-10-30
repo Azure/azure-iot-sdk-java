@@ -124,7 +124,7 @@ public class DeviceMethodTest
             {
                 mockedMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
                 times = 1;
-                mockedDeviceIO.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
+                mockedDeviceIO.sendEventAsync((Message)any, (IotHubEventCallback)any, null, null);
                 times = 1;
             }
         };
@@ -169,7 +169,7 @@ public class DeviceMethodTest
             {
                 mockedMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
                 maxTimes = 1;
-                mockedDeviceIO.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
+                mockedDeviceIO.sendEventAsync((Message)any, (IotHubEventCallback)any, null, null);
                 maxTimes = 1;
             }
         };
@@ -213,7 +213,7 @@ public class DeviceMethodTest
         new Verifications()
         {
             {
-                mockedDeviceIO.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
+                mockedDeviceIO.sendEventAsync((Message)any, (IotHubEventCallback)any, null, null);
                 maxTimes = 1;
             }
         };

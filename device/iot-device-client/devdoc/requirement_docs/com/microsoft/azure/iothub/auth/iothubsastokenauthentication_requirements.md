@@ -15,9 +15,9 @@ public class IotHubSasTokenAuthentication
     public String getRenewedSasToken();
     public String getCurrentSasToken();
     public SSLContext getSSLContext();
+    public long getTokenValidSecs()
     public void setTokenValidSecs(long tokenValidSecs) throws IllegalArgumentException;
     public boolean isRenewalNecessary();
-
     public void setPathToIotHubTrustedCert(String pathToCertificate) throws IOException;
     public void setIotHubTrustedCert(String certificate) throws IOException;
     public String getIotHubTrustedCert();
@@ -60,6 +60,13 @@ public SSLContext getSSLContext();
 
 **SRS_IOTHUBSASTOKENAUTHENTICATION_34_008: [**This function shall return the generated IotHubSSLContext.**]**
 
+### getTokenValidSecs
+
+```java
+public long getTokenValidSecs();
+```
+
+**SRS_IOTHUBSASTOKENAUTHENTICATION_12_001: [**This function shall return the tokenValidSecs as the number of seconds the current sas token valid for.**]**
 
 ### setTokenValidSecs
 ```java

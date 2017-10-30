@@ -17,6 +17,7 @@ public final class DeviceIO
 
     public void open() throws IOException;
     public void close() throws IOException;
+    public void multiplexClose() throws IOException
 
     public void sendEventAsync(Message message,
                                IotHubEventCallback callback,
@@ -52,7 +53,8 @@ public DeviceIO(DeviceClientConfig config, IotHubClientProtocol protocol,
 **SRS_DEVICE_IO_21_005: [**If the `protocol` is not valid, the constructor shall throw an IllegalArgumentException.**]**  
 **SRS_DEVICE_IO_21_006: [**The constructor shall set the `state` as `CLOSED`.**]**  
 **SRS_DEVICE_IO_21_037: [**The constructor shall initialize the `sendPeriodInMilliseconds` with default value of 10 milliseconds.**]**  
-**SRS_DEVICE_IO_21_038: [**The constructor shall initialize the `receivePeriodInMilliseconds` with default value of each protocol.**]**  
+**SRS_DEVICE_IO_21_038: [**The constructor shall initialize the `receivePeriodInMilliseconds` with default value of each protocol.**]**
+ 
 
 ### open
 ```java
@@ -65,6 +67,19 @@ public void open() throws IOException
 **SRS_DEVICE_IO_21_015: [**If an error occurs in opening the transport, the open shall throw an IOException.**]**  
 **SRS_DEVICE_IO_21_016: [**The open shall set the `state` as `OPEN`.**]**
 
+
+### multiplexOpen
+```java
+public void multiplexOpen(ArrayList<DeviceClient> deviceClientList) throws IOException
+```
+**SRS_DEVICE_IO_12_002: [**If the client is already open, the open shall do nothing.**]**
+**SRS_DEVICE_IO_12_003: [**The open shall open the transport in multiplex mode to communicate with an IoT Hub.**]**
+**SRS_DEVICE_IO_12_004: [**The open shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.**]**
+**SRS_DEVICE_IO_12_005: [**The open shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.**]**
+**SRS_DEVICE_IO_12_006: [**If an error occurs in opening the transport, the open shall throw an IOException.**]**
+**SRS_DEVICE_IO_12_007: [**The open shall set the `state` as `OPEN`.**]**
+
+
 ### close
 ```java
 public void close() throws IOException
@@ -75,25 +90,39 @@ public void close() throws IOException
 **SRS_DEVICE_IO_21_020: [**If the client is already closed, the close shall do nothing.**]**  
 **SRS_DEVICE_IO_21_021: [**The close shall set the `state` as `CLOSE`.**]**  
 
+
+### multiplexClose
+
+```java
+public void multiplexClose() throws IOException
+```
+
+**SRS_DEVICE_IO_12_009: [**THe function shall call close().**]**
+
+
 ### sendEventAsync
 ```java
 public void sendEventAsync(Message message,
                            IotHubEventCallback callback,
-                           Object callbackContext)
+                           Object callbackContext,
+                           IotHubConnectionString iotHubConnectionString)
 ```
 **SRS_DEVICE_IO_21_022: [**The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.**]**  
 **SRS_DEVICE_IO_21_023: [**If the message given is null, the sendEventAsync shall throw an IllegalArgumentException.**]**  
 **SRS_DEVICE_IO_21_024: [**If the client is closed, the sendEventAsync shall throw an IllegalStateException.**]**  
+**SRS_DEVICE_IO_12_001: [**The function shall set the connection string on the message if the iotHubConnectionString parameter is not null.**]**
 
 ### sendEventAsync
 ```java
 public void sendEventAsync(Message message,
                            IotHubResponseCallback callback,
-                           Object callbackContext)
+                           Object callbackContext,
+                           IotHubConnectionString iotHubConnectionString)
 ```
 **SRS_DEVICE_IO_21_040: [**The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.**]**  
 **SRS_DEVICE_IO_21_041: [**If the message given is null, the sendEventAsync shall throw an IllegalArgumentException.**]**  
-**SRS_DEVICE_IO_21_042: [**If the client is closed, the sendEventAsync shall throw an IllegalStateException.**]**  
+**SRS_DEVICE_IO_21_042: [**If the client is closed, the sendEventAsync shall throw an IllegalStateException.**]**
+**SRS_DEVICE_IO_12_008: [**The function shall set the connection string on the message if the iotHubConnectionString parameter is not null.**]**  
 
 ### getReceivePeriodInMilliseconds
 ```java

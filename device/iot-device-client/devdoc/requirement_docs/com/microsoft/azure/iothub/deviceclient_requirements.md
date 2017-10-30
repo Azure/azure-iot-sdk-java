@@ -11,6 +11,8 @@ Allows a single logical or physical device to connect to an IoT Hub.
 ```java
 public final class DeviceClient
 {
+    protected DeviceClient()
+    public DeviceClient(String connString, TransportClient transportClient) throws URISyntaxException;
     public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException;
     public DeviceClient(String connString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate) throws IOException, IllegalArgumentException;
 
@@ -36,6 +38,33 @@ public final class DeviceClient
 ```
 
 ### DeviceClient
+```java
+protected DeviceClient()
+```
+
+**SRS_DEVICECLIENT_12_028: [**The constructor shall shall set the config, deviceIO and tranportClient to null.**]**
+
+
+### DeviceClient
+
+```java
+public DeviceClient(String connString, TransportClient transportClient) throws URISyntaxException;
+```
+
+**SRS_DEVICECLIENT_12_008: [**If the connection string is null or empty, the function shall throw an IllegalArgumentException.**]**
+
+**SRS_DEVICECLIENT_12_018: [**If the tranportClient is null, the function shall throw an IllegalArgumentException.**]**
+
+**SRS_DEVICECLIENT_12_009: [**The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.**]**
+
+**SRS_DEVICECLIENT_12_010: [**The constructor shall set the connection type to MULTIPLEX.**]**
+
+**SRS_DEVICECLIENT_12_011: [**The constructor shall set the deviceIO to null.**]**
+
+**SRS_DEVICECLIENT_12_016: [**The constructor shall save the transportClient parameter.**]**
+
+**SRS_DEVICECLIENT_12_017: [**The constructor shall register the device client with the transport client.**]**
+
 
 ```java
 public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException;
@@ -53,6 +82,11 @@ public DeviceClient(String connString, IotHubClientProtocol protocol) throws URI
 
 **SRS_DEVICECLIENT_34_055: [**If the provided connection string contains an expired SAS token, a SecurityException shall be thrown.**]**
 
+**SRS_DEVICECLIENT_12_012: [**The constructor shall set the connection type to SINGLE.**]**
+
+**SRS_DEVICECLIENT_12_014: [**The constructor shall set the transportClient to null.**]**
+
+
 ```java
 public DeviceClient(String connString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate) throws IOException, IllegalArgumentException;
 ```
@@ -69,6 +103,10 @@ public DeviceClient(String connString, IotHubClientProtocol protocol, String pub
 
 **SRS_DEVICECLIENT_34_063: [**This function shall save the provided certificate and key within its config.**]**
 
+**SRS_DEVICECLIENT_12_013: [**The constructor shall set the connection type to SINGLE.**]**
+
+**SRS_DEVICECLIENT_12_015: [**The constructor shall set the transportClient to null.**]**
+
 
 ### open
 
@@ -76,17 +114,26 @@ public DeviceClient(String connString, IotHubClientProtocol protocol, String pub
 public void open() throws IOException;
 ```
 
+**SRS_DEVICECLIENT_12_007: [**If the client has been initialized to use TransportClient and the TransportClient is not opened yet the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_12_019: [**If the client has been initialized to use TransportClient and the TransportClient is already opened the function shall do nothing.**]**
+
 **SRS_DEVICECLIENT_21_006: [**The open shall open the deviceIO connection.**]**  
 
 **SRS_DEVICECLIENT_21_007: [**If the opening a connection via deviceIO is not successful, the open shall throw IOException.**]**  
 
 **SRS_DEVICECLIENT_34_044: [**If the SAS token has expired before this call, throw a Security Exception**]**
 
+
 ### close
 
 ```java
 public void close() throws IOException;
 ```
+
+**SRS_DEVICECLIENT_12_006: [**If the client has been initialized to use TransportClient and the TransportClient is already opened the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_12_020: [**If the client has been initialized to use TransportClient and the TransportClient is not opened yet the function shall do nothing.**]**
 
 **SRS_DEVICECLIENT_11_040: [**The function shall finish all ongoing tasks.**]**  
 
@@ -97,17 +144,23 @@ public void close() throws IOException;
 **SRS_DEVICECLIENT_21_043: [**If the closing a connection via deviceIO is not successful, the close shall throw IOException.**]**  
 
 
+
 ### closeNow
 
 ```java
 public void closeNow();
 ```
 
+**SRS_DEVICECLIENT_12_005: [**If the client has been initialized to use TransportClient and the TransportClient is already opened the function shall throw an IOException.**]**
+
+**SRS_DEVICECLIENT_12_021: [**If the client has been initialized to use TransportClient and the TransportClient is not opened yet the function shall do nothing.**]**
+
 **SRS_DEVICECLIENT_21_008: [**The close shall close the deviceIO connection.**]**  
 
 **SRS_DEVICECLIENT_21_009: [**If the closing a connection via deviceIO is not successful, the close shall throw IOException.**]**  
 
 **SRS_DEVICECLIENT_21_054: [**If the fileUpload is not null, the closeNow shall call closeNow on fileUpload.**]**  
+
 
 
 ### sendEventAsync
@@ -121,6 +174,8 @@ public void sendEventAsync(Message msg, IotHubEventCallback callback, Object cal
 **SRS_DEVICECLIENT_21_011: [**If starting to send via deviceIO is not successful, the sendEventAsync shall bypass the threw exception.**]**  
 
 **SRS_DEVICECLIENT_34_045: [**If the SAS token has expired before this call, throw a Security Exception**]**
+
+**SRS_DEVICECLIENT_12_001: [**The function shall call deviceIO.sendEventAsync with the client's config parameter to enable multiplexing.**]**
 
 
 ### setMessageCallback
@@ -144,6 +199,16 @@ This method sets the option given by optionName to value.
 
 **SRS_DEVICECLIENT_02_015: [**If optionName is null or not an option handled by the client, then it shall throw IllegalArgumentException.**]**
 
+**SRS_DEVICECLIENT_12_026: [**The function shall trow IllegalArgumentException if the value is null.**]**
+
+**SRS_DEVICECLIENT_12_022: [**If the client configured to use TransportClient the SetSendInterval shall throw IllegalStateException.**]**
+
+**SRS_DEVICECLIENT_12_023: [**If the client configured to use TransportClient the SetMinimumPollingInterval shall throw IOException.**]**
+
+**SRS_DEVICECLIENT_12_025: [**If the client configured to use TransportClient the function shall use transport client close() and open() for restart.**]**
+
+**SRS_DEVICECLIENT_12_027: [**The function shall throw IOError if either the deviceIO or the tranportClient's open() or close() throws.**]**
+
 Options handled by the client:
 
 **SRS_DEVICECLIENT_02_016: [**"SetMinimumPollingInterval" - time in milliseconds between 2 consecutive polls.**]**
@@ -159,6 +224,10 @@ Options handled by the client:
 **SRS_DEVICECLIENT_25_019: [**"SetCertificatePath" - path to the certificate to verify peer .**]**
 
 **SRS_DEVICECLIENT_25_020: [**"SetCertificatePath" is available only for AMQP.**]**
+
+**SRS_DEVICECLIENT_12_029: [**"SetCertificatePath" shall throw if the transportClient or deviceIO already open, otherwise set the path on the config.**]**
+
+**SRS_DEVICECLIENT_12_030: [**"SetCertificatePath" shall udate the config on transportClient if tranportClient used.**]**
 
 **SRS_DEVICECLIENT_25_021: [**"SetSASTokenExpiryTime" - Time in secs to specify SAS Token Expiry time.**]**
 
@@ -257,7 +326,7 @@ public void uploadToBlobAsync(String destinationBlobName, InputStream inputStrea
 
 **SRS_DEVICECLIENT_21_050: [**The uploadToBlobAsync shall start the stream upload process, by calling uploadToBlobAsync on the FileUpload class.**]**  
 
-**SRS_DEVICECLIENT_21_051: [**If uploadToBlobAsync failed to start the upload using the FileUpload, it shall bypass the exception.**]**  
+**SRS_DEVICECLIENT_21_051: [**If uploadToBlobAsync failed to start the upload using the FileUpload, it shall bypass the exception.**]** 
 
 
 ### registerConnectionStateCallback
@@ -284,3 +353,26 @@ public void setPublicKeyCertificate(String publicKeyCertificate, boolean isPath)
 ```
 
 **SRS_DEVICECLIENT_34_056: [**This method shall save the provided public key certificate in config.**]**
+
+
+### getConfig
+```java
+DeviceClientConfig getConfig()
+```
+
+**SRS_DEVICECLIENT_12_002: [**The function shall return with he current value of client config.**]**
+
+### getDeviceIO
+```java
+DeviceIO getDeviceIO()
+```
+
+**SRS_DEVICECLIENT_12_003: [**The function shall return with he current value of the client's underlying DeviceIO.**]**
+
+
+### setDeviceIOs
+```java
+void setDeviceIO(DeviceIO deviceIO)
+```
+
+**SRS_DEVICECLIENT_12_004: [**The function shall set the client's underlying DeviceIO to the value of the given deviceIO parameter.**]**

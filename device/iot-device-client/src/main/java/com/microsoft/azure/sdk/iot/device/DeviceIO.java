@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransport;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttTransport;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -160,6 +161,7 @@ public final class DeviceIO
      * Starts asynchronously sending and receiving messages from an IoT Hub. If
      * the client is already open, the function shall do nothing.
      *
+     * @throws IllegalAccessException if the function called in multiplex device setup.
      * @throws IOException if a connection to an IoT Hub cannot be established.
      */
     public void open() throws IOException
@@ -174,6 +176,41 @@ public final class DeviceIO
         /* Codes_SRS_DEVICE_IO_21_015: [If an error occurs in opening the transport, the open shall throw an IOException.] */
         this.transport.open();
 
+        /* Codes_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every receivePeriodInMilliseconds milliseconds.] */
+        /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `OPEN`.] */
+        commonOpenSetup();
+    }
+
+    /**
+     * Starts asynchronously sending and receiving messages from an IoT Hub
+     * using multiplexing.
+     * If the client is already open, the function shall do nothing.
+     *
+     * @throws IOException if a connection to an IoT Hub cannot be established.
+     */
+    public void multiplexOpen(List<DeviceClient> deviceClientList) throws IOException
+    {
+        // Codes_SRS_DEVICE_IO_12_002: [If the client is already open, the open shall do nothing.]
+        if (this.state == IotHubClientState.OPEN)
+        {
+            return;
+        }
+
+        // Codes_SRS_DEVICE_IO_12_003: [The open shall open the transport in multiplex mode to communicate with an IoT Hub.]
+        this.transport.multiplexOpen(deviceClientList);
+
+        // Codes_SRS_DEVICE_IO_12_004: [The open shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.]
+        // Codes_SRS_DEVICE_IO_12_005: [The open shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.]
+        // Codes_SRS_DEVICE_IO_12_006: [If an error occurs in opening the transport, the open shall throw an IOException.]
+        // Codes_SRS_DEVICE_IO_12_007: [The open shall set the `state` as `OPEN`.]
+        commonOpenSetup();
+    }
+
+    /**
+     * Handles logic common to all open functions.
+     */
+    private void commonOpenSetup()
+    {
         this.sendTask = new IotHubSendTask(this.transport);
         this.receiveTask = new IotHubReceiveTask(this.transport);
 
@@ -191,7 +228,6 @@ public final class DeviceIO
         /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `OPEN`.] */
         this.state = IotHubClientState.OPEN;
     }
-
 
     /**
      * Completes all current outstanding requests and closes the IoT Hub client.
@@ -221,6 +257,20 @@ public final class DeviceIO
     }
 
     /**
+     * Completes all current outstanding requests and closes the IoT Hub client.
+     * Must be called to terminate the background thread that is sending data to
+     * IoT Hub. After {@code close()} is called, the IoT Hub client is no longer
+     *  usable. If the client is already closed, the function shall do nothing.
+     *
+     * @throws IOException if the connection to an IoT Hub cannot be closed.
+     */
+    public void multiplexClose() throws IOException
+    {
+        // Codes_SRS_DEVICE_IO_12_009: [THe function shall call close().]
+        close();
+    }
+
+    /**
      * Asynchronously sends an event message to the IoT Hub.
      *
      * @param message the message to be sent.
@@ -234,7 +284,8 @@ public final class DeviceIO
      */
     public void sendEventAsync(Message message,
                                IotHubEventCallback callback,
-                               Object callbackContext)
+                               Object callbackContext,
+                               IotHubConnectionString iotHubConnectionString)
     {
         /* Codes_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
         if (this.state == IotHubClientState.CLOSED)
@@ -248,6 +299,12 @@ public final class DeviceIO
         if (message == null)
         {
             throw new IllegalArgumentException("Cannot send message 'null'.");
+        }
+
+        // Codes_SRS_DEVICE_IO_12_001: [The function shall set the connection string on the message if the iotHubConnectionString parameter is not null.]
+        if (iotHubConnectionString != null)
+        {
+            message.setIotHubConnectionString(iotHubConnectionString);
         }
 
         logger.LogInfo("Message with messageid %s along with callback and callbackcontext is added to the queue, method name is %s ", message.getMessageId(), logger.getMethodName());
@@ -271,7 +328,8 @@ public final class DeviceIO
      */
     public void sendEventAsync(Message message,
                                IotHubResponseCallback callback,
-                               Object callbackContext)
+                               Object callbackContext,
+                               IotHubConnectionString iotHubConnectionString)
     {
         /* Codes_SRS_DEVICE_IO_21_042: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
         if (this.state == IotHubClientState.CLOSED)
@@ -285,6 +343,11 @@ public final class DeviceIO
         if (message == null)
         {
             throw new IllegalArgumentException("Cannot send message 'null'.");
+        }
+
+        if (iotHubConnectionString != null)
+        {
+            message.setIotHubConnectionString(iotHubConnectionString);
         }
 
         logger.LogInfo("Message with messageid %s along with callback and callbackContext is added to the queue, method name is %s ", message.getMessageId(), logger.getMethodName());

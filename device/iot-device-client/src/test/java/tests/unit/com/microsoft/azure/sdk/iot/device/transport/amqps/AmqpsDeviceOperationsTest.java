@@ -8,10 +8,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsConvertFromProtonReturnValue;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsDeviceOperations;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsMessage;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSendReturnValue;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -28,12 +25,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-/* Unit tests for AmqpsDeviceOperations
+/**
+*  Unit tests for AmqpsDeviceOperations
 * 100% methods covered
-* 100% lines covered
+* 89% lines covered
 */
 public class AmqpsDeviceOperationsTest
 {
@@ -163,6 +160,7 @@ public class AmqpsDeviceOperationsTest
     /*
     **Tests_SRS_AMQPSDEVICEOPERATIONS_12_007: [**The function shall create receiver link with the receiverlinkTag member value.**]**
     **Tests_SRS_AMQPSDEVICEOPERATIONS_12_008: [**The function shall create sender link with the senderlinkTag member value.**]**
+    **Tests_SRS_AMQPSDEVICEOPERATIONS_12_044: [**The function shall set the link's state to OPENING.**]**
      */
     @Test
     public void openLinksCreatesReceiverAndSenderLinksWithTag()
@@ -171,15 +169,62 @@ public class AmqpsDeviceOperationsTest
         final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
 
         //act
+        AmqpsDeviceOperationLinkState amqpsSendLinkState1 = Deencapsulation.getField(amqpsDeviceOperations, "amqpsSendLinkState");
+        AmqpsDeviceOperationLinkState amqpsRecvLinkState1 = Deencapsulation.getField(amqpsDeviceOperations, "amqpsRecvLinkState");
         Deencapsulation.invoke(amqpsDeviceOperations, "openLinks", mockSession);
+        AmqpsDeviceOperationLinkState amqpsSendLinkState2 = Deencapsulation.getField(amqpsDeviceOperations, "amqpsSendLinkState");
+        AmqpsDeviceOperationLinkState amqpsRecvLinkState2 = Deencapsulation.getField(amqpsDeviceOperations, "amqpsRecvLinkState");
+
         Receiver receiverLink = Deencapsulation.getField(amqpsDeviceOperations, "receiverLink");
         Sender senderLink = Deencapsulation.getField(amqpsDeviceOperations, "senderLink");
         final String senderLinkTag = Deencapsulation.invoke(amqpsDeviceOperations, "getSenderLinkTag");
         final String receiverLinkTag = Deencapsulation.invoke(amqpsDeviceOperations, "getReceiverLinkTag");
 
         //assert
+        assertEquals(amqpsSendLinkState1, AmqpsDeviceOperationLinkState.CLOSED);
+        assertEquals(amqpsRecvLinkState1, AmqpsDeviceOperationLinkState.CLOSED);
+        assertEquals(amqpsSendLinkState2, AmqpsDeviceOperationLinkState.OPENING);
+        assertEquals(amqpsRecvLinkState2, AmqpsDeviceOperationLinkState.OPENING);
         assertTrue(receiverLink != null);
         assertTrue(senderLink != null);
+
+        new Verifications()
+        {
+            {
+                mockSession.receiver(receiverLinkTag);
+                times = 1;
+                mockSession.sender(senderLinkTag);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void openLinksCreatesReceiverAndSenderLinksWithTag_CBS()
+    {
+        //arrange
+        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+
+        //act
+        AmqpsDeviceOperationLinkState amqpsSendLinkState1 = Deencapsulation.getField(amqpsDeviceOperations, "amqpsSendLinkState");
+        AmqpsDeviceOperationLinkState amqpsRecvLinkState1 = Deencapsulation.getField(amqpsDeviceOperations, "amqpsRecvLinkState");
+        Deencapsulation.invoke(amqpsDeviceOperations, "openLinks", mockSession);
+        AmqpsDeviceOperationLinkState amqpsSendLinkState2 = Deencapsulation.getField(amqpsDeviceOperations, "amqpsSendLinkState");
+        AmqpsDeviceOperationLinkState amqpsRecvLinkState2 = Deencapsulation.getField(amqpsDeviceOperations, "amqpsRecvLinkState");
+
+        Receiver receiverLink = Deencapsulation.getField(amqpsDeviceOperations, "receiverLink");
+        Sender senderLink = Deencapsulation.getField(amqpsDeviceOperations, "senderLink");
+        final String senderLinkTag = Deencapsulation.invoke(amqpsDeviceOperations, "getSenderLinkTag");
+        final String receiverLinkTag = Deencapsulation.invoke(amqpsDeviceOperations, "getReceiverLinkTag");
+
+        //assert
+        assertEquals(amqpsSendLinkState1, AmqpsDeviceOperationLinkState.CLOSED);
+        assertEquals(amqpsRecvLinkState1, AmqpsDeviceOperationLinkState.CLOSED);
+        assertEquals(amqpsSendLinkState2, AmqpsDeviceOperationLinkState.OPENING);
+        assertEquals(amqpsRecvLinkState2, AmqpsDeviceOperationLinkState.OPENING);
+        assertTrue(receiverLink != null);
+        assertTrue(senderLink != null);
+
         new Verifications()
         {
             {
@@ -245,8 +290,8 @@ public class AmqpsDeviceOperationsTest
     }
 
     /*
-    **Tests_SRS_AMQPSDEVICEOPERATIONS_12_011: [**If the sender link is not null the function shall close it and sets it to null.**]**
-    **Tests_SRS_AMQPSDEVICEOPERATIONS_12_012: [**If the receiver link is not null the function shall close it and sets it to null.**]**
+    **Tests_SRS_AMQPSDEVICEOPERATIONS_12_011: [**If the sender link is not null the function shall closeNow it and sets it to null.**]**
+    **Tests_SRS_AMQPSDEVICEOPERATIONS_12_012: [**If the receiver link is not null the function shall closeNow it and sets it to null.**]**
     */
     @Test
     public void closeLinksClosesLinks()
@@ -305,6 +350,7 @@ public class AmqpsDeviceOperationsTest
         Deencapsulation.setField(amqpsDeviceOperations, "senderLinkTag",senderLinkTag);
         final String senderLinkAddress = "senderLinkAddress";
         Deencapsulation.setField(amqpsDeviceOperations, "senderLinkAddress", senderLinkAddress);
+        Deencapsulation.setField(amqpsDeviceOperations, "amqpsSendLinkState", AmqpsDeviceOperationLinkState.OPENING);
 
         new NonStrictExpectations()
         {
@@ -346,6 +392,7 @@ public class AmqpsDeviceOperationsTest
         Deencapsulation.setField(amqpsDeviceOperations, "receiverLinkTag", receiverLinkTag);
         final String receiverLinkAddress = "receiverLinkAddress";
         Deencapsulation.setField(amqpsDeviceOperations, "receiverLinkAddress", receiverLinkAddress);
+        Deencapsulation.setField(amqpsDeviceOperations, "amqpsRecvLinkState", AmqpsDeviceOperationLinkState.OPENING);
 
         new NonStrictExpectations()
         {
@@ -371,6 +418,53 @@ public class AmqpsDeviceOperationsTest
             }
         };
     }
+
+    // Tests_SRS_AMQPSDEVICEOPERATIONS_12_045: [THe function do nothing if the either the receiver or the sender link state is other than OPENING.]
+    public void initLinkDoesNothing()
+    {
+        //arrange
+        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        final String senderLinkTag = "senderLinkTag";
+        Deencapsulation.setField(amqpsDeviceOperations, "senderLinkTag",senderLinkTag);
+        final String receiverLinkTag = "receiverLinkTag";
+        Deencapsulation.setField(amqpsDeviceOperations, "receiverLinkTag", receiverLinkTag);
+        final String senderLinkAddress = "senderLinkAddress";
+        Deencapsulation.setField(amqpsDeviceOperations, "senderLinkAddress", senderLinkAddress);
+        final String receiverLinkAddress = "receiverLinkAddress";
+        Deencapsulation.setField(amqpsDeviceOperations, "receiverLinkAddress", receiverLinkAddress);
+        Deencapsulation.setField(amqpsDeviceOperations, "amqpsSendLinkState", AmqpsDeviceOperationLinkState.OPENED);
+        Deencapsulation.setField(amqpsDeviceOperations, "amqpsRecvLinkState", AmqpsDeviceOperationLinkState.OPENED);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockLink.getName();
+                result = receiverLinkTag;
+                new Source();
+                result = mockSource;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(amqpsDeviceOperations, "initLink", mockLink);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockSource.setAddress(receiverLinkAddress);
+                times = 0;
+                mockLink.setSource(mockSource);
+                times = 0;
+                mockTarget.setAddress(senderLinkAddress);
+                times = 0;
+                mockLink.setTarget(mockTarget);
+                times = 0;
+                mockLink.setSenderSettleMode(SenderSettleMode.UNSETTLED);
+                times = 0;            }
+        };
+    }
+
 
     /*
     **Tests_SRS_AMQPSDEVICEOPERATIONS_12_019: [**The function shall throw IllegalStateException if the sender link is not initialized.**]**
@@ -677,6 +771,52 @@ public class AmqpsDeviceOperationsTest
                 times = 1;
             }
         };
+    }
+
+    // Tests_SRS_AMQPSDEVICEOPERATIONS_12_047: [The function shall return true if all link are opened, false otherwise.]
+    @Test
+    public void operationLinksOpenedTrue()
+    {
+        //arrange
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        Deencapsulation.setField(amqpsDeviceOperations, "amqpsSendLinkState", AmqpsDeviceOperationLinkState.OPENED);
+        Deencapsulation.setField(amqpsDeviceOperations, "amqpsRecvLinkState", AmqpsDeviceOperationLinkState.OPENED);
+
+        //act
+        Boolean isOpened = Deencapsulation.invoke(amqpsDeviceOperations, "operationLinksOpened");
+
+        //assert
+        assertTrue(isOpened);
+    }
+
+    // Tests_SRS_AMQPSDEVICEOPERATIONS_12_047: [The function shall return true if all link are opened, false otherwise.]
+    @Test
+    public void operationLinksOpenedFalse()
+    {
+        //arrange
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        Deencapsulation.setField(amqpsDeviceOperations, "amqpsSendLinkState", AmqpsDeviceOperationLinkState.OPENED);
+        Deencapsulation.setField(amqpsDeviceOperations, "amqpsRecvLinkState", AmqpsDeviceOperationLinkState.CLOSED);
+
+        //act
+        Boolean isOpened = Deencapsulation.invoke(amqpsDeviceOperations, "operationLinksOpened");
+
+        //assert
+        assertFalse(isOpened);
+    }
+
+    // Tests_SRS_AMQPSDEVICEOPERATIONS_12_046: [The prototype function shall return null.]
+    @Test
+    public void isLinkFound()
+    {
+        //arrange
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+
+        //act
+        Boolean isFound = Deencapsulation.invoke(amqpsDeviceOperations, "isLinkFound", "linkName");
+
+        //assert
+        assertNull(isFound);
     }
 
     /*

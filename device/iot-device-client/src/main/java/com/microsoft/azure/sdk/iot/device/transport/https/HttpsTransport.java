@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -89,6 +90,12 @@ public final class HttpsTransport implements IotHubTransport
         // Codes_SRS_HTTPSTRANSPORT_11_021: [The function shall establish an HTTPS connection with the IoT Hub given in the configuration.]
         this.connection = new HttpsIotHubConnection(this.config);
         this.state = HttpsTransportState.OPEN;
+    }
+
+    @Override
+    public void multiplexOpen(List<DeviceClient> deviceClientList)
+    {
+        return;
     }
 
     /**

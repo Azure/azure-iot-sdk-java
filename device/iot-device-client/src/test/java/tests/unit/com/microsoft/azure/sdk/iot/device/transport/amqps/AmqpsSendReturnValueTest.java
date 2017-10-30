@@ -10,7 +10,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/* Unit tests for AmqpsSendReturnValue
+/**
+*  Unit tests for AmqpsSendReturnValue
 * 100% methods covered
 * 100% lines covered
 */

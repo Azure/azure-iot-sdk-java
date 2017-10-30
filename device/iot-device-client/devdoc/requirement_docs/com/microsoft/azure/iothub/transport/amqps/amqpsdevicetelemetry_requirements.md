@@ -2,7 +2,7 @@
 
 ## Overview
 
-Child class of DeviceOperations to provide telemetry specific attributes and objects for Device Client. 
+Child class of AmqpsDeviceOperations to provide telemetry specific attributes and objects for Device Client. 
 
 ## References
 
@@ -11,8 +11,9 @@ Child class of DeviceOperations to provide telemetry specific attributes and obj
 ```java
 class AmqpsDeviceTelemetry
 {
-    AmqpsDeviceTelemetry(String deviceId) throws IllegalArgumentException;
-    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException;
+    AmqpsDeviceTelemetry(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException;
+    protected Boolean isLinkFound(String linkName);
+    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException;    
     protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, IOException;
     protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig);
     protected AmqpsConvertToProtonReturnValue convertToProton(Message message);
@@ -23,10 +24,10 @@ class AmqpsDeviceTelemetry
 ### AmqpsDeviceTelemetry
 
 ```java
-public AmqpsDeviceTelemetry(String deviceId) throws IllegalArgumentException;
+public AmqpsDeviceTelemetry(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException;
 ```
 
-**SRS_AMQPSDEVICETELEMETRY_12_001: [**The constructor shall throw IllegalArgumentException if the deviceId argument is null or empty.**]**
+**SRS_AMQPSDEVICETELEMETRY_12_001: [**The constructor shall throw IllegalArgumentException if the deviceClientConfig argument is null.**]**
 
 **SRS_AMQPSDEVICETELEMETRY_12_002: [**The constructor shall set the sender and receiver endpoint path to IoTHub specific values.**]**
 
@@ -35,6 +36,19 @@ public AmqpsDeviceTelemetry(String deviceId) throws IllegalArgumentException;
 **SRS_AMQPSDEVICETELEMETRY_12_004: [**The constructor shall concatenate a receiver specific prefix to the receiver link tag's current value.**]**
 
 **SRS_AMQPSDEVICETELEMETRY_12_005: [**The constructor shall insert the given deviceId argument to the sender and receiver link address.**]**
+
+
+### isLinkFound
+
+```java
+protected Boolean isLinkFound(String linkName);
+```
+
+**SRS_AMQPSDEVICETELEMETRY_12_026: [**The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.**]**
+
+**SRS_AMQPSDEVICETELEMETRY_12_027: [**The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.**]**
+
+**SRS_AMQPSDEVICETELEMETRY_12_028: [**The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.**]**
 
 
 ### sendMessageAndGetDeliveryHash
