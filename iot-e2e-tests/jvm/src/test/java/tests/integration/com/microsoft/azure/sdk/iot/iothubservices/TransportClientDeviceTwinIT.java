@@ -1,16 +1,12 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
-import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
@@ -23,14 +19,13 @@ import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TransportClientDeviceTwinIT
 {
     // Max time to wait to see it on Hub
-    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 200; // 0.2 sec
+    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 500; // 0.2 sec
 
     private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB*10; // 2 sec
 
@@ -64,6 +59,8 @@ public class TransportClientDeviceTwinIT
     // Service client objects
     private static RawTwinQuery scRawTwinQueryClient;
     private static DeviceTwin sCDeviceTwin;
+
+    TransportClient transportClient = null;
 
     // Test devices
     private static ArrayList<TransportClientDeviceTwinIT.DeviceState> devicesUnderTest = new ArrayList<>();
@@ -161,27 +158,15 @@ public class TransportClientDeviceTwinIT
         }
     }
 
-    @BeforeClass
-    public static void setUp() throws IOException
+    private void setUp() throws IOException, NoSuchAlgorithmException, IotHubException, InterruptedException, URISyntaxException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
         scRawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
-    }
 
-    @AfterClass
-    public static void tearDown()
-    {
-        registryManager = null;
-        sCDeviceTwin = null;
-    }
-
-    @Before
-    public void addMultipleDevices() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
-    {
-        for (int i = 0 ; i < MAX_DEVICES; i++)
+        for (int i = 0; i < MAX_DEVICES; i++)
         {
             DeviceState deviceState = new TransportClientDeviceTwinIT.DeviceState();
             String deviceIdAmqps = "java-device-twin-e2e-test-multiplexing-twin-amqps".concat(UUID.randomUUID().toString());
@@ -192,16 +177,44 @@ public class TransportClientDeviceTwinIT
 
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
         }
+
+        TransportClient transportClient = new TransportClient(IotHubClientProtocol.AMQPS);
+
+        for (int i = 0; i < MAX_DEVICES; i++)
+        {
+            DeviceState deviceState = devicesUnderTest.get(i);
+            DeviceClient deviceClient = new DeviceClient(deviceState.connectionString, transportClient);
+            deviceState.deviceClient = deviceClient;
+            devicesUnderTest.get(i).dCDeviceForTwin = new TransportClientDeviceTwinIT.DeviceExtension();
+        }
+
+        transportClient.open();
+
+        for (int i = 0; i < MAX_DEVICES; i++)
+        {
+            devicesUnderTest.get(i).deviceClient.startDeviceTwin(new TransportClientDeviceTwinIT.DeviceTwinStatusCallBack(), devicesUnderTest.get(i), devicesUnderTest.get(i).dCDeviceForTwin, devicesUnderTest.get(i));
+            devicesUnderTest.get(i).deviceTwinStatus = STATUS.SUCCESS;
+            devicesUnderTest.get(i).sCDeviceForTwin = new DeviceTwinDevice(devicesUnderTest.get(i).sCDeviceForRegistryManager.getDeviceId());
+            sCDeviceTwin.getTwin(devicesUnderTest.get(i).sCDeviceForTwin);
+            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        }
     }
 
-    @After
-    public void removeMultipleDevices() throws IOException, IotHubException, InterruptedException
+    private void tearDown() throws IOException, IotHubException, InterruptedException
     {
+        if (transportClient != null)
+        {
+            transportClient.closeNow();
+        }
+
         for (int i = 0 ; i < MAX_DEVICES; i++)
         {
             registryManager.removeDevice(devicesUnderTest.get(i).sCDeviceForRegistryManager.getDeviceId());
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
         }
+
+        registryManager = null;
+        sCDeviceTwin = null;
     }
 
     private int readReportedProperties(TransportClientDeviceTwinIT.DeviceState deviceState, String startsWithKey, String startsWithValue) throws IOException , IotHubException, InterruptedException
@@ -223,255 +236,13 @@ public class TransportClientDeviceTwinIT
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testSendReportedProperties() throws IOException, IotHubException, InterruptedException, URISyntaxException
+    public void testTwin() throws IOException, InterruptedException, IotHubException, URISyntaxException, NoSuchAlgorithmException
     {
-        // arrange
-        TransportClient transportClient = new TransportClient(IotHubClientProtocol.AMQPS);
+        setUp();
 
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            DeviceState deviceState = devicesUnderTest.get(i);
-            DeviceClient deviceClient = new DeviceClient(deviceState.connectionString, transportClient);
-            deviceState.deviceClient = deviceClient;
-            devicesUnderTest.get(i).dCDeviceForTwin = new TransportClientDeviceTwinIT.DeviceExtension();
-        }
-
-        transportClient.open();
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            devicesUnderTest.get(i).deviceClient.startDeviceTwin(new TransportClientDeviceTwinIT.DeviceTwinStatusCallBack(), devicesUnderTest.get(i), devicesUnderTest.get(i).dCDeviceForTwin, devicesUnderTest.get(i));
-            devicesUnderTest.get(i).deviceTwinStatus = STATUS.SUCCESS;
-            devicesUnderTest.get(i).sCDeviceForTwin = new DeviceTwinDevice(devicesUnderTest.get(i).sCDeviceForRegistryManager.getDeviceId());
-            sCDeviceTwin.getTwin(devicesUnderTest.get(i).sCDeviceForTwin);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        }
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            // act
-            devicesUnderTest.get(i).dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
-
-            devicesUnderTest.get(i).deviceClient.sendReportedProperties(devicesUnderTest.get(i).dCDeviceForTwin.getReportedProp());
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-
-            // assert
-            assertEquals(devicesUnderTest.get(i).deviceTwinStatus, TransportClientDeviceTwinIT.STATUS.SUCCESS);
-
-            // verify if they are received by SC
-            int actualReportedPropFound = readReportedProperties(devicesUnderTest.get(i), PROPERTY_KEY, PROPERTY_VALUE);
-            assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
-        }
-
-        transportClient.closeNow();
-    }
-
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testSendReportedPropertiesMultiThreaded() throws IOException, IotHubException, InterruptedException, URISyntaxException
-    {
-        // arrange
         ExecutorService executor = Executors.newFixedThreadPool(MAX_PROPERTIES_TO_TEST);
 
-        TransportClient transportClient = new TransportClient(IotHubClientProtocol.AMQPS);
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            DeviceState deviceState = devicesUnderTest.get(i);
-            DeviceClient deviceClient = new DeviceClient(deviceState.connectionString, transportClient);
-            deviceState.deviceClient = deviceClient;
-            devicesUnderTest.get(i).dCDeviceForTwin = new TransportClientDeviceTwinIT.DeviceExtension();
-        }
-
-        transportClient.open();
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            devicesUnderTest.get(i).deviceClient.startDeviceTwin(new TransportClientDeviceTwinIT.DeviceTwinStatusCallBack(), devicesUnderTest.get(i), devicesUnderTest.get(i).dCDeviceForTwin, devicesUnderTest.get(i));
-            devicesUnderTest.get(i).deviceTwinStatus = STATUS.SUCCESS;
-            devicesUnderTest.get(i).sCDeviceForTwin = new DeviceTwinDevice(devicesUnderTest.get(i).sCDeviceForRegistryManager.getDeviceId());
-            sCDeviceTwin.getTwin(devicesUnderTest.get(i).sCDeviceForTwin);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        }
-
-        // act
-        // send max_prop RP one at a time in parallel
-        for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
-        {
-            final int finalI = i;
-            executor.submit(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    try
-                    {
-                        devicesUnderTest.get(finalI).dCDeviceForTwin.createNewReportedProperties(1);
-                        devicesUnderTest.get(finalI).deviceClient.sendReportedProperties(devicesUnderTest.get(finalI).dCDeviceForTwin.getReportedProp());
-                    }
-                    catch (IOException e)
-                    {
-                        assertTrue(e.getMessage(), true);
-                    }
-                    assertEquals(devicesUnderTest.get(finalI).deviceTwinStatus, TransportClientDeviceTwinIT.STATUS.SUCCESS);
-                }
-            });
-        }
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        executor.shutdown();
-        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
-        {
-            executor.shutdownNow();
-        }
-
-        transportClient.closeNow();
-    }
-
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testUpdateReportedProperties() throws IOException, InterruptedException, IotHubException, URISyntaxException
-    {
-        // arrange
-        TransportClient transportClient = new TransportClient(IotHubClientProtocol.AMQPS);
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            DeviceState deviceState = devicesUnderTest.get(i);
-            DeviceClient deviceClient = new DeviceClient(deviceState.connectionString, transportClient);
-            deviceState.deviceClient = deviceClient;
-            devicesUnderTest.get(i).dCDeviceForTwin = new TransportClientDeviceTwinIT.DeviceExtension();
-        }
-
-        transportClient.open();
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            devicesUnderTest.get(i).deviceClient.startDeviceTwin(new TransportClientDeviceTwinIT.DeviceTwinStatusCallBack(), devicesUnderTest.get(i), devicesUnderTest.get(i).dCDeviceForTwin, devicesUnderTest.get(i));
-            devicesUnderTest.get(i).deviceTwinStatus = STATUS.SUCCESS;
-            devicesUnderTest.get(i).sCDeviceForTwin = new DeviceTwinDevice(devicesUnderTest.get(i).sCDeviceForRegistryManager.getDeviceId());
-            sCDeviceTwin.getTwin(devicesUnderTest.get(i).sCDeviceForTwin);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        }
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            // act
-            // send max_prop RP all at once
-            devicesUnderTest.get(i).dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
-            devicesUnderTest.get(i).deviceClient.sendReportedProperties(devicesUnderTest.get(i).dCDeviceForTwin.getReportedProp());
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-
-            // act
-            // Update RP
-            devicesUnderTest.get(i).dCDeviceForTwin.updateAllExistingReportedProperties();
-            devicesUnderTest.get(i).deviceClient.sendReportedProperties(devicesUnderTest.get(i).dCDeviceForTwin.getReportedProp());
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-
-            // assert
-            assertEquals(devicesUnderTest.get(i).deviceTwinStatus, TransportClientDeviceTwinIT.STATUS.SUCCESS);
-
-            // verify if they are received by SC
-            Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
-            int actualReportedPropFound = readReportedProperties(devicesUnderTest.get(i), PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
-            assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
-        }
-
-        transportClient.closeNow();
-
-    }
-
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testUpdateReportedPropertiesMultiThreaded() throws IOException, InterruptedException, IotHubException, URISyntaxException
-    {
-        // arrange
-        ExecutorService executor = Executors.newFixedThreadPool(MAX_PROPERTIES_TO_TEST);
-
-        TransportClient transportClient = new TransportClient(IotHubClientProtocol.AMQPS);
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            DeviceState deviceState = devicesUnderTest.get(i);
-            DeviceClient deviceClient = new DeviceClient(deviceState.connectionString, transportClient);
-            deviceState.deviceClient = deviceClient;
-            devicesUnderTest.get(i).dCDeviceForTwin = new TransportClientDeviceTwinIT.DeviceExtension();
-        }
-
-        transportClient.open();
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            devicesUnderTest.get(i).deviceClient.startDeviceTwin(new TransportClientDeviceTwinIT.DeviceTwinStatusCallBack(), devicesUnderTest.get(i), devicesUnderTest.get(i).dCDeviceForTwin, devicesUnderTest.get(i));
-            devicesUnderTest.get(i).deviceTwinStatus = STATUS.SUCCESS;
-            devicesUnderTest.get(i).sCDeviceForTwin = new DeviceTwinDevice(devicesUnderTest.get(i).sCDeviceForRegistryManager.getDeviceId());
-            sCDeviceTwin.getTwin(devicesUnderTest.get(i).sCDeviceForTwin);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        }
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            // send max_prop RP all at once
-            devicesUnderTest.get(i).dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
-            devicesUnderTest.get(i).deviceClient.sendReportedProperties(devicesUnderTest.get(i).dCDeviceForTwin.getReportedProp());
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        }
-
-        // act
-        // Update RP
-        for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
-        {
-            final int index = i;
-            final int finalI = i;
-            executor.submit(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    try
-                    {
-                        devicesUnderTest.get(finalI).dCDeviceForTwin.updateExistingReportedProperty(index);
-                        devicesUnderTest.get(finalI).deviceClient.sendReportedProperties(devicesUnderTest.get(finalI).dCDeviceForTwin.getReportedProp());
-                    }
-                    catch (IOException e)
-                    {
-                        assertTrue(e.getMessage(), true);
-                    }
-                    assertEquals(devicesUnderTest.get(finalI).deviceTwinStatus, TransportClientDeviceTwinIT.STATUS.SUCCESS);
-                }
-            });
-        }
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        executor.shutdown();
-        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
-        {
-            executor.shutdownNow();
-        }
-
-        transportClient.closeNow();
-    }
-
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testSubscribeToDesiredProperties() throws IOException, InterruptedException, IotHubException, URISyntaxException
-    {
-        // arrange
-        TransportClient transportClient = new TransportClient(IotHubClientProtocol.AMQPS);
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            DeviceState deviceState = devicesUnderTest.get(i);
-            DeviceClient deviceClient = new DeviceClient(deviceState.connectionString, transportClient);
-            deviceState.deviceClient = deviceClient;
-            devicesUnderTest.get(i).dCDeviceForTwin = new TransportClientDeviceTwinIT.DeviceExtension();
-        }
-
-        transportClient.open();
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            devicesUnderTest.get(i).deviceClient.startDeviceTwin(new TransportClientDeviceTwinIT.DeviceTwinStatusCallBack(), devicesUnderTest.get(i), devicesUnderTest.get(i).dCDeviceForTwin, devicesUnderTest.get(i));
-            devicesUnderTest.get(i).deviceTwinStatus = STATUS.SUCCESS;
-            devicesUnderTest.get(i).sCDeviceForTwin = new DeviceTwinDevice(devicesUnderTest.get(i).sCDeviceForRegistryManager.getDeviceId());
-            sCDeviceTwin.getTwin(devicesUnderTest.get(i).sCDeviceForTwin);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        }
-
+        // testSubscribeToDesiredProperties
         for (int i = 0; i < MAX_DEVICES; i++)
         {
             for (int j = 0; j < MAX_PROPERTIES_TO_TEST; j++)
@@ -506,6 +277,72 @@ public class TransportClientDeviceTwinIT
             }
         }
 
-        transportClient.closeNow();
+        // testUpdateReportedProperties
+        for (int i = 0; i < MAX_DEVICES; i++)
+        {
+            // act
+            // send max_prop RP all at once
+            devicesUnderTest.get(i).dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
+            devicesUnderTest.get(i).deviceClient.sendReportedProperties(devicesUnderTest.get(i).dCDeviceForTwin.getReportedProp());
+            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+            // act
+            // Update RP
+            devicesUnderTest.get(i).dCDeviceForTwin.updateAllExistingReportedProperties();
+            devicesUnderTest.get(i).deviceClient.sendReportedProperties(devicesUnderTest.get(i).dCDeviceForTwin.getReportedProp());
+            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+            // assert
+            assertEquals(devicesUnderTest.get(i).deviceTwinStatus, TransportClientDeviceTwinIT.STATUS.SUCCESS);
+
+            // verify if they are received by SC
+            Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
+            int actualReportedPropFound = readReportedProperties(devicesUnderTest.get(i), PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
+            assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
+        }
+
+        // send max_prop RP one at a time in parallel
+        for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
+        {
+            final int finalI = i;
+            executor.submit(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    // testSendReportedPropertiesMultiThreaded
+                    try
+                    {
+                        devicesUnderTest.get(finalI).dCDeviceForTwin.createNewReportedProperties(1);
+                        devicesUnderTest.get(finalI).deviceClient.sendReportedProperties(devicesUnderTest.get(finalI).dCDeviceForTwin.getReportedProp());
+                    }
+                    catch (IOException e)
+                    {
+                        assertTrue(e.getMessage(), true);
+                    }
+                    assertEquals(devicesUnderTest.get(finalI).deviceTwinStatus, TransportClientDeviceTwinIT.STATUS.SUCCESS);
+
+                    // testUpdateReportedPropertiesMultiThreaded
+                    try
+                    {
+                        devicesUnderTest.get(finalI).dCDeviceForTwin.updateExistingReportedProperty(finalI);
+                        devicesUnderTest.get(finalI).deviceClient.sendReportedProperties(devicesUnderTest.get(finalI).dCDeviceForTwin.getReportedProp());
+                    }
+                    catch (IOException e)
+                    {
+                        assertTrue(e.getMessage(), true);
+                    }
+                    assertEquals(devicesUnderTest.get(finalI).deviceTwinStatus, TransportClientDeviceTwinIT.STATUS.SUCCESS);
+                }
+            });
+        }
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        executor.shutdown();
+        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        {
+            executor.shutdownNow();
+        }
+
+        tearDown();
     }
 }
