@@ -25,6 +25,7 @@ public interface IotHubTransport extends Closeable
      * Establishes a communication channel usingmultiplexing with an IoT Hub. If a channel is
      * already open, the function shall do nothing.
      *
+     * @param deviceClientList the list of clients use the same transport.
      * @throws IOException if a communication channel cannot be
      * established.
      */

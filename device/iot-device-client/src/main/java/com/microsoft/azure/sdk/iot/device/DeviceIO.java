@@ -161,7 +161,6 @@ public final class DeviceIO
      * Starts asynchronously sending and receiving messages from an IoT Hub. If
      * the client is already open, the function shall do nothing.
      *
-     * @throws IllegalAccessException if the function called in multiplex device setup.
      * @throws IOException if a connection to an IoT Hub cannot be established.
      */
     public void open() throws IOException
@@ -186,6 +185,7 @@ public final class DeviceIO
      * using multiplexing.
      * If the client is already open, the function shall do nothing.
      *
+     * @param deviceClientList the list of device clients to initialize for the transport.
      * @throws IOException if a connection to an IoT Hub cannot be established.
      */
     public void multiplexOpen(List<DeviceClient> deviceClientList) throws IOException
@@ -278,6 +278,7 @@ public final class DeviceIO
      * Can be {@code null}.
      * @param callbackContext a context to be passed to the callback. Can be
      * {@code null} if no callback is provided.
+     * @param iotHubConnectionString the sender's connection string.
      *
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
@@ -322,6 +323,7 @@ public final class DeviceIO
      * Can be {@code null}.
      * @param callbackContext a context to be passed to the callback. Can be
      * {@code null} if no callback is provided.
+     * @param iotHubConnectionString the sender's connection string.
      *
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.

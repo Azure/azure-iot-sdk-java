@@ -124,7 +124,8 @@ public class AmqpsSessionManager
 
     /**
      * Start the authetication process.
-     * 
+     *
+     * @throws IOException if authentication lock throws.
      */
     public void authenticate() throws IOException
     {
@@ -148,7 +149,8 @@ public class AmqpsSessionManager
     /**
      * Loop through the device list and open the links. 
      * Lock the execution to wait for the open finish. 
-     * 
+     *
+     * @throws IOException if open lock throws.
      */
     public void openDeviceOperationLinks() throws IOException
     {

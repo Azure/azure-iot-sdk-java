@@ -12,8 +12,6 @@ import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.message.impl.MessageImpl;
-
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.*;
@@ -53,9 +51,17 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
 
     /**
      * This constructor creates an instance of AmqpsDeviceAuthenticationCBS class and initializes member variables
+     *
+     * @param deviceClientConfig the device config to use for authentication.
+     * @throws IllegalArgumentException if deviceClientConfig is null.
      */
     public AmqpsDeviceAuthenticationCBS(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
     {
+        if (deviceClientConfig == null)
+        {
+            throw new IllegalArgumentException("The deviceClientConfig cannot be null.");
+        }
+
         this.deviceClientConfig = deviceClientConfig;
 
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_001: [The constructor shall set the sender and receiver endpoint path to IoTHub specific values.]
@@ -214,7 +220,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
      *                           authentication
      */
     @Override
-    protected void authenticate(DeviceClientConfig deviceClientConfig, UUID correlationId) throws IOException
+    protected void authenticate(DeviceClientConfig deviceClientConfig, UUID correlationId)
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_030: [The function shall create a CBS authentication message using the device configuration and the correlationID.]
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_031: [The function shall set the CBS related properties on the message.]

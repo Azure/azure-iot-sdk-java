@@ -48,7 +48,6 @@ public final class AmqpsIotHubConnection extends BaseHandler
     private Connection connection;
 
     private String hostName;
-    private String userName;
 
     private final Boolean useWebSockets;
     private DeviceClientConfig deviceClientConfig;
@@ -150,6 +149,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     /**
      * Creates a new DeviceOperation using the given configuration..
+     *
+     * @param deviceClientConfig the device configuration to add.
      */
     public void addDeviceOperationSession(DeviceClientConfig deviceClientConfig)
     {
@@ -248,6 +249,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     /**
      * Starts the authentication by calling the AmqpsSessionManager.
+     *
+     * @throws IOException if authentication open throws.
      */
     public void authenticate() throws IOException
     {
@@ -261,6 +264,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     /**
      * Opens all the operation links by calling the AmqpsSessionManager.
+     *
+     * @throws IOException if Proton throws.
      */
     public void openLinks() throws IOException
     {
@@ -350,8 +355,10 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     /**
      * Creates a binary message using the given content and messageId. Sends the created message using the sender link.
+     *
      * @param message The message to be sent.
      * @param messageType the type of the message being sent
+     * @param iotHubConnectionString the connection string to use for sender identification.
      * @throws IOException if send message fails
      * @return An {@link Integer} representing the hash of the message, or -1 if the connection is closed.
      */
@@ -719,6 +726,10 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     /**
      * Calls the AmqpsSessionManager to find the appropriate convertToProton converter.
+     *
+     * @param message the message to convert.
+     * @return AmqpsConvertToProtonReturnValue containing the status and converted message.
+     * @throws IOException if conversion fails.
      */
     protected AmqpsConvertToProtonReturnValue convertToProton(com.microsoft.azure.sdk.iot.device.Message message) throws IOException
     {
@@ -728,6 +739,11 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     /**
      * Calls the AmqpsSessionManager to find the appropriate convertFromProton converter.
+     *
+     * @param amqpsMessage the message to convert.
+     * @param deviceClientConfig the configuration to identify the message.
+     * @return AmqpsConvertFromProtonReturnValue containing the status and converted message.
+     * @throws IOException if conversion fails.
      */
     protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws IOException
     {

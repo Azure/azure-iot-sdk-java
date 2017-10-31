@@ -2,10 +2,8 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.message.impl.MessageImpl;
 
 import java.io.IOException;
 
@@ -17,6 +15,9 @@ public class AmqpsDeviceAuthenticationSAS extends AmqpsDeviceAuthentication
 
     /**
      * This constructor creates an instance of AmqpsDeviceAuthenticationSAS class and initializes member variables
+     *
+     * @param deviceClientConfig the device config to use for authentication.
+     * @throws IllegalArgumentException if deviceClientConfig is null.
      */
     public AmqpsDeviceAuthenticationSAS(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
     {

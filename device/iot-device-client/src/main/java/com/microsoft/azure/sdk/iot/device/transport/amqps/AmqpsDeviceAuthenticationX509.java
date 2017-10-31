@@ -15,6 +15,9 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
 
     /**
      * This constructor creates an instance of AmqpsDeviceAuthenticationSAS class and initializes member variables
+     *
+     * @param deviceClientConfig the device config to use for authentication.
+     * @throws IllegalArgumentException if deviceClientConfig is null.
      */
     public AmqpsDeviceAuthenticationX509(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
     {

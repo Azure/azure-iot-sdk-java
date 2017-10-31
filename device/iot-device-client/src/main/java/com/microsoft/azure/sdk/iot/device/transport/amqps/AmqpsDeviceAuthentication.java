@@ -12,6 +12,8 @@ public class AmqpsDeviceAuthentication extends AmqpsDeviceOperations
 {
     /**
      * Create Proton SslDomain object from Address using the given Ssl context
+     *
+     * @param sslContext the SslCOntext to set up the domain.
      * @return the created Ssl domain
      */
     protected SslDomain makeDomain(SSLContext sslContext)
@@ -42,8 +44,9 @@ public class AmqpsDeviceAuthentication extends AmqpsDeviceOperations
      * Prototype (empty) function for set the SslDomain
      *
      * @param deviceClientConfig The deviceClientConfig to use for authentication
+     * @param correlationId the authentication message's correlationId.
      */
-    protected void authenticate(DeviceClientConfig deviceClientConfig, UUID correlationId) throws IOException
+    protected void authenticate(DeviceClientConfig deviceClientConfig, UUID correlationId)
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATION_12_007: [The prototype function does nothing.]
     }

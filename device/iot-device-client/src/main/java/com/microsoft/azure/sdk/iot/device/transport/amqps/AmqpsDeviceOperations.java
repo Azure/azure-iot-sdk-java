@@ -235,6 +235,7 @@ public class AmqpsDeviceOperations
 
     /**
      * Sends the given message and returns with the delivery hash
+     * @param messageType The message operation type.
      * @param msgData The binary array of the bytes to send
      * @param offset The start offset to copy the bytes from
      * @param length The number of bytes to be send related to the offset
@@ -354,6 +355,8 @@ public class AmqpsDeviceOperations
 
     /**
      * Prototype (empty) function for operation specific implementations to identify if the given link is owned by the operation
+     *
+     * @param linkName the name of the link to find.
      * @return true if the link is owned by the operation, false otherwise
      */
     protected Boolean isLinkFound(String linkName)
@@ -364,9 +367,11 @@ public class AmqpsDeviceOperations
 
     /**
      * Prototype (empty) function for operation specific implementations to convert Proton message to IoTHubMessage
+     *
      * @param amqpsMessage The Proton message to convert
      * @param deviceClientConfig The device client configuration
      * @return the converted message
+     * @throws IOException if conversion fails.
      */
     protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws IOException
     {
@@ -376,8 +381,10 @@ public class AmqpsDeviceOperations
 
     /**
      * Prototype (empty) function for operation specific implementations to convert IoTHubMessage to Proton message
+     *
      * @param message The IoTHubMessage to convert
      * @return the converted message
+     * @throws IOException if conversion fails.
      */
     protected AmqpsConvertToProtonReturnValue convertToProton(Message message) throws IOException
     {
@@ -387,8 +394,10 @@ public class AmqpsDeviceOperations
 
     /**
      * Prototype (empty) function for protected converter function
+     *
      * @param protonMsg The Proton message to convert
      * @return the converted message
+     * @throws IOException if conversion fails.
      */
     protected Message protonMessageToIoTHubMessage(MessageImpl protonMsg) throws IOException
     {
@@ -400,6 +409,7 @@ public class AmqpsDeviceOperations
      * Prototype (empty) function for protected converter function
      * @param message The IoTHubMessage to convert
      * @return the converted message
+     * @throws IOException if conversion fails.
      */
     protected MessageImpl iotHubMessageToProtonMessage(com.microsoft.azure.sdk.iot.device.Message message) throws IOException
     {

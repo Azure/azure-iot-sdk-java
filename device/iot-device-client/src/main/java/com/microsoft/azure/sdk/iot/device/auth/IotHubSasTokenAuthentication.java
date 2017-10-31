@@ -116,6 +116,8 @@ public class IotHubSasTokenAuthentication
 
     /**
      * Getter for TokenValidSecs
+     *
+     * @return the value of the tokenValidSecs
      */
     public long getTokenValidSecs()
     {
