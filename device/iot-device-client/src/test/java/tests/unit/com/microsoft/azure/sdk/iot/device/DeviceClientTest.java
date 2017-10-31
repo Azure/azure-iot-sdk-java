@@ -1890,7 +1890,6 @@ public class DeviceClientTest
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
                 + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
-        final Map<String, Object> context = new HashMap<>();
         DeviceClient client = new DeviceClient(connString, protocol);
         final Integer value = 30;
 

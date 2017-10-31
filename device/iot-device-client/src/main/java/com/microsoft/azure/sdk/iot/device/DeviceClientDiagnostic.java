@@ -11,6 +11,10 @@ public class DeviceClientDiagnostic {
     private int currentMessageNumber;
 
     private static final int DIAGNOSTIC_ID_CHARACTER_BASE = 62;
+    // Total number of 0-9
+    private static final int DIAGNOSTIC_ID_CHARACTER_NUMBER = 10;
+    // Total number of A-Z
+    private static final int DIAGNOSTIC_ID_CHARACTER_CAPITALIZED = 26;
 
     public DeviceClientDiagnostic()
     {
@@ -37,12 +41,12 @@ public class DeviceClientDiagnostic {
     // Get a character from 0-9a-zA-Z
     private char getDiagnosticIdChar(int value)
     {
-        if (value <= 9) {
+        if (value < DIAGNOSTIC_ID_CHARACTER_NUMBER) {
             return (char) ('0' + value);
-        } else if (value <= 9 + 26) {
-            return (char) ('A' + value - 10);
+        } else if (value < DIAGNOSTIC_ID_CHARACTER_NUMBER + DIAGNOSTIC_ID_CHARACTER_CAPITALIZED) {
+            return (char) ('A' + value - DIAGNOSTIC_ID_CHARACTER_NUMBER);
         } else {
-            return (char) ('a' + value - 36);
+            return (char) ('a' + value - DIAGNOSTIC_ID_CHARACTER_CAPITALIZED - DIAGNOSTIC_ID_CHARACTER_NUMBER);
         }
     }
 

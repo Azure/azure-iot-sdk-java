@@ -1,21 +1,10 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
-import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import mockit.Deencapsulation;
 import mockit.Mocked;
-import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -106,12 +95,11 @@ public class DeviceClientDiagnosticTest {
         diagnostic.setDiagSamplingPercentage(80);
 
         // act
-        for(int i=0;i<10;i++) {
+        for (int i = 0; i < 10; i++) {
             diagnostic.addDiagnosticInfoIfNecessary(mockMessage);
         }
         // assert
-        new Verifications()
-        {
+        new Verifications() {
             {
                 mockMessage.setDiagnosticPropertyData((DiagnosticPropertyData) any);
                 times = 8;
