@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>Microsoft.Devices.Tpm.TcpEmulator</id>
+        <version>0.0.1</version>
+        <title>Tcp Emulator for Tpm 2.0</title>
+        <authors>Microsoft Corp</authors>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Tcp Emulator for Tpm 2.0</description>
+        <copyright>Microsoft Corporation 2017</copyright>
+    </metadata>
+    <files>
+        <file src="build\Microsoft.Devices.Tpm.TcpEmulator.targets" target="build\Microsoft.Devices.Tpm.TcpEmulator.targets" />
+        <file src="Simulator.exe" target="build\Simulator.exe" />
+        <file src="Tpm.dll" target="build\Tpm.dll" />
+    </files>
+</package>
