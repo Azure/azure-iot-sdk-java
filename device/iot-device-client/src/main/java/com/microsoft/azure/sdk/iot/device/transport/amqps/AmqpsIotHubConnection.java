@@ -362,7 +362,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      * @throws IOException if send message fails
      * @return An {@link Integer} representing the hash of the message, or -1 if the connection is closed.
      */
-    public Integer sendMessage(Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws IOException
+    public synchronized Integer sendMessage(Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws IOException
     {
         Integer deliveryHash = -1;
 
@@ -390,7 +390,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      *               {@link IotHubMessageResult#ABANDON}, or {@link IotHubMessageResult#REJECT}).
      * @return a boolean true if sent message was received with success, or false on fail.
      */
-    public Boolean sendMessageResult(AmqpsMessage message, IotHubMessageResult result)
+    public synchronized Boolean sendMessageResult(AmqpsMessage message, IotHubMessageResult result)
     {
         Boolean ackResult = false;
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_022: [If the AMQPS Connection is closed, the function shall return false.]
