@@ -11,7 +11,6 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
@@ -29,7 +28,6 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
 public class TransportClientSendMessagesIT
 {
     //Huw much sequential connections each device will open and close in the multithreaded test.
-    private static final Integer NUM_CONNECTIONS_PER_DEVICE = 10;
 
     //How many keys each message will cary.
     private static final Integer NUM_KEYS_PER_MESSAGE = 10;
@@ -56,11 +54,8 @@ public class TransportClientSendMessagesIT
     {
         private DeviceClient client;
         private String messageString;
-        private String connString;
 
-        private IotHubClientProtocol protocol;
-        private Integer numMessagesPerConnection;
-        private Integer numConnectionsPerDevice;
+        private Integer numMessagesPerDevice;
         private Integer sendTimeout;
         private Integer numKeys;
         private CountDownLatch latch;
@@ -68,44 +63,41 @@ public class TransportClientSendMessagesIT
         @Override
         public void run()
         {
-            for (int i = 0; i < this.numConnectionsPerDevice; i++) {
-                try {
-                    this.sendMessages();
-                } catch (Exception e)
-                {
-                    succeed.set(false);
-                }
+            try
+            {
+                this.sendMessages();
+            }
+            catch (Exception e)
+            {
+                succeed.set(false);
             }
             latch.countDown();
         }
 
-        public multiplexRunnable(Device deviceAmqps, DeviceClient deviceClient, IotHubClientProtocol protocol,
-                          Integer numConnectionsPerDevice, Integer numMessagesPerConnection,
+        public multiplexRunnable(Device deviceAmqps, DeviceClient deviceClient,
+                          Integer numMessagesPerConnection,
                           Integer numKeys, Integer sendTimeout, CountDownLatch latch)
         {
             this.client = deviceClient;
-            this.protocol = protocol;
-            this.numConnectionsPerDevice = numConnectionsPerDevice;
-            this.numMessagesPerConnection = numMessagesPerConnection;
+            this.numMessagesPerDevice = numMessagesPerConnection;
             this.sendTimeout = sendTimeout;
             this.numKeys = numKeys;
             this.latch = latch;
 
             succeed.set(true);
 
-            this.connString = DeviceConnectionString.get(iotHubConnectionString, deviceAmqps);
-
             messageString = "Java client " + deviceAmqps.getDeviceId() + " test e2e message over AMQP protocol";
         }
 
         public void sendMessages() {
-            for (int i = 0; i < numMessagesPerConnection; ++i)
+            for (int i = 0; i < numMessagesPerDevice; ++i)
             {
                 try
                 {
                     Message msgSend = new Message(messageString);
                     msgSend.setProperty("messageCount", Integer.toString(i));
-                    for (int j = 0; j < numKeys; j++) {
+                    for (int j = 0; j < numKeys; j++)
+                    {
                         msgSend.setProperty("key"+j, "value"+j);
                     }
                     msgSend.setExpiryTime(5000);
@@ -123,15 +115,10 @@ public class TransportClientSendMessagesIT
                             break;
                         }
                     }
-
-                    if (!messageSent.getResult())
-                    {
-                        Assert.fail("Sending message over AMQPS protocol failed");
-                    }
                 }
                 catch (Exception e)
                 {
-                    Assert.fail("Sending message over AMQPS protocol throws " + e);
+                    Assert.fail("Sending message multithreaded throws " + e);
                 }
             }
         }
@@ -208,7 +195,7 @@ public class TransportClientSendMessagesIT
         Integer count = 0;
         for (int i = 0; i < clientArrayList.size(); i++)
         {
-            Thread thread = new Thread(new TransportClientSendMessagesIT.multiplexRunnable(deviceListAmqps[i], clientArrayList.get(i), IotHubClientProtocol.AMQPS, NUM_CONNECTIONS_PER_DEVICE, NUM_MESSAGES_PER_CONNECTION, NUM_KEYS_PER_MESSAGE, SEND_TIMEOUT_MILLISECONDS, cdl));
+            Thread thread = new Thread(new TransportClientSendMessagesIT.multiplexRunnable(deviceListAmqps[i], clientArrayList.get(i), NUM_MESSAGES_PER_CONNECTION, NUM_KEYS_PER_MESSAGE, SEND_TIMEOUT_MILLISECONDS, cdl));
             thread.start();
             threads.add(thread);
             count++;
@@ -260,7 +247,7 @@ public class TransportClientSendMessagesIT
         Integer count = 0;
         for (int i = 0; i < clientArrayList.size(); i++)
         {
-            Thread thread = new Thread(new TransportClientSendMessagesIT.multiplexRunnable(deviceListAmqps[i], clientArrayList.get(i), IotHubClientProtocol.AMQPS, NUM_CONNECTIONS_PER_DEVICE, NUM_MESSAGES_PER_CONNECTION, NUM_KEYS_PER_MESSAGE, SEND_TIMEOUT_MILLISECONDS, cdl));
+            Thread thread = new Thread(new TransportClientSendMessagesIT.multiplexRunnable(deviceListAmqps[i], clientArrayList.get(i), NUM_MESSAGES_PER_CONNECTION, NUM_KEYS_PER_MESSAGE, SEND_TIMEOUT_MILLISECONDS, cdl));
             thread.start();
             threads.add(thread);
             count++;
