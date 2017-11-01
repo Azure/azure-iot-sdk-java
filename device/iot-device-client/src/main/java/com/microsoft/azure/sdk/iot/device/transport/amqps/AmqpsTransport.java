@@ -266,7 +266,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
      * @throws IllegalStateException if the transport has not been opened or is
      * already closed.
      */
-    public void sendMessages() throws IOException, IllegalStateException
+    public synchronized void sendMessages() throws IOException, IllegalStateException
     {
         // Codes_SRS_AMQPSTRANSPORT_15_012: [If the AMQPS session is closed, the function shall throw an IllegalStateException.]
         if (this.state == State.CLOSED)

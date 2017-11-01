@@ -85,6 +85,8 @@ public class AmqpsSessionDeviceOperation
      */
     public void close()
     {
+        this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.NOT_AUTHENTICATED;
+
         this.shutDownScheduler();
         this.closeLinks();
     }
