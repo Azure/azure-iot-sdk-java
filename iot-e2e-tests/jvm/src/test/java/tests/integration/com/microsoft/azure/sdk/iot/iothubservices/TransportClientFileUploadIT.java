@@ -297,7 +297,7 @@ public class TransportClientFileUploadIT
             executor.shutdownNow();
         }
 
-        for (int i = 1; i < MAX_FILES_TO_UPLOAD * clientArrayList.size(); i++)
+        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
         {
             assertEquals("File" + i + " has no notification", fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
         }
@@ -367,7 +367,7 @@ public class TransportClientFileUploadIT
             executor.shutdownNow();
         }
 
-        for (int i = 1; i < MAX_FILES_TO_UPLOAD * clientArrayList.size(); i++)
+        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
         {
             assertEquals("File" + i + " has no notification", fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
         }
