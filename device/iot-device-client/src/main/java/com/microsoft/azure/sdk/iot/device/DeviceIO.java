@@ -283,7 +283,7 @@ public final class DeviceIO
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
-    public void sendEventAsync(Message message,
+    public synchronized void sendEventAsync(Message message,
                                IotHubEventCallback callback,
                                Object callbackContext,
                                IotHubConnectionString iotHubConnectionString)
@@ -328,7 +328,7 @@ public final class DeviceIO
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
-    public void sendEventAsync(Message message,
+    public synchronized void sendEventAsync(Message message,
                                IotHubResponseCallback callback,
                                Object callbackContext,
                                IotHubConnectionString iotHubConnectionString)
