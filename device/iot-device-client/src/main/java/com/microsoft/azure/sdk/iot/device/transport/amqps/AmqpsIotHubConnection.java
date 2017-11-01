@@ -276,14 +276,19 @@ public final class AmqpsIotHubConnection extends BaseHandler
             this.reactor = createReactor();
         }
 
-        if (executorService == null)
+        runReactor();
+    }
+
+    private void runReactor()
+    {
+        if (this.executorService == null)
         {
-            executorService = Executors.newFixedThreadPool(1);
+            this.executorService = Executors.newFixedThreadPool(1);
         }
 
-        IotHubReactor iotHubReactor = new IotHubReactor(reactor);
+        IotHubReactor iotHubReactor = new IotHubReactor(this.reactor);
         ReactorRunner reactorRunner = new ReactorRunner(iotHubReactor);
-        executorService.submit(reactorRunner);
+        this.executorService.submit(reactorRunner);
         logger.LogInfo("Reactor is assigned to executor service, method name is %s ", logger.getMethodName());
     }
 

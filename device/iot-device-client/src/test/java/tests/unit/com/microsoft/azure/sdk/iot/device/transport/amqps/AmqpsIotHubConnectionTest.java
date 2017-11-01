@@ -1839,7 +1839,13 @@ public class AmqpsIotHubConnectionTest {
     {
         baseExpectations();
 
-        new NonStrictExpectations()
+        ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
+        amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
+
+        Deencapsulation.setField(connection, "openLock", mockOpenLock);
+
+        new NonStrictExpectations(connection)
         {
             {
                 mockConfig.getAuthenticationType();
@@ -1850,17 +1856,9 @@ public class AmqpsIotHubConnectionTest {
                 Proton.reactor((ReactorOptions) any, (Handler) any);
                 result = mockedReactor;
 
-                mockIotHubReactor.run();
-
-                mockExecutorService.submit((Runnable) any);
+                Deencapsulation.invoke(connection, "runReactor");
             }
         };
-
-        ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<AmqpsDeviceOperations>();
-        amqpsDeviceOperationsList.add(Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId));
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, amqpsDeviceOperationsList);
-
-        Deencapsulation.setField(connection, "openLock", mockOpenLock);
 
         //wiping the reactor causes it to be created again on open()
         Deencapsulation.setField(connection, "reactor", null);
@@ -1871,9 +1869,9 @@ public class AmqpsIotHubConnectionTest {
         {
             {
                 mockedReactorOptions.setEnableSaslByDefault(false);
-                times = 2;
+                times = 1;
                 Proton.reactor((ReactorOptions) any, (Handler) any);
-                times = 2;
+                times = 1;
             }
         };
     }
