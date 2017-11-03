@@ -28,6 +28,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
+@Ignore
 public class ExportImportIT
 {
     private static String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
@@ -42,6 +43,7 @@ public class ExportImportIT
 
     private static RegistryManager registryManager;
 
+    @Ignore
     @BeforeClass
     public static void setUp() throws URISyntaxException, InvalidKeyException, StorageException, IOException
     {
@@ -83,6 +85,7 @@ public class ExportImportIT
         importContainer.createIfNotExists();
     }
 
+    @Ignore
     @AfterClass
     public static void tearDown() throws Exception
     {
@@ -105,6 +108,7 @@ public class ExportImportIT
         exportContainer.deleteIfExists();
     }
 
+    @Ignore
     @Test
     public void export_import_e2e() throws Exception
     {
