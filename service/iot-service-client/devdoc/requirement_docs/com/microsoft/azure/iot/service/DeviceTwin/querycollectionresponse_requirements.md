@@ -37,7 +37,7 @@ QueryCollectionResponse(Collection<E> responseElementsCollection, String continu
 
 **SRS_QUERY_COLLECTION_RESPONSE_34_004: [**This constructor shall save the provided continuation token and Collection.**]**
 
-**SRS_QUERY_COLLECTION_RESPONSE_34_007: [**If the provided Collection is null or empty, this function shall throw an IllegalArgumentException.**]**
+**SRS_QUERY_COLLECTION_RESPONSE_34_007: [**If the provided Collection is null, this function shall throw an IllegalArgumentException.**]**
 
 
 ### getContinuationToken

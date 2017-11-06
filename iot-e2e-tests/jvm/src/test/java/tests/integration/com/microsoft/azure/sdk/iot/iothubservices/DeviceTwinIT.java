@@ -1043,6 +1043,25 @@ public class DeviceTwinIT
         }
     }
 
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void queryCollectionCanReturnEmptyQueryResults() {
+        try
+        {
+            String fullQuery = "select * from devices where deviceId='nonexistantdevice'";
+            DeviceTwin twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+            QueryCollection twinQuery = twinClient.queryTwinCollection(fullQuery);
+            QueryOptions options = new QueryOptions();
+            QueryCollectionResponse<DeviceTwinDevice> response = twinClient.next(twinQuery, options);
+
+            assertNull(response.getContinuationToken());
+            assertTrue(response.getCollection().isEmpty());
+        }
+        catch (Exception e)
+        {
+            Assert.fail(e.getMessage());
+        }
+    }
+
     @Test
     public void testMultipleQueryTwinInParallel() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
     {

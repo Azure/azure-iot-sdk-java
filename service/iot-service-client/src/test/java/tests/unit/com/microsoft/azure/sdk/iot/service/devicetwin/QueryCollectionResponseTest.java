@@ -94,7 +94,7 @@ public class QueryCollectionResponseTest
         assertEquals(expectedToken, actualContinuationToken);
     }
 
-    //Tests_SRS_QUERY_COLLECTION_RESPONSE_34_007: [If the provided Collection is null or has not items to iterate over, this function shall throw an IllegalArgumentException.]
+    //Tests_SRS_QUERY_COLLECTION_RESPONSE_34_007: [If the provided Collection is null, this function shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
     public void constructorWithCollectionThrowsForNullCollection()
     {
@@ -104,19 +104,6 @@ public class QueryCollectionResponseTest
         //act
         Deencapsulation.newInstance(QueryCollectionResponse.class, new Class[] {Collection.class, String.class}, null, expectedToken);
     }
-
-    //Tests_SRS_QUERY_COLLECTION_RESPONSE_34_007: [If the provided Collection is null or empty, this function shall throw an IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithCollectionThrowsForEmptyCollection()
-    {
-        //arrange
-        String expectedToken = "some valid token";
-        Collection emptyCollection = new ArrayList<String>();
-
-        //act
-        Deencapsulation.newInstance(QueryCollectionResponse.class, new Class[] {Collection.class, String.class}, emptyCollection, expectedToken);
-    }
-
 
     //Tests_SRS_QUERY_COLLECTION_RESPONSE_34_005: [This function shall return the saved continuation token.]
     @Test

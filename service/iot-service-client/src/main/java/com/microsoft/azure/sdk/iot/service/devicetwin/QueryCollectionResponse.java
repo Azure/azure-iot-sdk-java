@@ -42,14 +42,14 @@ public class QueryCollectionResponse<E>
      *
      * @param responseElementsCollection The collection to save
      * @param continuationToken The continuation token to save
-     * @throws IllegalArgumentException if responseElementsCollection is null or empty
+     * @throws IllegalArgumentException if responseElementsCollection is null
      */
     QueryCollectionResponse(Collection<E> responseElementsCollection, String continuationToken)
     {
-        if (responseElementsCollection == null || responseElementsCollection.isEmpty())
+        if (responseElementsCollection == null)
         {
-            //Codes_SRS_QUERY_COLLECTION_RESPONSE_34_007: [If the provided Collection is null or empty, this function shall throw an IllegalArgumentException.]
-            throw new IllegalArgumentException("Provided Collection must not be null and cannot be empty");
+            //Codes_SRS_QUERY_COLLECTION_RESPONSE_34_007: [If the provided Collection is null, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("Provided Collection must not be null");
         }
 
         //Codes_SRS_QUERY_COLLECTION_RESPONSE_34_004: [This constructor shall save the provided continuation token and Collection.]
