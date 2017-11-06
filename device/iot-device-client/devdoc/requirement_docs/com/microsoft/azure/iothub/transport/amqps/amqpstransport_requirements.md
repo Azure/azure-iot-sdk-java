@@ -157,6 +157,8 @@ public void sendMessages() throws IOException;
 
 **SRS_AMQPSTRANSPORT_34_041: [**If the config is using sas token authentication and its sas token has expired and cannot be renewed, the message shall not be sent, an UNAUTHORIZED message callback shall be added to the callback queue and SAS_TOKEN_EXPIRED state callback shall be fired.**]**
 
+**SRS_AMQPSTRANSPORT_34_043: [**If the config is using sas token authentication and its sas token has expired and cannot be renewed, the message shall not be put back into the waiting messages queue to be re-sent.**]**
+
 
 ### invokeCallbacks
 

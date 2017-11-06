@@ -740,6 +740,7 @@ public class AmqpsTransportTest
     }
 
     //Tests_SRS_AMQPSTRANSPORT_34_041: [If the config is using sas token authentication and its sas token has expired and cannot be renewed, the message shall not be sent, an UNAUTHORIZED message callback shall be added to the callback queue and SAS_TOKEN_EXPIRED state callback shall be fired.]
+    //Tests_SRS_AMQPSTRANSPORT_34_043: [If the config is using sas token authentication and its sas token has expired and cannot be renewed, the message shall not be put back into the waiting messages queue to be re-sent.]
     @Test
     public void sendMessagesWithExpiredSasTokenSendsCallbacks(
             @Mocked final Message mockMessage,
@@ -794,6 +795,9 @@ public class AmqpsTransportTest
         transport.sendMessages();
 
         //assert
+        Queue<IotHubOutboundPacket> waitingMessagesList = Deencapsulation.getField(transport, "waitingMessages");
+        assertTrue(waitingMessagesList.isEmpty());
+
         Queue<IotHubCallbackPacket> callbackList = Deencapsulation.getField(transport, "callbackList");
         assertEquals(1, callbackList.size());
         assertEquals(mockIotHubCallbackPacket.getStatus(), callbackList.remove().getStatus());

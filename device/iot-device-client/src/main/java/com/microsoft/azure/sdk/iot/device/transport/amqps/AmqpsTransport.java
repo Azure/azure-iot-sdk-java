@@ -319,7 +319,6 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                     if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.deviceClientConfig.getSasTokenAuthentication().isRenewalNecessary())
                     {
                         //Codes_SRS_AMQPSTRANSPORT_34_041: [If the config is using sas token authentication and its sas token has expired and cannot be renewed, the message shall not be sent, an UNAUTHORIZED message callback shall be added to the callback queue and SAS_TOKEN_EXPIRED state callback shall be fired.]
-                        failedMessages.add(packet);
                         logger.LogInfo("Creating a callback for the message with expired sas token with UNAUTHORIZED status, method name is %s ", logger.getMethodName());
                         IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.UNAUTHORIZED, packet.getCallback(), packet.getContext());
                         this.callbackList.add(callbackPacket);
@@ -328,6 +327,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                         {
                             this.stateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, this.stateCallbackContext);
                         }
+                        //Codes_SRS_AMQPSTRANSPORT_34_043: [If the config is using sas token authentication and its sas token has expired and cannot be renewed, the message shall not be put back into the waiting messages queue to be re-sent.]
                     }
                     else
                     {
