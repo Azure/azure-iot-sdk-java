@@ -8,7 +8,7 @@
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract;
 
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ResponseData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
 
 public interface ResponseCallback
 {

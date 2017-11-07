@@ -5,9 +5,9 @@
  *  
  */
 
-package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.provisioningtask;
+package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.task;
 
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.RequestData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;

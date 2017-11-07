@@ -5,14 +5,14 @@
  *
  */
 
-package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.provisioningtask;
+package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.task;
 
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.RequestData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientKey;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientX509;
-import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
@@ -20,9 +20,9 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegisterRequestParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegisterResponseTPMParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.Authorization;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.RegisterTask;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ResponseData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.Authorization;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RegisterTask;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
@@ -33,8 +33,8 @@ import javax.net.ssl.SSLContext;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 
-import static com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ContractState.DPS_REGISTRATION_RECEIVED;
-import static com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ContractState.DPS_REGISTRATION_UNKNOWN;
+import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState.DPS_REGISTRATION_RECEIVED;
+import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState.DPS_REGISTRATION_UNKNOWN;
 import static org.junit.Assert.assertNotNull;
 
 /*
@@ -52,7 +52,7 @@ public class RegisterTaskTest
     @Mocked
     SecurityClient mockedSecurityClient;
     @Mocked
-    SecurityClientKey mockedDpsSecurityClientKey;
+    SecurityClientTpm mockedSecurityClientTpm;
     @Mocked
     SecurityClientX509 mockedDpsSecurityClientX509;
     @Mocked
@@ -351,21 +351,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = "NonNullValue".getBytes();
@@ -375,7 +375,7 @@ public class RegisterTaskTest
                 result = TEST_AUTH_KEY;
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
-                mockedDpsSecurityClientKey.signData((byte[])any);
+                mockedSecurityClientTpm.signData((byte[])any);
                 result = "testToken".getBytes();
             }
         };
@@ -393,7 +393,7 @@ public class RegisterTaskTest
                 mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any,
                         (ResponseCallback)any, any);
                 times = 1;
-                mockedDpsSecurityClientKey.importKey((byte[])any);
+                mockedSecurityClientTpm.decryptAndStoreKey((byte[])any);
                 times = 1;
                 mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);
@@ -408,13 +408,13 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = null;
             }
         };
@@ -427,15 +427,15 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = null;
             }
         };
@@ -448,17 +448,17 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = null;
             }
         };
@@ -472,21 +472,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = null;
             }
         };
@@ -500,21 +500,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any,
                         (ResponseCallback)any, any);
@@ -531,21 +531,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
             }
         };
@@ -558,21 +558,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = null;
@@ -587,21 +587,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = new InterruptedException();
             }
         };
@@ -615,21 +615,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = "NonNullValue".getBytes();
@@ -648,21 +648,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = "NonNullValue".getBytes();
@@ -683,21 +683,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = "NonNullValue".getBytes();
@@ -705,7 +705,7 @@ public class RegisterTaskTest
                 result = DPS_REGISTRATION_RECEIVED;
                 mockedRegisterResponseTPMParser.getAuthenticationKey();
                 result = TEST_AUTH_KEY;
-                mockedDpsSecurityClientKey.importKey((byte[])any);
+                mockedSecurityClientTpm.decryptAndStoreKey((byte[])any);
                 result = new ProvisioningDeviceClientException("test exception");
             }
         };
@@ -723,21 +723,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = "NonNullValue".getBytes();
@@ -759,21 +759,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = "NonNullValue".getBytes();
@@ -794,21 +794,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = "NonNullValue".getBytes();
@@ -829,21 +829,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = "NonNullValue".getBytes();
@@ -853,7 +853,7 @@ public class RegisterTaskTest
                 result = TEST_AUTH_KEY;
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
-                mockedDpsSecurityClientKey.signData((byte[])any);
+                mockedSecurityClientTpm.signData((byte[])any);
                 result = new ProvisioningDeviceClientException("test Exception");
             }
         };
@@ -867,21 +867,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = "NonNullValue".getBytes();
@@ -891,7 +891,7 @@ public class RegisterTaskTest
                 result = TEST_AUTH_KEY;
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
-                mockedDpsSecurityClientKey.signData((byte[])any);
+                mockedSecurityClientTpm.signData((byte[])any);
                 result = null;
             }
         };
@@ -905,21 +905,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = "NonNullValue".getBytes();
@@ -929,7 +929,7 @@ public class RegisterTaskTest
                 result = TEST_AUTH_KEY;
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
-                mockedDpsSecurityClientKey.signData((byte[])any);
+                mockedSecurityClientTpm.signData((byte[])any);
                 result = "".getBytes();
             }
         };
@@ -944,21 +944,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = "NonNullValue".getBytes();
@@ -968,7 +968,7 @@ public class RegisterTaskTest
                 result = TEST_AUTH_KEY;
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
-                mockedDpsSecurityClientKey.signData((byte[])any);
+                mockedSecurityClientTpm.signData((byte[])any);
                 result = "testToken".getBytes();
                 mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);
@@ -985,21 +985,21 @@ public class RegisterTaskTest
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedDpsSecurityClientKey, mockedProvisioningDeviceClientContract,
+                                                                mockedSecurityClientTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
 
         new NonStrictExpectations()
         {
             {
-                mockedDpsSecurityClientKey.getRegistrationId();
+                mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedDpsSecurityClientKey.getDeviceEk();
+                mockedSecurityClientTpm.getDeviceEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedDpsSecurityClientKey.getDeviceSRK();
+                mockedSecurityClientTpm.getDeviceStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
-                mockedDpsSecurityClientKey.getSSLContext();
+                mockedSecurityClientTpm.getSSLContext();
                 result = mockedSslContext;
                 mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any, (ResponseCallback)any, any);
             }
@@ -1030,7 +1030,7 @@ public class RegisterTaskTest
                 result = TEST_AUTH_KEY;
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
-                mockedDpsSecurityClientKey.signData((byte[])any);
+                mockedSecurityClientTpm.signData((byte[])any);
                 result = "testToken".getBytes();
                 mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);

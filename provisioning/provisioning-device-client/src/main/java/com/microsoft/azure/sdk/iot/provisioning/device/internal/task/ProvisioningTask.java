@@ -5,16 +5,15 @@
  *
  */
 
-package com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask;
+package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
-import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientConfig;
-import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatusCallback;
+import com.microsoft.azure.sdk.iot.provisioning.device.*;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
+import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
-import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientRegistrationCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
-import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientAuthenticationException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
@@ -22,9 +21,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientX509;
 
 import java.util.concurrent.*;
 
-import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.DPS_DEVICE_STATUS_ASSIGNED;
-import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.DPS_DEVICE_STATUS_ASSIGNING;
-import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.DPS_DEVICE_STATUS_ERROR;
+import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.*;
 
 public class ProvisioningTask implements Callable
 {
@@ -35,9 +32,6 @@ public class ProvisioningTask implements Callable
     private SecurityClient securityClient = null;
     private ProvisioningDeviceClientContract provisioningDeviceClientContract = null;
     private ProvisioningDeviceClientConfig provisioningDeviceClientConfig = null;
-
-    private ProvisioningDeviceClientStatusCallback provisioningDeviceClientStatusCallback = null;
-    private Object dpsStatusCallbackContext = null;
 
     private ProvisioningDeviceClientRegistrationCallback provisioningDeviceClientRegistrationCallback = null;
     private Object dpsRegistrationCallbackContext = null;
@@ -50,24 +44,12 @@ public class ProvisioningTask implements Callable
     /**
      * Constructor for creating a provisioning task
      * @param provisioningDeviceClientConfig Config that contains details pertaining to Service
-     * @param securityClient Security client that holds information about device authentication
      * @param provisioningDeviceClientContract Contract with the service over the specified protocol
-     * @param provisioningDeviceClientStatusCallback Callback which provides status of the device during registration. Can be {@code null}
-     * @param dpsStatusCallbackContext Context for the callback
      * @throws ProvisioningDeviceClientException If any of the input parameters are invalid then this exception is thrown
      */
     public ProvisioningTask(ProvisioningDeviceClientConfig provisioningDeviceClientConfig,
-                            SecurityClient securityClient,
-                            ProvisioningDeviceClientContract provisioningDeviceClientContract,
-                            ProvisioningDeviceClientStatusCallback provisioningDeviceClientStatusCallback,
-                            Object dpsStatusCallbackContext) throws ProvisioningDeviceClientException
+                            ProvisioningDeviceClientContract provisioningDeviceClientContract) throws ProvisioningDeviceClientException
     {
-        //SRS_provisioningtask_25_002: [ Constructor throw ProvisioningDeviceClientException if provisioningDeviceClientConfig , securityClient or provisioningDeviceClientContract is null.]
-        if (securityClient == null)
-        {
-            throw new ProvisioningDeviceClientException(new IllegalArgumentException("security client cannot be null"));
-        }
-
         if (provisioningDeviceClientContract == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("DPS Transport cannot be null"));
@@ -78,53 +60,36 @@ public class ProvisioningTask implements Callable
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("Config cannot be null"));
         }
 
-        //SRS_provisioningtask_25_001: [ Constructor shall save provisioningDeviceClientConfig , securityClient, provisioningDeviceClientContract, provisioningDeviceClientStatusCallback, dpsStatusCallbackContext.]
+        //SRS_ProvisioningTask_25_001: [ Constructor shall save provisioningDeviceClientConfig, provisioningDeviceClientContract.]
         this.provisioningDeviceClientConfig = provisioningDeviceClientConfig;
-        this.securityClient = securityClient;
+        this.securityClient = provisioningDeviceClientConfig.getSecurityClient();
+
+        if (securityClient == null)
+        {
+            //SRS_ProvisioningTask_25_002: [ Constructor shall shall throw ProvisioningDeviceClientException if the securityClient is null.]
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("Security client cannot be null"));
+        }
+
         this.provisioningDeviceClientContract = provisioningDeviceClientContract;
-        this.provisioningDeviceClientStatusCallback = provisioningDeviceClientStatusCallback;
-        this.dpsStatusCallbackContext = dpsStatusCallbackContext;
-        this.authorization = new Authorization();
-        //SRS_ProvisioningTask_25_015: [ Constructor shall start the executor with a fixed thread pool of size 2.]
-        this.executor = Executors.newFixedThreadPool(MAX_THREADS_TO_RUN);
+        this.provisioningDeviceClientRegistrationCallback = provisioningDeviceClientConfig.getRegistrationCallback();
+        this.dpsRegistrationCallbackContext = provisioningDeviceClientConfig.getRegistrationCallbackContext();
 
-        //SRS_provisioningtask_25_003: [ Constructor shall trigger status callback if provided with status DPS_DEVICE_STATUS_UNAUTHENTICATED.]
-        this.dpsStatus = ProvisioningDeviceClientStatus.DPS_DEVICE_STATUS_UNAUTHENTICATED;
-        invokeStatusCallback(this.dpsStatus, null);
-    }
-
-    /**
-     * Setter for the registration call back
-     * @param provisioningDeviceClientRegistrationCallback Callback to provide details of the registration. Cannot be {@code null}
-     * @param dpsRegistrationCallbackContext Context for the callback
-     * @throws ProvisioningDeviceClientException If any of the input parameters are invalid
-     */
-    public void setRegistrationCallback(ProvisioningDeviceClientRegistrationCallback provisioningDeviceClientRegistrationCallback,
-                                        Object dpsRegistrationCallbackContext) throws ProvisioningDeviceClientException
-    {
-        //SRS_provisioningtask_25_004: [ This method shall throw ProvisioningDeviceClientException if the provisioningDeviceClientRegistrationCallback is null. ]
+        //SRS_ProvisioningTask_25_004: [ This method shall throw ProvisioningDeviceClientException if the provisioningDeviceClientRegistrationCallback is null. ]
         if (provisioningDeviceClientRegistrationCallback == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("Registration callback cannot be null"));
         }
-        //SRS_provisioningtask_25_005: [ This method shall save the registration callback. ]
-        this.provisioningDeviceClientRegistrationCallback = provisioningDeviceClientRegistrationCallback;
-        this.dpsRegistrationCallbackContext = dpsRegistrationCallbackContext;
+
+        this.authorization = new Authorization();
+        //SRS_ProvisioningTask_25_015: [ Constructor shall start the executor with a fixed thread pool of size 2.]
+        this.executor = Executors.newFixedThreadPool(MAX_THREADS_TO_RUN);
     }
 
-    private void invokeStatusCallback(ProvisioningDeviceClientStatus status, Exception e)
-    {
-        if (this.provisioningDeviceClientStatusCallback != null)
-        {
-            this.provisioningDeviceClientStatusCallback.run(status, e, this.dpsStatusCallbackContext);
-        }
-    }
-
-    private void invokeRegistrationCallback(RegistrationInfo registrationInfo) throws ProvisioningDeviceClientException
+    private void invokeRegistrationCallback(RegistrationResult registrationInfo, Exception e) throws ProvisioningDeviceClientException
     {
         if (this.provisioningDeviceClientRegistrationCallback != null)
         {
-            this.provisioningDeviceClientRegistrationCallback.run(registrationInfo, this.dpsRegistrationCallbackContext);
+            this.provisioningDeviceClientRegistrationCallback.run(registrationInfo, e, this.dpsRegistrationCallbackContext);
         }
         else
         {
@@ -144,7 +109,7 @@ public class ProvisioningTask implements Callable
 
         if (registrationResponseParser == null)
         {
-            this.dpsStatus = DPS_DEVICE_STATUS_ERROR;
+            this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;
             throw new ProvisioningDeviceClientAuthenticationException("Registration response could not be retrieved, " +
                                                                               "authentication failure");
         }
@@ -152,7 +117,7 @@ public class ProvisioningTask implements Callable
         ProvisioningStatus status = ProvisioningStatus.fromString(registrationResponseParser.getStatus());
         if (status == null)
         {
-            this.dpsStatus = DPS_DEVICE_STATUS_ERROR;
+            this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;
             throw new ProvisioningDeviceClientAuthenticationException("Received null status for registration, " +
                                                                               "authentication failure");
         }
@@ -179,69 +144,72 @@ public class ProvisioningTask implements Callable
 
         if (statusResponseParser == null)
         {
-            this.dpsStatus = DPS_DEVICE_STATUS_ERROR;
+            this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;
             throw new ProvisioningDeviceClientAuthenticationException("Status response could not be retrieved, " +
                                                                               "authentication failure");
         }
 
          if (statusResponseParser.getStatus() == null)
         {
-            this.dpsStatus = DPS_DEVICE_STATUS_ERROR;
+            this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;
             throw new ProvisioningDeviceClientAuthenticationException("Status could not be retrieved, " +
                                                                               "authentication failure");
         }
 
         if (ProvisioningStatus.fromString(statusResponseParser.getStatus()) == null)
         {
-            this.dpsStatus = DPS_DEVICE_STATUS_ERROR;
+            this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;
             throw new ProvisioningDeviceClientAuthenticationException("Status could not be retrieved, " +
                                                                               "authentication failure");
         }
         return statusResponseParser;
     }
 
-    private void executeStateMachineForStatus(ProvisioningStatus nextStatus, ResponseParser registrationResponseParser)
+    private void executeStateMachineForStatus(ResponseParser registrationResponseParser)
             throws TimeoutException, InterruptedException, ExecutionException, ProvisioningDeviceClientException
     {
         boolean isContinue = false;
         ResponseParser statusResponseParser = registrationResponseParser;
+        ProvisioningStatus nextStatus = ProvisioningStatus.fromString(registrationResponseParser.getStatus());
         // continue invoking for status until a terminal state is reached
         do
         {
+            if (nextStatus == null)
+            {
+                throw new ProvisioningDeviceClientException("Did not receive a valid status");
+            }
+
             switch (nextStatus)
             {
                 case UNASSIGNED:
-                    this.dpsStatus = DPS_DEVICE_STATUS_ASSIGNING;
-                    invokeStatusCallback(this.dpsStatus, null);
                     //intended fall through
                 case ASSIGNING:
                     statusResponseParser = this.invokeStatus(registrationResponseParser.getOperationId());
-                    if (ProvisioningStatus.fromString(statusResponseParser.getStatus()) == ProvisioningStatus.ASSIGNING)
-                    {
-                        this.dpsStatus = DPS_DEVICE_STATUS_ASSIGNING;
-                        invokeStatusCallback(this.dpsStatus, null);
-                    }
                     nextStatus = ProvisioningStatus.fromString(statusResponseParser.getStatus());
                     isContinue = true;
                     break;
                 case ASSIGNED:
-                    this.dpsStatus = DPS_DEVICE_STATUS_ASSIGNED;
-                    this.invokeStatusCallback(this.dpsStatus, null);
-                    RegistrationInfo registrationInfo = new RegistrationInfo(
+                    this.dpsStatus = PROVISIONING_DEVICE_STATUS_ASSIGNED;
+                    RegistrationResult registrationInfo = new RegistrationResult(
                             statusResponseParser.getRegistrationStatus().getAssignedHub(),
-                            statusResponseParser.getRegistrationStatus().getDeviceId(), DPS_DEVICE_STATUS_ASSIGNED);
-                    this.invokeRegistrationCallback(registrationInfo);
+                            statusResponseParser.getRegistrationStatus().getDeviceId(), PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                    this.invokeRegistrationCallback(registrationInfo, null);
                     isContinue = false;
                     break;
                 case FAILED:
-                    //intended fall through
-                case DISABLED:
-                    this.dpsStatus = DPS_DEVICE_STATUS_ERROR;
+                    this.dpsStatus = PROVISIONING_DEVICE_STATUS_FAILED;
                     ProvisioningDeviceHubException dpsHubException = new ProvisioningDeviceHubException(
                             statusResponseParser.getRegistrationStatus().getErrorMessage());
-                    this.invokeStatusCallback(this.dpsStatus, dpsHubException);
-                    registrationInfo = new RegistrationInfo(null, null, DPS_DEVICE_STATUS_ERROR);
-                    this.invokeRegistrationCallback(registrationInfo);
+                    registrationInfo = new RegistrationResult(null, null, PROVISIONING_DEVICE_STATUS_FAILED);
+                    this.invokeRegistrationCallback(registrationInfo, dpsHubException);
+                    isContinue = false;
+                    break;
+                case DISABLED:
+                    this.dpsStatus = PROVISIONING_DEVICE_STATUS_DISABLED;
+                    dpsHubException = new ProvisioningDeviceHubException(
+                            statusResponseParser.getRegistrationStatus().getErrorMessage());
+                    registrationInfo = new RegistrationResult(null, null, PROVISIONING_DEVICE_STATUS_DISABLED);
+                    this.invokeRegistrationCallback(registrationInfo, dpsHubException);
                     isContinue = false;
                     break;
             }
@@ -262,18 +230,18 @@ public class ProvisioningTask implements Callable
     {
         try
         {
-            //SRS_provisioningtask_25_015: [ This method shall invoke open call on the contract.]
+            //SRS_ProvisioningTask_25_015: [ This method shall invoke open call on the contract.]
             provisioningDeviceClientContract.open(new RequestData(securityClient.getRegistrationId(), securityClient.getSSLContext(), securityClient instanceof SecurityClientX509));
-            //SRS_provisioningtask_25_007: [ This method shall invoke Register task and status task to execute the state machine of the service as per below rules.]
+            //SRS_ProvisioningTask_25_007: [ This method shall invoke Register task and status task to execute the state machine of the service as per below rules.]
             /*
             Service State Machine Rules
 
-            SRS_provisioningtask_25_008: [ This method shall invoke register task and wait for it to complete.]
-            SRS_provisioningtask_25_009: [ This method shall invoke status callback with status DPS_DEVICE_STATUS_AUTHENTICATED if register task completes successfully.]
-            SRS_provisioningtask_25_010: [ This method shall invoke status task to get the current state of the device registration and wait until a terminal state is reached.]
-            SRS_provisioningtask_25_011: [ Upon reaching one of the terminal state i.e ASSIGNED, this method shall invoke registration callback with the information retrieved from service for IotHub Uri and DeviceId. Also if status callback is defined then it shall be invoked with status DPS_DEVICE_STATUS_ASSIGNED.]
-            SRS_provisioningtask_25_012: [ Upon reaching one of the terminal states i.e FAILED or DISABLED, this method shall invoke registration callback with error message received from service. Also if status callback is defined then it shall be invoked with status DPS_DEVICE_STATUS_ERROR.]
-            SRS_provisioningtask_25_013: [ Upon reaching intermediate state i.e UNASSIGNED or ASSIGNING, this method shall continue to query for status until a terminal state is reached. Also if status callback is defined then it shall be invoked with status DPS_DEVICE_STATUS_ASSIGNING.]
+            SRS_ProvisioningTask_25_008: [ This method shall invoke register task and wait for it to complete.]
+            SRS_ProvisioningTask_25_009: [ This method shall invoke status callback with status PROVISIONING_DEVICE_STATUS_AUTHENTICATED if register task completes successfully.]
+            SRS_ProvisioningTask_25_010: [ This method shall invoke status task to get the current state of the device registration and wait until a terminal state is reached.]
+            SRS_ProvisioningTask_25_011: [ Upon reaching one of the terminal state i.e ASSIGNED, this method shall invoke registration callback with the information retrieved from service for IotHub Uri and DeviceId. Also if status callback is defined then it shall be invoked with status PROVISIONING_DEVICE_STATUS_ASSIGNED.]
+            SRS_ProvisioningTask_25_012: [ Upon reaching one of the terminal states i.e FAILED or DISABLED, this method shall invoke registration callback with error message received from service. Also if status callback is defined then it shall be invoked with status PROVISIONING_DEVICE_STATUS_ERROR.]
+            SRS_ProvisioningTask_25_013: [ Upon reaching intermediate state i.e UNASSIGNED or ASSIGNING, this method shall continue to query for status until a terminal state is reached. Also if status callback is defined then it shall be invoked with status PROVISIONING_DEVICE_STATUS_ASSIGNING.]
             State diagram :
 
             One of the following states can be reached from register or status task - (A) Unassigned (B) Assigning (C) Assigned (D) Fail (E) Disable
@@ -283,18 +251,16 @@ public class ProvisioningTask implements Callable
                 Status-State	B, C, D, E	    C, D, E	    terminal	terminal	terminal
              */
             ResponseParser registrationResponseParser = this.invokeRegister();
-            this.dpsStatus = ProvisioningDeviceClientStatus.DPS_DEVICE_STATUS_AUTHENTICATED;
-            invokeStatusCallback(this.dpsStatus, null);
 
-            this.executeStateMachineForStatus(ProvisioningStatus.fromString(registrationResponseParser.getStatus()), registrationResponseParser);
+            this.executeStateMachineForStatus(registrationResponseParser);
             this.close();
         }
         catch (ExecutionException | TimeoutException | ProvisioningDeviceClientException e)
         {
-            //SRS_provisioningtask_25_006: [ This method shall invoke the status callback, if any of the task fail or throw any exception. ]
-            this.dpsStatus = DPS_DEVICE_STATUS_ERROR;
-            invokeStatusCallback(this.dpsStatus, e);
-            //SRS_provisioningtask_25_015: [ This method shall invoke close call on the contract and close the threads started.]
+            //SRS_ProvisioningTask_25_006: [ This method shall invoke the status callback, if any of the task fail or throw any exception. ]
+            this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;
+            invokeRegistrationCallback(new RegistrationResult(null, null, PROVISIONING_DEVICE_STATUS_ERROR), e);
+            //SRS_ProvisioningTask_25_015: [ This method shall invoke close call on the contract and close the threads started.]
             this.close();
         }
         return null;
@@ -303,10 +269,10 @@ public class ProvisioningTask implements Callable
     /**
      * This method shall shutdown the existing threads if not already done so.
      */
-    public void close() throws ProvisioningDeviceConnectionException
+    private void close() throws ProvisioningDeviceConnectionException
     {
         provisioningDeviceClientContract.close();
-        //SRS_provisioningtask_25_014: [ This method shall shutdown the executors if they have not already shutdown. ]
+        //SRS_ProvisioningTask_25_014: [ This method shall shutdown the executors if they have not already shutdown. ]
         if (executor != null && !executor.isShutdown())
         {
             executor.shutdownNow();

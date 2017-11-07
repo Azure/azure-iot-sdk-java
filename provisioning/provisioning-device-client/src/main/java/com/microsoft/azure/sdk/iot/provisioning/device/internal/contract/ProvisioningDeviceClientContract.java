@@ -7,22 +7,18 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract;
 
-import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientConfig;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http.ContractAPIHttp;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceTransportException;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.RequestData;
-
-import javax.net.ssl.SSLContext;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 
 public abstract class ProvisioningDeviceClientContract
 {
     /**
      * Static method to create contracts with the service over the specified protocol
-     * @param provisioningDeviceClientConfig Config used to specify details of the service
-     * @return Implementation of the relevant contract for the requested protocol
+     *
+     * @param provisioningDeviceClientConfig@return Implementation of the relevant contract for the requested protocol
      * @throws ProvisioningDeviceClientException This exception is thrown if the contract implementation could not be instantiated.
      */
     public static ProvisioningDeviceClientContract createProvisioningContract(ProvisioningDeviceClientConfig provisioningDeviceClientConfig) throws ProvisioningDeviceClientException
@@ -46,7 +42,7 @@ public abstract class ProvisioningDeviceClientContract
                 return null;
 
             case HTTPS:
-                return new ContractAPIHttp(provisioningDeviceClientConfig.getDpsScopeId(), provisioningDeviceClientConfig.getDpsURI());
+                return new ContractAPIHttp(provisioningDeviceClientConfig.getScopeId(), provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint());
 
             default:
                 throw new ProvisioningDeviceClientException("Unknown protocol");

@@ -7,7 +7,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.contract;
 
-import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientConfig;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http.ContractAPIHttp;
@@ -41,9 +41,9 @@ public class ProvisioningDeviceClientContractTest
         {
             {
 
-                mockedProvisioningDeviceClientConfig.getDpsScopeId();
+                mockedProvisioningDeviceClientConfig.getScopeId();
                 result = TEST_SCOPE_ID;
-                mockedProvisioningDeviceClientConfig.getDpsURI();
+                mockedProvisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint();
                 result = TEST_URI;
                 mockedProvisioningDeviceClientConfig.getProtocol();
                 result = ProvisioningDeviceClientTransportProtocol.HTTPS;
@@ -66,9 +66,9 @@ public class ProvisioningDeviceClientContractTest
         {
             {
 
-                mockedProvisioningDeviceClientConfig.getDpsScopeId();
+                mockedProvisioningDeviceClientConfig.getScopeId();
                 result = new ProvisioningDeviceClientException("lower layer Exception");
-                mockedProvisioningDeviceClientConfig.getDpsURI();
+                mockedProvisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint();
                 result = TEST_URI;
                 mockedProvisioningDeviceClientConfig.getProtocol();
                 result = ProvisioningDeviceClientTransportProtocol.HTTPS;

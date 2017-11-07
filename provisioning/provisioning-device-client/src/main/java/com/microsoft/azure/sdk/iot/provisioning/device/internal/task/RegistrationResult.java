@@ -5,12 +5,12 @@
  *
  */
 
-package com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask;
+package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
-import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientRegistrationInfo;
+import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientRegistrationResult;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
 
-class RegistrationInfo extends ProvisioningDeviceClientRegistrationInfo
+public class RegistrationResult extends ProvisioningDeviceClientRegistrationResult
 {
     /**
      * Constructor to set iothub uri, device id and status of the service as retrieved
@@ -18,11 +18,11 @@ class RegistrationInfo extends ProvisioningDeviceClientRegistrationInfo
      * @param deviceId Value of device id. Can be {@code null}
      * @param dpsStatus Status of the service.
      */
-    RegistrationInfo(String iothubUri, String deviceId, ProvisioningDeviceClientStatus dpsStatus)
+    RegistrationResult(String iothubUri, String deviceId, ProvisioningDeviceClientStatus dpsStatus)
     {
         super();
         this.iothubUri = iothubUri;
         this.deviceId = deviceId;
-        this.dpsStatus = dpsStatus;
+        this.provisioningDeviceClientStatus = dpsStatus;
     }
 }

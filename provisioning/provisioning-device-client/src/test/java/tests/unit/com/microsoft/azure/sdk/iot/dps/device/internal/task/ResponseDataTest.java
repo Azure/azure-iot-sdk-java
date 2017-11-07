@@ -5,16 +5,16 @@
  *
  */
 
-package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.provisioningtask;
+package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.task;
 
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ContractState;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ResponseData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
 import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ContractState.DPS_REGISTRATION_UNKNOWN;
+import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState.DPS_REGISTRATION_UNKNOWN;
 import static mockit.Deencapsulation.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

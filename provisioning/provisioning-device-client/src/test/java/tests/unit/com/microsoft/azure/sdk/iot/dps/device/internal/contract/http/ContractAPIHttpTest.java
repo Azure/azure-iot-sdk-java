@@ -15,8 +15,8 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPath
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http.ContractAPIHttp;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.RequestData;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ResponseData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;

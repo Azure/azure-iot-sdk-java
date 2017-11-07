@@ -5,7 +5,7 @@
  *
  */
 
-package com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask;
+package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
 import javax.net.ssl.SSLContext;
 

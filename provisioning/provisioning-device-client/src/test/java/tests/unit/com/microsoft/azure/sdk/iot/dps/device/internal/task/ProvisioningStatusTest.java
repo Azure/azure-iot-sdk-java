@@ -5,13 +5,13 @@
  *
  */
 
-package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.provisioningtask;
+package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.task;
 
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ProvisioningStatus;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ProvisioningStatus;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
-import static com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ProvisioningStatus.*;
+import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ProvisioningStatus.*;
 import static org.junit.Assert.assertEquals;
 
 /* Unit tests for Provisioning Status

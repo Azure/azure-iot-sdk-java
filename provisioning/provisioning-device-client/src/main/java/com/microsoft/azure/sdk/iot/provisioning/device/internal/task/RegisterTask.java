@@ -5,8 +5,9 @@
  *
  */
 
-package com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask;
+package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientX509;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
@@ -15,11 +16,10 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegisterResponseTPMParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
-import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientKey;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 
 import javax.net.ssl.SSLContext;
@@ -29,7 +29,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
-import static com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ContractState.DPS_REGISTRATION_RECEIVED;
+import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState.DPS_REGISTRATION_RECEIVED;
 
 public class RegisterTask implements Callable
 {
@@ -151,21 +151,21 @@ public class RegisterTask implements Callable
         }
     }
 
-    private String constructSasToken(String registrationId, int expiryTime) throws ProvisioningDeviceClientException, UnsupportedEncodingException
+    private String constructSasToken(String registrationId, int expiryTime) throws ProvisioningDeviceClientException, UnsupportedEncodingException, SecurityClientException
     {
         //"SharedAccessSignature sr=%s&sig=%s&se=%s&skn=", token_scope, STRING_c_str(urlEncodedSignature), expire_token);
         if (expiryTime <= 0)
         {
             throw new IllegalArgumentException("expiry time cannot be negative or zero");
         }
-        String tokenScope = new UrlPathBuilder(provisioningDeviceClientConfig.getDpsScopeId()).generateSasTokenUrl(registrationId);
+        String tokenScope = new UrlPathBuilder(provisioningDeviceClientConfig.getScopeId()).generateSasTokenUrl(registrationId);
         if (tokenScope == null || tokenScope.isEmpty())
         {
             throw new ProvisioningDeviceClientException("Could not construct token scope");
         }
-        SecurityClientKey dpsSecurityClientKey = (SecurityClientKey) securityClient;
+        SecurityClientTpm securityClientTpm = (SecurityClientTpm) securityClient;
         Long expiryTimeUTC = System.currentTimeMillis() / 1000 + expiryTime;
-        byte[] token = dpsSecurityClientKey.signData(tokenScope.concat("\n" + String.valueOf(expiryTimeUTC)).getBytes());
+        byte[] token = securityClientTpm.signData(tokenScope.concat("\n" + String.valueOf(expiryTimeUTC)).getBytes());
         if (token == null || token.length == 0)
         {
             throw new ProvisioningDeviceSecurityException("Security client could not sign data successfully");
@@ -178,9 +178,9 @@ public class RegisterTask implements Callable
     }
 
     private ResponseParser processWithNonce(ResponseData responseDataForNonce,
-                                            SecurityClientKey dpsSecurityClientKey,
+                                            SecurityClientTpm securityClientTpm,
                                             RequestData requestData)
-            throws IOException, InterruptedException, ProvisioningDeviceClientException
+            throws IOException, InterruptedException, ProvisioningDeviceClientException,SecurityClientException
     {
 
         RegisterResponseTPMParser registerResponseTPMParser = RegisterResponseTPMParser.createFromJson(new String(responseDataForNonce.getResponseData()));
@@ -189,7 +189,7 @@ public class RegisterTask implements Callable
         {
             //SRS_RegisterTask_25_018: [ If the provided security client is for Key then, this method shall import the Base 64 encoded Authentication Key into the HSM using the security client and pass the exception to the user on failure. ]
             byte[] base64DecodedAuthKey = Base64.decodeBase64Local(registerResponseTPMParser.getAuthenticationKey().getBytes());
-            dpsSecurityClientKey.importKey(base64DecodedAuthKey);
+            securityClientTpm.decryptAndStoreKey(base64DecodedAuthKey);
 
             /*SRS_RegisterTask_25_014: [ If the provided security client is for Key then, this method shall construct SasToken by doing the following
 
@@ -200,7 +200,7 @@ public class RegisterTask implements Callable
             String sasToken = null;
             try
             {
-                sasToken = this.constructSasToken(dpsSecurityClientKey.getRegistrationId(), DEFAULT_EXPIRY_TIME_IN_SECS);
+                sasToken = this.constructSasToken(securityClientTpm.getRegistrationId(), DEFAULT_EXPIRY_TIME_IN_SECS);
             }
             catch (SecurityClientException e)
             {
@@ -248,21 +248,21 @@ public class RegisterTask implements Callable
 
         try
         {
-            SecurityClientKey dpsSecurityClientKey = (SecurityClientKey) securityClient;
-            if (dpsSecurityClientKey.getDeviceEk() == null || dpsSecurityClientKey.getDeviceSRK() == null)
+            SecurityClientTpm securityClientTpm = (SecurityClientTpm) securityClient;
+            if (securityClientTpm.getDeviceEnrollmentKey() == null || securityClientTpm.getDeviceStorageRootKey() == null)
             {
                 throw new ProvisioningDeviceSecurityException(new IllegalArgumentException("Ek or SRK cannot be null"));
             }
 
             //SRS_RegisterTask_25_009: [ If the provided security client is for Key then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
-            SSLContext sslContext = dpsSecurityClientKey.getSSLContext();
+            SSLContext sslContext = securityClientTpm.getSSLContext();
             if (sslContext == null)
             {
                 throw new ProvisioningDeviceSecurityException("Null SSL Context received from security client");
             }
             authorization.setSslContext(sslContext);
 
-            RequestData requestData = new RequestData(dpsSecurityClientKey.getDeviceEk(), dpsSecurityClientKey.getDeviceSRK(), registrationId, sslContext, null);
+            RequestData requestData = new RequestData(securityClientTpm.getDeviceEnrollmentKey(), securityClientTpm.getDeviceStorageRootKey(), registrationId, sslContext, null);
 
             //SRS_RegisterTask_25_011: [ If the provided security client is for Key then, this method shall trigger requestNonceForTPM on the contract API and wait for Authentication Key and decode it from Base64. Also this method shall pass the exception back to the user if it fails. ]
             ResponseData nonceResponseData = new ResponseData();
@@ -275,7 +275,7 @@ public class RegisterTask implements Callable
 
             if (nonceResponseData.getResponseData() != null && nonceResponseData.getContractState() == DPS_REGISTRATION_RECEIVED)
             {
-                return processWithNonce(nonceResponseData, dpsSecurityClientKey, requestData);
+                return processWithNonce(nonceResponseData, securityClientTpm, requestData);
             }
             else
             {
@@ -297,7 +297,7 @@ public class RegisterTask implements Callable
             {
                 return this.authenticateWithX509(this.securityClient.getRegistrationId());
             }
-            else if (this.securityClient instanceof SecurityClientKey)
+            else if (this.securityClient instanceof SecurityClientTpm)
             {
                 return this.authenticateWithSasToken(this.securityClient.getRegistrationId());
             }

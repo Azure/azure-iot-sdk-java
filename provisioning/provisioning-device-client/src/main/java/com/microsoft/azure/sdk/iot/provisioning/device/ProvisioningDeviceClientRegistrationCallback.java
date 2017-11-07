@@ -9,5 +9,5 @@ package com.microsoft.azure.sdk.iot.provisioning.device;
 
 public interface ProvisioningDeviceClientRegistrationCallback
 {
-    void run(ProvisioningDeviceClientRegistrationInfo provisioningDeviceClientRegistrationInfo, Object context);
+    void run(ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationResult, Exception e, Object context);
 }

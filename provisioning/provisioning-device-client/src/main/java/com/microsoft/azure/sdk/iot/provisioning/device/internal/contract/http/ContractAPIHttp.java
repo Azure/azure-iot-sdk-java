@@ -18,11 +18,10 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.Respons
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegisterRequestParser;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ContractState;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.RequestData;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ResponseData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;

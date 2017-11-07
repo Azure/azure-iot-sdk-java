@@ -5,9 +5,9 @@
  *
  */
 
-package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.provisioningtask;
+package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.task;
 
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.RequestData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
@@ -16,9 +16,9 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegisterRequestParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.Authorization;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ResponseData;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.StatusTask;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.Authorization;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.StatusTask;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -31,7 +31,7 @@ import javax.net.ssl.SSLContext;
 
 import java.io.IOException;
 
-import static com.microsoft.azure.sdk.iot.provisioning.device.internal.provisioningtask.ContractState.DPS_REGISTRATION_RECEIVED;
+import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState.DPS_REGISTRATION_RECEIVED;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
