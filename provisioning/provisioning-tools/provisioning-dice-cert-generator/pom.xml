@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>dice-client</artifactId>
+            <artifactId>dice-client-emulator</artifactId>
             <version>0.0.1</version>
         </dependency>
     </dependencies>

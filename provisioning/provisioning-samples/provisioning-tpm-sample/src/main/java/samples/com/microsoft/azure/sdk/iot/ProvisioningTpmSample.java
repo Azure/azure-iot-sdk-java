@@ -7,7 +7,11 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
+import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientTpm;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityClientTPMEmulator;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
@@ -19,47 +23,28 @@ import java.util.Scanner;
 public class ProvisioningTpmSample
 {
     //private static final String scopeId = "[Your scope ID here]";
-    private static final String scopeId = "0NE3F78B3C0";
-    //private static final String dpsUri = "[Your DPS HUB here]";
-    private static final String dpsUri = "dpspp9.azure-devices-provisioning-int.net";
+    private static final String scopeId = "0ne00001D71";
+    //private static final String globalEndpoint = "[Your Provisioning Service Global Endpoint here]";
+    private static final String globalEndpoint = "global.azure-devices-provisioning.net";
     private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
+    private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milli seconds
 
-    private static ProvisioningDeviceClientRegistrationInfo provisioningDeviceClientRegistrationInfoClient = new ProvisioningDeviceClientRegistrationInfo();
-    private static final int MAX_TIME_TO_WAIT_FOR_DPS_REGISTRATION = 1000; // in milli seconds
-
-    static class DPSStatus
+    static class ProvisioningStatus
     {
-        ProvisioningDeviceClientStatus status;
-        Exception reason;
-    }
-
-    static class ProvisioningDeviceClientStatusCallbackImpl implements ProvisioningDeviceClientStatusCallback
-    {
-        @Override
-        public void run(ProvisioningDeviceClientStatus status, Exception exception, Object context)
-        {
-            System.out.println("DPS status " + status );
-            if (exception != null)
-            {
-                exception.printStackTrace();
-            }
-            if (context instanceof DPSStatus)
-            {
-                DPSStatus dpsStatus = (DPSStatus) context;
-                dpsStatus.status = status;
-                dpsStatus.reason = exception;
-            }
-        }
+        ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationInfoClient = new ProvisioningDeviceClientRegistrationResult();
+        Exception exception;
     }
 
     static class ProvisioningDeviceClientRegistrationCallbackImpl implements ProvisioningDeviceClientRegistrationCallback
     {
         @Override
-        public void run(ProvisioningDeviceClientRegistrationInfo provisioningDeviceClientRegistrationInfo, Object context)
+        public void run(ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationResult, Exception exception, Object context)
         {
-            if (context instanceof ProvisioningDeviceClientRegistrationInfo)
+            if (context instanceof ProvisioningStatus)
             {
-                provisioningDeviceClientRegistrationInfoClient = provisioningDeviceClientRegistrationInfo;
+                ProvisioningStatus status = (ProvisioningStatus) context;
+                status.provisioningDeviceClientRegistrationInfoClient = provisioningDeviceClientRegistrationResult;
+                status.exception = exception;
             }
             else
             {
@@ -72,31 +57,45 @@ public class ProvisioningTpmSample
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
+        SecurityClientTpm securityClientTPMEmulator = null;
+
+        try
+        {
+            securityClientTPMEmulator = new SecurityClientTPMEmulator();
+            System.out.println("EK - " + new String(Base64.encodeBase64Local(securityClientTPMEmulator.getDeviceEnrollmentKey())));
+            System.out.println("Registration Id - " + securityClientTPMEmulator.getRegistrationId());
+        }
+        catch (SecurityClientException e)
+        {
+            e.printStackTrace();
+        }
+
         ProvisioningDeviceClient provisioningDeviceClient = null;
         try
         {
-            DPSStatus dpsStatus = new DPSStatus();
-            ProvisioningDeviceClientConfig provisioningDeviceClientConfig = new ProvisioningDeviceClientConfig(dpsUri, scopeId, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, new SecurityClientTPMEmulator());
+            ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 
-            provisioningDeviceClient = new ProvisioningDeviceClient(provisioningDeviceClientConfig, new ProvisioningDeviceClientStatusCallbackImpl(), dpsStatus);
+            provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, scopeId, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, securityClientTPMEmulator);
 
-            provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningDeviceClientRegistrationInfoClient);
-
-            while (dpsStatus.status != ProvisioningDeviceClientStatus.DPS_DEVICE_STATUS_ASSIGNED)
+            provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus);
+            while (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
             {
-                if (dpsStatus.status == ProvisioningDeviceClientStatus.DPS_DEVICE_STATUS_ERROR)
+                if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ERROR ||
+                        provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_DISABLED ||
+                        provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_FAILED)
                 {
+                    provisioningStatus.exception.printStackTrace();
                     System.out.println("Dps error, bailing out");
                     break;
                 }
                 System.out.println("Waiting for Dps Hub to register");
-                Thread.sleep(MAX_TIME_TO_WAIT_FOR_DPS_REGISTRATION);
+                Thread.sleep(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
             }
 
-            if (provisioningDeviceClientRegistrationInfoClient.getDpsStatus() == ProvisioningDeviceClientStatus.DPS_DEVICE_STATUS_ASSIGNED)
+            if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
             {
-                System.out.println("IotHUb Uri : " + provisioningDeviceClientRegistrationInfoClient.getIothubUri());
-                System.out.println("Device ID : " + provisioningDeviceClientRegistrationInfoClient.getDeviceId());
+                System.out.println("IotHUb Uri : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
+                System.out.println("Device ID : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
                 // connect to iothub
             }
         }
@@ -105,7 +104,7 @@ public class ProvisioningTpmSample
             System.out.println("DPS threw a exception" + e.getMessage());
             if (provisioningDeviceClient != null)
             {
-                provisioningDeviceClient.close();
+                provisioningDeviceClient.closeNow();
             }
         }
 
@@ -115,7 +114,7 @@ public class ProvisioningTpmSample
         scanner.nextLine();
         if (provisioningDeviceClient != null)
         {
-            provisioningDeviceClient.close();
+            provisioningDeviceClient.closeNow();
         }
 
         System.out.println("Shutting down...");
