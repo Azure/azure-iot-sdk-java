@@ -7,11 +7,11 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-    <artifactId>security-client</artifactId>
-    <name>Provisioning Security Client</name>
+    <artifactId>x509-client</artifactId>
+    <name>Provisioning Security X509 Client</name>
     <version>0.0.1</version>
     <packaging>jar</packaging>
-    <description>The Microsoft Azure IoT Provisioning Security client for Java</description>
+    <description>The Microsoft Azure IoT Provisioning Security X509 client for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
     <developers>
         <developer>
@@ -36,23 +36,20 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.microsoft.msr</groupId>
-            <artifactId>riot</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-            <optional>true</optional>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>1.46</version>
         </dependency>
         <dependency>
-            <groupId>com.github.microsoft</groupId>
-            <artifactId>TSS.Java</artifactId>
-            <version>0.2.0</version>
-            <scope>compile</scope>
-            <optional>true</optional>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
+            <artifactId>security-client</artifactId>
+            <version>0.0.1</version>
         </dependency>
         <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.5</version>
+            <groupId>junit</groupId>
+            <artifactId>junit-dep</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jmockit</groupId>
@@ -61,10 +58,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit-dep</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.5</version>
         </dependency>
     </dependencies>
     <build>

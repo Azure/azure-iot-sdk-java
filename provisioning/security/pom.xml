@@ -13,8 +13,11 @@
     <description>The Microsoft Azure IoT Provisioning Security SDK for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
     <modules>
+        <module>x509-client</module>
         <module>dice-client</module>
+        <module>dice-client-emulator</module>
         <module>tpm-client</module>
+        <module>tpm-client-emulator</module>
         <module>security-client</module>
     </modules>
 </project>

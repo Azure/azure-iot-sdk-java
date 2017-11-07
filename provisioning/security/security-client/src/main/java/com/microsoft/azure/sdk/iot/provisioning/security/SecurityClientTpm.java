@@ -9,28 +9,21 @@ package com.microsoft.azure.sdk.iot.provisioning.security;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 import org.apache.commons.codec.binary.Base32;
 
-import java.io.InputStream;
 import java.security.*;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.util.Collection;
-import java.util.UUID;
 
-public abstract class SecurityClientKey extends SecurityClient
+public abstract class SecurityClientTpm extends SecurityClient
 {
-    private HsmType HsmType;
-
-    abstract public byte[] importKey(byte[] key) throws IOException;
-    abstract public byte[] getDeviceEk();
-    abstract public byte[] getDeviceSRK();
-    abstract public byte[] signData(byte[] data);
+    private static final String SHA_256 = "SHA-256";
+    abstract public byte[] decryptAndStoreKey(byte[] key) throws SecurityClientException;
+    abstract public byte[] getDeviceEnrollmentKey() throws SecurityClientException;
+    abstract public byte[] getDeviceStorageRootKey() throws SecurityClientException;
+    abstract public byte[] signData(byte[] data) throws SecurityClientException;
 
     @Override
     public String getRegistrationId() throws SecurityClientException
@@ -44,8 +37,8 @@ public abstract class SecurityClientKey extends SecurityClient
         String registrationId = null;
         try
         {
-            byte[] ek = this.getDeviceEk();
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] ek = this.getDeviceEnrollmentKey();
+            MessageDigest digest = MessageDigest.getInstance(SHA_256);
             byte[] hash = digest.digest(ek);
             Base32 base32 = new Base32();
             byte[] base32Encoded = base32.encode(hash);
@@ -54,13 +47,24 @@ public abstract class SecurityClientKey extends SecurityClient
             {
                 registrationId = base32EncodedString.replace("=", "").toLowerCase();
             }
-
-            System.out.println("registration id \n" + registrationId);
             return registrationId;
         }
         catch (NoSuchAlgorithmException e)
         {
-            throw new SecurityException(e.getMessage());
+            throw new SecurityClientException(e);
+        }
+    }
+
+    @Override
+    public SSLContext getSSLContext() throws SecurityClientException
+    {
+        try
+        {
+            return this.generateSSLContext();
+        }
+        catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException | KeyManagementException e)
+        {
+            throw new SecurityClientException(e);
         }
     }
 
@@ -75,18 +79,5 @@ public abstract class SecurityClientKey extends SecurityClient
         trustManagerFactory.init(keyStore);
         sslContext.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
         return sslContext;
-    }
-
-    @Override
-    public SSLContext getSSLContext() throws SecurityClientException
-    {
-        try
-        {
-            return this.generateSSLContext();
-        }
-        catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException | KeyManagementException e)
-        {
-            throw new SecurityClientException(e);
-        }
     }
 }

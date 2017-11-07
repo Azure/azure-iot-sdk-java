@@ -156,24 +156,39 @@ public abstract class SecurityClient
                     "jaXIH9KZVpSxbxQIIM0YQKVjrODfL/MdkMSNxS9C5GkQeftIulw=\n" +
                     "-----END CERTIFICATE-----";
 
+    /**
+     * Unique id required for registration
+     * @return Returns the registration Id used needed for the service
+     * @throws SecurityClientException If registration id with the underlying implementation could not be retrieved
+     */
     abstract public String getRegistrationId() throws SecurityClientException;
+
+    /**
+     * Retrieves the SSL context loaded with trusted certs. In case of X509 SSL context shall be loaded with complete chain
+     * all the way till the leaf along with its private key.
+     * @return The SSLContext relevant to the flow
+     * @throws SecurityClientException If ssl context could not be generated for any of the reason
+     */
     abstract public SSLContext getSSLContext() throws SecurityClientException;
 
     KeyStore getKeyStoreWithTrustedCerts() throws NoSuchAlgorithmException, IOException, CertificateException, KeyStoreException
     {
         // create keystore
+        //SRS_SecurityClient_25_001: [ This method shall retrieve the default instance of keystore using default algorithm type. ]
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
         keyStore.load(null);
 
+        //SRS_SecurityClient_25_002: [ This method shall retrieve the default CertificateFactory instance. ]
         CertificateFactory certFactory = CertificateFactory.getInstance(DEFAULT_CERT_INSTANCE);
-        Collection<? extends Certificate> serverCert;
+        Collection<? extends Certificate> trustedCert;
         try (InputStream certStreamArray = new ByteArrayInputStream(DEFAULT_TRUSTED_CERT.getBytes()))
         {
-            serverCert =  certFactory.generateCertificates(certStreamArray);
+            trustedCert =  certFactory.generateCertificates(certStreamArray);
         }
 
-        for (Certificate c : serverCert)
+        for (Certificate c : trustedCert)
         {
+            //SRS_SecurityClient_25_003: [ This method shall load all the trusted certificates to the keystore. ]
             keyStore.setCertificateEntry(TRUSTED_CERT_ALIAS + UUID.randomUUID(), c);
         }
 
