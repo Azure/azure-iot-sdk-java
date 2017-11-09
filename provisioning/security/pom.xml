@@ -18,6 +18,6 @@
         <module>dice-client-emulator</module>
         <module>tpm-client</module>
         <module>tpm-client-emulator</module>
-        <module>security-client</module>
+        <module>security-provider</module>
     </modules>
 </project>

@@ -7,11 +7,11 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-    <artifactId>tpm-client</artifactId>
-    <name>Provisioning Security TPM Client</name>
+    <artifactId>security-provider</artifactId>
+    <name>Provisioning Security Provider</name>
     <version>0.0.1</version>
     <packaging>jar</packaging>
-    <description>The Microsoft Azure IoT Provisioning Security TPM client for Java</description>
+    <description>The Microsoft Azure IoT Provisioning Security Provider for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
     <developers>
         <developer>
@@ -36,19 +36,21 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.github.microsoft</groupId>
-            <artifactId>TSS.Java</artifactId>
-            <version>0.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>security-provider</artifactId>
-            <version>0.0.1</version>
-        </dependency>
-        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
+            <version>1.22</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit-dep</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

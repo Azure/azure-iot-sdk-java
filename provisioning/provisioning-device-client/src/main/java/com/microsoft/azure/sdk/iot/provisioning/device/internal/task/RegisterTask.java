@@ -165,7 +165,7 @@ public class RegisterTask implements Callable
         }
         SecurityClientTpm securityClientTpm = (SecurityClientTpm) securityClient;
         Long expiryTimeUTC = System.currentTimeMillis() / 1000 + expiryTime;
-        byte[] token = securityClientTpm.signData(tokenScope.concat("\n" + String.valueOf(expiryTimeUTC)).getBytes());
+        byte[] token = securityClientTpm.signWithIdentity(tokenScope.concat("\n" + String.valueOf(expiryTimeUTC)).getBytes());
         if (token == null || token.length == 0)
         {
             throw new ProvisioningDeviceSecurityException("Security client could not sign data successfully");
@@ -189,7 +189,7 @@ public class RegisterTask implements Callable
         {
             //SRS_RegisterTask_25_018: [ If the provided security client is for Key then, this method shall import the Base 64 encoded Authentication Key into the HSM using the security client and pass the exception to the user on failure. ]
             byte[] base64DecodedAuthKey = Base64.decodeBase64Local(registerResponseTPMParser.getAuthenticationKey().getBytes());
-            securityClientTpm.decryptAndStoreKey(base64DecodedAuthKey);
+            securityClientTpm.activateIdentityKey(base64DecodedAuthKey);
 
             /*SRS_RegisterTask_25_014: [ If the provided security client is for Key then, this method shall construct SasToken by doing the following
 
@@ -249,7 +249,7 @@ public class RegisterTask implements Callable
         try
         {
             SecurityClientTpm securityClientTpm = (SecurityClientTpm) securityClient;
-            if (securityClientTpm.getDeviceEnrollmentKey() == null || securityClientTpm.getDeviceStorageRootKey() == null)
+            if (securityClientTpm.getEnrollmentKey() == null || securityClientTpm.getStorageRootKey() == null)
             {
                 throw new ProvisioningDeviceSecurityException(new IllegalArgumentException("Ek or SRK cannot be null"));
             }
@@ -262,7 +262,7 @@ public class RegisterTask implements Callable
             }
             authorization.setSslContext(sslContext);
 
-            RequestData requestData = new RequestData(securityClientTpm.getDeviceEnrollmentKey(), securityClientTpm.getDeviceStorageRootKey(), registrationId, sslContext, null);
+            RequestData requestData = new RequestData(securityClientTpm.getEnrollmentKey(), securityClientTpm.getStorageRootKey(), registrationId, sslContext, null);
 
             //SRS_RegisterTask_25_011: [ If the provided security client is for Key then, this method shall trigger requestNonceForTPM on the contract API and wait for Authentication Key and decode it from Base64. Also this method shall pass the exception back to the user if it fails. ]
             ResponseData nonceResponseData = new ResponseData();

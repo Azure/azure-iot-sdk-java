@@ -359,9 +359,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -375,7 +375,7 @@ public class RegisterTaskTest
                 result = TEST_AUTH_KEY;
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
-                mockedSecurityClientTpm.signData((byte[])any);
+                mockedSecurityClientTpm.signWithIdentity((byte[])any);
                 result = "testToken".getBytes();
             }
         };
@@ -393,7 +393,7 @@ public class RegisterTaskTest
                 mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any,
                         (ResponseCallback)any, any);
                 times = 1;
-                mockedSecurityClientTpm.decryptAndStoreKey((byte[])any);
+                mockedSecurityClientTpm.activateIdentityKey((byte[])any);
                 times = 1;
                 mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);
@@ -435,7 +435,7 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = null;
             }
         };
@@ -456,9 +456,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = null;
             }
         };
@@ -480,9 +480,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -508,9 +508,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -539,9 +539,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -566,9 +566,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -595,9 +595,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -623,9 +623,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -656,9 +656,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -691,9 +691,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -705,7 +705,7 @@ public class RegisterTaskTest
                 result = DPS_REGISTRATION_RECEIVED;
                 mockedRegisterResponseTPMParser.getAuthenticationKey();
                 result = TEST_AUTH_KEY;
-                mockedSecurityClientTpm.decryptAndStoreKey((byte[])any);
+                mockedSecurityClientTpm.activateIdentityKey((byte[])any);
                 result = new ProvisioningDeviceClientException("test exception");
             }
         };
@@ -731,9 +731,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -767,9 +767,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -802,9 +802,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -837,9 +837,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -853,7 +853,7 @@ public class RegisterTaskTest
                 result = TEST_AUTH_KEY;
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
-                mockedSecurityClientTpm.signData((byte[])any);
+                mockedSecurityClientTpm.signWithIdentity((byte[])any);
                 result = new ProvisioningDeviceClientException("test Exception");
             }
         };
@@ -875,9 +875,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -891,7 +891,7 @@ public class RegisterTaskTest
                 result = TEST_AUTH_KEY;
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
-                mockedSecurityClientTpm.signData((byte[])any);
+                mockedSecurityClientTpm.signWithIdentity((byte[])any);
                 result = null;
             }
         };
@@ -913,9 +913,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -929,7 +929,7 @@ public class RegisterTaskTest
                 result = TEST_AUTH_KEY;
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
-                mockedSecurityClientTpm.signData((byte[])any);
+                mockedSecurityClientTpm.signWithIdentity((byte[])any);
                 result = "".getBytes();
             }
         };
@@ -952,9 +952,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -968,7 +968,7 @@ public class RegisterTaskTest
                 result = TEST_AUTH_KEY;
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
-                mockedSecurityClientTpm.signData((byte[])any);
+                mockedSecurityClientTpm.signWithIdentity((byte[])any);
                 result = "testToken".getBytes();
                 mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);
@@ -993,9 +993,9 @@ public class RegisterTaskTest
             {
                 mockedSecurityClientTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedSecurityClientTpm.getDeviceEnrollmentKey();
+                mockedSecurityClientTpm.getEnrollmentKey();
                 result = TEST_EK.getBytes();
-                mockedSecurityClientTpm.getDeviceStorageRootKey();
+                mockedSecurityClientTpm.getStorageRootKey();
                 result = TEST_SRK.getBytes();
                 mockedRegisterRequestParser.toJson();
                 result = "testJson";
@@ -1030,7 +1030,7 @@ public class RegisterTaskTest
                 result = TEST_AUTH_KEY;
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
-                mockedSecurityClientTpm.signData((byte[])any);
+                mockedSecurityClientTpm.signWithIdentity((byte[])any);
                 result = "testToken".getBytes();
                 mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);

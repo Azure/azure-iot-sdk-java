@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>security-client</artifactId>
+            <artifactId>security-provider</artifactId>
             <version>0.0.1</version>
         </dependency>
         <dependency>
