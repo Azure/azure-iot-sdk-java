@@ -374,17 +374,6 @@ public class IotHubConnectionStringTest
     }
 
     /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_025: [If the parameters for the connection string is not valid, the constructor shall throw an IllegalArgumentException.] */
-    /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_005: [A valid connectionString shall contain a `sharedAccessToken` or a `sharedAccessKey`.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void IotHubConnectionStringParametersNullAccessKeyThrows() throws ClassNotFoundException
-    {
-        // act
-        Deencapsulation.newInstance(Class.forName(IOTHUB_CONNECTION_STRING_CLASS),
-                new Class[]{String.class, String.class, String.class, String.class},
-                VALID_HOSTNAME, VALID_DEVICEID, null, null);
-    }
-
-    /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_025: [If the parameters for the connection string is not valid, the constructor shall throw an IllegalArgumentException.] */
     /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_006: [If provided, the `sharedAccessToken` shall not be null or empty.] */
     /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_007: [If provided, the `sharedAccessKey` shall not be null or empty.] */
     @Test (expected = IllegalArgumentException.class)
@@ -622,7 +611,7 @@ public class IotHubConnectionStringTest
         Deencapsulation.invoke(iotHubConnectionString, "setSharedAccessToken", "");
     }
 
-    // Tests_SRS_IOTHUB_CONNECTIONSTRING_21_005: [A valid connectionString shall contain a `sharedAccessToken` or a `sharedAccessKey`.]
+    // Tests_SRS_IOTHUB_CONNECTIONSTRING_21_005: [A valid connectionString shall contain a `sharedAccessToken` or a `sharedAccessKey` unless using x509 Authentication.]
     @Test
     public void missingSasTokenAndDeviceKeyDoesNotThrowIfUsingX509() throws ClassNotFoundException
     {

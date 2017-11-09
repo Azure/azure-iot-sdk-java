@@ -13,6 +13,8 @@ public final class IotHubSSLContext
 {
     IotHubSSLContext() throws KeyManagementException, IOException, CertificateException;
 
+    IotHubSSLContext(SSLContext sslContext);
+
     IotHubSSLContext(String cert, boolean isPath)
             throws KeyStoreException, KeyManagementException, IOException, CertificateException, NoSuchAlgorithmException;
 
@@ -55,6 +57,15 @@ IotHubSSLContext(String cert, boolean isPath) throws KeyStoreException, KeyManag
 **SRS_IOTHUBSSLCONTEXT_34_025: [**If the provided cert is a path, this function shall set the path of the default cert to the provided cert path.**]**
 
 **SRS_IOTHUBSSLCONTEXT_34_026: [**If the provided cert is not a path, this function shall set the default cert to the provided cert.**]**
+
+
+```java
+IotHubSSLContext(SSLContext sslContext);
+```
+
+**SRS_IOTHUBSSLCONTEXT_34_027: [**This constructor shall save the provided ssl context.**]**
+
+**SRS_IOTHUBSSLCONTEXT_34_028: [**If the provided sslContext is null, this function shall throw an IllegalArgumentException.**]**
 
 
 ```java

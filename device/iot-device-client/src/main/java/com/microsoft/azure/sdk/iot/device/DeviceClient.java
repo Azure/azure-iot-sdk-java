@@ -7,11 +7,9 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
 
-import java.io.Closeable;
-import java.io.IOError;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -230,6 +228,50 @@ public final class DeviceClient implements Closeable
     }
 
     /**
+     * Creates a device client that uses the provided security client for authentication.
+     *
+     * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
+     * @param deviceId The id for the device to use
+     * @param securityClient The security client for the device
+     * @param protocol The protocol the device shall use for communication to the IoT Hub
+     * @return The created device client instance
+     * @throws URISyntaxException If the provided {@param connString}
+     * @throws IOException If the SecurityClient throws any exception while authenticating
+     */
+    public static DeviceClient createFromSecurityClient(String uri, String deviceId, SecurityClient securityClient, IotHubClientProtocol protocol) throws URISyntaxException, IOException
+    {
+        return new DeviceClient(uri, deviceId, securityClient, protocol);
+    }
+
+    /**
+     * Creates a device client that uses the provided security client for authentication.
+     *
+     * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
+     * @param deviceId The id for the device to use
+     * @param securityClient The security client for the device
+     * @param protocol The protocol the device shall use for communication to the IoT Hub
+     * @return The created device client instance
+     * @throws URISyntaxException If the provided {@param connString}
+     * @throws IOException If the SecurityClient throws any exception while authenticating
+     */
+    private DeviceClient(String uri, String deviceId, SecurityClient securityClient, IotHubClientProtocol protocol) throws URISyntaxException, IOException
+    {
+        if (protocol == null)
+        {
+            //Codes_SRS_DEVICECLIENT_34_064: [If the provided protocol is null, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("The transport protocol cannot be null");
+        }
+
+        //Codes_SRS_DEVICECLIENT_34_065: [The provided uri and device id will be used to create an iotHubConnectionString that will be saved in config.]
+        //Codes_SRS_DEVICECLIENT_34_066: [The provided security client will be saved in config.]
+        IotHubConnectionString connectionString = new IotHubConnectionString(uri, deviceId, null, null);
+        this.config = new DeviceClientConfig(connectionString, securityClient);
+
+        //Codes_SRS_DEVICECLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
+        commonConstructorSetup(protocol);
+    }
+
+    /**
      * Throws an IllegalArgumentException if either of the arguments is null or if the connString is empty.
      * @param connString the connection string
      * @param protocol the transport protocol
@@ -256,7 +298,7 @@ public final class DeviceClient implements Closeable
      * @throws SecurityException if the provided connection string contains an expired sas token
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      */
-    private void commonConstructorSetup(IotHubClientProtocol protocol) throws IllegalArgumentException, SecurityException, URISyntaxException
+    private void commonConstructorSetup(IotHubClientProtocol protocol)
     {
         switch (protocol)
         {

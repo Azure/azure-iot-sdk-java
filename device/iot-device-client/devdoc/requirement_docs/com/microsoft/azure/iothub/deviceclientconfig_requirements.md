@@ -13,7 +13,8 @@ public final class DeviceClientConfig
 {
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString) throws IllegalArgumentException;
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate);
-    
+    DeviceClientConfig(IotHubConnectionString connectionString, SecurityClient securityClient) throws IOException;
+
     public IotHubX509Authentication getX509Authentication();
     public IotHubSasTokenAuthentication getSasTokenAuthentication();
     public IotHubConnectionString getIotHubConnectionString();
@@ -77,6 +78,21 @@ public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, String 
 **SRS_DEVICECLIENTCONFIG_34_069: [**This function shall generate a new SSLContext and set this to using X509 authentication.**] **
 
 **SRS_DEVICECLIENTCONFIG_34_070: [**If any exceptions are encountered while generating the new SSLContext, an IOException shall be thrown.**] **
+
+
+```java
+DeviceClientConfig(IotHubConnectionString connectionString, SecurityClient securityClient) throws IOException;
+```
+
+** SRS_DEVICECLIENTCONFIG_34_080: [**If the provided connectionString or security client is null, an IllegalArgumentException shall be thrown.**] **
+
+** SRS_DEVICECLIENTCONFIG_34_081: [**This constructor shall save the provided connection string.**] **
+
+** SRS_DEVICECLIENTCONFIG_34_082: [**If the provided security client is a SecurityClientX509 instance, this function shall set its auth type to X509 and create its IotHubX509Authentication instance using the security client's ssl context.**] **
+
+** SRS_DEVICECLIENTCONFIG_34_083: [**If the provided security client is a SecurityClientTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthentication instance using the security client.**] **
+
+** SRS_DEVICECLIENTCONFIG_34_084: [**If the provided security client is neither a SecurityClientX509 instance nor a SecurityClientTpm instance, this function shall throw an UnsupportedOperationException.**] **
 
 
 ### getIotHubHostname

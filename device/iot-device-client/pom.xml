@@ -43,6 +43,11 @@
             <artifactId>bcprov-jdk16</artifactId>
             <version>1.46</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
+            <artifactId>security-client</artifactId>
+            <version>0.0.1</version>
+        </dependency>
         <!-- test dependencies -->
         <dependency>
             <groupId>org.jmockit</groupId>

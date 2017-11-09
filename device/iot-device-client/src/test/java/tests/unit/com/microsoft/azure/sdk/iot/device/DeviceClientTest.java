@@ -9,6 +9,8 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509Authentication;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 import mockit.*;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
@@ -23,7 +25,7 @@ import java.util.*;
 /**
  * Unit tests for DeviceClient.
  * Methods: 100%
- * Lines: 98%
+ * Lines: 96%
  */
 public class DeviceClientTest
 {
@@ -47,6 +49,9 @@ public class DeviceClientTest
 
     @Mocked
     IotHubX509Authentication mockIotHubX509Authentication;
+
+    @Mocked
+    SecurityClient mockSecurityClient;
 
     private static long SEND_PERIOD_MILLIS = 10L;
     private static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
@@ -253,6 +258,50 @@ public class DeviceClientTest
         new DeviceClient(connString, protocol, "any cert", false, "any key", false);
     }
 
+    //Tests_SRS_DEVICECLIENT_34_064: [If the provided protocol is null, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void createFromSecurityClientThrowsForNullProtocol() throws URISyntaxException, SecurityClientException, IOException
+    {
+        //act
+        DeviceClient.createFromSecurityClient("some uri", "some device id", mockSecurityClient, null);
+    }
+
+    //Tests_SRS_DEVICECLIENT_34_065: [The provided uri and device id will be used to create an iotHubConnectionString that will be saved in config.]
+    //Tests_SRS_DEVICECLIENT_34_066: [The provided security client will be saved in config.]
+    //Tests_SRS_DEVICECLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
+    @Test
+    public void createFromSecurityClientUsesUriAndDeviceIdAndSavesSecurityClientAndCreatesDeviceIO() throws URISyntaxException, SecurityClientException, IOException
+    {
+        //arrange
+        final String expectedUri = "some uri";
+        final String expectedDeviceId = "some device id";
+        final IotHubClientProtocol expectedProtocol = IotHubClientProtocol.HTTPS;
+        new StrictExpectations()
+        {
+            {
+                new IotHubConnectionString(expectedUri, expectedDeviceId, null, null);
+                result = mockIotHubConnectionString;
+            }
+        };
+
+        //act
+        DeviceClient.createFromSecurityClient(expectedUri, expectedDeviceId, mockSecurityClient, expectedProtocol);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityClient.class}, mockIotHubConnectionString, mockSecurityClient);
+                times = 1;
+
+                Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
+                        new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
+                        (DeviceClientConfig)any, expectedProtocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_HTTPS);
+                times = 1;
+            }
+        };
+    }
+
 
     /* Tests_SRS_DEVICECLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
@@ -393,7 +442,7 @@ public class DeviceClientTest
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
-                        + "SharedAccessKey=adjkl234j52=";
+                + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         DeviceClient client = new DeviceClient(connString, protocol);
 
@@ -907,7 +956,7 @@ public class DeviceClientTest
      */
     @Test (expected = IllegalArgumentException.class)
     public void startDeviceTwinThrowsIfPropCBisNull(@Mocked final DeviceTwin mockedDeviceTwin,
-                                                      @Mocked final IotHubEventCallback mockedStatusCB) throws IOException, URISyntaxException
+                                                    @Mocked final IotHubEventCallback mockedStatusCB) throws IOException, URISyntaxException
 
     {
         //arrange
@@ -1042,8 +1091,8 @@ public class DeviceClientTest
 
     @Test
     public void subscribeToDPWorksWhenMapIsNull(@Mocked final DeviceTwin mockedDeviceTwin,
-                                      @Mocked final IotHubEventCallback mockedStatusCB,
-                                      @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                @Mocked final IotHubEventCallback mockedStatusCB,
+                                                @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
 
     {
         //arrange
@@ -1077,8 +1126,8 @@ public class DeviceClientTest
 
     @Test
     public void subscribeToDPSucceedsEvenWhenUserCBIsNull(@Mocked final DeviceTwin mockedDeviceTwin,
-                                                      @Mocked final IotHubEventCallback mockedStatusCB,
-                                                      @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                          @Mocked final IotHubEventCallback mockedStatusCB,
+                                                          @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
     {
         //arrange
         final Device mockDevice = new Device()
@@ -2665,8 +2714,8 @@ public class DeviceClientTest
     /* Tests_SRS_DEVICECLIENT_21_052: [If the `streamLength` is negative, the uploadToBlobAsync shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void startFileUploadNegativeLengthThrows(@Mocked final IotHubEventCallback mockedStatusCB,
-                                                     @Mocked final InputStream mockInputStream,
-                                                     @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                    @Mocked final InputStream mockInputStream,
+                                                    @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2820,7 +2869,7 @@ public class DeviceClientTest
                 Deencapsulation.newInstance(FileUpload.class, mockConfig);
                 result = mockedFileUpload;
                 Deencapsulation.invoke(mockedFileUpload, "uploadToBlobAsync",
-                                       destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
+                        destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
             }
         };
         DeviceClient client = new DeviceClient(connString, protocol);
@@ -2836,7 +2885,7 @@ public class DeviceClientTest
                 Deencapsulation.newInstance(FileUpload.class, mockConfig);
                 times = 1;
                 Deencapsulation.invoke(mockedFileUpload, "uploadToBlobAsync",
-                                       destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
+                        destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
                 times = 2;
 
             }
@@ -2854,8 +2903,9 @@ public class DeviceClientTest
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
         final DeviceClient client = new DeviceClient(connString, protocol);
+
         client.open();
-        
+
         //act
         client.registerConnectionStateCallback(mockedStateCB, null);
 
@@ -2884,7 +2934,7 @@ public class DeviceClientTest
         //act
         client.registerConnectionStateCallback(null, null);
     }
-    
+
     /* Tests_SRS_DEVICECLIENT_21_049: [If uploadToBlobAsync failed to create a new instance of the FileUpload, it shall bypass the exception.] */
     @Test (expected = IllegalArgumentException.class)
     public void startFileUploadNewInstanceThrows(@Mocked final FileUpload mockedFileUpload,

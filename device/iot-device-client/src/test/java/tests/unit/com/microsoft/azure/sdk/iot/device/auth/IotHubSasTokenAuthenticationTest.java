@@ -8,7 +8,10 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
-import mockit.*;
+import mockit.Deencapsulation;
+import mockit.Expectations;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
@@ -18,24 +21,23 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
-import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.*;
 
 /**
  * Unit tests for IotHubSasTokenAuthentication.java
  * Methods: 100%
- * Lines: 91%
+ * Lines: 100%
  */
 public class IotHubSasTokenAuthenticationTest
 {
     @Mocked
     SSLContext mockSSLContext;
-
     @Mocked
     IotHubSSLContext mockIotHubSSLContext;
-
     @Mocked
     IotHubSasToken mockSasToken;
+    @Mocked
+    System mockSystem;
 
     private static String expectedDeviceId = "deviceId";
     private static String expectedHostname = "hostname";
@@ -45,69 +47,36 @@ public class IotHubSasTokenAuthenticationTest
     private static final long MILLISECONDS_PER_SECOND = 1000L;
     private static final long MINIMUM_EXPIRATION_TIME_OFFSET = 1L;
 
-    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_004: [If the saved sas token has expired and there is a device key present, the saved sas token shall be renewed.]
-    @Test
-    public void getRenewedSasTokenAutoRenews() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException
+    private class mockIotHubSasTokenAuthenticationImplementation extends IotHubSasTokenAuthentication
     {
-        //arrange
-        new Expectations()
+        public mockIotHubSasTokenAuthenticationImplementation()
         {
-            {
-                Deencapsulation.invoke(mockSasToken, "isExpired");
-                result = true;
-                Long expiryTime = (System.currentTimeMillis() / MILLISECONDS_PER_SECOND) + expectedExpiryTime + MINIMUM_EXPIRATION_TIME_OFFSET;
-                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class}, expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken, expiryTime);
-                result = mockSasToken;
-            }
-        };
+            this.sasToken = mockSasToken;
+            this.deviceId = expectedDeviceId;
+            this.hostname = expectedHostname;
+        }
 
-        IotHubSasTokenAuthentication sasAuth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
-
-        //act
-        String actualSasToken = sasAuth.getRenewedSasToken();
-
-        //assert
-        assertNotEquals(mockSasToken.toString(), actualSasToken);
-    }
-
-    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_005: [This function shall return the saved sas token.]
-    @Test
-    public void getSasTokenReturnsSavedValue() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException
-    {
-        //arrange
-        new Expectations()
+        @Override
+        public void setPathToIotHubTrustedCert(String pathToCertificate)
         {
-            {
-                Long expiryTime = (System.currentTimeMillis() / MILLISECONDS_PER_SECOND) + expectedExpiryTime + MINIMUM_EXPIRATION_TIME_OFFSET;
-                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class}, expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken, expiryTime);
-                result = mockSasToken;
-                Deencapsulation.invoke(mockSasToken, "isExpired");
-                result = false;
-            }
-        };
+        }
 
-        IotHubSasTokenAuthentication sasAuth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
+        @Override
+        public void setIotHubTrustedCert(String certificate)
+        {
+        }
 
-        //act
-        String actualSasToken = sasAuth.getRenewedSasToken();
+        @Override
+        public SSLContext getSSLContext() throws IOException
+        {
+            return null;
+        }
 
-        //assert
-        assertEquals(mockSasToken.toString(), actualSasToken);
-    }
-
-    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_008: [This function shall return the generated IotHubSSLContext.]
-    @Test
-    public void getIotHubSSLContextGets() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException
-    {
-        //arrange
-        IotHubSasTokenAuthentication sasAuth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
-        Deencapsulation.setField(sasAuth, "iotHubSSLContext", mockIotHubSSLContext);
-
-        //act
-        SSLContext actualSSLContext = sasAuth.getSSLContext();
-
-        //assert
-        assertEquals(mockSSLContext, actualSSLContext);
+        @Override
+        public String getRenewedSasToken() throws IOException
+        {
+            return null;
+        }
     }
 
     // Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_12_001: [This function shall return the tokenValidSecs as the number of seconds the current sas token valid for.]
@@ -116,7 +85,7 @@ public class IotHubSasTokenAuthenticationTest
     {
         //arrange
         long newTokenValidSecs = 5000L;
-        IotHubSasTokenAuthentication sasAuth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenAuthentication sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
         sasAuth.setTokenValidSecs(newTokenValidSecs);
 
         //act
@@ -133,7 +102,7 @@ public class IotHubSasTokenAuthenticationTest
     {
         //arrange
         long newTokenValidSecs = 5000L;
-        IotHubSasTokenAuthentication sasAuth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenAuthentication sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
 
         //act
         sasAuth.setTokenValidSecs(newTokenValidSecs);
@@ -141,72 +110,6 @@ public class IotHubSasTokenAuthenticationTest
         //assert
         long actualTokenValidSecs = Deencapsulation.getField(sasAuth, "tokenValidSecs");
         assertEquals(newTokenValidSecs, actualTokenValidSecs);
-    }
-
-    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the saved sas token has expired and cannot be renewed, this function shall return true.]
-    @Test
-    public void isRenewalNecessaryReturnsTrueWhenTokenHasExpiredAndNoDeviceKeyIsPresent() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException
-    {
-        //arrange
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockSasToken, "isExpired");
-                result = true;
-            }
-        };
-
-        IotHubSasTokenAuthentication sasAuth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, null, expectedSasToken);
-
-        //act
-        boolean needsToRenew = sasAuth.isRenewalNecessary();
-
-        //assert
-        assertTrue(needsToRenew);
-    }
-
-    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the saved sas token has expired and cannot be renewed, this function shall return true.]
-    @Test
-    public void isRenewalNecessaryReturnsFalseDeviceKeyPresent() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException
-    {
-        //arrange
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockSasToken, "isExpired");
-                result = true;
-            }
-        };
-
-        IotHubSasTokenAuthentication sasAuth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
-
-        //act
-        boolean needsToRenew = sasAuth.isRenewalNecessary();
-
-        //assert
-        assertFalse(needsToRenew);
-    }
-
-    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the saved sas token has expired and cannot be renewed, this function shall return true.]
-    @Test
-    public void isRenewalNecessaryReturnsFalseWhenTokenHasNotExpired() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException
-    {
-        //arrange
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockSasToken, "isExpired");
-                result = false;
-            }
-        };
-
-        IotHubSasTokenAuthentication sasAuth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
-
-        //act
-        boolean needsToRenew = sasAuth.isRenewalNecessary();
-
-        //assert
-        assertFalse(needsToRenew);
     }
 
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_018: [This function shall return the current sas token without renewing it.]
@@ -222,7 +125,7 @@ public class IotHubSasTokenAuthenticationTest
             }
         };
 
-        IotHubSasTokenAuthentication sasAuth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenAuthentication sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
 
         //act
         String actualCurrentSasToken = sasAuth.getCurrentSasToken();
@@ -231,105 +134,72 @@ public class IotHubSasTokenAuthenticationTest
         assertEquals(expectedSasToken, actualCurrentSasToken);
     }
 
-    // Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_019: [If this has a saved iotHubTrustedCert, this function shall generate a new IotHubSSLContext object with that saved cert as the trusted cert.]
+    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the saved sas token has expired, this function shall return true.]
     @Test
-    public void generateSSLContextUsesSavedTrustedCert() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException
+    public void isRenewalNecessaryWithExpiredToken()
     {
         //arrange
-        final String expectedCert = "someTrustedCert";
-        IotHubSasTokenAuthentication sasAuth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
-        sasAuth.setIotHubTrustedCert(expectedCert);
-
-        //act
-        Deencapsulation.invoke(sasAuth, "generateSSLContext");
-
-        //assert
-        new Verifications()
+        new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {String.class, boolean.class}, expectedCert, false);
-                times = 1;
+                Deencapsulation.invoke(mockSasToken, "isExpired");
+                result = true;
             }
         };
-    }
 
-    // Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_020: [If this has a saved path to a iotHubTrustedCert, this function shall generate a new IotHubSSLContext object with that saved cert path as the trusted cert.]
-    @Test
-    public void generateSSLContextUsesSavedTrustedCertPath() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException
-    {
-        //arrange
-        final String expectedCertPath = "someTrustedCertPath";
-        IotHubSasTokenAuthentication sasAuth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
-        sasAuth.setPathToIotHubTrustedCert(expectedCertPath);
+        IotHubSasTokenAuthentication sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
+        Deencapsulation.setField(sasAuth, "sasToken", mockSasToken);
 
         //act
-        Deencapsulation.invoke(sasAuth, "generateSSLContext");
+        boolean isRenewalNecessary = Deencapsulation.invoke(sasAuth, "isRenewalNecessary");
 
         //assert
-        new Verifications()
+        assertTrue(isRenewalNecessary);
+    }
+
+    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the saved sas token has expired, this function shall return true.]
+    @Test
+    public void isRenewalNecessaryWithNonExpiredToken()
+    {
+        //arrange
+        new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {String.class, boolean.class}, expectedCertPath, true);
-                times = 1;
+                Deencapsulation.invoke(mockSasToken, "isExpired");
+                result = false;
             }
         };
-    }
 
-    // Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_021: [If this has no saved iotHubTrustedCert or path, This function shall create and save a new default IotHubSSLContext object.]
-    @Test
-    public void generateSSLContextGeneratesDefaultIotHubSSLContext() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException
-    {
-        //arrange
-        IotHubSasTokenAuthentication sasAuth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenAuthentication sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
+        Deencapsulation.setField(sasAuth, "sasToken", mockSasToken);
 
         //act
-        Deencapsulation.invoke(sasAuth, "generateSSLContext");
+        boolean isRenewalNecessary = Deencapsulation.invoke(sasAuth, "isRenewalNecessary");
 
         //assert
-        new Verifications()
+        assertFalse(isRenewalNecessary);
+    }
+
+    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_001: [This function shall return the number of seconds from the UNIX Epoch that a sas token constructed now would expire.]
+    @Test
+    public void getExpiryTimeInSecondsSuccess()
+    {
+        //arrange
+        long expectedExpiryTime = 3601;
+        new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(IotHubSSLContext.class);
-                times = 1;
+                System.currentTimeMillis();
+                result = 0;
             }
         };
-    }
 
-    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_059: [This function shall save the provided pathToCertificate.]
-    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_030: [If the provided pathToCertificate is different than the saved path, this function shall set sslContextNeedsRenewal to true.]
-    @Test
-    public void setPathToCertificateWorks() throws IOException
-    {
-        //arrange
-        IotHubSasTokenAuthentication auth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
-        String pathToCert = "somePath";
+        IotHubSasTokenAuthentication sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
 
         //act
-        auth.setPathToIotHubTrustedCert(pathToCert);
+        long actualExpiryTime =  Deencapsulation.invoke(sasAuth, "getExpiryTimeInSeconds");
 
         //assert
-        String actualPathToCert = Deencapsulation.getField(auth, "pathToIotHubTrustedCert");
-        assertEquals(pathToCert, actualPathToCert);
-        boolean sslContextNeedsRenewal = Deencapsulation.getField(auth, "sslContextNeedsUpdate");
-        assertTrue(sslContextNeedsRenewal);
-    }
-
-    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_064: [This function shall save the provided userCertificateString.]
-    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_031: [If the provided certificate is different than the saved certificate, this function shall set sslContextNeedsRenewal to true.]
-    @Test
-    public void setCertificateWorks() throws IOException
-    {
-        //arrange
-        IotHubSasTokenAuthentication auth = new IotHubSasTokenAuthentication(expectedHostname, expectedDeviceId, expectedDeviceKey, expectedSasToken);
-        String cert = "somePath";
-
-        //act
-        auth.setIotHubTrustedCert(cert);
-
-        //assert
-        String actualCert = Deencapsulation.getField(auth, "iotHubTrustedCert");
-        assertEquals(cert, actualCert);
-        boolean sslContextNeedsRenewal = Deencapsulation.getField(auth, "sslContextNeedsUpdate");
-        assertTrue(sslContextNeedsRenewal);
+        assertEquals(expectedExpiryTime, actualExpiryTime);
     }
 }

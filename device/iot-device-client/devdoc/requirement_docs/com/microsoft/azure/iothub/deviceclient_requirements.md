@@ -15,6 +15,7 @@ public final class DeviceClient
     public DeviceClient(String connString, TransportClient transportClient) throws URISyntaxException;
     public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException;
     public DeviceClient(String connString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate) throws IOException, IllegalArgumentException;
+    public static DeviceClient createFromSecurityClient(String uri, String deviceId, SecurityClient securityClient, IotHubClientProtocol protocol) throws URISyntaxException, IOException;
 
     public void open() throws IOException;
     public void close() throws IOException;
@@ -106,6 +107,21 @@ public DeviceClient(String connString, IotHubClientProtocol protocol, String pub
 **SRS_DEVICECLIENT_12_013: [**The constructor shall set the connection type to SINGLE.**]**
 
 **SRS_DEVICECLIENT_12_015: [**The constructor shall set the transportClient to null.**]**
+
+
+### createFromSecurityClient
+
+```java
+public static DeviceClient createFromSecurityClient(String uri, String deviceId, SecurityClient securityClient, IotHubClientProtocol protocol) throws URISyntaxException, IOException;
+```
+
+**SRS_DEVICECLIENT_34_064: [**If the provided protocol is null, this function shall throw an IllegalArgumentException.**]**
+
+**SRS_DEVICECLIENT_34_065: [**The provided uri and device id will be used to create an iotHubConnectionString that will be saved in config.**]**
+
+**SRS_DEVICECLIENT_34_066: [**The provided security client will be saved in config.**]**
+
+**SRS_DEVICECLIENT_34_067: [**The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.**]**  
 
 
 ### open

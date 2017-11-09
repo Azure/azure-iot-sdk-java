@@ -178,7 +178,7 @@ public class MqttIotHubConnection
                 {
                     this.deviceMessaging.stop();
                 }
-                throw new IOException(e.getMessage(), e.getCause());
+                throw new IOException(e);
             }
 
         }
