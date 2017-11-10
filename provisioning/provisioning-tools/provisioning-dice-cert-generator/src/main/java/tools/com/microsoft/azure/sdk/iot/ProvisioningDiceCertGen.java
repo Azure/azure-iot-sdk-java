@@ -4,7 +4,7 @@
 package tools.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
-import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityClientDiceEmulator;
+import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderDiceEmulator;
 
 import java.util.Scanner;
 
@@ -18,29 +18,26 @@ public class ProvisioningDiceCertGen
         try
         {
             String aliasCertCnName, rootCertCnName, signerCertCnName = null;
-            SecurityClientDiceEmulator securityClient = null;
+            SecurityProviderDiceEmulator securityClient = null;
             Scanner scanner = new Scanner(System.in);
             System.out.println("Do you want to input common name : Y/N(use default)");
             String isCnName = scanner.next();
             if (isCnName.equalsIgnoreCase("Y"))
             {
                 System.out.println("Input Alias Cert commonName :");
-                scanner = new Scanner(System.in);
                 aliasCertCnName = scanner.next();
 
                 System.out.println("Input Root Cert commonName :");
-                scanner = new Scanner(System.in);
                 rootCertCnName = scanner.next();
 
                 System.out.println("Input Signer Cert commonName :");
-                scanner = new Scanner(System.in);
                 signerCertCnName = scanner.next();
 
-                securityClient = new SecurityClientDiceEmulator(aliasCertCnName, signerCertCnName, rootCertCnName);
+                securityClient = new SecurityProviderDiceEmulator(aliasCertCnName, signerCertCnName, rootCertCnName);
             }
             else
             {
-                securityClient = new SecurityClientDiceEmulator();
+                securityClient = new SecurityProviderDiceEmulator();
             }
 
             System.out.println("Alias Cert");
@@ -49,7 +46,6 @@ public class ProvisioningDiceCertGen
             System.out.println(securityClient.getRootCertPem());
             System.out.println("Do you want to input Verification Code Y/N");
 
-            scanner = new Scanner(System.in);
             String isVerify = scanner.next();
             try
             {

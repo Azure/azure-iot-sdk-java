@@ -17,7 +17,6 @@ public class ProvisioningDeviceClientExceptionManager
     public static void verifyHttpResponse(HttpResponse httpResponse) throws ProvisioningDeviceHubException
     {
         int responseStatus = httpResponse.getStatus();
-        System.out.println("DPS responded with status : " + responseStatus);
 
         String errorMessage = ErrorMessageParser.bestErrorMessage(new String(httpResponse.getErrorReason(), StandardCharsets.UTF_8));
 

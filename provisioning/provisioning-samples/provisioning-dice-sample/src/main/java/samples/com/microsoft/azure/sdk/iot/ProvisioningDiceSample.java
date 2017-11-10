@@ -4,7 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
-import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityClientDiceEmulator;
+import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderDiceEmulator;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 
@@ -15,12 +15,10 @@ import java.util.Scanner;
  */
 public class ProvisioningDiceSample
 {
-    //private static final String scopeId = "[Your scope ID here]";
-    private static final String scopeId = "0ne00001D71";
-    //private static final String globalEndpoint = "[Your Provisioning Service Global Endpoint here]";
-    private static final String globalEndpoint = "global.azure-devices-provisioning.net";
-    //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
-    private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS;
+    private static final String scopeId = "[Your scope ID here]";
+    private static final String globalEndpoint = "[Your Provisioning Service Global Endpoint here]";
+    private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
+    //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS;
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milli seconds
 
     static class ProvisioningStatus
@@ -56,7 +54,7 @@ public class ProvisioningDiceSample
         {
             ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 
-            provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, scopeId, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, new SecurityClientDiceEmulator());
+            provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, scopeId, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, new SecurityProviderDiceEmulator());
 
             provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus);
 
@@ -68,10 +66,10 @@ public class ProvisioningDiceSample
 
                 {
                     provisioningStatus.exception.printStackTrace();
-                    System.out.println("Dps error, bailing out");
+                    System.out.println("Registration error, bailing out");
                     break;
                 }
-                System.out.println("Waiting for Dps Hub to register");
+                System.out.println("Waiting for Provisioning Service to register");
                 Thread.sleep(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
             }
 
@@ -84,7 +82,7 @@ public class ProvisioningDiceSample
         }
         catch (ProvisioningDeviceClientException | InterruptedException e)
         {
-            System.out.println("DPS threw a exception" + e.getMessage());
+            System.out.println("Provisioning Device Client threw an exception" + e.getMessage());
             if (provisioningDeviceClient != null)
             {
                 provisioningDeviceClient.closeNow();
@@ -95,11 +93,13 @@ public class ProvisioningDiceSample
 
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
+
+        System.out.println("Shutting down...");
         if (provisioningDeviceClient != null)
         {
             provisioningDeviceClient.closeNow();
         }
 
-        System.out.println("Shutting down...");
+
     }
 }
