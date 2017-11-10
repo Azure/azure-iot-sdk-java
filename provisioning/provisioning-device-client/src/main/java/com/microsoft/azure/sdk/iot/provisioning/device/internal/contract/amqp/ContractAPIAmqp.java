@@ -67,7 +67,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 
     /**
      * Indicates to close the connection
-     * @throws ProvisioningDeviceConnectionException
+     * @throws ProvisioningDeviceConnectionException If close could not succeed
      */
     public synchronized void close() throws ProvisioningDeviceConnectionException
     {

@@ -121,11 +121,6 @@ public class ContractAPIAmqpTest
 
         //act
         ContractAPIAmqp contractAPIAmqp = new ContractAPIAmqp(TEST_SCOPE_ID, TEST_HOST_NAME);
-
-        //assert
-        assertEquals(TEST_SCOPE_ID, Deencapsulation.getField(contractAPIAmqp, "idScope"));
-        assertEquals(TEST_HOST_NAME, Deencapsulation.getField(contractAPIAmqp, "hostName"));
-
     }
 
     // SRS_ContractAPIAmqp_07_002: [The constructor shall throw ProvisioningDeviceClientException if either idScope and hostName are null or empty.]

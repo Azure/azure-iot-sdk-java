@@ -69,11 +69,11 @@ public class AmqpsConnection extends BaseHandler
     /**
      * Constructor for the Amqp library
      * @param hostName Name of the AMQP Endpoint
-     * @param amqpDeviceOperations
-     * @param sslContext
-     * @param useSasl
-     * @param useWebSockets
-     * @throws IOException
+     * @param amqpDeviceOperations Object holding details of the links used in this connection
+     * @param sslContext SSL Context to be set over TLS.
+     * @param useSasl SASL to be used or disabled
+     * @param useWebSockets WebSockets to be used or disabled.
+     * @throws IOException This exception is thrown if for any reason constructor cannot succeed.
      */
     public AmqpsConnection(String hostName, AmqpDeviceOperations amqpDeviceOperations, SSLContext sslContext, boolean useSasl, boolean useWebSockets) throws IOException
     {
@@ -114,6 +114,10 @@ public class AmqpsConnection extends BaseHandler
         }
     }
 
+    /**
+     * Sets the listener for this connection.
+     * @param listener Listener to be used for this connection.
+     */
     public void setListener(AmqpListener listener)
     {
         if (listener == null)
@@ -123,11 +127,19 @@ public class AmqpsConnection extends BaseHandler
         this.msgListener = listener;
     }
 
+    /**
+     * Returns the status of the connection
+     * @return status of the connection
+     */
     public boolean isConnected()
     {
         return this.isOpen;
     }
 
+    /**
+     * Opens the connection.
+     * @throws IOException If connection could not be opened.
+     */
     public void open() throws IOException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
@@ -177,6 +189,10 @@ public class AmqpsConnection extends BaseHandler
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
+    /**
+     * Closes the connection
+     * @throws IOException If connection could not be closed.
+     */
     public void close() throws IOException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
@@ -390,7 +406,7 @@ public class AmqpsConnection extends BaseHandler
 
             if (msgListener != null)
             {
-                msgListener.ConnectionEstablished();
+                msgListener.connectionEstablished();
 
                 synchronized (openLock)
                 {
@@ -404,8 +420,8 @@ public class AmqpsConnection extends BaseHandler
     /**
      * Send message to the Amqp Endpoint
      * @param message Message to be sent
-     * @return
-     * @throws IOException
+     * @return true if message was sent successfully, false other wise.
+     * @throws IOException If message could not be sent.
      */
     public boolean sendAmqpMessage(AmqpMessage message) throws IOException
     {
@@ -480,7 +496,7 @@ public class AmqpsConnection extends BaseHandler
         }
         else
         {
-            msgListener.MessageReceived(message);
+            msgListener.messageReceived(message);
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());

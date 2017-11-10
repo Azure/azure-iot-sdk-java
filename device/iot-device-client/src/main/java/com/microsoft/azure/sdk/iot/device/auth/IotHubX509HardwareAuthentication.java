@@ -5,8 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientX509;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 
 import javax.net.ssl.SSLContext;
@@ -15,18 +15,18 @@ import java.io.IOException;
 public class IotHubX509HardwareAuthentication extends IotHubX509Authentication
 {
     protected IotHubSSLContext iotHubSSLContext;
-    protected SecurityClientX509 securityClientX509;
+    protected SecurityProviderX509 securityProviderX509;
 
-    public IotHubX509HardwareAuthentication(SecurityClient securityClient)
+    public IotHubX509HardwareAuthentication(SecurityProvider securityProvider)
     {
-        if (!(securityClient instanceof SecurityClientX509))
+        if (!(securityProvider instanceof SecurityProviderX509))
         {
-            //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_002: [If the provided security client is not an instance of SecurityClientX509, an IllegalArgumentException shall be thrown.]
-            throw new IllegalArgumentException("The provided security client must be of type SecurityClientX509");
+            //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_002: [If the provided security client is not an instance of SecurityProviderX509, an IllegalArgumentException shall be thrown.]
+            throw new IllegalArgumentException("The provided security client must be of type SecurityProviderX509");
         }
 
         //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_001: [This function shall save the provided security client.]
-        this.securityClientX509 = (SecurityClientX509) securityClient;
+        this.securityProviderX509 = (SecurityProviderX509) securityProvider;
     }
 
     /**
@@ -42,11 +42,11 @@ public class IotHubX509HardwareAuthentication extends IotHubX509Authentication
             try
             {
                 //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_003: [If this object's ssl context has not been generated yet, this function shall generate it from the saved security client.]
-                this.iotHubSSLContext = new IotHubSSLContext(securityClientX509.getSSLContext());
+                this.iotHubSSLContext = new IotHubSSLContext(securityProviderX509.getSSLContext());
             }
             catch (SecurityClientException e)
             {
-                //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_004: [If the security client throws a SecurityClientException while generating an SSLContext, this function shall throw an IOException.]
+                //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_004: [If the security client throws a SecurityProviderException while generating an SSLContext, this function shall throw an IOException.]
                 throw new IOException(e);
             }
         }

@@ -604,7 +604,7 @@ public class AmqpConnectionTest
                 mockedEvent.getType();
                 result = Event.Type.TRANSPORT;
 
-                mockedAmqpListener.MessageReceived(mockedMessage);
+                mockedAmqpListener.messageReceived(mockedMessage);
             }
         };
 

@@ -6,11 +6,11 @@ package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 
 public interface AmqpListener
 {
-    void MessageReceived(AmqpMessage message);
+    void messageReceived(AmqpMessage message);
 
-    void ConnectionEstablished();
+    void connectionEstablished();
 
-    void ConnectionLost();
+    void connectionLost();
 
-    void MessageSent();
+    void messageSent();
 }

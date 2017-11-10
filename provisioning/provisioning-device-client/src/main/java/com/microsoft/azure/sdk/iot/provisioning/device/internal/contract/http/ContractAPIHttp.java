@@ -148,7 +148,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
      * @param requestData A non {@code null} value with all the required request data
      * @throws ProvisioningDeviceClientException If any of the parameters are invalid ({@code null} or empty)
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
-     * @throws ProvisioningDeviceHubException If hub responds back with status other than <300
+     * @throws ProvisioningDeviceHubException If hub responds back with status other than 300 or less
      */
     public synchronized void requestNonceForTPM(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException
     {
@@ -229,7 +229,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
      * @param dpsAuthorizationCallbackContext An object for context. Can be {@code null}
      * @throws ProvisioningDeviceClientException If any of the parameters are invalid ({@code null} or empty)
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
-     * @throws ProvisioningDeviceHubException If hub responds back with status other than <300
+     * @throws ProvisioningDeviceHubException If hub responds back with status other than 300 or less
      */
     public synchronized void authenticateWithProvisioningService(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException
     {
@@ -296,7 +296,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
      * @param dpsAuthorizationCallbackContext An object for context. Can be {@code null}
      * @throws ProvisioningDeviceClientException If any of the parameters are invalid ({@code null} or empty)
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
-     * @throws ProvisioningDeviceHubException If hub responds back with status other than <300
+     * @throws ProvisioningDeviceHubException If hub responds back with status other than 300 or less.
      */
     public synchronized void getRegistrationStatus(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException
     {

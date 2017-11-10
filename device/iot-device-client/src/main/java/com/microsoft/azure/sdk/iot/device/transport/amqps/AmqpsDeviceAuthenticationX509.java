@@ -71,13 +71,6 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
             throw new IllegalArgumentException("Input parameter transport cannot be null.");
         }
 
-//        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_006: [The function shall throw IllegalArgumentException if any of the input parameter is null.]
-//        if (sslContext == null)
-//        {
-//            throw new IllegalArgumentException("Input parameter sslContext cannot be null.");
-//        }
-
-
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_010: [The function shall call the prototype class makeDomain function with the sslContext.]
         SslDomain domain = null;
         try
@@ -94,9 +87,9 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
     }
 
     /**
-     * Fodun the link by name.
+     * Found the link by name.
      *
-     * @param linkName
+     * @param linkName link name to be used.
      * @return true if link found, false otherwise.
      */
     @Override

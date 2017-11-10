@@ -9,7 +9,7 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509Authentication;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 import mockit.*;
 import org.junit.Test;
@@ -51,7 +51,7 @@ public class DeviceClientTest
     IotHubX509Authentication mockIotHubX509Authentication;
 
     @Mocked
-    SecurityClient mockSecurityClient;
+    SecurityProvider mockSecurityProvider;
 
     private static long SEND_PERIOD_MILLIS = 10L;
     private static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
@@ -260,17 +260,17 @@ public class DeviceClientTest
 
     //Tests_SRS_DEVICECLIENT_34_064: [If the provided protocol is null, this function shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
-    public void createFromSecurityClientThrowsForNullProtocol() throws URISyntaxException, SecurityClientException, IOException
+    public void createFromSecurityProviderThrowsForNullProtocol() throws URISyntaxException, SecurityClientException, IOException
     {
         //act
-        DeviceClient.createFromSecurityClient("some uri", "some device id", mockSecurityClient, null);
+        DeviceClient.createFromSecurityProvider("some uri", "some device id", mockSecurityProvider, null);
     }
 
     //Tests_SRS_DEVICECLIENT_34_065: [The provided uri and device id will be used to create an iotHubConnectionString that will be saved in config.]
     //Tests_SRS_DEVICECLIENT_34_066: [The provided security client will be saved in config.]
     //Tests_SRS_DEVICECLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
     @Test
-    public void createFromSecurityClientUsesUriAndDeviceIdAndSavesSecurityClientAndCreatesDeviceIO() throws URISyntaxException, SecurityClientException, IOException
+    public void createFromSecurityProviderUsesUriAndDeviceIdAndSavesSecurityProviderAndCreatesDeviceIO() throws URISyntaxException, SecurityClientException, IOException
     {
         //arrange
         final String expectedUri = "some uri";
@@ -285,13 +285,13 @@ public class DeviceClientTest
         };
 
         //act
-        DeviceClient.createFromSecurityClient(expectedUri, expectedDeviceId, mockSecurityClient, expectedProtocol);
+        DeviceClient.createFromSecurityProvider(expectedUri, expectedDeviceId, mockSecurityProvider, expectedProtocol);
 
         //assert
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityClient.class}, mockIotHubConnectionString, mockSecurityClient);
+                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class}, mockIotHubConnectionString, mockSecurityProvider);
                 times = 1;
 
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",

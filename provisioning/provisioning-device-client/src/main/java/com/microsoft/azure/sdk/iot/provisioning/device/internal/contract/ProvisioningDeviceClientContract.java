@@ -18,8 +18,8 @@ public abstract class ProvisioningDeviceClientContract
 {
     /**
      * Static method to create contracts with the service over the specified protocol
-     *
-     * @param provisioningDeviceClientConfig@return Implementation of the relevant contract for the requested protocol
+     * @param provisioningDeviceClientConfig Config used for provisioning
+     * @return Implementation of the relevant contract for the requested protocol
      * @throws ProvisioningDeviceClientException This exception is thrown if the contract implementation could not be instantiated.
      */
     public static ProvisioningDeviceClientContract createProvisioningContract(ProvisioningDeviceClientConfig provisioningDeviceClientConfig) throws ProvisioningDeviceClientException
@@ -31,16 +31,16 @@ public abstract class ProvisioningDeviceClientContract
         switch (provisioningDeviceClientConfig.getProtocol())
         {
             case MQTT:
-                return null;
+                throw new UnsupportedOperationException("MQTT is still work in progress");
 
             case MQTT_WS:
-                return null;
+                throw new UnsupportedOperationException("MQTT is still work in progress");
 
             case AMQPS:
                 return new ContractAPIAmqp(provisioningDeviceClientConfig.getIdScope(), provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint());
 
             case AMQPS_WS:
-                return null;
+                throw new UnsupportedOperationException("Amqp over websocket is still work in progress");
 
             case HTTPS:
                 return new ContractAPIHttp(provisioningDeviceClientConfig.getIdScope(), provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint());

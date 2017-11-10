@@ -113,7 +113,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
      * @param registrationId The specified registration id for the connection
      * @param sslContext The SSLContext that will get used for this connection
      * @param isX509Cert Indicates if using x509 or TPM
-     * @throws ProvisioningDeviceConnectionException
+     * @throws ProvisioningDeviceConnectionException if connection could not succeed for any reason.
      */
     public void open(String registrationId, SSLContext sslContext, boolean isX509Cert) throws ProvisioningDeviceConnectionException
     {
@@ -151,6 +151,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
 
     /**
      * Closes the AMQP connection
+     * @throws IOException if connection could not be closed.
      */
     public void close() throws IOException
     {
@@ -167,7 +168,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
      * @param operationId The operation ID of this call?
      * @param responseCallback Callback that gets initiated when the function call is complete
      * @param callbackContext Callback context for the response call.
-     * @throws ProvisioningDeviceClientException
+     * @throws ProvisioningDeviceClientException If sending status is unsuccessful for any reason.
      */
     public void sendStatusMessage(String operationId, ResponseCallback responseCallback, Object callbackContext) throws ProvisioningDeviceClientException
     {
@@ -204,7 +205,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
      * Sends the Registration message to the Amqp Endpoint
      * @param responseCallback Callback that gets initiated when the function call is complete
      * @param callbackContext Callback context for the response call.
-     * @throws ProvisioningDeviceClientException
+     * @throws ProvisioningDeviceClientException If sending Register Message is unsuccessful for any reason.
      */
     public void sendRegisterMessage(ResponseCallback responseCallback, Object callbackContext) throws ProvisioningDeviceClientException
     {
@@ -234,31 +235,31 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
     }
 
     /**
-     * ConnectionEstablished Unused
+     * connectionEstablished Unused
      */
-    public void ConnectionEstablished()
+    public void connectionEstablished()
     {
     }
 
     /**
-     * ConnectionLost Unused
+     * connectionLost Unused
      */
-    public void ConnectionLost()
+    public void connectionLost()
     {
     }
 
     /**
-     * MessageSent Unused
+     * messageSent Unused
      */
-    public void MessageSent()
+    public void messageSent()
     {
     }
 
     /**
      * Function that gets called when amqp gets a message from the amqp endpoint
-     * @param message
+     * @param message Message received during transmission.
      */
-    public void MessageReceived(AmqpMessage message)
+    public void messageReceived(AmqpMessage message)
     {
         // SRS_ProvisioningAmqpOperations_07_013: [This method shall add the message to a message queue.]
         this.receivedMessages.add(message);

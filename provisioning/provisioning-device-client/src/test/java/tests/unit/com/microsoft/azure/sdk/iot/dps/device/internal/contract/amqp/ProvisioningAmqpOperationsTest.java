@@ -523,7 +523,7 @@ public class ProvisioningAmqpOperationsTest
         ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
 
         //act
-        provisioningAmqpOperations.MessageReceived(mockedAmqpMessage);
+        provisioningAmqpOperations.messageReceived(mockedAmqpMessage);
 
         //assert
         new Verifications()
@@ -542,9 +542,9 @@ public class ProvisioningAmqpOperationsTest
         ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
 
         //act
-        provisioningAmqpOperations.ConnectionEstablished();
-        provisioningAmqpOperations.ConnectionLost();
-        provisioningAmqpOperations.MessageSent();
+        provisioningAmqpOperations.connectionEstablished();
+        provisioningAmqpOperations.connectionLost();
+        provisioningAmqpOperations.messageSent();
 
         //assert
     }

@@ -73,6 +73,8 @@ public class ProvisioningTaskTest
     RequestData mockedRequestData;
     @Mocked
     RegistrationResult mockedRegistrationData;
+    @Mocked
+    Thread mockedThread;
 
     private void constructorExpectations()
     {

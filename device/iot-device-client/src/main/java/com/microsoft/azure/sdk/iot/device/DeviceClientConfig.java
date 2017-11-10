@@ -4,9 +4,9 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.auth.*;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientTpm;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientX509;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 
 import java.io.IOException;
 
@@ -148,10 +148,10 @@ public final class DeviceClientConfig
     /**
      * Constructor for a device client config that retrieves the authentication method from a security client instance
      * @param connectionString The connection string for the iot hub to connect with
-     * @param securityClient The security client instance to be used for authentication of this device
+     * @param securityProvider The security client instance to be used for authentication of this device
      * @throws IOException if the provided security client throws an exception while authenticating
      */
-    DeviceClientConfig(IotHubConnectionString connectionString, SecurityClient securityClient) throws IOException
+    DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider) throws IOException
     {
         if (connectionString == null)
         {
@@ -159,26 +159,26 @@ public final class DeviceClientConfig
             throw new IllegalArgumentException("The provided connection string cannot be null");
         }
 
-        if (securityClient == null)
+        if (securityProvider == null)
         {
             //Codes_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security client is null, an IllegalArgumentException shall be thrown.]
             throw new IllegalArgumentException("security client cannot be null");
         }
 
-        if (securityClient instanceof SecurityClientTpm)
+        if (securityProvider instanceof SecurityProviderTpm)
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security client is a SecurityClientTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthentication instance using the security client.]
+            //Codes_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security client is a SecurityProviderTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthentication instance using the security client.]
             throw new UnsupportedOperationException("This type of security client is not supported currently");
         }
-        else if (securityClient instanceof SecurityClientX509)
+        else if (securityProvider instanceof SecurityProviderX509)
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_082: [If the provided security client is a SecurityClientX509 instance, this function shall set its auth type to X509 and create its IotHubX509Authentication instance using the security client's ssl context.]
+            //Codes_SRS_DEVICECLIENTCONFIG_34_082: [If the provided security client is a SecurityProviderX509 instance, this function shall set its auth type to X509 and create its IotHubX509Authentication instance using the security client's ssl context.]
             this.authenticationType = AuthType.X509_CERTIFICATE;
-            this.x509Authentication = new IotHubX509HardwareAuthentication(securityClient);
+            this.x509Authentication = new IotHubX509HardwareAuthentication(securityProvider);
         }
         else
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security client is neither a SecurityClientX509 instance nor a SecurityClientTpm instance, this function shall throw an UnsupportedOperationException.]
+            //Codes_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security client is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
             throw new UnsupportedOperationException("The provided security client is not supported.");
         }
 

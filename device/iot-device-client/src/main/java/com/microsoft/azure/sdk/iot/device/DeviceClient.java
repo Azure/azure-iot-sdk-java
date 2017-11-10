@@ -7,7 +7,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -232,15 +232,15 @@ public final class DeviceClient implements Closeable
      *
      * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
      * @param deviceId The id for the device to use
-     * @param securityClient The security client for the device
+     * @param securityProvider The security client for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
      * @return The created device client instance
-     * @throws URISyntaxException If the provided {@param connString}
-     * @throws IOException If the SecurityClient throws any exception while authenticating
+     * @throws URISyntaxException If the provided connString could not be parsed.
+     * @throws IOException If the SecurityProvider throws any exception while authenticating
      */
-    public static DeviceClient createFromSecurityClient(String uri, String deviceId, SecurityClient securityClient, IotHubClientProtocol protocol) throws URISyntaxException, IOException
+    public static DeviceClient createFromSecurityProvider(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws URISyntaxException, IOException
     {
-        return new DeviceClient(uri, deviceId, securityClient, protocol);
+        return new DeviceClient(uri, deviceId, securityProvider, protocol);
     }
 
     /**
@@ -248,13 +248,13 @@ public final class DeviceClient implements Closeable
      *
      * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
      * @param deviceId The id for the device to use
-     * @param securityClient The security client for the device
+     * @param securityProvider The security client for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
      * @return The created device client instance
-     * @throws URISyntaxException If the provided {@param connString}
-     * @throws IOException If the SecurityClient throws any exception while authenticating
+     * @throws URISyntaxException If the provided connString could not be parsed.
+     * @throws IOException If the SecurityProvider throws any exception while authenticating
      */
-    private DeviceClient(String uri, String deviceId, SecurityClient securityClient, IotHubClientProtocol protocol) throws URISyntaxException, IOException
+    private DeviceClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws URISyntaxException, IOException
     {
         if (protocol == null)
         {
@@ -265,7 +265,7 @@ public final class DeviceClient implements Closeable
         //Codes_SRS_DEVICECLIENT_34_065: [The provided uri and device id will be used to create an iotHubConnectionString that will be saved in config.]
         //Codes_SRS_DEVICECLIENT_34_066: [The provided security client will be saved in config.]
         IotHubConnectionString connectionString = new IotHubConnectionString(uri, deviceId, null, null);
-        this.config = new DeviceClientConfig(connectionString, securityClient);
+        this.config = new DeviceClientConfig(connectionString, securityProvider);
 
         //Codes_SRS_DEVICECLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
         commonConstructorSetup(protocol);

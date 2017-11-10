@@ -105,7 +105,7 @@ public class AmqpsDeviceAuthenticationSAS extends AmqpsDeviceAuthentication
     /**
      * Found the link by name.
      *
-     * @param linkName
+     * @param linkName link name to be used.
      * @return true if link found, false otherwise.
      */
     @Override

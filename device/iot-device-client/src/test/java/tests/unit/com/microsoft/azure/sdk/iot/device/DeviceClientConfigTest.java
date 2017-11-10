@@ -7,9 +7,9 @@ import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.MessageCallback;
 import com.microsoft.azure.sdk.iot.device.auth.*;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientTpm;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientX509;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 import mockit.*;
 import org.junit.Test;
@@ -39,9 +39,9 @@ public class DeviceClientConfigTest
     @Mocked IotHubX509HardwareAuthentication mockX509HardwareAuthentication;
     @Mocked IotHubX509SoftwareAuthentication mockX509SoftwareAuthentication;
     @Mocked IotHubConnectionString mockIotHubConnectionString;
-    @Mocked SecurityClient mockSecurityClient;
-    @Mocked SecurityClientX509 mockSecurityClientX509;
-    @Mocked SecurityClientTpm mockSecurityClientSAS;
+    @Mocked SecurityProvider mockSecurityProvider;
+    @Mocked SecurityProviderX509 mockSecurityProviderX509;
+    @Mocked SecurityProviderTpm mockSecurityProviderSAS;
     @Mocked SSLContext mockSSLContext;
 
     private static String expectedDeviceId = "deviceId";
@@ -553,38 +553,38 @@ public class DeviceClientConfigTest
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security client is null, an IllegalArgumentException shall be thrown.]
     @Test (expected = IllegalArgumentException.class)
-    public void securityClientConstructorThrowsForNullConnectionString()
+    public void securityProviderConstructorThrowsForNullConnectionString()
     {
         //act
-        Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityClient.class}, null, mockSecurityClient);
+        Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class}, null, mockSecurityProvider);
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security client is null, an IllegalArgumentException shall be thrown.]
     @Test (expected = IllegalArgumentException.class)
-    public void securityClientConstructorThrowsForNullSecurityClient()
+    public void securityProviderConstructorThrowsForNullSecurityProvider()
     {
         //act
-        Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityClient.class}, mockIotHubConnectionString, null);
+        Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class}, mockIotHubConnectionString, null);
     }
 
-    //Tests_SRS_DEVICECLIENTCONFIG_34_082: [If the provided security client is a SecurityClientX509 instance, this function shall set its auth type to X509 and create its IotHubX509Authentication instance using the security client's ssl context.]
+    //Tests_SRS_DEVICECLIENTCONFIG_34_082: [If the provided security client is a SecurityProviderX509 instance, this function shall set its auth type to X509 and create its IotHubX509Authentication instance using the security client's ssl context.]
     @Test
-    public void securityClientConstructorWithX509Success() throws SecurityClientException
+    public void securityProviderConstructorWithX509Success() throws SecurityClientException
     {
         //arrange
         new NonStrictExpectations()
         {
             {
-                mockSecurityClientX509.getSSLContext();
+                mockSecurityProviderX509.getSSLContext();
                 result = mockSSLContext;
 
-                new IotHubX509HardwareAuthentication(mockSecurityClientX509);
+                new IotHubX509HardwareAuthentication(mockSecurityProviderX509);
                 result = mockX509HardwareAuthentication;
             }
         };
 
         //act
-        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityClient.class}, mockIotHubConnectionString, mockSecurityClientX509);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class}, mockIotHubConnectionString, mockSecurityProviderX509);
 
         //assert
         DeviceClientConfig.AuthType actualAuthType = Deencapsulation.getField(config, "authenticationType");
@@ -592,18 +592,18 @@ public class DeviceClientConfigTest
         new Verifications()
         {
             {
-                new IotHubX509HardwareAuthentication(mockSecurityClientX509);
+                new IotHubX509HardwareAuthentication(mockSecurityProviderX509);
                 times = 1;
             }
         };
     }
 
-    //Tests_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security client is a SecurityClientTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthentication instance using the security client.]
+    //Tests_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security client is a SecurityProviderTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthentication instance using the security client.]
 
 
-    //Tests_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security client is neither a SecurityClientX509 instance nor a SecurityClientTpm instance, this function shall throw an UnsupportedOperationException.]
+    //Tests_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security client is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
     @Test (expected = UnsupportedOperationException.class)
-    public void securityClientConstructorThrowsForUnknownSecurityClientImplementation() throws SecurityClientException
+    public void securityProviderConstructorThrowsForUnknownSecurityProviderImplementation() throws SecurityClientException
     {
         //arrange
         new NonStrictExpectations()
@@ -618,6 +618,6 @@ public class DeviceClientConfigTest
         };
 
         //act
-        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityClient.class}, mockIotHubConnectionString, mockSecurityClient);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class}, mockIotHubConnectionString, mockSecurityProvider);
     }
 }
