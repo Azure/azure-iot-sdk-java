@@ -11,8 +11,8 @@ Generates a url/path for different operations that can be performed on the servi
 ```java
 public class UrlPathBuilder 
 {
-    public UrlPathBuilder(String scopeId) throws IllegalArgumentException;
-    public UrlPathBuilder(String hostName, String scopeId, ProvisioningDeviceClientTransportProtocol protocol) throws IllegalArgumentException;
+    public UrlPathBuilder(String idScope) throws IllegalArgumentException;
+    public UrlPathBuilder(String hostName, String idScope, ProvisioningDeviceClientTransportProtocol protocol) throws IllegalArgumentException;
     public String generateSasTokenUrl(String registrationId) throws UnsupportedEncodingException;
     public String generateRegisterUrl(String registrationId) throws IOException;
     public String generateRequestUrl(String registrationId, String operationsId) throws IOException;
@@ -22,20 +22,20 @@ public class UrlPathBuilder
 ### UrlPathBuilder
 
 ```java
-    public UrlPathBuilder(String scopeId) throws IllegalArgumentException;
+    public UrlPathBuilder(String idScope) throws IllegalArgumentException;
 ```
-**SRS_UrlPathBuilder_25_001: [** Constructor shall save `scopeId`.**]**
+**SRS_UrlPathBuilder_25_001: [** Constructor shall save `idScope`.**]**
 
-**SRS_UrlPathBuilder_25_002: [** Constructor throw IllegalArgumentException if `scopeId` is null or empty.**]**
+**SRS_UrlPathBuilder_25_002: [** Constructor throw IllegalArgumentException if `idScope` is null or empty.**]**
 
 ### UrlPathBuilder
 
 ```java
-    public UrlPathBuilder(String hostName, String scopeId, ProvisioningDeviceClientTransportProtocol protocol) throws IllegalArgumentException;
+    public UrlPathBuilder(String hostName, String idScope, ProvisioningDeviceClientTransportProtocol protocol) throws IllegalArgumentException;
 ```
-**SRS_UrlPathBuilder_25_003: [** The constructor shall throw IllegalArgumentException if the `scopeId` or `hostName` string is empty or null or if `protocol` is null.**]**
+**SRS_UrlPathBuilder_25_003: [** The constructor shall throw IllegalArgumentException if the `idScope` or `hostName` string is empty or null or if `protocol` is null.**]**
 
-**SRS_UrlPathBuilder_25_004: [** The constructor shall save the `scopeId` or `hostName` string and  `protocol`. **]**
+**SRS_UrlPathBuilder_25_004: [** The constructor shall save the `idScope` or `hostName` string and  `protocol`. **]**
 
 ### generateSasTokenUrl
 

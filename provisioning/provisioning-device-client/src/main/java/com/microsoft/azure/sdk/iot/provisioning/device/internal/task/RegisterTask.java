@@ -8,8 +8,6 @@
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientX509;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientAuthenticationException;
@@ -19,7 +17,9 @@ import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientTpm;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 
 import javax.net.ssl.SSLContext;
@@ -39,7 +39,7 @@ public class RegisterTask implements Callable
     private ResponseCallback responseCallback = null;
     private ProvisioningDeviceClientContract provisioningDeviceClientContract = null;
     private Authorization authorization = null;
-    private SecurityClient securityClient = null;
+    private SecurityProvider securityProvider = null;
     private ProvisioningDeviceClientConfig provisioningDeviceClientConfig = null;
 
     private class ResponseCallbackImpl implements ResponseCallback
@@ -65,22 +65,22 @@ public class RegisterTask implements Callable
     /**
      * Constructor for the task to perform registration with service
      * @param provisioningDeviceClientConfig Config client registered with. Cannot be {@code null}.
-     * @param securityClient Security client holding HSM details. Cannot be {@code null}.
+     * @param securityProvider Security client holding HSM details. Cannot be {@code null}.
      * @param provisioningDeviceClientContract Lower level contract with the service over multiple protocols. Cannot be {@code null}.
      * @param authorization An object that holds the state of the service retrieved data. Cannot be {@code null}.
      * @throws ProvisioningDeviceClientException When any of the provided parameters are invalid.
      */
-    RegisterTask(ProvisioningDeviceClientConfig provisioningDeviceClientConfig, SecurityClient securityClient,
+    RegisterTask(ProvisioningDeviceClientConfig provisioningDeviceClientConfig, SecurityProvider securityProvider,
                  ProvisioningDeviceClientContract provisioningDeviceClientContract, Authorization authorization)
             throws ProvisioningDeviceClientException
     {
-        //SRS_RegisterTask_25_002: [ Constructor throw ProvisioningDeviceClientException if provisioningDeviceClientConfig , securityClient, authorization or provisioningDeviceClientContract is null.]
+        //SRS_RegisterTask_25_002: [ Constructor throw ProvisioningDeviceClientException if provisioningDeviceClientConfig , securityProvider, authorization or provisioningDeviceClientContract is null.]
         if (provisioningDeviceClientContract == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("provisioningDeviceClientContract cannot be null"));
         }
 
-        if (securityClient == null)
+        if (securityProvider == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("security client cannot be null"));
         }
@@ -95,9 +95,9 @@ public class RegisterTask implements Callable
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("authorization cannot be null"));
         }
 
-        //SRS_RegisterTask_25_001: [ Constructor shall save provisioningDeviceClientConfig , securityClient, provisioningDeviceClientContract and authorization.]
+        //SRS_RegisterTask_25_001: [ Constructor shall save provisioningDeviceClientConfig , securityProvider, provisioningDeviceClientContract and authorization.]
         this.provisioningDeviceClientConfig = provisioningDeviceClientConfig;
-        this.securityClient = securityClient;
+        this.securityProvider = securityProvider;
         this.provisioningDeviceClientContract = provisioningDeviceClientContract;
         this.authorization = authorization;
         this.responseCallback = new ResponseCallbackImpl();
@@ -113,11 +113,11 @@ public class RegisterTask implements Callable
 
         try
         {
-            SecurityClientX509 dpsSecurityClientX509 = (SecurityClientX509) securityClient;
+            SecurityProviderX509 dpsSecurityProviderX509 = (SecurityProviderX509) securityProvider;
 
             //SRS_RegisterTask_25_004: [ If the provided security client is for X509 then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
 
-            SSLContext sslContext = dpsSecurityClientX509.getSSLContext();
+            SSLContext sslContext = dpsSecurityProviderX509.getSSLContext();
             if (sslContext == null)
             {
                 throw new ProvisioningDeviceSecurityException("Retrieved Null SSL context from security client");
@@ -153,17 +153,16 @@ public class RegisterTask implements Callable
 
     private String constructSasToken(String registrationId, int expiryTime) throws ProvisioningDeviceClientException, UnsupportedEncodingException, SecurityClientException
     {
-        //"SharedAccessSignature sr=%s&sig=%s&se=%s&skn=", token_scope, STRING_c_str(urlEncodedSignature), expire_token);
         if (expiryTime <= 0)
         {
             throw new IllegalArgumentException("expiry time cannot be negative or zero");
         }
-        String tokenScope = new UrlPathBuilder(provisioningDeviceClientConfig.getScopeId()).generateSasTokenUrl(registrationId);
+        String tokenScope = new UrlPathBuilder(provisioningDeviceClientConfig.getIdScope()).generateSasTokenUrl(registrationId);
         if (tokenScope == null || tokenScope.isEmpty())
         {
             throw new ProvisioningDeviceClientException("Could not construct token scope");
         }
-        SecurityClientTpm securityClientTpm = (SecurityClientTpm) securityClient;
+        SecurityProviderTpm securityClientTpm = (SecurityProviderTpm) securityProvider;
         Long expiryTimeUTC = System.currentTimeMillis() / 1000 + expiryTime;
         byte[] token = securityClientTpm.signWithIdentity(tokenScope.concat("\n" + String.valueOf(expiryTimeUTC)).getBytes());
         if (token == null || token.length == 0)
@@ -178,7 +177,7 @@ public class RegisterTask implements Callable
     }
 
     private ResponseParser processWithNonce(ResponseData responseDataForNonce,
-                                            SecurityClientTpm securityClientTpm,
+                                            SecurityProviderTpm securityClientTpm,
                                             RequestData requestData)
             throws IOException, InterruptedException, ProvisioningDeviceClientException,SecurityClientException
     {
@@ -193,7 +192,7 @@ public class RegisterTask implements Callable
 
             /*SRS_RegisterTask_25_014: [ If the provided security client is for Key then, this method shall construct SasToken by doing the following
 
-            1. Build a tokenScope of format <scopeid>/registrations/<registrationId>
+            1. Build a tokenScope of format <scope>/registrations/<registrationId>
             2. Sign the HSM with the string of format <tokenScope>/n<expiryTime> and receive a token
             3. Encode the token to Base64 format and UrlEncode it to generate the signature. ]*/
 
@@ -248,8 +247,8 @@ public class RegisterTask implements Callable
 
         try
         {
-            SecurityClientTpm securityClientTpm = (SecurityClientTpm) securityClient;
-            if (securityClientTpm.getEnrollmentKey() == null || securityClientTpm.getStorageRootKey() == null)
+            SecurityProviderTpm securityClientTpm = (SecurityProviderTpm) securityProvider;
+            if (securityClientTpm.getEndorsementKey() == null || securityClientTpm.getStorageRootKey() == null)
             {
                 throw new ProvisioningDeviceSecurityException(new IllegalArgumentException("Ek or SRK cannot be null"));
             }
@@ -262,7 +261,7 @@ public class RegisterTask implements Callable
             }
             authorization.setSslContext(sslContext);
 
-            RequestData requestData = new RequestData(securityClientTpm.getEnrollmentKey(), securityClientTpm.getStorageRootKey(), registrationId, sslContext, null);
+            RequestData requestData = new RequestData(securityClientTpm.getEndorsementKey(), securityClientTpm.getStorageRootKey(), registrationId, sslContext, null);
 
             //SRS_RegisterTask_25_011: [ If the provided security client is for Key then, this method shall trigger requestNonceForTPM on the contract API and wait for Authentication Key and decode it from Base64. Also this method shall pass the exception back to the user if it fails. ]
             ResponseData nonceResponseData = new ResponseData();
@@ -293,13 +292,13 @@ public class RegisterTask implements Callable
     {
         try
         {
-            if (this.securityClient instanceof SecurityClientX509)
+            if (this.securityProvider instanceof SecurityProviderX509)
             {
-                return this.authenticateWithX509(this.securityClient.getRegistrationId());
+                return this.authenticateWithX509(this.securityProvider.getRegistrationId());
             }
-            else if (this.securityClient instanceof SecurityClientTpm)
+            else if (this.securityProvider instanceof SecurityProviderTpm)
             {
-                return this.authenticateWithSasToken(this.securityClient.getRegistrationId());
+                return this.authenticateWithSasToken(this.securityProvider.getRegistrationId());
             }
             else
             {

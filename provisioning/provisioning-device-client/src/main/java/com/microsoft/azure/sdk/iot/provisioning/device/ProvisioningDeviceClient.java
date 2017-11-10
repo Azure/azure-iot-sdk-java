@@ -11,7 +11,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDevi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ProvisioningTask;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,12 +24,21 @@ public class ProvisioningDeviceClient
     private ProvisioningDeviceClientContract provisioningDeviceClientContract;
     private ExecutorService executor;
 
-    public static ProvisioningDeviceClient create(String globalEndpoint, String scopeId, ProvisioningDeviceClientTransportProtocol protocol, SecurityClient securityClient) throws ProvisioningDeviceClientException
+    /**
+     * Creates an instance of ProvisioningDeviceClient
+     * @param globalEndpoint global endpoint for the service to connect to. Cannot be {@code null}.
+     * @param idScope IdScope for the instance of the service hosted by you. Cannot be {@code null}.
+     * @param protocol Protocol to communicate with the service onto. Cannot be {@code null}.
+     * @param securityProvider Security Provider for X509 or TPM flow. Cannot be {@code null}.
+     * @return An instance of ProvisioningDeviceClient
+     * @throws ProvisioningDeviceClientException if any of the underlying API calls fail to process.
+     */
+    public static ProvisioningDeviceClient create(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider) throws ProvisioningDeviceClientException
     {
-        return new ProvisioningDeviceClient(globalEndpoint, scopeId, protocol, securityClient);
+        return new ProvisioningDeviceClient(globalEndpoint, idScope, protocol, securityProvider);
     }
 
-    private ProvisioningDeviceClient(String globalEndpoint, String scopeId, ProvisioningDeviceClientTransportProtocol protocol, SecurityClient securityClient) throws ProvisioningDeviceClientException
+    private ProvisioningDeviceClient(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider) throws ProvisioningDeviceClientException
     {
         if (globalEndpoint == null || globalEndpoint.isEmpty())
         {
@@ -37,9 +46,9 @@ public class ProvisioningDeviceClient
             throw new IllegalArgumentException("global endpoint cannot be null or empty");
         }
 
-        if (scopeId == null || scopeId.isEmpty())
+        if (idScope == null || idScope.isEmpty())
         {
-            //SRS_ProvisioningDeviceClient_25_002: [ The constructor shall throw IllegalArgumentException if scopeId is null or empty. ]
+            //SRS_ProvisioningDeviceClient_25_002: [ The constructor shall throw IllegalArgumentException if idScope is null or empty. ]
             throw new IllegalArgumentException("scope id cannot be null or empty");
         }
 
@@ -49,9 +58,9 @@ public class ProvisioningDeviceClient
             throw new IllegalArgumentException("protocol cannot be null");
         }
 
-        if (securityClient == null)
+        if (securityProvider == null)
         {
-            //SRS_ProvisioningDeviceClient_25_004: [ The constructor shall throw IllegalArgumentException if securityClient is null. ]
+            //SRS_ProvisioningDeviceClient_25_004: [ The constructor shall throw IllegalArgumentException if securityProvider is null. ]
             throw new IllegalArgumentException("Security client cannot be null");
         }
 
@@ -59,9 +68,9 @@ public class ProvisioningDeviceClient
         this.provisioningDeviceClientConfig = new ProvisioningDeviceClientConfig();
 
         this.provisioningDeviceClientConfig.setProvisioningServiceGlobalEndpoint(globalEndpoint);
-        this.provisioningDeviceClientConfig.setScopeId(scopeId);
+        this.provisioningDeviceClientConfig.setIdScope(idScope);
         this.provisioningDeviceClientConfig.setProtocol(protocol);
-        this.provisioningDeviceClientConfig.setSecurityClient(securityClient);
+        this.provisioningDeviceClientConfig.setSecurityProvider(securityProvider);
 
         //SRS_ProvisioningDeviceClient_25_006: [ The constructor shall create provisioningDeviceClientContract with the given config. ]
         this.provisioningDeviceClientContract = ProvisioningDeviceClientContract.createProvisioningContract(this.provisioningDeviceClientConfig);
@@ -69,6 +78,13 @@ public class ProvisioningDeviceClient
         this.executor = Executors.newFixedThreadPool(MAX_THREADS_TO_RUN);
     }
 
+    /**
+     * Register's a device with the service and provides you with iothub uri and the registered device.
+     * @param provisioningDeviceClientRegistrationCallback Callback where you can retrieve the status of registration like iothub uri and the registered device or
+     *                                                     any exception that was caused during registration process. Cannot be {@code null}.
+     * @param context Context for the callback. Can be {@code null}.
+     * @throws ProvisioningDeviceClientException if any of the underlying API calls fail to process.
+     */
     public void registerDevice(ProvisioningDeviceClientRegistrationCallback provisioningDeviceClientRegistrationCallback, Object context) throws ProvisioningDeviceClientException
     {
         if (provisioningDeviceClientRegistrationCallback == null)
@@ -85,6 +101,9 @@ public class ProvisioningDeviceClient
         executor.submit(provisioningTask);
     }
 
+    /**
+     * Closes all the executors opened by the client if they have not already closed.
+     */
     public void closeNow()
     {
         //SRS_ProvisioningDeviceClient_25_011: [ This method shall check if executor is terminated and if not shall shutdown the executor. ]

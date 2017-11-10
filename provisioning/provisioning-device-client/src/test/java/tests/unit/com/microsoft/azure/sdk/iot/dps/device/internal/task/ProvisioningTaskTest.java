@@ -11,7 +11,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.task;
 
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.OperationRegistrationStatusParser;
@@ -44,7 +44,7 @@ public class ProvisioningTaskTest
     private static final String TEST_DEVICE_ID = "testDeviceId";
 
     @Mocked
-    SecurityClient mockedSecurityClient;
+    SecurityProvider mockedSecurityProvider;
     @Mocked
     ProvisioningDeviceClientContract mockedProvisioningDeviceClientContract;
     @Mocked
@@ -87,7 +87,7 @@ public class ProvisioningTaskTest
         };
     }
 
-    //SRS_provisioningtask_25_001: [ Constructor shall save provisioningDeviceClientConfig , securityClient, provisioningDeviceClientContract, provisioningDeviceClientStatusCallback, dpsStatusCallbackContext.]
+    //SRS_provisioningtask_25_001: [ Constructor shall save provisioningDeviceClientConfig , securityProvider, provisioningDeviceClientContract, provisioningDeviceClientStatusCallback, dpsStatusCallbackContext.]
     //SRS_ProvisioningTask_25_015: [ Constructor shall start the executor with a fixed thread pool of size 2.]
     //SRS_provisioningtask_25_003: [ Constructor shall trigger status callback if provided with status PROVISIONING_DEVICE_STATUS_UNAUTHENTICATED.]
     @Test
@@ -106,7 +106,7 @@ public class ProvisioningTaskTest
             }
         };
         assertEquals(mockedProvisioningDeviceClientConfig, Deencapsulation.getField(testProvisioningTask, "provisioningDeviceClientConfig"));
-        assertEquals(mockedSecurityClient, Deencapsulation.getField(testProvisioningTask, "securityClient"));
+        assertEquals(mockedSecurityProvider, Deencapsulation.getField(testProvisioningTask, "securityProvider"));
         assertEquals(mockedProvisioningDeviceClientContract, Deencapsulation.getField(testProvisioningTask, "provisioningDeviceClientContract"));
         assertNotNull(Deencapsulation.getField(testProvisioningTask, "authorization"));
     }
@@ -1369,7 +1369,7 @@ public class ProvisioningTaskTest
         };
     }
 
-    //SRS_provisioningtask_25_002: [ Constructor throw ProvisioningDeviceClientException if provisioningDeviceClientConfig , securityClient or provisioningDeviceClientContract is null.]
+    //SRS_provisioningtask_25_002: [ Constructor throw ProvisioningDeviceClientException if provisioningDeviceClientConfig , securityProvider or provisioningDeviceClientContract is null.]
     @Test (expected = ProvisioningDeviceClientException.class)
     public void constructorThrowsOnNullConfig() throws ProvisioningDeviceClientException
     {
@@ -1380,13 +1380,13 @@ public class ProvisioningTaskTest
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
-    public void constructorThrowsOnNullSecurityClient() throws ProvisioningDeviceClientException
+    public void constructorThrowsOnNullSecurityProvider() throws ProvisioningDeviceClientException
     {
         //arrange
         new NonStrictExpectations()
         {
             {
-                mockedProvisioningDeviceClientConfig.getSecurityClient();
+                mockedProvisioningDeviceClientConfig.getSecurityProvider();
                 result = null;
             }
         };

@@ -36,28 +36,28 @@ public class UrlPathBuilder
 
     /**
      * Constructor for Url Path builder
-     * @param scopeId scope id for Provisioning service which cannot be {@code null} or empty
+     * @param idScope scope id for Provisioning service which cannot be {@code null} or empty
      * @throws IllegalArgumentException is thrown when invalid parameters are given
      */
-    public UrlPathBuilder(String scopeId) throws IllegalArgumentException
+    public UrlPathBuilder(String idScope) throws IllegalArgumentException
     {
         //SRS_UrlPathBuilder_25_002: [ Constructor throw IllegalArgumentException if scope id is null or empty.]
-        if (scopeId == null || scopeId.isEmpty())
+        if (idScope == null || idScope.isEmpty())
         {
             throw new IllegalArgumentException("scope id cannot be null or empty");
         }
         //SRS_UrlPathBuilder_25_001: [ Constructor shall save scope id.]
-        this.scope = scopeId;
+        this.scope = idScope;
     }
 
     /**
      * Constructor for Url Path builder
      * @param hostName HostName for Provisioning service which cannot be {@code null} or empty
-     * @param scopeId scope id for Provisioning service which cannot be {@code null} or empty
+     * @param idScope scope id for Provisioning service which cannot be {@code null} or empty
      * @param protocol One of the valid protocols. Cannot be {@code null}
      * @throws IllegalArgumentException is thrown when invalid parameters are given
      */
-    public UrlPathBuilder(String hostName, String scopeId, ProvisioningDeviceClientTransportProtocol protocol) throws IllegalArgumentException
+    public UrlPathBuilder(String hostName, String idScope, ProvisioningDeviceClientTransportProtocol protocol) throws IllegalArgumentException
     {
         //SRS_UrlPathBuilder_25_003: [ The constructor shall throw IllegalArgumentException if the scope id or hostName string is empty or null or if protocol is null.]
         if (hostName == null || hostName.isEmpty())
@@ -65,7 +65,7 @@ public class UrlPathBuilder
             throw new IllegalArgumentException("host name cannot be null or empty");
         }
 
-        if (scopeId == null || scopeId.isEmpty())
+        if (idScope == null || idScope.isEmpty())
         {
             throw new IllegalArgumentException("scope id cannot be null or empty");
         }
@@ -76,7 +76,7 @@ public class UrlPathBuilder
         }
 
         //SRS_UrlPathBuilder_25_004: [ The constructor shall save the scope id or hostName string and protocol. ]
-        this.scope = scopeId;
+        this.scope = idScope;
         this.provisioningDeviceClientTransportProtocol = protocol;
         url = new StringBuilder();
         url.append(URL_HTTPS);
@@ -134,7 +134,7 @@ public class UrlPathBuilder
         {
             throw new IllegalArgumentException("registration id cannot be null or empty");
         }
-        //SRS_UrlPathBuilder_25_006: [ This method shall create a String using the following format after Url Encoding: <scopeid>/registrations/<registrationId> ]
+        //SRS_UrlPathBuilder_25_006: [ This method shall create a String using the following format after Url Encoding: <scope>/registrations/<registrationId> ]
         StringBuilder sasTokenUrl = new StringBuilder();
         sasTokenUrl.append(scope);
         sasTokenUrl.append(SLASH);

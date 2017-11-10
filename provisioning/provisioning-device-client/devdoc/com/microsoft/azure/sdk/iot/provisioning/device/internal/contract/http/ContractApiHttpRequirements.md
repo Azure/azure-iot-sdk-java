@@ -11,7 +11,7 @@ An HTTPS connection between a device and an IoT Hub for exercising the contract 
 ```java
 public class ContractAPIHttp extends ProvisioningDeviceClientContract
 {
-    public ContractAPIHttp(String scopeId, String hostName) throws ProvisioningDeviceClientException;
+    public ContractAPIHttp(String idScope, String hostName) throws ProvisioningDeviceClientException;
 
     public synchronized void requestNonceWithDPSTPM(byte[] payload, String registrationId, SSLContext sslContext, RestResponseCallback restResponseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException;
 
@@ -24,12 +24,12 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
 ### ContractAPIHttp
 
 ```java
-public ContractAPIHttp(String scopeId, String hostName) throws ProvisioningDeviceClientException;
+public ContractAPIHttp(String idScope, String hostName) throws ProvisioningDeviceClientException;
 ```
 
 **SRS_ContractAPIHttp_25_001: [**The constructor shall save the scope id and hostname.**]**
 
-**SRS_ContractAPIHttp_25_002: [**The constructor shall throw ProvisioningDeviceClientException if either scopeId and hostName are null or empty.**]**
+**SRS_ContractAPIHttp_25_002: [**The constructor shall throw ProvisioningDeviceClientException if either idScope and hostName are null or empty.**]**
 
 
 ### requestNonceWithDPSTPM

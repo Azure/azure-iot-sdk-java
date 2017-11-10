@@ -8,7 +8,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.task;
 
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
@@ -46,7 +46,7 @@ public class StatusTaskTest
     private static final String TEST_REGISTRATION_ID = "testRegistrationId";
 
     @Mocked
-    SecurityClient mockedSecurityClient;
+    SecurityProvider mockedSecurityProvider;
     @Mocked
     ProvisioningDeviceClientContract mockedProvisioningDeviceClientContract;
     @Mocked
@@ -66,30 +66,30 @@ public class StatusTaskTest
     @Mocked
     RequestData mockedRequestData;
 
-    //SRS_StatusTask_25_001: [ Constructor shall save operationId , dpsSecurityClient, provisioningDeviceClientContract and authorization. ]
+    //SRS_StatusTask_25_001: [ Constructor shall save operationId , dpsSecurityProvider, provisioningDeviceClientContract and authorization. ]
     @Test
     public void constructorSucceeds() throws ProvisioningDeviceClientException
     {
         //arrange
         //act
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
-                                                            mockedSecurityClient, mockedProvisioningDeviceClientContract,
+                                                            mockedSecurityProvider, mockedProvisioningDeviceClientContract,
                                                             TEST_OPERATION_ID, mockedAuthorization);
         //assert
-        assertNotNull(Deencapsulation.getField(statusTask, "securityClient"));
+        assertNotNull(Deencapsulation.getField(statusTask, "securityProvider"));
         assertNotNull(Deencapsulation.getField(statusTask, "provisioningDeviceClientContract"));
         assertNotNull(Deencapsulation.getField(statusTask, "authorization"));
         assertEquals(TEST_OPERATION_ID, Deencapsulation.getField(statusTask, "operationId"));
     }
 
-    //SRS_StatusTask_25_002: [ Constructor shall throw ProvisioningDeviceClientException if operationId , dpsSecurityClient, authorization or provisioningDeviceClientContract is null. ]
+    //SRS_StatusTask_25_002: [ Constructor shall throw ProvisioningDeviceClientException if operationId , dpsSecurityProvider, authorization or provisioningDeviceClientContract is null. ]
     @Test (expected = ProvisioningDeviceClientException.class)
-    public void constructorThrowsOnNullSecurityClient() throws ProvisioningDeviceClientException
+    public void constructorThrowsOnNullSecurityProvider() throws ProvisioningDeviceClientException
     {
         //act
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
                                                             null, mockedProvisioningDeviceClientContract,
@@ -100,10 +100,10 @@ public class StatusTaskTest
     public void constructorThrowsOnNullContract() throws ProvisioningDeviceClientException
     {
         //act
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
-                                                            mockedSecurityClient, null,
+                                                            mockedSecurityProvider, null,
                                                             TEST_OPERATION_ID, mockedAuthorization);
     }
 
@@ -111,10 +111,10 @@ public class StatusTaskTest
     public void constructorThrowsOnNullOperationId() throws ProvisioningDeviceClientException
     {
         //act
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
-                                                            mockedSecurityClient, mockedProvisioningDeviceClientContract,
+                                                            mockedSecurityProvider, mockedProvisioningDeviceClientContract,
                                                             null, mockedAuthorization);
     }
 
@@ -122,10 +122,10 @@ public class StatusTaskTest
     public void constructorThrowsOnEmptyOperationId() throws ProvisioningDeviceClientException
     {
         //act
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
-                                                            mockedSecurityClient, mockedProvisioningDeviceClientContract,
+                                                            mockedSecurityProvider, mockedProvisioningDeviceClientContract,
                                                             "", mockedAuthorization);
     }
 
@@ -133,10 +133,10 @@ public class StatusTaskTest
     public void constructorThrowsOnNullAuth() throws ProvisioningDeviceClientException
     {
         //act
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
-                                                            mockedSecurityClient, mockedProvisioningDeviceClientContract,
+                                                            mockedSecurityProvider, mockedProvisioningDeviceClientContract,
                                                             TEST_OPERATION_ID, null);
     }
 
@@ -144,15 +144,15 @@ public class StatusTaskTest
     public void getRegistrationStatusSucceeds() throws Exception
     {
         //arrange
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
-                                                            mockedSecurityClient, mockedProvisioningDeviceClientContract,
+                                                            mockedSecurityProvider, mockedProvisioningDeviceClientContract,
                                                             TEST_OPERATION_ID, mockedAuthorization);
         new NonStrictExpectations()
         {
             {
-                mockedSecurityClient.getRegistrationId();
+                mockedSecurityProvider.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 Deencapsulation.invoke(mockedAuthorization, "getSslContext");
                 result = mockedSslContext;
@@ -183,15 +183,15 @@ public class StatusTaskTest
     public void getRegistrationStatusThrowsOnNullRegId() throws Exception
     {
         //arrange
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
-                                                            mockedSecurityClient, mockedProvisioningDeviceClientContract,
+                                                            mockedSecurityProvider, mockedProvisioningDeviceClientContract,
                                                             TEST_OPERATION_ID, mockedAuthorization);
         new NonStrictExpectations()
         {
             {
-                mockedSecurityClient.getRegistrationId();
+                mockedSecurityProvider.getRegistrationId();
                 result = null;
             }
         };
@@ -204,15 +204,15 @@ public class StatusTaskTest
     public void getRegistrationStatusThrowsOnEmptyRegId() throws Exception
     {
         //arrange
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
-                                                            mockedSecurityClient, mockedProvisioningDeviceClientContract,
+                                                            mockedSecurityProvider, mockedProvisioningDeviceClientContract,
                                                             TEST_OPERATION_ID, mockedAuthorization);
         new NonStrictExpectations()
         {
             {
-                mockedSecurityClient.getRegistrationId();
+                mockedSecurityProvider.getRegistrationId();
                 result = "";
             }
         };
@@ -226,15 +226,15 @@ public class StatusTaskTest
     public void getRegistrationStatusThrowsOnNullSslContext() throws Exception
     {
         //arrange
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
-                                                            mockedSecurityClient, mockedProvisioningDeviceClientContract,
+                                                            mockedSecurityProvider, mockedProvisioningDeviceClientContract,
                                                             TEST_OPERATION_ID, mockedAuthorization);
         new NonStrictExpectations()
         {
             {
-                mockedSecurityClient.getRegistrationId();
+                mockedSecurityProvider.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 Deencapsulation.invoke(mockedAuthorization, "getSslContext");
                 result = null;
@@ -250,15 +250,15 @@ public class StatusTaskTest
     public void getRegistrationStatusThrowsOnContractGetStatusFails() throws Exception
     {
         //arrange
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
-                                                            mockedSecurityClient, mockedProvisioningDeviceClientContract,
+                                                            mockedSecurityProvider, mockedProvisioningDeviceClientContract,
                                                             TEST_OPERATION_ID, mockedAuthorization);
         new NonStrictExpectations()
         {
             {
-                mockedSecurityClient.getRegistrationId();
+                mockedSecurityProvider.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 Deencapsulation.invoke(mockedAuthorization, "getSslContext");
                 result = mockedSslContext;
@@ -277,15 +277,15 @@ public class StatusTaskTest
     public void getRegistrationStatusThrowsIfNoResponseReceivedInMaxTime() throws Exception
     {
         //arrange
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
-                                                            mockedSecurityClient, mockedProvisioningDeviceClientContract,
+                                                            mockedSecurityProvider, mockedProvisioningDeviceClientContract,
                                                             TEST_OPERATION_ID, mockedAuthorization);
         new NonStrictExpectations()
         {
             {
-                mockedSecurityClient.getRegistrationId();
+                mockedSecurityProvider.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 Deencapsulation.invoke(mockedAuthorization, "getSslContext");
                 result = mockedSslContext;
@@ -300,15 +300,15 @@ public class StatusTaskTest
     public void getRegistrationStatusThrowsOnNullResponseReceived() throws Exception
     {
         //arrange
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
-                                                            mockedSecurityClient, mockedProvisioningDeviceClientContract,
+                                                            mockedSecurityProvider, mockedProvisioningDeviceClientContract,
                                                             TEST_OPERATION_ID, mockedAuthorization);
         new NonStrictExpectations()
         {
             {
-                mockedSecurityClient.getRegistrationId();
+                mockedSecurityProvider.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 Deencapsulation.invoke(mockedAuthorization, "getSslContext");
                 result = mockedSslContext;
@@ -325,15 +325,15 @@ public class StatusTaskTest
     public void getRegistrationStatusThrowsOnInterruptedException() throws Exception
     {
         //arrange
-        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityClient.class,
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
                                                                     ProvisioningDeviceClientContract.class, String.class,
                                                                     Authorization.class},
-                                                            mockedSecurityClient, mockedProvisioningDeviceClientContract,
+                                                            mockedSecurityProvider, mockedProvisioningDeviceClientContract,
                                                             TEST_OPERATION_ID, mockedAuthorization);
         new NonStrictExpectations()
         {
             {
-                mockedSecurityClient.getRegistrationId();
+                mockedSecurityProvider.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 Deencapsulation.invoke(mockedAuthorization, "getSslContext");
                 result = mockedSslContext;

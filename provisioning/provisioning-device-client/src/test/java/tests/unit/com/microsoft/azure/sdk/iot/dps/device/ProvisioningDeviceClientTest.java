@@ -14,7 +14,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDevi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ProvisioningTask;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -38,7 +38,7 @@ public class ProvisioningDeviceClientTest
     private static final ProvisioningDeviceClientTransportProtocol testProtocol = ProvisioningDeviceClientTransportProtocol.HTTPS;
 
     @Mocked
-    SecurityClient mockedSecurityClient;
+    SecurityProvider mockedSecurityProvider;
 
     @Mocked
     ProvisioningDeviceClientRegistrationCallback mockedRegistrationCB;
@@ -66,7 +66,7 @@ public class ProvisioningDeviceClientTest
     {
         //arrange
         //act
-        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, scopeId, testProtocol, mockedSecurityClient);
+        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, scopeId, testProtocol, mockedSecurityProvider);
 
         //assert
         new Verifications()
@@ -74,9 +74,9 @@ public class ProvisioningDeviceClientTest
             {
                 mockedProvisioningDeviceClientConfig.setProvisioningServiceGlobalEndpoint(endPoint);
                 times = 1;
-                mockedProvisioningDeviceClientConfig.setScopeId(scopeId);
+                mockedProvisioningDeviceClientConfig.setIdScope(scopeId);
                 times = 1;
-                mockedProvisioningDeviceClientConfig.setSecurityClient(mockedSecurityClient);
+                mockedProvisioningDeviceClientConfig.setSecurityProvider(mockedSecurityProvider);
                 times = 1;
                 mockedProvisioningDeviceClientConfig.setProtocol(testProtocol);
                 times = 1;
@@ -93,14 +93,14 @@ public class ProvisioningDeviceClientTest
     public void constructorThrowsOnNullEndPoint() throws ProvisioningDeviceClientException
     {
         //act
-        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(null, scopeId, testProtocol, mockedSecurityClient);
+        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(null, scopeId, testProtocol, mockedSecurityProvider);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyEndPoint() throws ProvisioningDeviceClientException
     {
         //act
-        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create("", scopeId, testProtocol, mockedSecurityClient);
+        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create("", scopeId, testProtocol, mockedSecurityProvider);
     }
 
     //SRS_ProvisioningDeviceClient_25_002: [ The constructor shall throw IllegalArgumentException if scopeId is null or empty. ]
@@ -108,14 +108,14 @@ public class ProvisioningDeviceClientTest
     public void constructorThrowsOnNullScopeId() throws ProvisioningDeviceClientException
     {
         //act
-        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, null, testProtocol, mockedSecurityClient);
+        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, null, testProtocol, mockedSecurityProvider);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyScopeId() throws ProvisioningDeviceClientException
     {
         //act
-        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, "", testProtocol, mockedSecurityClient);
+        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, "", testProtocol, mockedSecurityProvider);
     }
 
     //SRS_ProvisioningDeviceClient_25_003: [ The constructor shall throw IllegalArgumentException if protocol is null. ]
@@ -123,7 +123,7 @@ public class ProvisioningDeviceClientTest
     public void constructorThrowsOnNullProtocol() throws ProvisioningDeviceClientException
     {
         //act
-        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, scopeId, null, mockedSecurityClient);
+        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, scopeId, null, mockedSecurityProvider);
     }
 
     //SRS_ProvisioningDeviceClient_25_004: [ The constructor shall throw IllegalArgumentException if securityClient is null. ]
@@ -140,7 +140,7 @@ public class ProvisioningDeviceClientTest
     public void registerSucceeds() throws ProvisioningDeviceClientException
     {
         //arrange
-        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, scopeId, testProtocol, mockedSecurityClient);
+        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, scopeId, testProtocol, mockedSecurityProvider);
         //act
         testProvisioningDeviceClient.registerDevice(mockedRegistrationCB, null);
 
@@ -161,7 +161,7 @@ public class ProvisioningDeviceClientTest
     public void registerThrowsOnNullCB() throws ProvisioningDeviceClientException
     {
         //arrange
-        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, scopeId, testProtocol, mockedSecurityClient);
+        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, scopeId, testProtocol, mockedSecurityProvider);
         //act
         testProvisioningDeviceClient.registerDevice(null, null);
     }
@@ -179,7 +179,7 @@ public class ProvisioningDeviceClientTest
             }
         };
 
-        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, scopeId, testProtocol, mockedSecurityClient);
+        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, scopeId, testProtocol, mockedSecurityProvider);
         //act
         testProvisioningDeviceClient.closeNow();
         //assert
@@ -204,7 +204,7 @@ public class ProvisioningDeviceClientTest
             }
         };
 
-        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, scopeId, testProtocol, mockedSecurityClient);
+        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(endPoint, scopeId, testProtocol, mockedSecurityProvider);
         //act
         testProvisioningDeviceClient.closeNow();
         //assert

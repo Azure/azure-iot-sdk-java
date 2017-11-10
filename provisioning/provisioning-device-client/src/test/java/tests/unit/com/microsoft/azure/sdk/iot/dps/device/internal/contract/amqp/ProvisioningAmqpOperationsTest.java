@@ -101,7 +101,7 @@ public class ProvisioningAmqpOperationsTest
         ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
 
         //assert
-        assertEquals(TEST_SCOPE_ID, Deencapsulation.getField(provisioningAmqpOperations, "scopeId"));
+        assertEquals(TEST_SCOPE_ID, Deencapsulation.getField(provisioningAmqpOperations, "idScope"));
         assertEquals(TEST_HOST_NAME, Deencapsulation.getField(provisioningAmqpOperations, "hostName"));
     }
 

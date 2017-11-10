@@ -41,7 +41,7 @@ public class ProvisioningDeviceClientContractTest
         {
             {
 
-                mockedProvisioningDeviceClientConfig.getScopeId();
+                mockedProvisioningDeviceClientConfig.getIdScope();
                 result = TEST_SCOPE_ID;
                 mockedProvisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint();
                 result = TEST_URI;
@@ -66,7 +66,7 @@ public class ProvisioningDeviceClientContractTest
         {
             {
 
-                mockedProvisioningDeviceClientConfig.getScopeId();
+                mockedProvisioningDeviceClientConfig.getIdScope();
                 result = new ProvisioningDeviceClientException("lower layer Exception");
                 mockedProvisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint();
                 result = TEST_URI;

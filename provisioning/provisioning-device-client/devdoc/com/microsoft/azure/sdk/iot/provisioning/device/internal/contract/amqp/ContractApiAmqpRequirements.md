@@ -11,7 +11,7 @@ An AMQP connection between a device and an IoT Hub for exercising the contract w
 ```java
 public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 {
-    public ContractAPIAmqp(String scopeId, String hostName) throws ProvisioningDeviceClientException;
+    public ContractAPIAmqp(String idScope, String hostName) throws ProvisioningDeviceClientException;
 
     public synchronized void open(RequestData requestData) throws ProvisioningDeviceConnectionException;
 
@@ -28,12 +28,12 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 ### ContractAPIAmqp
 
 ```java
-public ContractAPIAmqp(String scopeId, String hostName) throws ProvisioningDeviceClientException;
+public ContractAPIAmqp(String idScope, String hostName) throws ProvisioningDeviceClientException;
 ```
 
 **SRS_ContractAPIAmqp_07_001: [**The constructor shall save the scope id and hostname.**]**
 
-**SRS_ContractAPIAmqp_07_002: [**The constructor shall throw ProvisioningDeviceClientException if either scopeId and hostName are null or empty.**]**
+**SRS_ContractAPIAmqp_07_002: [**The constructor shall throw ProvisioningDeviceClientException if either idScope and hostName are null or empty.**]**
 
 ### authenticateWithDPS
 
@@ -97,7 +97,7 @@ public synchronized void open(RequestData requestData) throws ProvisioningDevice
 
 **SRS_ContractAPIAmqp_07_020: [**If `requestData.getSslContext()` is null, this method shall throw ProvisioningDeviceClientException.**]**
 
-**SRS_ContractAPIAmqp_07_021: [**This method shall connect to the amqpConnectoins with the link address of `amqps://<hostname>/<scopeId>/registrations/<registrationId>`.**]**
+**SRS_ContractAPIAmqp_07_021: [**This method shall connect to the amqpConnectoins with the link address of `amqps://<hostname>/<idScope>/registrations/<registrationId>`.**]**
 
 ```Java
 public synchronized void close() throws ProvisioningDeviceConnectionException

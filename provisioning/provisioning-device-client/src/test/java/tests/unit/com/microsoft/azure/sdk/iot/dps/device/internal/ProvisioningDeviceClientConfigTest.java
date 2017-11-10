@@ -10,7 +10,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientRegistrationCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import mockit.Mocked;
 import org.junit.Test;
 
@@ -28,7 +28,7 @@ public class ProvisioningDeviceClientConfigTest
     private static final ProvisioningDeviceClientTransportProtocol testProtocol = ProvisioningDeviceClientTransportProtocol.HTTPS;
 
     @Mocked
-    SecurityClient mockedSecurityClient;
+    SecurityProvider mockedSecurityProvider;
 
     @Mocked
     ProvisioningDeviceClientRegistrationCallback mockedRegistrationCB;
@@ -72,10 +72,10 @@ public class ProvisioningDeviceClientConfigTest
         ProvisioningDeviceClientConfig testConfig = new ProvisioningDeviceClientConfig();
 
         //act
-        testConfig.setScopeId(scopeId);
+        testConfig.setIdScope(scopeId);
 
         //assert
-        assertEquals(scopeId, testConfig.getScopeId());
+        assertEquals(scopeId, testConfig.getIdScope());
     }
 
     //SRS_ProvisioningDeviceClientConfig_25_010: [ This method shall retrieve securityClient. ]
@@ -87,10 +87,10 @@ public class ProvisioningDeviceClientConfigTest
         ProvisioningDeviceClientConfig testConfig = new ProvisioningDeviceClientConfig();
 
         //act
-        testConfig.setSecurityClient(mockedSecurityClient);
+        testConfig.setSecurityProvider(mockedSecurityProvider);
 
         //assert
-        assertEquals(mockedSecurityClient, testConfig.getSecurityClient());
+        assertEquals(mockedSecurityProvider, testConfig.getSecurityProvider());
     }
 
     //SRS_ProvisioningDeviceClientConfig_25_001: [ This method shall save registrationCallback and registrationCallbackContext. ]

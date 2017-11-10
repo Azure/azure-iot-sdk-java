@@ -13,11 +13,11 @@ import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientS
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientAuthenticationException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClientX509;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 
 import java.util.concurrent.*;
 
@@ -29,7 +29,7 @@ public class ProvisioningTask implements Callable
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1000000;
     private static final int MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE = 10000;
 
-    private SecurityClient securityClient = null;
+    private SecurityProvider securityProvider = null;
     private ProvisioningDeviceClientContract provisioningDeviceClientContract = null;
     private ProvisioningDeviceClientConfig provisioningDeviceClientConfig = null;
 
@@ -62,11 +62,11 @@ public class ProvisioningTask implements Callable
 
         //SRS_ProvisioningTask_25_001: [ Constructor shall save provisioningDeviceClientConfig, provisioningDeviceClientContract.]
         this.provisioningDeviceClientConfig = provisioningDeviceClientConfig;
-        this.securityClient = provisioningDeviceClientConfig.getSecurityClient();
+        this.securityProvider = provisioningDeviceClientConfig.getSecurityProvider();
 
-        if (securityClient == null)
+        if (securityProvider == null)
         {
-            //SRS_ProvisioningTask_25_002: [ Constructor shall shall throw ProvisioningDeviceClientException if the securityClient is null.]
+            //SRS_ProvisioningTask_25_002: [ Constructor shall shall throw ProvisioningDeviceClientException if the securityProvider is null.]
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("Security client cannot be null"));
         }
 
@@ -100,7 +100,7 @@ public class ProvisioningTask implements Callable
     private ResponseParser invokeRegister() throws InterruptedException, ExecutionException, TimeoutException,
                                                    ProvisioningDeviceClientException
     {
-        RegisterTask registerTask = new RegisterTask(this.provisioningDeviceClientConfig, securityClient,
+        RegisterTask registerTask = new RegisterTask(this.provisioningDeviceClientConfig, securityProvider,
                                                      provisioningDeviceClientContract, authorization);
         FutureTask<ResponseParser> futureRegisterTask = new FutureTask<ResponseParser>(registerTask);
         executor.submit(futureRegisterTask);
@@ -136,7 +136,7 @@ public class ProvisioningTask implements Callable
     {
         // To-Do : Add appropriate wait time retrieved from Service
         Thread.sleep(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE);
-        StatusTask statusTask = new StatusTask(securityClient, provisioningDeviceClientContract, operationId,
+        StatusTask statusTask = new StatusTask(securityProvider, provisioningDeviceClientContract, operationId,
                                                this.authorization);
         FutureTask<ResponseParser> futureStatusTask = new FutureTask<ResponseParser>(statusTask);
         executor.submit(futureStatusTask);
@@ -231,7 +231,7 @@ public class ProvisioningTask implements Callable
         try
         {
             //SRS_ProvisioningTask_25_015: [ This method shall invoke open call on the contract.]
-            provisioningDeviceClientContract.open(new RequestData(securityClient.getRegistrationId(), securityClient.getSSLContext(), securityClient instanceof SecurityClientX509));
+            provisioningDeviceClientContract.open(new RequestData(securityProvider.getRegistrationId(), securityProvider.getSSLContext(), securityProvider instanceof SecurityProviderX509));
             //SRS_ProvisioningTask_25_007: [ This method shall invoke Register task and status task to execute the state machine of the service as per below rules.]
             /*
             Service State Machine Rules

@@ -106,11 +106,11 @@ public class ContractAPIHttpTest
         ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
 
         //assert
-        assertEquals(TEST_SCOPE_ID, Deencapsulation.getField(contractAPIHttp, "scopeId"));
+        assertEquals(TEST_SCOPE_ID, Deencapsulation.getField(contractAPIHttp, "idScope"));
         assertEquals(TEST_HOST_NAME, Deencapsulation.getField(contractAPIHttp, "hostName"));
     }
 
-    //SRS_ContractAPIHttp_25_002: [The constructor shall throw ProvisioningDeviceClientException if either scopeId and hostName are null or empty.]
+    //SRS_ContractAPIHttp_25_002: [The constructor shall throw ProvisioningDeviceClientException if either idScope and hostName are null or empty.]
     @Test (expected = ProvisioningDeviceClientException.class)
     public void constructorThrowsOnNullScopeID() throws ProvisioningDeviceClientException
     {

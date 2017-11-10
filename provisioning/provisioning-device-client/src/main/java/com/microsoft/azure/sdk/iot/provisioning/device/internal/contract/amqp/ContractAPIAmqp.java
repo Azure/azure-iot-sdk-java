@@ -17,16 +17,16 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 
     /**
      * This constructor creates an instance of DpsAPIAmqps class and initializes member variables
-     * @param scopeId scope id used with the service Cannot be {@code null} or empty.
+     * @param idScope scope id used with the service Cannot be {@code null} or empty.
      * @param hostName host name for the service Cannot be {@code null} or empty.
      * @throws ProvisioningDeviceClientException is thrown when any of the input parameters are invalid
      */
-    public ContractAPIAmqp(String scopeId, String hostName) throws ProvisioningDeviceClientException
+    public ContractAPIAmqp(String idScope, String hostName) throws ProvisioningDeviceClientException
     {
-        // SRS_ContractAPIAmqp_07_002: [The constructor shall throw ProvisioningDeviceClientException if either scopeId and hostName are null or empty.]
-        if ((scopeId == null) || (scopeId.isEmpty()))
+        // SRS_ContractAPIAmqp_07_002: [The constructor shall throw ProvisioningDeviceClientException if either idScope and hostName are null or empty.]
+        if ((idScope == null) || (idScope.isEmpty()))
         {
-            throw new ProvisioningDeviceClientException("The scopeId cannot be null or empty.");
+            throw new ProvisioningDeviceClientException("The idScope cannot be null or empty.");
         }
 
         if ((hostName == null) || (hostName.isEmpty()))
@@ -35,7 +35,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
         }
 
         // SRS_ContractAPIAmqp_07_001: [The constructor shall save the scope id and hostname.]
-        provisioningAmqpOperations = new ProvisioningAmqpOperations(scopeId, hostName);
+        provisioningAmqpOperations = new ProvisioningAmqpOperations(idScope, hostName);
     }
 
     /**

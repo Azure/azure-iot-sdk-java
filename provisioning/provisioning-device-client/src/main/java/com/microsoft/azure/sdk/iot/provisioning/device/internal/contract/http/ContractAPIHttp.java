@@ -29,7 +29,7 @@ import java.util.Map;
 
 public class ContractAPIHttp extends ProvisioningDeviceClientContract
 {
-    private String scopeId;
+    private String idScope;
     private String hostName;
 
     /*
@@ -58,14 +58,14 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
 
     /**
      * Constructor for Contract API HTTP
-     * @param scopeId scope id used with the service Cannot be {@code null} or empty.
+     * @param idScope scope id used with the service Cannot be {@code null} or empty.
      * @param hostName host name for the service Cannot be {@code null} or empty.
      * @throws ProvisioningDeviceClientException is thrown when any of the input parameters are invalid
      */
-    public ContractAPIHttp(String scopeId, String hostName) throws ProvisioningDeviceClientException
+    public ContractAPIHttp(String idScope, String hostName) throws ProvisioningDeviceClientException
     {
-        //SRS_ContractAPIHttp_25_002: [The constructor shall throw ProvisioningDeviceClientException if either scopeId and hostName are null or empty.]
-        if (scopeId == null || scopeId.isEmpty())
+        //SRS_ContractAPIHttp_25_002: [The constructor shall throw ProvisioningDeviceClientException if either idScope and hostName are null or empty.]
+        if (idScope == null || idScope.isEmpty())
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("scope id cannot be null or empty"));
         }
@@ -76,7 +76,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         }
 
         //SRS_ContractAPIHttp_25_001: [The constructor shall save the scope id and hostname.]
-        this.scopeId = scopeId;
+        this.idScope = idScope;
         this.hostName = hostName;
     }
 
@@ -181,7 +181,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         try
         {
             //SRS_ContractAPIHttp_25_004: [This method shall retrieve the Url by calling 'generateRegisterUrl' on an object for UrlPathBuilder.]
-            String url = new UrlPathBuilder(this.hostName, this.scopeId, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(requestData.getRegistrationId());
+            String url = new UrlPathBuilder(this.hostName, this.idScope, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(requestData.getRegistrationId());
             String base64EncodedEk = new String(Base64.encodeBase64Local(requestData.getEndorsementKey()));
             String base64EncodedSrk = new String(Base64.encodeBase64Local(requestData.getStorageRootKey()));
             //SRS_ContractAPIHttp_25_025: [ This method shall build the required Json input using parser. ]
@@ -252,7 +252,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         try
         {
             //SRS_ContractAPIHttp_25_012: [This method shall retrieve the Url by calling 'generateRegisterUrl' on an object for UrlPathBuilder.]
-            String url = new UrlPathBuilder(this.hostName, this.scopeId, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(requestData.getRegistrationId());
+            String url = new UrlPathBuilder(this.hostName, this.idScope, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(requestData.getRegistrationId());
             Map<String, String> headersMap = null;
             if(requestData.getSasToken() != null)
             {
@@ -324,7 +324,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         try
         {
             //SRS_ContractAPIHttp_25_019: [This method shall retrieve the Url by calling generateRequestUrl on an object for UrlPathBuilder.]
-            String url = new UrlPathBuilder(this.hostName, this.scopeId, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRequestUrl(requestData.getRegistrationId(), requestData.getOperationId());
+            String url = new UrlPathBuilder(this.hostName, this.idScope, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRequestUrl(requestData.getRegistrationId(), requestData.getOperationId());
             Map<String, String> headersMap = null;
             if (requestData.getSasToken() != null)
             {

@@ -37,13 +37,13 @@ public abstract class ProvisioningDeviceClientContract
                 return null;
 
             case AMQPS:
-                return new ContractAPIAmqp(provisioningDeviceClientConfig.getScopeId(), provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint());
+                return new ContractAPIAmqp(provisioningDeviceClientConfig.getIdScope(), provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint());
 
             case AMQPS_WS:
                 return null;
 
             case HTTPS:
-                return new ContractAPIHttp(provisioningDeviceClientConfig.getScopeId(), provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint());
+                return new ContractAPIHttp(provisioningDeviceClientConfig.getIdScope(), provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint());
 
             default:
                 throw new ProvisioningDeviceClientException("Unknown protocol");

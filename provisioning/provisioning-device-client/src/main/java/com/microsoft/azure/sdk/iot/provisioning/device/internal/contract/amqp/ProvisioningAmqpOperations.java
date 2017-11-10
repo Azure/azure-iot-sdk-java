@@ -31,21 +31,21 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
     private final Queue<AmqpMessage> receivedMessages = new LinkedBlockingQueue<>();
     private final ObjectLock receiveLock = new ObjectLock();
 
-    private String scopeId;
+    private String idScope;
     private String hostName;
 
     /**
      * Constructor for ProvisioningAmqpOperation that handle the AMQP transport for provisioning
-     * @param scopeId The Scope ID associated with this provisioning client
+     * @param idScope The Scope ID associated with this provisioning client
      * @param hostName The Provisioning Endpoint
      * @throws ProvisioningDeviceClientException
      */
-    public ProvisioningAmqpOperations(String scopeId, String hostName) throws ProvisioningDeviceClientException
+    public ProvisioningAmqpOperations(String idScope, String hostName) throws ProvisioningDeviceClientException
     {
         // SRS_ProvisioningAmqpOperations_07_002: [The constructor shall throw ProvisioningDeviceClientException if either scopeId and hostName are null or empty.]
-        if ((scopeId == null) || (scopeId.isEmpty()))
+        if ((idScope == null) || (idScope.isEmpty()))
         {
-            throw new ProvisioningDeviceClientException("The scopeId cannot be null or empty.");
+            throw new ProvisioningDeviceClientException("The idScope cannot be null or empty.");
         }
 
         if ((hostName == null) || (hostName.isEmpty()))
@@ -54,7 +54,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
         }
 
         //SRS_ProvisioningAmqpOperations_07_001: [The constructor shall save the scopeId and hostname.]
-        this.scopeId = scopeId;
+        this.idScope = idScope;
         this.hostName = hostName;
     }
 
@@ -133,7 +133,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
             try
             {
                 // SRS_ProvisioningAmqpOperations_07_005: [This method shall construct the Link Address with /<scopeId>/registrations/<registrationId>.]
-                this.amqpLinkAddress = String.format(AMQP_ADDRESS_FMT, this.scopeId, registrationId);
+                this.amqpLinkAddress = String.format(AMQP_ADDRESS_FMT, this.idScope, registrationId);
 
                 this.amqpConnection = new AmqpsConnection(this.hostName, this, sslContext, !isX509Cert, false);
 

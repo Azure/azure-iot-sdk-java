@@ -7,7 +7,7 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityClient;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
@@ -22,7 +22,7 @@ public class StatusTask implements Callable
 {
     private static final int MAX_WAIT_FOR_STATUS_RESPONSE = 100;
     private ProvisioningDeviceClientContract provisioningDeviceClientContract;
-    private SecurityClient securityClient;
+    private SecurityProvider securityProvider;
     private String operationId;
     private Authorization authorization;
 
@@ -47,22 +47,22 @@ public class StatusTask implements Callable
 
     /**
      * Task to query Status information from the service
-     * @param securityClient security client for the HSM on which this device is registering on. Cannot be {@code null}
+     * @param securityProvider security client for the HSM on which this device is registering on. Cannot be {@code null}
      * @param provisioningDeviceClientContract Contract of the transport with the lower layers. Cannot be {@code null}
      * @param operationId Id retrieved from the service.  Cannot be {@code null} or empty
      * @param authorization Object holding auth info.  Cannot be {@code null}
      * @throws ProvisioningDeviceClientException is thrown if any of the parameters are invalid.
      */
-    StatusTask(SecurityClient securityClient, ProvisioningDeviceClientContract provisioningDeviceClientContract,
+    StatusTask(SecurityProvider securityProvider, ProvisioningDeviceClientContract provisioningDeviceClientContract,
                String operationId, Authorization authorization) throws ProvisioningDeviceClientException
     {
-        //SRS_StatusTask_25_002: [ Constructor shall throw ProvisioningDeviceClientException if operationId , securityClient, authorization or provisioningDeviceClientContract is null. ]
+        //SRS_StatusTask_25_002: [ Constructor shall throw ProvisioningDeviceClientException if operationId , securityProvider, authorization or provisioningDeviceClientContract is null. ]
         if (provisioningDeviceClientContract == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("provisioningDeviceClientContract cannot be null"));
         }
 
-        if (securityClient == null)
+        if (securityProvider == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("security client cannot be null"));
         }
@@ -77,8 +77,8 @@ public class StatusTask implements Callable
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("authorization cannot be null"));
         }
 
-        //SRS_StatusTask_25_001: [ Constructor shall save operationId , securityClient, provisioningDeviceClientContract and authorization. ]
-        this.securityClient = securityClient;
+        //SRS_StatusTask_25_001: [ Constructor shall save operationId , securityProvider, provisioningDeviceClientContract and authorization. ]
+        this.securityProvider = securityProvider;
         this.provisioningDeviceClientContract = provisioningDeviceClientContract;
         this.operationId = operationId;
         this.authorization = authorization;
@@ -89,7 +89,7 @@ public class StatusTask implements Callable
         try
         {
             //SRS_StatusTask_25_003: [ This method shall throw ProvisioningDeviceClientException if registration id is null or empty. ]
-            String registrationId = this.securityClient.getRegistrationId();
+            String registrationId = this.securityProvider.getRegistrationId();
             if (registrationId == null || registrationId.isEmpty())
             {
                 throw new ProvisioningDeviceSecurityException("registrationId cannot be null or empty");
