@@ -19,7 +19,8 @@ public class ProvisioningDiceSample
     private static final String scopeId = "0ne00001D71";
     //private static final String globalEndpoint = "[Your Provisioning Service Global Endpoint here]";
     private static final String globalEndpoint = "global.azure-devices-provisioning.net";
-    private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
+    //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
+    private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS;
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milli seconds
 
     static class ProvisioningStatus
