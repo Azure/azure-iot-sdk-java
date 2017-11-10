@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class provisioningAmqpOperations extends AmqpDeviceOperations implements AmqpListener
+public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements AmqpListener
 {
     private static final String AMQP_ADDRESS_FMT = "/%s/registrations/%s";
     private static final String AMQP_REGISTER_DEVICE = "iotdps-register";
@@ -40,8 +40,9 @@ public class provisioningAmqpOperations extends AmqpDeviceOperations implements 
      * @param hostName The Provisioning Endpoint
      * @throws ProvisioningDeviceClientException
      */
-    public provisioningAmqpOperations(String scopeId, String hostName) throws ProvisioningDeviceClientException
+    public ProvisioningAmqpOperations(String scopeId, String hostName) throws ProvisioningDeviceClientException
     {
+        // SRS_ProvisioningAmqpOperations_07_002: [The constructor shall throw ProvisioningDeviceClientException if either scopeId and hostName are null or empty.]
         if ((scopeId == null) || (scopeId.isEmpty()))
         {
             throw new ProvisioningDeviceClientException("The scopeId cannot be null or empty.");
@@ -52,6 +53,7 @@ public class provisioningAmqpOperations extends AmqpDeviceOperations implements 
             throw new ProvisioningDeviceClientException("The hostName cannot be null or empty.");
         }
 
+        //SRS_ProvisioningAmqpOperations_07_001: [The constructor shall save the scopeId and hostname.]
         this.scopeId = scopeId;
         this.hostName = hostName;
     }
@@ -115,8 +117,10 @@ public class provisioningAmqpOperations extends AmqpDeviceOperations implements 
      */
     public void open(String registrationId, SSLContext sslContext, boolean isX509Cert) throws ProvisioningDeviceConnectionException
     {
+        // SRS_ProvisioningAmqpOperations_07_003: [If amqpConnection is not null and is connected, open shall do nothing .]
         if (this.amqpConnection == null || !this.amqpConnection.isConnected())
         {
+            // SRS_ProvisioningAmqpOperations_07_004: [open shall throw ProvisioningDeviceClientException if either registrationId or sslContext are null or empty.]
             if (registrationId == null || registrationId.isEmpty())
             {
                 throw new ProvisioningDeviceConnectionException(new IllegalArgumentException("registration Id cannot be null or empty"));
@@ -128,6 +132,7 @@ public class provisioningAmqpOperations extends AmqpDeviceOperations implements 
 
             try
             {
+                // SRS_ProvisioningAmqpOperations_07_005: [This method shall construct the Link Address with /<scopeId>/registrations/<registrationId>.]
                 this.amqpLinkAddress = String.format(AMQP_ADDRESS_FMT, this.scopeId, registrationId);
 
                 this.amqpConnection = new AmqpsConnection(this.hostName, this, sslContext, !isX509Cert, false);
@@ -138,6 +143,7 @@ public class provisioningAmqpOperations extends AmqpDeviceOperations implements 
             }
             catch (Exception ex)
             {
+                // SRS_ProvisioningAmqpOperations_07_006: [This method shall connect to the amqp connection and throw ProvisioningDeviceConnectionException on error.]
                 throw new ProvisioningDeviceConnectionException("Failure opening amqp connection", ex);
             }
         }
@@ -148,9 +154,10 @@ public class provisioningAmqpOperations extends AmqpDeviceOperations implements 
      */
     public void close() throws IOException
     {
+        // SRS_ProvisioningAmqpOperations_07_007: [If amqpConnection is null, this method shall do nothing.]
         if (this.amqpConnection != null)
         {
-            // SRS_ContractAPIAmqp_07_023: [This method will close the amqpConnection connection.]
+            // SRS_ProvisioningAmqpOperations_07_008: [This method shall call close on amqpConnection.]
             this.amqpConnection.close();
         }
     }
@@ -164,6 +171,7 @@ public class provisioningAmqpOperations extends AmqpDeviceOperations implements 
      */
     public void sendStatusMessage(String operationId, ResponseCallback responseCallback, Object callbackContext) throws ProvisioningDeviceClientException
     {
+        // SRS_ProvisioningAmqpOperations_07_015: [sendStatusMessage shall throw ProvisioningDeviceClientException if either operationId or responseCallback are null or empty.]
         if (operationId == null || operationId.isEmpty())
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("operationId cannot be null or empty"));
@@ -173,10 +181,12 @@ public class provisioningAmqpOperations extends AmqpDeviceOperations implements 
             throw new ProvisioningDeviceClientException("responseCallback cannot be null");
         }
 
+        // SRS_ProvisioningAmqpOperations_07_016: [This method shall send the Operation Status AMQP Provisioning message.]
         this.sendAmqpMessage(AMQP_OPERATION_STATUS, operationId);
 
         try
         {
+            // SRS_ProvisioningAmqpOperations_07_017: [This method shall wait for the response of this message for MAX_WAIT_TO_SEND_MSG and call the responseCallback with the reply.]
             synchronized (this.receiveLock)
             {
                 this.receiveLock.waitLock(MAX_WAIT_TO_SEND_MSG);
@@ -185,6 +195,7 @@ public class provisioningAmqpOperations extends AmqpDeviceOperations implements 
         }
         catch (InterruptedException e)
         {
+            // SRS_ProvisioningAmqpOperations_07_018: [This method shall throw ProvisioningDeviceClientException if any failure is encountered.]
             throw new ProvisioningDeviceClientException("Provisioning service failed to reply is alloted time.");
         }
     }
@@ -197,15 +208,18 @@ public class provisioningAmqpOperations extends AmqpDeviceOperations implements 
      */
     public void sendRegisterMessage(ResponseCallback responseCallback, Object callbackContext) throws ProvisioningDeviceClientException
     {
+        // SRS_ProvisioningAmqpOperations_07_009: [sendRegisterMessage shall throw ProvisioningDeviceClientException if either responseCallback is null.]
         if (responseCallback == null)
         {
             throw new ProvisioningDeviceClientException("responseCallback cannot be null");
         }
 
+        // SRS_ProvisioningAmqpOperations_07_010: [This method shall send the Register AMQP Provisioning message.]
         this.sendAmqpMessage(AMQP_REGISTER_DEVICE, null);
 
         try
         {
+            // SRS_ProvisioningAmqpOperations_07_011: [This method shall wait for the response of this message for MAX_WAIT_TO_SEND_MSG and call the responseCallback with the reply.]
             synchronized (this.receiveLock)
             {
                 this.receiveLock.waitLock(MAX_WAIT_TO_SEND_MSG);
@@ -214,6 +228,7 @@ public class provisioningAmqpOperations extends AmqpDeviceOperations implements 
         }
         catch (InterruptedException e)
         {
+            // SRS_ProvisioningAmqpOperations_07_012: [This method shall throw ProvisioningDeviceClientException if any failure is encountered.]
             throw new ProvisioningDeviceClientException("Provisioning service failed to reply is alloted time.");
         }
     }
@@ -245,9 +260,11 @@ public class provisioningAmqpOperations extends AmqpDeviceOperations implements 
      */
     public void MessageReceived(AmqpMessage message)
     {
+        // SRS_ProvisioningAmqpOperations_07_013: [This method shall add the message to a message queue.]
         this.receivedMessages.add(message);
         synchronized (this.receiveLock)
         {
+            // SRS_ProvisioningAmqpOperations_07_014: [This method shall then Notify the receiveLock.]
             this.receiveLock.notifyLock();
         }
     }

@@ -13,10 +13,7 @@ import java.io.IOException;
 
 public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 {
-    private provisioningAmqpOperations provisioningAmqpOperations;
-
-    private String scopeId;
-    private String hostName;
+    private ProvisioningAmqpOperations provisioningAmqpOperations;
 
     /**
      * This constructor creates an instance of DpsAPIAmqps class and initializes member variables
@@ -38,10 +35,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
         }
 
         // SRS_ContractAPIAmqp_07_001: [The constructor shall save the scope id and hostname.]
-        this.scopeId = scopeId;
-        this.hostName = hostName;
-
-        provisioningAmqpOperations = new provisioningAmqpOperations(scopeId, hostName);
+        provisioningAmqpOperations = new ProvisioningAmqpOperations(scopeId, hostName);
     }
 
     /**

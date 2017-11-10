@@ -9,7 +9,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.contract.amqp
 
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpDeviceOperations;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.provisioningAmqpOperations;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.ProvisioningAmqpOperations;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.ContractAPIAmqp;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
@@ -51,7 +51,7 @@ public class ContractAPIAmqpTest
     AmqpDeviceOperations mockedAmqpProvOperations;
 
     @Mocked
-    provisioningAmqpOperations mockedProvisionAmqpConnection;
+    ProvisioningAmqpOperations mockedProvisionAmqpConnection;
 
     @Mocked
     SSLContext mockedSslContext;
@@ -123,8 +123,6 @@ public class ContractAPIAmqpTest
         ContractAPIAmqp contractAPIAmqp = new ContractAPIAmqp(TEST_SCOPE_ID, TEST_HOST_NAME);
 
         //assert
-        assertEquals(TEST_SCOPE_ID, Deencapsulation.getField(contractAPIAmqp, "scopeId"));
-        assertEquals(TEST_HOST_NAME, Deencapsulation.getField(contractAPIAmqp, "hostName"));
     }
 
     // SRS_ContractAPIAmqp_07_002: [The constructor shall throw ProvisioningDeviceClientException if either scopeId and hostName are null or empty.]
