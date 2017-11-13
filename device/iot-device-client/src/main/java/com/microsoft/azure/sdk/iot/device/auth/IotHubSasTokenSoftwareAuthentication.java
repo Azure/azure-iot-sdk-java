@@ -37,7 +37,7 @@ public class IotHubSasTokenSoftwareAuthentication extends IotHubSasTokenAuthenti
         this.sslContextNeedsUpdate = true;
 
         //Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_002: [This constructor shall save the provided hostname, device id, deviceKey, and sharedAccessToken.]
-        this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, tokenValidSecs);
+        this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, getExpiryTimeInSeconds());
     }
 
     /**
