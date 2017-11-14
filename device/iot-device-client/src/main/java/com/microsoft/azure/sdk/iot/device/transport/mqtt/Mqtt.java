@@ -80,7 +80,7 @@ abstract public class Mqtt implements MqttCallback
                     /*
                     ** Codes_SRS_Mqtt_25_006: [**If the inner class MqttConnectionInfo has not been instantiated then the function shall throw IOException.**]**
                      */
-                    throw new IOException("Mqtt client should be initialised atleast once before using it");
+                    throw new IOException("Mqtt client should be initialised at least once before using it");
                 }
 
                 /*
@@ -100,7 +100,7 @@ abstract public class Mqtt implements MqttCallback
                 /*
                 ** Codes_SRS_Mqtt_25_007: [**If an MQTT connection is unable to be established for any reason, the function shall throw an IOException.**]**
                  */
-                throw new IOException("Unable to connect to service" + e.getCause());
+                throw new IOException("Unable to connect to service" + e.getCause(), e);
             }
         }
 
@@ -133,7 +133,7 @@ abstract public class Mqtt implements MqttCallback
             /*
             ** SRS_Mqtt_25_011: [**If an MQTT connection is unable to be closed for any reason, the function shall throw an IOException.**]**
             */
-            throw new IOException("Unable to disconnect" + "because " + e.getMessage() );
+            throw new IOException("Unable to disconnect" + "because " + e.getMessage(), e);
         }
     }
 
@@ -212,7 +212,7 @@ abstract public class Mqtt implements MqttCallback
                 /*
                 **Codes_SRS_Mqtt_25_047: [**If the Mqtt Client Async throws MqttException, the function shall throw an IOException with the message.**]**
                  */
-                throw new IOException("Unable to publish message on topic : " + publishTopic + " because " + e.getCause() + e.getMessage());
+                throw new IOException("Unable to publish message on topic : " + publishTopic + " because " + e.getCause() + e.getMessage(), e);
             }
             catch (InterruptedException e)
             {
@@ -220,7 +220,7 @@ abstract public class Mqtt implements MqttCallback
             }
             catch (Exception e)
             {
-                throw new IOException("Unable to publish message on topic : " + publishTopic + " " + e.getCause() + e.getMessage());
+                throw new IOException("Unable to publish message on topic : " + publishTopic + " " + e.getCause() + e.getMessage(), e);
             }
         }
     }
@@ -275,7 +275,7 @@ abstract public class Mqtt implements MqttCallback
                 /*
                 **Codes_SRS_Mqtt_25_048: [**If the Mqtt Client Async throws MqttException for any reason, the function shall throw an IOException with the message.**]**
                  */
-                throw new IOException("Unable to subscribe to topic :" + topic + " because " + e.getCause() + e.getMessage());
+                throw new IOException("Unable to subscribe to topic :" + topic + " because " + e.getCause() + e.getMessage(), e);
             }
         }
     }
@@ -313,14 +313,13 @@ abstract public class Mqtt implements MqttCallback
                  */
                 IMqttToken subToken = this.mqttConnection.getMqttAsyncClient().unsubscribe(topic);
                 subToken.waitForCompletion();
-
             }
             catch (MqttException e)
             {
                 /*
                 **Codes_SRS_Mqtt_25_019: [**If the unsubscribeTopic is null or empty, the function shall throw an IOException.**]**
                  */
-                throw new IOException("Unable to unsubscribe to topic :" + topic + "because " + e.getCause() + e.getMessage());
+                throw new IOException("Unable to unsubscribe to topic :" + topic + "because " + e.getCause() + e.getMessage(), e);
             }
         }
     }
