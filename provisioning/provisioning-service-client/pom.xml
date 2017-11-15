@@ -9,7 +9,7 @@
     <name>Provisioning Service Client</name>
     <version>0.0.1</version>
     <packaging>jar</packaging>
-    <description>The Microsoft Azure IoT Provisioning Service Client for Java</description>
+    <description>The Microsoft Azure IoT Provisioning Service Client SDK for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
     <developers>
         <developer>
@@ -32,7 +32,32 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <dependencies></dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-deps</artifactId>
+            <version>0.1.4</version>
+        </dependency>
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
+            <version>1.22</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit-dep</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>

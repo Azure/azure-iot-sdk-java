@@ -35,6 +35,9 @@
     <modules>
         <module>provisioning-dice-sample</module>
         <module>provisioning-tpm-sample</module>
+        <module>service-enrollment-sample</module>
+        <module>service-bulkoperation-sample</module>
+        <module>service-enrollment-group-sample</module>
     </modules>
     <dependencies>
     </dependencies>
