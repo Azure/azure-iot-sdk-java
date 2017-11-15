@@ -4,22 +4,27 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
-import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderDiceEmulator;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderX509Cert;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 /**
- * Provisioning Sample for DICE
+ * Provisioning Sample for X509
  */
-public class ProvisioningDiceSample
+public class ProvisioningX509Sample
 {
-    private static final String scopeId = "[Your scope ID here]";
+    private static final String idScope = "[Your ID scope here]";
     private static final String globalEndpoint = "[Your Provisioning Service Global Endpoint here]";
     private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS;
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milli seconds
+    private static final String leafPublicPem = "<Your Public Leaf Certificate Here>";
+    private static final String leafPrivateKey = "<Your Leaf Key Here>";
+    private static final Collection<String> signerCertificates = new LinkedList<>();
 
     static class ProvisioningStatus
     {
@@ -54,7 +59,8 @@ public class ProvisioningDiceSample
         {
             ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 
-            provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, scopeId, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, new SecurityProviderDiceEmulator());
+            provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, idScope, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL,
+                                                                       new SecurityProviderX509Cert(leafPublicPem, leafPrivateKey, signerCertificates));
 
             provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus);
 
@@ -99,7 +105,5 @@ public class ProvisioningDiceSample
         {
             provisioningDeviceClient.closeNow();
         }
-
-
     }
 }

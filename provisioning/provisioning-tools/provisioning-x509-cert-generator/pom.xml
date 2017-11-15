@@ -2,10 +2,9 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.tools</groupId>
-    <artifactId>provisioning-dice-cert-generator</artifactId>
-    <name>Provisioning DICE cert generator</name>
+    <artifactId>provisioning-x509-cert-generator</artifactId>
+    <name>Provisioning X509 cert generator</name>
     <version>0.0.1</version>
-    <packaging>pom</packaging>
     <description>The Microsoft Azure IoT Provisioning Cert Generator for Java</description>
     <developers>
         <developer>
@@ -33,7 +32,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>tools.com.microsoft.azure.sdk.iot.ProvisioningDiceCertGen</mainClass>
+                            <mainClass>tools.com.microsoft.azure.sdk.iot.ProvisioningX509CertGen</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -46,6 +45,31 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>with-deps</shadedClassifierName>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

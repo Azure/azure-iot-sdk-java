@@ -9,9 +9,9 @@ import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderDic
 import java.util.Scanner;
 
 /**
- * Provisioning Sample for DICE
+ * Provisioning X509 Cert generator to generate X509 certificates using DICE emulator
  */
-public class ProvisioningDiceCertGen
+public class ProvisioningX509CertGen
 {
     public static void main(String[] args)
     {
@@ -24,7 +24,7 @@ public class ProvisioningDiceCertGen
             String isCnName = scanner.next();
             if (isCnName.equalsIgnoreCase("Y"))
             {
-                System.out.println("Input Alias Cert commonName :");
+                System.out.println("Input Client Cert commonName :");
                 aliasCertCnName = scanner.next();
 
                 System.out.println("Input Root Cert commonName :");
@@ -39,9 +39,11 @@ public class ProvisioningDiceCertGen
             {
                 securityClient = new SecurityProviderDiceEmulator();
             }
-
-            System.out.println("Alias Cert");
+            System.out.println("Your registration Id is : " + securityClient.getRegistrationId());
+            System.out.println("Client Cert");
             System.out.println(securityClient.getAliasCertPem());
+            System.out.println("Client Cert Private Key");
+            System.out.println(securityClient.getAliasCertPrivateKeyPem());
             System.out.println("Root Cert");
             System.out.println(securityClient.getRootCertPem());
             System.out.println("Do you want to input Verification Code Y/N");

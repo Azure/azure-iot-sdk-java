@@ -19,10 +19,8 @@ Prepare your platform following the instructions [here][lnk-devbox-setup] to ins
 
 #### Provisioning Device Client
 
-* [Provisioning Sample for DICE](provisioning-dice-sample): Shows how to provisioning a device using DICE with
-X509 certificate.
-* [Provisioning Sample for TPM](provisioning-tpm-sample): Shows how to provisioning a device using TPM with
-endorsement key.
+* [Provisioning Sample for X509](provisioning-x509-sample): Shows how to register a device using X509 certificates.
+* [Provisioning Sample for TPM](provisioning-tpm-sample): Shows how to register a device using TPM with endorsement key.
 
 #### Provisioning Service Client
 

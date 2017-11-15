@@ -33,7 +33,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <modules>
-        <module>provisioning-dice-cert-generator</module>
+        <module>provisioning-x509-cert-generator</module>
     </modules>
     <dependencies>
     </dependencies>

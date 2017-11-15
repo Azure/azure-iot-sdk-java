@@ -23,6 +23,9 @@ import java.util.LinkedList;
 
 public class SecurityProviderX509Cert extends SecurityProviderX509
 {
+    private static final String CN = "CN=";
+    private static final String COMMA = ",";
+    private static final String EQUALS = "=";
     private final String commonNameLeaf;
     private X509Certificate leafCertificatePublic;
     private Key leafPrivateKey;
@@ -58,7 +61,7 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
             {
                 this.signerCertificates.add(this.convertPemToCertificate(cert));
             }
-            this.commonNameLeaf = getCommonName(this.leafCertificatePublic);
+            this.commonNameLeaf = this.getCommonName(this.leafCertificatePublic);
         }
         catch (IOException | CertificateException e)
         {
@@ -66,10 +69,21 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
         }
     }
 
-    private String getCommonName(X509Certificate certificate)
+    private String getCommonName(X509Certificate certificate) throws SecurityClientException
     {
-        //TODO : this needs testing
-        return  certificate.getIssuerX500Principal().getName();
+        //Expected format CN=<CNName>,O=<>,C=<US>
+        String cnName = certificate.getSubjectDN().getName();
+        String[] tokens = cnName.split(COMMA);
+        for (String token : tokens)
+        {
+            if (token.contains(CN))
+            {
+                String[] cn = token.split(EQUALS);
+                return cn[cn.length - 1];
+            }
+        }
+
+        throw new SecurityClientException("CN name could not be found");
     }
 
     private X509Certificate convertPemToCertificate(String pem) throws IOException, CertificateException
@@ -103,8 +117,8 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
     @Override
     public String getClientCertificateCommonName()
     {
-        //SRS_SecurityClientDiceEmulator_25_005: [ This method shall return Root certificate name as common name ]
-        return commonNameLeaf;
+        //SRS_SecurityClientDiceEmulator_25_005: [ This method shall return Leaf certificate name as common name ]
+        return this.commonNameLeaf;
     }
 
     /**
@@ -171,7 +185,6 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
             throw new SecurityClientException(new IllegalArgumentException("unique id cannot be null or empty"));
         }
 
-        // TODO : Add functionality to generate leaf.
-        return  null;
+        throw new UnsupportedOperationException("This method is not supported, use other means to validate certificate");
     }
 }

@@ -22,7 +22,7 @@ import java.util.Scanner;
  */
 public class ProvisioningTpmSample
 {
-    private static final String scopeId = "[Your scope ID here]";
+    private static final String idScope = "[Your ID scope here]";
     private static final String globalEndpoint = "[Your Provisioning Service Global Endpoint here]";
     private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milli seconds
@@ -77,7 +77,7 @@ public class ProvisioningTpmSample
         {
             ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 
-            provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, scopeId, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, securityClientTPMEmulator);
+            provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, idScope, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, securityClientTPMEmulator);
 
             provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus);
             while (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
