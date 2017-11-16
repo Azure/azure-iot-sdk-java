@@ -50,7 +50,6 @@ public void start() throws IOException;
 public void stop() throws IOException;
 ```
 
-**SRS_MQTTDEVICEMETHOD_25_015: [**stop method shall unsubscribe from method's subscribe topic ($iothub/methods/POST/#) and throw IOException if it fails.**]**
 
 ### send
 

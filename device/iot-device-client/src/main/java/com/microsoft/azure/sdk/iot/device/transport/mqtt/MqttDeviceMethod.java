@@ -62,14 +62,8 @@ public class MqttDeviceMethod extends Mqtt
 
     public void stop() throws IOException
     {
-        if (isStarted)
-        {
-            /*
-            Codes_SRS_MqttDeviceMethod_25_015: [**stop method shall unsubscribe from method subscribe topic ($iothub/methods/POST/#) and throw IoException otherwise.**]**
-             */
-            this.unsubscribe(subscribeTopic);
-            isStarted = false;
-        }
+        isStarted = false;
+
         if (!requestMap.isEmpty())
         {
             logger.LogInfo("Pending %d responses to be sent to IotHub yet unsubscribed %s", requestMap.size(), logger.getMethodName());

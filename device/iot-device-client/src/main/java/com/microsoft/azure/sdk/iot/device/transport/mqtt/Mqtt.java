@@ -280,50 +280,6 @@ abstract public class Mqtt implements MqttCallback
         }
     }
 
-    /**
-     * Method to unsubscribe to mqtt broker connection.
-     *
-     * @param topic the topic to unsubscribe on mqtt broker connection.
-     * @throws IOException if failed to unsubscribe the mqtt topic.
-     */
-    void unsubscribe(String topic) throws IOException
-    {
-        synchronized (this.mqttLock)
-        {
-            try
-            {
-                if (!this.mqttConnection.getMqttAsyncClient().isConnected())
-                {
-                    /*
-                    **Codes_SRS_Mqtt_25_018: [**If the MQTT connection is closed, the function shall throw an IOException with message.**]**
-                     */
-                    throw new IOException("Cannot unsubscribe when mqtt client is disconnected");
-                }
-
-                if (this.userSpecifiedSASTokenExpiredOnRetry)
-                {
-                    /*
-                    ** Codes_SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
-                     */
-                    throw new IOException("Cannot unsubscribe when user supplied SAS token has expired");
-                }
-
-                /*
-                **Codes_SRS_Mqtt_25_020: [**The function shall unsubscribe from subscribeTopic specified to the IoT Hub given in the configuration.**]**
-                 */
-                IMqttToken subToken = this.mqttConnection.getMqttAsyncClient().unsubscribe(topic);
-                subToken.waitForCompletion();
-            }
-            catch (MqttException e)
-            {
-                /*
-                **Codes_SRS_Mqtt_25_019: [**If the unsubscribeTopic is null or empty, the function shall throw an IOException.**]**
-                 */
-                throw new IOException("Unable to unsubscribe to topic :" + topic + "because " + e.getCause() + e.getMessage(), e);
-            }
-        }
-    }
-
     protected boolean isConnected()
     {
         if (this.mqttConnection == null || this.mqttConnection.getMqttAsyncClient() == null)
