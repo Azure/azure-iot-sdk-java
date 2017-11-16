@@ -11,21 +11,20 @@ An MQTT is an abtract class defining all the operations that can be performed ov
 ```java
 public final class Mqtt implements MqttCallback
 {
-    public Mqtt(MqttConnection mqttConnection) throws IllegalArgumentException
+    public Mqtt(MqttConnection mqttConnection) throws IllegalArgumentException;
 
     Pair<String, byte[]> peekMessage() throws IOException;
 
     private class MqttConnectionInfo
     {
-        MqttConnectionInfo(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext) throws IOException
-        private void updateConnectionOptions(String userName, String userPassword, IotHubSSLContext iotHubSSLContext)
+        MqttConnectionInfo(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext) throws IOException;
+        private void updateConnectionOptions(String userName, String userPassword, IotHubSSLContext iotHubSSLContext);
     }
 
-    protected void connect() throws IOException
-    protected void disconnect() throws IOException
-    protected void publish(String publishTopic, byte[] payload) throws IOException
-    protected void subscribe(String topic) throws IOException
-    protected void unsubscribe(String topic) throws IOException
+    protected void connect() throws IOException;
+    protected void disconnect() throws IOException;
+    protected void publish(String publishTopic, byte[] payload) throws IOException;
+    protected void subscribe(String topic) throws IOException;
     public Message receive() throws IOException;
     public void restartBaseMqtt();
 
@@ -106,21 +105,6 @@ protected void subscribe(String topic) throws IOException;
 **SRS_Mqtt_25_048: [**If the Mqtt Client Async throws MqttException for any reason, the function shall throw an IOException with the message.**]**
 
 **SRS_Mqtt_25_017: [**The function shall subscribe to subscribeTopic specified to the IoT Hub given in the configuration.**]**
-
-
-### unsubscribe
-
-```java
-protected void unsubscribe(String topic) throws IOException;
-```
-
-**SRS_Mqtt_25_018: [**If the MQTT connection is closed, the function shall throw an IOException with message.**]**
-
-**SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
-
-**SRS_Mqtt_25_019: [**If the unsubscribeTopic is null or empty, the function shall throw an IOException.**]**
-
-**SRS_Mqtt_25_020: [**The function shall unsubscribe from subscribeTopic specified to the IoT Hub given in the configuration.**]**
 
 
 ### receive

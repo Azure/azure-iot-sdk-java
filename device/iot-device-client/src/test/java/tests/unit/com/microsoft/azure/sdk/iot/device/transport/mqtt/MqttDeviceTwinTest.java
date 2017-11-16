@@ -117,56 +117,6 @@ public class MqttDeviceTwinTest
 
         }
     }
-    /*
-    **Tests_SRS_MQTTDEVICETWIN_25_020: [**stop method shall unsubscribe from twin response topic ($iothub/twin/res/#).**]**
-     */
-    @Test
-    public void stopUnsubscribesFromDeviceTwinResponse(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        //arrange
-
-        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
-        Deencapsulation.setField(testTwin, "isStarted", true);
-
-        //act
-        testTwin.stop();
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockMqtt, "unsubscribe", resTopic);
-                times = 1;
-            }
-        };
-    }
-    /*
-    **Tests_SRS_MQTTDEVICETWIN_25_020: [**stop method shall unsubscribe from twin response topic ($iothub/twin/res/#) and throw IoException otherwise.**]**
-     */
-    @Test (expected = IOException.class)
-    public void stopThrowsExceptionIfUnSubscribesFails(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        try
-        {
-            //arrange
-            new StrictExpectations()
-            {
-                {
-                    Deencapsulation.invoke(mockMqtt, "unsubscribe", resTopic);
-                    result = mockIOException;
-                }
-            };
-
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
-            Deencapsulation.setField(testTwin, "isStarted", true);
-            //act
-            testTwin.stop();
-        }
-        finally
-        {
-            //assert
-        }
-    }
 
     /*
     **Tests_SRS_MQTTDEVICETWIN_25_024: [**send method shall build the get request topic of the format mentioned in spec ($iothub/twin/GET/?$rid={request id}) if the operation is of type DEVICE_OPERATION_TWIN_GET_REQUEST.**]**

@@ -197,8 +197,7 @@ public class MqttIotHubConnection
             return;
         }
 
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [**The function shall close the MQTT connection.]
-
+        // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [The function shall close the MQTT connection.]
         try
         {
             this.deviceMethod.stop();

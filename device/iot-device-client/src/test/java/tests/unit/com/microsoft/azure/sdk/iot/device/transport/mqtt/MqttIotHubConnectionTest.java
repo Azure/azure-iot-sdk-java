@@ -408,7 +408,7 @@ public class MqttIotHubConnectionTest
             MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
             connection.open();
         }
-        catch (Exception e)
+        catch (IOException e)
         {
             new Verifications()
             {
@@ -484,7 +484,7 @@ public class MqttIotHubConnectionTest
         }
     }
 
-    // Tests_SRS_MQTTIOTHUBCONNECTION_15_006: [If the MQTT connection is already open, the function shall do nothing.]
+    // Tests_SRS_MQTTIOTHUBCONNECTION_15_007: [If the MQTT connection is already open, the function shall do nothing.]
     @Test
     public void openDoesNothingIfAlreadyOpened() throws IOException
     {
@@ -504,7 +504,7 @@ public class MqttIotHubConnectionTest
         };
     }
 
-    // Tests_SRS_MQTTIOTHUBCONNECTION_15_005: [The function shall close the MQTT connection.]
+    // Tests_SRS_MQTTIOTHUBCONNECTION_15_006: [The function shall close the MQTT connection.]
     @Test
     public void closeClosesMqttConnection() throws IOException
     {
