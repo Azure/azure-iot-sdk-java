@@ -61,7 +61,7 @@ public class ProvisioningDeviceClient
         if (securityProvider == null)
         {
             //SRS_ProvisioningDeviceClient_25_004: [ The constructor shall throw IllegalArgumentException if securityProvider is null. ]
-            throw new IllegalArgumentException("Security client cannot be null");
+            throw new IllegalArgumentException("Security provider cannot be null");
         }
 
         //SRS_ProvisioningDeviceClient_25_005: [ The constructor shall create provisioningDeviceClientConfig and set all the provided values to it.. ]

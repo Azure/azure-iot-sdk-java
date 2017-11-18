@@ -5,8 +5,8 @@ package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubX509Authentication;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubX509AuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -45,10 +45,10 @@ public class DeviceClientTest
     FileUpload mockFileUpload;
 
     @Mocked
-    IotHubSasTokenAuthentication mockIotHubSasTokenAuthentication;
+    IotHubSasTokenAuthenticationProvider mockIotHubSasTokenAuthenticationProvider;
 
     @Mocked
-    IotHubX509Authentication mockIotHubX509Authentication;
+    IotHubX509AuthenticationProvider mockIotHubX509AuthenticationProvider;
 
     @Mocked
     SecurityProvider mockSecurityProvider;
@@ -267,7 +267,7 @@ public class DeviceClientTest
     }
 
     //Tests_SRS_DEVICECLIENT_34_065: [The provided uri and device id will be used to create an iotHubConnectionString that will be saved in config.]
-    //Tests_SRS_DEVICECLIENT_34_066: [The provided security client will be saved in config.]
+    //Tests_SRS_DEVICECLIENT_34_066: [The provided security provider will be saved in config.]
     //Tests_SRS_DEVICECLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
     @Test
     public void createFromSecurityProviderUsesUriAndDeviceIdAndSavesSecurityProviderAndCreatesDeviceIO() throws URISyntaxException, SecurityClientException, IOException
@@ -2271,8 +2271,8 @@ public class DeviceClientTest
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.CBS;
                 mockConfig.getSasTokenAuthentication();
-                result = mockIotHubSasTokenAuthentication;
-                mockIotHubSasTokenAuthentication.setPathToIotHubTrustedCert(value);
+                result = mockIotHubSasTokenAuthenticationProvider;
+                mockIotHubSasTokenAuthenticationProvider.setPathToIotHubTrustedCert(value);
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2292,7 +2292,7 @@ public class DeviceClientTest
                 times = 2;
                 mockConfig.getSasTokenAuthentication();
                 times = 1;
-                mockIotHubSasTokenAuthentication.setPathToIotHubTrustedCert(value);
+                mockIotHubSasTokenAuthenticationProvider.setPathToIotHubTrustedCert(value);
                 times = 1;
             }
         };
@@ -2391,7 +2391,7 @@ public class DeviceClientTest
                 times = 1;
                 mockConfig.getSasTokenAuthentication();
                 times = 1;
-                mockIotHubSasTokenAuthentication.setPathToIotHubTrustedCert(value);
+                mockIotHubSasTokenAuthenticationProvider.setPathToIotHubTrustedCert(value);
                 times = 1;
             }
         };
@@ -2433,7 +2433,7 @@ public class DeviceClientTest
                 times = 3;
                 mockConfig.getX509Authentication();
                 times = 1;
-                mockIotHubX509Authentication.setPathToIotHubTrustedCert(value);
+                mockIotHubX509AuthenticationProvider.setPathToIotHubTrustedCert(value);
                 times = 1;
             }
         };

@@ -9,19 +9,24 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.dps.device.internal.task;
 
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.OperationsRegistrationStatusTPMParser;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.OperationRegistrationStatusParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.*;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.security.SecureRandom;
 import java.util.concurrent.*;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.*;
@@ -31,7 +36,7 @@ import static org.junit.Assert.assertNotNull;
 
 /*
   Unit test for ProvisioningTask
-  Coverage : 100% method, 100% line
+  Coverage : 100% method, 99% line
 */
 
 @RunWith(JMockit.class)
@@ -44,7 +49,13 @@ public class ProvisioningTaskTest
     private static final String TEST_DEVICE_ID = "testDeviceId";
 
     @Mocked
+    Base64 mockedBase64;
+    @Mocked
     SecurityProvider mockedSecurityProvider;
+    @Mocked
+    SecurityProviderTpm mockedSecurityProviderTpm;
+    @Mocked
+    OperationsRegistrationStatusTPMParser mockedTpm;
     @Mocked
     ProvisioningDeviceClientContract mockedProvisioningDeviceClientContract;
     @Mocked
@@ -75,6 +86,10 @@ public class ProvisioningTaskTest
     RegistrationResult mockedRegistrationData;
     @Mocked
     Thread mockedThread;
+    @Mocked
+    ProvisioningDeviceClientException mockProvisioningDeviceClientException;
+    @Mocked
+    SecurityClientException mockSecurityClientException;
 
     private void constructorExpectations()
     {
@@ -119,15 +134,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-                mockedResponseParser.getOperationId();
-                result = TEST_OPERATION_ID;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register assigning to status assigned
         new StrictExpectations()
@@ -150,12 +157,12 @@ public class ProvisioningTaskTest
                 mockedOperationRegistrationStatusParser.getDeviceId();
                 result = TEST_DEVICE_ID;
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            any, any, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                        any, any, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
             }
         };
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig,
-                                                                     mockedProvisioningDeviceClientContract);
+                mockedProvisioningDeviceClientContract);
         //act
         testProvisioningTask.call();
 
@@ -179,15 +186,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-                mockedResponseParser.getOperationId();
-                result = TEST_OPERATION_ID;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register assigning to status assigned
         new StrictExpectations()
@@ -208,12 +207,12 @@ public class ProvisioningTaskTest
                 mockedOperationRegistrationStatusParser.getErrorMessage();
                 result = "Test Error Message";
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            any, any, PROVISIONING_DEVICE_STATUS_FAILED);
+                        any, any, PROVISIONING_DEVICE_STATUS_FAILED);
                 result = mockedRegistrationData;
             }
         };
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig,
-                                                                     mockedProvisioningDeviceClientContract);
+                mockedProvisioningDeviceClientContract);
         //act
         testProvisioningTask.call();
 
@@ -237,15 +236,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-                mockedResponseParser.getOperationId();
-                result = TEST_OPERATION_ID;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register assigning to status assigned
         new StrictExpectations()
@@ -266,12 +257,12 @@ public class ProvisioningTaskTest
                 mockedOperationRegistrationStatusParser.getErrorMessage();
                 result = "Test Error Message";
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            any, any, PROVISIONING_DEVICE_STATUS_DISABLED);
+                        any, any, PROVISIONING_DEVICE_STATUS_DISABLED);
                 result = mockedRegistrationData;
             }
         };
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig,
-                                                                     mockedProvisioningDeviceClientContract);
+                mockedProvisioningDeviceClientContract);
         //act
         testProvisioningTask.call();
 
@@ -280,7 +271,7 @@ public class ProvisioningTaskTest
         {
             {
                 mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationResult)any, (Exception) any,
-                                                                       null);
+                        null);
                 times = 1;
                 mockedProvisioningDeviceClientContract.open((RequestData) any);
                 times = 1;
@@ -296,13 +287,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register assigning to status assigning
         new StrictExpectations()
@@ -362,12 +347,12 @@ public class ProvisioningTaskTest
                 mockedOperationRegistrationStatusParser.getDeviceId();
                 result = TEST_DEVICE_ID;
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
             }
         };
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig,
-                                                                     mockedProvisioningDeviceClientContract);
+                mockedProvisioningDeviceClientContract);
 
         //act
         testProvisioningTask.call();
@@ -392,13 +377,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register assigning to status assigning
         new StrictExpectations()
@@ -456,12 +435,12 @@ public class ProvisioningTaskTest
                 mockedOperationRegistrationStatusParser.getErrorMessage();
                 result = "Some error Message";
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            any, any, PROVISIONING_DEVICE_STATUS_FAILED);
+                        any, any, PROVISIONING_DEVICE_STATUS_FAILED);
                 result = mockedRegistrationData;
             }
         };
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig,
-                                                                     mockedProvisioningDeviceClientContract);
+                mockedProvisioningDeviceClientContract);
 
         //act
         testProvisioningTask.call();
@@ -486,13 +465,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register assigning to status assigning
         new StrictExpectations()
@@ -550,12 +523,12 @@ public class ProvisioningTaskTest
                 mockedOperationRegistrationStatusParser.getErrorMessage();
                 result = "Some error Message";
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            any, any, PROVISIONING_DEVICE_STATUS_DISABLED);
+                        any, any, PROVISIONING_DEVICE_STATUS_DISABLED);
                 result = mockedRegistrationData;
             }
         };
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig,
-                                                                     mockedProvisioningDeviceClientContract);
+                mockedProvisioningDeviceClientContract);
 
         //act
         testProvisioningTask.call();
@@ -580,13 +553,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register unassigned to status unassigned
         new StrictExpectations()
@@ -638,12 +605,12 @@ public class ProvisioningTaskTest
                 mockedOperationRegistrationStatusParser.getErrorMessage();
                 result = "Test Error Message";
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            null, null, PROVISIONING_DEVICE_STATUS_DISABLED);
+                        null, null, PROVISIONING_DEVICE_STATUS_DISABLED);
                 result = mockedRegistrationData;
             }
         };
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig,
-                                                                     mockedProvisioningDeviceClientContract);
+                mockedProvisioningDeviceClientContract);
 
         //act
         testProvisioningTask.call();
@@ -668,13 +635,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register unassigned to status unassigned
         new StrictExpectations()
@@ -734,13 +695,13 @@ public class ProvisioningTaskTest
                 mockedOperationRegistrationStatusParser.getDeviceId();
                 result = TEST_DEVICE_ID;
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
             }
         };
 
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig,
-                                                                     mockedProvisioningDeviceClientContract);
+                mockedProvisioningDeviceClientContract);
 
         //act
         testProvisioningTask.call();
@@ -765,13 +726,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register unassigned to status unassigned
         new StrictExpectations()
@@ -831,13 +786,13 @@ public class ProvisioningTaskTest
                 mockedOperationRegistrationStatusParser.getDeviceId();
                 result = TEST_DEVICE_ID;
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
             }
         };
 
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig,
-                                                                     mockedProvisioningDeviceClientContract);
+                mockedProvisioningDeviceClientContract);
 
         //act
         testProvisioningTask.call();
@@ -871,7 +826,7 @@ public class ProvisioningTaskTest
         };
         //act
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig,
-                                                                     mockedProvisioningDeviceClientContract);
+                mockedProvisioningDeviceClientContract);
     }
 
     @Test
@@ -880,15 +835,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-                mockedResponseParser.getOperationId();
-                result = TEST_OPERATION_ID;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register assigning to status assigned
         new StrictExpectations()
@@ -909,12 +856,12 @@ public class ProvisioningTaskTest
                 mockedOperationRegistrationStatusParser.getErrorMessage();
                 result = "Test Error Message";
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            any, any, PROVISIONING_DEVICE_STATUS_ERROR);
+                        any, any, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig,
-                                                                     mockedProvisioningDeviceClientContract);
+                mockedProvisioningDeviceClientContract);
         //act
         testProvisioningTask.call();
 
@@ -939,13 +886,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register unassigned to status unassigned
         new StrictExpectations()
@@ -967,13 +908,13 @@ public class ProvisioningTaskTest
                 mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
                 result = null;
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            null, null, PROVISIONING_DEVICE_STATUS_ERROR);
+                        null, null, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
 
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig,
-                                                                     mockedProvisioningDeviceClientContract);
+                mockedProvisioningDeviceClientContract);
 
         //act
         testProvisioningTask.call();
@@ -998,13 +939,8 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-            }
-        };
+        registerExpectations();
+
 
         // Moving from status register unassigned to status unassigned
         new StrictExpectations()
@@ -1028,7 +964,7 @@ public class ProvisioningTaskTest
                 mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
                 result = mockedResponseParser;
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            null, null, PROVISIONING_DEVICE_STATUS_ERROR);
+                        null, null, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
@@ -1057,13 +993,8 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-            }
-        };
+        registerExpectations();
+
 
         // Moving from status register unassigned to status unassigned
         new StrictExpectations()
@@ -1089,7 +1020,7 @@ public class ProvisioningTaskTest
                 mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
                 result = mockedResponseParser;
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            null, null, PROVISIONING_DEVICE_STATUS_ERROR);
+                        null, null, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
@@ -1118,16 +1049,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            null, null, PROVISIONING_DEVICE_STATUS_ERROR);
-                result = mockedRegistrationData;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register unassigned to status unassigned
         new StrictExpectations()
@@ -1162,6 +1084,7 @@ public class ProvisioningTaskTest
     {
         // arrange
         constructorExpectations();
+
         // Register expectations
         new NonStrictExpectations()
         {
@@ -1169,7 +1092,7 @@ public class ProvisioningTaskTest
                 mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
                 result = null;
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            null, null, PROVISIONING_DEVICE_STATUS_ERROR);
+                        null, null, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
@@ -1199,16 +1122,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            null, null, PROVISIONING_DEVICE_STATUS_ERROR);
-                result = mockedRegistrationData;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register unassigned to status unassigned
         new StrictExpectations()
@@ -1253,7 +1167,7 @@ public class ProvisioningTaskTest
                 mockedResponseParser.getOperationId();
                 result = null;
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            null, null, PROVISIONING_DEVICE_STATUS_ERROR);
+                        null, null, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
@@ -1283,17 +1197,7 @@ public class ProvisioningTaskTest
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = new TimeoutException();
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            null, null, PROVISIONING_DEVICE_STATUS_ERROR);
-                result = mockedRegistrationData;
-
-            }
-        };
+        registerExpectations();
 
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig, mockedProvisioningDeviceClientContract);
         //act
@@ -1416,22 +1320,14 @@ public class ProvisioningTaskTest
     SRS_provisioningtask_25_011: [ Upon reaching one of the terminal state i.e ASSIGNED, this method shall invoke registration callback with the information retrieved from service for IotHub Uri and DeviceId. Also if status callback is defined then it shall be invoked with status PROVISIONING_DEVICE_STATUS_ASSIGNED.]
     SRS_provisioningtask_25_012: [ Upon reaching one of the terminal states i.e FAILED or DISABLED, this method shall invoke registration callback with error message received from service. Also if status callback is defined then it shall be invoked with status PROVISIONING_DEVICE_STATUS_ERROR.]
     SRS_provisioningtask_25_013: [ Upon reaching intermediate state i.e UNASSIGNED or ASSIGNING, this method shall continue to query for status until a terminal state is reached. Also if status callback is defined then it shall be invoked with status PROVISIONING_DEVICE_STATUS_ASSIGNING.]
-
     */
-
     @Test
     public void invokeRegisterReturnsUnassignedToAssignedSucceeds() throws Exception, InterruptedException, ExecutionException, TimeoutException, ProvisioningDeviceClientException
     {
         // arrange
         constructorExpectations();
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-            }
-        };
+        registerExpectations();
 
         // Moving from status unassigned to assigned
         new StrictExpectations()
@@ -1478,7 +1374,7 @@ public class ProvisioningTaskTest
                 mockedOperationRegistrationStatusParser.getDeviceId();
                 result = TEST_DEVICE_ID;
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
             }
         };
@@ -1501,19 +1397,15 @@ public class ProvisioningTaskTest
         };
     }
 
+    //SRS_ProvisioningTask_34_016: [ Upon reaching the terminal state ASSIGNED, if the saved security client is an instance of SecurityClientTpm, the security client shall decrypt and store the authentication key from the statusResponseParser.]
     @Test
-    public void invokeRegisterReturnsAssigningToStatusAssignedSucceeds() throws Exception
+    public void invokeRegisterReturnsAssigningToStatusAssignedSucceedsWithTPMSecurityProvider() throws Exception
     {
         // arrange
         constructorExpectations();
+
         // Register expectations
-        new NonStrictExpectations()
-        {
-            {
-                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
-                result = mockedResponseParser;
-            }
-        };
+        registerExpectations();
 
         // Moving from status register assigning to status assigned
         new StrictExpectations()
@@ -1560,8 +1452,14 @@ public class ProvisioningTaskTest
                 mockedOperationRegistrationStatusParser.getDeviceId();
                 result = TEST_DEVICE_ID;
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
+                mockedOperationRegistrationStatusParser.getTpm();
+                result = mockedTpm;
+                mockedTpm.getAuthenticationKey();
+                result = "some auth key";
+                mockedProvisioningDeviceClientConfig.getSecurityProvider();
+                result = mockedSecurityProviderTpm;
             }
         };
         ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig, mockedProvisioningDeviceClientContract);
@@ -1579,7 +1477,700 @@ public class ProvisioningTaskTest
                 times = 1;
                 mockedProvisioningDeviceClientContract.close();
                 times = 1;
+                mockedTpm.getAuthenticationKey();
+                times = 3; //called twice for verifying it is not null or empty, once for actual use
+                mockedSecurityProviderTpm.activateIdentityKey((byte[]) any);
+                times = 1;
             }
         };
+    }
+
+    //SRS_ProvisioningTask_34_016: [ Upon reaching the terminal state ASSIGNED, if the saved security client is an instance of SecurityClientTpm, the security client shall decrypt and store the authentication key from the statusResponseParser.]
+    @Test
+    public void invokeRegisterReturnsAssigningToStatusAssignedSucceedsWithNonTpmSecurityProvider() throws Exception
+    {
+        // arrange
+        constructorExpectations();
+
+        // Register expectations
+        registerExpectations();
+
+        // Moving from status register assigning to status assigned
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+            }
+        };
+
+        // Invoke Status expectations
+        new NonStrictExpectations()
+        {
+            {
+                mockedResponseParser.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
+                result = mockedResponseParser;
+            }
+        };
+
+        // State machine expectations
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigned";
+                mockedResponseParser.getStatus();
+                result = "assigned";
+            }
+        };
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedResponseParser.getRegistrationStatus();
+                result = mockedOperationRegistrationStatusParser;
+                mockedOperationRegistrationStatusParser.getAssignedHub();
+                result = TEST_HUB;
+                mockedOperationRegistrationStatusParser.getDeviceId();
+                result = TEST_DEVICE_ID;
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                result = mockedRegistrationData;
+                mockedOperationRegistrationStatusParser.getTpm();
+                result = mockedTpm;
+                mockedTpm.getAuthenticationKey();
+                result = "some auth key";
+                mockedProvisioningDeviceClientConfig.getSecurityProvider();
+                result = mockedSecurityProvider;
+            }
+        };
+        ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig, mockedProvisioningDeviceClientContract);
+
+        //act
+        testProvisioningTask.call();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedProvisioningDeviceClientRegistrationCallback.run((ProvisioningDeviceClientRegistrationResult)any, null, null);
+                times = 1;
+                mockedProvisioningDeviceClientContract.open((RequestData) any);
+                times = 1;
+                mockedProvisioningDeviceClientContract.close();
+                times = 1;
+                mockedTpm.getAuthenticationKey();
+                times = 0;
+            }
+        };
+    }
+
+    //Tests_SRS_ProvisioningTask_34_017: [Upon reaching the terminal state ASSIGNED, if the saved security client is an instance of SecurityClientTpm and if the registration status json does not contain an authentication key, this function shall throw a ProvisioningDeviceClientException.]
+    @Test
+    public void invokeRegisterReturnsAssigningToStatusAssignedThrowsForMissingTPMJson() throws Exception
+    {
+        // arrange
+        constructorExpectations();
+
+        // Register expectations
+        registerExpectations();
+
+        // Moving from status register assigning to status assigned
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+            }
+        };
+
+        // Invoke Status expectations
+        new NonStrictExpectations()
+        {
+            {
+                mockedResponseParser.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
+                result = mockedResponseParser;
+            }
+        };
+
+        // State machine expectations
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigned";
+                mockedResponseParser.getStatus();
+                result = "assigned";
+            }
+        };
+
+        registrationStatusJsonExpectations(TEST_HUB, TEST_DEVICE_ID, null, null);
+        new NonStrictExpectations()
+        {
+            {
+                mockedProvisioningDeviceClientConfig.getSecurityProvider();
+                result = mockedSecurityProviderTpm;
+                new ProvisioningDeviceClientException(anyString);
+                result = mockProvisioningDeviceClientException;
+            }
+        };
+        ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig, mockedProvisioningDeviceClientContract);
+
+        //act
+        testProvisioningTask.call();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedProvisioningDeviceClientRegistrationCallback.run((RegistrationResult) any, mockProvisioningDeviceClientException, any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_ProvisioningTask_34_017: [Upon reaching the terminal state ASSIGNED, if the saved security client is an instance of SecurityClientTpm and if the registration status json does not contain an authentication key, this function shall throw a ProvisioningDeviceClientException.]
+    @Test
+    public void invokeRegisterReturnsAssigningToStatusAssignedThrowsForMissingTPMAuthenticationKeyJson() throws Exception
+    {
+        // arrange
+        constructorExpectations();
+
+        // Register expectations
+        registerExpectations();
+
+        // Moving from status register assigning to status assigned
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+            }
+        };
+
+        // Invoke Status expectations
+        new NonStrictExpectations()
+        {
+            {
+                mockedResponseParser.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
+                result = mockedResponseParser;
+            }
+        };
+
+        // State machine expectations
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigned";
+                mockedResponseParser.getStatus();
+                result = "assigned";
+            }
+        };
+
+        registrationStatusJsonExpectations(TEST_HUB, TEST_DEVICE_ID, mockedTpm, null);
+        new NonStrictExpectations()
+        {
+            {
+                mockedProvisioningDeviceClientConfig.getSecurityProvider();
+                result = mockedSecurityProviderTpm;
+                new ProvisioningDeviceClientException(anyString);
+                result = mockProvisioningDeviceClientException;
+            }
+        };
+        ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig, mockedProvisioningDeviceClientContract);
+
+        //act
+        testProvisioningTask.call();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedProvisioningDeviceClientRegistrationCallback.run((RegistrationResult) any, mockProvisioningDeviceClientException, any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_ProvisioningTask_34_017: [Upon reaching the terminal state ASSIGNED, if the saved security client is an instance of SecurityClientTpm and if the registration status json does not contain an authentication key, this function shall throw a ProvisioningDeviceClientException.]
+    @Test
+    public void invokeRegisterReturnsAssigningToStatusAssignedThrowsForEmptyTPMAuthenticationKeyJson() throws Exception
+    {
+        // arrange
+        constructorExpectations();
+
+        // Register expectations
+        registerExpectations();
+
+        // Moving from status register assigning to status assigned
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+            }
+        };
+
+        // Invoke Status expectations
+        new NonStrictExpectations()
+        {
+            {
+                mockedResponseParser.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
+                result = mockedResponseParser;
+            }
+        };
+
+        // State machine expectations
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigned";
+                mockedResponseParser.getStatus();
+                result = "assigned";
+            }
+        };
+
+        registrationStatusJsonExpectations(TEST_HUB, TEST_DEVICE_ID, mockedTpm, "");
+        new NonStrictExpectations()
+        {
+            {
+                mockedProvisioningDeviceClientConfig.getSecurityProvider();
+                result = mockedSecurityProviderTpm;
+                new ProvisioningDeviceClientException(anyString);
+                result = mockProvisioningDeviceClientException;
+            }
+        };
+        ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig, mockedProvisioningDeviceClientContract);
+
+        //act
+        testProvisioningTask.call();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedProvisioningDeviceClientRegistrationCallback.run((RegistrationResult) any, mockProvisioningDeviceClientException, any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_ProvisioningTask_34_018: [Upon reaching the terminal state ASSIGNED, if the registration status json is missing an assigned hub or device id, this function shall throw a ProvisioningDeviceClientException.]
+    @Test
+    public void invokeRegisterReturnsAssigningToStatusAssignedThrowsForMissingDeviceIdJson() throws Exception
+    {
+        // arrange
+        constructorExpectations();
+        // Register expectations
+        registerExpectations();
+
+        // Moving from status register assigning to status assigned
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+            }
+        };
+
+        // Invoke Status expectations
+        new NonStrictExpectations()
+        {
+            {
+                mockedResponseParser.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
+                result = mockedResponseParser;
+            }
+        };
+
+        // State machine expectations
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigned";
+                mockedResponseParser.getStatus();
+                result = "assigned";
+            }
+        };
+
+        registrationStatusJsonExpectations(TEST_HUB, null, null, null);
+        new NonStrictExpectations()
+        {
+            {
+                new ProvisioningDeviceClientException(anyString);
+                result = mockProvisioningDeviceClientException;
+            }
+        };
+        ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig, mockedProvisioningDeviceClientContract);
+
+        //act
+        testProvisioningTask.call();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedProvisioningDeviceClientRegistrationCallback.run((RegistrationResult) any, mockProvisioningDeviceClientException, any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_ProvisioningTask_34_018: [Upon reaching the terminal state ASSIGNED, if the registration status json is missing an assigned hub or device id, this function shall throw a ProvisioningDeviceClientException.]
+    @Test
+    public void invokeRegisterReturnsAssigningToStatusAssignedThrowsForEmptyDeviceIdJson() throws Exception
+    {
+        // arrange
+        constructorExpectations();
+
+        // Register expectations
+        registerExpectations();
+
+        // Moving from status register assigning to status assigned
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+            }
+        };
+
+        // Invoke Status expectations
+        new NonStrictExpectations()
+        {
+            {
+                mockedResponseParser.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
+                result = mockedResponseParser;
+            }
+        };
+
+        // State machine expectations
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigned";
+                mockedResponseParser.getStatus();
+                result = "assigned";
+            }
+        };
+
+        registrationStatusJsonExpectations(TEST_HUB, "", null, null);
+        new NonStrictExpectations()
+        {
+            {
+                new ProvisioningDeviceClientException(anyString);
+                result = mockProvisioningDeviceClientException;
+            }
+        };
+        ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig, mockedProvisioningDeviceClientContract);
+
+        //act
+        testProvisioningTask.call();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedProvisioningDeviceClientRegistrationCallback.run((RegistrationResult) any, mockProvisioningDeviceClientException, any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_ProvisioningTask_34_018: [Upon reaching the terminal state ASSIGNED, if the registration status json is missing an assigned hub or device id, this function shall throw a ProvisioningDeviceClientException.]
+    @Test
+    public void invokeRegisterReturnsAssigningToStatusAssignedThrowsForMissingHostnameJson() throws Exception
+    {
+        // arrange
+        constructorExpectations();
+
+        // Register expectations
+        registerExpectations();
+
+        // Moving from status register assigning to status assigned
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+            }
+        };
+
+        // Invoke Status expectations
+        new NonStrictExpectations()
+        {
+            {
+                mockedResponseParser.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
+                result = mockedResponseParser;
+            }
+        };
+
+        // State machine expectations
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigned";
+                mockedResponseParser.getStatus();
+                result = "assigned";
+            }
+        };
+
+        registrationStatusJsonExpectations(null, TEST_DEVICE_ID, null, null);
+        new NonStrictExpectations()
+        {
+            {
+                new ProvisioningDeviceClientException(anyString);
+                result = mockProvisioningDeviceClientException;
+            }
+        };
+        ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig, mockedProvisioningDeviceClientContract);
+
+        //act
+        testProvisioningTask.call();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedProvisioningDeviceClientRegistrationCallback.run((RegistrationResult) any, mockProvisioningDeviceClientException, any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_ProvisioningTask_34_018: [Upon reaching the terminal state ASSIGNED, if the registration status json is missing an assigned hub or device id, this function shall throw a ProvisioningDeviceClientException.]
+    @Test
+    public void invokeRegisterReturnsAssigningToStatusAssignedThrowsForEmptyHostnameJson() throws Exception
+    {
+        // arrange
+        constructorExpectations();
+        // Register expectations
+        registerExpectations();
+
+        // Moving from status register assigning to status assigned
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+            }
+        };
+
+        // Invoke Status expectations
+        new NonStrictExpectations()
+        {
+            {
+                mockedResponseParser.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
+                result = mockedResponseParser;
+            }
+        };
+
+        // State machine expectations
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigned";
+                mockedResponseParser.getStatus();
+                result = "assigned";
+            }
+        };
+
+        registrationStatusJsonExpectations("", TEST_DEVICE_ID, null, null);
+        new NonStrictExpectations()
+        {
+            {
+                new ProvisioningDeviceClientException(anyString);
+                result = mockProvisioningDeviceClientException;
+            }
+        };
+        ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig, mockedProvisioningDeviceClientContract);
+
+        //act
+        testProvisioningTask.call();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedProvisioningDeviceClientRegistrationCallback.run((RegistrationResult) any, mockProvisioningDeviceClientException, any);
+                times = 1;
+            }
+        };
+    }
+
+    //SRS_ProvisioningTask_25_006: [ This method shall invoke the status callback, if any of the task fail or throw any exception. ]
+    @Test
+    public void securityClientExceptionThrownHandledByStatusCallback() throws Exception
+    {
+        // arrange
+        constructorExpectations();
+
+        // Register expectations
+        registerExpectations();
+
+        // Moving from status register assigning to status assigned
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+                mockedResponseParser.getStatus();
+                result = "assigning";
+            }
+        };
+
+        // Invoke Status expectations
+        new NonStrictExpectations()
+        {
+            {
+                mockedResponseParser.getOperationId();
+                result = TEST_OPERATION_ID;
+                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
+                result = mockedResponseParser;
+            }
+        };
+
+        // State machine expectations
+        new StrictExpectations()
+        {
+            {
+                mockedResponseParser.getStatus();
+                result = "assigned";
+                mockedResponseParser.getStatus();
+                result = "assigned";
+            }
+        };
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedResponseParser.getRegistrationStatus();
+                result = mockedOperationRegistrationStatusParser;
+                mockedOperationRegistrationStatusParser.getAssignedHub();
+                result = TEST_HUB;
+                mockedOperationRegistrationStatusParser.getDeviceId();
+                result = TEST_DEVICE_ID;
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                result = mockedRegistrationData;
+                mockedOperationRegistrationStatusParser.getTpm();
+                result = mockedTpm;
+                mockedTpm.getAuthenticationKey();
+                result = mockSecurityClientException;
+                mockedProvisioningDeviceClientConfig.getSecurityProvider();
+                result = mockedSecurityProviderTpm;
+            }
+        };
+        ProvisioningTask testProvisioningTask = new ProvisioningTask(mockedProvisioningDeviceClientConfig, mockedProvisioningDeviceClientContract);
+
+        //act
+        testProvisioningTask.call();
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedProvisioningDeviceClientRegistrationCallback.run((RegistrationResult) any, mockSecurityClientException, any);
+                times = 1;
+            }
+        };
+    }
+
+    private void registerExpectations() throws InterruptedException, ExecutionException, TimeoutException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
+                result = mockedResponseParser;
+                mockedResponseParser.getOperationId();
+                result = TEST_OPERATION_ID;
+            }
+        };
+    }
+
+    private void registrationStatusJsonExpectations(String hostname, String deviceId, OperationsRegistrationStatusTPMParser tpm, String authenticationKey)
+    {
+        new NonStrictExpectations()
+        {
+            {
+                mockedResponseParser.getRegistrationStatus();
+                result = mockedOperationRegistrationStatusParser;
+                mockedOperationRegistrationStatusParser.getAssignedHub();
+                result = hostname;
+                mockedOperationRegistrationStatusParser.getDeviceId();
+                result = deviceId;
+
+                //TPM flow specific json
+                mockedOperationRegistrationStatusParser.getTpm();
+                result = tpm;
+            }
+        };
+
+        if (tpm != null)
+        {
+            new NonStrictExpectations()
+            {
+                {
+                    tpm.getAuthenticationKey();
+                    result = authenticationKey;
+                }
+            };
+        }
     }
 }

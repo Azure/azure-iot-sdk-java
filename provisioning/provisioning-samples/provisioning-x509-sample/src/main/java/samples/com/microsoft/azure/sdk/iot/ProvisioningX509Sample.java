@@ -3,11 +3,14 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderX509Cert;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Scanner;
@@ -50,17 +53,28 @@ public class ProvisioningX509Sample
         }
     }
 
+    private static class IotHubEventCallbackImpl implements IotHubEventCallback
+    {
+        @Override
+        public void execute(IotHubStatusCode responseStatus, Object callbackContext)
+        {
+            System.out.println("Message received!");
+        }
+    }
+
     public static void main(String[] args) throws Exception
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
         ProvisioningDeviceClient provisioningDeviceClient = null;
+        DeviceClient deviceClient = null;
         try
         {
             ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 
+            SecurityProvider securityProviderX509 = new SecurityProviderX509Cert(leafPublicPem, leafPrivateKey, signerCertificates);
             provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, idScope, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL,
-                                                                       new SecurityProviderX509Cert(leafPublicPem, leafPrivateKey, signerCertificates));
+                                                                       securityProviderX509);
 
             provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus);
 
@@ -83,7 +97,27 @@ public class ProvisioningX509Sample
             {
                 System.out.println("IotHUb Uri : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
                 System.out.println("Device ID : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
+
                 // connect to iothub
+                String iotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
+                String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
+                try
+                {
+                    deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityProviderX509, IotHubClientProtocol.MQTT);
+                    deviceClient.open();
+                    Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
+
+                    System.out.println("Sending message from device to IoT Hub...");
+                    deviceClient.sendEventAsync(messageToSendFromDeviceToHub, new IotHubEventCallbackImpl(), null);
+                }
+                catch (IOException e)
+                {
+                    System.out.println("Device client threw an exception: " + e.getMessage());
+                    if (deviceClient != null)
+                    {
+                        deviceClient.closeNow();
+                    }
+                }
             }
         }
         catch (ProvisioningDeviceClientException | InterruptedException e)
@@ -104,6 +138,10 @@ public class ProvisioningX509Sample
         if (provisioningDeviceClient != null)
         {
             provisioningDeviceClient.closeNow();
+        }
+        if (deviceClient != null)
+        {
+            deviceClient.closeNow();
         }
     }
 }

@@ -13,7 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
-public class IotHubX509SoftwareAuthentication extends IotHubX509Authentication
+public class IotHubX509SoftwareAuthenticationProvider extends IotHubX509AuthenticationProvider
 {
     protected String iotHubTrustedCert;
     protected String pathToIotHubTrustedCert;
@@ -29,7 +29,7 @@ public class IotHubX509SoftwareAuthentication extends IotHubX509Authentication
      * @param isPrivateKeyPath If the provided privateKey is a path to the PEM encoded private key file
      * @throws IllegalArgumentException if the public key certificate or private key is null or empty
      */
-    public IotHubX509SoftwareAuthentication(String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws IllegalArgumentException
+    public IotHubX509SoftwareAuthenticationProvider(String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws IllegalArgumentException
     {
         //Codes_SRS_IOTHUBX509AUTHENTICATION_34_002: [This constructor will create and save an IotHubX509 object using the provided public key certificate and private key.]
         this.iotHubX509 = new IotHubX509(publicKeyCertificate, isCertificatePath, privateKey, isPrivateKeyPath);
@@ -49,7 +49,7 @@ public class IotHubX509SoftwareAuthentication extends IotHubX509Authentication
         {
             if (this.iotHubSSLContext == null || this.sslContextNeedsUpdate)
             {
-                //Codes_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_003: [If this object's ssl context has not been generated yet, this function shall generate it from the saved security client.]
+                //Codes_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_003: [If this object's ssl context has not been generated yet, this function shall generate it from the saved security provider.]
                 this.iotHubSSLContext = generateSSLContext();
                 this.sslContextNeedsUpdate = false;
             }
@@ -59,7 +59,7 @@ public class IotHubX509SoftwareAuthentication extends IotHubX509Authentication
         }
         catch (CertificateException | UnrecoverableKeyException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException e)
         {
-            //Codes_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_004: [If the security client throws a SecurityClientException while generating an SSLContext, this function shall throw an IOException.]
+            //Codes_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_004: [If the security provider throws a SecurityClientException while generating an SSLContext, this function shall throw an IOException.]
             throw new IOException(e);
         }
     }

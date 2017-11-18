@@ -12,7 +12,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
-public class IotHubSasTokenSoftwareAuthentication extends IotHubSasTokenAuthentication
+public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasTokenAuthenticationProvider
 {
     protected String deviceKey;
 
@@ -28,7 +28,7 @@ public class IotHubSasTokenSoftwareAuthentication extends IotHubSasTokenAuthenti
      * @param sharedAccessToken the sas token string for accessing the device. Must be null if the provided deviceKey is not.
      * @throws SecurityException if the provided sas token has expired
      */
-    public IotHubSasTokenSoftwareAuthentication(String hostname, String deviceId, String deviceKey, String sharedAccessToken) throws SecurityException
+    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String deviceId, String deviceKey, String sharedAccessToken) throws SecurityException
     {
         this.hostname = hostname;
         this.deviceId = deviceId;

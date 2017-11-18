@@ -4,7 +4,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
@@ -36,7 +36,7 @@ public class MqttTransportTest
     MqttIotHubConnection mockConnection;
 
     @Mocked
-    IotHubSasTokenAuthentication mockSasTokenAuthentication;
+    IotHubSasTokenAuthenticationProvider mockSasTokenAuthentication;
 
     @Mocked
     IotHubConnectionStateCallback mockConnectionStateCallback;

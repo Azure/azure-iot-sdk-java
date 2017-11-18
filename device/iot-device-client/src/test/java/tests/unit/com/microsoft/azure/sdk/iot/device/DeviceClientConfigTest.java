@@ -33,11 +33,18 @@ import static org.junit.Assert.*;
  */
 public class DeviceClientConfigTest
 {
-    @Mocked IotHubSasTokenAuthentication mockSasTokenAuthentication;
-    @Mocked IotHubSasTokenSoftwareAuthentication mockSasTokenSoftwareAuthentication;
-    @Mocked IotHubX509Authentication mockX509Authentication;
-    @Mocked IotHubX509HardwareAuthentication mockX509HardwareAuthentication;
-    @Mocked IotHubX509SoftwareAuthentication mockX509SoftwareAuthentication;
+    @Mocked
+    IotHubSasTokenAuthenticationProvider mockSasTokenAuthentication;
+    @Mocked
+    IotHubSasTokenSoftwareAuthenticationProvider mockSasTokenSoftwareAuthentication;
+    @Mocked
+    IotHubSasTokenHardwareAuthenticationProvider mockSasTokenHardwareAuthentication;
+    @Mocked
+    IotHubX509AuthenticationProvider mockX509Authentication;
+    @Mocked
+    IotHubX509HardwareAuthenticationProvider mockX509HardwareAuthentication;
+    @Mocked
+    IotHubX509SoftwareAuthenticationProvider mockX509SoftwareAuthentication;
     @Mocked IotHubConnectionString mockIotHubConnectionString;
     @Mocked SecurityProvider mockSecurityProvider;
     @Mocked SecurityProviderX509 mockSecurityProviderX509;
@@ -410,7 +417,7 @@ public class DeviceClientConfigTest
 
     // Tests_SRS_DEVICECLIENTCONFIG_12_001: [The constructor shall set the authentication type to the given authType value.]
 
-    //Tests_SRS_DEVICECLIENTCONFIG_34_046: [If the provided `iotHubConnectionString` does not use x509 authentication, it shall be saved to a new IotHubSasTokenAuthentication object and the authentication type of this shall be set to SASToken.]
+    //Tests_SRS_DEVICECLIENTCONFIG_34_046: [If the provided `iotHubConnectionString` does not use x509 authentication, it shall be saved to a new IotHubSasTokenAuthenticationProvider object and the authentication type of this shall be set to SASToken.]
     @Test
     public void constructorSetsAuthType(@Mocked final IotHubConnectionString mockIotHubConnectionString) throws URISyntaxException, IOException
     {
@@ -481,7 +488,7 @@ public class DeviceClientConfigTest
         Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.X509_CERTIFICATE);
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_34_077: [This function shall return the saved IotHubX509Authentication object.]
+    // Tests_SRS_DEVICECLIENTCONFIG_34_077: [This function shall return the saved IotHubX509AuthenticationProvider object.]
     @Test
     public void getIotHubX509AuthenticationWorks()
     {
@@ -492,7 +499,7 @@ public class DeviceClientConfigTest
                 mockIotHubConnectionString.isUsingX509();
                 result = true;
 
-                new IotHubX509SoftwareAuthentication("", false, "", false);
+                new IotHubX509SoftwareAuthenticationProvider("", false, "", false);
                 result = mockX509SoftwareAuthentication;
             }
         };
@@ -501,13 +508,13 @@ public class DeviceClientConfigTest
         Deencapsulation.setField(config, "x509Authentication", mockX509Authentication);
 
         //act
-        IotHubX509Authentication auth = config.getX509Authentication();
+        IotHubX509AuthenticationProvider auth = config.getX509Authentication();
 
         //assert
         assertEquals(mockX509Authentication, auth);
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_34_078: [This function shall return the saved IotHubSasTokenAuthentication object.]
+    // Tests_SRS_DEVICECLIENTCONFIG_34_078: [This function shall return the saved IotHubSasTokenAuthenticationProvider object.]
     @Test
     public void getIotHubSasTokenAuthenticationWorks()
     {
@@ -524,7 +531,7 @@ public class DeviceClientConfigTest
         Deencapsulation.setField(config, "sasTokenAuthentication", mockSasTokenAuthentication);
 
         //act
-        IotHubSasTokenAuthentication auth = config.getSasTokenAuthentication();
+        IotHubSasTokenAuthenticationProvider auth = config.getSasTokenAuthentication();
 
         //assert
         assertEquals(mockSasTokenAuthentication, auth);
@@ -551,7 +558,7 @@ public class DeviceClientConfigTest
         assertEquals(mockIotHubConnectionString, actualConnString);
     }
 
-    //Tests_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security client is null, an IllegalArgumentException shall be thrown.]
+    //Tests_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security provider is null, an IllegalArgumentException shall be thrown.]
     @Test (expected = IllegalArgumentException.class)
     public void securityProviderConstructorThrowsForNullConnectionString()
     {
@@ -559,7 +566,7 @@ public class DeviceClientConfigTest
         Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class}, null, mockSecurityProvider);
     }
 
-    //Tests_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security client is null, an IllegalArgumentException shall be thrown.]
+    //Tests_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security provider is null, an IllegalArgumentException shall be thrown.]
     @Test (expected = IllegalArgumentException.class)
     public void securityProviderConstructorThrowsForNullSecurityProvider()
     {
@@ -567,7 +574,7 @@ public class DeviceClientConfigTest
         Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class}, mockIotHubConnectionString, null);
     }
 
-    //Tests_SRS_DEVICECLIENTCONFIG_34_082: [If the provided security client is a SecurityProviderX509 instance, this function shall set its auth type to X509 and create its IotHubX509Authentication instance using the security client's ssl context.]
+    //Tests_SRS_DEVICECLIENTCONFIG_34_082: [If the provided security provider is a SecurityProviderX509 instance, this function shall set its auth type to X509 and create its IotHubX509AuthenticationProvider instance using the security provider's ssl context.]
     @Test
     public void securityProviderConstructorWithX509Success() throws SecurityClientException
     {
@@ -578,7 +585,7 @@ public class DeviceClientConfigTest
                 mockSecurityProviderX509.getSSLContext();
                 result = mockSSLContext;
 
-                new IotHubX509HardwareAuthentication(mockSecurityProviderX509);
+                new IotHubX509HardwareAuthenticationProvider(mockSecurityProviderX509);
                 result = mockX509HardwareAuthentication;
             }
         };
@@ -592,16 +599,50 @@ public class DeviceClientConfigTest
         new Verifications()
         {
             {
-                new IotHubX509HardwareAuthentication(mockSecurityProviderX509);
+                new IotHubX509HardwareAuthenticationProvider(mockSecurityProviderX509);
                 times = 1;
             }
         };
     }
 
-    //Tests_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security client is a SecurityProviderTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthentication instance using the security client.]
+    //Tests_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security provider is a SecurityProviderTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthenticationProvider instance using the security provider.]
+    @Test
+    public void securityClientConstructorWithTPMSuccess() throws SecurityClientException, IOException
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockSecurityProviderSAS.getSSLContext();
+                result = mockSSLContext;
 
+                mockIotHubConnectionString.getHostName();
+                result = expectedHostname;
 
-    //Tests_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security client is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
+                mockIotHubConnectionString.getDeviceId();
+                result = expectedDeviceId;
+
+                new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedDeviceId, mockSecurityProviderSAS);
+                result = mockSasTokenHardwareAuthentication;
+            }
+        };
+
+        //act
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class}, mockIotHubConnectionString, mockSecurityProviderSAS);
+
+        //assert
+        DeviceClientConfig.AuthType actualAuthType = Deencapsulation.getField(config, "authenticationType");
+        assertEquals(DeviceClientConfig.AuthType.SAS_TOKEN, actualAuthType);
+        new Verifications()
+        {
+            {
+                new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedDeviceId, mockSecurityProviderSAS);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security provider is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
     @Test (expected = UnsupportedOperationException.class)
     public void securityProviderConstructorThrowsForUnknownSecurityProviderImplementation() throws SecurityClientException
     {

@@ -1,4 +1,4 @@
-# IotHubX509Authentication Requirements
+# IotHubX509SoftwareAuthenticationProvider Requirements
 
 ## Overview
 
@@ -9,9 +9,9 @@ This class holds all the authentication information needed for a device to conne
 ## Exposed API
 
 ```java
-public class IotHubX509Authentication
+public class IotHubX509SoftwareAuthenticationProvider
 {
-    public IotHubX509Authentication(String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate) throws IllegalArgumentException;
+    public IotHubX509SoftwareAuthentication(String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate) throws IllegalArgumentException;
     public SSLContext getSSLContext() throws IOException;
     
     @Override
@@ -22,9 +22,9 @@ public class IotHubX509Authentication
 }
 ```
 
-### IotHubX509Authentication
+### IotHubX509SoftwareAuthenticationProvider
 ```java
-public IotHubX509Authentication(IotHubConnectionString iotHubConnectionString, String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate);
+public IotHubX509SoftwareAuthenticationProvider(IotHubConnectionString iotHubConnectionString, String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate);
 ```
 
 **SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_002: [**This constructor will create and save an IotHubX509 object using the provided public key certificate and private key.**]**
@@ -35,9 +35,9 @@ public IotHubX509Authentication(IotHubConnectionString iotHubConnectionString, S
 public SSLContext getSSLContext();
 ```
 
-**SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_003: [**If this object's ssl context has not been generated yet, this function shall generate it from the saved security client.**]**
+**SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_003: [**If this object's ssl context has not been generated yet, this function shall generate it from the saved security provider.**]**
 
-**SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_004: [**If the security client throws a SecurityClientException while generating an SSLContext, this function shall throw an IOException.**]**
+**SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_004: [**If the security provider throws a SecurityClientException while generating an SSLContext, this function shall throw an IOException.**]**
 
 **SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_005: [**This function shall return the saved IotHubSSLContext.**]**
 

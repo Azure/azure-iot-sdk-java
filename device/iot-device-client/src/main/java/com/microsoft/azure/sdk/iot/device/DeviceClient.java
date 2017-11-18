@@ -228,11 +228,11 @@ public final class DeviceClient implements Closeable
     }
 
     /**
-     * Creates a device client that uses the provided security client for authentication.
+     * Creates a device client that uses the provided security provider for authentication.
      *
      * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
      * @param deviceId The id for the device to use
-     * @param securityProvider The security client for the device
+     * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
      * @return The created device client instance
      * @throws URISyntaxException If the provided connString could not be parsed.
@@ -244,11 +244,11 @@ public final class DeviceClient implements Closeable
     }
 
     /**
-     * Creates a device client that uses the provided security client for authentication.
+     * Creates a device client that uses the provided security provider for authentication.
      *
      * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
      * @param deviceId The id for the device to use
-     * @param securityProvider The security client for the device
+     * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
      * @return The created device client instance
      * @throws URISyntaxException If the provided connString could not be parsed.
@@ -263,7 +263,7 @@ public final class DeviceClient implements Closeable
         }
 
         //Codes_SRS_DEVICECLIENT_34_065: [The provided uri and device id will be used to create an iotHubConnectionString that will be saved in config.]
-        //Codes_SRS_DEVICECLIENT_34_066: [The provided security client will be saved in config.]
+        //Codes_SRS_DEVICECLIENT_34_066: [The provided security provider will be saved in config.]
         IotHubConnectionString connectionString = new IotHubConnectionString(uri, deviceId, null, null);
         this.config = new DeviceClientConfig(connectionString, securityProvider);
 

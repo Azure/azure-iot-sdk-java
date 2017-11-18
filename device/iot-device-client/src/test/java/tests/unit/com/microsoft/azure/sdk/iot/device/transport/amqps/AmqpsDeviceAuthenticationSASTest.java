@@ -2,7 +2,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.MessageType;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import mockit.Deencapsulation;
 import mockit.Mocked;
@@ -46,7 +46,7 @@ public class AmqpsDeviceAuthenticationSASTest
     DeviceClientConfig mockDeviceClientConfig;
 
     @Mocked
-    IotHubSasTokenAuthentication mockIotHubSasTokenAuthentication;
+    IotHubSasTokenAuthenticationProvider mockIotHubSasTokenAuthenticationProvider;
 
     @Mocked
     AmqpsDeviceAuthentication mockamqpsDeviceAuthentication;
@@ -152,8 +152,8 @@ public class AmqpsDeviceAuthenticationSASTest
                 mockDeviceClientConfig.getIotHubName();
                 result = "iotHubName";
                 mockDeviceClientConfig.getSasTokenAuthentication();
-                result = mockIotHubSasTokenAuthentication;
-                mockIotHubSasTokenAuthentication.getCurrentSasToken();
+                result = mockIotHubSasTokenAuthenticationProvider;
+                mockIotHubSasTokenAuthenticationProvider.getCurrentSasToken();
                 result = "sasToken";
                 Deencapsulation.invoke(mockamqpsDeviceAuthentication, "makeDomain", mockSSLContext);
                 result = mockSslDomain;

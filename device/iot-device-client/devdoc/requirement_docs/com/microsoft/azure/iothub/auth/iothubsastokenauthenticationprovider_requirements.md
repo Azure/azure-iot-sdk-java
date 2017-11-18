@@ -1,4 +1,4 @@
-# IotHubSasTokenAuthentication Requirements
+# IotHubSasTokenAuthenticationProvider Requirements
 
 ## Overview
 
@@ -9,7 +9,7 @@ This class holds all the authentication information needed for a device to conne
 ## Exposed API
 
 ```java
-public class IotHubSasTokenAuthentication
+public class IotHubSasTokenAuthenticationProvider
 {
     public abstract void setPathToIotHubTrustedCert(String pathToCertificate);
     public abstract void setIotHubTrustedCert(String certificate);
@@ -18,9 +18,9 @@ public class IotHubSasTokenAuthentication
 
     public String getCurrentSasToken();
     public void setTokenValidSecs(long tokenValidSecs);
-    Long getExpiryTimeInSeconds();
     public boolean isRenewalNecessary();
     public long getTokenValidSecs();
+    long getExpiryTimeInSeconds();
 }
 ```
 
@@ -59,8 +59,7 @@ public boolean isRenewalNecessary();
 
 ### getExpiryTimeInSeconds
 ```java
-Long getExpiryTimeInSeconds();
+long getExpiryTimeInSeconds();
 ```
 
 **SRS_IOTHUBSASTOKENAUTHENTICATION_34_001: [**This function shall return the number of seconds from the UNIX Epoch that a sas token constructed now would expire.**]**
-

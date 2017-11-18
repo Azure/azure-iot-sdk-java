@@ -7,17 +7,21 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.OperationRegistrationStatusParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientAuthenticationException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
 
 import java.util.concurrent.*;
 
@@ -98,20 +102,20 @@ public class ProvisioningTask implements Callable
     }
 
     private ResponseParser invokeRegister() throws InterruptedException, ExecutionException, TimeoutException,
-                                                   ProvisioningDeviceClientException
+            ProvisioningDeviceClientException
     {
         RegisterTask registerTask = new RegisterTask(this.provisioningDeviceClientConfig, securityProvider,
-                                                     provisioningDeviceClientContract, authorization);
+                provisioningDeviceClientContract, authorization);
         FutureTask<ResponseParser> futureRegisterTask = new FutureTask<ResponseParser>(registerTask);
         executor.submit(futureRegisterTask);
         ResponseParser registrationResponseParser =  futureRegisterTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION,
-                                                                            TimeUnit.MILLISECONDS);
+                TimeUnit.MILLISECONDS);
 
         if (registrationResponseParser == null)
         {
             this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;
             throw new ProvisioningDeviceClientAuthenticationException("Registration response could not be retrieved, " +
-                                                                              "authentication failure");
+                    "authentication failure");
         }
 
         ProvisioningStatus status = ProvisioningStatus.fromString(registrationResponseParser.getStatus());
@@ -119,25 +123,25 @@ public class ProvisioningTask implements Callable
         {
             this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;
             throw new ProvisioningDeviceClientAuthenticationException("Received null status for registration, " +
-                                                                              "authentication failure");
+                    "authentication failure");
         }
 
         if (registrationResponseParser.getOperationId() == null)
         {
             throw new ProvisioningDeviceClientAuthenticationException("operation id could not be retrieved, " +
-                                                                              "authentication failure");
+                    "authentication failure");
         }
 
         return registrationResponseParser;
     }
 
     private ResponseParser invokeStatus(String operationId) throws TimeoutException, InterruptedException, ExecutionException,
-                                                                   ProvisioningDeviceClientException
+            ProvisioningDeviceClientException
     {
         // To-Do : Add appropriate wait time retrieved from Service
         Thread.sleep(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE);
         StatusTask statusTask = new StatusTask(securityProvider, provisioningDeviceClientContract, operationId,
-                                               this.authorization);
+                this.authorization);
         FutureTask<ResponseParser> futureStatusTask = new FutureTask<ResponseParser>(statusTask);
         executor.submit(futureStatusTask);
         ResponseParser statusResponseParser =  futureStatusTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
@@ -146,27 +150,27 @@ public class ProvisioningTask implements Callable
         {
             this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;
             throw new ProvisioningDeviceClientAuthenticationException("Status response could not be retrieved, " +
-                                                                              "authentication failure");
+                    "authentication failure");
         }
 
-         if (statusResponseParser.getStatus() == null)
+        if (statusResponseParser.getStatus() == null)
         {
             this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;
             throw new ProvisioningDeviceClientAuthenticationException("Status could not be retrieved, " +
-                                                                              "authentication failure");
+                    "authentication failure");
         }
 
         if (ProvisioningStatus.fromString(statusResponseParser.getStatus()) == null)
         {
             this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;
             throw new ProvisioningDeviceClientAuthenticationException("Status could not be retrieved, " +
-                                                                              "authentication failure");
+                    "authentication failure");
         }
         return statusResponseParser;
     }
 
     private void executeStateMachineForStatus(ResponseParser registrationResponseParser)
-            throws TimeoutException, InterruptedException, ExecutionException, ProvisioningDeviceClientException
+            throws TimeoutException, InterruptedException, ExecutionException, ProvisioningDeviceClientException, SecurityClientException
     {
         boolean isContinue = false;
         ResponseParser statusResponseParser = registrationResponseParser;
@@ -190,9 +194,37 @@ public class ProvisioningTask implements Callable
                     break;
                 case ASSIGNED:
                     this.dpsStatus = PROVISIONING_DEVICE_STATUS_ASSIGNED;
+                    OperationRegistrationStatusParser registrationStatus = statusResponseParser.getRegistrationStatus();
+
+                    if (registrationStatus == null
+                            || registrationStatus.getAssignedHub() == null
+                            || registrationStatus.getAssignedHub().isEmpty()
+                            || registrationStatus.getDeviceId() == null
+                            || registrationStatus.getDeviceId().isEmpty())
+                    {
+                        //Codes_SRS_ProvisioningTask_34_018: [Upon reaching the terminal state ASSIGNED, if the registration status json is missing an assigned hub or device id, this function shall throw a ProvisioningDeviceClientException.]
+                        throw new ProvisioningDeviceClientException("Could not retrieve Assigned Hub or Device ID and status changed to Assigned");
+                    }
+
                     RegistrationResult registrationInfo = new RegistrationResult(
-                            statusResponseParser.getRegistrationStatus().getAssignedHub(),
-                            statusResponseParser.getRegistrationStatus().getDeviceId(), PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                            registrationStatus.getAssignedHub(),
+                            registrationStatus.getDeviceId(), PROVISIONING_DEVICE_STATUS_ASSIGNED);
+
+                    if (this.securityProvider instanceof SecurityProviderTpm)
+                    {
+                        if (registrationStatus.getTpm() == null
+                                || registrationStatus.getTpm().getAuthenticationKey() == null
+                                || registrationStatus.getTpm().getAuthenticationKey().isEmpty())
+                        {
+                            //Codes_SRS_ProvisioningTask_34_017: [Upon reaching the terminal state ASSIGNED, if the saved security client is an instance of SecurityClientTpm and if the registration status json does not contain an authentication key, this function shall throw a ProvisioningDeviceClientException.]
+                            throw new ProvisioningDeviceClientException("Could not retrieve Authentication key when status was assigned");
+                        }
+
+                        //Codes_SRS_ProvisioningTask_34_016: [Upon reaching the terminal state ASSIGNED, if the saved security client is an instance of SecurityClientTpm, the security client shall decrypt and store the authentication key from the statusResponseParser.]
+                        String authenticationKey = registrationStatus.getTpm().getAuthenticationKey();
+                        ((SecurityProviderTpm) this.securityProvider).activateIdentityKey(Base64.decodeBase64Local(authenticationKey.getBytes()));
+                    }
+
                     this.invokeRegistrationCallback(registrationInfo, null);
                     isContinue = false;
                     break;
@@ -255,7 +287,7 @@ public class ProvisioningTask implements Callable
             this.executeStateMachineForStatus(registrationResponseParser);
             this.close();
         }
-        catch (ExecutionException | TimeoutException | ProvisioningDeviceClientException e)
+        catch (ExecutionException | TimeoutException | ProvisioningDeviceClientException | SecurityClientException e)
         {
             //SRS_ProvisioningTask_25_006: [ This method shall invoke the status callback, if any of the task fail or throw any exception. ]
             this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;

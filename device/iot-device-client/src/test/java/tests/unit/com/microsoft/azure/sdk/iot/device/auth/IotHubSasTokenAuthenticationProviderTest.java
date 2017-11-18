@@ -7,9 +7,8 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import mockit.Deencapsulation;
-import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import org.junit.Test;
@@ -24,11 +23,11 @@ import java.security.cert.CertificateException;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for IotHubSasTokenAuthentication.java
+ * Unit tests for IotHubSasTokenAuthenticationProvider.java
  * Methods: 100%
  * Lines: 100%
  */
-public class IotHubSasTokenAuthenticationTest
+public class IotHubSasTokenAuthenticationProviderTest
 {
     @Mocked
     SSLContext mockSSLContext;
@@ -47,7 +46,7 @@ public class IotHubSasTokenAuthenticationTest
     private static final long MILLISECONDS_PER_SECOND = 1000L;
     private static final long MINIMUM_EXPIRATION_TIME_OFFSET = 1L;
 
-    private class mockIotHubSasTokenAuthenticationImplementation extends IotHubSasTokenAuthentication
+    private class mockIotHubSasTokenAuthenticationImplementation extends IotHubSasTokenAuthenticationProvider
     {
         public mockIotHubSasTokenAuthenticationImplementation()
         {
@@ -85,7 +84,7 @@ public class IotHubSasTokenAuthenticationTest
     {
         //arrange
         long newTokenValidSecs = 5000L;
-        IotHubSasTokenAuthentication sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
+        IotHubSasTokenAuthenticationProvider sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
         sasAuth.setTokenValidSecs(newTokenValidSecs);
 
         //act
@@ -102,7 +101,7 @@ public class IotHubSasTokenAuthenticationTest
     {
         //arrange
         long newTokenValidSecs = 5000L;
-        IotHubSasTokenAuthentication sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
+        IotHubSasTokenAuthenticationProvider sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
 
         //act
         sasAuth.setTokenValidSecs(newTokenValidSecs);
@@ -125,7 +124,7 @@ public class IotHubSasTokenAuthenticationTest
             }
         };
 
-        IotHubSasTokenAuthentication sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
+        IotHubSasTokenAuthenticationProvider sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
 
         //act
         String actualCurrentSasToken = sasAuth.getCurrentSasToken();
@@ -147,7 +146,7 @@ public class IotHubSasTokenAuthenticationTest
             }
         };
 
-        IotHubSasTokenAuthentication sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
+        IotHubSasTokenAuthenticationProvider sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
         Deencapsulation.setField(sasAuth, "sasToken", mockSasToken);
 
         //act
@@ -170,7 +169,7 @@ public class IotHubSasTokenAuthenticationTest
             }
         };
 
-        IotHubSasTokenAuthentication sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
+        IotHubSasTokenAuthenticationProvider sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
         Deencapsulation.setField(sasAuth, "sasToken", mockSasToken);
 
         //act
@@ -194,7 +193,7 @@ public class IotHubSasTokenAuthenticationTest
             }
         };
 
-        IotHubSasTokenAuthentication sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
+        IotHubSasTokenAuthenticationProvider sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
 
         //act
         long actualExpiryTime =  Deencapsulation.invoke(sasAuth, "getExpiryTimeInSeconds");

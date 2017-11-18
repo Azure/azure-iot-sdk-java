@@ -13,7 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
-public abstract class IotHubX509Authentication
+public abstract class IotHubX509AuthenticationProvider
 {
     IotHubSSLContext iotHubSSLContext;
 

@@ -30,6 +30,11 @@
             <artifactId>provisioning-device-client</artifactId>
             <version>0.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-device-client</artifactId>
+            <version>1.5.37</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

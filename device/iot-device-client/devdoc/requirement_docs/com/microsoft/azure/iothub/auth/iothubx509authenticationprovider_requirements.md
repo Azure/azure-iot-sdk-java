@@ -1,4 +1,4 @@
-# IotHubX509Authentication Requirements
+# IotHubX509AuthenticationProvider Requirements
 
 ## Overview
 
@@ -9,7 +9,7 @@ This class holds all the authentication information needed for a device to conne
 ## Exposed API
 
 ```java
-public class IotHubX509Authentication
+public class IotHubX509AuthenticationProvider
 {
     public abstract SSLContext getSSLContext() throws IOException;
     public abstract void setPathToIotHubTrustedCert(String pathToCertificate) throws IOException;

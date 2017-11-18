@@ -1,4 +1,4 @@
-# IotHubSasTokenSoftwareAuthentication Requirements
+# IotHubSasTokenSoftwareAuthenticationProvider Requirements
 
 ## Overview
 
@@ -9,9 +9,9 @@ This class holds all the authentication information needed for a device to conne
 ## Exposed API
 
 ```java
-public class IotHubSasTokenAuthentication
+public class IotHubSasTokenAuthenticationProvider
 {
-    public IotHubSasTokenSoftwareAuthentication(String hostname, String deviceId, String deviceKey, String sharedAccessToken) throws SecurityException;
+    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String deviceId, String deviceKey, String sharedAccessToken) throws SecurityException;
 
     public boolean isRenewalNecessary();
     public String getRenewedSasToken() throws IOException;
@@ -23,9 +23,9 @@ public class IotHubSasTokenAuthentication
 }
 ```
 
-### IotHubSasTokenAuthentication
+### IotHubSasTokenAuthenticationProvider
 ```java
-public IotHubSasTokenSoftwareAuthentication(String hostname, String deviceId, String deviceKey, String sharedAccessToken) throws SecurityException;
+public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String deviceId, String deviceKey, String sharedAccessToken) throws SecurityException;
 ```
 
 **SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_002: [**This constructor shall save the provided hostname, device id, deviceKey, and sharedAccessToken.**]**

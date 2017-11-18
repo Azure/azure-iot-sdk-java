@@ -4,7 +4,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.State;
@@ -87,7 +87,7 @@ public class AmqpsTransportTest
     @Mocked
     DeviceClient mockDeviceClient;
     @Mocked
-    IotHubSasTokenAuthentication mockSasTokenAuthentication;
+    IotHubSasTokenAuthenticationProvider mockSasTokenAuthentication;
 
     // Tests_SRS_AMQPSTRANSPORT_15_001: [The constructor shall save the input parameters into instance variables.]
     @Test

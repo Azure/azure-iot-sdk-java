@@ -1,14 +1,12 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
-import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
-import org.apache.qpid.proton.engine.Delivery;
 import org.apache.qpid.proton.engine.Link;
 import org.apache.qpid.proton.engine.Session;
 import org.junit.Test;
@@ -85,7 +83,7 @@ public class AmqpsSessionDeviceOperationTest
     AmqpsConvertFromProtonReturnValue mockAmqpsConvertFromProtonReturnValue;
 
     @Mocked
-    IotHubSasTokenAuthentication mockIotHubSasTokenAuthentication;
+    IotHubSasTokenAuthenticationProvider mockIotHubSasTokenAuthenticationProvider;
 
     @Mocked
     Executors mockExecutors;
@@ -174,8 +172,8 @@ public class AmqpsSessionDeviceOperationTest
                 mockDeviceClientConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.CBS;
                 mockDeviceClientConfig.getSasTokenAuthentication();
-                result = mockIotHubSasTokenAuthentication;
-                mockIotHubSasTokenAuthentication.getTokenValidSecs();
+                result = mockIotHubSasTokenAuthenticationProvider;
+                mockIotHubSasTokenAuthenticationProvider.getTokenValidSecs();
                 result = tokenValidSecs;
 
                 new AmqpsDeviceAuthenticationCBSTokenRenewalTask((AmqpsSessionDeviceOperation)any);
@@ -351,8 +349,8 @@ public class AmqpsSessionDeviceOperationTest
                 mockDeviceClientConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.CBS;
                 mockDeviceClientConfig.getSasTokenAuthentication();
-                result = mockIotHubSasTokenAuthentication;
-                mockIotHubSasTokenAuthentication.getTokenValidSecs();
+                result = mockIotHubSasTokenAuthenticationProvider;
+                mockIotHubSasTokenAuthenticationProvider.getTokenValidSecs();
                 result = tokenValidSecs;
             }
         };
@@ -395,8 +393,8 @@ public class AmqpsSessionDeviceOperationTest
                 mockDeviceClientConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.CBS;
                 mockDeviceClientConfig.getSasTokenAuthentication();
-                result = mockIotHubSasTokenAuthentication;
-                mockIotHubSasTokenAuthentication.getTokenValidSecs();
+                result = mockIotHubSasTokenAuthenticationProvider;
+                mockIotHubSasTokenAuthenticationProvider.getTokenValidSecs();
                 result = -1;
             }
         };

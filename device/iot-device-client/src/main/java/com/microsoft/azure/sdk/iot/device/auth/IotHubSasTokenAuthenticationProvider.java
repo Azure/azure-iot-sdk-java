@@ -9,7 +9,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public abstract class IotHubSasTokenAuthentication
+public abstract class IotHubSasTokenAuthenticationProvider
 {
     /**
      * The number of seconds after which the generated SAS token for a message
@@ -57,7 +57,7 @@ public abstract class IotHubSasTokenAuthentication
         this.tokenValidSecs = tokenValidSecs;
     }
 
-    Long getExpiryTimeInSeconds()
+    long getExpiryTimeInSeconds()
     {
         //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_001: [This function shall return the number of seconds from the UNIX Epoch that a sas token constructed now would expire.]
         return (System.currentTimeMillis() / MILLISECONDS_PER_SECOND) + this.tokenValidSecs + MINIMUM_EXPIRATION_TIME_OFFSET;
