@@ -340,12 +340,130 @@ Start adding the following to your main.
 
 18. Save and close the `app.java` file.
 19. Build and run the **App** as you did in the item *8*. Check the results on your console.
-20. Upon successful completion of the registration you can now close the TPM simulator.
+20. Upon successful completion of the registration you can now close the TPM simulator if you dont want to proceed to How to connect to your provisioned device, step by step. If not keep the simulator running until end.
+
+
+## How to connect to your provisioned device, step by step
+
+At this point in the tutorial, you have successfully managed to provision a device to an IoT Hub. Now, you will learn how to connect to that device and have it start sending telemetry.
+This part of the tutorial builds on top of the code you wrote in the previous section.
+
+1. Add a dependency from your sample to the Java SDK's Device Client package.
+	1. In your current project, find the pom.xml file that you edited earlier. Open that file in your favorite text editor.
+	2. In that pom.xml, you will find a section that lists the dependencies of your project. You will need to copy the dependency below and insert it into that section.
+
+    ```
+    <dependencies>
+		...
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-device-client</artifactId>
+            <version>1.5.37</version>
+        </dependency>
+		...
+	</dependencies>
+     ``` 
+	 
+	 Your pom.xml's dependencies should look like this afterwards:
+	 
+	 ```
+	 <dependencies>
+	    <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-device-client</artifactId>
+            <version>1.5.37</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
+            <artifactId>provisioning-device-client</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
+            <artifactId>tpm-client-emulator</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+    </dependencies>
+	 ```
+	 
+2. Add logic to connect to your provisioned device and have it send a single message to its hub.
+	1. Open up your `app.java` file. Near the top, after the `package com.mycompany.app;` statement, add one more import statement
+	
+	```java
+		import com.microsoft.azure.sdk.iot.device.*;
+	```
+	
+	2. From the previous section, you added some code to your `app.java` file that contained the line:
+	
+	```java
+	// connect to iothub
+	```
+	
+	Replace that comment with the following code:
+	
+    ```java
+    String iotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
+    String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
+    DeviceClient deviceClient = null;
+    try
+    {
+        deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientTPMEmulator, IotHubClientProtocol.MQTT);
+        deviceClient.open();
+        Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
+        IotHubEventCallback callback = new IotHubEventCallback()
+        {
+            @Override
+            public void execute(IotHubStatusCode responseStatus, Object callbackContext)
+            {
+                System.out.println("Message received! Response status: " + responseStatus);
+            }
+        };
+                        
+        System.out.println("Sending message from provisioned device...");
+        deviceClient.sendEventAsync(messageToSendFromDeviceToHub, callback, null);
+    }
+    catch (IOException e)
+    {
+        System.out.println("Device client threw an exception: " + e.getMessage());
+        if (deviceClient != null)
+        {
+            deviceClient.closeNow();
+        }
+    }	
+    ```
+	
+	Note that, when creating the device client instance, you can change which protocol the device client will use for communication. You have the following options:
+	
+    ```java
+    IotHubClientProtocol.MQTT
+    IotHubClientProtocol.HTTPS
+    IotHubClientProtocol.AMQPS
+    IotHubClientProtocol.MQTT_WS
+    IotHubClientProtocol.AMQPS_WS
+    ```
+		 
+4. Save and close the `app.java` file.
+5. Make sure you start the simulator still running. Then, build and run the **App** as you did in the item *8* in the previous section. Check the results on your console.
+6. The console should yield an output like:
+```
+	Starting...
+	Beginning setup.
+	Waiting for Provisioning Service to register
+	Waiting for Provisioning Service to register
+	Waiting for Provisioning Service to register
+	Waiting for Provisioning Service to register
+	IotHUb Uri : <hostName>.azure-devices.net
+	Device ID : <deviceId>
+	Sending message from provisioned device...
+	Message received! Response status: OK_EMPTY	
+```
+
+7. Now you can close the simulator when you are done running your sample.
 
 
 [azure-portal]: www.portal.azure.com
 [povisioning-device-client]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-device-client
 [povisioning-service-client]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-service-client
-[povisioning-single-enrollment-sample]:
-[povisioning-group-enrollment-sample]:
+[povisioning-single-enrollment-sample]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-samples/service-enrollment-sample
+[povisioning-group-enrollment-sample]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-samples/service-enrollment-group-sample
 [tpm-simulator]:(../../provisioning-tools/tpm-simulator/Simulator.exe)
