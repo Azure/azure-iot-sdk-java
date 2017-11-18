@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a quick tutorial with the steps to create, get, query, and delete an Enrollment in the Microsoft Azure IoT Hub 
+This is a quick tutorial with the steps to create, get, query, and delete an individualEnrollment in the Microsoft Azure IoT Hub 
 Device Provisioning Service using the [ProvisioningServiceClient](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client)
 on the java SDK.
 
@@ -92,7 +92,7 @@ Note that the samples for Windows and Linux use Maven.
     ```
 6. Navigate to the folder containing the executable JAR file for the sample and run the sample as follows:
 
-    The executable JAR file for create a single enrollment can be found at:
+    The executable JAR file for create a IndividualEnrollment can be found at:
     ```
     {sample root}/target/service-enrollment-sample-{version}-with-deps.jar
     ```
@@ -202,7 +202,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
     java -jar ./service-enrollment-sample-1.0-SNAPSHOT-with-deps.jar
     ```
     4. As a result, it should print `Hello world!` in the screen.
-9. Now, you are ready to write the provisioning code to create the enrollment. Using a text editor, open the 
+9. Now, you are ready to write the provisioning code to create the IndividualEnrollment. Using a text editor, open the 
     `service-enrollment-sample\src\main\java\com\mycompany\app\App.java` file.
 10. Add the following import statements at the beginning of the file, after the `package com.mycompany.app;`:
     ```java
@@ -259,7 +259,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
                 "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
                 "-----END CERTIFICATE-----\n";
         ```
-15. Optionally, you can provide some extra parameters to your enrollment, 
+15. Optionally, you can provide some extra parameters to your individualEnrollment, 
     ```java
     // Optional parameters
     private static final String IOTHUB_HOST_NAME = "[Host name].azure-devices.net";
@@ -279,8 +279,8 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
      ProvisioningServiceClient provisioningServiceClient =
              ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
     ```
-18. After that, you can create a new individual enrollment. 
-    1. Every enrollment needs a unique name, called **RegistrationId**, and an **[Attestation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Attestation)**
+18. After that, you can create a new IndividualEnrollment. 
+    1. Every individualEnrollment needs a unique name, called **RegistrationId**, and an **[Attestation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Attestation)**
         that can be [TpmAttestation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Tpm_Attestation)
         or [X509Attestation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._X509_Attestation).
         For this sample, we will use TPM.
@@ -290,17 +290,17 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
         it from the following code.
         ```java
         // ******************************** Create a new individual enrollment config **********************************
-        System.out.println("\nCreate a new enrollment...");
+        System.out.println("\nCreate a new individualEnrollment...");
         Attestation attestation = new TpmAttestation(TPM_ENDORSEMENT_KEY);
-        Enrollment enrollment =
-                new Enrollment(
+        IndividualEnrollment individualEnrollment =
+                new IndividualEnrollment(
                         REGISTRATION_ID,
                         attestation);
 
         // The following parameters are optional. Remove it if you don't need.
-        enrollment.setDeviceId(DEVICE_ID);
-        enrollment.setIotHubHostName(IOTHUB_HOST_NAME);
-        enrollment.setProvisioningStatus(PROVISIONING_STATUS);
+        individualEnrollment.setDeviceId(DEVICE_ID);
+        individualEnrollment.setIotHubHostName(IOTHUB_HOST_NAME);
+        individualEnrollment.setProvisioningStatus(PROVISIONING_STATUS);
         ```
     3. For **X509**, replace the Attestation mechanism in the preview code, to work with X509 client certificate 
         instead of TPM.  
@@ -313,13 +313,13 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
         Attestation attestation = X509Attestation.createFromClientCertificates(PUBLIC_KEY_CERTIFICATE_STRING);
         ```
     4. Now, call the [createOrUpdateIndividualEnrollment](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.createorupdateindividualenrollment#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_createOrUpdateIndividualEnrollment_Enrollment_) 
-        on the ProvisioningServiceClient to create a new individual enrollment.
+        on the ProvisioningServiceClient to create a new IndividualEnrollment.
         ```java
-        // ************************************ Create the individual enrollment *************************************
-        System.out.println("\nAdd new enrollment...");
-        Enrollment enrollmentResult =  provisioningServiceClient.createOrUpdateIndividualEnrollment(enrollment);
-        System.out.println("\nEnrollment created with success...");
-        System.out.println(enrollmentResult.toString());
+        // ************************************ Create the individual individualEnrollment *************************************
+        System.out.println("\nAdd new individualEnrollment...");
+        IndividualEnrollment individualEnrollmentResult =  provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
+        System.out.println("\nIndividualEnrollment created with success...");
+        System.out.println(individualEnrollmentResult.toString());
         ```
 19. Save and close the `app.java` file.
 20. Build and run the **App** as you did in the item *8*.
@@ -327,11 +327,11 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
         ```
         Beginning my sample for the Provisioning Service Client!
     
-        Create new enrollment config...
+        Create new individualEnrollment config...
     
-        Add new enrollment...
+        Add new individualEnrollment...
         
-        Enrollment created with success...
+        IndividualEnrollment created with success...
         {
           "registrationId": "myRegistrationId",
           "deviceId": "myJavaDevice",
@@ -346,25 +346,25 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
           "etag": "\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\""
         }
         ```
-    2. Check in the Azure Portal if your individual enrollment was created with success.
-    3. Delete the Enrollment using the Portal, or create a new certificate or endorsement key for the next test.
-21. Check the created enrollment information in your **App**. You can consult using 2 ProvisioningServiceClient APIs, 
+    2. Check in the Azure Portal if your IndividualEnrollment was created with success.
+    3. Delete the IndividualEnrollment using the Portal, or create a new certificate or endorsement key for the next test.
+21. Check the created individualEnrollment information in your **App**. You can consult using 2 ProvisioningServiceClient APIs, 
     `get` and `query`.
     1. Use the [getIndividualEnrollment](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.getindividualenrollment#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_getIndividualEnrollment_String_) 
-        to **get** an specific enrollment using the registrationId. Add the following code and check the result.
+        to **get** an specific individualEnrollment using the registrationId. Add the following code and check the result.
         ```java
-        // ************************************* Get info of individual enrollment *************************************
-        System.out.println("\nGet the enrollment information...");
-        Enrollment getResult = provisioningServiceClient.getIndividualEnrollment(registrationId);
+        // ************************************* Get info of individual individualEnrollment *************************************
+        System.out.println("\nGet the individualEnrollment information...");
+        IndividualEnrollment getResult = provisioningServiceClient.getIndividualEnrollment(registrationId);
         System.out.println(getResult.toString());
         ```
     2. Use the [createIndividualEnrollmentQuery](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.createindividualenrollmentquery#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_createIndividualEnrollmentQuery_QuerySpecification_) 
         to create a **query** for the individual enrollments in the provisioning service. The [QuerySpecificationBuilder](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification_Builder)
         will help you to create a correct [QuerySpecification](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification).
-        For this sample, we will query all **`"*"`** enrollments is the provisioning service.
+        For this sample, we will query all **`"*"`** individualEnrollments is the provisioning service.
         ```java
-        // ************************************ Query info of individual enrollment ************************************
-        System.out.println("\nCreate a query for enrollments...");
+        // ************************************ Query info of individual individualEnrollment ************************************
+        System.out.println("\nCreate a query for individualEnrollments...");
         QuerySpecification querySpecification = 
                new QuerySpecificationBuilder("*", QuerySpecificationBuilder.FromType.ENROLLMENTS)
                        .createSqlQuery();
@@ -373,18 +373,18 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
         while(query.hasNext())
         {
             System.out.println();
-            System.out.println("Query the next enrollments...");
+            System.out.println("Query the next individualEnrollments...");
             QueryResult queryResult = query.next();
             System.out.println(queryResult.toString());
         }    
         ```
-22. Delete the enrollment from the provisioning service. You can delete the enrollment adding the following code that 
+22. Delete the individualEnrollment from the provisioning service. You can delete the individualEnrollment adding the following code that 
     invokes the API [deleteIndividualEnrollment](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.deleteindividualenrollment#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_deleteIndividualEnrollment_String_):
     ```java
-    // *********************************** Delete info of individual enrollment ************************************
-    System.out.println("\nDelete the enrollment...");
+    // *********************************** Delete info of individual individualEnrollment ************************************
+    System.out.println("\nDelete the individualEnrollment...");
     provisioningServiceClient.deleteIndividualEnrollment(registrationId);
     ```
 23. Save and close the `app.java` file.
 24. Build and run the **App** as you did in the item *8*. Check the results on your console. Note that you will **not** 
-    see any new enrollment in the Azure Portal, because we are deleting it in the item *19*.
+    see any new individualEnrollment in the Azure Portal, because we are deleting it in the item *19*.

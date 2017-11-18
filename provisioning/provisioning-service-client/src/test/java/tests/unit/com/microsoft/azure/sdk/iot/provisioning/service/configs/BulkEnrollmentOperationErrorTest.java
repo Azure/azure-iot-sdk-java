@@ -5,7 +5,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceRegistrationOperationError;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.BulkEnrollmentOperationError;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
  * Unit tests for Device Provisioning Service Device Registration Operation Error
  * 100% methods, 100% lines covered
  */
-public class DeviceRegistrationOperationErrorTest
+public class BulkEnrollmentOperationErrorTest
 {
     private static final String VALID_REGISTRATION_ID_1 = "8be9cd0e-8934-4991-9cbf-cc3b6c7ac647";
     private static final Integer VALID_ERROR_CODE_1 = 201;
@@ -27,10 +27,10 @@ public class DeviceRegistrationOperationErrorTest
                     "        \"errorStatus\": \"" + VALID_ERROR_STATUS_1 + "\"\n" +
                     "      }\n";
 
-    DeviceRegistrationOperationError makeDeviceRegistrationOperationError(String json)
+    BulkEnrollmentOperationError makeBulkEnrollmentOperationError(String json)
     {
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
-        DeviceRegistrationOperationError result = gson.fromJson(json, DeviceRegistrationOperationError.class);
+        BulkEnrollmentOperationError result = gson.fromJson(json, BulkEnrollmentOperationError.class);
         return result;
     }
 
@@ -39,10 +39,10 @@ public class DeviceRegistrationOperationErrorTest
     public void getRegistrationIdReturnsRegistrationId()
     {
         // arrange
-        DeviceRegistrationOperationError deviceRegistrationOperationError = makeDeviceRegistrationOperationError(VALID_ERROR_JSON_1);
+        BulkEnrollmentOperationError bulkEnrollmentOperationError = makeBulkEnrollmentOperationError(VALID_ERROR_JSON_1);
 
         // act
-        String result = deviceRegistrationOperationError.getRegistrationId();
+        String result = bulkEnrollmentOperationError.getRegistrationId();
 
         // assert
         assertEquals(VALID_REGISTRATION_ID_1, result);
@@ -53,10 +53,10 @@ public class DeviceRegistrationOperationErrorTest
     public void getErrorCodeReturnsErrorCode()
     {
         // arrange
-        DeviceRegistrationOperationError deviceRegistrationOperationError = makeDeviceRegistrationOperationError(VALID_ERROR_JSON_1);
+        BulkEnrollmentOperationError bulkEnrollmentOperationError = makeBulkEnrollmentOperationError(VALID_ERROR_JSON_1);
 
         // act
-        Integer result = deviceRegistrationOperationError.getErrorCode();
+        Integer result = bulkEnrollmentOperationError.getErrorCode();
 
         // assert
         assertEquals(VALID_ERROR_CODE_1, result);
@@ -67,10 +67,10 @@ public class DeviceRegistrationOperationErrorTest
     public void getErrorStatusReturnsErrorStatus()
     {
         // arrange
-        DeviceRegistrationOperationError deviceRegistrationOperationError = makeDeviceRegistrationOperationError(VALID_ERROR_JSON_1);
+        BulkEnrollmentOperationError bulkEnrollmentOperationError = makeBulkEnrollmentOperationError(VALID_ERROR_JSON_1);
 
         // act
-        String result = deviceRegistrationOperationError.getErrorStatus();
+        String result = bulkEnrollmentOperationError.getErrorStatus();
 
         // assert
         assertEquals(VALID_ERROR_STATUS_1, result);
@@ -86,10 +86,10 @@ public class DeviceRegistrationOperationErrorTest
                 "        \"errorCode\": " + VALID_ERROR_CODE_1 + ",\n" +
                 "        \"errorStatus\": \"" + VALID_ERROR_STATUS_1 + "\"\n" +
                 "      }\n";
-        DeviceRegistrationOperationError deviceRegistrationOperationError = makeDeviceRegistrationOperationError(json);
+        BulkEnrollmentOperationError bulkEnrollmentOperationError = makeBulkEnrollmentOperationError(json);
 
         // act
-        Deencapsulation.invoke(deviceRegistrationOperationError, "validateError");
+        Deencapsulation.invoke(bulkEnrollmentOperationError, "validateError");
 
         // assert
     }
@@ -105,10 +105,10 @@ public class DeviceRegistrationOperationErrorTest
                 "        \"errorCode\": " + VALID_ERROR_CODE_1 + ",\n" +
                 "        \"errorStatus\": \"" + VALID_ERROR_STATUS_1 + "\"\n" +
                 "      }\n";
-        DeviceRegistrationOperationError deviceRegistrationOperationError = makeDeviceRegistrationOperationError(json);
+        BulkEnrollmentOperationError bulkEnrollmentOperationError = makeBulkEnrollmentOperationError(json);
 
         // act
-        Deencapsulation.invoke(deviceRegistrationOperationError, "validateError");
+        Deencapsulation.invoke(bulkEnrollmentOperationError, "validateError");
 
         // assert
     }
@@ -124,10 +124,10 @@ public class DeviceRegistrationOperationErrorTest
                 "        \"errorCode\": " + VALID_ERROR_CODE_1 + ",\n" +
                 "        \"errorStatus\": \"" + VALID_ERROR_STATUS_1 + "\"\n" +
                 "      }\n";
-        DeviceRegistrationOperationError deviceRegistrationOperationError = makeDeviceRegistrationOperationError(json);
+        BulkEnrollmentOperationError bulkEnrollmentOperationError = makeBulkEnrollmentOperationError(json);
 
         // act
-        Deencapsulation.invoke(deviceRegistrationOperationError, "validateError");
+        Deencapsulation.invoke(bulkEnrollmentOperationError, "validateError");
 
         // assert
     }
@@ -142,10 +142,10 @@ public class DeviceRegistrationOperationErrorTest
                 "        \"registrationId\": \"" + VALID_REGISTRATION_ID_1 + "\",\n" +
                 "        \"errorStatus\": \"" + VALID_ERROR_STATUS_1 + "\"\n" +
                 "      }\n";
-        DeviceRegistrationOperationError deviceRegistrationOperationError = makeDeviceRegistrationOperationError(json);
+        BulkEnrollmentOperationError bulkEnrollmentOperationError = makeBulkEnrollmentOperationError(json);
 
         // act
-        Deencapsulation.invoke(deviceRegistrationOperationError, "validateError");
+        Deencapsulation.invoke(bulkEnrollmentOperationError, "validateError");
 
         // assert
     }
@@ -155,24 +155,24 @@ public class DeviceRegistrationOperationErrorTest
     public void validateErrorSucceeded()
     {
         // arrange
-        DeviceRegistrationOperationError deviceRegistrationOperationError = makeDeviceRegistrationOperationError(VALID_ERROR_JSON_1);
+        BulkEnrollmentOperationError bulkEnrollmentOperationError = makeBulkEnrollmentOperationError(VALID_ERROR_JSON_1);
 
         // act
-        Deencapsulation.invoke(deviceRegistrationOperationError, "validateError");
+        Deencapsulation.invoke(bulkEnrollmentOperationError, "validateError");
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_007: [The BulkOperationResult shall provide an empty constructor to make GSON happy.] */
+    /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_007: [The BulkEnrollmentOperationResult shall provide an empty constructor to make GSON happy.] */
     @Test
     public void emptyConstructorSucceeded()
     {
         // arrange
 
         // act
-        DeviceRegistrationOperationError deviceRegistrationOperationError =  Deencapsulation.newInstance(DeviceRegistrationOperationError.class);
+        BulkEnrollmentOperationError bulkEnrollmentOperationError =  Deencapsulation.newInstance(BulkEnrollmentOperationError.class);
 
         // assert
-        assertNotNull(deviceRegistrationOperationError);
+        assertNotNull(bulkEnrollmentOperationError);
     }
 }

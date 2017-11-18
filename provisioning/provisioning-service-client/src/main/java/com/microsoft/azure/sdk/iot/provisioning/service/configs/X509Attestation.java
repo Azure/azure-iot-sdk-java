@@ -14,28 +14,29 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
  *     mechanism. To use DICE, user must provide the X509 certificate. This class provide the means to create a new
  *     attestation for a X509 certificate and return it as an abstract interface {@link Attestation}.
  *
- * <p> An X509 attestation can contains one of the 2 types of certificate:
+ * <p> An X509 attestation can contains one of the 3 types of certificate:
  *
  * <dl>
  *     <dt><b>Client or Alias certificate:</b>
  *     <dd>Called on this class as clientCertificates, this certificate can authenticate a single device.
- * </dl>
- * <dl>
  *     <dt><b>Signing or Root certificate:</b>
  *     <dd>Called on this class as rootCertificates, this certificate can create multiple Client certificates
  *         to authenticate multiple devices.
+ *     <dt><b>CA Reference:</b>
+ *     <dd>Called on this class as X509CAReferences, this is a CA reference for a rootCertificate that can
+ *         creates multiple Client certificates to authenticate multiple devices.
  * </dl>
  *
- * <p> The provisioning service allows user to create {@link Enrollment} and {@link EnrollmentGroup}. For all
- *     operations over {@link Enrollment} with <b>DICE</b>, user must provide a <b>clientCertificates</b>, and
- *     for operations over {@link EnrollmentGroup}, user must provide a <b>rootCertificates</b>.
+ * <p> The provisioning service allows user to create {@link IndividualEnrollment} and {@link EnrollmentGroup}. For all
+ *     operations over {@link IndividualEnrollment} with <b>DICE</b>, user must provide a <b>clientCertificates</b>, and
+ *     for operations over {@link EnrollmentGroup}, user must provide a <b>rootCertificates</b> or a <b>X509CAReferences</b>.
  *
  * <p> For each of this types of certificates, user can provide 2 Certificates, a primary and a secondary. Only the
  *     primary is mandatory, the secondary is optional.
  *
  * <p> The provisioning service will process the provided certificates, but will never return it back. Instead of
- *     it, {@link #getPrimaryX509CertificateInfo()} and {@link #getSecondaryX509CertificateInfo()} will return a
- *     translated info in the certificate.
+ *     it, {@link #getPrimaryX509CertificateInfo()} and {@link #getSecondaryX509CertificateInfo()} will return the
+ *     certificate information for the certificates.
  *
  * @see <a href="https://www.trustedcomputinggroup.org/wp-content/uploads/Device-Identifier-Composition-Engine-Rev69_Public-Review.pdf">Device Identifier Composition Engine (DICE) spec</a>
  * @see <a href="https://www.microsoft.com/en-us/research/publication/riot-a-foundation-for-trust-in-the-internet-of-things">RIoT – A Foundation for Trust in the Internet of Things</a>
@@ -56,31 +57,33 @@ public class X509Attestation extends Attestation
     @SerializedName(SIGNED_CERTIFICATES_TAG)
     private X509Certificates rootCertificates;
 
+    // the CA references.
+    private static final String CA_REFERENCES_TAG = "caReferences";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(CA_REFERENCES_TAG)
+    private X509CAReferences caReferences;
+
     /**
      * Private constructor
      *
-     * <p> Creates a new instance of the X509Attestation using one of the 2 certificates types. This constructor
+     * <p> Creates a new instance of the X509Attestation using one of the 3 certificates types. This constructor
      *     requires one, and only one certificate type.
      *
-     * @param clientCertificates the {@link X509Certificates} with the primary and secondary certificates for Individual Enrollment.
+     * @param clientCertificates the {@link X509Certificates} with the primary and secondary certificates for Individual IndividualEnrollment.
      * @param rootCertificates the {@link X509Certificates} with the primary and secondary certificates for Enrollment Group.
-     * @throws IllegalArgumentException if non certificate is provided or both certificates are provided.
+     * @param caReferences the {@link X509CAReferences} with the primary and secondary CA references for Enrollment Group.
+     * @throws IllegalArgumentException if non certificate is provided or more than one certificates are provided.
      */
-    private X509Attestation(X509Certificates clientCertificates, X509Certificates rootCertificates)
+    private X509Attestation(X509Certificates clientCertificates, X509Certificates rootCertificates, X509CAReferences caReferences)
     {
-        /* SRS_X509_ATTESTATION_21_001: [The constructor shall throws IllegalArgumentException if both `clientCertificates` and `rootCertificates` are null.] */
-        if((clientCertificates == null) && (rootCertificates == null))
-        {
-            throw new IllegalArgumentException("Attestation cannot receive null client and signing certificate");
-        }
-        /* SRS_X509_ATTESTATION_21_002: [The constructor shall throws IllegalArgumentException if both `clientCertificates` and `rootCertificates` are not null.] */
-        if((clientCertificates != null) && (rootCertificates != null))
-        {
-            throw new IllegalArgumentException("Attestation cannot receive client and signing certificates together");
-        }
-        /* SRS_X509_ATTESTATION_21_003: [The constructor shall store the provided `clientCertificates` and `rootCertificates`.] */
+        /* SRS_X509_ATTESTATION_21_001: [The constructor shall throws IllegalArgumentException if `clientCertificates`, `rootCertificates`, and `caReferences` are null.] */
+        /* SRS_X509_ATTESTATION_21_002: [The constructor shall throws IllegalArgumentException if more than one certificate type are not null.] */
+        validateCertificates(clientCertificates, rootCertificates, caReferences);
+
+        /* SRS_X509_ATTESTATION_21_003: [The constructor shall store the provided `clientCertificates`, `rootCertificates`, and `caReferences`.] */
         this.clientCertificates = clientCertificates;
         this.rootCertificates = rootCertificates;
+        this.caReferences = caReferences;
     }
 
     /**
@@ -100,28 +103,17 @@ public class X509Attestation extends Attestation
         }
 
         X509Certificates clientCertificates = x509Attestation.getClientCertificates();
-        X509Certificates rootCertificates = x509Attestation.getIntermediateCertificatesChain();
+        X509Certificates rootCertificates = x509Attestation.getRootCertificates();
+        X509CAReferences caReferences = x509Attestation.getCAReferences();
 
-        /* SRS_X509_ATTESTATION_21_005: [The constructor shall throws IllegalArgumentException if both `clientCertificates` and `rootCertificates` are null.] */
-        if((clientCertificates == null) && (rootCertificates == null))
-        {
-            throw new IllegalArgumentException("Attestation cannot receive null client and signing certificates");
-        }
-        /* SRS_X509_ATTESTATION_21_006: [The constructor shall throws IllegalArgumentException if both `clientCertificates` and `rootCertificates` are not null.] */
-        if((clientCertificates != null) && (rootCertificates != null))
-        {
-            throw new IllegalArgumentException("Attestation cannot receive client and signing certificates together");
-        }
+        /* SRS_X509_ATTESTATION_21_005: [The constructor shall throws IllegalArgumentException if `clientCertificates`, `rootCertificates`, and `caReferences` are null.] */
+        /* SRS_X509_ATTESTATION_21_006: [The constructor shall throws IllegalArgumentException if more than one certificate type are not null.] */
+        validateCertificates(clientCertificates, rootCertificates, caReferences);
 
-        /* SRS_X509_ATTESTATION_21_007: [The constructor shall copy `clientCertificates` and `rootCertificates` from the provided X509Attestation.] */
-        if(clientCertificates != null)
-        {
-            this.clientCertificates = new X509Certificates(clientCertificates);
-        }
-        if(rootCertificates != null)
-        {
-            this.rootCertificates = new X509Certificates(rootCertificates);
-        }
+        /* SRS_X509_ATTESTATION_21_007: [The constructor shall copy `clientCertificates`, `rootCertificates`, and `caReferences` from the provided X509Attestation.] */
+        this.clientCertificates = clientCertificates;
+        this.rootCertificates = rootCertificates;
+        this.caReferences = caReferences;
     }
 
     /**
@@ -161,11 +153,11 @@ public class X509Attestation extends Attestation
         X509Certificates x509Certificates = new X509Certificates(primary, secondary);
 
         /* SRS_X509_ATTESTATION_21_011: [The factory shall create a new instance of the X509Attestation with the created X509Certificates as the ClientCertificates.] */
-        return new X509Attestation(x509Certificates, null);
+        return new X509Attestation(x509Certificates, null, null);
     }
 
     /**
-     * Factory with IntermediateCertificatesChain with only primary certificate.
+     * Factory with RootCertificates with only primary certificate.
      *
      * <p> Creates a new instance of the X509Attestation using the provided primary Certificate.
      *
@@ -180,7 +172,7 @@ public class X509Attestation extends Attestation
     }
 
     /**
-     * Factory with IntermediateCertificatesChain with primary and secondary certificates.
+     * Factory with RootCertificates with primary and secondary certificates.
      *
      * <p> Creates a new instance of the X509Attestation with the primary and secondary certificates.
      *
@@ -200,8 +192,48 @@ public class X509Attestation extends Attestation
         /* SRS_X509_ATTESTATION_21_014: [The factory shall create a new instance of the X509Certificates with the provided primary and secondary certificates.] */
         X509Certificates x509Certificates = new X509Certificates(primary, secondary);
 
-        /* SRS_X509_ATTESTATION_21_015: [The factory shall create a new instance of the X509Attestation with the created X509Certificates as the IntermediateCertificatesChain.] */
-        return new X509Attestation(null, x509Certificates);
+        /* SRS_X509_ATTESTATION_21_015: [The factory shall create a new instance of the X509Attestation with the created X509Certificates as the RootCertificates.] */
+        return new X509Attestation(null, x509Certificates, null);
+    }
+
+    /**
+     * Factory with CAReferences with only primary reference.
+     *
+     * <p> Creates a new instance of the X509Attestation using the provided primary CA reference.
+     *
+     * @param primary the {@code String} with the primary CA reference. It cannot be {@code null} or empty.
+     * @return the new instance of the X509Attestation.
+     * @throws IllegalArgumentException if the provide CA reference is invalid.
+     */
+    public static X509Attestation createFromCAReferences(String primary)
+    {
+        /* SRS_X509_ATTESTATION_21_025: [The factory shall create a new instance of the X509Attestation for CA reference receiving only the primary certificate.] */
+        return X509Attestation.createFromCAReferences(primary, null);
+    }
+
+    /**
+     * Factory with CAReferences with primary and secondary references.
+     *
+     * <p> Creates a new instance of the X509Attestation with the primary and secondary CA references.
+     *
+     * @param primary the {@code String} with the primary CA references. It cannot be {@code null} or empty.
+     * @param secondary the {@code String} with the secondary CA references. It can be {@code null} or empty (ignored).
+     * @return the new instance of the X509Attestation.
+     * @throws IllegalArgumentException if the provide primary CA reference is invalid.
+     */
+    public static X509Attestation createFromCAReferences(String primary, String secondary)
+    {
+        /* SRS_X509_ATTESTATION_21_026: [The factory shall throws IllegalArgumentException if the primary CA reference is null or empty.] */
+        if(Tools.isNullOrEmpty(primary))
+        {
+            throw new IllegalArgumentException("primary CA reference cannot be null or empty");
+        }
+
+        /* SRS_X509_ATTESTATION_21_027: [The factory shall create a new instance of the X509CAReferences with the provided primary and secondary CA references.] */
+        X509CAReferences x509CAReferences = new X509CAReferences(primary, secondary);
+
+        /* SRS_X509_ATTESTATION_21_028: [The factory shall create a new instance of the X509Attestation with the created X509CAReferences as the caReferences.] */
+        return new X509Attestation(null, null, x509CAReferences);
     }
 
     /**
@@ -212,7 +244,11 @@ public class X509Attestation extends Attestation
     public X509Certificates getClientCertificates()
     {
         /* SRS_X509_ATTESTATION_21_016: [The getClientCertificates shall return the stored clientCertificates.] */
-        return this.clientCertificates;
+        if(this.clientCertificates == null)
+        {
+            return null;
+        }
+        return new X509Certificates(this.clientCertificates);
     }
 
     /**
@@ -220,10 +256,29 @@ public class X509Attestation extends Attestation
      *
      * @return the {@link X509Certificates} with the stored rootCertificates. it can be {@code null}.
      */
-    public X509Certificates getIntermediateCertificatesChain()
+    public X509Certificates getRootCertificates()
     {
-        /* SRS_X509_ATTESTATION_21_017: [The getIntermediateCertificatesChain shall return the stored rootCertificates.] */
-        return this.rootCertificates;
+        /* SRS_X509_ATTESTATION_21_017: [The getRootCertificates shall return the stored rootCertificates.] */
+        if(this.rootCertificates == null)
+        {
+            return null;
+        }
+        return new X509Certificates(this.rootCertificates);
+    }
+
+    /**
+     * Getter for the caReferences.
+     *
+     * @return the {@link X509CAReferences} with the stored caReferences. it can be {@code null}.
+     */
+    public X509CAReferences getCAReferences()
+    {
+        /* SRS_X509_ATTESTATION_21_024: [The getCAReferences shall return the stored caReferences.] */
+        if(this.caReferences == null)
+        {
+            return null;
+        }
+        return new X509CAReferences(this.caReferences);
     }
 
     /**
@@ -247,7 +302,7 @@ public class X509Attestation extends Attestation
             return this.rootCertificates.getPrimary().getInfo();
         }
         /* SRS_X509_ATTESTATION_21_020: [If both clientCertificates and rootCertificates are null, the getPrimaryX509CertificateInfo shall throws IllegalArgumentException.] */
-        throw new IllegalArgumentException("There is no valid certificate.");
+        throw new IllegalArgumentException("There is no valid certificate information.");
     }
 
     /**
@@ -277,6 +332,18 @@ public class X509Attestation extends Attestation
             return secondaryCertificate.getInfo();
         }
         return null;
+    }
+
+    private void validateCertificates(X509Certificates clientCertificates, X509Certificates rootCertificates, X509CAReferences caReferences)
+    {
+        if((clientCertificates == null) && (rootCertificates == null) && (caReferences == null))
+        {
+            throw new IllegalArgumentException("Attestation shall receive one no null Certificate");
+        }
+        if(((clientCertificates != null) && ((rootCertificates != null) || (caReferences != null))) || ((rootCertificates != null) && (caReferences != null)))
+        {
+            throw new IllegalArgumentException("Attestation cannot receive more than one certificate together");
+        }
     }
 
     /**

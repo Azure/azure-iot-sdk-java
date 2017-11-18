@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 
 /**
- * Representation of a single Device Provisioning Service Attestation mechanism in the Enrollment and EnrollmentGroup.
+ * Representation of a single Device Provisioning Service Attestation mechanism in the IndividualEnrollment and EnrollmentGroup.
  *
  * <p> It is an internal class that converts one of the attestations into JSON format. To configure
  *     the attestation mechanism, see the external API {@link Attestation}.

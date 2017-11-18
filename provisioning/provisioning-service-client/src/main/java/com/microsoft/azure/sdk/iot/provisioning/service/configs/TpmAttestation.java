@@ -46,7 +46,7 @@ public class TpmAttestation extends Attestation
         /* SRS_TPM_ATTESTATION_21_001: [The constructor shall throws IllegalArgumentException if the provided endorsementKey is null or empty.] */
         /* SRS_TPM_ATTESTATION_21_002: [The constructor shall store the provided endorsementKey.] */
         this.setEndorsementKey(endorsementKey);
-        /* SRS_TPM_ATTESTATION_21_003: [The constructor shall store the provided endorsementKey.] */
+        /* SRS_TPM_ATTESTATION_21_003: [The constructor shall store the provided storageRootKey.] */
         this.storageRootKey = storageRootKey;
     }
 

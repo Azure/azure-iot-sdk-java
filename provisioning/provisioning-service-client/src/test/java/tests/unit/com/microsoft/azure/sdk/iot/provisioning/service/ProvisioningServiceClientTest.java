@@ -263,7 +263,7 @@ public class ProvisioningServiceClientTest
     /* SRS_PROVISIONING_SERVICE_CLIENT_21_008: [The createOrUpdateIndividualEnrollment shall create a new Provisioning enrollment by calling the createOrUpdate in the individualEnrollmentManager.] */
     @Test
     public void createOrUpdateIndividualEnrollmentSucceed(
-            @Mocked final Enrollment mockedEnrollment)
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -271,41 +271,41 @@ public class ProvisioningServiceClientTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockedIndividualEnrollmentManager, "createOrUpdate", mockedEnrollment);
-                result = mockedEnrollment;
+                Deencapsulation.invoke(mockedIndividualEnrollmentManager, "createOrUpdate", mockedIndividualEnrollment);
+                result = mockedIndividualEnrollment;
                 times = 1;
             }
         };
 
         // act
-        Enrollment result = provisioningServiceClient.createOrUpdateIndividualEnrollment(mockedEnrollment);
+        IndividualEnrollment result = provisioningServiceClient.createOrUpdateIndividualEnrollment(mockedIndividualEnrollment);
 
         // assert
         assertNotNull(result);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_009: [The runBulkOperation shall do a Provisioning operation over individual enrollment by calling the bulkOperation in the individualEnrollmentManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_009: [The runBulkEnrollmentOperation shall do a Provisioning operation over individual enrollment by calling the bulkOperation in the individualEnrollmentManager.] */
     @Test
-    public void runBulkOperationSucceed(
-            @Mocked final Enrollment mockedEnrollment,
-            @Mocked final BulkOperationResult mockedBulkOperationResult)
+    public void runBulkEnrollmentOperationSucceed(
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment,
+            @Mocked final BulkEnrollmentOperationResult mockedBulkEnrollmentOperationResult)
             throws ProvisioningServiceClientException
     {
         // arrange
-        final List<Enrollment> enrollments = new LinkedList<>();
-        enrollments.add(mockedEnrollment);
+        final List<IndividualEnrollment> individualEnrollments = new LinkedList<>();
+        individualEnrollments.add(mockedIndividualEnrollment);
         ProvisioningServiceClient provisioningServiceClient = createClient();
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockedIndividualEnrollmentManager, "bulkOperation", BulkOperationMode.CREATE, enrollments);
-                result = mockedBulkOperationResult;
+                Deencapsulation.invoke(mockedIndividualEnrollmentManager, "bulkOperation", BulkOperationMode.CREATE, individualEnrollments);
+                result = mockedBulkEnrollmentOperationResult;
                 times = 1;
             }
         };
 
         // act
-        BulkOperationResult result = provisioningServiceClient.runBulkOperation(BulkOperationMode.CREATE, enrollments);
+        BulkEnrollmentOperationResult result = provisioningServiceClient.runBulkEnrollmentOperation(BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
         assertNotNull(result);
@@ -314,7 +314,7 @@ public class ProvisioningServiceClientTest
     /* SRS_PROVISIONING_SERVICE_CLIENT_21_010: [The getIndividualEnrollment shall retrieve the individual enrollment information for the provided registrationId by calling the get in the individualEnrollmentManager.] */
     @Test
     public void getIndividualEnrollmentSucceed(
-            @Mocked final Enrollment mockedEnrollment)
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -324,13 +324,13 @@ public class ProvisioningServiceClientTest
         {
             {
                 Deencapsulation.invoke(mockedIndividualEnrollmentManager, "get", registrationId);
-                result = mockedEnrollment;
+                result = mockedIndividualEnrollment;
                 times = 1;
             }
         };
 
         // act
-        Enrollment result = provisioningServiceClient.getIndividualEnrollment(registrationId);
+        IndividualEnrollment result = provisioningServiceClient.getIndividualEnrollment(registrationId);
 
         // assert
         assertNotNull(result);
@@ -339,7 +339,7 @@ public class ProvisioningServiceClientTest
     /* SRS_PROVISIONING_SERVICE_CLIENT_21_011: [The deleteIndividualEnrollment shall delete the individual enrollment for the provided enrollment by calling the delete in the individualEnrollmentManager.] */
     @Test
     public void deleteIndividualEnrollmentWithEnrollmentSucceed(
-            @Mocked final Enrollment mockedEnrollment)
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -347,13 +347,13 @@ public class ProvisioningServiceClientTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockedIndividualEnrollmentManager, "delete", mockedEnrollment);
+                Deencapsulation.invoke(mockedIndividualEnrollmentManager, "delete", mockedIndividualEnrollment);
                 times = 1;
             }
         };
 
         // act
-        provisioningServiceClient.deleteIndividualEnrollment(mockedEnrollment);
+        provisioningServiceClient.deleteIndividualEnrollment(mockedIndividualEnrollment);
 
         // assert
     }
@@ -611,10 +611,10 @@ public class ProvisioningServiceClientTest
         assertNotNull(query);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_023: [The getRegistrationStatus shall retrieve the registrationStatus information for the provided id by calling the get in the registrationStatusManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_023: [The getDeviceRegistrationState shall retrieve the registrationStatus information for the provided id by calling the get in the registrationStatusManager.] */
     @Test
-    public void getRegistrationStatusSucceed(
-            @Mocked final DeviceRegistrationStatus mockedDeviceRegistrationStatus)
+    public void getDeviceRegistrationStateSucceed(
+            @Mocked final DeviceRegistrationState mockedDeviceRegistrationState)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -624,22 +624,22 @@ public class ProvisioningServiceClientTest
         {
             {
                 Deencapsulation.invoke(mockedRegistrationStatusManager, "get", id);
-                result = mockedDeviceRegistrationStatus;
+                result = mockedDeviceRegistrationState;
                 times = 1;
             }
         };
 
         // act
-        DeviceRegistrationStatus result = provisioningServiceClient.getRegistrationStatus(id);
+        DeviceRegistrationState result = provisioningServiceClient.getDeviceRegistrationState(id);
 
         // assert
         assertNotNull(result);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_024: [The deleteRegistrationStatus shall delete the registrationStatus for the provided deviceRegistrationStatus by calling the delete in the registrationStatusManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_024: [The deleteDeviceRegistrationStatus shall delete the registrationStatus for the provided DeviceRegistrationState by calling the delete in the registrationStatusManager.] */
     @Test
-    public void deleteRegistrationStatusWithDeviceRegistrationStatusSucceed(
-            @Mocked final DeviceRegistrationStatus mockedDeviceRegistrationStatus)
+    public void deleteDeviceRegistrationStatusWithDeviceRegistrationStateSucceed(
+            @Mocked final DeviceRegistrationState mockedDeviceRegistrationState)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -647,20 +647,20 @@ public class ProvisioningServiceClientTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockedRegistrationStatusManager, "delete", mockedDeviceRegistrationStatus);
+                Deencapsulation.invoke(mockedRegistrationStatusManager, "delete", mockedDeviceRegistrationState);
                 times = 1;
             }
         };
 
         // act
-        provisioningServiceClient.deleteRegistrationStatus(mockedDeviceRegistrationStatus);
+        provisioningServiceClient.deleteDeviceRegistrationStatus(mockedDeviceRegistrationState);
 
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_025: [The deleteRegistrationStatus shall delete the registrationStatus for the provided id by calling the delete in the registrationStatusManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_025: [The deleteDeviceRegistrationStatus shall delete the registrationStatus for the provided id by calling the delete in the registrationStatusManager.] */
     @Test
-    public void deleteRegistrationStatusWithIdSucceed()
+    public void deleteDeviceRegistrationStatusWithIdSucceed()
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -675,14 +675,14 @@ public class ProvisioningServiceClientTest
         };
 
         // act
-        provisioningServiceClient.deleteRegistrationStatus(id);
+        provisioningServiceClient.deleteDeviceRegistrationStatus(id);
 
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_026: [The deleteRegistrationStatus shall delete the registrationStatus for the provided id and eTag by calling the delete in the registrationStatusManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_026: [The deleteDeviceRegistrationStatus shall delete the registrationStatus for the provided id and eTag by calling the delete in the registrationStatusManager.] */
     @Test
-    public void deleteRegistrationStatusWithIdAndEtagSucceed()
+    public void deleteDeviceRegistrationStatusWithIdAndEtagSucceed()
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -698,7 +698,7 @@ public class ProvisioningServiceClientTest
         };
 
         // act
-        provisioningServiceClient.deleteRegistrationStatus(id, eTag);
+        provisioningServiceClient.deleteDeviceRegistrationStatus(id, eTag);
 
         // assert
     }

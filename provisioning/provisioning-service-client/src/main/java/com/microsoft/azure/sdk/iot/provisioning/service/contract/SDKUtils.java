@@ -8,8 +8,8 @@ package com.microsoft.azure.sdk.iot.provisioning.service.contract;
  */
 class SDKUtils
 {
-    private static final String SERVICE_API_VERSION = "2017-08-31-preview";
-    private static final String PROVISIONING_DEVICE_CLIENT = "com.microsoft.azure.sdk.iot.provisioning.provisioning-device-client/";
+    private static final String SERVICE_API_VERSION = "2017-11-15";
+    private static final String PROVISIONING_DEVICE_CLIENT = "com.microsoft.azure.sdk.iot.provisioning.service/";
     private static final String PROVISIONING_DEVICE_CLIENT_VERSION = "0.0.1";
 
     /**

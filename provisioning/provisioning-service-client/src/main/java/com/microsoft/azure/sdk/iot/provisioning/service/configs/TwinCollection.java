@@ -206,7 +206,7 @@ public class TwinCollection extends HashMap<String, Object>
     /**
      * Internal Constructor from raw map.
      *
-     * <p> This internal constructor is used by the Enrollment and EnrollmentGroup
+     * <p> This internal constructor is used by the IndividualEnrollment and EnrollmentGroup
      *     after the deserialization process.
      *
      * <p> During the deserialization process, the GSON will convert both tags and

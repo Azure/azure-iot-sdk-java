@@ -41,7 +41,7 @@ public class TpmAttestationTest
     }
 
     /* SRS_TPM_ATTESTATION_21_002: [The constructor shall store the provided endorsementKey.] */
-    /* SRS_TPM_ATTESTATION_21_003: [The constructor shall store the provided endorsementKey.] */
+    /* SRS_TPM_ATTESTATION_21_003: [The constructor shall store the provided storageRootKey.] */
     @Test
     public void constructorStoresEndorsementKey()
     {

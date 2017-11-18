@@ -14,8 +14,8 @@ import java.util.Collection;
  * Representation of a single Device Provisioning Service device registration operation error.
  *
  * <p> This error is returned as a result of the
- *     {@link ProvisioningServiceClient#runBulkOperation(BulkOperationMode, Collection)},
- *     in the {@link BulkOperationResult}.
+ *     {@link ProvisioningServiceClient#runBulkEnrollmentOperation(BulkOperationMode, Collection)},
+ *     in the {@link BulkEnrollmentOperationResult}.
  *
  * <p> The following JSON is an example of a single error operation from a Bulk operation
  * <pre>
@@ -30,7 +30,7 @@ import java.util.Collection;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
-public class DeviceRegistrationOperationError
+public class BulkEnrollmentOperationError
 {
     // the registration identifier
     private static final String REGISTRATION_ID_TAG = "registrationId";
@@ -105,8 +105,8 @@ public class DeviceRegistrationOperationError
      * </p>
      */
     @SuppressWarnings("unused")
-    protected DeviceRegistrationOperationError()
+    protected BulkEnrollmentOperationError()
     {
-        /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_007: [The BulkOperationResult shall provide an empty constructor to make GSON happy.] */
+        /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_007: [The BulkEnrollmentOperationResult shall provide an empty constructor to make GSON happy.] */
     }
 }

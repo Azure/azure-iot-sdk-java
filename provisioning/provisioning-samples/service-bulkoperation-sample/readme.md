@@ -85,7 +85,7 @@ Note that the samples for Windows and Linux use Maven.
     ```
 6. Navigate to the folder containing the executable JAR file for the sample and run the sample as follows:
 
-    The executable JAR file for create a single enrollment can be found at:
+    The executable JAR file for create an IndividualEnrollment can be found at:
     ```
     {sample root}/target/service-bulkoperation-sample-{version}-with-deps.jar
     ```
@@ -189,7 +189,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-bulkoper
     java -jar ./service-bulkoperation-sample-1.0-SNAPSHOT-with-deps.jar
     ```
     4. As a result, it should print `Hello world!` in the screen.
-9. Now, you are ready to write the provisioning code to create the bulk of enrollments. Using a text editor, open the 
+9. Now, you are ready to write the provisioning code to create the bulk of individualEnrollments. Using a text editor, open the 
     `service-bulkoperation-sample\src\main\java\com\mycompany\app\App.java` file.
 10. Add the following import statements at the beginning of the file, after the `package com.mycompany.app;`:
     ```java
@@ -264,26 +264,26 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-bulkoper
      ProvisioningServiceClient provisioningServiceClient =
              ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
     ```
-15. After that, you can create a new bulk of individual enrollment. 
-    1. Every enrollment needs a unique name, called **RegistrationId**, and an **[Attestation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Attestation)**
+15. After that, you can create a new bulk of IndividualEnrollment. 
+    1. Every individualEnrollment needs a unique name, called **RegistrationId**, and an **[Attestation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Attestation)**
         that can be [TpmAttestation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Tpm_Attestation)
         or [X509Attestation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._X509_Attestation).
     2. Once you defined the set of RegistrationId and the Attestation mechanism, you can create the list of [Enrollment](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Enrollment)
         configuration.
         ```java
-        // ******************************** Create a new bulk of individual enrollment *********************************
-        System.out.println("\nCreate a new set of enrollments...");
-        List<Enrollment> enrollments = new LinkedList<>();
+        // ******************************** Create a new bulk of IndividualEnrollment *********************************
+        System.out.println("\nCreate a new set of individualEnrollments...");
+        List<IndividualEnrollment> individualEnrollments = new LinkedList<>();
         for(Map.Entry<String, String> device:DEVICE_MAP.entrySet())
         {
             Attestation attestation = new TpmAttestation(device.getValue());
             String registrationId = device.getKey();
             System.out.println("  Add " + registrationId);
-            Enrollment enrollment =
-                    new Enrollment(
+            IndividualEnrollment individualEnrollment =
+                    new IndividualEnrollment(
                             registrationId,
                             attestation);
-            enrollments.add(enrollment);
+            individualEnrollments.add(individualEnrollment);
         }
         ```
     3. For **X509**, replace the Attestation mechanism in the preview loop, to work with X509 client certificate 
@@ -297,13 +297,13 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-bulkoper
         Attestation attestation = X509Attestation.createFromClientCertificates(device.getValue());
         ```
     4. Now, call the [runBulkOperation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.runbulkoperation#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_runBulkOperation_BulkOperationMode_List_Enrollment__) 
-        on the ProvisioningServiceClient to create a new individual enrollment.
+        on the ProvisioningServiceClient to create a new IndividualEnrollment.
         ```java
-        // ********************************* Create a new set of individual enrollment *********************************
-        System.out.println("\nRun the bulk operation to create the enrollments...");
+        // ********************************* Create a new set of individual individualEnrollment *********************************
+        System.out.println("\nRun the bulk operation to create the individualEnrollments...");
         BulkOperationResult bulkOperationResult =  provisioningServiceClient.runBulkOperation(
-                BulkOperationMode.CREATE, enrollments);
-        System.out.println("Result of the Create bulk enrollment...");
+                BulkOperationMode.CREATE, individualEnrollments);
+        System.out.println("Result of the Create bulk individualEnrollment...");
         System.out.println(bulkOperationResult);
         ```
 16. Save and close the `app.java` file.
@@ -312,40 +312,40 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-bulkoper
     ```
     Beginning my sample for the Provisioning Service Client!
 
-    Create a new set of enrollments...
+    Create a new set of individualEnrollments...
         Add RegistrationId1
         Add RegistrationId2
 
-    Run the bulk operation to create the enrollments...
+    Run the bulk operation to create the individualEnrollments...
     
-    Result of the Create bulk enrollment...
+    Result of the Create bulk individualEnrollment...
     {
       "isSuccessful": true,
       "errors": []
     }
     ```
     2. Check in the Azure Portal if your set of individual enrollments was created with success.
-18. Check the created enrollments information in your **App**. You can consult using 2 ProvisioningServiceClient APIs, 
+18. Check the created individualEnrollments information in your **App**. You can consult using 2 ProvisioningServiceClient APIs, 
     `get` and `query`.
     1. Use the [getIndividualEnrollment](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.getindividualenrollment#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_getIndividualEnrollment_String_) 
-        to **get** an specific enrollment using the registrationId. Add the following code and check the result.
+        to **get** an specific individualEnrollment using the registrationId. Add the following code and check the result.
         ```java
-        // ************************************ Get info of individual enrollments *************************************
-        for (Enrollment enrollment: enrollments)
+        // ************************************ Get info of individual individualEnrollments *************************************
+        for (IndividualEnrollment individualEnrollment: individualEnrollments)
         {
-            String registrationId = enrollment.getRegistrationId();
-            System.out.println("\nGet the enrollment information for " + registrationId + "...");
-            Enrollment getResult = provisioningServiceClient.getIndividualEnrollment(registrationId);
+            String registrationId = individualEnrollment.getRegistrationId();
+            System.out.println("\nGet the individualEnrollment information for " + registrationId + "...");
+            IndividualEnrollment getResult = provisioningServiceClient.getIndividualEnrollment(registrationId);
             System.out.println(getResult);
         }
         ```
     2. Use the [createIndividualEnrollmentQuery](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.createindividualenrollmentquery#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_createIndividualEnrollmentQuery_QuerySpecification_) 
        to create a **query** for the individual enrollments in the provisioning service. The [QuerySpecificationBuilder](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification_Builder)
        will help you to create a correct [QuerySpecification](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification).
-       For this sample, we will query all **`"*"`** enrollments is the provisioning service.
+       For this sample, we will query all **`"*"`** individualEnrollments is the provisioning service.
         ```java
-        // ************************************ Query info of individual enrollments ***********************************
-        System.out.println("\nCreate a query for enrollments...");
+        // ************************************ Query info of individual individualEnrollments ***********************************
+        System.out.println("\nCreate a query for individualEnrollments...");
         QuerySpecification querySpecification =
                 new QuerySpecificationBuilder("*", QuerySpecificationBuilder.FromType.ENROLLMENTS)
                         .createSqlQuery();
@@ -353,19 +353,19 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-bulkoper
 
         while(query.hasNext())
         {
-            System.out.println("\nQuery the next enrollments...");
+            System.out.println("\nQuery the next individualEnrollments...");
             QueryResult queryResult = query.next();
             System.out.println(queryResult);
         }
         ```
-19. Delete the bulk of individual enrollments from the provisioning service. You can delete a bulk of enrollments 
+19. Delete the bulk of individual individualEnrollments from the provisioning service. You can delete a bulk of individualEnrollments 
     adding the following code that invokes the API [runBulkOperation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.runbulkoperation#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_runBulkOperation_BulkOperationMode_List_Enrollment__):
     ```java
-    // ********************************** Delete bulk of individual enrollments ************************************
-    System.out.println("\nDelete the set of enrollments...");
-    bulkOperationResult =  provisioningServiceClient.runBulkOperation(BulkOperationMode.DELETE, enrollments);
+    // ********************************** Delete bulk of individual individualEnrollments ************************************
+    System.out.println("\nDelete the set of individualEnrollments...");
+    bulkOperationResult =  provisioningServiceClient.runBulkOperation(BulkOperationMode.DELETE, individualEnrollments);
     System.out.println(bulkOperationResult);
     ```
 20. Save and close the `app.java` file.
 21. Build and run the **App** as you did in the item *8*. Check the results on your console. Note that you will **not** 
-    see any new enrollment in the Azure Portal, because we are deleting it in the item *19*.
+    see any new individualEnrollment in the Azure Portal, because we are deleting it in the item *19*.

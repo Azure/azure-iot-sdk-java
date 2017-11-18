@@ -5,7 +5,7 @@
     <groupId>com.microsoft.azure.sdk.iot.provisioning.samples</groupId>
     <artifactId>service-enrollment-sample</artifactId>
     <version>0.0.1</version>
-    <name>Provisioning enrollment using service Sample</name>
+    <name>Provisioning individual enrollment using service Sample</name>
     <developers>
         <developer>
             <id>microsoft</id>

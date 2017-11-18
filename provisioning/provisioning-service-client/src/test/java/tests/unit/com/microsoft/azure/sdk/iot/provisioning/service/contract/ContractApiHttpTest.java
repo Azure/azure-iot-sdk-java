@@ -199,7 +199,7 @@ public class ContractApiHttpTest
         // arrange
         requestNonStrictExpectations();
         ContractApiHttp contractApiHttp = ContractApiHttp.createFromConnectionString(mockedProvisioningConnectionString);
-        String expectedURL = "https://" + VALID_HOST_NAME + "/" + VALID_PATH + "?api-version=2017-08-31-preview";
+        String expectedURL = "https://" + VALID_HOST_NAME + "/" + VALID_PATH + "?api-version=2017-11-15";
 
         // act
         contractApiHttp.request(

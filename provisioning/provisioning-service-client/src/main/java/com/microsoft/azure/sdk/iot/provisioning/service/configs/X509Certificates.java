@@ -31,7 +31,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
  *                         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
  *                         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
  *                         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
- *                         "-----END CERTIFICATE-----\n";
+ *                         "-----END CERTIFICATE-----\n"
  *      },
  *      "secondary": {
  *          "certificate": "-----BEGIN CERTIFICATE-----\n" +
@@ -45,7 +45,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
  *                         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
  *                         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
  *                         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
- *                         "-----END CERTIFICATE-----\n";
+ *                         "-----END CERTIFICATE-----\n"
  *      }
  *  }
  * }
@@ -122,12 +122,12 @@ public class X509Certificates
      * "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
      * "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
      * "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
-     * "-----END CERTIFICATE-----\n";
+     * "-----END CERTIFICATE-----\n"
      * }
      * </pre>
      *
      * @param primary the {@code String} with the primary certificate.
-     * @param secondary the {@code String} with the primary certificate.
+     * @param secondary the {@code String} with the secondary certificate.
      * @throws IllegalArgumentException if the primary certificate is {@code null} or empty.
      */
     X509Certificates(String primary, String secondary)
@@ -175,7 +175,7 @@ public class X509Certificates
     /**
      * Getter for the primary.
      *
-     * @return the {@code String} with the stored primary. It cannot be {@code null}.
+     * @return the {@link X509CertificateWithInfo} with the stored primary. It cannot be {@code null}.
      */
     public X509CertificateWithInfo getPrimary()
     {
@@ -186,7 +186,7 @@ public class X509Certificates
     /**
      * Getter for the secondary.
      *
-     * @return the {@code String} with the stored secondary. It can be {@code null}.
+     * @return the {@link X509CertificateWithInfo} with the stored secondary. It can be {@code null}.
      */
     public X509CertificateWithInfo getSecondary()
     {

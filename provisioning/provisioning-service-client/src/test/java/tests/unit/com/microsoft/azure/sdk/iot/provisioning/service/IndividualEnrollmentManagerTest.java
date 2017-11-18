@@ -19,7 +19,7 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for Individual Enrollment Manager.
+ * Unit tests for Individual IndividualEnrollment Manager.
  * 100% methods, 100% lines covered
  */
 public class IndividualEnrollmentManagerTest
@@ -71,7 +71,7 @@ public class IndividualEnrollmentManagerTest
         IndividualEnrollmentManager individualEnrollmentManager = createIndividualEnrollmentManager();
 
         // act
-        Deencapsulation.invoke(individualEnrollmentManager, "createOrUpdate", new Class[] {Enrollment.class}, (Enrollment)null);
+        Deencapsulation.invoke(individualEnrollmentManager, "createOrUpdate", new Class[] {IndividualEnrollment.class}, (IndividualEnrollment)null);
 
         // assert
     }
@@ -79,11 +79,11 @@ public class IndividualEnrollmentManagerTest
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_006: [The createOrUpdate shall send a Http request for the path `enrollments/[registrationId]`.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_007: [The createOrUpdate shall send a Http request with a body with the enrollment content in JSON format.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_008: [The createOrUpdate shall send a Http request with a Http verb `PUT`.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_011: [The createOrUpdate shall return an Enrollment object created from the body of the response for the Http request .] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_011: [The createOrUpdate shall return an IndividualEnrollment object created from the body of the response for the Http request .] */
     @Test
     public void createOrUpdateRequestSucceed(
-            @Mocked final Enrollment mockedEnrollment,
-            @Mocked final Enrollment mockedEnrollmentResponse)
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment,
+            @Mocked final IndividualEnrollment mockedIndividualEnrollmentResponse)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -95,10 +95,10 @@ public class IndividualEnrollmentManagerTest
         new StrictExpectations()
         {
             {
-                mockedEnrollment.getRegistrationId();
+                mockedIndividualEnrollment.getRegistrationId();
                 result = registrationId;
                 times = 1;
-                mockedEnrollment.toJson();
+                mockedIndividualEnrollment.toJson();
                 result = enrollmentPayload;
                 times = 1;
                 mockedContractApiHttp.request(HttpMethod.PUT, enrollmentPath, null, enrollmentPayload);
@@ -107,14 +107,14 @@ public class IndividualEnrollmentManagerTest
                 mockedHttpResponse.getBody();
                 result = resultPayload.getBytes();
                 times = 1;
-                Deencapsulation.newInstance(Enrollment.class, resultPayload);
-                result = mockedEnrollmentResponse;
+                Deencapsulation.newInstance(IndividualEnrollment.class, resultPayload);
+                result = mockedIndividualEnrollmentResponse;
                 times = 1;
             }
         };
 
         // act
-        Enrollment response = Deencapsulation.invoke(individualEnrollmentManager, "createOrUpdate", new Class[] {Enrollment.class}, mockedEnrollment);
+        IndividualEnrollment response = Deencapsulation.invoke(individualEnrollmentManager, "createOrUpdate", new Class[] {IndividualEnrollment.class}, mockedIndividualEnrollment);
 
         // assert
         assertNotNull(response);
@@ -123,7 +123,7 @@ public class IndividualEnrollmentManagerTest
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_042: [The createOrUpdate shall throws ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
     @Test (expected = ProvisioningServiceClientServiceException.class)
     public void createOrUpdateRequestThrowsOnNullBody(
-            @Mocked final Enrollment mockedEnrollment)
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -134,10 +134,10 @@ public class IndividualEnrollmentManagerTest
         new StrictExpectations()
         {
             {
-                mockedEnrollment.getRegistrationId();
+                mockedIndividualEnrollment.getRegistrationId();
                 result = registrationId;
                 times = 1;
-                mockedEnrollment.toJson();
+                mockedIndividualEnrollment.toJson();
                 result = enrollmentPayload;
                 times = 1;
                 mockedContractApiHttp.request(HttpMethod.PUT, enrollmentPath, null, enrollmentPayload);
@@ -150,7 +150,7 @@ public class IndividualEnrollmentManagerTest
         };
 
         // act
-        Deencapsulation.invoke(individualEnrollmentManager, "createOrUpdate", new Class[] {Enrollment.class}, mockedEnrollment);
+        Deencapsulation.invoke(individualEnrollmentManager, "createOrUpdate", new Class[] {IndividualEnrollment.class}, mockedIndividualEnrollment);
 
         // assert
     }
@@ -158,7 +158,7 @@ public class IndividualEnrollmentManagerTest
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_009: [The createOrUpdate shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void createOrUpdateRequestTransportFailed(
-            @Mocked final Enrollment mockedEnrollment)
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -169,9 +169,9 @@ public class IndividualEnrollmentManagerTest
         new NonStrictExpectations()
         {
             {
-                mockedEnrollment.getRegistrationId();
+                mockedIndividualEnrollment.getRegistrationId();
                 result = registrationId;
-                mockedEnrollment.toJson();
+                mockedIndividualEnrollment.toJson();
                 result = enrollmentPayload;
                 mockedContractApiHttp.request(HttpMethod.PUT, enrollmentPath, null, enrollmentPayload);
                 result = new ProvisioningServiceClientTransportException();
@@ -180,7 +180,7 @@ public class IndividualEnrollmentManagerTest
         };
 
         // act
-        Deencapsulation.invoke(individualEnrollmentManager, "createOrUpdate", new Class[] {Enrollment.class}, mockedEnrollment);
+        Deencapsulation.invoke(individualEnrollmentManager, "createOrUpdate", new Class[] {IndividualEnrollment.class}, mockedIndividualEnrollment);
 
         // assert
     }
@@ -188,7 +188,7 @@ public class IndividualEnrollmentManagerTest
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_010: [The createOrUpdate shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientInternalServerErrorException.class)
     public void createOrUpdateServiceReportedFail(
-            @Mocked final Enrollment mockedEnrollment)
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -199,9 +199,9 @@ public class IndividualEnrollmentManagerTest
         new NonStrictExpectations()
         {
             {
-                mockedEnrollment.getRegistrationId();
+                mockedIndividualEnrollment.getRegistrationId();
                 result = registrationId;
-                mockedEnrollment.toJson();
+                mockedIndividualEnrollment.toJson();
                 result = enrollmentPayload;
                 mockedContractApiHttp.request(HttpMethod.PUT, enrollmentPath, null, enrollmentPayload);
                 result = new ProvisioningServiceClientInternalServerErrorException();
@@ -210,7 +210,7 @@ public class IndividualEnrollmentManagerTest
         };
 
         // act
-        Deencapsulation.invoke(individualEnrollmentManager, "createOrUpdate", new Class[] {Enrollment.class}, mockedEnrollment);
+        Deencapsulation.invoke(individualEnrollmentManager, "createOrUpdate", new Class[] {IndividualEnrollment.class}, mockedIndividualEnrollment);
 
         // assert
     }
@@ -218,15 +218,15 @@ public class IndividualEnrollmentManagerTest
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_012: [The bulkOperation shall throws IllegalArgumentException if the provided bulkOperationMode is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void bulkOperationThrowsOnNullbulkOperationMode(
-            @Mocked final Enrollment mockedEnrollment) throws ProvisioningServiceClientException
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment) throws ProvisioningServiceClientException
     {
         // arrange
-        final Collection<Enrollment> enrollments = new LinkedList<>();
-        enrollments.add(mockedEnrollment);
+        final Collection<IndividualEnrollment> individualEnrollments = new LinkedList<>();
+        individualEnrollments.add(mockedIndividualEnrollment);
         IndividualEnrollmentManager individualEnrollmentManager = createIndividualEnrollmentManager();
 
         // act
-        Deencapsulation.invoke(individualEnrollmentManager, "bulkOperation", new Class[] {BulkOperationMode.class, Collection.class}, (BulkOperationMode)null, enrollments);
+        Deencapsulation.invoke(individualEnrollmentManager, "bulkOperation", new Class[] {BulkOperationMode.class, Collection.class}, (BulkOperationMode)null, individualEnrollments);
 
         // assert
     }
@@ -249,11 +249,11 @@ public class IndividualEnrollmentManagerTest
     public void bulkOperationThrowsOnEmptyEnrollments() throws ProvisioningServiceClientException
     {
         // arrange
-        final Collection<Enrollment> enrollments = new LinkedList<>();
+        final Collection<IndividualEnrollment> individualEnrollments = new LinkedList<>();
         IndividualEnrollmentManager individualEnrollmentManager = createIndividualEnrollmentManager();
 
         // act
-        Deencapsulation.invoke(individualEnrollmentManager, "bulkOperation", new Class[] {BulkOperationMode.class, Collection.class}, BulkOperationMode.CREATE, enrollments);
+        Deencapsulation.invoke(individualEnrollmentManager, "bulkOperation", new Class[] {BulkOperationMode.class, Collection.class}, BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
     }
@@ -261,24 +261,24 @@ public class IndividualEnrollmentManagerTest
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_014: [The bulkOperation shall send a Http request for the path `enrollments`.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_015: [The bulkOperation shall send a Http request with a body with the enrollments content in JSON format.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_016: [The bulkOperation shall send a Http request with a Http verb `POST`.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_019: [The bulkOperation shall return a BulkOperationResult object created from the body of the response for the Http request .] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_019: [The bulkOperation shall return a BulkEnrollmentOperationResult object created from the body of the response for the Http request .] */
     @Test
     public void bulkOperationRequestSucceed(
-            @Mocked final Enrollment mockedEnrollment,
-            @Mocked final BulkOperation mockedBulkOperation,
-            @Mocked final BulkOperationResult mockedBulkOperationResult) throws ProvisioningServiceClientException
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment,
+            @Mocked final BulkEnrollmentOperation mockedBulkOperation,
+            @Mocked final BulkEnrollmentOperationResult mockedBulkEnrollmentOperationResult) throws ProvisioningServiceClientException
     {
         // arrange
         final String bulkEnrollmentPath = "enrollments";
         final String bulkEnrollmentPayload = "validJson";
         final String resultPayload = "validJson";
-        final Collection<Enrollment> enrollments = new LinkedList<>();
-        enrollments.add(mockedEnrollment);
+        final Collection<IndividualEnrollment> individualEnrollments = new LinkedList<>();
+        individualEnrollments.add(mockedIndividualEnrollment);
         IndividualEnrollmentManager individualEnrollmentManager = createIndividualEnrollmentManager();
         new StrictExpectations()
         {
             {
-                mockedBulkOperation.toJson(BulkOperationMode.CREATE, enrollments);
+                mockedBulkOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
                 result = bulkEnrollmentPayload;
                 times = 1;
                 mockedContractApiHttp.request(HttpMethod.POST, bulkEnrollmentPath, null, bulkEnrollmentPayload);
@@ -287,37 +287,37 @@ public class IndividualEnrollmentManagerTest
                 mockedHttpResponse.getBody();
                 result = resultPayload.getBytes();
                 times = 1;
-                Deencapsulation.newInstance(BulkOperationResult.class, resultPayload);
-                result = mockedBulkOperationResult;
+                Deencapsulation.newInstance(BulkEnrollmentOperationResult.class, resultPayload);
+                result = mockedBulkEnrollmentOperationResult;
                 times = 1;
             }
         };
 
         // act
-        BulkOperationResult bulkOperationResult = Deencapsulation.invoke(
+        BulkEnrollmentOperationResult bulkEnrollmentOperationResult = Deencapsulation.invoke(
                 individualEnrollmentManager, "bulkOperation", 
-                new Class[] {BulkOperationMode.class, Collection.class}, BulkOperationMode.CREATE, enrollments);
+                new Class[] {BulkOperationMode.class, Collection.class}, BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
-        assertNotNull(bulkOperationResult);
+        assertNotNull(bulkEnrollmentOperationResult);
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_043: [The bulkOperation shall throws ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
     @Test (expected = ProvisioningServiceClientServiceException.class)
     public void bulkOperationRequestThrowsOnNullBody(
-            @Mocked final Enrollment mockedEnrollment,
-            @Mocked final BulkOperation mockedBulkOperation) throws ProvisioningServiceClientException
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment,
+            @Mocked final BulkEnrollmentOperation mockedBulkOperation) throws ProvisioningServiceClientException
     {
         // arrange
         final String bulkEnrollmentPath = "enrollments";
         final String bulkEnrollmentPayload = "validJson";
-        final Collection<Enrollment> enrollments = new LinkedList<>();
-        enrollments.add(mockedEnrollment);
+        final Collection<IndividualEnrollment> individualEnrollments = new LinkedList<>();
+        individualEnrollments.add(mockedIndividualEnrollment);
         IndividualEnrollmentManager individualEnrollmentManager = createIndividualEnrollmentManager();
         new StrictExpectations()
         {
             {
-                mockedBulkOperation.toJson(BulkOperationMode.CREATE, enrollments);
+                mockedBulkOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
                 result = bulkEnrollmentPayload;
                 times = 1;
                 mockedContractApiHttp.request(HttpMethod.POST, bulkEnrollmentPath, null, bulkEnrollmentPayload);
@@ -332,7 +332,7 @@ public class IndividualEnrollmentManagerTest
         // act
         Deencapsulation.invoke(
                 individualEnrollmentManager, "bulkOperation",
-                new Class[] {BulkOperationMode.class, Collection.class}, BulkOperationMode.CREATE, enrollments);
+                new Class[] {BulkOperationMode.class, Collection.class}, BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
     }
@@ -340,19 +340,19 @@ public class IndividualEnrollmentManagerTest
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_017: [The bulkOperation shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void bulkOperationRequestTransportFailed(
-            @Mocked final Enrollment mockedEnrollment,
-            @Mocked final BulkOperation mockedBulkOperation) throws ProvisioningServiceClientException
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment,
+            @Mocked final BulkEnrollmentOperation mockedBulkOperation) throws ProvisioningServiceClientException
     {
         // arrange
         final String bulkEnrollmentPath = "enrollments";
         final String bulkEnrollmentPayload = "validJson";
-        final Collection<Enrollment> enrollments = new LinkedList<>();
-        enrollments.add(mockedEnrollment);
+        final Collection<IndividualEnrollment> individualEnrollments = new LinkedList<>();
+        individualEnrollments.add(mockedIndividualEnrollment);
         IndividualEnrollmentManager individualEnrollmentManager = createIndividualEnrollmentManager();
         new StrictExpectations()
         {
             {
-                mockedBulkOperation.toJson(BulkOperationMode.CREATE, enrollments);
+                mockedBulkOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
                 result = bulkEnrollmentPayload;
                 mockedContractApiHttp.request(HttpMethod.POST, bulkEnrollmentPath, null, bulkEnrollmentPayload);
                 result = new ProvisioningServiceClientTransportException();
@@ -363,7 +363,7 @@ public class IndividualEnrollmentManagerTest
         // act
         Deencapsulation.invoke(
                 individualEnrollmentManager, "bulkOperation",
-                new Class[] {BulkOperationMode.class, Collection.class}, BulkOperationMode.CREATE, enrollments);
+                new Class[] {BulkOperationMode.class, Collection.class}, BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
     }
@@ -371,19 +371,19 @@ public class IndividualEnrollmentManagerTest
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_018: [The bulkOperation shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientException.class)
     public void bulkOperationServiceReportedFail(
-            @Mocked final Enrollment mockedEnrollment,
-            @Mocked final BulkOperation mockedBulkOperation) throws ProvisioningServiceClientException
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment,
+            @Mocked final BulkEnrollmentOperation mockedBulkOperation) throws ProvisioningServiceClientException
     {
         // arrange
         final String bulkEnrollmentPath = "enrollments";
         final String bulkEnrollmentPayload = "validJson";
-        final Collection<Enrollment> enrollments = new LinkedList<>();
-        enrollments.add(mockedEnrollment);
+        final Collection<IndividualEnrollment> individualEnrollments = new LinkedList<>();
+        individualEnrollments.add(mockedIndividualEnrollment);
         IndividualEnrollmentManager individualEnrollmentManager = createIndividualEnrollmentManager();
         new StrictExpectations()
         {
             {
-                mockedBulkOperation.toJson(BulkOperationMode.CREATE, enrollments);
+                mockedBulkOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
                 result = bulkEnrollmentPayload;
                 mockedContractApiHttp.request(HttpMethod.POST, bulkEnrollmentPath, null, bulkEnrollmentPayload);
                 result = new ProvisioningServiceClientBadFormatException();
@@ -394,7 +394,7 @@ public class IndividualEnrollmentManagerTest
         // act
         Deencapsulation.invoke(
                 individualEnrollmentManager, "bulkOperation",
-                new Class[] {BulkOperationMode.class, Collection.class}, BulkOperationMode.CREATE, enrollments);
+                new Class[] {BulkOperationMode.class, Collection.class}, BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
     }
@@ -427,10 +427,10 @@ public class IndividualEnrollmentManagerTest
 
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_021: [The get shall send a Http request for the path `enrollments/[registrationId]`.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_022: [The get shall send a Http request with a Http verb `GET`.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_025: [The get shall return an Enrollment object created from the body of the response for the Http request .] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_025: [The get shall return an IndividualEnrollment object created from the body of the response for the Http request .] */
     @Test
     public void getRequestSucceed(
-            @Mocked final Enrollment mockedEnrollmentResponse)
+            @Mocked final IndividualEnrollment mockedIndividualEnrollmentResponse)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -447,14 +447,14 @@ public class IndividualEnrollmentManagerTest
                 mockedHttpResponse.getBody();
                 result = resultPayload.getBytes();
                 times = 1;
-                Deencapsulation.newInstance(Enrollment.class, resultPayload);
-                result = mockedEnrollmentResponse;
+                Deencapsulation.newInstance(IndividualEnrollment.class, resultPayload);
+                result = mockedIndividualEnrollmentResponse;
                 times = 1;
             }
         };
 
         // act
-        Enrollment response = Deencapsulation.invoke(individualEnrollmentManager, "get", new Class[] {String.class}, registrationId);
+        IndividualEnrollment response = Deencapsulation.invoke(individualEnrollmentManager, "get", new Class[] {String.class}, registrationId);
 
         // assert
         assertNotNull(response);
@@ -543,7 +543,7 @@ public class IndividualEnrollmentManagerTest
         IndividualEnrollmentManager individualEnrollmentManager = createIndividualEnrollmentManager();
 
         // act
-        Deencapsulation.invoke(individualEnrollmentManager, "delete", new Class[] {Enrollment.class}, (Enrollment)null);
+        Deencapsulation.invoke(individualEnrollmentManager, "delete", new Class[] {IndividualEnrollment.class}, (IndividualEnrollment)null);
 
         // assert
     }
@@ -553,7 +553,7 @@ public class IndividualEnrollmentManagerTest
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_029: [The delete shall send a Http request with a Http verb `DELETE`.] */
     @Test
     public void deleteEnrollmentRequestWithEtagSucceed(
-            @Mocked final Enrollment mockedEnrollment)
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -564,10 +564,10 @@ public class IndividualEnrollmentManagerTest
         new StrictExpectations()
         {
             {
-                mockedEnrollment.getRegistrationId();
+                mockedIndividualEnrollment.getRegistrationId();
                 result = registrationId;
                 times = 1;
-                mockedEnrollment.getEtag();
+                mockedIndividualEnrollment.getEtag();
                 result = eTag;
                 times = 2;
                 mockedContractApiHttp.request(HttpMethod.DELETE, enrollmentPath, (Map)any, "");
@@ -577,7 +577,7 @@ public class IndividualEnrollmentManagerTest
         };
 
         // act
-        Deencapsulation.invoke(individualEnrollmentManager, "delete", new Class[] {Enrollment.class}, mockedEnrollment);
+        Deencapsulation.invoke(individualEnrollmentManager, "delete", new Class[] {IndividualEnrollment.class}, mockedIndividualEnrollment);
 
         // assert
     }
@@ -585,7 +585,7 @@ public class IndividualEnrollmentManagerTest
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_028: [If the enrollment contains eTag, the delete shall send a Http request with `If-Match` the eTag in the header.] */
     @Test
     public void deleteEnrollmentRequestWithoutEtagSucceed(
-            @Mocked final Enrollment mockedEnrollment)
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -595,10 +595,10 @@ public class IndividualEnrollmentManagerTest
         new StrictExpectations()
         {
             {
-                mockedEnrollment.getRegistrationId();
+                mockedIndividualEnrollment.getRegistrationId();
                 result = registrationId;
                 times = 1;
-                mockedEnrollment.getEtag();
+                mockedIndividualEnrollment.getEtag();
                 result = null;
                 times = 1;
                 mockedContractApiHttp.request(HttpMethod.DELETE, enrollmentPath, (Map)any, "");
@@ -608,7 +608,7 @@ public class IndividualEnrollmentManagerTest
         };
 
         // act
-        Deencapsulation.invoke(individualEnrollmentManager, "delete", new Class[] {Enrollment.class}, mockedEnrollment);
+        Deencapsulation.invoke(individualEnrollmentManager, "delete", new Class[] {IndividualEnrollment.class}, mockedIndividualEnrollment);
 
         // assert
     }
@@ -616,7 +616,7 @@ public class IndividualEnrollmentManagerTest
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_030: [The delete shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void deleteEnrollmentRequestTransportFailed(
-            @Mocked final Enrollment mockedEnrollment)
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -627,9 +627,9 @@ public class IndividualEnrollmentManagerTest
         new NonStrictExpectations()
         {
             {
-                mockedEnrollment.getRegistrationId();
+                mockedIndividualEnrollment.getRegistrationId();
                 result = registrationId;
-                mockedEnrollment.getEtag();
+                mockedIndividualEnrollment.getEtag();
                 result = eTag;
                 mockedContractApiHttp.request(HttpMethod.DELETE, enrollmentPath, (Map)any, "");
                 result = new ProvisioningServiceClientTransportException();
@@ -638,7 +638,7 @@ public class IndividualEnrollmentManagerTest
         };
 
         // act
-        Deencapsulation.invoke(individualEnrollmentManager, "delete", new Class[] {Enrollment.class}, mockedEnrollment);
+        Deencapsulation.invoke(individualEnrollmentManager, "delete", new Class[] {IndividualEnrollment.class}, mockedIndividualEnrollment);
 
         // assert
     }
@@ -646,7 +646,7 @@ public class IndividualEnrollmentManagerTest
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_031: [The delete shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientException.class)
     public void deleteEnrollmentServiceReportedFail(
-            @Mocked final Enrollment mockedEnrollment)
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -657,9 +657,9 @@ public class IndividualEnrollmentManagerTest
         new NonStrictExpectations()
         {
             {
-                mockedEnrollment.getRegistrationId();
+                mockedIndividualEnrollment.getRegistrationId();
                 result = registrationId;
-                mockedEnrollment.getEtag();
+                mockedIndividualEnrollment.getEtag();
                 result = eTag;
                 mockedContractApiHttp.request(HttpMethod.DELETE, enrollmentPath, (Map)any, "");
                 result = new ProvisioningServiceClientBadFormatException();
@@ -668,7 +668,7 @@ public class IndividualEnrollmentManagerTest
         };
 
         // act
-        Deencapsulation.invoke(individualEnrollmentManager, "delete", new Class[] {Enrollment.class}, mockedEnrollment);
+        Deencapsulation.invoke(individualEnrollmentManager, "delete", new Class[] {IndividualEnrollment.class}, mockedIndividualEnrollment);
 
         // assert
     }

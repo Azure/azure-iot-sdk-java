@@ -27,7 +27,7 @@ public enum QueryResultType
 
     /**
      * The query result in a list of enrollments. You shall cast the
-     * Objects in the items using {@link Enrollment}.
+     * Objects in the items using {@link IndividualEnrollment}.
      */
     @SerializedName("enrollment")
     ENROLLMENT,
@@ -41,7 +41,7 @@ public enum QueryResultType
 
     /**
      * The query result in a list of enrollments. You shall cast the
-     * Objects in the items using {@link DeviceRegistrationStatus}.
+     * Objects in the items using {@link DeviceRegistrationState}.
      */
     @SerializedName("deviceRegistration")
     DEVICE_REGISTRATION;

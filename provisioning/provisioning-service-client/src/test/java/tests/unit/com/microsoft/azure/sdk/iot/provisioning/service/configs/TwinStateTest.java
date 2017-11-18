@@ -5,6 +5,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.TwinCollection;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.TwinProperties;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.TwinState;
 import mockit.Deencapsulation;
 import org.junit.Test;
@@ -45,10 +46,12 @@ public class TwinStateTest
                     "\"tag2\":\"val2\"," +
                     "\"tag3\":\"val3\"" +
                 "}," +
-                "\"desiredProperties\":{" +
-                    "\"prop1\":\"val1\"," +
-                    "\"prop2\":\"val2\"," +
-                    "\"prop3\":\"val3\"" +
+                "\"properties\":{" +
+                    "\"desired\":{" +
+                        "\"prop1\":\"val1\"," +
+                        "\"prop2\":\"val2\"," +
+                        "\"prop3\":\"val3\"" +
+                    "}" +
                 "}" +
             "}";
 
@@ -63,14 +66,16 @@ public class TwinStateTest
 
     private final static String JSON_ONLY_PROPERTIES =
             "{" +
-                "\"desiredProperties\":{" +
-                    "\"prop1\":\"val1\"," +
-                    "\"prop2\":\"val2\"," +
-                    "\"prop3\":\"val3\"" +
+                "\"properties\":{" +
+                    "\"desired\":{" +
+                        "\"prop1\":\"val1\"," +
+                        "\"prop2\":\"val2\"," +
+                        "\"prop3\":\"val3\"" +
+                    "}" +
                 "}" +
             "}";
 
-    /* SRS_TWIN_STATE_21_001: [The constructor shall store the provided tags and desiredProperties.] */
+    /* SRS_TWIN_STATE_21_001: [The constructor shall store the provided tags and desiredProperty.] */
     @Test
     public void constructorStoreTagsAndProperties()
     {
@@ -81,10 +86,12 @@ public class TwinStateTest
 
         // assert
         assertEquals(TAGS, Deencapsulation.getField(twinState, "tags"));
-        assertEquals(PROPERTIES, Deencapsulation.getField(twinState, "desiredProperties"));
+        TwinProperties propertiesResult = Deencapsulation.getField(twinState, "properties");
+        assertNotNull(propertiesResult);
+        assertEquals(PROPERTIES, propertiesResult.getDesired());
     }
 
-    /* SRS_TWIN_STATE_21_001: [The constructor shall store the provided tags and desiredProperties.] */
+    /* SRS_TWIN_STATE_21_001: [The constructor shall store the provided tags and desiredProperty.] */
     @Test
     public void constructorSucceedOnNullTags()
     {
@@ -97,9 +104,9 @@ public class TwinStateTest
         assertNull(Deencapsulation.getField(twinState, "tags"));
     }
 
-    /* SRS_TWIN_STATE_21_001: [The constructor shall store the provided tags and desiredProperties.] */
+    /* SRS_TWIN_STATE_21_001: [The constructor shall store the provided tags and desiredProperty.] */
     @Test
-    public void constructorSucceedOnNullDesiredProperties()
+    public void constructorSucceedOnNullDesiredProperty()
     {
         // arrange
 
@@ -107,7 +114,7 @@ public class TwinStateTest
         TwinState twinState = new TwinState(TAGS, null);
 
         // assert
-        assertNull(Deencapsulation.getField(twinState, "desiredProperties"));
+        assertNull(Deencapsulation.getField(twinState, "properties"));
     }
 
     /* SRS_TWIN_STATE_21_002: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
@@ -138,7 +145,7 @@ public class TwinStateTest
         Helpers.assertJson(jsonElement.toString(), JSON_ONLY_PROPERTIES);
     }
 
-    /* SRS_TWIN_STATE_21_004: [If the desiredProperties is null, the toJsonElement shall not include the `desiredProperties` in the final JSON.] */
+    /* SRS_TWIN_STATE_21_004: [If the properties is null, the toJsonElement shall not include the `properties` in the final JSON.] */
     @Test
     public void toJsonElementReturnsTags()
     {
@@ -153,7 +160,7 @@ public class TwinStateTest
     }
 
     /* SRS_TWIN_STATE_21_003: [If the tags is null, the toJsonElement shall not include the `tags` in the final JSON.] */
-    /* SRS_TWIN_STATE_21_004: [If the desiredProperties is null, the toJsonElement shall not include the `desiredProperties` in the final JSON.] */
+    /* SRS_TWIN_STATE_21_004: [If the properties is null, the toJsonElement shall not include the `properties` in the final JSON.] */
     @Test
     public void toJsonElementReturnsEmptyJson()
     {
@@ -168,7 +175,7 @@ public class TwinStateTest
     }
 
     /* SRS_TWIN_STATE_21_005: [The getTags shall return a TwinCollection with the stored tags.] */
-    /* SRS_TWIN_STATE_21_006: [The getDesiredProperties shall return a TwinCollection with the stored desiredProperties.] */
+    /* SRS_TWIN_STATE_21_006: [The getDesiredProperty shall return a TwinCollection with the stored desired property.] */
     @Test
     public void gettersSucceed()
     {
@@ -177,7 +184,7 @@ public class TwinStateTest
 
         // act - assert
         assertEquals(TAGS, twinState.getTags());
-        assertEquals(PROPERTIES, twinState.getDesiredProperties());
+        assertEquals(PROPERTIES, twinState.getDesiredProperty());
     }
 
     /* SRS_TWIN_STATE_21_007: [The toString shall return a String with the information in this class in a pretty print JSON.] */
@@ -208,9 +215,9 @@ public class TwinStateTest
         Helpers.assertJson(result, JSON_ONLY_PROPERTIES);
     }
 
-    /* SRS_TWIN_STATE_21_009: [If the desiredProperties is null, the JSON shall not include the `desiredProperties`.] */
+    /* SRS_TWIN_STATE_21_009: [If the property is null, the JSON shall not include the `properties`.] */
     @Test
-    public void toStringSucceedOnDesiredPropertiesNull()
+    public void toStringSucceedOnDesiredPropertyNull()
     {
         // arrange
         TwinState twinState = new TwinState(TAGS, null);

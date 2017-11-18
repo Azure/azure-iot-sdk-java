@@ -59,7 +59,7 @@ public class EnrollmentGroupTest
         Attestation mockedAttestation;
         String mockedIotHubHostName;
         ProvisioningStatus mockedProvisioningStatus;
-        TwinState mockedInitialTwinState;
+        TwinState mockedInitialTwin;
         String mockedCreatedDateTimeUtc;
         String mockedLastUpdatedDateTimeUtc;
         String mockedEtag;
@@ -108,9 +108,9 @@ public class EnrollmentGroupTest
         }
 
         @Mock
-        public void setInitialTwinState(TwinState initialTwinState)
+        public void setInitialTwin(TwinState initialTwin)
         {
-            mockedInitialTwinState = initialTwinState;
+            mockedInitialTwin = initialTwin;
         }
 
         @Mock
@@ -239,9 +239,11 @@ public class EnrollmentGroupTest
                 "      }\n" +
                 "    }\n" +
                 "  },\n" +
-                "  \"initialTwinState\" : {\n" +
-                "    \"desiredProperties\": {\n" +
-                "      \"prop1\": \"value1\"\n" +
+                "  \"initialTwin\" : {\n" +
+                "    \"properties\": {\n" +
+                "      \"desired\": {\n" +
+                "        \"prop1\": \"value1\"\n" +
+                "      }\n" +
                 "    }\n" +
                 "  }," +
                 "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
@@ -259,13 +261,13 @@ public class EnrollmentGroupTest
         assertEquals(ProvisioningStatus.ENABLED, enrollmentGroup.getProvisioningStatus());
         Helpers.assertDateWithError(enrollmentGroup.getCreatedDateTimeUtc(), VALID_DATE_AS_STRING);
         Helpers.assertDateWithError(enrollmentGroup.getLastUpdatedDateTimeUtc(), VALID_DATE_AS_STRING);
-        TwinState twinState = enrollmentGroup.getInitialTwinState();
+        TwinState twinState = enrollmentGroup.getInitialTwin();
         assertNotNull(twinState);
-        assertEquals("value1", twinState.getDesiredProperties().get("prop1"));
+        assertEquals("value1", twinState.getDesiredProperty().get("prop1"));
         Attestation attestation = enrollmentGroup.getAttestation();
         assertTrue("attestation is not x509", (attestation instanceof X509Attestation));
         X509Attestation x509Attestation = (X509Attestation)attestation;
-        X509CertificateWithInfo primary = x509Attestation.getIntermediateCertificatesChain().getPrimary();
+        X509CertificateWithInfo primary = x509Attestation.getRootCertificates().getPrimary();
         assertEquals(PUBLIC_KEY_CERTIFICATE_STRING, primary.getCertificate());
         X509CertificateInfo info = primary.getInfo();
         assertEquals(VALID_ENROLLMENT_GROUP_ID, info.getSha256Thumbprint());
@@ -300,9 +302,9 @@ public class EnrollmentGroupTest
         assertNotNull(enrollmentGroup.mockedAttestationMechanism);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwinState`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
+    /* SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwin`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
     @Test
-    public void constructorWithJsonSetsInitialTwinStateUsesSetters()
+    public void constructorWithJsonSetsInitialTwinUsesSetters()
     {
         // arrange
         final String json = "{\n" +
@@ -317,9 +319,11 @@ public class EnrollmentGroupTest
                 "      }\n" +
                 "    }\n" +
                 "  },\n" +
-                "  \"initialTwinState\" : {\n" +
-                "    \"desiredProperties\": {\n" +
-                "      \"prop1\": \"value1\"\n" +
+                "  \"initialTwin\" : {\n" +
+                "    \"properties\": {\n" +
+                "      \"desired\": {\n" +
+                "        \"prop1\": \"value1\"\n" +
+                "      }\n" +
                 "    }\n" +
                 "  }," +
                 "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
@@ -332,14 +336,14 @@ public class EnrollmentGroupTest
         MockEnrollmentGroup enrollmentGroup = new MockEnrollmentGroup(json);
 
         // assert
-        assertNotNull(enrollmentGroup.mockedInitialTwinState);
+        assertNotNull(enrollmentGroup.mockedInitialTwin);
         assertEquals(VALID_IOTHUB_HOST_NAME, enrollmentGroup.mockedIotHubHostName);
         assertEquals(ProvisioningStatus.ENABLED, enrollmentGroup.mockedProvisioningStatus);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwinState`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
+    /* SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwin`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
     @Test
-    public void constructorWithJsonSetsInitialTwinStateSucceedOnNull()
+    public void constructorWithJsonSetsInitialTwinSucceedOnNull()
     {
         // arrange
         final String json = "{\n" +
@@ -360,7 +364,7 @@ public class EnrollmentGroupTest
         MockEnrollmentGroup enrollmentGroup = new MockEnrollmentGroup(json);
 
         // assert
-        assertNull(enrollmentGroup.mockedInitialTwinState);
+        assertNull(enrollmentGroup.mockedInitialTwin);
         assertNull(enrollmentGroup.mockedIotHubHostName);
         assertNull(enrollmentGroup.mockedProvisioningStatus);
     }
@@ -588,13 +592,13 @@ public class EnrollmentGroupTest
         Helpers.assertJson(result.toString(), json);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_012: [If the initialTwinState is not null, the toJsonElement shall include its content in the final JSON.] */
+    /* SRS_ENROLLMENT_GROUP_21_012: [If the initialTwin is not null, the toJsonElement shall include its content in the final JSON.] */
     @Test
     public void toJsonElementSimpleEnrollmentWithTwin()
     {
         // arrange
         EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
-        enrollmentGroup.setInitialTwinState(new TwinState(
+        enrollmentGroup.setInitialTwin(new TwinState(
                 new TwinCollection() {{
                     put("tag1", "valueTag1");
                     put("tag2", "valueTag2");
@@ -616,14 +620,16 @@ public class EnrollmentGroupTest
                 "      }\n" +
                 "    }\n" +
                 "  },\n" +
-                "  \"initialTwinState\" : {\n" +
+                "  \"initialTwin\" : {\n" +
                 "    \"tags\": {\n" +
                 "      \"tag1\": \"valueTag1\",\n" +
                 "      \"tag2\": \"valueTag2\"\n" +
                 "    },\n" +
-                "    \"desiredProperties\": {\n" +
-                "      \"prop1\": \"value1\",\n" +
-                "      \"prop2\": \"value2\"\n" +
+                "    \"properties\": {\n" +
+                "      \"desired\": {\n" +
+                "        \"prop1\": \"value1\",\n" +
+                "        \"prop2\": \"value2\"\n" +
+                "      }\n" +
                 "    }\n" +
                 "  }," +
                 "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
@@ -643,7 +649,7 @@ public class EnrollmentGroupTest
     {
         // arrange
         EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
-        enrollmentGroup.setInitialTwinState(new TwinState(
+        enrollmentGroup.setInitialTwin(new TwinState(
                 new TwinCollection() {{
                     put("tag1", "valueTag1");
                     put("tag2", "valueTag2");
@@ -665,14 +671,16 @@ public class EnrollmentGroupTest
                 "      }\n" +
                 "    }\n" +
                 "  },\n" +
-                "  \"initialTwinState\" : {\n" +
+                "  \"initialTwin\" : {\n" +
                 "    \"tags\": {\n" +
                 "      \"tag1\": \"valueTag1\",\n" +
                 "      \"tag2\": \"valueTag2\"\n" +
                 "    },\n" +
-                "    \"desiredProperties\": {\n" +
-                "      \"prop1\": \"value1\",\n" +
-                "      \"prop2\": \"value2\"\n" +
+                "    \"properties\": {\n" +
+                "      \"desired\": {\n" +
+                "        \"prop1\": \"value1\",\n" +
+                "        \"prop2\": \"value2\"\n" +
+                "      }\n" +
                 "    }\n" +
                 "  }," +
                 "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
@@ -689,7 +697,7 @@ public class EnrollmentGroupTest
     /* SRS_ENROLLMENT_GROUP_21_014: [The getEnrollmentGroupId shall return a String with the stored enrollmentGroupId.] */
     /* SRS_ENROLLMENT_GROUP_21_017: [The getAttestation shall return a Attestation with the stored attestation.] */
     /* SRS_ENROLLMENT_GROUP_21_020: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
-    /* SRS_ENROLLMENT_GROUP_21_023: [The getInitialTwinState shall return a TwinState with the stored initialTwinState.] */
+    /* SRS_ENROLLMENT_GROUP_21_023: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
     /* SRS_ENROLLMENT_GROUP_21_026: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
     /* SRS_ENROLLMENT_GROUP_21_029: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
     /* SRS_ENROLLMENT_GROUP_21_032: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
@@ -710,14 +718,16 @@ public class EnrollmentGroupTest
                 "      }\n" +
                 "    }\n" +
                 "  },\n" +
-                "  \"initialTwinState\" : {\n" +
+                "  \"initialTwin\" : {\n" +
                 "    \"tags\": {\n" +
                 "      \"tag1\": \"valueTag1\",\n" +
                 "      \"tag2\": \"valueTag2\"\n" +
                 "    },\n" +
-                "    \"desiredProperties\": {\n" +
-                "      \"prop1\": \"value1\",\n" +
-                "      \"prop2\": \"value2\"\n" +
+                "    \"properties\": {\n" +
+                "      \"desired\": {\n" +
+                "        \"prop1\": \"value1\",\n" +
+                "        \"prop2\": \"value2\"\n" +
+                "      }\n" +
                 "    }\n" +
                 "  }," +
                 "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
@@ -732,7 +742,7 @@ public class EnrollmentGroupTest
         assertEquals(VALID_ENROLLMENT_GROUP_ID, enrollmentGroup.getEnrollmentGroupId());
         assertNotNull(enrollmentGroup.getAttestation());
         assertEquals(VALID_IOTHUB_HOST_NAME, enrollmentGroup.getIotHubHostName());
-        assertNotNull(enrollmentGroup.getInitialTwinState());
+        assertNotNull(enrollmentGroup.getInitialTwin());
         assertEquals(ProvisioningStatus.ENABLED, enrollmentGroup.getProvisioningStatus());
         Helpers.assertDateWithError(enrollmentGroup.getCreatedDateTimeUtc(), VALID_DATE_AS_STRING);
         Helpers.assertDateWithError(enrollmentGroup.getLastUpdatedDateTimeUtc(), VALID_DATE_AS_STRING);
@@ -857,7 +867,7 @@ public class EnrollmentGroupTest
             {
                 Deencapsulation.invoke(mockedAttestationMechanismMechanism, "getAttestation");
                 result = mockedX509Attestation;
-                mockedX509Attestation.getIntermediateCertificatesChain();
+                mockedX509Attestation.getRootCertificates();
                 result = null;
             }
         };
@@ -884,7 +894,7 @@ public class EnrollmentGroupTest
             {
                 Deencapsulation.invoke(mockedAttestationMechanismMechanism, "getAttestation");
                 result = mockedX509Attestation;
-                mockedX509Attestation.getIntermediateCertificatesChain();
+                mockedX509Attestation.getRootCertificates();
                 result = mockedX509Certificates;
             }
         };
@@ -936,7 +946,7 @@ public class EnrollmentGroupTest
         new NonStrictExpectations()
         {
             {
-                mockedX509Attestation.getIntermediateCertificatesChain();
+                mockedX509Attestation.getRootCertificates();
                 result = null;
             }
         };
@@ -960,7 +970,7 @@ public class EnrollmentGroupTest
         new NonStrictExpectations()
         {
             {
-                mockedX509Attestation.getIntermediateCertificatesChain();
+                mockedX509Attestation.getRootCertificates();
                 result = mockedX509Certificates;
             }
         };
@@ -1059,32 +1069,32 @@ public class EnrollmentGroupTest
         assertEquals(newHostName, Deencapsulation.getField(enrollmentGroup, "iotHubHostName"));
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_024: [The setInitialTwinState shall throw IllegalArgumentException if the initialTwinState is null.] */
+    /* SRS_ENROLLMENT_GROUP_21_024: [The setInitialTwin shall throw IllegalArgumentException if the initialTwin is null.] */
     @Test (expected = IllegalArgumentException.class)
-    public void setInitialTwinStateThrowsOnNull()
+    public void setInitialTwinThrowsOnNull()
     {
         // arrange
         EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
 
         // act
-        enrollmentGroup.setInitialTwinState(null);
+        enrollmentGroup.setInitialTwin(null);
 
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_025: [The setInitialTwinState shall store the provided initialTwinState.] */
+    /* SRS_ENROLLMENT_GROUP_21_025: [The setInitialTwin shall store the provided initialTwin.] */
     @Test
-    public void setInitialTwinStateSucceed(@Mocked final TwinState mockedTwinState)
+    public void setInitialTwinSucceed(@Mocked final TwinState mockedTwinState)
     {
         // arrange
         EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
-        assertNotEquals(mockedTwinState, Deencapsulation.getField(enrollmentGroup, "initialTwinState"));
+        assertNotEquals(mockedTwinState, Deencapsulation.getField(enrollmentGroup, "initialTwin"));
 
         // act
-        enrollmentGroup.setInitialTwinState(mockedTwinState);
+        enrollmentGroup.setInitialTwin(mockedTwinState);
 
         // assert
-        assertEquals(mockedTwinState, Deencapsulation.getField(enrollmentGroup, "initialTwinState"));
+        assertEquals(mockedTwinState, Deencapsulation.getField(enrollmentGroup, "initialTwin"));
     }
 
     /* SRS_ENROLLMENT_GROUP_21_027: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */

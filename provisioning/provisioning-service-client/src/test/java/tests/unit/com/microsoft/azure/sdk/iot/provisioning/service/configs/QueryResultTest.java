@@ -184,7 +184,7 @@ public class QueryResultTest
         // assert
     }
 
-    /* SRS_QUERY_RESULT_21_004: [If the type is `enrollment`, the constructor shall parse the body as Enrollment[].] */
+    /* SRS_QUERY_RESULT_21_004: [If the type is `enrollment`, the constructor shall parse the body as IndividualEnrollment[].] */
     /* SRS_QUERY_RESULT_21_011: [The constructor shall store the provided parameters `type` and `continuationToken`.] */
     @Test
     public void constructorEnrollmentSucceed()
@@ -197,7 +197,7 @@ public class QueryResultTest
         // assert
         assertEquals(QueryResultType.ENROLLMENT, Deencapsulation.getField(queryResult, "type"));
         assertEquals(VALID_CONTINUATION_TOKEN, Deencapsulation.getField(queryResult, "continuationToken"));
-        Enrollment[] items = (Enrollment[]) Deencapsulation.getField(queryResult, "items");
+        IndividualEnrollment[] items = (IndividualEnrollment[]) Deencapsulation.getField(queryResult, "items");
         assertEquals(2, items.length);
     }
 
@@ -218,7 +218,7 @@ public class QueryResultTest
         assertEquals(2, items.length);
     }
 
-    /* SRS_QUERY_RESULT_21_006: [If the type is `deviceRegistration`, the constructor shall parse the body as DeviceRegistrationStatus[].] */
+    /* SRS_QUERY_RESULT_21_006: [If the type is `deviceRegistration`, the constructor shall parse the body as DeviceRegistrationState[].] */
     /* SRS_QUERY_RESULT_21_011: [The constructor shall store the provided parameters `type` and `continuationToken`.] */
     @Test
     public void constructorDeviceRegistrationSucceed()
@@ -231,7 +231,7 @@ public class QueryResultTest
         // assert
         assertEquals(QueryResultType.DEVICE_REGISTRATION, Deencapsulation.getField(queryResult, "type"));
         assertEquals(VALID_CONTINUATION_TOKEN, Deencapsulation.getField(queryResult, "continuationToken"));
-        DeviceRegistrationStatus[] items = (DeviceRegistrationStatus[]) Deencapsulation.getField(queryResult, "items");
+        DeviceRegistrationState[] items = (DeviceRegistrationState[]) Deencapsulation.getField(queryResult, "items");
         assertEquals(2, items.length);
     }
 
@@ -348,7 +348,7 @@ public class QueryResultTest
         // act - assert
         assertEquals(QueryResultType.ENROLLMENT, queryResult.getType());
         assertEquals(VALID_CONTINUATION_TOKEN, queryResult.getContinuationToken());
-        Enrollment[] items = (Enrollment[]) queryResult.getItems();
+        IndividualEnrollment[] items = (IndividualEnrollment[]) queryResult.getItems();
         assertEquals(2, items.length);
     }
 

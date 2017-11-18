@@ -15,7 +15,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for Device Provisioning Service Enrollment serializer
+ * Unit tests for Device Provisioning Service IndividualEnrollment serializer
  * 100% methods, 100% lines covered
  */
 public class AttestationMechanismTest
