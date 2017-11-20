@@ -117,11 +117,10 @@ public class IotHubSSLContextTest
 
         //assert
         generateSSLContextVerifications();
-        assertNotNull(Deencapsulation.invoke(testContext, "getSSlContext"));
+        assertNotNull(Deencapsulation.invoke(testContext, "getSSLContext"));
         testCollection.remove(mockedCertificate);
 
     }
-
 
     //Tests_SRS_IOTHUBSSLCONTEXT_25_017: [*This method shall return the value of sslContext.**]**
     @Test
@@ -134,14 +133,13 @@ public class IotHubSSLContextTest
         IotHubSSLContext testContext = Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {});
 
         //act
-        SSLContext testSSLContext = Deencapsulation.invoke(testContext, "getSSlContext");
+        SSLContext testSSLContext = Deencapsulation.invoke(testContext, "getSSLContext");
 
         //assert
         generateSSLContextVerifications();
         assertNotNull(testSSLContext);
         testCollection.remove(mockedCertificate);
     }
-
 
     //Tests_SRS_IOTHUBSSLCONTEXT_34_018: [This constructor shall generate a temporary password to protect the created keystore holding the private key.]
     //Tests_SRS_IOTHUBSSLCONTEXT_34_019: [The constructor shall create default SSL context for TLSv1.2.]
@@ -471,5 +469,4 @@ public class IotHubSSLContextTest
             }
         };
     }
-
 }

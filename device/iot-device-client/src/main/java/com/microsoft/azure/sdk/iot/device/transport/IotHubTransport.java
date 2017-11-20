@@ -3,13 +3,11 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStateCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubResponseCallback;
-import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.*;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.List;
 
 /** An interface for an IoT Hub transport. */
 public interface IotHubTransport extends Closeable
@@ -22,6 +20,16 @@ public interface IotHubTransport extends Closeable
      * established.
      */
     void open() throws IOException;
+
+    /**
+     * Establishes a communication channel usingmultiplexing with an IoT Hub. If a channel is
+     * already open, the function shall do nothing.
+     *
+     * @param deviceClientList the list of clients use the same transport.
+     * @throws IOException if a communication channel cannot be
+     * established.
+     */
+    void multiplexOpen(List<DeviceClient> deviceClientList) throws IOException;
 
     /**
      * Closes all resources used to communicate with an IoT Hub. Once {@code close()} is

@@ -1405,32 +1405,7 @@ public class MqttTest {
         assertEquals("\"", receivedMessage.getProperties()[2].getValue());
         assertEquals("=", receivedMessage.getProperties()[3].getValue());
     }
-    /*
-    **Tests_SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
-     */
-    @Test(expected = IOException.class)
-    public void unsubscribeThrowsExceptionWhenUserSuppliedSASTokenHasExpired() throws IOException, MqttException
-    {
-        //arrange
-        Mqtt mockMqtt = null;
 
-        baseConstructorExpectations();
-        new NonStrictExpectations()
-        {
-            {
-                mockMqttAsyncClient.isConnected();
-                result = true;
-            }
-        };
-
-        mockMqtt = instantiateMqtt(true);
-        Deencapsulation.invoke(mockMqtt, "connect");
-
-        //act
-        Deencapsulation.setField(mockMqtt,"userSpecifiedSASTokenExpiredOnRetry",true);
-        Deencapsulation.invoke(mockMqtt, "unsubscribe", MOCK_PARSE_TOPIC);
-    }
-   
     /*
     ** Codes_SRS_Mqtt_99_50: [**If deviceConfig is null, the function shall throw an IllegalArgumentException**]**
     */

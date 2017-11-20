@@ -110,6 +110,11 @@ public class Message
     /// </summary>
     private MessageType messageType;
 
+    /// <summary>
+    /// [Optional] Used to specify the sender device client for multiplexing scenarios
+    /// </summary>
+    private IotHubConnectionString iotHubConnectionString;
+
     private String deliveryAcknowledgement;
 
     /**
@@ -459,7 +464,8 @@ public class Message
      * Getter for the diagnostic property data
      * @return the diagnostic property data
      */
-    public DiagnosticPropertyData getDiagnosticPropertyData() {
+    public DiagnosticPropertyData getDiagnosticPropertyData()
+    {
         // Codes_SRS_MESSAGE_35_001: [The function shall return the message's diagnostic property data.]
         return diagnosticPropertyData;
     }
@@ -468,7 +474,8 @@ public class Message
      * Setter for the ediagnostic property data
      * @param diagnosticPropertyData The diagnostic property data
      */
-    public void setDiagnosticPropertyData(DiagnosticPropertyData diagnosticPropertyData) {
+    public void setDiagnosticPropertyData(DiagnosticPropertyData diagnosticPropertyData)
+    {
         // Codes_SRS_MESSAGE_35_002: [The function shall set the message's diagnostic property data.]
         if (diagnosticPropertyData == null)
         {
@@ -476,4 +483,25 @@ public class Message
         }
         this.diagnosticPropertyData = diagnosticPropertyData;
     }
+
+    /*
+     * Getter for the iotHubConnectionString property
+     * @return the iotHubConnectionString value
+     */
+    public IotHubConnectionString getIotHubConnectionString()
+    {
+        // Codes_SRS_MESSAGE_12_001: [The function shall return the message's iotHubConnectionString object.]
+        return iotHubConnectionString;
+    }
+
+    /**
+     * Setter for the iotHubConnectionString type
+     * @param iotHubConnectionString The iotHubConnectionString value to set
+     */
+    public void setIotHubConnectionString(IotHubConnectionString iotHubConnectionString)
+    {
+        // Codes_SRS_MESSAGE_12_002: [The function shall set the message's iotHubConnectionString object to the provided value.]
+        this.iotHubConnectionString = iotHubConnectionString;
+    }
+
 }

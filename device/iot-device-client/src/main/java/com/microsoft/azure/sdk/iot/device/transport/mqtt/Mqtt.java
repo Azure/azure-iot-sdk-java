@@ -82,7 +82,7 @@ abstract public class Mqtt implements MqttCallback
                     /*
                     ** Codes_SRS_Mqtt_25_006: [**If the inner class MqttConnectionInfo has not been instantiated then the function shall throw IOException.**]**
                      */
-                    throw new IOException("Mqtt client should be initialised atleast once before using it");
+                    throw new IOException("Mqtt client should be initialised at least once before using it");
                 }
 
                 /*
@@ -102,7 +102,7 @@ abstract public class Mqtt implements MqttCallback
                 /*
                 ** Codes_SRS_Mqtt_25_007: [**If an MQTT connection is unable to be established for any reason, the function shall throw an IOException.**]**
                  */
-                throw new IOException("Unable to connect to service" + e.getCause());
+                throw new IOException("Unable to connect to service" + e.getCause(), e);
             }
         }
 
@@ -135,7 +135,7 @@ abstract public class Mqtt implements MqttCallback
             /*
             ** SRS_Mqtt_25_011: [**If an MQTT connection is unable to be closed for any reason, the function shall throw an IOException.**]**
             */
-            throw new IOException("Unable to disconnect" + "because " + e.getMessage() );
+            throw new IOException("Unable to disconnect" + "because " + e.getMessage(), e);
         }
     }
 
@@ -214,7 +214,7 @@ abstract public class Mqtt implements MqttCallback
                 /*
                 **Codes_SRS_Mqtt_25_047: [**If the Mqtt Client Async throws MqttException, the function shall throw an IOException with the message.**]**
                  */
-                throw new IOException("Unable to publish message on topic : " + publishTopic + " because " + e.getCause() + e.getMessage());
+                throw new IOException("Unable to publish message on topic : " + publishTopic + " because " + e.getCause() + e.getMessage(), e);
             }
             catch (InterruptedException e)
             {
@@ -222,7 +222,7 @@ abstract public class Mqtt implements MqttCallback
             }
             catch (Exception e)
             {
-                throw new IOException("Unable to publish message on topic : " + publishTopic + " " + e.getCause() + e.getMessage());
+                throw new IOException("Unable to publish message on topic : " + publishTopic + " " + e.getCause() + e.getMessage(), e);
             }
         }
     }
@@ -277,52 +277,7 @@ abstract public class Mqtt implements MqttCallback
                 /*
                 **Codes_SRS_Mqtt_25_048: [**If the Mqtt Client Async throws MqttException for any reason, the function shall throw an IOException with the message.**]**
                  */
-                throw new IOException("Unable to subscribe to topic :" + topic + " because " + e.getCause() + e.getMessage());
-            }
-        }
-    }
-
-    /**
-     * Method to unsubscribe to mqtt broker connection.
-     *
-     * @param topic the topic to unsubscribe on mqtt broker connection.
-     * @throws IOException if failed to unsubscribe the mqtt topic.
-     */
-    void unsubscribe(String topic) throws IOException
-    {
-        synchronized (this.mqttLock)
-        {
-            try
-            {
-                if (!this.mqttConnection.getMqttAsyncClient().isConnected())
-                {
-                    /*
-                    **Codes_SRS_Mqtt_25_018: [**If the MQTT connection is closed, the function shall throw an IOException with message.**]**
-                     */
-                    throw new IOException("Cannot unsubscribe when mqtt client is disconnected");
-                }
-
-                if (this.userSpecifiedSASTokenExpiredOnRetry)
-                {
-                    /*
-                    ** Codes_SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
-                     */
-                    throw new IOException("Cannot unsubscribe when user supplied SAS token has expired");
-                }
-
-                /*
-                **Codes_SRS_Mqtt_25_020: [**The function shall unsubscribe from subscribeTopic specified to the IoT Hub given in the configuration.**]**
-                 */
-                IMqttToken subToken = this.mqttConnection.getMqttAsyncClient().unsubscribe(topic);
-                subToken.waitForCompletion();
-
-            }
-            catch (MqttException e)
-            {
-                /*
-                **Codes_SRS_Mqtt_25_019: [**If the unsubscribeTopic is null or empty, the function shall throw an IOException.**]**
-                 */
-                throw new IOException("Unable to unsubscribe to topic :" + topic + "because " + e.getCause() + e.getMessage());
+                throw new IOException("Unable to subscribe to topic :" + topic + " because " + e.getCause() + e.getMessage(), e);
             }
         }
     }

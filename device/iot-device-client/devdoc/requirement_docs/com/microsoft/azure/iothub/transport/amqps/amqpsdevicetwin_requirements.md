@@ -43,6 +43,17 @@ public AmqpsDeviceTwin(String deviceId) throws IllegalArgumentException;
 **SRS_AMQPSDEVICETWIN_12_009: [**The constructor shall create a HashMap for correlationId list.**]**
 
 
+### isLinkFound
+```java
+protected Boolean isLinkFound(String linkName);
+```
+**SRS_AMQPSDEVICETWIN_12_046: [**The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.**]**
+
+**SRS_AMQPSDEVICETWIN_12_047: [**The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.**]**
+
+**SRS_AMQPSDEVICETWIN_12_048: [**The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.**]**
+
+
 ### sendMessageAndGetDeliveryHash
 
 ```java

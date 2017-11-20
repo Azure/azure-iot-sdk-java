@@ -19,7 +19,7 @@ import java.util.UUID;
 
 public class IotHubSSLContext
 {
-    private SSLContext iotHubSslContext = null;
+    private SSLContext sslContext = null;
 
     private static final String SSL_CONTEXT_INSTANCE = "TLSv1.2";
 
@@ -46,6 +46,22 @@ public class IotHubSSLContext
         //Codes_SRS_IOTHUBSSLCONTEXT_25_001: [**The constructor shall create a default certificate to be used with IotHub.**]**
         IotHubCertificateManager defaultCert = new IotHubCertificateManager();
         generateDefaultSSLContext(defaultCert);
+    }
+
+    /**
+     * Constructor that takes and saves an SSLContext object
+     * @param sslContext the ssl context to save
+     */
+    IotHubSSLContext(SSLContext sslContext)
+    {
+        if (sslContext == null)
+        {
+            //Codes_SRS_IOTHUBSSLCONTEXT_34_028: [If the provided sslContext is null, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("sslContext cannot be null");
+        }
+
+        //Codes_SRS_IOTHUBSSLCONTEXT_34_027: [This constructor shall save the provided ssl context.]
+        this.sslContext = sslContext;
     }
 
     /**
@@ -184,10 +200,10 @@ public class IotHubSSLContext
         TrustManagerFactory trustManagerFactory = generateTrustManagerFactory(certificateManager, keystore);
 
         //Codes_SRS_IOTHUBSSLCONTEXT_34_019: [The constructor shall create default SSL context for TLSv1.2.]
-        this.iotHubSslContext = SSLContext.getInstance(SSL_CONTEXT_INSTANCE);
+        this.sslContext = SSLContext.getInstance(SSL_CONTEXT_INSTANCE);
 
         //Codes_SRS_IOTHUBSSLCONTEXT_34_024: [The constructor shall initialize SSL context with its initialized keystore, its initialized TrustManagerFactory and a new secure random.]
-        this.iotHubSslContext.init(kmf.getKeyManagers(), trustManagerFactory.getTrustManagers(), new SecureRandom());
+        this.sslContext.init(kmf.getKeyManagers(), trustManagerFactory.getTrustManagers(), new SecureRandom());
     }
 
     /**
@@ -203,7 +219,7 @@ public class IotHubSSLContext
             throws KeyStoreException, IOException, CertificateException, KeyManagementException, NoSuchAlgorithmException
     {
         //Codes_SRS_IOTHUBSSLCONTEXT_25_002: [The constructor shall create default SSL context for TLSv1.2.]
-        this.iotHubSslContext = SSLContext.getInstance(SSL_CONTEXT_INSTANCE);
+        this.sslContext = SSLContext.getInstance(SSL_CONTEXT_INSTANCE);
 
         //Codes_SRS_IOTHUBSSLCONTEXT_25_003: [The constructor shall create default TrustManagerFactory with the default algorithm.]
         //Codes_SRS_IOTHUBSSLCONTEXT_25_004: [The constructor shall create default KeyStore instance with the default type and initialize it.]
@@ -212,7 +228,7 @@ public class IotHubSSLContext
         //Codes_SRS_IOTHUBSSLCONTEXT_25_007: [The constructor shall initialize SSL context with the above initialized TrustManagerFactory and a new secure random.]
         TrustManagerFactory trustManagerFactory = generateTrustManagerFactory(certificateManager, null);
 
-        this.iotHubSslContext.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
+        this.sslContext.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
     }
 
     /**
@@ -249,10 +265,10 @@ public class IotHubSSLContext
      * Getter for the IotHubSSLContext
      * @return SSLContext defined for the IotHub.
      */
-    SSLContext getSSlContext()
+    SSLContext getSSLContext()
     {
         //Codes_SRS_IOTHUBSSLCONTEXT_25_017: [*This method shall return the value of sslContext.**]**
-        return this.iotHubSslContext;
+        return this.sslContext;
     }
 
     private char[] generateTemporaryPassword()

@@ -24,6 +24,8 @@ public final class DeviceMethod
 
     private final class deviceMethodResponseCallback implements MessageCallback
     {
+        DeviceClientConfig nestedConfig = config;
+
         /*
         **Codes_SRS_DEVICEMETHOD_25_007: [**On receiving a message from IOTHub with for method invoke, the callback DeviceMethodResponseMessageCallback is triggered.**]**
          */
@@ -85,7 +87,7 @@ public final class DeviceMethod
                                     responseMessage.setStatus(String.valueOf(responseData.getStatus()));
                                     responseMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SEND_RESPONSE);
 
-                                    deviceIO.sendEventAsync(responseMessage, new deviceMethodRequestMessageCallback(), null);
+                                    deviceIO.sendEventAsync(responseMessage, new deviceMethodRequestMessageCallback(), null, nestedConfig.getIotHubConnectionString());
                                     result = IotHubMessageResult.COMPLETE;
                                 }
                                 else
@@ -206,9 +208,8 @@ public final class DeviceMethod
              */
             IotHubTransportMessage subscribeMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
             subscribeMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
-            this.deviceIO.sendEventAsync(subscribeMessage, new deviceMethodRequestMessageCallback(), null);
+            this.deviceIO.sendEventAsync(subscribeMessage, new deviceMethodRequestMessageCallback(), null, this.config.getIotHubConnectionString());
         }
 
     }
-
 }

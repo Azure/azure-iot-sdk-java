@@ -20,6 +20,19 @@ call mvn install
 if errorlevel 1 goto :eof
 cd %build-root%
 
+REM -- Java Provisioning --
+cd %build-root%\provisioning
+call mvn install
+if errorlevel 1 goto :eof
+call mvn -q javadoc:javadoc
+if errorlevel 1 goto :eof
+echo.
+echo [info] ---------------------------------------------------------------------
+echo [info] javadoc for provisioning succeeded
+echo [info] ---------------------------------------------------------------------
+echo.
+cd %build-root%
+
 REM -- Java Service Client --
 cd %build-root%\service\iot-service-client
 call mvn -q javadoc:javadoc
@@ -58,7 +71,7 @@ call mvn install
 if errorlevel 1 goto :eof
 cd %build-root%
 
-REM -- Java SDK --
+REM --Java SDK Run E2E  --
 cd %build-root%
 call mvn install -DskipITs=false
 if errorlevel 1 goto :eof

@@ -19,6 +19,7 @@ import org.apache.qpid.proton.engine.Receiver;
 import org.apache.qpid.proton.engine.Sender;
 import org.apache.qpid.proton.engine.Session;
 import org.apache.qpid.proton.message.impl.MessageImpl;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -30,9 +31,10 @@ import java.util.UUID;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.*;
 
-/* Unit tests for AmqpsDeviceTelemetry
+/**
+*  Unit tests for AmqpsDeviceTelemetryTest
 * 100% methods covered
-* 100% lines covered
+* 98% lines covered
 */
 public class AmqpsDeviceTelemetryTest
 {
@@ -56,24 +58,12 @@ public class AmqpsDeviceTelemetryTest
     @Mocked
     DeviceClientConfig mockDeviceClientConfig;
 
-    /*
-    **Tests_SRS_AMQPSDEVICETELEMETRY_12_001: [**The constructor shall throw IllegalArgumentException if the deviceId argument is null or empty.**]**
-    */
+    // Tests_SRS_AMQPSDEVICETELEMETRY_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig argument is null.]
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsIfDeviceIdNull()
     {
         //act
         AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class);
-    }
-
-    /*
-    **Tests_SRS_AMQPSDEVICETELEMETRY_12_001: [**The constructor shall throw IllegalArgumentException if the deviceId argument is null or empty.**]**
-    */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsIfDeviceIdEmpty()
-    {
-        //act
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, "");
     }
 
     /*
@@ -96,11 +86,13 @@ public class AmqpsDeviceTelemetryTest
                 result = mockUUID;
                 mockUUID.toString();
                 result = uuidStr;
+                mockDeviceClientConfig.getDeviceId();
+                result = "deviceId";
             }
         };
 
         //act
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId);
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
         String SENDER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsDeviceTelemetry, "SENDER_LINK_ENDPOINT_PATH");
         String RECEIVER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsDeviceTelemetry, "RECEIVER_LINK_ENDPOINT_PATH");
         String SENDER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceTelemetry, "SENDER_LINK_TAG_PREFIX");
@@ -123,8 +115,65 @@ public class AmqpsDeviceTelemetryTest
         assertTrue(senderLinkTag.endsWith(uuidStr));
         assertTrue(receiverLinkTag.endsWith(uuidStr));
 
-        assertTrue(senderLinkAddress.contains(deviceId));
-        assertTrue(receiverLinkAddress.contains(deviceId));
+        assertTrue(senderLinkAddress.contains(mockDeviceClientConfig.getDeviceId()));
+        assertTrue(receiverLinkAddress.contains(mockDeviceClientConfig.getDeviceId()));
+    }
+
+    // Tests_SRS_AMQPSDEVICETELEMETRY_12_026: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
+    @Test
+    public void isLinkFoundReturnsTrueIfSenderLinkTagMatches()
+    {
+        // arrange
+        String linkName = "linkName";
+
+        //act
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsDeviceTelemetry, "senderLinkTag", linkName);
+        AmqpsDeviceOperationLinkState linkSate1 = Deencapsulation.getField(amqpsDeviceTelemetry, "amqpsSendLinkState");
+        Boolean retVal = Deencapsulation.invoke(amqpsDeviceTelemetry, "isLinkFound", linkName);
+        AmqpsDeviceOperationLinkState linkSate2 = Deencapsulation.getField(amqpsDeviceTelemetry, "amqpsSendLinkState");
+
+        // assert
+        assertTrue(retVal);
+        assertEquals(linkSate1, AmqpsDeviceOperationLinkState.CLOSED);
+        assertEquals(linkSate2, AmqpsDeviceOperationLinkState.OPENED);
+    }
+
+    // Tests_SRS_AMQPSDEVICETELEMETRY_12_027: [The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.]
+    @Test
+    public void isLinkFoundReturnsTrueIfReceiverLinkTagMatches()
+    {
+        // arrange
+        String linkName = "linkName";
+
+        //act
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsDeviceTelemetry, "receiverLinkTag", linkName);
+        AmqpsDeviceOperationLinkState linkSate1 = Deencapsulation.getField(amqpsDeviceTelemetry, "amqpsRecvLinkState");
+        Boolean retVal = Deencapsulation.invoke(amqpsDeviceTelemetry, "isLinkFound", linkName);
+        AmqpsDeviceOperationLinkState linkSate2 = Deencapsulation.getField(amqpsDeviceTelemetry, "amqpsRecvLinkState");
+
+        // assert
+        assertTrue(retVal);
+        assertEquals(linkSate1, AmqpsDeviceOperationLinkState.CLOSED);
+        assertEquals(linkSate2, AmqpsDeviceOperationLinkState.OPENED);
+    }
+
+    // Tests_SRS_AMQPSDEVICETELEMETRY_12_028: [The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.]
+    @Test
+    public void isLinkFoundReturnsFalseIfThereIsNoMatch()
+    {
+        // arrange
+        String linkName = "linkName";
+
+        //act
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsDeviceTelemetry, "senderLinkTag", "xxx");
+        Deencapsulation.setField(amqpsDeviceTelemetry, "receiverLinkTag", "yyy");
+        Boolean retVal = Deencapsulation.invoke(amqpsDeviceTelemetry, "isLinkFound", linkName);
+
+        // assert
+        Assert.assertFalse(retVal);
     }
 
     /*
@@ -134,7 +183,7 @@ public class AmqpsDeviceTelemetryTest
     public void sendMessageAndGetDeliveryHashReturnsFalseIfMessageTypeIsNotDeviceTelemetry() throws IOException
     {
         //arrange
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId);
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
@@ -158,7 +207,7 @@ public class AmqpsDeviceTelemetryTest
     public void sendMessageAndGetDeliveryHashReturnsWithSuperResult() throws IOException
     {
         //arrange
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId);
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTelemetry, "openLinks", mockSession);
         final byte[] msgData = new byte[1];
         final int offset = 0;
@@ -184,7 +233,7 @@ public class AmqpsDeviceTelemetryTest
     )
     {
         //arrange
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId);
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
 
         new NonStrictExpectations()
         {
@@ -213,7 +262,7 @@ public class AmqpsDeviceTelemetryTest
         byte[] bytes = new byte[1];
         final Object messageContext = "context";
 
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId);
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTelemetry, "openLinks", mockSession);
 
         new NonStrictExpectations()
@@ -280,7 +329,7 @@ public class AmqpsDeviceTelemetryTest
 
         final ApplicationProperties applicationProperties = new ApplicationProperties(applicationPropertiesMap);
 
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId);
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
         final String AMQPS_APP_PROPERTY_PREFIX = Deencapsulation.getField(amqpsDeviceTelemetry, "AMQPS_APP_PROPERTY_PREFIX");
         final byte[] msgData = new byte[1];
         final int offset = 0;
@@ -351,7 +400,7 @@ public class AmqpsDeviceTelemetryTest
     )
     {
         //arrange
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId);
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
@@ -397,7 +446,7 @@ public class AmqpsDeviceTelemetryTest
         userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
         userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
 
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId);
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
@@ -446,7 +495,7 @@ public class AmqpsDeviceTelemetryTest
         String linkName = "receiver";
         byte[] bytes = new byte[1];
 
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId);
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTelemetry, "openLinks", mockSession);
         Deencapsulation.setField(amqpsDeviceTelemetry, "receiverLink", mockReceiver);
         Deencapsulation.setField(amqpsDeviceTelemetry, "senderLink", mockSender);
@@ -493,7 +542,7 @@ public class AmqpsDeviceTelemetryTest
         byte[] bytes = new byte[1];
 
 
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, deviceId);
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTelemetry, "openLinks", mockSession);
         Deencapsulation.setField(amqpsDeviceTelemetry, "receiverLink", mockReceiver);
         Deencapsulation.setField(amqpsDeviceTelemetry, "senderLink", mockSender);
@@ -527,6 +576,7 @@ public class AmqpsDeviceTelemetryTest
                 times = 0;
             }
         };
-    }}
+    }
+}
 
 

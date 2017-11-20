@@ -117,69 +117,6 @@ public class MqttDeviceMethodTest
     }
 
     /*
-    Tests_SRS_MqttDeviceMethod_25_015: [**stop method shall unsubscribe from method subscribe topic ($iothub/methods/POST/#) and throw IoException otherwise.**]**
-     */
-    @Test
-    public void stopSucceedsCallsUnSubscribe(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        //arrange
-        final MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection);
-        testMethod.start();
-
-        //act
-        testMethod.stop();
-
-        //assert
-
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(testMethod, "unsubscribe", anyString);
-                maxTimes = 1;
-            }
-        };
-    }
-
-    @Test
-    public void stopSucceedsDoesNotCallUnSubscribeIfStopped(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        //arrange
-        final MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection);
-        testMethod.start();
-        testMethod.stop();
-
-        //act
-        testMethod.stop();
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(testMethod, "unsubscribe", anyString);
-                maxTimes = 1;
-            }
-        };
-    }
-
-    @Test
-    public void stopSucceedsDoesNotCallUnSubscribeIfNotStarted(@Mocked final Mqtt mockMqtt) throws IOException
-    {
-        //arrange
-        final MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection);
-
-        //act
-        testMethod.stop();
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(testMethod, "unsubscribe", anyString);
-                maxTimes = 0;
-            }
-        };
-    }
-    /*
     Tests_SRS_MqttDeviceMethod_25_020: [**send method shall subscribe to topic from spec ($iothub/methods/POST/#) if the operation is of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST.**]**
      */
     @Test

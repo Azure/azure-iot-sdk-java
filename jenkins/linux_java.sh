@@ -17,6 +17,19 @@ echo
 mvn install
 [ $? -eq 0 ] || exit $?
 
+# -- Java Provisioning --
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+cd $build_root/provisioning
+mvn install
+[ $? -eq 0 ] || exit $?
+mvn -q javadoc:javadoc
+[ $? -eq 0 ] || exit $?
+echo
+echo [info] ---------------------------------------------------------------------
+echo [info] javadoc for provisioning succeeded
+echo [info] ---------------------------------------------------------------------
+echo
+
 # -- Java Service Client --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/service/iot-service-client
@@ -55,7 +68,7 @@ cd $build_root/device/iot-device-samples
 mvn install
 [ $? -eq 0 ] || exit $?
 
-# -- Java SDK --
+# -- Java SDK Run E2E --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root
 mvn install -DskipITs=false

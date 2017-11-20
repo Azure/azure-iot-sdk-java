@@ -11,13 +11,13 @@ An MqttConnection is class defining the connection options that can be performed
 ```java
 public class MqttConnection
 {
-    MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext iotHubSSLContext) throws IOException
+    MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext iotHubSSLContext) throws IOException;
 
-    void setMqttCallback(MqttCallback mqttCallback) throws IllegalArgumentException
-    MqttAsyncClient getMqttAsyncClient()
-    ConcurrentLinkedQueue<Pair<String, byte[]>> getAllReceivedMessages()
-    Object getMqttLock()
-    MqttConnectOptions getConnectionOptions()
+    void setMqttCallback(MqttCallback mqttCallback) throws IllegalArgumentException;
+    MqttAsyncClient getMqttAsyncClient();
+    ConcurrentLinkedQueue<Pair<String, byte[]>> getAllReceivedMessages();
+    Object getMqttLock();
+    MqttConnectOptions getConnectionOptions();
     void setMqttAsyncClient(MqttAsyncClient mqttAsyncClient);
 }
 ```

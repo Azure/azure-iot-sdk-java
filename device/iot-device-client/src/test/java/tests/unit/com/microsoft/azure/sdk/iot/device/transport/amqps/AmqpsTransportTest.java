@@ -22,10 +22,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.Assert.*;
 
-/* Unit tests for AmqpsTransport
-* 100% methods covered
-* 100% lines covered
-*/
+/**
+ * Unit tests for AmqpsTransport.
+ * Coverage :
+ * 100% method,
+ * 100% line
+ */
 public class AmqpsTransportTest
 {
     @Mocked
@@ -83,6 +85,8 @@ public class AmqpsTransportTest
     DeviceClientConfig mockDeviceClientConfig;
 
     @Mocked
+    DeviceClient mockDeviceClient;
+    @Mocked
     IotHubSasTokenAuthentication mockSasTokenAuthentication;
 
     // Tests_SRS_AMQPSTRANSPORT_15_001: [The constructor shall save the input parameters into instance variables.]
@@ -101,7 +105,7 @@ public class AmqpsTransportTest
 
         AmqpsTransport transport = new AmqpsTransport(expectedClientConfig);
 
-        DeviceClientConfig actualClientConfig = Deencapsulation.getField(transport, "config");
+        DeviceClientConfig actualClientConfig = Deencapsulation.getField(transport, "deviceClientConfig");
 
         assertEquals(expectedClientConfig, actualClientConfig);
     }
@@ -158,7 +162,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
                 result = mockConnection;
                 mockConfig.getDeviceId();
                 result = "deviceId";
@@ -184,7 +188,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
                 result = mockConnection;
                 mockConnection.open();
                 result = new IOException();
@@ -204,7 +208,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
                 result = mockConnection;
                 mockConfig.getDeviceId();
                 result = "deviceId";
@@ -230,7 +234,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
                 result = mockConnection;
                 mockConfig.getDeviceId();
                 result = "deviceId";
@@ -244,11 +248,116 @@ public class AmqpsTransportTest
         assertEquals(State.OPEN, state);
     }
 
+    // Tests_SRS_AMQPSTRANSPORT_12_009: [The function shall throw IllegalArgumentException if the deviceClientList is null or empty.]
+    @Test (expected = IllegalArgumentException.class)
+    public void multiplexOpenThrowsIfDeviceClientListNull() throws IOException
+    {
+        // arrange
+        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+
+        // act
+        transport.multiplexOpen(null);
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_12_009: [The function shall throw IllegalArgumentException if the deviceClientList is null or empty.]
+    @Test (expected = IllegalArgumentException.class)
+    public void multiplexOpenThrowsIfDeviceClientListEmpty() throws IOException
+    {
+        // arrange
+        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        ArrayList<DeviceClient> deviceClientList = new ArrayList<>();
+
+        // act
+        transport.multiplexOpen(deviceClientList);
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_12_010: [The function shall throw IllegalStateException if the transport state is already OPEN.]
+    @Test (expected = IllegalStateException.class)
+    public void multiplexOpenThrowsIftransportOpen() throws IOException
+    {
+        // arrange
+        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        ArrayList<DeviceClient> deviceClientList = new ArrayList<>();
+        deviceClientList.add(mockDeviceClient);
+        Deencapsulation.setField(transport, "state", State.OPEN);
+
+        // act
+        transport.multiplexOpen(deviceClientList);
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_12_017: [The function shall throw IOException if the underlying connection throws.]
+    @Test (expected = IOException.class)
+    public void multiplexOpenThrowsIfConnectionThrows() throws IOException
+    {
+        // arrange
+        AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        ArrayList<DeviceClient> deviceClientList = new ArrayList<>();
+        deviceClientList.add(mockDeviceClient);
+        Deencapsulation.setField(transport, "connection", mockConnection);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConnection.open();
+                result = new IOException();
+            }
+        };
+
+        // act
+        transport.multiplexOpen(deviceClientList);
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_12_011: [The function shall open an AMQPS connection with the IoT Hub given in the configuration. ]
+    // Tests_SRS_AMQPSTRANSPORT_12_012: [The function shall add the transport to the list of listeners subscribed to the connection events.]
+    // Tests_SRS_AMQPSTRANSPORT_12_013: [The function shall add the device clients to the underlying connection.]
+    // Tests_SRS_AMQPSTRANSPORT_12_014: [The function shall open the connection.]
+    // Tests_SRS_AMQPSTRANSPORT_12_015: [The function shall call the connection to authenticate.]
+    // Tests_SRS_AMQPSTRANSPORT_12_016: [The function shall call the connection to open device client links.]
+    // Tests_SRS_AMQPSTRANSPORT_12_018: [The function shal set the transport state to OPEN.]
+    @Test
+    public void multiplexOpenSuccess() throws IOException
+    {
+        // arrange
+        new NonStrictExpectations()
+        {
+            {
+                new AmqpsIotHubConnection(mockConfig);
+                result = mockConnection;
+                mockDeviceClient.getConfig();
+                result = mockDeviceClientConfig;
+            }
+        };
+
+        final AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        final ArrayList<DeviceClient> deviceClientList = new ArrayList<>();
+        deviceClientList.add(mockDeviceClient);
+        deviceClientList.add(mockDeviceClient);
+
+        // act
+        transport.multiplexOpen(deviceClientList);
+
+        // assert
+        State actualState = Deencapsulation.getField(transport, "state");
+        assertEquals(State.OPEN, actualState);
+
+        new Verifications()
+        {
+            {
+                mockConnection.open();
+                mockConnection.addListener(transport);
+                times = 1;
+                mockConnection.addDeviceOperationSession(deviceClientList.get(1).getConfig());
+                times = 1;
+                mockConnection.open();
+                times = 1;
+            }
+        };
+    }
+
     // Tests_SRS_AMQPSTRANSPORT_15_007: [If the AMQPS connection is closed, the function shall do nothing.]
     @Test
     public void closeDoesNothingIfConnectionAlreadyClosed() throws IOException, InterruptedException
     {
-
         new NonStrictExpectations()
         {
             {
@@ -272,11 +381,10 @@ public class AmqpsTransportTest
         };
     }
 
-    // Tests_SRS_AMQPSTRANSPORT_15_008: [The function shall close an AMQPS connection with the IoT Hub given in the configuration.]
+    // Tests_SRS_AMQPSTRANSPORT_15_008: [The function shall closeNow an AMQPS connection with the IoT Hub given in the configuration.]
     @Test
     public void closeClosesAmqpsConnection() throws IOException, InterruptedException
     {
-
         new NonStrictExpectations()
         {
             {
@@ -299,7 +407,7 @@ public class AmqpsTransportTest
         };
     }
 
-    // Tests_SRS_AMQPSTRANSPORT_15_008: [The function shall close an AMQPS connection with the IoT Hub given in the configuration.]
+    // Tests_SRS_AMQPSTRANSPORT_15_008: [The function shall closeNow an AMQPS connection with the IoT Hub given in the configuration.]
     // Tests_SRS_AMQPSTRANSPORT_99_036: [The method shall remove all the messages which are in progress or waiting to be sent and add them to the callback list.]
     // Tests_SRS_AMQPSTRANSPORT_99_037: [The method shall invoke all the callbacks.]
     // Tests_SRS_AMQPSTRANSPORT_12_005: [The function shall add a new outbound packet to the callback list.]
@@ -308,7 +416,6 @@ public class AmqpsTransportTest
                                                              @Mocked final IotHubEventCallback mockCallback,
                                                              @Mocked final IotHubOutboundPacket mockedPacket) throws IOException, InterruptedException
     {
-
         new NonStrictExpectations()
         {
             {
@@ -522,59 +629,28 @@ public class AmqpsTransportTest
     // Tests_SRS_AMQPSTRANSPORT_12_003: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
     @Test(expected = IllegalStateException.class)
     public void sendMessagesThrowsIfNoDeviceOperationEnabled(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
+            @Mocked final Message mockMessage,
+            @Mocked final IotHubOutboundPacket mockPacket,
+            @Mocked final IotHubEventCallback mockCallback)
             throws IOException
     {
+        // arrange
         final Map<String, Object> context = new HashMap<>();
-        final byte[] messageBytes = new byte[] {1, 2};
-        new NonStrictExpectations()
-        {
-            {
-                new IotHubOutboundPacket(mockMsg, mockCallback, context);
-                result = mockPacket;
-                mockPacket.getMessage();
-                result = mockMsg;
-                mockMsg.getBytes();
-                result = messageBytes;
-            }
-        };
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        Deencapsulation.setField(transport, "amqpsDeviceOperationsList", null);
-        transport.open();
-        transport.addMessage(mockMsg, mockCallback, context);
-        transport.addMessage(mockMsg, mockCallback, context);
-        transport.sendMessages();
-    }
 
-    // Tests_SRS_AMQPSTRANSPORT_12_003: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
-    @Test(expected = IllegalStateException.class)
-    public void sendMessagesThrowsIfNoDeviceOperationHandlerFound(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubOutboundPacket mockPacket)
-            throws IOException
-    {
-        final Map<String, Object> context = new HashMap<>();
-        final byte[] messageBytes = new byte[] {1, 2};
+        final AmqpsTransport transport = new AmqpsTransport(mockConfig);
+        transport.open();
+        transport.addMessage(mockMessage, mockCallback, context);
+        Deencapsulation.setField(transport, "connection", mockConnection);
+
         new NonStrictExpectations()
         {
             {
-                new IotHubOutboundPacket(mockMsg, mockCallback, context);
-                result = mockPacket;
-                mockPacket.getMessage();
-                result = mockMsg;
-                mockMsg.getBytes();
-                result = messageBytes;
+                Deencapsulation.invoke(mockConnection, "convertToProton", mockMessage);
+                result = null;
             }
         };
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<>();
-        Deencapsulation.setField(transport, "amqpsDeviceOperationsList", amqpsDeviceOperationsList);
-        transport.open();
-        transport.addMessage(mockMsg, mockCallback, context);
-        transport.addMessage(mockMsg, mockCallback, context);
+
+        // act
         transport.sendMessages();
     }
 
@@ -586,7 +662,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
                 result = mockConnection;
                 mockConfig.getDeviceId();
                 result = "deviceId";
@@ -623,7 +699,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
                 result = mockConnection;
                 new IotHubOutboundPacket(mockMessage, mockCallback, context);
                 result = mockPacket;
@@ -657,13 +733,14 @@ public class AmqpsTransportTest
                 times = 2;
                 mockPacket.getMessage();
                 times = 2;
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY, (IotHubConnectionString) any);
                 times = 2;
             }
         };
     }
 
     //Tests_SRS_AMQPSTRANSPORT_34_041: [If the config is using sas token authentication and its sas token has expired and cannot be renewed, the message shall not be sent, an UNAUTHORIZED message callback shall be added to the callback queue and SAS_TOKEN_EXPIRED state callback shall be fired.]
+    //Tests_SRS_AMQPSTRANSPORT_34_043: [If the config is using sas token authentication and its sas token has expired and cannot be renewed, the message shall not be put back into the waiting messages queue to be re-sent.]
     @Test
     public void sendMessagesWithExpiredSasTokenSendsCallbacks(
             @Mocked final Message mockMessage,
@@ -677,7 +754,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
                 result = mockConnection;
                 new IotHubOutboundPacket(mockMessage, mockCallback, context);
                 result = mockPacket;
@@ -718,6 +795,9 @@ public class AmqpsTransportTest
         transport.sendMessages();
 
         //assert
+        Queue<IotHubOutboundPacket> waitingMessagesList = Deencapsulation.getField(transport, "waitingMessages");
+        assertTrue(waitingMessagesList.isEmpty());
+
         Queue<IotHubCallbackPacket> callbackList = Deencapsulation.getField(transport, "callbackList");
         assertEquals(1, callbackList.size());
         assertEquals(mockIotHubCallbackPacket.getStatus(), callbackList.remove().getStatus());
@@ -725,7 +805,7 @@ public class AmqpsTransportTest
         new Verifications()
         {
             {
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY, (IotHubConnectionString) any);
                 times = 0;
                 mockConnectionStateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, any);
                 times = 1;
@@ -745,7 +825,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
                 result = mockConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
@@ -765,7 +845,7 @@ public class AmqpsTransportTest
         new Verifications()
         {
             {
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY, (IotHubConnectionString) any);
                 times = 0;
             }
         };
@@ -783,7 +863,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
                 result = mockConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
@@ -807,7 +887,7 @@ public class AmqpsTransportTest
         new Verifications()
         {
             {
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY, (IotHubConnectionString) any);
                 times = 0;
             }
         };
@@ -826,7 +906,7 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
                 result = mockConnection;
                 new IotHubOutboundPacket(mockMessage, mockCallback, context);
                 result = mockPacket;
@@ -836,7 +916,7 @@ public class AmqpsTransportTest
                 result = messageBytes;
                 mockMessage.getMessageType();
                 result = MessageType.DEVICE_TELEMETRY;
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY, (IotHubConnectionString) any);
                 returns (1, 2);
                 mockConfig.getDeviceId();
                 result = "deviceId";
@@ -865,7 +945,7 @@ public class AmqpsTransportTest
                 times = 2;
                 mockPacket.getMessage();
                 times = 2;
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY, (IotHubConnectionString) any);
                 times = 2;
             }
         };
@@ -885,7 +965,7 @@ public class AmqpsTransportTest
         {
             {
 
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
 
                 result = mockConnection;
                 new IotHubOutboundPacket(mockMessage, mockCallback, context);
@@ -896,7 +976,7 @@ public class AmqpsTransportTest
                 result = messageBytes;
                 mockMessage.getMessageType();
                 result = MessageType.DEVICE_TELEMETRY;
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY, (IotHubConnectionString) any);
                 returns (1, -1);
                 mockConfig.getDeviceId();
                 result = "deviceId";
@@ -928,7 +1008,7 @@ public class AmqpsTransportTest
                 times = 2;
                 mockPacket.getMessage();
                 times = 2;
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY, (IotHubConnectionString) any);
                 times = 2;
             }
         };
@@ -949,7 +1029,7 @@ public class AmqpsTransportTest
         {
             {
 
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
 
                 result = mockConnection;
                 new IotHubOutboundPacket(mockMessage, mockCallback, context);
@@ -962,7 +1042,7 @@ public class AmqpsTransportTest
                 returns (true, false);
                 mockMessage.getMessageType();
                 result = MessageType.DEVICE_TELEMETRY;
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY, (IotHubConnectionString) any);
                 result = 1;
                 mockConfig.getDeviceId();
                 result = "deviceId";
@@ -991,7 +1071,7 @@ public class AmqpsTransportTest
                 times = 2;
                 mockPacket.getMessage();
                 times = 2;
-                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY);
+                mockConnection.sendMessage((org.apache.qpid.proton.message.Message) any, MessageType.DEVICE_TELEMETRY, (IotHubConnectionString) any);
                 times = 0;
                 new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_EXPIRED, (IotHubEventCallback) any, any);
                 times = 1;
@@ -1047,7 +1127,7 @@ public class AmqpsTransportTest
         {
             {
 
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
 
                 result = mockConnection;
                 mockIotHubCallbackPacket.getCallback();
@@ -1121,7 +1201,7 @@ public class AmqpsTransportTest
         {
             {
 
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
 
                 result = mockConnection;
                 mockConfig.getDeviceTelemetryMessageCallback();
@@ -1148,34 +1228,27 @@ public class AmqpsTransportTest
     }
 
     // Tests_SRS_AMQPSTRANSPORT_12_007: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
-    @Test(expected = IllegalStateException.class)
+    @Test (expected = IllegalStateException.class)
     public void handleMessageThrowsIfNoDeviceOperationEnabled() throws IOException
     {
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<>();
-        Deencapsulation.setField(transport, "amqpsDeviceOperationsList", amqpsDeviceOperationsList);
+        final AmqpsTransport transport = new AmqpsTransport(mockConfig);
         transport.open();
 
-        Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
+        final Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
         receivedMessages.add(mockAmqpsMessage);
         receivedMessages.add(mockAmqpsMessage);
         Deencapsulation.setField(transport, "receivedMessages", receivedMessages);
+        Deencapsulation.setField(transport, "connection", mockConnection);
 
-        transport.handleMessage();
-    }
-
-    // Tests_SRS_AMQPSTRANSPORT_12_007: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
-    @Test(expected = IllegalStateException.class)
-    public void handleMessageThrowsIfNoDeviceOperationHandlerFound() throws IOException
-    {
-        AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        Deencapsulation.setField(transport, "amqpsDeviceOperationsList", null);
-        transport.open();
-
-        Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
-        receivedMessages.add(mockAmqpsMessage);
-        receivedMessages.add(mockAmqpsMessage);
-        Deencapsulation.setField(transport, "receivedMessages", receivedMessages);
+        new NonStrictExpectations()
+        {
+            {
+                mockAmqpsMessage.getDeviceClientConfig();
+                result = mockDeviceClientConfig;
+                Deencapsulation.invoke(mockConnection, "convertFromProton", mockAmqpsMessage, mockAmqpsMessage.getDeviceClientConfig());
+                result = null;
+            }
+        };
 
         transport.handleMessage();
     }
@@ -1232,7 +1305,7 @@ public class AmqpsTransportTest
         {
             {
 
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
 
                 result = mockConnection;
                 mockConfig.getDeviceTelemetryMessageCallback();
@@ -1283,7 +1356,7 @@ public class AmqpsTransportTest
         {
             {
 
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
 
                 result = mockConnection;
                 mockConfig.getDeviceTelemetryMessageCallback();
@@ -1333,7 +1406,7 @@ public class AmqpsTransportTest
         {
             {
 
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
 
                 result = mockConnection;
                 mockConfig.getDeviceId();
@@ -1367,7 +1440,7 @@ public class AmqpsTransportTest
         {
             {
 
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
 
                 result = mockConnection;
                 mockConfig.getDeviceId();
@@ -1409,7 +1482,7 @@ public class AmqpsTransportTest
         {
             {
 
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
 
                 result = mockConnection;
                 mockConfig.getDeviceId();
@@ -1452,7 +1525,7 @@ public class AmqpsTransportTest
         {
             {
 
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
 
                 result = mockConnection;
                 mockConfig.getDeviceId();
@@ -1488,7 +1561,7 @@ public class AmqpsTransportTest
         {
             {
 
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
 
                 result = mockConnection;
                 mockConnectionStateCallback.execute(IotHubConnectionState.CONNECTION_DROP, null);
@@ -1533,7 +1606,7 @@ public class AmqpsTransportTest
         {
             {
 
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
 
                 result = mockConnection;
                 mockConnectionStateCallback.execute(IotHubConnectionState.CONNECTION_SUCCESS, null);
@@ -1565,7 +1638,7 @@ public class AmqpsTransportTest
         {
             {
 
-                new AmqpsIotHubConnection(mockConfig, (ArrayList<AmqpsDeviceOperations>) any);
+                new AmqpsIotHubConnection(mockConfig);
 
                 result = mockConnection;
                 mockConfig.getDeviceId();

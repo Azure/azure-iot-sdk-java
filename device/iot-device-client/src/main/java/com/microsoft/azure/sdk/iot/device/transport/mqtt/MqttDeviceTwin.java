@@ -76,14 +76,7 @@ public class MqttDeviceTwin extends Mqtt
 
     public void stop() throws IOException
     {
-        /*
-        **Codes_SRS_MQTTDEVICETWIN_25_020: [**stop method shall unsubscribe from twin response topic ($iothub/twin/res/#) and throw IoException otherwise.**]**
-         */
-        if (isStarted)
-        {
-            this.unsubscribe(subscribeTopic);
-            isStarted = false;
-        }
+        isStarted = false;
 
         if (!requestMap.isEmpty())
         {

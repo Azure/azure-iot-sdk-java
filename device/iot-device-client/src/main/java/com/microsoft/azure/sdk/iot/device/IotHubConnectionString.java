@@ -125,8 +125,10 @@ public class IotHubConnectionString
                                   String sharedAccessKey, String sharedAccessToken)
             throws IllegalArgumentException, URISyntaxException
     {
+        this.isUsingX509 = (sharedAccessKey == null && sharedAccessToken == null);
+
         /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_025: [If the parameters for the connection string is not valid, the constructor shall throw an IllegalArgumentException.] */
-        validateTerms(hostName, deviceId, sharedAccessKey, sharedAccessToken, false);
+        validateTerms(hostName, deviceId, sharedAccessKey, sharedAccessToken, this.isUsingX509);
 
         /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_020: [The constructor shall save the IoT Hub hostname as the value of `hostName` in the connection string.] */
         this.hostName = hostName;

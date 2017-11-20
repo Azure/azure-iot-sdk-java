@@ -64,6 +64,8 @@ protected void openLinks(Session session) throws IOException, IllegalArgumentExc
 
 **SRS_AMQPSDEVICEOPERATIONS_12_010: [**The function shall open both receiver and sender link.**]**
 
+**SRS_AMQPSDEVICEOPERATIONS_12_044: [**The function shall set the link's state to OPENING.**]**
+
 
 ### closeLinks
 
@@ -92,7 +94,10 @@ protected void initLink(Link link) throws IOException, IllegalArgumentException;
 
 **SRS_AMQPSDEVICEOPERATIONS_12_017: [**If the link is the receiver link, the function shall create a new Source (Proton) object using the receiver link address member variable.**]**
 
-**SRS_AMQPSDEVICEOPERATIONS_12_018: [**If the link is the receiver link, the function shall set its source to the created Source (Proton) object.**]**
+**SRS_AMQPSDEVICEOPERATIONS_12_018: [**If the link is the receiver link and the linkState is OPENING, the function shall set its source to the created Source (Proton) object.**]**
+
+**SRS_AMQPSDEVICEOPERATIONS_12_045: [**The function do nothing if the either the receiver or the sender link state is other than OPENING.**]**
+
 
 
 ### sendMessageAndGetDeliveryHash
@@ -137,6 +142,22 @@ protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws Illega
 **SRS_AMQPSDEVICEOPERATIONS_12_035: [**The function shall advance the receiver link.**]**
 
 **SRS_AMQPSDEVICEOPERATIONS_12_038: [**The function shall create a Proton message from the received buffer and return with it.**]**
+
+
+### operationLinksOpened
+```java
+public Boolean operationLinksOpened();
+```
+
+**SRS_AMQPSDEVICEOPERATIONS_12_047: [**The function shall return true if all link are opened, false otherwise.**]**
+
+
+### isLinkFound
+```java
+protected Boolean isLinkFound(String linkName)
+```
+
+**SRS_AMQPSDEVICEOPERATIONS_12_046: [**The prototype function shall return null.**]**
 
 
 ### convertFromProton

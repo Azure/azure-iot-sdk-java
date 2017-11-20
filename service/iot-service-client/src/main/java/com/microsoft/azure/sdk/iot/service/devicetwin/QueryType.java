@@ -34,6 +34,8 @@ public enum QueryType
                 return queryType;
             }
         }
-        return null;
+
+        //if no values match, then it is unknown
+        return UNKNOWN;
     }
 }

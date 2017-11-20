@@ -14,6 +14,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     public AmqpsTransport(DeviceClientConfig config, Boolean useWebSockets);
 
     public void open() throws IOException;
+    public void multiplexOpen(ArrayList<DeviceClient> deviceClientList) throws IOException;
     public void close() throws IOException;
 
     public void addMessage(Message message, IotHubEventCallback callback, Object callbackContext) throws IllegalStateException;
@@ -64,6 +65,29 @@ public void open() throws IOException;
 **SRS_AMQPSTRANSPORT_15_006: [**If the connection was opened successfully, the transport state shall be set to OPEN.**]**
 
 **SRS_AMQPSTRANSPORT_12_004: [**The function shall throw IOException if connection open throws.**]**
+
+
+### multiplexOpen
+
+```java
+public void multiplexOpen(ArrayList<DeviceClient> deviceClientList) throws IOException;
+```
+
+**SRS_AMQPSTRANSPORT_12_009: [**The function shall throw IllegalArgumentException if the deviceClientList is null or empty.**]**
+
+**SRS_AMQPSTRANSPORT_12_010: [**The function shall throw IllegalStateException if the transport state is already OPEN.**]**
+
+**SRS_AMQPSTRANSPORT_12_011: [**The function shall open an AMQPS connection with the IoT Hub given in the configuration. **]**
+
+**SRS_AMQPSTRANSPORT_12_012: [**The function shall add the transport to the list of listeners subscribed to the connection events.**]**
+
+**SRS_AMQPSTRANSPORT_12_013: [**The function shall add the device clients to the underlying connection.**]**
+
+**SRS_AMQPSTRANSPORT_12_014: [**The function shall open the connection.**]**
+
+**SRS_AMQPSTRANSPORT_12_017: [**The function shall throw IOException if the underlying connection throws.**]**
+
+**SRS_AMQPSTRANSPORT_12_018: [**The function shal set the transport state to OPEN.**]**
 
 
 ### close
@@ -132,6 +156,8 @@ public void sendMessages() throws IOException;
 **SRS_AMQPSTRANSPORT_12_003: [**The function throws IllegalStateException if none of the device operation object could handle the conversion.**]**
 
 **SRS_AMQPSTRANSPORT_34_041: [**If the config is using sas token authentication and its sas token has expired and cannot be renewed, the message shall not be sent, an UNAUTHORIZED message callback shall be added to the callback queue and SAS_TOKEN_EXPIRED state callback shall be fired.**]**
+
+**SRS_AMQPSTRANSPORT_34_043: [**If the config is using sas token authentication and its sas token has expired and cannot be renewed, the message shall not be put back into the waiting messages queue to be re-sent.**]**
 
 
 ### invokeCallbacks

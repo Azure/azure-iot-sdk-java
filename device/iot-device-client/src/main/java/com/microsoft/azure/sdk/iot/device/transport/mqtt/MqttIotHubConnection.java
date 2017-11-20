@@ -133,7 +133,7 @@ public class MqttIotHubConnection
                 }
 
                 String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION, "UTF-8");
-                this.iotHubUserName = this.config.getIotHubHostname() + "/" + this.config.getDeviceId() + "/" + TWIN_API_VERSION + "/" + clientIdentifier;
+                this.iotHubUserName = this.config.getIotHubHostname() + "/" + this.config.getDeviceId() + "/" + TWIN_API_VERSION + "&" + clientIdentifier;
 
                 if (this.config.isUseWebsocket())
                 {
@@ -178,7 +178,7 @@ public class MqttIotHubConnection
                 {
                     this.deviceMessaging.stop();
                 }
-                throw new IOException(e.getMessage(), e.getCause());
+                throw new IOException(e);
             }
 
         }
@@ -197,8 +197,7 @@ public class MqttIotHubConnection
             return;
         }
 
-        // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [**The function shall close the MQTT connection.]
-
+        // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [The function shall close the MQTT connection.]
         try
         {
             this.deviceMethod.stop();

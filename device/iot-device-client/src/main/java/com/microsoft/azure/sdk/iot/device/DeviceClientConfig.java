@@ -3,8 +3,12 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubX509Authentication;
+import com.microsoft.azure.sdk.iot.device.auth.*;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
+
+import java.io.IOException;
 
 /**
  * Configuration settings for an IoT Hub client. Validates all user-defined
@@ -51,7 +55,8 @@ public final class DeviceClientConfig
     public enum AuthType
     {
         X509_CERTIFICATE,
-        SAS_TOKEN
+        SAS_TOKEN,
+        CBS
     }
 
     private AuthType authenticationType;
@@ -62,10 +67,12 @@ public final class DeviceClientConfig
      * @param iotHubConnectionString is the string with the hostname, deviceId, and
      *                               deviceKey or token, which identify the device in
      *                               the Azure IotHub.
+     * @param authType is the authentication type to be used
+     *
      * @throws IllegalArgumentException if the IoT Hub hostname does not contain
      * a valid IoT Hub name as its prefix.
      */
-    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString) throws IllegalArgumentException
+    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, AuthType authType) throws IllegalArgumentException
     {
         // Codes_SRS_DEVICECLIENTCONFIG_21_034: [If the provided `iotHubConnectionString` is null,
         // the constructor shall throw IllegalArgumentException.]
@@ -80,13 +87,19 @@ public final class DeviceClientConfig
             throw new IllegalArgumentException("Cannot use this constructor for x509 connection strings. Use constructor that takes public key certificate and private key instead");
         }
 
+        if (authType == AuthType.X509_CERTIFICATE)
+        {
+            // Codes_SRS_DEVICECLIENTCONFIG_12_002: [If the authentication type is X509 the constructor shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("Cannot use this constructor for x509 authentication type. Use constructor that takes public key certificate and private key instead");
+        }
+
         this.useWebsocket = false;
 
-        //Codes_SRS_DEVICECLIENTCONFIG_34_046: [If the provided `iotHubConnectionString` does not use x509 authentication, it shall be saved to a new IotHubSasTokenAuthentication object and the authentication type of this shall be set to SASToken.]
-        this.authenticationType = AuthType.SAS_TOKEN;
+        // Codes_SRS_DEVICECLIENTCONFIG_12_001: [The constructor shall set the authentication type to the given authType value.]
+        this.authenticationType = authType;
         this.iotHubConnectionString = iotHubConnectionString;
 
-        this.sasTokenAuthentication = new IotHubSasTokenAuthentication(
+        this.sasTokenAuthentication = new IotHubSasTokenSoftwareAuthentication(
                 this.iotHubConnectionString.getHostName(),
                 this.iotHubConnectionString.getDeviceId(),
                 this.iotHubConnectionString.getSharedAccessKey(),
@@ -125,11 +138,58 @@ public final class DeviceClientConfig
         this.iotHubConnectionString = iotHubConnectionString;
 
         //Codes_SRS_DEVICECLIENTCONFIG_34_069: [This function shall generate a new SSLContext and set this to using X509 authentication.]
-        this.x509Authentication = new IotHubX509Authentication(publicKeyCertificate, isPathForPublic, privateKey, isPathForPrivate);
+        this.x509Authentication = new IotHubX509SoftwareAuthentication(publicKeyCertificate, isPathForPublic, privateKey, isPathForPrivate);
 
         this.logger = new CustomLogger(this.getClass());
         logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
                 iotHubConnectionString.getHostName(), iotHubConnectionString.getDeviceId(), logger.getMethodName());
+    }
+
+    /**
+     * Constructor for a device client config that retrieves the authentication method from a security client instance
+     * @param connectionString The connection string for the iot hub to connect with
+     * @param securityProvider The security client instance to be used for authentication of this device
+     * @throws IOException if the provided security client throws an exception while authenticating
+     */
+    DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider) throws IOException
+    {
+        if (connectionString == null)
+        {
+            //Codes_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security client is null, an IllegalArgumentException shall be thrown.]
+            throw new IllegalArgumentException("The provided connection string cannot be null");
+        }
+
+        if (securityProvider == null)
+        {
+            //Codes_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security client is null, an IllegalArgumentException shall be thrown.]
+            throw new IllegalArgumentException("security client cannot be null");
+        }
+
+        if (securityProvider instanceof SecurityProviderTpm)
+        {
+            //Codes_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security client is a SecurityProviderTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthentication instance using the security client.]
+            throw new UnsupportedOperationException("This type of security client is not supported currently");
+        }
+        else if (securityProvider instanceof SecurityProviderX509)
+        {
+            //Codes_SRS_DEVICECLIENTCONFIG_34_082: [If the provided security client is a SecurityProviderX509 instance, this function shall set its auth type to X509 and create its IotHubX509Authentication instance using the security client's ssl context.]
+            this.authenticationType = AuthType.X509_CERTIFICATE;
+            this.x509Authentication = new IotHubX509HardwareAuthentication(securityProvider);
+        }
+        else
+        {
+            //Codes_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security client is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
+            throw new UnsupportedOperationException("The provided security client is not supported.");
+        }
+
+        this.useWebsocket = false;
+
+        //Codes_SRS_DEVICECLIENTCONFIG_34_081: [This constructor shall save the provided connection string.]
+        this.iotHubConnectionString = connectionString;
+
+        this.logger = new CustomLogger(this.getClass());
+        logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
+                connectionString.getHostName(), connectionString.getDeviceId(), logger.getMethodName());
     }
 
     /**
@@ -365,7 +425,7 @@ public final class DeviceClientConfig
         return DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS;
     }
 
-    /*
+    /**
      * Getter for AuthenticationType
      *
      * @return The value of AuthenticationType

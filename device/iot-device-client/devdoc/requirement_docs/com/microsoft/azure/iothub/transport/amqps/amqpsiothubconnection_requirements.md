@@ -11,21 +11,34 @@ An AMQPS IotHub connection between a device and an IoTHub. This class contains f
 ```java
 public final class AmqpsIotHubConnection extends BaseHandler
 {
-	public AmqpsIotHubConnection(DeviceClientConfig config, Boolean useWebSockets);
-	public void open() throws IOException;
-	public void close();
-    public Integer sendMessage(Message message);
+    public AmqpsIotHubConnection(DeviceClientConfig config, Boolean useWebSockets);
+    public void addDeviceOperationSession(DeviceClientConfig deviceClientConfig);
+    public void open() throws IOException;
+    public void authenticate() throws IOException;
+    public void openLinks() throws IOException;
+    public void close();
+    public Integer sendMessage(Message message)
     public Boolean sendMessageResult(AmqpsMessage message, IotHubMessageResult result);
-	
-	public void onConnectionInit(Event event);
-	public void onConnectionBound(Event event);
-	public void onReactorInit(Event event);
-	public void onDelivery(Event event);
-	public void onLinkFlow(Event event);
-	public void onLinkRemoteClose(Event event);
-	public void onLinkRemoteOpen(Event event);
-	public void onLinkInit(Event event);
-	public void onTransportError(Event event);
+
+    public void onReactorInit(Event event);
+    public void onReactorFinal(Event event)
+
+    public void onConnectionInit(Event event);
+    public void onConnectionBound(Event event);
+    public void onConnectionUnbound(Event event)
+
+    public void onDelivery(Event event);
+
+    public void onLinkInit(Event event);
+    public void onLinkFlow(Event event);
+    public void onLinkRemoteOpen(Event event);
+    public void onLinkRemoteClose(Event event);
+
+    public void onTransportError(Event event);
+
+    public void addListener(ServerListener listener);
+    protected AmqpsConvertToProtonReturnValue convertToProton(com.microsoft.azure.sdk.iot.device.Message message) throws IOException;
+    protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws IOException;
 }
 ```
 
@@ -40,8 +53,6 @@ public AmqpsIotHubConnection(DeviceClientConfig config, Boolean useWebSockets);
 
 **SRS_AMQPSIOTHUBCONNECTION_15_002: [**The constructor shall save the configuration into private member variables.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_12_001: [**The constructor shall save the device operation list to private member variable.**]**
-
 **SRS_AMQPSIOTHUBCONNECTION_15_004: [**The constructor shall initialize a new Handshaker (Proton) object to handle communication handshake.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_15_005: [**The constructor shall initialize a new FlowController (Proton) object to handle communication flow.**]**
@@ -52,7 +63,22 @@ public AmqpsIotHubConnection(DeviceClientConfig config, Boolean useWebSockets);
 
 **SRS_AMQPSIOTHUBCONNECTION_12_003: [**The constructor shall throw IOException if the Proton reactor creation failed.**]**
 
+**SRS_AMQPSIOTHUBCONNECTION_12_001: [**The constructor shall initialize the AmqpsSessionManager member variable with the given config.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_017: [**The constructor shall set the AMQP socket port using the configuration.**]**
+
 **SRS_AMQPSIOTHUBCONNECTION_34_053: [**If the config is using x509 Authentication, the created Proton reactor shall not have SASL enabled by default.**]**
+
+
+### addDeviceOperationSession
+
+```java
+public void addDeviceOperationSession(DeviceClientConfig deviceClientConfig)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_12_018: [**The function shall do nothing if the deviceClientConfig parameter is null.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_019: [**The function shall call AmqpsSessionManager.addDeviceOperationSession with the given deviceClientConfig.**]**
 
 
 ### open
@@ -71,6 +97,34 @@ public void open() throws IOException
 
 **SRS_AMQPSIOTHUBCONNECTION_34_052: [**If the config is not using sas token authentication, then the created iotHubReactor shall omit the Sasl.**]**
 
+**SRS_AMQPSIOTHUBCONNECTION_12_059: [**The function shall call waitlock on openlock.**]** 
+
+**SRS_AMQPSIOTHUBCONNECTION_12_057: [**The function shall call the connection to authenticate.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_058: [**The function shall call the connection to open device client links.**]**
+
+
+### authenticate
+
+```java
+public void authenticate() throws IOException;
+```	
+
+**SRS_AMQPSIOTHUBCONNECTION_12_020: [**The function shall do nothing if the authentication is already open.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_021: [**The function shall call AmqpsSessionManager.authenticate.**]**
+
+
+### openLinks
+
+```java
+public void openLinks() throws IOException;
+```	
+
+**SRS_AMQPSIOTHUBCONNECTION_12_022: [**The function shall do nothing if the authentication is already open.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_023: [**The function shall call AmqpsSessionManager.openDeviceOperationLinks.**]**
+
 
 ### close
 
@@ -78,11 +132,11 @@ public void open() throws IOException
 public synchronized void close()
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_15_048 [**If the AMQPS connection is already closed, the function shall do nothing.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_048: [**If the AMQPS connection is already closed, the function shall do nothing.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_15_012: [**The function shall set the status of the AMQPS connection to CLOSED.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_15_013: [**The function shall close the AMQPS sender and receiver links, the AMQP session and the AMQP connection.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_013: [**The function shall close the AmqpsSessionManager and the AMQP connection.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_15_014: [**The function shall stop the Proton reactor.**]**
 
@@ -99,15 +153,10 @@ public Integer sendMessage(Message message)
 
 **SRS_AMQPSIOTHUBCONNECTION_15_015: [**If the state of the connection is CLOSED or there is not enough credit, the function shall return -1.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_15_016: [**The function shall encode the message and copy the contents to the byte buffer.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_017: [**The function shall set the delivery tag for the sender.**]**
+**SRS_AMQPSIOTHUBCONNECTION_12_024: [**The function shall call AmqpsSessionManager.sendMessage with the given parameters.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_15_021: [**The function shall return the delivery hash.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_12_006: [**The function shall call sendMessageAndGetDeliveryHash on all device operation objects.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_12_007: [**The function shall doubles the buffer if encode throws BufferOverflowException.**]**
 
 ### sendMessageResult
 
@@ -122,45 +171,6 @@ public Boolean sendMessageResult(AmqpsMessage message, IotHubMessageResult resul
 **SRS_AMQPSIOTHUBCONNECTION_15_024: [**The function shall return true after the message was acknowledged.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_12_008: [**The function shall return false if message acknowledge throws exception.**]**
-
-
-## onConnectionInit
-
-```java
-public void onConnectionInit(Event event)
-```
-
-**SRS_AMQPSIOTHUBCONNECTION_15_025: [**The event handler shall get the Connection (Proton) object from the event handler and set the host name on the connection.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_026: [**The event handler shall create a Session (Proton) object from the connection.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_029: [**The event handler shall open the connection, session, sender and receiver objects.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_12_009: [**The event handler shall calls the openLink on all device operation objects.**]**
-
-
-## onConnectionBound
-
-```java
-public void onConnectionBound(Event event)
-```
-
-**SRS_AMQPSIOTHUBCONNECTION_15_030: [**The event handler shall get the Transport (Proton) object from the event.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_031: [**The event handler shall set the SASL_PLAIN authentication on the transport using the given user name and sas token.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_25_049: [**The event handler shall set the SSL Context to IOTHub SSL context containing valid certificates.**]**
-
-**SRS_AMQPSIOTHUBCONNECTION_15_032: [**The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport.**]**
-
-
-## onConnectionUnbound
-
-```java
-public void onConnectionUnbound(Event event)
-```
-
-**SRS_AMQPSIOTHUBCONNECTION_12_010: [**The function sets the state to closed.**]**
 
 
 ## onReactorInit
@@ -187,6 +197,41 @@ public void onReactorFinal(Event event)
 **SRS_AMQPSIOTHUBCONNECTION_12_014: [**The function shall log the error if openAsync failed.**]**
 
 
+## onConnectionInit
+
+```java
+public void onConnectionInit(Event event)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_15_025: [**The event handler shall get the Connection (Proton) object from the event handler and set the host name on the connection.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_029: [**The event handler shall open the connection.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_009: [**The event handler shall call the AmqpsSessionManager.onConnectionInit function with the connection.**]**
+
+
+## onConnectionBound
+
+```java
+public void onConnectionBound(Event event)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_15_030: [**The event handler shall get the Transport (Proton) object from the event.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_15_031: [**The event handler shall call the AmqpsSessionManager.onConnectionBound with the transport and the SSLContext.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_25_049: [**If websocket enabled the event handler shall configure the transport layer for websocket.**]**
+
+
+## onConnectionUnbound
+
+```java
+public void onConnectionUnbound(Event event)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_12_010: [**The function sets the state to closed.**]**
+
+
 ## onDelivery
 
 ```java
@@ -199,7 +244,16 @@ public void onDelivery(Event event)
 
 **SRS_AMQPSIOTHUBCONNECTION_15_050: [**All the listeners shall be notified that a message was received from the server.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_12_015: [**The function shall call getMessageFromReceiverLink on all device operation objects.**]**
+**SRS_AMQPSIOTHUBCONNECTION_12_015: [**The function shall call AmqpsSessionManager.getMessageFromReceiverLink.**]**
+
+
+## onLinkInit
+
+```java
+public void onLinkInit(Event event)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_12_016: [** The function shall get the link from the event and call device operation objects with it. **]**
 
 
 ## onLinkFlow
@@ -217,9 +271,13 @@ public void onLinkFlow(Event event)
 public void onLinkRemoteOpen(Event event)
 ```
 
-**SRS_AMQPSIOTHUBCONNECTION_15_041 [**The connection state shall be considered OPEN when the sender link is open remotely.**]**
-**SRS_AMQPSIOTHUBCONNECTION_99_001 [**All server listeners shall be notified when that the connection has been established.**]**
-**SRS_AMQPSIOTHUBCONNECTION_21_051 [**The open lock shall be notified when that the connection has been established.**]**
+**SRS_AMQPSIOTHUBCONNECTION_15_041: [**The connection state shall be considered OPEN when the sender link is open remotely.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_99_001: [**All server listeners shall be notified when that the connection has been established.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_21_051: [**The open lock shall be notified when that the connection has been established.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_052: [**The function shall call AmqpsSessionManager.onLinkRemoteOpen with the given link.**]**
 
 ## onLinkRemoteClose
 
@@ -230,14 +288,6 @@ public void onLinkRemoteClose(Event event)
 **SRS_AMQPSIOTHUBCONNECTION_15_042 [**The event handler shall attempt to reconnect to the IoTHub.**]**
 
 
-## onLinkInit
-
-```java
-public void onLinkInit(Event event)
-```
-
-**SRS_AMQPSIOTHUBCONNECTION_12_016: [** The function shall get the link from the event and call device operation objects with it. **]**
-
 
 ## onTransportError
 
@@ -246,3 +296,32 @@ public void onTransportError(Event event)
 ```
 
 **SRS_AMQPSIOTHUBCONNECTION_15_048 [**The event handler shall attempt to reconnect to IoTHub.**]**
+
+
+### addListener
+
+```java
+public void addListener(ServerListener listener);
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_12_053: [**The function shall do nothing if the listener parameter is null.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_12_054: [**The function shall add the given listener to the listener list.**]**
+
+
+### convertToProton
+
+```java
+protected AmqpsConvertToProtonReturnValue convertToProton(com.microsoft.azure.sdk.iot.device.Message message) throws IOException;
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_12_055: [**The function shall call AmqpsSessionManager.convertToProton with the given message.**]**
+
+
+### convertFromProton
+
+```java
+protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws IOException;
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_12_056: [**The function shall call AmqpsSessionManager.convertFromProton with the given message.**]**

@@ -46,7 +46,7 @@ public class HttpsIotHubConnectionTest
     private static final String testSasToken = "SharedAccessSignature sr=test&sig=test&se=0";
 
     @Before
-    public void setup()
+    public void setup() throws IOException
     {
         new NonStrictExpectations()
         {

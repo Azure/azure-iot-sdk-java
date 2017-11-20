@@ -13,7 +13,8 @@ public final class DeviceClientConfig
 {
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString) throws IllegalArgumentException;
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate);
-    
+    DeviceClientConfig(IotHubConnectionString connectionString, SecurityClient securityClient) throws IOException;
+
     public IotHubX509Authentication getX509Authentication();
     public IotHubSasTokenAuthentication getSasTokenAuthentication();
     public IotHubConnectionString getIotHubConnectionString();
@@ -54,27 +55,44 @@ public final class DeviceClientConfig
 ### DeviceClientConfig
 
 ```java
-public DeviceClientConfig(IotHubConnectionString iotHubConnectionString) throws URISyntaxException;
+public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, AuthType authType) throws URISyntaxException;
 ```
 
-** SRS_DEVICECLIENTCONFIG_34_046: [**If the provided `iotHubConnectionString` does not use x509 authentication, it shall be saved to a new IotHubSasTokenAuthentication object and the authentication type of this shall be set to SASToken.**]**
+**SRS_DEVICECLIENTCONFIG_34_048: [**If an exception is thrown when creating the appropriate Authentication object, an IOException shall be thrown containing the details of that exception.**]**
 
-** SRS_DEVICECLIENTCONFIG_34_048: [**If an exception is thrown when creating the appropriate Authentication object, an IOException shall be thrown containing the details of that exception.**]**
+**SRS_DEVICECLIENTCONFIG_21_034: [**If the provided `iotHubConnectionString` is null, the constructor shall throw IllegalArgumentException.**] **
 
-** SRS_DEVICECLIENTCONFIG_21_034: [**If the provided `iotHubConnectionString` is null, the constructor shall throw IllegalArgumentException.**] **
+**SRS_DEVICECLIENTCONFIG_34_076: [**If the provided `iotHubConnectionString` uses x509 authentication, the constructor shall throw an IllegalArgumentException.**] **
 
-** SRS_DEVICECLIENTCONFIG_34_076: [**If the provided `iotHubConnectionString` uses x509 authentication, the constructor shall throw an IllegalArgumentException.**] **
+**SRS_DEVICECLIENTCONFIG_12_002: [**If the authentication type is X509 the constructor shall throw an IllegalArgumentException.**]**
+
+**SRS_DEVICECLIENTCONFIG_12_001: [**The constructor shall set the authentication type to the given authType value.**]**
 
 
 ```java
 public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate) throws IOException
 ```
 
-** SRS_DEVICECLIENTCONFIG_34_069: [**If the provided connection string is null or does not use x509 auth, and IllegalArgumentException shall be thrown.**] **
+**SRS_DEVICECLIENTCONFIG_34_069: [**If the provided connection string is null or does not use x509 auth, and IllegalArgumentException shall be thrown.**] **
 
-** SRS_DEVICECLIENTCONFIG_34_069: [**This function shall generate a new SSLContext and set this to using X509 authentication.**] **
+**SRS_DEVICECLIENTCONFIG_34_069: [**This function shall generate a new SSLContext and set this to using X509 authentication.**] **
 
-** SRS_DEVICECLIENTCONFIG_34_070: [**If any exceptions are encountered while generating the new SSLContext, an IOException shall be thrown.**] **
+**SRS_DEVICECLIENTCONFIG_34_070: [**If any exceptions are encountered while generating the new SSLContext, an IOException shall be thrown.**] **
+
+
+```java
+DeviceClientConfig(IotHubConnectionString connectionString, SecurityClient securityClient) throws IOException;
+```
+
+** SRS_DEVICECLIENTCONFIG_34_080: [**If the provided connectionString or security client is null, an IllegalArgumentException shall be thrown.**] **
+
+** SRS_DEVICECLIENTCONFIG_34_081: [**This constructor shall save the provided connection string.**] **
+
+** SRS_DEVICECLIENTCONFIG_34_082: [**If the provided security client is a SecurityClientX509 instance, this function shall set its auth type to X509 and create its IotHubX509Authentication instance using the security client's ssl context.**] **
+
+** SRS_DEVICECLIENTCONFIG_34_083: [**If the provided security client is a SecurityClientTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthentication instance using the security client.**] **
+
+** SRS_DEVICECLIENTCONFIG_34_084: [**If the provided security client is neither a SecurityClientX509 instance nor a SecurityClientTpm instance, this function shall throw an UnsupportedOperationException.**] **
 
 
 ### getIotHubHostname
@@ -83,7 +101,7 @@ public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, String 
 public String getIotHubHostname();
 ```
 
-** SRS_DEVICECLIENTCONFIG_11_002: [**The function shall return the IoT Hub hostname given in the constructor.**] **
+**SRS_DEVICECLIENTCONFIG_11_002: [**The function shall return the IoT Hub hostname given in the constructor.**] **
 
 
 ### getIotHubName
@@ -92,7 +110,7 @@ public String getIotHubHostname();
 public String getIotHubName();
 ```
 
-** SRS_DEVICECLIENTCONFIG_11_007: [**The function shall return the IoT Hub name given in the constructor, where the IoT Hub name is embedded in the IoT Hub hostname as follows: [IoT Hub name].[valid HTML chars]+.**] ** 
+**SRS_DEVICECLIENTCONFIG_11_007: [**The function shall return the IoT Hub name given in the constructor, where the IoT Hub name is embedded in the IoT Hub hostname as follows: [IoT Hub name].[valid HTML chars]+.**] ** 
 
 
 ### getDeviceId
@@ -101,7 +119,7 @@ public String getIotHubName();
 public String getDeviceId();
 ```
 
-** SRS_DEVICECLIENTCONFIG_11_003: [**The function shall return the device ID given in the constructor.**] **
+**SRS_DEVICECLIENTCONFIG_11_003: [**The function shall return the device ID given in the constructor.**] **
 
 
 ### getMessageValidSecs
@@ -110,7 +128,7 @@ public String getDeviceId();
 public long getTokenValidSecs();
 ```
 
-** SRS_DEVICECLIENTCONFIG_11_005: [**If this is using Sas token authentication, then this function shall return the value of tokenValidSecs saved in it and 0 otherwise.**] **
+**SRS_DEVICECLIENTCONFIG_11_005: [**If this is using Sas token authentication, then this function shall return the value of tokenValidSecs saved in it and 0 otherwise.**] **
 
 
 ### setDeviceTwinMessageCallback
@@ -119,9 +137,9 @@ public long getTokenValidSecs();
 public void setDeviceTwinMessageCallback(MessageCallback  callback, Object context);
 ```
 
-** SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceTwin message callback.**] ** 
+**SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceTwin message callback.**] ** 
 
-** SRS_DEVICECLIENTCONFIG_25_024: [**The function shall set the DeviceTwin message context.**] **
+**SRS_DEVICECLIENTCONFIG_25_024: [**The function shall set the DeviceTwin message context.**] **
 
 
 ### getDeviceTwinMessageCallback
@@ -130,7 +148,7 @@ public void setDeviceTwinMessageCallback(MessageCallback  callback, Object conte
 public MessageCallback getDeviceTwinMessageCallback();
 ```
 
-** SRS_DEVICECLIENTCONFIG_25_025: [**The function shall return the current DeviceTwin message callback.**] ** 
+**SRS_DEVICECLIENTCONFIG_25_025: [**The function shall return the current DeviceTwin message callback.**] ** 
 
 
 ### getDeviceTwinMessageContext
@@ -139,7 +157,7 @@ public MessageCallback getDeviceTwinMessageCallback();
 public Object getDeviceTwinMessageContext();
 ```
 
-** SRS_DEVICECLIENTCONFIG_25_026: [**The function shall return the current DeviceTwin message context.**] **
+**SRS_DEVICECLIENTCONFIG_25_026: [**The function shall return the current DeviceTwin message context.**] **
 
 
 ### isUseWebsocket
@@ -166,7 +184,7 @@ public AuthType getAuthenticationType();
 
 **SRS_DEVICECLIENTCONFIG_34_039: [**This function shall return the type of authentication that the config is set up to use.**]**
 
-** SRS_DEVICECLIENTCONFIG_25_020: [**The function shall set the DeviceMethod message context.**] **
+**SRS_DEVICECLIENTCONFIG_25_020: [**The function shall set the DeviceMethod message context.**] **
 
 **SRS_DEVICECLIENTCONFIG_34_059: [**This function shall save the provided pathToCertificate.**]**
 

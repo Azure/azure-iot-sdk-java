@@ -106,4 +106,43 @@ public class SendMessagesCommon
             }
         }
     }
+
+    /*
+     * method to send message over given DeviceClient
+     */
+    public static void sendMessagesMultiplex(DeviceClient client, IotHubClientProtocol protocol, final int NUM_MESSAGES_PER_CONNECTION,
+                                    final Integer RETRY_MILLISECONDS, final Integer SEND_TIMEOUT_MILLISECONDS)
+            throws URISyntaxException, IOException, InterruptedException
+    {
+        String messageString = "Java client e2e test message over " + protocol + " protocol";
+        Message msg = new Message(messageString);
+
+        for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; ++i)
+        {
+            try
+            {
+                Success messageSent = new Success();
+                EventCallback callback = new EventCallback(IotHubStatusCode.OK_EMPTY);
+                client.sendEventAsync(msg, callback, messageSent);
+
+                Integer waitDuration = 0;
+                while (!messageSent.getResult())
+                {
+                    Thread.sleep(RETRY_MILLISECONDS);
+                    if ((waitDuration += RETRY_MILLISECONDS) > SEND_TIMEOUT_MILLISECONDS)
+                    {
+                        break;
+                    }
+                }
+
+                if (!messageSent.getResult())
+                {
+                    Assert.fail("Sending message over " + protocol + " protocol failed");
+                }
+            } catch (Exception e)
+            {
+                Assert.fail("Sending message over " + protocol + " protocol failed");
+            }
+        }
+    }
 }

@@ -10,6 +10,7 @@ import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
+import org.apache.qpid.proton.engine.Session;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
 import java.io.IOException;
@@ -47,30 +48,34 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
 
     Map<String, DeviceOperations> correlationIdList;
 
+    private DeviceClientConfig deviceClientConfig;
+
     /**
      * This constructor creates an instance of AmqpsDeviceTwin class and initializes member variables
      * @throws IllegalArgumentException if deviceId argument is null or empty
      */
-    AmqpsDeviceTwin(String deviceId) throws IllegalArgumentException
+    AmqpsDeviceTwin(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
     {
-        // Codes_SRS_AMQPSDEVICETWIN_12_001: [The constructor shall throw IllegalArgumentException if the deviceId argument is null or empty.]
-        if ((deviceId == null) || (deviceId.isEmpty()))
+        // Codes_SRS_AMQPSDEVICETWIN_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig argument is null or empty.]
+        if (deviceClientConfig == null)
         {
-            throw new IllegalArgumentException("The deviceId cannot be null or empty.");
+            throw new IllegalArgumentException("The deviceClientConfig cannot be null or empty.");
         }
+
+        this.deviceClientConfig = deviceClientConfig;
 
         // Codes_SRS_AMQPSDEVICETWIN_12_002: [The constructor shall set the sender and receiver endpoint path to IoTHub specific values.]
         this.senderLinkEndpointPath = SENDER_LINK_ENDPOINT_PATH;
         this.receiverLinkEndpointPath = RECEIVER_LINK_ENDPOINT_PATH;
 
         // Codes_SRS_AMQPSDEVICETWIN_12_003: [The constructor shall concatenate a sender specific prefix to the sender link tag's current value.]
-        this.senderLinkTag = SENDER_LINK_TAG_PREFIX + senderLinkTag;
+        this.senderLinkTag = SENDER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "-" + senderLinkTag;
         // Codes_SRS_AMQPSDEVICETWIN_12_004: [The constructor shall concatenate a receiver specific prefix to the receiver link tag's current value.]
-        this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX + receiverLinkTag;
+        this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "-" + receiverLinkTag;
 
         // Codes_SRS_AMQPSDEVICETWIN_12_005: [The constructor shall insert the given deviceId argument to the sender and receiver link address.]
-        this.senderLinkAddress = String.format(senderLinkEndpointPath, deviceId);
-        this.receiverLinkAddress = String.format(receiverLinkEndpointPath, deviceId);
+        this.senderLinkAddress = String.format(senderLinkEndpointPath, this.deviceClientConfig.getDeviceId());
+        this.receiverLinkAddress = String.format(receiverLinkEndpointPath, this.deviceClientConfig.getDeviceId());
 
         // Codes_SRS_AMQPSDEVICETWIN_12_006: [The constructor shall add the API version key to the amqpProperties.]
         this.amqpProperties.put(Symbol.getSymbol(API_VERSION_KEY), API_VERSION_VALUE);
@@ -81,6 +86,43 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
         this.correlationIdList = new HashMap<>();
     }
 
+    /**
+     * Identify if the given link is owned by the operation
+     *
+     * @return true if the link is owned by the operation, false otherwise
+     */
+    @Override
+    protected Boolean isLinkFound(String linkName)
+    {
+        // Codes_SRS_AMQPSDEVICETWIN_12_046: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
+        if (linkName.equals(this.getSenderLinkTag()))
+        {
+            this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.OPENED;
+            return true;
+        }
+
+        // Codes_SRS_AMQPSDEVICETWIN_12_047: [The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.]
+        if (linkName.equals(this.getReceiverLinkTag()))
+        {
+            this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.OPENED;
+            return true;
+        }
+
+        // Codes_SRS_AMQPSDEVICETWIN_12_048: [The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.]
+        return false;
+    }
+
+    /**
+     * Sends the given message and returns with the delivery hash if the message type is twin
+     *
+     * @param msgData The binary array of the bytes to send
+     * @param offset The start offset to copy the bytes from
+     * @param length The number of bytes to be send related to the offset
+     * @param deliveryTag The unique identfier of the delivery
+     * @return delivery tag
+     * @throws IllegalStateException if sender link has not been initialized
+     * @throws IllegalArgumentException if deliveryTag's length is 0
+     */
     @Override
     protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
     {
@@ -96,6 +138,15 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
         }
     }
 
+    /**
+     * Read the message from Proton if the link name matches
+     * Set the message type to twin
+     *
+     * @param linkName The receiver link's name to read from
+     * @return the received message
+     * @throws IllegalArgumentException if linkName argument is empty
+     * @throws IOException if Proton throws
+     */
     @Override
     protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, IOException
     {
@@ -105,20 +156,29 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
         {
             // Codes_SRS_AMQPSDEVICETWIN_12_013: [The function shall set the MessageType to DEVICE_TWIN if the super function returned not null.]
             amqpsMessage.setAmqpsMessageType(MessageType.DEVICE_TWIN);
+            amqpsMessage.setDeviceClientConfig(this.deviceClientConfig);
         }
 
         // Codes_SRS_AMQPSDEVICETWIN_12_014: [The function shall return the super function return value.]
         return amqpsMessage;
     }
 
+    /**
+     * Convert Proton message to IoTHubMessage if the message type is twin
+     *
+     * @param amqpsMessage The Proton message to convert
+     * @param deviceClientConfig The device client configuration
+     * @return the converted message
+     */
     @Override
     protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws IOException
     {
-        if (amqpsMessage.getAmqpsMessageType() == MessageType.DEVICE_TWIN)
+        if ((amqpsMessage.getAmqpsMessageType() == MessageType.DEVICE_TWIN) &&
+            (this.deviceClientConfig.getDeviceId() == deviceClientConfig.getDeviceId()))
         {
             // Codes_SRS_AMQPSDEVICETWIN_12_016: [The function shall convert the amqpsMessage to IoTHubTransportMessage.]
-            Message message = null;
-            message = protonMessageToIoTHubMessage(amqpsMessage);
+            Message message = protonMessageToIoTHubMessage(amqpsMessage);
+            message.setIotHubConnectionString(this.deviceClientConfig.getIotHubConnectionString());
 
             MessageCallback messageCallback = deviceClientConfig.getDeviceTwinMessageCallback();
             Object messageContext = deviceClientConfig.getDeviceTwinMessageContext();
@@ -134,6 +194,13 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
         }
     }
 
+    /**
+     * Convert IoTHubMessage to Proton message
+     * Set the message type to twin
+     *
+     * @param message The IoTHubMessage to convert
+     * @return the converted message
+     */
     @Override
     protected AmqpsConvertToProtonReturnValue convertToProton(Message message) throws IOException
     {

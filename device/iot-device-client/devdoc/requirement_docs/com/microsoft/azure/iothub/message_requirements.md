@@ -180,3 +180,15 @@ public MessageType getMessageType();
 ```
 
 **SRS_MESSAGE_34_049: [**The function shall return the message's message type.**]**
+
+
+**SRS_MESSAGE_12_001: [**The function shall return the message's iotHubConnectionString object.**]**
+```java
+public IotHubConnectionString getIotHubConnectionString();
+```
+
+
+**SRS_MESSAGE_12_002: [**The function shall set the message's iotHubConnectionString object to the provided value.**]**
+```java
+public void setIotHubConnectionString(IotHubConnectionString iotHubConnectionString);
+```

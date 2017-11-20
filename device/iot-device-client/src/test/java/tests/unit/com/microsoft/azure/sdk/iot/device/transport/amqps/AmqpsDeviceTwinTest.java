@@ -29,9 +29,10 @@ import java.util.UUID;
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
 import static org.junit.Assert.*;
 
-/* Unit tests for AmqpsDeviceTwin
+/**
+*  Unit tests for AmqpsDeviceTwin
 * 100% methods covered
-* 98% lines covered
+* 97% lines covered
 */
 public class AmqpsDeviceTwinTest
 {
@@ -49,6 +50,9 @@ public class AmqpsDeviceTwinTest
 
     @Mocked
     MessageCallback mockMessageCallback;
+
+    @Mocked
+    DeviceClientConfig mockDeviceClientConfig;
 
     // Tests_SRS_AMQPSDEVICETWIN_12_001: [The constructor shall throw IllegalArgumentException if the deviceId argument is null or empty.]
     @Test (expected = IllegalArgumentException.class)
@@ -88,11 +92,12 @@ public class AmqpsDeviceTwinTest
                 result = mockUUID;
                 mockUUID.toString();
                 result = uuidStr;
-            }
+                mockDeviceClientConfig.getDeviceId();
+                result = "deviceId";            }
         };
 
         //act
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         String API_VERSION_KEY = Deencapsulation.getField(amqpsDeviceTwin, "API_VERSION_KEY");
         String CORRELATION_ID_KEY = Deencapsulation.getField(amqpsDeviceTwin, "CORRELATION_ID_KEY");
         String SENDER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsDeviceTwin, "SENDER_LINK_ENDPOINT_PATH");
@@ -120,8 +125,8 @@ public class AmqpsDeviceTwinTest
         assertTrue(senderLinkTag.endsWith(uuidStr));
         assertTrue(receiverLinkTag.endsWith(uuidStr));
 
-        assertTrue(senderLinkAddress.contains(deviceId));
-        assertTrue(receiverLinkAddress.contains(deviceId));
+        assertTrue(senderLinkAddress.contains(mockDeviceClientConfig.getDeviceId()));
+        assertTrue(receiverLinkAddress.contains(mockDeviceClientConfig.getDeviceId()));
 
         assertTrue(amqpsProperties.containsKey(Symbol.getSymbol(API_VERSION_KEY)));
         assertTrue(amqpsProperties.containsKey(Symbol.getSymbol(CORRELATION_ID_KEY)));
@@ -134,11 +139,8 @@ public class AmqpsDeviceTwinTest
     @Test
     public void classHasAnnotationFieldsValues()
     {
-        //arrange
-        String deviceId = "deviceId";
-
         //act
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         String MESSAGE_ANNOTATION_FIELD_KEY_OPERATION = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_KEY_OPERATION");
         String MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE");
         String MESSAGE_ANNOTATION_FIELD_VALUE_GET = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_VALUE_GET");
@@ -161,6 +163,60 @@ public class AmqpsDeviceTwinTest
         assertTrue(MESSAGE_ANNOTATION_FIELD_VALUE_NOTIFICATIONS_TWIN_PROPERTIES_DESIRED.equals("/notifications/twin/properties/desired"));
     }
 
+    @Test
+    public void isLinkFoundReturnsTrueIfSenderLinkTagMatches()
+    {
+        // arrange
+        String linkName = "linkName";
+
+        //act
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsDeviceTwin, "senderLinkTag", linkName);
+        AmqpsDeviceOperationLinkState linkSate1 = Deencapsulation.getField(amqpsDeviceTwin, "amqpsSendLinkState");
+        Boolean retVal = Deencapsulation.invoke(amqpsDeviceTwin, "isLinkFound", linkName);
+        AmqpsDeviceOperationLinkState linkSate2 = Deencapsulation.getField(amqpsDeviceTwin, "amqpsSendLinkState");
+
+        // assert
+        assertTrue(retVal);
+        assertEquals(linkSate1, AmqpsDeviceOperationLinkState.CLOSED);
+        assertEquals(linkSate2, AmqpsDeviceOperationLinkState.OPENED);
+    }
+
+    @Test
+    public void isLinkFoundReturnsTrueIfReceiverLinkTagMatches()
+    {
+        // arrange
+        String linkName = "linkName";
+
+        //act
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsDeviceTwin, "receiverLinkTag", linkName);
+        AmqpsDeviceOperationLinkState linkSate1 = Deencapsulation.getField(amqpsDeviceTwin, "amqpsRecvLinkState");
+        Boolean retVal = Deencapsulation.invoke(amqpsDeviceTwin, "isLinkFound", linkName);
+        AmqpsDeviceOperationLinkState linkSate2 = Deencapsulation.getField(amqpsDeviceTwin, "amqpsRecvLinkState");
+
+        // assert
+        assertTrue(retVal);
+        assertEquals(linkSate1, AmqpsDeviceOperationLinkState.CLOSED);
+        assertEquals(linkSate2, AmqpsDeviceOperationLinkState.OPENED);
+    }
+
+    @Test
+    public void isLinkFoundReturnsFalseIfThereIsNoMatch()
+    {
+        // arrange
+        String linkName = "linkName";
+
+        //act
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsDeviceTwin, "senderLinkTag", "xxx");
+        Deencapsulation.setField(amqpsDeviceTwin, "receiverLinkTag", "yyy");
+        Boolean retVal = Deencapsulation.invoke(amqpsDeviceTwin, "isLinkFound", linkName);
+
+        // assert
+        assertFalse(retVal);
+    }
+
     // Tests_SRS_AMQPSDEVICETWIN_12_010: [The function shall call the super function if the MessageType is DEVICE_TWIN, and return with it's return value.]
     @Test
     public void sendMessageAndGetDeliveryHashCallsSuper() throws IOException
@@ -169,7 +225,7 @@ public class AmqpsDeviceTwinTest
         String deviceId = "deviceId";
         byte[] bytes = new byte[1];
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         //act
@@ -192,7 +248,7 @@ public class AmqpsDeviceTwinTest
         String deviceId = "deviceId";
         byte[] bytes = new byte[1];
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         //act
@@ -216,7 +272,7 @@ public class AmqpsDeviceTwinTest
         String linkName = "receiver";
         byte[] bytes = new byte[1];
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
         Deencapsulation.setField(amqpsDeviceTwin, "receiverLink", mockReceiver);
         Deencapsulation.setField(amqpsDeviceTwin, "senderLink", mockSender);
@@ -262,7 +318,7 @@ public class AmqpsDeviceTwinTest
         String linkName = "receiver";
         byte[] bytes = new byte[1];
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
         Deencapsulation.setField(amqpsDeviceTwin, "receiverLink", mockReceiver);
         Deencapsulation.setField(amqpsDeviceTwin, "senderLink", mockSender);
@@ -309,7 +365,7 @@ public class AmqpsDeviceTwinTest
         String deviceId = "deviceId";
         byte[] bytes = new byte[1];
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         new NonStrictExpectations()
@@ -342,7 +398,7 @@ public class AmqpsDeviceTwinTest
         byte[] bytes = new byte[1];
         final Object messageContext = "context";
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         new NonStrictExpectations()
@@ -400,7 +456,7 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(mockMessageAnnotations);
         amqpsMessage.setProperties(null);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         final String MESSAGE_ANNOTATION_FIELD_KEY_STATUS = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_KEY_STATUS");
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
@@ -465,7 +521,7 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(mockMessageAnnotations);
         amqpsMessage.setProperties(null);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         final String MESSAGE_ANNOTATION_FIELD_KEY_VERSION = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_KEY_VERSION");
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
@@ -530,7 +586,7 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(mockMessageAnnotations);
         amqpsMessage.setProperties(null);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         final String MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE");
         final String MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_DESIRED = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_DESIRED");
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
@@ -594,7 +650,7 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         new NonStrictExpectations()
@@ -652,7 +708,7 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         new NonStrictExpectations()
@@ -711,7 +767,7 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceTwin, "correlationIdList", mockCorrelationIdList);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
@@ -778,7 +834,7 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceTwin, "correlationIdList", mockCorrelationIdList);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
@@ -845,7 +901,7 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceTwin, "correlationIdList", mockCorrelationIdList);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
@@ -912,7 +968,7 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceTwin, "correlationIdList", mockCorrelationIdList);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
@@ -979,7 +1035,7 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceTwin, "correlationIdList", mockCorrelationIdList);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
@@ -1055,7 +1111,7 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setProperties(mockProperties);
         amqpsMessage.setApplicationProperties(null);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         final String AMQPS_APP_PROPERTY_PREFIX = Deencapsulation.getField(amqpsDeviceTwin, "AMQPS_APP_PROPERTY_PREFIX");
         final String TO_KEY = Deencapsulation.getField(amqpsDeviceTwin, "TO_KEY");
         final String USER_ID_KEY = Deencapsulation.getField(amqpsDeviceTwin, "USER_ID_KEY");
@@ -1122,7 +1178,7 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setProperties(null);
         amqpsMessage.setApplicationProperties(mockApplicationProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         new NonStrictExpectations()
@@ -1184,7 +1240,7 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setProperties(null);
         amqpsMessage.setApplicationProperties(mockApplicationProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         new NonStrictExpectations()
@@ -1230,7 +1286,7 @@ public class AmqpsDeviceTwinTest
         //arrange
         String deviceId = "deviceId";
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         new NonStrictExpectations()
@@ -1259,7 +1315,7 @@ public class AmqpsDeviceTwinTest
         //arrange
         String deviceId = "deviceId";
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         new NonStrictExpectations()
@@ -1297,7 +1353,7 @@ public class AmqpsDeviceTwinTest
         final String messageId = "messageId";
         final String correlationId = "correlationId";
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceTwin, "correlationIdList", mockCorrelationIdList);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
@@ -1359,7 +1415,7 @@ public class AmqpsDeviceTwinTest
         final String propertyKey = "testPropertyKey";
         final String propertyValue = "testPropertyValue";
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         new NonStrictExpectations()
@@ -1422,7 +1478,7 @@ public class AmqpsDeviceTwinTest
         final MessageProperty[] properties = new MessageProperty[1];
         properties[0] = mockMessageProperty;
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         new NonStrictExpectations()
@@ -1483,7 +1539,7 @@ public class AmqpsDeviceTwinTest
         final MessageProperty[] properties = new MessageProperty[1];
         properties[0] = mockMessageProperty;
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         new NonStrictExpectations()
@@ -1544,7 +1600,7 @@ public class AmqpsDeviceTwinTest
         final MessageProperty[] properties = new MessageProperty[1];
         properties[0] = mockMessageProperty;
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         new NonStrictExpectations()
@@ -1605,7 +1661,7 @@ public class AmqpsDeviceTwinTest
         final MessageProperty[] properties = new MessageProperty[1];
         properties[0] = mockMessageProperty;
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, deviceId);
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
 
         new NonStrictExpectations()

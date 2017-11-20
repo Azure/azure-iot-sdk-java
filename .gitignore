@@ -211,3 +211,4 @@ target
 *.project
 *.classpath
 *.prefs
+provisioning/provisioning-tools/tpm-simulator/NVChip

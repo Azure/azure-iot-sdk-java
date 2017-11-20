@@ -26,7 +26,7 @@ public final class AmqpsDeviceMethods
 AmqpsDeviceMethods(String deviceId) throws IllegalArgumentException
 ```
 
-**SRS_AMQPSDEVICEMETHODS_12_001: [**The constructor shall throw IllegalArgumentException if the deviceId argument is null or empty.**]**
+**SRS_AMQPSDEVICEMETHODS_12_001: [**The constructor shall throw IllegalArgumentException if the deviceClientConfig argument is null.**]**
 
 **SRS_AMQPSDEVICEMETHODS_12_002: [**The constructor shall set the sender and receiver endpoint path to IoTHub specific values.**]**
 
@@ -39,6 +39,18 @@ AmqpsDeviceMethods(String deviceId) throws IllegalArgumentException
 **SRS_AMQPSDEVICEMETHODS_12_006: [**The constructor shall add API version key and API version value to the amqpProperties.**]**
 
 **SRS_AMQPSDEVICEMETHODS_12_007: [**The constructor shall add correlation ID key and deviceId value to the amqpProperties.**]**
+
+
+### isLinkFound
+```java
+protected Boolean isLinkFound(String linkName);
+```
+
+**SRS_AMQPSDEVICEMETHODS_12_047: [**The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.**]**
+
+**SRS_AMQPSDEVICEMETHODS_12_048: [**The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.**]**
+
+**SRS_AMQPSDEVICEMETHODS_12_049: [**The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.**]**
 
 
 ### sendMessageAndGetDeliveryHash

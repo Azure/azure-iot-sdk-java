@@ -5,6 +5,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
@@ -15,10 +16,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,7 +28,7 @@ import static org.junit.Assert.*;
 
 /*
     Unit tests for Device Twin
-    Coverage : 90% method, 86% line
+    Coverage : 94% method, 88% line
  */
 public class DeviceTwinTest
 {
@@ -58,13 +56,34 @@ public class DeviceTwinTest
     @Mocked
     Query mockedQuery;
 
+    @Mocked
+    ParserUtility mockParserUtility;
+
+    @Mocked
+    QueryCollection mockQueryCollection;
+
+    @Mocked
+    QueryCollectionResponse<DeviceTwinDevice> mockQueryCollectionResponse;
+
+    @Mocked
+    QueryOptions mockQueryOptions;
+
+    @Mocked
+    URL mockUrl;
+
+    @Mocked
+    Collection mockCollection;
+
+    @Mocked
+    Iterator<String> mockIterator;
+
     static String VALID_SQL_QUERY = null;
 
     @Before
     public void setUp() throws IOException
     {
         VALID_SQL_QUERY = SqlQuery.createSqlQuery("tags.Floor, AVG(properties.reported.temperature) AS AvgTemperature",
-                                                  SqlQuery.FromType.DEVICES, "tags.building = '43'", null).getQuery();
+                SqlQuery.FromType.DEVICES, "tags.building = '43'", null).getQuery();
     }
 
     private void assetEqualSetAndMap(Set<Pair> pairSet, Map<String, String> map)
@@ -455,46 +474,46 @@ public class DeviceTwinTest
             }
         };
     }
-/*
-    @Test (expected = IotHubException.class)
-    public void replaceDesiredPropertiesThrowsVerificationThrows() throws Exception
-    {
-        //arrange
-        final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-        new NonStrictExpectations()
+    /*
+        @Test (expected = IotHubException.class)
+        public void replaceDesiredPropertiesThrowsVerificationThrows() throws Exception
         {
+            //arrange
+            final String connectionString = "testString";
+            DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+            new NonStrictExpectations()
             {
-                mockedDevice.getDeviceId();
-                result = "SomeDevID";
-                mockedTwinObject.resetDesiredProperty((Map<String, Object>)any);
-                result = "SomeJsonString";
-                IotHubExceptionManager.httpResponseVerification(mockedHttpResponse);
-                result = new IotHubException();
-            }
-        };
+                {
+                    mockedDevice.getDeviceId();
+                    result = "SomeDevID";
+                    mockedTwinObject.resetDesiredProperty((Map<String, Object>)any);
+                    result = "SomeJsonString";
+                    IotHubExceptionManager.httpResponseVerification(mockedHttpResponse);
+                    result = new IotHubException();
+                }
+            };
 
-        //act
-        testTwin.replaceDesiredProperties(mockedDevice);
+            //act
+            testTwin.replaceDesiredProperties(mockedDevice);
 
-        //assert
-        new Verifications()
-        {
+            //assert
+            new Verifications()
             {
-                mockedConnectionString.getUrlTwinDesired(anyString);
-                times = 1;
-                mockedTwinObject.resetDesiredProperty((Map<String, Object>)any);
-                times = 1;
-                mockedHttpRequest.setReadTimeoutMillis(anyInt);
-                times = 1;
-                mockedHttpRequest.setHeaderField(anyString, anyString);
-                times = 7;
-                mockedHttpRequest.send();
-                times = 1;
-            }
-        };
-    }
-*/
+                {
+                    mockedConnectionString.getUrlTwinDesired(anyString);
+                    times = 1;
+                    mockedTwinObject.resetDesiredProperty((Map<String, Object>)any);
+                    times = 1;
+                    mockedHttpRequest.setReadTimeoutMillis(anyInt);
+                    times = 1;
+                    mockedHttpRequest.setHeaderField(anyString, anyString);
+                    times = 7;
+                    mockedHttpRequest.send();
+                    times = 1;
+                }
+            };
+        }
+    */
     /*
     **Tests_SRS_DEVICETWIN_25_038: [** The function shall build the URL for this operation by calling getUrlTwinTags **]**
     **Tests_SRS_DEVICETWIN_25_039: [** The function shall serialize the tags map by calling resetTags Api on the twin object for the device provided by the user**]**
@@ -1564,4 +1583,210 @@ public class DeviceTwinTest
         testTwin.scheduleUpdateTwin(queryCondition, mockedDevice, now, maxExecutionTimeInSeconds);
     }
 
+    //Tests_SRS_DEVICETWIN_34_069: [This function shall return the results of calling queryTwinCollection(sqlQuery, DEFAULT_PAGE_SIZE).]
+    @Test
+    public void queryTwinCollectionWithoutPageSizeUsesDefaultPageSize() throws IOException, IotHubException
+    {
+        //arrange
+        DeviceTwin deviceTwin = new DeviceTwin();
+        String expectedQuery = "someQuery";
+        Integer expectedPageSize = Deencapsulation.getField(deviceTwin, "DEFAULT_PAGE_SIZE");
+        new StrictExpectations(deviceTwin)
+        {
+            {
+                //assert
+                deviceTwin.queryTwinCollection(expectedQuery, expectedPageSize);
+                result = null;
+            }
+        };
+
+        //act
+        deviceTwin.queryTwinCollection(expectedQuery);
+    }
+
+    //Tests_SRS_DEVICETWIN_34_070: [This function shall return a new QueryCollection object of type TWIN with the provided sql query and page size.]
+    @Test
+    public void queryTwinCollectionWithPageSizeSuccess() throws IOException, IotHubException
+    {
+        //arrange
+        String expectedSqlQuery = "some query";
+        int expectedPageSize = 23;
+
+        new StrictExpectations()
+        {
+            {
+                //returning mock URL seems to break this test for some reason
+                mockedConnectionString.getUrlTwinQuery();
+                result = null;
+                Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, expectedSqlQuery, expectedPageSize, QueryType.TWIN, mockedConnectionString, null, HttpMethod.POST, 0);
+                result = mockQueryCollection;
+            }
+        };
+
+        DeviceTwin deviceTwin = new DeviceTwin();
+        Deencapsulation.setField(deviceTwin, "iotHubConnectionString", mockedConnectionString);
+
+        //act
+        deviceTwin.queryTwinCollection(expectedSqlQuery, expectedPageSize);
+    }
+
+    //Tests_SRS_DEVICETWIN_34_075: [This function shall call next(deviceTwinQueryCollection, queryOptions) where queryOptions has the deviceTwinQueryCollection's current page size.]
+    @Test
+    public void getNextDeviceTwinCollectionWithoutOptionsCallsGetNextDeviceTwinCollectionWithOptions() throws IOException, IotHubException
+    {
+        //arrange
+        DeviceTwin deviceTwin = new DeviceTwin();
+        Integer expectedPageSize = 33;
+
+        new NonStrictExpectations(deviceTwin)
+        {
+            {
+                new QueryOptions();
+                result = mockQueryOptions;
+                mockQueryOptions.getPageSize();
+                result = expectedPageSize;
+                deviceTwin.next(mockQueryCollection, mockQueryOptions);
+                result = mockQueryCollectionResponse;
+            }
+        };
+
+        //act
+        deviceTwin.next(mockQueryCollection);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockQueryOptions.setPageSize(anyInt);
+                times = 1;
+                deviceTwin.next(mockQueryCollection, mockQueryOptions);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICETWIN_34_076: [If the provided deviceTwinQueryCollection is null, an IllegalArgumentException shall be thrown.]
+    @Test (expected = IllegalArgumentException.class)
+    public void getNextDeviceTwinCollectionWithOptionsThrowsForNullQueryCollection() throws IOException, IotHubException
+    {
+        //arrange
+        DeviceTwin deviceTwin = new DeviceTwin();
+
+        //act
+        deviceTwin.next(null, new QueryOptions());
+    }
+
+    //Tests_SRS_DEVICETWIN_34_077: [If the provided deviceTwinQueryCollection has no next set to give, this function shall return null.]
+    @Test
+    public void getNextDeviceTwinCollectionWithOptionsReturnsNullIfDoesNotHaveNext() throws IOException, IotHubException
+    {
+        //arrange
+        DeviceTwin deviceTwin = new DeviceTwin();
+
+        new NonStrictExpectations(deviceTwin)
+        {
+            {
+                deviceTwin.hasNext(mockQueryCollection);
+                result = false;
+            }
+        };
+
+        //act
+        QueryCollectionResponse actualResponse = deviceTwin.next(mockQueryCollection, mockQueryOptions);
+
+        //assert
+        assertNull(actualResponse);
+    }
+
+    //Tests_SRS_DEVICETWIN_34_078: [If the provided deviceTwinQueryCollection has a next set to give, this function shall retrieve that set from deviceTwinQueryCollection, cast its contents to DeviceTwinDevice objects, and return it in a QueryCollectionResponse object.]
+    //Tests_SRS_DEVICETWIN_34_079: [The returned QueryCollectionResponse object shall contain the continuation token needed to retrieve the next set with.]
+    @Test
+    public void getNextDeviceTwinCollectionWithOptionsSuccess() throws IOException, IotHubException
+    {
+        //arrange
+        DeviceTwin deviceTwin = new DeviceTwin();
+        String expectedContinuationToken = "some continuation token";
+
+        String expectedJsonString = "some json string";
+
+        new StrictExpectations(deviceTwin)
+        {
+            {
+                deviceTwin.hasNext(mockQueryCollection);
+                result = true;
+
+                Deencapsulation.invoke(mockQueryCollection, "next", new Class[] {QueryOptions.class}, mockQueryOptions);
+                result = mockQueryCollectionResponse;
+
+                mockQueryCollectionResponse.getCollection();
+                result = mockCollection;
+
+                mockCollection.iterator();
+                result = mockIterator;
+
+                mockIterator.hasNext();
+                result = true;
+
+                mockIterator.next();
+                result = expectedJsonString;
+
+                Deencapsulation.invoke(deviceTwin, "jsonToDeviceTwinDevice", new Class[] {String.class}, expectedJsonString);
+                result = new DeviceTwinDevice();
+
+                mockIterator.hasNext();
+                result = true;
+
+                mockIterator.next();
+                result = expectedJsonString;
+
+                Deencapsulation.invoke(deviceTwin, "jsonToDeviceTwinDevice", new Class[] {String.class}, expectedJsonString);
+                result = new DeviceTwinDevice();
+
+                mockIterator.hasNext();
+                result = false;
+
+                mockQueryCollectionResponse.getContinuationToken();
+                result = expectedContinuationToken;
+
+                Deencapsulation.newInstance(QueryCollectionResponse.class, new Class[] {Collection.class, String.class}, (Collection) any, expectedContinuationToken);
+                result = mockQueryCollectionResponse;
+            }
+        };
+
+        //act
+        deviceTwin.next(mockQueryCollection, mockQueryOptions);
+    }
+
+    //Tests_SRS_DEVICETWIN_34_071: [This function shall return if the provided deviceTwinQueryCollection has next.]
+    @Test
+    public void hasNextDeviceTwinQueryCollectionSuccess() throws IOException, IotHubException
+    {
+        //arrange
+        DeviceTwin deviceTwin = new DeviceTwin();
+
+        new StrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockQueryCollection, "hasNext");
+                result = true;
+            }
+        };
+
+        //act
+        boolean actualHasNext = deviceTwin.hasNext(mockQueryCollection);
+
+        //assert
+        assertTrue(actualHasNext);
+    }
+
+    //Tests_SRS_DEVICETWIN_34_080: [If the provided deviceTwinQueryCollection is null, an IllegalArgumentException shall be thrown.]
+    @Test (expected = IllegalArgumentException.class)
+    public void hasNextDeviceTwinQueryCollectionThrowsForNullQuery() throws IOException, IotHubException
+    {
+        //arrange
+        DeviceTwin deviceTwin = new DeviceTwin();
+
+        //act
+        deviceTwin.hasNext(null);
+    }
 }
