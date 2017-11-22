@@ -4,6 +4,12 @@
 
 build_root=$(cd "$(dirname "$0")/.." && pwd)
 
+# -- Java SDK Run E2E --
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+cd $build_root
+mvn install -DskipITs=false
+[ $? -eq 0 ] || exit $?
+
 # -- Java Dependencies --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/deps
@@ -12,21 +18,6 @@ mvn -q javadoc:javadoc
 echo
 echo [info] ---------------------------------------------------------------------
 echo [info] javadoc for deps succeeded
-echo [info] ---------------------------------------------------------------------
-echo
-mvn install
-[ $? -eq 0 ] || exit $?
-
-# -- Java Provisioning --
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-cd $build_root/provisioning
-mvn install
-[ $? -eq 0 ] || exit $?
-mvn -q javadoc:javadoc
-[ $? -eq 0 ] || exit $?
-echo
-echo [info] ---------------------------------------------------------------------
-echo [info] javadoc for provisioning succeeded
 echo [info] ---------------------------------------------------------------------
 echo
 
@@ -40,14 +31,6 @@ echo [info] --------------------------------------------------------------------
 echo [info] javadoc for iot-service-client succeeded
 echo [info] ---------------------------------------------------------------------
 echo
-mvn install
-[ $? -eq 0 ] || exit $?
-
-# -- Java Service Samples --
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-cd $build_root/service/iot-service-samples
-mvn install
-[ $? -eq 0 ] || exit $?
 
 # -- Java Device Client --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
@@ -59,17 +42,16 @@ echo [info] --------------------------------------------------------------------
 echo [info] javadoc for iot-device-client succeeded
 echo [info] ---------------------------------------------------------------------
 echo
-mvn install
-[ $? -eq 0 ] || exit $?
 
-# -- Java Device Samples --
+# -- Java Provisioning --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-cd $build_root/device/iot-device-samples
-mvn install
+cd $build_root/provisioning
+mvn -q javadoc:javadoc
 [ $? -eq 0 ] || exit $?
+echo
+echo [info] ---------------------------------------------------------------------
+echo [info] javadoc for provisioning succeeded
+echo [info] ---------------------------------------------------------------------
+echo
 
-# -- Java SDK Run E2E --
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-cd $build_root
-mvn install -DskipITs=false
-[ $? -eq 0 ] || exit $?
+
