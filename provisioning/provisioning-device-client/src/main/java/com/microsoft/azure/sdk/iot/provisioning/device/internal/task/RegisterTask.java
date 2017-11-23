@@ -11,12 +11,12 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDevi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientAuthenticationException;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegisterResponseTPMParser;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.TpmRegistrationResultParser;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
@@ -103,7 +103,7 @@ public class RegisterTask implements Callable
         this.responseCallback = new ResponseCallbackImpl();
     }
 
-    private ResponseParser authenticateWithX509(String registrationId) throws ProvisioningDeviceClientException
+    private RegistrationOperationStatusParser authenticateWithX509(String registrationId) throws ProvisioningDeviceClientException
     {
         //SRS_RegisterTask_25_003: [ If the provided security client is for X509 then, this method shall throw ProvisioningDeviceClientException if registration id is null. ]
         if (registrationId == null)
@@ -137,7 +137,7 @@ public class RegisterTask implements Callable
 
             if (dpsRegistrationData.getResponseData() != null && dpsRegistrationData.getContractState() == DPS_REGISTRATION_RECEIVED)
             {
-                return ResponseParser.createFromJson(new String(dpsRegistrationData.getResponseData()));
+                return RegistrationOperationStatusParser.createFromJson(new String(dpsRegistrationData.getResponseData()));
             }
             else
             {
@@ -176,13 +176,13 @@ public class RegisterTask implements Callable
         return String.format(SASTOKEN_FORMAT, tokenScope, base64UrlEncodedSignature, expiryTimeUTC);
     }
 
-    private ResponseParser processWithNonce(ResponseData responseDataForNonce,
-                                            SecurityProviderTpm securityClientTpm,
-                                            RequestData requestData)
+    private RegistrationOperationStatusParser processWithNonce(ResponseData responseDataForNonce,
+                                                               SecurityProviderTpm securityClientTpm,
+                                                               RequestData requestData)
             throws IOException, InterruptedException, ProvisioningDeviceClientException,SecurityClientException
     {
 
-        RegisterResponseTPMParser registerResponseTPMParser = RegisterResponseTPMParser.createFromJson(new String(responseDataForNonce.getResponseData()));
+        TpmRegistrationResultParser registerResponseTPMParser = TpmRegistrationResultParser.createFromJson(new String(responseDataForNonce.getResponseData()));
 
         if (registerResponseTPMParser.getAuthenticationKey() != null)
         {
@@ -222,7 +222,7 @@ public class RegisterTask implements Callable
                     responseDataForSasTokenAuth.getContractState() == DPS_REGISTRATION_RECEIVED)
             {
                 this.authorization.setSasToken(sasToken);
-                return ResponseParser.createFromJson(new String(responseDataForSasTokenAuth.getResponseData()));
+                return RegistrationOperationStatusParser.createFromJson(new String(responseDataForSasTokenAuth.getResponseData()));
             }
             else
             {
@@ -237,7 +237,7 @@ public class RegisterTask implements Callable
         }
     }
 
-    private ResponseParser authenticateWithSasToken(String registrationId) throws ProvisioningDeviceClientException
+    private RegistrationOperationStatusParser authenticateWithSasToken(String registrationId) throws ProvisioningDeviceClientException
     {
         //SRS_RegisterTask_25_008: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if registration id or endorsement key or storage root key are null. ]
         if (registrationId == null)
@@ -288,7 +288,7 @@ public class RegisterTask implements Callable
         }
     }
 
-    private ResponseParser authenticateWithDPS() throws ProvisioningDeviceClientException
+    private RegistrationOperationStatusParser authenticateWithDPS() throws ProvisioningDeviceClientException
     {
         try
         {
@@ -313,11 +313,11 @@ public class RegisterTask implements Callable
 
     /**
      * Callable call by the thread which handles Authentication and registration of a given device with the service
-     * @return ResponseParser holding the state of the service post registration
+     * @return RegistrationOperationStatusParser holding the state of the service post registration
      * @throws Exception if registration fails.
      */
     @Override
-    public ResponseParser call() throws Exception
+    public RegistrationOperationStatusParser call() throws Exception
     {
         return this.authenticateWithDPS();
     }

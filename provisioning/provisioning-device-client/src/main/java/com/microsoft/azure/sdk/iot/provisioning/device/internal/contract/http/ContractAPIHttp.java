@@ -17,7 +17,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegisterRequestParser;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
@@ -185,7 +185,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             String base64EncodedEk = new String(Base64.encodeBase64Local(requestData.getEndorsementKey()));
             String base64EncodedSrk = new String(Base64.encodeBase64Local(requestData.getStorageRootKey()));
             //SRS_ContractAPIHttp_25_025: [ This method shall build the required Json input using parser. ]
-            byte[] payload = new RegisterRequestParser(requestData.getRegistrationId(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
+            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
             //SRS_ContractAPIHttp_25_005: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8".]
             HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.PUT, payload, DEFAULT_HTTP_TIMEOUT_MS, null, SDKUtils.getUserAgentString());
             //SRS_ContractAPIHttp_25_006: [This method shall set the SSLContext for the Http Request.]
@@ -266,11 +266,11 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
                 //SRS_ContractAPIHttp_25_027: [ This method shall base 64 encoded endorsement key, storage root key. ]
                 String base64EncodedEk = new String(Base64.encodeBase64Local(requestData.getEndorsementKey()));
                 String base64EncodedSrk = new String(Base64.encodeBase64Local(requestData.getStorageRootKey()));
-                payload = new RegisterRequestParser(requestData.getRegistrationId(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
+                payload = new DeviceRegistrationParser(requestData.getRegistrationId(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
             }
             else
             {
-                payload = new RegisterRequestParser(requestData.getRegistrationId()).toJson().getBytes();
+                payload = new DeviceRegistrationParser(requestData.getRegistrationId()).toJson().getBytes();
             }
 
             //SRS_ContractAPIHttp_25_013: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8" 4. Authorization: specified sas token as authorization if a non null value is given.]

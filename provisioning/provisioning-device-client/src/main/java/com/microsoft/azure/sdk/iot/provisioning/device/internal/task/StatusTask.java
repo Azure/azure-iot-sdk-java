@@ -7,10 +7,10 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ResponseParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
@@ -84,7 +84,7 @@ public class StatusTask implements Callable
         this.authorization = authorization;
     }
 
-    private ResponseParser getRegistrationStatus(String operationId, Authorization authorization) throws ProvisioningDeviceClientException
+    private RegistrationOperationStatusParser getRegistrationStatus(String operationId, Authorization authorization) throws ProvisioningDeviceClientException
     {
         try
         {
@@ -103,7 +103,7 @@ public class StatusTask implements Callable
             }
 
             RequestData requestData = new RequestData( registrationId, operationId, authorization.getSslContext(), authorization.getSasToken());
-            //SRS_StatusTask_25_005: [ This method shall trigger getRegistrationStatus on the contract API and wait for response and return it. ]
+            //SRS_StatusTask_25_005: [ This method shall trigger getRegistrationState on the contract API and wait for response and return it. ]
             ResponseData responseData = new ResponseData();
             provisioningDeviceClientContract.getRegistrationStatus(requestData, new ResponseCallbackImpl(), responseData);
             if (responseData.getResponseData() == null || responseData.getContractState() != ContractState.DPS_REGISTRATION_RECEIVED)
@@ -112,7 +112,7 @@ public class StatusTask implements Callable
             }
             if (responseData.getResponseData() != null && responseData.getContractState() == ContractState.DPS_REGISTRATION_RECEIVED)
             {
-                return ResponseParser.createFromJson(new String(responseData.getResponseData()));
+                return RegistrationOperationStatusParser.createFromJson(new String(responseData.getResponseData()));
             }
             else
             {
@@ -129,11 +129,11 @@ public class StatusTask implements Callable
     /**
      * Implementation of callable for this task. This task queries for status
      * with the service
-     * @return ResponseParser object holding the information received from service
+     * @return RegistrationOperationStatusParser object holding the information received from service
      * @throws Exception If any of the underlying calls fail
      */
     @Override
-    public ResponseParser call() throws Exception
+    public RegistrationOperationStatusParser call() throws Exception
     {
        return this.getRegistrationStatus(this.operationId, this.authorization);
     }
