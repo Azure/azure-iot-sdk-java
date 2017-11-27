@@ -83,7 +83,7 @@ public class TwinPropertiesTest
             "      \"$version\":" + VERSION + "\n" +
             "    }\n";
 
-    /* SRS_TWIN_PROPERTIES_21_001: [The constructor shall throws IllegalArgumentException if the provided desired property is null.] */
+    /* SRS_TWIN_PROPERTIES_21_001: [The constructor shall throw IllegalArgumentException if the provided desired property is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullDesiredProperty()
     {

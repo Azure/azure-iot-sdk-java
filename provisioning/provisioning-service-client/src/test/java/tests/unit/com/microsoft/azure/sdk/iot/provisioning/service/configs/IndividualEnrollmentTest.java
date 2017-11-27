@@ -787,7 +787,7 @@ public class IndividualEnrollmentTest
         assertEquals(VALID_PARSED_ETAG, individualEnrollment.getEtag());
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throws IllegalArgumentException if the provided registrationId is {@code null}, empty, or invalid.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throw IllegalArgumentException if the provided registrationId is {@code null}, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setRegistrationIdThrowsOnNull()
     {
@@ -800,7 +800,7 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throws IllegalArgumentException if the provided registrationId is {@code null}, empty, or invalid.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throw IllegalArgumentException if the provided registrationId is {@code null}, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setRegistrationIdThrowsOnEmpty()
     {
@@ -813,7 +813,7 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throws IllegalArgumentException if the provided registrationId is {@code null}, empty, or invalid.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throw IllegalArgumentException if the provided registrationId is {@code null}, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setRegistrationIdThrowsOnNotUtf8()
     {
@@ -826,7 +826,7 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throws IllegalArgumentException if the provided registrationId is {@code null}, empty, or invalid.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throw IllegalArgumentException if the provided registrationId is {@code null}, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setRegistrationIdThrowsOnInvalidChar()
     {
@@ -855,7 +855,7 @@ public class IndividualEnrollmentTest
         assertEquals(newRegistrationId, Deencapsulation.getField(individualEnrollment, "registrationId"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throws IllegalArgumentException if the provided deviceId is {@code null}, empty, or invalid.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId is {@code null}, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setDeviceIdThrowsOnNull()
     {
@@ -868,7 +868,7 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throws IllegalArgumentException if the provided deviceId is {@code null}, empty, or invalid.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId is {@code null}, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setDeviceIdThrowsOnEmpty()
     {
@@ -881,7 +881,7 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throws IllegalArgumentException if the provided deviceId is {@code null}, empty, or invalid.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId is {@code null}, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setDeviceIdThrowsOnNotUtf8()
     {
@@ -894,7 +894,7 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The getDeviceId shall throws IllegalArgumentException if the provided deviceId is {@code null}, empty, or invalid.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The getDeviceId shall throw IllegalArgumentException if the provided deviceId is {@code null}, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setDeviceIdThrowsOnInvalidChar()
     {
@@ -923,7 +923,7 @@ public class IndividualEnrollmentTest
         assertEquals(newDeviceId, Deencapsulation.getField(individualEnrollment, "deviceId"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_023: [The setRegistrationState shall throws IllegalArgumentException if the provided registrationState is null.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_023: [The setRegistrationState shall throw IllegalArgumentException if the provided registrationState is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void setRegistrationStateThrowsOnNull()
     {
@@ -1176,7 +1176,7 @@ public class IndividualEnrollmentTest
         Helpers.assertDateWithError((Date)Deencapsulation.getField(individualEnrollment, "createdDateTimeUtcDate"), VALID_DATE_AS_STRING);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setCreatedDateTimeUtcThrowsOnNull()
     {
@@ -1189,7 +1189,7 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setCreatedDateTimeUtcThrowsOnEmpty()
     {
@@ -1202,7 +1202,7 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setCreatedDateTimeUtcThrowsOnInvalid()
     {
@@ -1230,7 +1230,7 @@ public class IndividualEnrollmentTest
         Helpers.assertDateWithError((Date)Deencapsulation.getField(individualEnrollment, "lastUpdatedDateTimeUtcDate"), VALID_DATE_AS_STRING);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setLastUpdatedDateTimeUtcThrowsOnNull()
     {
@@ -1243,7 +1243,7 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setLastUpdatedDateTimeUtcThrowsOnEmpty()
     {
@@ -1256,7 +1256,7 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setLastUpdatedDateTimeUtcThrowsOnInvalid()
     {

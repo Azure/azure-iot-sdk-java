@@ -132,7 +132,7 @@ public class X509Certificates
      */
     X509Certificates(String primary, String secondary)
     {
-        /* SRS_X509_CERTIFICATES_21_001: [The constructor shall throws IllegalArgumentException if the primary certificate is null or empty.] */
+        /* SRS_X509_CERTIFICATES_21_001: [The constructor shall throw IllegalArgumentException if the primary certificate is null or empty.] */
         if(Tools.isNullOrEmpty(primary))
         {
             throw new IllegalArgumentException("primary certificate cannot be null or empty");
@@ -157,7 +157,7 @@ public class X509Certificates
      */
     public X509Certificates(X509Certificates x509Certificates)
     {
-        /* SRS_X509_CERTIFICATES_21_004: [The constructor shall throws IllegalArgumentException if the provide X509Certificates is null or if its primary certificate is null.] */
+        /* SRS_X509_CERTIFICATES_21_004: [The constructor shall throw IllegalArgumentException if the provide X509Certificates is null or if its primary certificate is null.] */
         if((x509Certificates == null) || (x509Certificates.getPrimary() == null))
         {
             throw new IllegalArgumentException("original x509Certificates cannot be null and its primary certificate cannot be null.");

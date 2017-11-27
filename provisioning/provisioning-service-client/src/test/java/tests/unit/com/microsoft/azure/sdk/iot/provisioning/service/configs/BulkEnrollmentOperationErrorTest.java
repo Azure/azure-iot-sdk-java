@@ -76,7 +76,7 @@ public class BulkEnrollmentOperationErrorTest
         assertEquals(VALID_ERROR_STATUS_1, result);
     }
 
-    /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_004: [The validateError shall throws IllegalArgumentException if the registrationId is null, empty or not a valid id.] */
+    /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_004: [The validateError shall throw IllegalArgumentException if the registrationId is null, empty or not a valid id.] */
     @Test (expected = IllegalArgumentException.class)
     public void validateErrorThrowsOnNullRegistrationId()
     {
@@ -94,7 +94,7 @@ public class BulkEnrollmentOperationErrorTest
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_004: [The validateError shall throws IllegalArgumentException if the registrationId is null, empty or not a valid id.] */
+    /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_004: [The validateError shall throw IllegalArgumentException if the registrationId is null, empty or not a valid id.] */
     @Test (expected = IllegalArgumentException.class)
     public void validateErrorThrowsOnEmptyRegistrationId()
     {
@@ -113,7 +113,7 @@ public class BulkEnrollmentOperationErrorTest
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_004: [The validateError shall throws IllegalArgumentException if the registrationId is null, empty or not a valid id.] */
+    /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_004: [The validateError shall throw IllegalArgumentException if the registrationId is null, empty or not a valid id.] */
     @Test (expected = IllegalArgumentException.class)
     public void validateErrorThrowsOnInvalidRegistrationId()
     {
@@ -132,7 +132,7 @@ public class BulkEnrollmentOperationErrorTest
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_005: [The validateError shall throws IllegalArgumentException if the errorCode is null.] */
+    /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_005: [The validateError shall throw IllegalArgumentException if the errorCode is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void validateErrorThrowsOnNullErrorCode()
     {

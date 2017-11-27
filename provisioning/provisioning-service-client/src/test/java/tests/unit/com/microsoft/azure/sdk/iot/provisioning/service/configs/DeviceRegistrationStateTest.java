@@ -113,7 +113,7 @@ public class DeviceRegistrationStateTest
         assertNotNull(deviceRegistrationState);
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATE_21_004: [The constructor shall throws IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_004: [The constructor shall throw IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullRegistrationId()
     {
@@ -136,7 +136,7 @@ public class DeviceRegistrationStateTest
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATE_21_004: [The constructor shall throws IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_004: [The constructor shall throw IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyRegistrationId()
     {
@@ -160,7 +160,7 @@ public class DeviceRegistrationStateTest
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATE_21_004: [The constructor shall throws IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_004: [The constructor shall throw IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidRegistrationId()
     {
@@ -196,7 +196,7 @@ public class DeviceRegistrationStateTest
         assertEquals(VALID_REGISTRATION_ID, Deencapsulation.getField(deviceRegistrationState, "registrationId"));
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATE_21_006: [The constructor shall throws IllegalArgumentException if the provided deviceId is empty, or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_006: [The constructor shall throw IllegalArgumentException if the provided deviceId is empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyDeviceId()
     {
@@ -220,7 +220,7 @@ public class DeviceRegistrationStateTest
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATE_21_006: [The constructor shall throws IllegalArgumentException if the provided deviceId is empty, or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_006: [The constructor shall throw IllegalArgumentException if the provided deviceId is empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidDeviceId()
     {
@@ -279,7 +279,7 @@ public class DeviceRegistrationStateTest
         assertNull(Deencapsulation.getField(deviceRegistrationState, "createdDateTimeUtcDate"));
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATE_21_031: [Te constructor shall throws IllegalArgumentException if the createdDateTimeUtc is empty or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_031: [Te constructor shall throw IllegalArgumentException if the createdDateTimeUtc is empty or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyCreatedDateTimeUtc()
     {
@@ -302,7 +302,7 @@ public class DeviceRegistrationStateTest
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATE_21_031: [Te constructor shall throws IllegalArgumentException if the createdDateTimeUtc is empty or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_031: [Te constructor shall throw IllegalArgumentException if the createdDateTimeUtc is empty or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidCreatedDateTimeUtc()
     {
@@ -360,7 +360,7 @@ public class DeviceRegistrationStateTest
         assertNull(Deencapsulation.getField(deviceRegistrationState, "lastUpdatedDateTimeUtcDate"));
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATE_21_032: [Te constructor shall throws IllegalArgumentException if the lastUpdatedDateTimeUtc is empty or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_032: [Te constructor shall throw IllegalArgumentException if the lastUpdatedDateTimeUtc is empty or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyLastUpdatedDateTimeUtc()
     {
@@ -383,7 +383,7 @@ public class DeviceRegistrationStateTest
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATE_21_032: [Te constructor shall throws IllegalArgumentException if the lastUpdatedDateTimeUtc is empty or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_032: [Te constructor shall throw IllegalArgumentException if the lastUpdatedDateTimeUtc is empty or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidLastUpdatedDateTimeUtc()
     {
@@ -499,7 +499,7 @@ public class DeviceRegistrationStateTest
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATE_21_014: [The constructor shall throws IllegalArgumentException if the provided status is invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_014: [The constructor shall throw IllegalArgumentException if the provided status is invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidStatus()
     {

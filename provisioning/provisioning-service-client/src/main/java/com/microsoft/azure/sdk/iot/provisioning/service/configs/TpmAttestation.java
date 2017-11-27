@@ -43,7 +43,7 @@ public class TpmAttestation extends Attestation
      */
     public TpmAttestation(String endorsementKey, String storageRootKey)
     {
-        /* SRS_TPM_ATTESTATION_21_001: [The constructor shall throws IllegalArgumentException if the provided endorsementKey is null or empty.] */
+        /* SRS_TPM_ATTESTATION_21_001: [The constructor shall throw IllegalArgumentException if the provided endorsementKey is null or empty.] */
         /* SRS_TPM_ATTESTATION_21_002: [The constructor shall store the provided endorsementKey.] */
         this.setEndorsementKey(endorsementKey);
         /* SRS_TPM_ATTESTATION_21_003: [The constructor shall store the provided storageRootKey.] */
@@ -63,7 +63,7 @@ public class TpmAttestation extends Attestation
      */
     public TpmAttestation(String endorsementKey)
     {
-        /* SRS_TPM_ATTESTATION_21_004: [The constructor shall throws IllegalArgumentException if the provided endorsementKey is null or empty.] */
+        /* SRS_TPM_ATTESTATION_21_004: [The constructor shall throw IllegalArgumentException if the provided endorsementKey is null or empty.] */
         /* SRS_TPM_ATTESTATION_21_005: [The constructor shall store the provided endorsementKey.] */
         this.setEndorsementKey(endorsementKey);
     }
@@ -81,7 +81,7 @@ public class TpmAttestation extends Attestation
      */
     public TpmAttestation(TpmAttestation tpm)
     {
-        /* SRS_TPM_ATTESTATION_21_006: [The constructor shall throws IllegalArgumentException if the provided tpm is null.] */
+        /* SRS_TPM_ATTESTATION_21_006: [The constructor shall throw IllegalArgumentException if the provided tpm is null.] */
         if(tpm == null)
         {
             throw new IllegalArgumentException("Tpm cannot be null");

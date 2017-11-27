@@ -34,7 +34,7 @@ public class ServiceEnrollmentSample
         ProvisioningServiceClient provisioningServiceClient =
                 ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
 
-        // ******************************** Create a new individual individualEnrollment config **********************************
+        // ******************************** Create a new individualEnrollment config **********************************
         System.out.println("\nCreate a new individualEnrollment...");
         Attestation attestation = new TpmAttestation(TPM_ENDORSEMENT_KEY);
         IndividualEnrollment individualEnrollment =
@@ -47,18 +47,18 @@ public class ServiceEnrollmentSample
         individualEnrollment.setIotHubHostName(IOTHUB_HOST_NAME);
         individualEnrollment.setProvisioningStatus(PROVISIONING_STATUS);
 
-        // ************************************ Create the individual individualEnrollment *************************************
+        // ************************************ Create the individualEnrollment *************************************
         System.out.println("\nAdd new individualEnrollment...");
         IndividualEnrollment individualEnrollmentResult =  provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
         System.out.println("\nIndividualEnrollment created with success...");
         System.out.println(individualEnrollmentResult);
 
-        // ************************************* Get info of individual individualEnrollment *************************************
+        // ************************************* Get info of individualEnrollment *************************************
         System.out.println("\nGet the individualEnrollment information...");
         IndividualEnrollment getResult = provisioningServiceClient.getIndividualEnrollment(REGISTRATION_ID);
         System.out.println(getResult);
 
-        // ************************************ Query info of individual individualEnrollment ************************************
+        // ************************************ Query info of individualEnrollment ************************************
         System.out.println("\nCreate a query for enrollments...");
         QuerySpecification querySpecification =
                 new QuerySpecificationBuilder("*", QuerySpecificationBuilder.FromType.ENROLLMENTS)
@@ -72,7 +72,7 @@ public class ServiceEnrollmentSample
             System.out.println(queryResult);
         }
 
-        // *********************************** Delete info of individual individualEnrollment ************************************
+        // *********************************** Delete info of individualEnrollment ************************************
         System.out.println("\nDelete the individualEnrollment...");
         provisioningServiceClient.deleteIndividualEnrollment(REGISTRATION_ID);
     }

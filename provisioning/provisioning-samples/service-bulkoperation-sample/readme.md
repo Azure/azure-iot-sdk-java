@@ -299,7 +299,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-bulkoper
     4. Now, call the [runBulkOperation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.runbulkoperation#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_runBulkOperation_BulkOperationMode_List_Enrollment__) 
         on the ProvisioningServiceClient to create a new IndividualEnrollment.
         ```java
-        // ********************************* Create a new set of individual individualEnrollment *********************************
+        // ********************************* Create a new set of individualEnrollment *********************************
         System.out.println("\nRun the bulk operation to create the individualEnrollments...");
         BulkOperationResult bulkOperationResult =  provisioningServiceClient.runBulkOperation(
                 BulkOperationMode.CREATE, individualEnrollments);
@@ -330,7 +330,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-bulkoper
     1. Use the [getIndividualEnrollment](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.getindividualenrollment#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_getIndividualEnrollment_String_) 
         to **get** an specific individualEnrollment using the registrationId. Add the following code and check the result.
         ```java
-        // ************************************ Get info of individual individualEnrollments *************************************
+        // ************************************ Get info of individualEnrollments *************************************
         for (IndividualEnrollment individualEnrollment: individualEnrollments)
         {
             String registrationId = individualEnrollment.getRegistrationId();
@@ -344,7 +344,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-bulkoper
        will help you to create a correct [QuerySpecification](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification).
        For this sample, we will query all **`"*"`** individualEnrollments is the provisioning service.
         ```java
-        // ************************************ Query info of individual individualEnrollments ***********************************
+        // ************************************ Query info of individualEnrollments ***********************************
         System.out.println("\nCreate a query for individualEnrollments...");
         QuerySpecification querySpecification =
                 new QuerySpecificationBuilder("*", QuerySpecificationBuilder.FromType.ENROLLMENTS)
@@ -358,10 +358,10 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-bulkoper
             System.out.println(queryResult);
         }
         ```
-19. Delete the bulk of individual individualEnrollments from the provisioning service. You can delete a bulk of individualEnrollments 
+19. Delete the bulk of individualEnrollments from the provisioning service. You can delete a bulk of individualEnrollments 
     adding the following code that invokes the API [runBulkOperation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.runbulkoperation#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_runBulkOperation_BulkOperationMode_List_Enrollment__):
     ```java
-    // ********************************** Delete bulk of individual individualEnrollments ************************************
+    // ********************************** Delete bulk of individualEnrollments ************************************
     System.out.println("\nDelete the set of individualEnrollments...");
     bulkOperationResult =  provisioningServiceClient.runBulkOperation(BulkOperationMode.DELETE, individualEnrollments);
     System.out.println(bulkOperationResult);

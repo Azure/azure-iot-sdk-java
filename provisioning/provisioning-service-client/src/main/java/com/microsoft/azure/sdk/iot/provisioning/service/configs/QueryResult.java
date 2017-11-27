@@ -90,11 +90,11 @@ public class QueryResult
      */
     public QueryResult(String type, String body, String continuationToken)
     {
-        /* SRS_QUERY_RESULT_21_001: [The constructor shall throws IllegalArgumentException if the provided type is null, empty, or not parsed to QueryResultType.] */
+        /* SRS_QUERY_RESULT_21_001: [The constructor shall throw IllegalArgumentException if the provided type is null, empty, or not parsed to QueryResultType.] */
         QueryResultType queryResultType = QueryResultType.fromString(type);
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
 
-        /* SRS_QUERY_RESULT_21_002: [The constructor shall throws IllegalArgumentException if the provided body is null or empty and the type is not `unknown`.] */
+        /* SRS_QUERY_RESULT_21_002: [The constructor shall throw IllegalArgumentException if the provided body is null or empty and the type is not `unknown`.] */
         if((queryResultType != QueryResultType.UNKNOWN) && Tools.isNullOrEmpty(body))
         {
             throw new IllegalArgumentException("body cannot be null or empty");

@@ -36,7 +36,7 @@ public class RegistrationStatusManagerTest
 
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_001: [The constructor shall throws IllegalArgumentException if the provided ContractApiHttp is null.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_001: [The constructor shall throw IllegalArgumentException if the provided ContractApiHttp is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNull()
     {
@@ -61,7 +61,7 @@ public class RegistrationStatusManagerTest
         assertNotNull(registrationStatusManager);
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_005: [The get shall throws IllegalArgumentException if the provided id is null or empty.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_005: [The get shall throw IllegalArgumentException if the provided id is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void getThrowsOnNullId() throws ProvisioningServiceClientException
     {
@@ -74,7 +74,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_005: [The get shall throws IllegalArgumentException if the provided id is null or empty.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_005: [The get shall throw IllegalArgumentException if the provided id is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void getThrowsOnEmptyId() throws ProvisioningServiceClientException
     {
@@ -122,7 +122,7 @@ public class RegistrationStatusManagerTest
         assertNotNull(response);
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_028: [The get shall throws ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_028: [The get shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
     @Test (expected = ProvisioningServiceClientServiceException.class)
     public void getRequestThrowsOnNullBody()
             throws ProvisioningServiceClientException
@@ -149,7 +149,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_008: [The get shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_008: [The get shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void getRequestTransportFailed()
             throws ProvisioningServiceClientException
@@ -173,7 +173,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_009: [The get shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_009: [The get shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientException.class)
     public void getRequestServiceReportedFail()
             throws ProvisioningServiceClientException
@@ -197,7 +197,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_011: [The delete shall throws IllegalArgumentException if the provided DeviceRegistrationState is null.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_011: [The delete shall throw IllegalArgumentException if the provided DeviceRegistrationState is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void deleteDeviceRegistrationStatusThrowsOnNullDeviceRegistrationState() throws ProvisioningServiceClientException
     {
@@ -275,7 +275,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_015: [The delete shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_015: [The delete shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void deleteDeviceRegistrationStatusRequestTransportFailed(
             @Mocked final DeviceRegistrationState mockedDeviceRegistrationState)
@@ -305,7 +305,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_016: [The delete shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_016: [The delete shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientException.class)
     public void deleteRegistrationServiceReportedFail(
             @Mocked final DeviceRegistrationState mockedDeviceRegistrationState)
@@ -335,7 +335,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_017: [The delete shall throws IllegalArgumentException if the provided id is null or empty.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_017: [The delete shall throw IllegalArgumentException if the provided id is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void deleteIdAndETagThrowsOnNullId() throws ProvisioningServiceClientException
     {
@@ -349,7 +349,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_017: [The delete shall throws IllegalArgumentException if the provided id is null or empty.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_017: [The delete shall throw IllegalArgumentException if the provided id is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void deleteIdAndETagThrowsOnEmptyId() throws ProvisioningServiceClientException
     {
@@ -438,7 +438,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_021: [The delete shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_021: [The delete shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void deleteIdAndETagRequestTransportFailed()
             throws ProvisioningServiceClientException
@@ -463,7 +463,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_022: [The delete shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_022: [The delete shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientException.class)
     public void deleteIdAndETagRequestServiceReportedFail()
             throws ProvisioningServiceClientException
@@ -488,7 +488,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_023: [The createEnrollmentGroupQuery shall throws IllegalArgumentException if the provided querySpecification is null.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_023: [The createEnrollmentGroupQuery shall throw IllegalArgumentException if the provided querySpecification is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void createEnrollmentGroupQueryThrowsOnNullQuerySpecification() throws ProvisioningServiceClientException
     {
@@ -503,7 +503,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_024: [The createEnrollmentGroupQuery shall throws IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_024: [The createEnrollmentGroupQuery shall throw IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void createEnrollmentGroupQueryThrowsOnNullEnrollmentGroupId(@Mocked final QuerySpecification mockedQuerySpecification) throws ProvisioningServiceClientException
     {
@@ -517,7 +517,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_024: [The createEnrollmentGroupQuery shall throws IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_024: [The createEnrollmentGroupQuery shall throw IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void createEnrollmentGroupQueryThrowsOnEmptyEnrollmentGroupId(@Mocked final QuerySpecification mockedQuerySpecification) throws ProvisioningServiceClientException
     {
@@ -531,7 +531,7 @@ public class RegistrationStatusManagerTest
         // assert
     }
 
-    /* SRS_REGISTRATION_STATUS_MANAGER_21_025: [The createEnrollmentGroupQuery shall throws IllegalArgumentException if the provided pageSize is negative.] */
+    /* SRS_REGISTRATION_STATUS_MANAGER_21_025: [The createEnrollmentGroupQuery shall throw IllegalArgumentException if the provided pageSize is negative.] */
     @Test (expected = IllegalArgumentException.class)
     public void createEnrollmentGroupQueryThrowsOnNegativePageSize(@Mocked final QuerySpecification mockedQuerySpecification) throws ProvisioningServiceClientException
     {

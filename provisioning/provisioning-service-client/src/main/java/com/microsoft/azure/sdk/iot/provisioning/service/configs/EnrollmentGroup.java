@@ -321,7 +321,7 @@ public class EnrollmentGroup extends Serializable
      */
     protected void setEnrollmentGroupId(String enrollmentGroupId)
     {
-        /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throws IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
+        /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
         ParserUtility.validateId(enrollmentGroupId);
 
         /* SRS_ENROLLMENT_GROUP_21_016: [The setEnrollmentGroupId shall store the provided enrollmentGroupId.] */
@@ -537,7 +537,7 @@ public class EnrollmentGroup extends Serializable
     protected void setCreatedDateTimeUtc(String createdDateTimeUtc)
     {
         /* SRS_ENROLLMENT_GROUP_21_030: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
-        /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+        /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
         this.createdDateTimeUtcDate = ParserUtility.getDateTimeUtc(createdDateTimeUtc);
     }
 
@@ -568,7 +568,7 @@ public class EnrollmentGroup extends Serializable
     protected void setLastUpdatedDateTimeUtc(String lastUpdatedDateTimeUtc)
     {
         /* SRS_ENROLLMENT_GROUP_21_033: [The setLastUpdatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
-        /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
+        /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
         this.lastUpdatedDateTimeUtcDate = ParserUtility.getDateTimeUtc(lastUpdatedDateTimeUtc);
     }
 

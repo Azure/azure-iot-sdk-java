@@ -107,13 +107,13 @@ public final class ProvisioningServiceClient
      */
     private ProvisioningServiceClient(String connectionString)
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_002: [The constructor shall throws IllegalArgumentException if the provided connectionString is null or empty.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_002: [The constructor shall throw IllegalArgumentException if the provided connectionString is null or empty.] */
         if(Tools.isNullOrEmpty(connectionString))
         {
             throw new IllegalArgumentException("connectionString cannot be null or empty");
         }
 
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The constructor shall throws IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The constructor shall throw IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
         /* SRS_PROVISIONING_SERVICE_CLIENT_21_004: [The constructor shall create a new instance of the ContractApiHttp class using the provided connectionString.] */
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
         ContractApiHttp contractApiHttp = ContractApiHttp.createFromConnectionString(provisioningConnectionString);
@@ -162,7 +162,7 @@ public final class ProvisioningServiceClient
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
      *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
      *
-     *     // Create a new individual individualEnrollment configurations.
+     *     // Create a new individualEnrollment configurations.
      *     Attestation attestation = new TpmAttestation(TPM_ENDORSEMENT_KEY);
      *     IndividualEnrollment individualEnrollment =
      *        new IndividualEnrollment(
@@ -172,7 +172,7 @@ public final class ProvisioningServiceClient
      *     individualEnrollment.setIotHubHostName(IOTHUB_HOST_NAME);
      *     individualEnrollment.setProvisioningStatus(ProvisioningStatus.DISABLED);
      *
-     *     // Create a new individual individualEnrollment.
+     *     // Create a new individualEnrollment.
      *     IndividualEnrollment enrollmentResult =  deviceProvisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
      * }
      * }
@@ -202,7 +202,7 @@ public final class ProvisioningServiceClient
      *     // Change the provisioning status, from disabled to enabled
      *     individualEnrollment.setProvisioningStatus(ProvisioningStatus.ENABLED);
      *
-     *     // Update the individual individualEnrollment information.
+     *     // Update the individualEnrollment information.
      *     IndividualEnrollment enrollmentResult =  deviceProvisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
      * }
      * }
@@ -211,7 +211,7 @@ public final class ProvisioningServiceClient
      * @see <a href="https://docs.microsoft.com/en-us/azure/iot-dps/">Azure IoT Hub Device Provisioning Service</a>
      * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
      *
-     * @param individualEnrollment the {@link IndividualEnrollment} object that describes the individual individualEnrollment that will be created of
+     * @param individualEnrollment the {@link IndividualEnrollment} object that describes the individualEnrollment that will be created of
      *                   updated. It cannot be {@code null}.
      * @return An {@link IndividualEnrollment} object with the result of the create or update requested.
      * @throws IllegalArgumentException if the provided parameter is not correct.
@@ -227,7 +227,7 @@ public final class ProvisioningServiceClient
     /**
      * Create, update or delete a set of individual Device Enrollments.
      *
-     * <p> This API provide the means to do a single operation over multiple individual individualEnrollments. A valid operation
+     * <p> This API provide the means to do a single operation over multiple individualEnrollments. A valid operation
      *     is determined by {@link BulkOperationMode}, and can be 'create', 'update', 'updateIfMatchETag', or 'delete'.
      *
      * <p> To use the Device Provisioning Service API, you must include the follow package on your application.
@@ -262,7 +262,7 @@ public final class ProvisioningServiceClient
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
      *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
      *
-     *     // Create two new individual enrollment configurations.
+     *     // Create two new individualEnrollment configurations.
      *     Attestation attestation = new TpmAttestation(TPM_ENDORSEMENT_KEY);
      *     IndividualEnrollment enrollment1 =
      *        new IndividualEnrollment(
@@ -285,7 +285,7 @@ public final class ProvisioningServiceClient
      *     individualEnrollments.add(enrollment1);
      *     individualEnrollments.add(enrollment2);
      *
-     *     // Create these 2 new individual enrollment using the bulk operation.
+     *     // Create these 2 new individualEnrollment using the bulk operation.
      *     BulkEnrollmentOperationResult bulkEnrollmentOperationResult =  provisioningServiceClient.runBulkEnrollmentOperation(BulkOperationMode.create, individualEnrollments);
      * }
      * }
@@ -295,7 +295,7 @@ public final class ProvisioningServiceClient
      * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
      *
      * @param bulkOperationMode the {@link BulkOperationMode} that defines the single operation to do over the individualEnrollments. It cannot be {@code null}.
-     * @param individualEnrollments the collection of {@link IndividualEnrollment} that contains the description of each individual enrollment. It cannot be {@code null} or empty.
+     * @param individualEnrollments the collection of {@link IndividualEnrollment} that contains the description of each individualEnrollment. It cannot be {@code null} or empty.
      * @return A {@link BulkEnrollmentOperationResult} object with the result of operation for each enrollment.
      * @throws IllegalArgumentException if the provided parameters are not correct.
      * @throws ProvisioningServiceClientTransportException if the SDK failed to send the request to the Device Provisioning Service.
@@ -305,15 +305,15 @@ public final class ProvisioningServiceClient
             BulkOperationMode bulkOperationMode, Collection<IndividualEnrollment> individualEnrollments)
             throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_009: [The runBulkEnrollmentOperation shall do a Provisioning operation over individual enrollment by calling the bulkOperation in the individualEnrollmentManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_009: [The runBulkEnrollmentOperation shall do a Provisioning operation over individualEnrollment by calling the bulkOperation in the individualEnrollmentManager.] */
         return individualEnrollmentManager.bulkOperation(bulkOperationMode, individualEnrollments);
     }
 
     /**
-     * Retrieve the individual enrollment information.
+     * Retrieve the individualEnrollment information.
      *
      * <p> This method will return the enrollment information for the provided registrationId. It will retrieve
-     *     the correspondent individual enrollment from the Device Provisioning Service, and return it in the
+     *     the correspondent individualEnrollment from the Device Provisioning Service, and return it in the
      *     {@link IndividualEnrollment} object.
      *
      * <p> If the registrationId do not exists, this method will throw
@@ -322,7 +322,7 @@ public final class ProvisioningServiceClient
      *     {@link ProvisioningServiceClientExceptionManager}
      *
      * <p> <b>Sample:</b>
-     * <p> The follow code will get and print the information about the individual enrollment "registrationId-1".
+     * <p> The follow code will get and print the information about the individualEnrollment "registrationId-1".
      * <pre>
      * {@code
      * // IndividualEnrollment information.
@@ -337,29 +337,29 @@ public final class ProvisioningServiceClient
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
      *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
      *
-     *     // Get the individual enrollment information.
+     *     // Get the individualEnrollment information.
      *     IndividualEnrollment enrollmentResult =  deviceProvisioningServiceClient.getIndividualEnrollment(REGISTRATION_ID);
      *     System.out.println(enrollmentResult.toString());
      * }
      * }
      * </pre>
      *
-     * @param registrationId the {@code String} that identifies the individual enrollment. It cannot be {@code null} or empty.
-     * @return The {@link IndividualEnrollment} with the content of the individual enrollment in the Provisioning Device Service.
+     * @param registrationId the {@code String} that identifies the individualEnrollment. It cannot be {@code null} or empty.
+     * @return The {@link IndividualEnrollment} with the content of the individualEnrollment in the Provisioning Device Service.
      * @throws IllegalArgumentException if the provided parameter is not correct.
      * @throws ProvisioningServiceClientTransportException if the SDK failed to send the request to the Device Provisioning Service.
      * @throws ProvisioningServiceClientException if the Device Provisioning Service was not able to execute the bulk operation.
      */
     public IndividualEnrollment getIndividualEnrollment(String registrationId) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_010: [The getIndividualEnrollment shall retrieve the individual enrollment information for the provided registrationId by calling the get in the individualEnrollmentManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_010: [The getIndividualEnrollment shall retrieve the individualEnrollment information for the provided registrationId by calling the get in the individualEnrollmentManager.] */
         return individualEnrollmentManager.get(registrationId);
     }
 
     /**
-     * Delete the individual individualEnrollment information.
+     * Delete the individualEnrollment information.
      *
-     * <p> This method will remove the individual individualEnrollment from the Device Provisioning Service using the
+     * <p> This method will remove the individualEnrollment from the Device Provisioning Service using the
      *     provided {@link IndividualEnrollment} information. The Device Provisioning Service will care about the
      *     registrationId and the eTag on the individualEnrollment. If you want to delete the individualEnrollment regardless the
      *     eTag, you can set the {@code eTag="*"} into the individualEnrollment, or use the {@link #deleteIndividualEnrollment(String)}
@@ -373,7 +373,7 @@ public final class ProvisioningServiceClient
      *     {@link ProvisioningServiceClientExceptionManager}
      *
      * <p> <b>Sample:</b>
-     * <p> The follow code will delete the information about the individual individualEnrollment "registrationId-1".
+     * <p> The follow code will delete the information about the individualEnrollment "registrationId-1".
      * <pre>
      * {@code
      * // IndividualEnrollment information.
@@ -388,30 +388,30 @@ public final class ProvisioningServiceClient
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
      *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
      *
-     *     // Get the individual individualEnrollment information.
+     *     // Get the individualEnrollment information.
      *     IndividualEnrollment enrollmentResult =  deviceProvisioningServiceClient.getIndividualEnrollment(REGISTRATION_ID);
      *
-     *     // Delete the individual individualEnrollment information.
+     *     // Delete the individualEnrollment information.
      *     deviceProvisioningServiceClient.deleteIndividualEnrollment(enrollmentResult);
      * }
      * }
      * </pre>
      *
-     * @param individualEnrollment the {@link IndividualEnrollment} that identifies the individual individualEnrollment. It cannot be {@code null}.
+     * @param individualEnrollment the {@link IndividualEnrollment} that identifies the individualEnrollment. It cannot be {@code null}.
      * @throws IllegalArgumentException if the provided parameter is not correct.
      * @throws ProvisioningServiceClientTransportException if the SDK failed to send the request to the Device Provisioning Service.
      * @throws ProvisioningServiceClientException if the Device Provisioning Service was not able to execute the bulk operation.
      */
     public void deleteIndividualEnrollment(IndividualEnrollment individualEnrollment) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_011: [The deleteIndividualEnrollment shall delete the individual individualEnrollment for the provided individualEnrollment by calling the delete in the individualEnrollmentManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_011: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided individualEnrollment by calling the delete in the individualEnrollmentManager.] */
         individualEnrollmentManager.delete(individualEnrollment);
     }
 
     /**
-     * Delete the individual enrollment information.
+     * Delete the individualEnrollment information.
      *
-     * <p> This method will remove the individual enrollment from the Device Provisioning Service using the
+     * <p> This method will remove the individualEnrollment from the Device Provisioning Service using the
      *     provided registrationId. It will delete the enrollment regardless the eTag. It means that this API
      *     correspond to the {@link #deleteIndividualEnrollment(String, String)} with the {@code eTag="*"}.
      *
@@ -423,7 +423,7 @@ public final class ProvisioningServiceClient
      *     {@link ProvisioningServiceClientExceptionManager}
      *
      * <p> <b>Sample:</b>
-     * <p> The follow code will delete the information about the individual enrollment "registrationId-1".
+     * <p> The follow code will delete the information about the individualEnrollment "registrationId-1".
      * <pre>
      * {@code
      * // IndividualEnrollment information.
@@ -438,27 +438,27 @@ public final class ProvisioningServiceClient
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
      *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
      *
-     *     // Delete the individual enrollment information.
+     *     // Delete the individualEnrollment information.
      *     deviceProvisioningServiceClient.deleteIndividualEnrollment(REGISTRATION_ID);
      * }
      * }
      * </pre>
      *
-     * @param registrationId the {@code String} that identifies the individual enrollment. It cannot be {@code null} or empty.
+     * @param registrationId the {@code String} that identifies the individualEnrollment. It cannot be {@code null} or empty.
      * @throws IllegalArgumentException if the provided registrationId is not correct.
      * @throws ProvisioningServiceClientTransportException if the SDK failed to send the request to the Device Provisioning Service.
      * @throws ProvisioningServiceClientException if the Device Provisioning Service was not able to execute the bulk operation.
      */
     public void deleteIndividualEnrollment(String registrationId) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_012: [The deleteIndividualEnrollment shall delete the individual enrollment for the provided registrationId by calling the delete in the individualEnrollmentManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_012: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided registrationId by calling the delete in the individualEnrollmentManager.] */
         individualEnrollmentManager.delete(registrationId, null);
     }
 
     /**
-     * Delete the individual enrollment information.
+     * Delete the individualEnrollment information.
      *
-     * <p> This method will remove the individual enrollment from the Device Provisioning Service using the
+     * <p> This method will remove the individualEnrollment from the Device Provisioning Service using the
      *     provided registrationId and eTag. If you want to delete the enrollment regardless the eTag, you can
      *     use {@link #deleteIndividualEnrollment(String)} or you can pass the eTag as {@code null}, empty, or
      *     {@code "*"}.
@@ -471,7 +471,7 @@ public final class ProvisioningServiceClient
      *     {@link ProvisioningServiceClientExceptionManager}
      *
      * <p> <b>Sample:</b>
-     * <p> The follow code will delete the information about the individual enrollment "registrationId-1" regardless the eTag.
+     * <p> The follow code will delete the information about the individualEnrollment "registrationId-1" regardless the eTag.
      * <pre>
      * {@code
      * // IndividualEnrollment information.
@@ -487,13 +487,13 @@ public final class ProvisioningServiceClient
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
      *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
      *
-     *     // Delete the individual enrollment information.
+     *     // Delete the individualEnrollment information.
      *     deviceProvisioningServiceClient.deleteIndividualEnrollment(REGISTRATION_ID, ANY_ETAG);
      * }
      * }
      * </pre>
      *
-     * @param registrationId the {@code String} that identifies the individual enrollment. It cannot be {@code null} or empty.
+     * @param registrationId the {@code String} that identifies the individualEnrollment. It cannot be {@code null} or empty.
      * @param eTag the {@code String} with the IndividualEnrollment eTag. It can be {@code null} or empty.
      *             The Device Provisioning Service will ignore it in all of these cases.
      * @throws IllegalArgumentException if the provided registrationId is not correct.
@@ -502,14 +502,14 @@ public final class ProvisioningServiceClient
      */
     public void deleteIndividualEnrollment(String registrationId, String eTag) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_013: [The deleteIndividualEnrollment shall delete the individual enrollment for the provided registrationId and etag by calling the delete in the individualEnrollmentManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_013: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided registrationId and etag by calling the delete in the individualEnrollmentManager.] */
         individualEnrollmentManager.delete(registrationId, eTag);
     }
 
     /**
-     * Factory to create a individual enrollment query.
+     * Factory to create a individualEnrollment query.
      *
-     * <p> This method will create a new individual enrollment query for Device Provisioning Service and return it
+     * <p> This method will create a new individualEnrollment query for Device Provisioning Service and return it
      *     as a {@link Query} iterator.
      *
      * <p> The Device Provisioning Service expects a SQL query in the {@link QuerySpecification}, for instance
@@ -526,9 +526,9 @@ public final class ProvisioningServiceClient
     }
 
     /**
-     * Factory to create a individual enrollment query.
+     * Factory to create a individualEnrollment query.
      *
-     * <p> This method will create a new individual enrollment query for Device Provisioning Service and return it
+     * <p> This method will create a new individualEnrollment query for Device Provisioning Service and return it
      *     as a {@link Query} iterator.
      *
      * <p> The Device Provisioning Service expects a SQL query in the {@link QuerySpecification}, for instance
@@ -614,7 +614,7 @@ public final class ProvisioningServiceClient
      * @see <a href="https://docs.microsoft.com/en-us/azure/iot-dps/">Azure IoT Hub Device Provisioning Service</a>
      * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollmentgroup">Device Enrollment Group</a>
      *
-     * @param enrollmentGroup the {@link EnrollmentGroup} object that describes the individual enrollment that will be created of updated.
+     * @param enrollmentGroup the {@link EnrollmentGroup} object that describes the individualEnrollment that will be created of updated.
      * @return An {@link EnrollmentGroup} object with the result of the create or update requested.
      * @throws ProvisioningServiceClientException if the Provisioning was not able to create or update the enrollment
      */
@@ -652,7 +652,7 @@ public final class ProvisioningServiceClient
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
      *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
      *
-     *     // Get the individual enrollment information.
+     *     // Get the individualEnrollment information.
      *     EnrollmentGroup enrollmentGroupResult =  deviceProvisioningServiceClient.getEnrollmentGroup(ENROLLMENT_GROUP_ID);
      *     System.out.println(enrollmentGroupResult.toString());
      * }

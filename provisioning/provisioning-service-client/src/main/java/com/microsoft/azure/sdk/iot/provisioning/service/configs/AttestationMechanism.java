@@ -104,7 +104,7 @@ public final class AttestationMechanism
                 /* SRS_ATTESTATION_MECHANISM_21_011: [If the type is `X509`, the getAttestation shall return the stored X509Attestation.] */
                 return new X509Attestation(this.x509);
             default:
-                /* SRS_ATTESTATION_MECHANISM_21_012: [If the type is not `X509` or `TPM`, the getAttestation shall throws ProvisioningServiceClientException.] */
+                /* SRS_ATTESTATION_MECHANISM_21_012: [If the type is not `X509` or `TPM`, the getAttestation shall throw ProvisioningServiceClientException.] */
                 throw new ProvisioningServiceClientException("Unknown attestation mechanism");
         }
     }

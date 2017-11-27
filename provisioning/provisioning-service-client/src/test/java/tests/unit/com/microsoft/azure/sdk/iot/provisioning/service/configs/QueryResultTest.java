@@ -124,7 +124,7 @@ public class QueryResultTest
             VALID_REGISTRATION_STATUS_2 +
             "]";
 
-    /* SRS_QUERY_RESULT_21_001: [The constructor shall throws IllegalArgumentException if the provided type is null, empty, or not parsed to QueryResultType.] */
+    /* SRS_QUERY_RESULT_21_001: [The constructor shall throw IllegalArgumentException if the provided type is null, empty, or not parsed to QueryResultType.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullType()
     {
@@ -134,7 +134,7 @@ public class QueryResultTest
         // assert
     }
 
-    /* SRS_QUERY_RESULT_21_001: [The constructor shall throws IllegalArgumentException if the provided type is null, empty, or not parsed to QueryResultType.] */
+    /* SRS_QUERY_RESULT_21_001: [The constructor shall throw IllegalArgumentException if the provided type is null, empty, or not parsed to QueryResultType.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyType()
     {
@@ -144,7 +144,7 @@ public class QueryResultTest
         // assert
     }
 
-    /* SRS_QUERY_RESULT_21_001: [The constructor shall throws IllegalArgumentException if the provided type is null, empty, or not parsed to QueryResultType.] */
+    /* SRS_QUERY_RESULT_21_001: [The constructor shall throw IllegalArgumentException if the provided type is null, empty, or not parsed to QueryResultType.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidType()
     {
@@ -154,7 +154,7 @@ public class QueryResultTest
         // assert
     }
 
-    /* SRS_QUERY_RESULT_21_002: [The constructor shall throws IllegalArgumentException if the provided body is null or empty and the type is not `unknown`.] */
+    /* SRS_QUERY_RESULT_21_002: [The constructor shall throw IllegalArgumentException if the provided body is null or empty and the type is not `unknown`.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullBody()
     {
@@ -164,7 +164,7 @@ public class QueryResultTest
         // assert
     }
 
-    /* SRS_QUERY_RESULT_21_002: [The constructor shall throws IllegalArgumentException if the provided body is null or empty and the type is not `unknown`.] */
+    /* SRS_QUERY_RESULT_21_002: [The constructor shall throw IllegalArgumentException if the provided body is null or empty and the type is not `unknown`.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyBody()
     {

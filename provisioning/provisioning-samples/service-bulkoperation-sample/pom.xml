@@ -5,7 +5,7 @@
     <groupId>com.microsoft.azure.sdk.iot.provisioning.sample</groupId>
     <artifactId>service-bulkoperation-sample</artifactId>
     <version>0.0.1</version>
-    <name>Provisioning bulk individualEnrollments using service Sample</name>
+    <name>Provisioning bulk individual enrollments using service Sample</name>
     <developers>
         <developer>
             <id>microsoft</id>

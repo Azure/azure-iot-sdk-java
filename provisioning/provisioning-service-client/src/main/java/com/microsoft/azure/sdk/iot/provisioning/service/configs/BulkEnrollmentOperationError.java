@@ -90,9 +90,9 @@ public class BulkEnrollmentOperationError
      */
     void validateError()
     {
-        /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_004: [The validateError shall throws IllegalArgumentException if the registrationId is null, empty or not a valid id.] */
+        /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_004: [The validateError shall throw IllegalArgumentException if the registrationId is null, empty or not a valid id.] */
         ParserUtility.validateId(this.registrationId);
-        /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_005: [The validateError shall throws IllegalArgumentException if the errorCode is null.] */
+        /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_005: [The validateError shall throw IllegalArgumentException if the errorCode is null.] */
         ParserUtility.validateObject(this.errorCode);
         /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_006: [The validateError shall do nothing if all parameters in the class are correct.] */
     }

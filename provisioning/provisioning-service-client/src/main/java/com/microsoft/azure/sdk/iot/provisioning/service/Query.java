@@ -42,10 +42,10 @@ import java.util.*;
  * <p> You can use this Object as a standard Iterator, just using the {@link #hasNext()} and {@link #next()} in a
  *     {@code while} loop, up to the point where the {@link #hasNext()} return {@code false}. But, keep in mind
  *     that the {@link QueryResult} can contain a empty list, even if the {@link #hasNext()} returned {@code true}.
- *     For example, image that you have 10 Individual Enrollments in the Device Provisioning Service and you created
+ *     For example, image that you have 10 IndividualEnrollment in the Device Provisioning Service and you created
  *     new query with the {@code pageSize} equals 5. The first {@code hasNext()} will return {@code true}, and the
  *     first {@code next()} will return a {@code QueryResult} with 5 items. After that you call the {@code hasNext},
- *     which will returns {@code true}. Now, before you get the next page, somebody delete all the Individual Enrollments,
+ *     which will returns {@code true}. Now, before you get the next page, somebody delete all the IndividualEnrollment,
  *     What happened, when you call the {@code next()}, it will return a valid {@code QueryResult}, but the
  *     {@link QueryResult#getItems()} will return a empty list.
  *
@@ -101,25 +101,25 @@ public class Query implements Iterator
      */
     protected Query(ContractApiHttp contractApiHttp, String targetPath, QuerySpecification querySpecification, int pageSize)
     {
-        /* SRS_QUERY_21_001: [The constructor shall throws IllegalArgumentException if the provided contractApiHttp is null.] */
+        /* SRS_QUERY_21_001: [The constructor shall throw IllegalArgumentException if the provided contractApiHttp is null.] */
         if(contractApiHttp == null)
         {
             throw new IllegalArgumentException("contractApiHttp cannot be null.");
         }
 
-        /* SRS_QUERY_21_002: [The constructor shall throws IllegalArgumentException if the provided targetPath is null or empty.] */
+        /* SRS_QUERY_21_002: [The constructor shall throw IllegalArgumentException if the provided targetPath is null or empty.] */
         if(Tools.isNullOrEmpty(targetPath))
         {
             throw new IllegalArgumentException("targetPath cannot be null.");
         }
 
-        /* SRS_QUERY_21_003: [The constructor shall throws IllegalArgumentException if the provided querySpecification is null.] */
+        /* SRS_QUERY_21_003: [The constructor shall throw IllegalArgumentException if the provided querySpecification is null.] */
         if(querySpecification == null)
         {
             throw new IllegalArgumentException("querySpecification cannot be null.");
         }
 
-        /* SRS_QUERY_21_004: [The constructor shall throws IllegalArgumentException if the provided pageSize is negative.] */
+        /* SRS_QUERY_21_004: [The constructor shall throw IllegalArgumentException if the provided pageSize is negative.] */
         if(pageSize < 0)
         {
             throw new IllegalArgumentException("pageSize cannot be negative.");
@@ -168,7 +168,7 @@ public class Query implements Iterator
     @Override
     public QueryResult next()
     {
-        /* SRS_QUERY_21_011: [The next shall throws NoSuchElementException if the hasNext is false.] */
+        /* SRS_QUERY_21_011: [The next shall throw NoSuchElementException if the hasNext is false.] */
         if(!hasNext)
         {
             throw new NoSuchElementException("There are no more pending elements");
@@ -199,12 +199,12 @@ public class Query implements Iterator
         }
         catch (ProvisioningServiceClientException e)
         {
-            /* SRS_QUERY_21_015: [The next shall throws IllegalArgumentException if the Http request throws any ProvisioningServiceClientException.] */
+            /* SRS_QUERY_21_015: [The next shall throw IllegalArgumentException if the Http request throws any ProvisioningServiceClientException.] */
             // Because Query implements the iterator interface, the next cannot throws ProvisioningServiceClientException.
             throw new IllegalArgumentException(e);
         }
 
-        /* SRS_QUERY_21_024: [The next shall throws IllegalArgumentException if the heepResponse contains a null body.] */
+        /* SRS_QUERY_21_024: [The next shall throw IllegalArgumentException if the heepResponse contains a null body.] */
         byte[] body = httpResponse.getBody();
         if(body == null)
         {
@@ -231,7 +231,7 @@ public class Query implements Iterator
      */
     public QueryResult next(String continuationToken)
     {
-        /* SRS_QUERY_21_018: [The next shall throws NoSuchElementException if the provided continuationToken is null or empty.] */
+        /* SRS_QUERY_21_018: [The next shall throw NoSuchElementException if the provided continuationToken is null or empty.] */
         if(Tools.isNullOrEmpty(continuationToken))
         {
             throw new NoSuchElementException("There is no Continuation Token to get pending elements,");
@@ -268,7 +268,7 @@ public class Query implements Iterator
      */
     public void setPageSize(int pageSize)
     {
-        /* SRS_QUERY_21_022: [The setPageSize shall throws IllegalArgumentException if the provided pageSize is negative.] */
+        /* SRS_QUERY_21_022: [The setPageSize shall throw IllegalArgumentException if the provided pageSize is negative.] */
         if(pageSize < 0)
         {
             throw new IllegalArgumentException("pageSize cannot be null");

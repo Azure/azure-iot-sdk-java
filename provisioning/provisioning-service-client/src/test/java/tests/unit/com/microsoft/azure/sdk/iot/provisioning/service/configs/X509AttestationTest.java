@@ -34,7 +34,7 @@ public class X509AttestationTest
             "-----END CERTIFICATE-----\n";
     private static String CA_REFERENCES_STRING = "validCertificateName";
 
-    /* SRS_X509_ATTESTATION_21_001: [The constructor shall throws IllegalArgumentException if `clientCertificates`, `rootCertificates`, and `caReferences` are null.] */
+    /* SRS_X509_ATTESTATION_21_001: [The constructor shall throw IllegalArgumentException if `clientCertificates`, `rootCertificates`, and `caReferences` are null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnClientAndRootCertificatesNull()
     {
@@ -51,7 +51,7 @@ public class X509AttestationTest
         // assert
     }
 
-    /* SRS_X509_ATTESTATION_21_002: [The constructor shall throws IllegalArgumentException if more than one certificate type are not null.] */
+    /* SRS_X509_ATTESTATION_21_002: [The constructor shall throw IllegalArgumentException if more than one certificate type are not null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnClientAndRootCertificatesNotNull(
             @Mocked final X509Certificates mockedX509Certificates)
@@ -69,7 +69,7 @@ public class X509AttestationTest
         // assert
     }
 
-    /* SRS_X509_ATTESTATION_21_002: [The constructor shall throws IllegalArgumentException if more than one certificate type are not null.] */
+    /* SRS_X509_ATTESTATION_21_002: [The constructor shall throw IllegalArgumentException if more than one certificate type are not null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnRootCertificatesAndCAReferenceNotNull(
             @Mocked final X509Certificates mockedX509Certificates,
@@ -154,7 +154,7 @@ public class X509AttestationTest
         assertNull(Deencapsulation.getField(x509Attestation, "rootCertificates"));
     }
 
-    /* SRS_X509_ATTESTATION_21_004: [The constructor shall throws IllegalArgumentException if the provided x509Attestation is null.] */
+    /* SRS_X509_ATTESTATION_21_004: [The constructor shall throw IllegalArgumentException if the provided x509Attestation is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorCopiesClientCertificateThrowsOnNull()
             throws IllegalArgumentException
@@ -166,7 +166,7 @@ public class X509AttestationTest
         // assert
     }
 
-    /* SRS_X509_ATTESTATION_21_005: [The constructor shall throws IllegalArgumentException if `clientCertificates`, `rootCertificates`, and `caReferences` are null.] */
+    /* SRS_X509_ATTESTATION_21_005: [The constructor shall throw IllegalArgumentException if `clientCertificates`, `rootCertificates`, and `caReferences` are null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorCopiesClientCertificateThrowsOnAllCertsNull()
     {
@@ -179,7 +179,7 @@ public class X509AttestationTest
         // assert
     }
 
-    /* SRS_X509_ATTESTATION_21_006: [The constructor shall throws IllegalArgumentException if more than one certificate type are not null.] */
+    /* SRS_X509_ATTESTATION_21_006: [The constructor shall throw IllegalArgumentException if more than one certificate type are not null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorCopiesClientCertificateThrowsOnBothCertsNotNull(
             @Mocked final X509Certificates mockedX509Certificates)
@@ -195,7 +195,7 @@ public class X509AttestationTest
         // assert
     }
 
-    /* SRS_X509_ATTESTATION_21_006: [The constructor shall throws IllegalArgumentException if more than one certificate type are not null.] */
+    /* SRS_X509_ATTESTATION_21_006: [The constructor shall throw IllegalArgumentException if more than one certificate type are not null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorCopiesClientCertificateThrowsOnBothRootCertificateAndCAReferenceAreNotNull(
             @Mocked final X509Certificates mockedX509Certificates,
@@ -305,7 +305,7 @@ public class X509AttestationTest
         assertNull(Deencapsulation.getField(x509Attestation, "caReferences"));
     }
 
-    /* SRS_X509_ATTESTATION_21_009: [The factory shall throws IllegalArgumentException if the primary certificate is null or empty.] */
+    /* SRS_X509_ATTESTATION_21_009: [The factory shall throw IllegalArgumentException if the primary certificate is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryCreatesX509AttestationForClientCertificateOnlyPrimaryThrowsOnNull()
     {
@@ -316,7 +316,7 @@ public class X509AttestationTest
         // assert
     }
 
-    /* SRS_X509_ATTESTATION_21_09: [The factory shall throws IllegalArgumentException if the primary certificate is null or empty.] */
+    /* SRS_X509_ATTESTATION_21_09: [The factory shall throw IllegalArgumentException if the primary certificate is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryCreatesX509AttestationForClientCertificateThrowsOnNull()
     {
@@ -376,7 +376,7 @@ public class X509AttestationTest
         assertNull(Deencapsulation.getField(x509Attestation, "caReferences"));
     }
 
-    /* SRS_X509_ATTESTATION_21_013: [The factory shall throws IllegalArgumentException if the primary certificate is null or empty.] */
+    /* SRS_X509_ATTESTATION_21_013: [The factory shall throw IllegalArgumentException if the primary certificate is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryCreatesX509AttestationForSigningCertificateThrowsOnNull()
     {
@@ -436,7 +436,7 @@ public class X509AttestationTest
         assertNotNull(Deencapsulation.getField(x509Attestation, "caReferences"));
     }
 
-    /* SRS_X509_ATTESTATION_21_026: [The factory shall throws IllegalArgumentException if the primary CA reference is null or empty.] */
+    /* SRS_X509_ATTESTATION_21_026: [The factory shall throw IllegalArgumentException if the primary CA reference is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryCreatesX509AttestationForCAReferencesThrowsOnNull()
     {
@@ -570,7 +570,7 @@ public class X509AttestationTest
         assertEquals(mockedX509CertificateInfo, x509Attestation.getPrimaryX509CertificateInfo());
     }
 
-    /* SRS_X509_ATTESTATION_21_020: [If both clientCertificates and rootCertificates are null, the getPrimaryX509CertificateInfo shall throws IllegalArgumentException.] */
+    /* SRS_X509_ATTESTATION_21_020: [If both clientCertificates and rootCertificates are null, the getPrimaryX509CertificateInfo shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void getterForCertificatesPrimaryInfoThrowsOnNonCertificate()
     {

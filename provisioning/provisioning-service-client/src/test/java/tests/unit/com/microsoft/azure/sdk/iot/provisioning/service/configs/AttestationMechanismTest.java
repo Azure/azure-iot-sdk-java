@@ -119,7 +119,7 @@ public class AttestationMechanismTest
         assertNotNull(Deencapsulation.invoke(attestationMechanism, "getAttestation"));
     }
 
-    /* SRS_ATTESTATION_MECHANISM_21_012: [If the type is not `x509` or `tpm`, the getAttestation shall throws ProvisioningServiceClientException.] */
+    /* SRS_ATTESTATION_MECHANISM_21_012: [If the type is not `x509` or `tpm`, the getAttestation shall throw ProvisioningServiceClientException.] */
     @Test (expected = ProvisioningServiceClientException.class)
     public void getAttestationThrowsOnUnknownAttestation()
     {

@@ -315,7 +315,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
     4. Now, call the [createOrUpdateIndividualEnrollment](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.createorupdateindividualenrollment#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_createOrUpdateIndividualEnrollment_Enrollment_) 
         on the ProvisioningServiceClient to create a new IndividualEnrollment.
         ```java
-        // ************************************ Create the individual individualEnrollment *************************************
+        // ************************************ Create the individualEnrollment *************************************
         System.out.println("\nAdd new individualEnrollment...");
         IndividualEnrollment individualEnrollmentResult =  provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
         System.out.println("\nIndividualEnrollment created with success...");
@@ -353,7 +353,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
     1. Use the [getIndividualEnrollment](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.getindividualenrollment#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_getIndividualEnrollment_String_) 
         to **get** an specific individualEnrollment using the registrationId. Add the following code and check the result.
         ```java
-        // ************************************* Get info of individual individualEnrollment *************************************
+        // ************************************* Get info of individualEnrollment *************************************
         System.out.println("\nGet the individualEnrollment information...");
         IndividualEnrollment getResult = provisioningServiceClient.getIndividualEnrollment(registrationId);
         System.out.println(getResult.toString());
@@ -363,7 +363,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
         will help you to create a correct [QuerySpecification](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification).
         For this sample, we will query all **`"*"`** individualEnrollments is the provisioning service.
         ```java
-        // ************************************ Query info of individual individualEnrollment ************************************
+        // ************************************ Query info of individualEnrollment ************************************
         System.out.println("\nCreate a query for individualEnrollments...");
         QuerySpecification querySpecification = 
                new QuerySpecificationBuilder("*", QuerySpecificationBuilder.FromType.ENROLLMENTS)
@@ -381,7 +381,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
 22. Delete the individualEnrollment from the provisioning service. You can delete the individualEnrollment adding the following code that 
     invokes the API [deleteIndividualEnrollment](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.deleteindividualenrollment#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_deleteIndividualEnrollment_String_):
     ```java
-    // *********************************** Delete info of individual individualEnrollment ************************************
+    // *********************************** Delete info of individualEnrollment ************************************
     System.out.println("\nDelete the individualEnrollment...");
     provisioningServiceClient.deleteIndividualEnrollment(registrationId);
     ```

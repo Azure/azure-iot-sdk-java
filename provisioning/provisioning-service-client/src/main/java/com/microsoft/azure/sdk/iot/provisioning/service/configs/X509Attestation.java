@@ -24,7 +24,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
  *         to authenticate multiple devices.
  *     <dt><b>CA Reference:</b>
  *     <dd>Called on this class as X509CAReferences, this is a CA reference for a rootCertificate that can
- *         creates multiple Client certificates to authenticate multiple devices.
+ *         create multiple Client certificates to authenticate multiple devices.
  * </dl>
  *
  * <p> The provisioning service allows user to create {@link IndividualEnrollment} and {@link EnrollmentGroup}. For all
@@ -69,15 +69,15 @@ public class X509Attestation extends Attestation
      * <p> Creates a new instance of the X509Attestation using one of the 3 certificates types. This constructor
      *     requires one, and only one certificate type.
      *
-     * @param clientCertificates the {@link X509Certificates} with the primary and secondary certificates for Individual IndividualEnrollment.
+     * @param clientCertificates the {@link X509Certificates} with the primary and secondary certificates for IndividualEnrollment.
      * @param rootCertificates the {@link X509Certificates} with the primary and secondary certificates for Enrollment Group.
      * @param caReferences the {@link X509CAReferences} with the primary and secondary CA references for Enrollment Group.
      * @throws IllegalArgumentException if non certificate is provided or more than one certificates are provided.
      */
     private X509Attestation(X509Certificates clientCertificates, X509Certificates rootCertificates, X509CAReferences caReferences)
     {
-        /* SRS_X509_ATTESTATION_21_001: [The constructor shall throws IllegalArgumentException if `clientCertificates`, `rootCertificates`, and `caReferences` are null.] */
-        /* SRS_X509_ATTESTATION_21_002: [The constructor shall throws IllegalArgumentException if more than one certificate type are not null.] */
+        /* SRS_X509_ATTESTATION_21_001: [The constructor shall throw IllegalArgumentException if `clientCertificates`, `rootCertificates`, and `caReferences` are null.] */
+        /* SRS_X509_ATTESTATION_21_002: [The constructor shall throw IllegalArgumentException if more than one certificate type are not null.] */
         validateCertificates(clientCertificates, rootCertificates, caReferences);
 
         /* SRS_X509_ATTESTATION_21_003: [The constructor shall store the provided `clientCertificates`, `rootCertificates`, and `caReferences`.] */
@@ -96,7 +96,7 @@ public class X509Attestation extends Attestation
      */
     public X509Attestation(X509Attestation x509Attestation)
     {
-        /* SRS_X509_ATTESTATION_21_004: [The constructor shall throws IllegalArgumentException if the provided x509Attestation is null.] */
+        /* SRS_X509_ATTESTATION_21_004: [The constructor shall throw IllegalArgumentException if the provided x509Attestation is null.] */
         if(x509Attestation == null)
         {
             throw new IllegalArgumentException("x509Attestation cannot be null");
@@ -106,8 +106,8 @@ public class X509Attestation extends Attestation
         X509Certificates rootCertificates = x509Attestation.getRootCertificates();
         X509CAReferences caReferences = x509Attestation.getCAReferences();
 
-        /* SRS_X509_ATTESTATION_21_005: [The constructor shall throws IllegalArgumentException if `clientCertificates`, `rootCertificates`, and `caReferences` are null.] */
-        /* SRS_X509_ATTESTATION_21_006: [The constructor shall throws IllegalArgumentException if more than one certificate type are not null.] */
+        /* SRS_X509_ATTESTATION_21_005: [The constructor shall throw IllegalArgumentException if `clientCertificates`, `rootCertificates`, and `caReferences` are null.] */
+        /* SRS_X509_ATTESTATION_21_006: [The constructor shall throw IllegalArgumentException if more than one certificate type are not null.] */
         validateCertificates(clientCertificates, rootCertificates, caReferences);
 
         /* SRS_X509_ATTESTATION_21_007: [The constructor shall copy `clientCertificates`, `rootCertificates`, and `caReferences` from the provided X509Attestation.] */
@@ -143,7 +143,7 @@ public class X509Attestation extends Attestation
      */
     public static X509Attestation createFromClientCertificates(String primary, String secondary)
     {
-        /* SRS_X509_ATTESTATION_21_009: [The factory shall throws IllegalArgumentException if the primary certificate is null or empty.] */
+        /* SRS_X509_ATTESTATION_21_009: [The factory shall throw IllegalArgumentException if the primary certificate is null or empty.] */
         if(Tools.isNullOrEmpty(primary))
         {
             throw new IllegalArgumentException("primary certificate cannot be null or empty");
@@ -183,7 +183,7 @@ public class X509Attestation extends Attestation
      */
     public static X509Attestation createFromRootCertificates(String primary, String secondary)
     {
-        /* SRS_X509_ATTESTATION_21_013: [The factory shall throws IllegalArgumentException if the primary certificate is null or empty.] */
+        /* SRS_X509_ATTESTATION_21_013: [The factory shall throw IllegalArgumentException if the primary certificate is null or empty.] */
         if(Tools.isNullOrEmpty(primary))
         {
             throw new IllegalArgumentException("primary certificate cannot be null or empty");
@@ -223,7 +223,7 @@ public class X509Attestation extends Attestation
      */
     public static X509Attestation createFromCAReferences(String primary, String secondary)
     {
-        /* SRS_X509_ATTESTATION_21_026: [The factory shall throws IllegalArgumentException if the primary CA reference is null or empty.] */
+        /* SRS_X509_ATTESTATION_21_026: [The factory shall throw IllegalArgumentException if the primary CA reference is null or empty.] */
         if(Tools.isNullOrEmpty(primary))
         {
             throw new IllegalArgumentException("primary CA reference cannot be null or empty");
@@ -301,7 +301,7 @@ public class X509Attestation extends Attestation
         {
             return this.rootCertificates.getPrimary().getInfo();
         }
-        /* SRS_X509_ATTESTATION_21_020: [If both clientCertificates and rootCertificates are null, the getPrimaryX509CertificateInfo shall throws IllegalArgumentException.] */
+        /* SRS_X509_ATTESTATION_21_020: [If both clientCertificates and rootCertificates are null, the getPrimaryX509CertificateInfo shall throw IllegalArgumentException.] */
         throw new IllegalArgumentException("There is no valid certificate information.");
     }
 

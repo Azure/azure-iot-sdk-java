@@ -32,7 +32,7 @@ public class X509CertificateWithInfoTest
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "-----END CERTIFICATE-----\n";
 
-    /* SRS_X509_CERTIFICATE_WITH_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided certificate is null or empty.] */
+    /* SRS_X509_CERTIFICATE_WITH_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided certificate is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnCertificateNull()
     {
@@ -42,7 +42,7 @@ public class X509CertificateWithInfoTest
         // assert
     }
 
-    /* SRS_X509_CERTIFICATE_WITH_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided certificate is null or empty.] */
+    /* SRS_X509_CERTIFICATE_WITH_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided certificate is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnCertificateEmpty()
     {
@@ -65,7 +65,7 @@ public class X509CertificateWithInfoTest
         assertNull(Deencapsulation.getField(x509CertificateWithInfo, "info"));
     }
 
-    /* SRS_X509_CERTIFICATE_WITH_INFO_21_003: [The constructor shall throws IllegalArgumentException if the provided x509CertificateWithInfo is null.] */
+    /* SRS_X509_CERTIFICATE_WITH_INFO_21_003: [The constructor shall throw IllegalArgumentException if the provided x509CertificateWithInfo is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorCopyThrowsOnNull()
     {

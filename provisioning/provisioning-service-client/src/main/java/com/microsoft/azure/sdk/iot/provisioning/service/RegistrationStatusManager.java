@@ -36,7 +36,7 @@ public class RegistrationStatusManager
      */
     private RegistrationStatusManager(ContractApiHttp contractApiHttp)
     {
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_001: [The constructor shall throws IllegalArgumentException if the provided ContractApiHttp is null.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_001: [The constructor shall throw IllegalArgumentException if the provided ContractApiHttp is null.] */
         if(contractApiHttp == null)
         {
             throw new IllegalArgumentException("ContractApiHttp cannot be null");
@@ -71,7 +71,7 @@ public class RegistrationStatusManager
      */
     public DeviceRegistrationState get(String id) throws ProvisioningServiceClientException
     {
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_005: [The get shall throws IllegalArgumentException if the provided id is null or empty.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_005: [The get shall throw IllegalArgumentException if the provided id is null or empty.] */
         if(Tools.isNullOrEmpty(id))
         {
             throw new IllegalArgumentException("Id cannot be null or empty.");
@@ -81,8 +81,8 @@ public class RegistrationStatusManager
         String enrollmentPath = RegistrationStatusManager.getDeviceRegistrationStatePath(id);
 
         /* SRS_REGISTRATION_STATUS_MANAGER_21_007: [The get shall send a Http request with a Http verb `GET`.] */
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_008: [The get shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_009: [The get shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_008: [The get shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_009: [The get shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
         HttpResponse httpResponse =
                 contractApiHttp.request(
                         HttpMethod.GET,
@@ -90,7 +90,7 @@ public class RegistrationStatusManager
                         null,
                         "");
 
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_028: [The get shall throws ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_028: [The get shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
         byte[] body = httpResponse.getBody();
         if(body == null)
         {
@@ -114,7 +114,7 @@ public class RegistrationStatusManager
      */
     public void delete(DeviceRegistrationState DeviceRegistrationState) throws ProvisioningServiceClientException
     {
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_011: [The delete shall throws IllegalArgumentException if the provided DeviceRegistrationState is null.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_011: [The delete shall throw IllegalArgumentException if the provided DeviceRegistrationState is null.] */
         if(DeviceRegistrationState == null)
         {
             throw new IllegalArgumentException("DeviceRegistrationState cannot be null.");
@@ -131,8 +131,8 @@ public class RegistrationStatusManager
         }
 
         /* SRS_REGISTRATION_STATUS_MANAGER_21_014: [The delete shall send a Http request with a Http verb `DELETE`.] */
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_015: [The delete shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_016: [The delete shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_015: [The delete shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_016: [The delete shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
         contractApiHttp.request(
                 HttpMethod.DELETE,
                 enrollmentPath,
@@ -154,7 +154,7 @@ public class RegistrationStatusManager
      */
     public void delete(String id, String eTag) throws ProvisioningServiceClientException
     {
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_017: [The delete shall throws IllegalArgumentException if the provided id is null or empty.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_017: [The delete shall throw IllegalArgumentException if the provided id is null or empty.] */
         if(Tools.isNullOrEmpty(id))
         {
             throw new IllegalArgumentException("Id cannot be null.");
@@ -171,8 +171,8 @@ public class RegistrationStatusManager
         }
 
         /* SRS_REGISTRATION_STATUS_MANAGER_21_020: [The delete shall send a Http request with a Http verb `DELETE`.] */
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_021: [The delete shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_022: [The delete shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_021: [The delete shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_022: [The delete shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
         contractApiHttp.request(
                 HttpMethod.DELETE,
                 enrollmentPath,
@@ -194,19 +194,19 @@ public class RegistrationStatusManager
      */
     public Query createEnrollmentGroupQuery(QuerySpecification querySpecification, String enrollmentGroupId, int pageSize)
     {
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_023: [The createEnrollmentGroupQuery shall throws IllegalArgumentException if the provided querySpecification is null.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_023: [The createEnrollmentGroupQuery shall throw IllegalArgumentException if the provided querySpecification is null.] */
         if(querySpecification == null)
         {
             throw new IllegalArgumentException("querySpecification cannot be null.");
         }
 
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_024: [The createEnrollmentGroupQuery shall throws IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_024: [The createEnrollmentGroupQuery shall throw IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
         if(Tools.isNullOrEmpty(enrollmentGroupId))
         {
             throw new IllegalArgumentException("enrollmentGroupId cannot be null or empty.");
         }
 
-        /* SRS_REGISTRATION_STATUS_MANAGER_21_025: [The createEnrollmentGroupQuery shall throws IllegalArgumentException if the provided pageSize is negative.] */
+        /* SRS_REGISTRATION_STATUS_MANAGER_21_025: [The createEnrollmentGroupQuery shall throw IllegalArgumentException if the provided pageSize is negative.] */
         if(pageSize < 0)
         {
             throw new IllegalArgumentException("pageSize cannot be negative.");

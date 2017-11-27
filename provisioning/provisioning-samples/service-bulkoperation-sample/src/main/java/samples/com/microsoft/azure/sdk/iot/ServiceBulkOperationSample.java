@@ -59,7 +59,7 @@ public class ServiceBulkOperationSample
         System.out.println("Result of the Create bulk enrollment...");
         System.out.println(bulkOperationResult);
 
-        // ************************************ Get info of individual individualEnrollments *************************************
+        // ************************************ Get info of individualEnrollments *************************************
         for (IndividualEnrollment individualEnrollment : individualEnrollments)
         {
             String registrationId = individualEnrollment.getRegistrationId();
@@ -68,7 +68,7 @@ public class ServiceBulkOperationSample
             System.out.println(getResult);
         }
 
-        // ************************************ Query info of individual individualEnrollments ***********************************
+        // ************************************ Query info of individualEnrollments ***********************************
         System.out.println("\nCreate a query for individualEnrollments...");
         QuerySpecification querySpecification =
                 new QuerySpecificationBuilder("*", QuerySpecificationBuilder.FromType.ENROLLMENTS)
@@ -82,7 +82,7 @@ public class ServiceBulkOperationSample
             System.out.println(queryResult);
         }
 
-        // ********************************** Delete bulk of individual individualEnrollments ************************************
+        // ********************************** Delete bulk of individualEnrollments ************************************
         System.out.println("\nDelete the set of individualEnrollments...");
         bulkOperationResult =  provisioningServiceClient.runBulkEnrollmentOperation(BulkOperationMode.DELETE, individualEnrollments);
         System.out.println(bulkOperationResult);

@@ -55,7 +55,7 @@ public class X509CAReferences
      */
     X509CAReferences(String primary, String secondary)
     {
-        /* SRS_X509_CAREFERENCE_21_001: [The constructor shall throws IllegalArgumentException if the primary CA reference is null or empty.] */
+        /* SRS_X509_CAREFERENCE_21_001: [The constructor shall throw IllegalArgumentException if the primary CA reference is null or empty.] */
         if(Tools.isNullOrEmpty(primary))
         {
             throw new IllegalArgumentException("primary CA reference cannot be null or empty");
@@ -75,7 +75,7 @@ public class X509CAReferences
      */
     public X509CAReferences(X509CAReferences x509CAReferences)
     {
-        /* SRS_X509_CAREFERENCE_21_003: [The constructor shall throws IllegalArgumentException if the provide X509CAReferences is null or if its primary certificate is null.] */
+        /* SRS_X509_CAREFERENCE_21_003: [The constructor shall throw IllegalArgumentException if the provide X509CAReferences is null or if its primary certificate is null.] */
         if((x509CAReferences == null) || (x509CAReferences.getPrimary() == null))
         {
             throw new IllegalArgumentException("original x509CAReferences cannot be null and its primary certificate cannot be null.");

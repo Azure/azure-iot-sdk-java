@@ -117,13 +117,13 @@ public class DeviceRegistrationState
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         DeviceRegistrationState result = gson.fromJson(json, DeviceRegistrationState.class);
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_004: [The constructor shall throws IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
+        /* SRS_DEVICE_REGISTRATION_STATE_21_004: [The constructor shall throw IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
         ParserUtility.validateId(result.registrationId);
 
         /* SRS_DEVICE_REGISTRATION_STATE_21_005: [The constructor shall store the provided registrationId.] */
         this.registrationId = result.registrationId;
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_006: [The constructor shall throws IllegalArgumentException if the provided deviceId is empty, or invalid.] */
+        /* SRS_DEVICE_REGISTRATION_STATE_21_006: [The constructor shall throw IllegalArgumentException if the provided deviceId is empty, or invalid.] */
         if(result.deviceId != null)
         {
             ParserUtility.validateId(result.deviceId);
@@ -135,14 +135,14 @@ public class DeviceRegistrationState
         /* SRS_DEVICE_REGISTRATION_STATE_21_008: [If the createdDateTimeUtc is provided, the constructor shall parse it as date and time UTC.] */
         if(result.createdDateTimeUtc != null)
         {
-            /* SRS_DEVICE_REGISTRATION_STATE_21_031: [Te constructor shall throws IllegalArgumentException if the createdDateTimeUtc is empty or invalid.] */
+            /* SRS_DEVICE_REGISTRATION_STATE_21_031: [Te constructor shall throw IllegalArgumentException if the createdDateTimeUtc is empty or invalid.] */
             this.createdDateTimeUtcDate = ParserUtility.getDateTimeUtc(result.createdDateTimeUtc);
         }
 
         /* SRS_DEVICE_REGISTRATION_STATE_21_009: [If the lastUpdatedDateTimeUtc is provided, the constructor shall parse it as date and time UTC.] */
         if(result.lastUpdatedDateTimeUtc != null)
         {
-            /* SRS_DEVICE_REGISTRATION_STATE_21_032: [Te constructor shall throws IllegalArgumentException if the lastUpdatedDateTimeUtc is empty or invalid.] */
+            /* SRS_DEVICE_REGISTRATION_STATE_21_032: [Te constructor shall throw IllegalArgumentException if the lastUpdatedDateTimeUtc is empty or invalid.] */
             this.lastUpdatedDateTimeUtcDate = ParserUtility.getDateTimeUtc(result.lastUpdatedDateTimeUtc);
         }
 
@@ -154,7 +154,7 @@ public class DeviceRegistrationState
             this.assignedHub = result.assignedHub;
         }
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_014: [The constructor shall throws IllegalArgumentException if the provided status is invalid.] */
+        /* SRS_DEVICE_REGISTRATION_STATE_21_014: [The constructor shall throw IllegalArgumentException if the provided status is invalid.] */
         if(result.status == null)
         {
             if(json.contains(QUOTED_STATE_TAG))

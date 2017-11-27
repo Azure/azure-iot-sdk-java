@@ -24,12 +24,12 @@ class ServiceAuthenticationWithSharedAccessPolicyToken extends AuthenticationMet
      */
     ServiceAuthenticationWithSharedAccessPolicyToken(String policyName, String token)
     {
-        /* Codes_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_002: [If the provided policyName is null or empty, the constructor shall throws IllegalArgumentException.] */
+        /* Codes_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_002: [If the provided policyName is null or empty, the constructor shall throw IllegalArgumentException.] */
         if (Tools.isNullOrEmpty(policyName))
         {
             throw new IllegalArgumentException("policyName cannot be null or empty");
         }
-        /* Codes_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_003: [If the provided token is null or empty, the constructor shall throws IllegalArgumentException.] */
+        /* Codes_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_003: [If the provided token is null or empty, the constructor shall throw IllegalArgumentException.] */
         if (Tools.isNullOrEmpty(token))
         {
             throw new IllegalArgumentException("token cannot be null or empty");
@@ -52,7 +52,7 @@ class ServiceAuthenticationWithSharedAccessPolicyToken extends AuthenticationMet
             ProvisioningConnectionString provisioningConnectionString)
             throws IllegalArgumentException
     {
-        /* Codes_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_004: [If the provided provisioningConnectionString is null, the populateWithAuthenticationProperties shall throws IllegalArgumentException.] */
+        /* Codes_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_004: [If the provided provisioningConnectionString is null, the populateWithAuthenticationProperties shall throw IllegalArgumentException.] */
         if (provisioningConnectionString == null)
         {
             throw new IllegalArgumentException("Input parameter \"provisioningConnectionString\" is null");

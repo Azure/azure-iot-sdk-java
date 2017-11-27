@@ -19,7 +19,7 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for Individual IndividualEnrollment Manager.
+ * Unit tests for IndividualEnrollment Manager.
  * 100% methods, 100% lines covered
  */
 public class IndividualEnrollmentManagerTest
@@ -38,7 +38,7 @@ public class IndividualEnrollmentManagerTest
 
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_001: [The constructor shall throws IllegalArgumentException if the provided ContractApiHttp is null.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_001: [The constructor shall throw IllegalArgumentException if the provided ContractApiHttp is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNull()
     {
@@ -63,7 +63,7 @@ public class IndividualEnrollmentManagerTest
         assertNotNull(individualEnrollmentManager);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_005: [The createOrUpdate shall throws IllegalArgumentException if the provided enrollment is null.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_005: [The createOrUpdate shall throw IllegalArgumentException if the provided enrollment is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void createOrUpdateThrowsOnNullEnrollment() throws ProvisioningServiceClientException
     {
@@ -120,7 +120,7 @@ public class IndividualEnrollmentManagerTest
         assertNotNull(response);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_042: [The createOrUpdate shall throws ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_042: [The createOrUpdate shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
     @Test (expected = ProvisioningServiceClientServiceException.class)
     public void createOrUpdateRequestThrowsOnNullBody(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment)
@@ -155,7 +155,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_009: [The createOrUpdate shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_009: [The createOrUpdate shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void createOrUpdateRequestTransportFailed(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment)
@@ -185,7 +185,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_010: [The createOrUpdate shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_010: [The createOrUpdate shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientInternalServerErrorException.class)
     public void createOrUpdateServiceReportedFail(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment)
@@ -215,7 +215,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_012: [The bulkOperation shall throws IllegalArgumentException if the provided bulkOperationMode is null.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_012: [The bulkOperation shall throw IllegalArgumentException if the provided bulkOperationMode is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void bulkOperationThrowsOnNullbulkOperationMode(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment) throws ProvisioningServiceClientException
@@ -231,7 +231,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_013: [The bulkOperation shall throws IllegalArgumentException if the provided enrollments is null or empty.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_013: [The bulkOperation shall throw IllegalArgumentException if the provided enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void bulkOperationThrowsOnNullEnrollments() throws ProvisioningServiceClientException
     {
@@ -244,7 +244,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_013: [The bulkOperation shall throws IllegalArgumentException if the provided enrollments is null or empty.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_013: [The bulkOperation shall throw IllegalArgumentException if the provided enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void bulkOperationThrowsOnEmptyEnrollments() throws ProvisioningServiceClientException
     {
@@ -302,7 +302,7 @@ public class IndividualEnrollmentManagerTest
         assertNotNull(bulkEnrollmentOperationResult);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_043: [The bulkOperation shall throws ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_043: [The bulkOperation shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
     @Test (expected = ProvisioningServiceClientServiceException.class)
     public void bulkOperationRequestThrowsOnNullBody(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment,
@@ -337,7 +337,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_017: [The bulkOperation shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_017: [The bulkOperation shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void bulkOperationRequestTransportFailed(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment,
@@ -368,7 +368,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_018: [The bulkOperation shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_018: [The bulkOperation shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientException.class)
     public void bulkOperationServiceReportedFail(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment,
@@ -399,7 +399,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_020: [The get shall throws IllegalArgumentException if the provided registrationId is null or empty.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_020: [The get shall throw IllegalArgumentException if the provided registrationId is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void getThrowsOnNullRegistrationId() throws ProvisioningServiceClientException
     {
@@ -412,7 +412,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_020: [The get shall throws IllegalArgumentException if the provided registrationId is null or empty.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_020: [The get shall throw IllegalArgumentException if the provided registrationId is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void getThrowsOnEmptyRegistrationId() throws ProvisioningServiceClientException
     {
@@ -460,7 +460,7 @@ public class IndividualEnrollmentManagerTest
         assertNotNull(response);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_044: [The get shall throws ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_044: [The get shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
     @Test (expected = ProvisioningServiceClientServiceException.class)
     public void getRequestThrowsOnNullBody()
             throws ProvisioningServiceClientException
@@ -487,7 +487,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_023: [The get shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_023: [The get shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void getRequestTransportFailed()
             throws ProvisioningServiceClientException
@@ -511,7 +511,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_024: [The get shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_024: [The get shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientException.class)
     public void getRequestServiceReportedFail()
             throws ProvisioningServiceClientException
@@ -535,7 +535,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_026: [The delete shall throws IllegalArgumentException if the provided enrollment is null.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_026: [The delete shall throw IllegalArgumentException if the provided enrollment is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void deleteEnrollmentThrowsOnNullEnrollment() throws ProvisioningServiceClientException
     {
@@ -613,7 +613,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_030: [The delete shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_030: [The delete shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void deleteEnrollmentRequestTransportFailed(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment)
@@ -643,7 +643,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_031: [The delete shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_031: [The delete shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientException.class)
     public void deleteEnrollmentServiceReportedFail(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment)
@@ -673,7 +673,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_032: [The delete shall throws IllegalArgumentException if the provided registrationId is null or empty.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_032: [The delete shall throw IllegalArgumentException if the provided registrationId is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void deleteRegistrationIdAndETagThrowsOnNullRegistrationId() throws ProvisioningServiceClientException
     {
@@ -687,7 +687,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_032: [The delete shall throws IllegalArgumentException if the provided registrationId is null or empty.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_032: [The delete shall throw IllegalArgumentException if the provided registrationId is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void deleteRegistrationIdAndETagThrowsOnEmptyRegistrationId() throws ProvisioningServiceClientException
     {
@@ -776,7 +776,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_036: [The delete shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_036: [The delete shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void deleteRegistrationIdAndETagRequestTransportFailed()
             throws ProvisioningServiceClientException
@@ -801,7 +801,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_037: [The delete shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_037: [The delete shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientException.class)
     public void deleteRegistrationIdAndETagRequestServiceReportedFail()
             throws ProvisioningServiceClientException
@@ -826,7 +826,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_038: [The createQuery shall throws IllegalArgumentException if the provided querySpecification is null.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_038: [The createQuery shall throw IllegalArgumentException if the provided querySpecification is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void createQueryThrowsOnNullQuerySpecification() throws ProvisioningServiceClientException
     {
@@ -840,7 +840,7 @@ public class IndividualEnrollmentManagerTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_039: [The createQuery shall throws IllegalArgumentException if the provided pageSize is negative.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_039: [The createQuery shall throw IllegalArgumentException if the provided pageSize is negative.] */
     @Test (expected = IllegalArgumentException.class)
     public void createQueryThrowsOnNegativePageSize(@Mocked final QuerySpecification mockedQuerySpecification) throws ProvisioningServiceClientException
     {

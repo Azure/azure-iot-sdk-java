@@ -18,7 +18,7 @@ public class X509CAReferencesTest
 {
     private static final String CA_REFERENCE_STRING = "validCAReference";
 
-    /* SRS_X509_CAREFERENCE_21_001: [The constructor shall throws IllegalArgumentException if the primary CA reference is null or empty.] */
+    /* SRS_X509_CAREFERENCE_21_001: [The constructor shall throw IllegalArgumentException if the primary CA reference is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnPrimaryNull()
     {
@@ -28,7 +28,7 @@ public class X509CAReferencesTest
         // assert
     }
 
-    /* SRS_X509_CAREFERENCE_21_001: [The constructor shall throws IllegalArgumentException if the primary CA reference is null or empty.] */
+    /* SRS_X509_CAREFERENCE_21_001: [The constructor shall throw IllegalArgumentException if the primary CA reference is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnPrimaryNullWitValidSecondary()
     {
@@ -64,7 +64,7 @@ public class X509CAReferencesTest
         assertEquals(CA_REFERENCE_STRING, Deencapsulation.getField(x509CAReferences, "secondary"));
     }
 
-    /* SRS_X509_CAREFERENCE_21_003: [The constructor shall throws IllegalArgumentException if the provide X509CAReferences is null or if its primary certificate is null.] */
+    /* SRS_X509_CAREFERENCE_21_003: [The constructor shall throw IllegalArgumentException if the provide X509CAReferences is null or if its primary certificate is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorCopyThrowsOnX509CAReferencesNull()
     {
@@ -75,7 +75,7 @@ public class X509CAReferencesTest
         // assert
     }
 
-    /* SRS_X509_CAREFERENCE_21_003: [The constructor shall throws IllegalArgumentException if the provide X509CAReferences is null or if its primary certificate is null.] */
+    /* SRS_X509_CAREFERENCE_21_003: [The constructor shall throw IllegalArgumentException if the provide X509CAReferences is null or if its primary certificate is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorCopyThrowsOnPrimaryNull()
     {

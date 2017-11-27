@@ -36,7 +36,7 @@ public class EnrollmentGroupManagerTest
 
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_001: [The constructor shall throws IllegalArgumentException if the provided ContractApiHttp is null.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_001: [The constructor shall throw IllegalArgumentException if the provided ContractApiHttp is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNull()
     {
@@ -61,7 +61,7 @@ public class EnrollmentGroupManagerTest
         assertNotNull(enrollmentGroupManager);
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_005: [The createOrUpdate shall throws IllegalArgumentException if the provided enrollmentGroup is null.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_005: [The createOrUpdate shall throw IllegalArgumentException if the provided enrollmentGroup is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void createOrUpdateThrowsOnNullEnrollment() throws ProvisioningServiceClientException
     {
@@ -118,7 +118,7 @@ public class EnrollmentGroupManagerTest
         assertNotNull(response);
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_042: [The createOrUpdate shall throws ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_042: [The createOrUpdate shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
     @Test (expected = ProvisioningServiceClientServiceException.class)
     public void createOrUpdateRequestTrowsOnNullBody(
             @Mocked final EnrollmentGroup mockedEnrollmentGroup)
@@ -154,7 +154,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_009: [The createOrUpdate shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_009: [The createOrUpdate shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void createOrUpdateRequestTransportFailed(
             @Mocked final EnrollmentGroup mockedEnrollmentGroup)
@@ -184,7 +184,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_010: [The createOrUpdate shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_010: [The createOrUpdate shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientInternalServerErrorException.class)
     public void createOrUpdateServiceReportedFail(
             @Mocked final EnrollmentGroup mockedEnrollmentGroup)
@@ -214,7 +214,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_020: [The get shall throws IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_020: [The get shall throw IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void getThrowsOnNullEnrollmentGroupId() throws ProvisioningServiceClientException
     {
@@ -227,7 +227,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_020: [The get shall throws IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_020: [The get shall throw IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void getThrowsOnEmptyEnrollmentGroupId() throws ProvisioningServiceClientException
     {
@@ -275,7 +275,7 @@ public class EnrollmentGroupManagerTest
         assertNotNull(response);
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_043: [The get shall throws ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_043: [The get shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
     @Test (expected = ProvisioningServiceClientServiceException.class)
     public void getRequestThrowsOnNullBody()
             throws ProvisioningServiceClientException
@@ -302,7 +302,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_023: [The get shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_023: [The get shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void getRequestTransportFailed()
             throws ProvisioningServiceClientException
@@ -326,7 +326,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_024: [The get shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_024: [The get shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientException.class)
     public void getRequestServiceReportedFail()
             throws ProvisioningServiceClientException
@@ -350,7 +350,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_026: [The delete shall throws IllegalArgumentException if the provided enrollmentGroup is null.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_026: [The delete shall throw IllegalArgumentException if the provided enrollmentGroup is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void deleteEnrollmentThrowsOnNullEnrollment() throws ProvisioningServiceClientException
     {
@@ -428,7 +428,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_030: [The delete shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_030: [The delete shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void deleteEnrollmentRequestTransportFailed(
             @Mocked final EnrollmentGroup mockedEnrollmentGroup)
@@ -458,7 +458,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_031: [The delete shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_031: [The delete shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientException.class)
     public void deleteEnrollmentServiceReportedFail(
             @Mocked final EnrollmentGroup mockedEnrollmentGroup)
@@ -488,7 +488,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_032: [The delete shall throws IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_032: [The delete shall throw IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void deleteEnrollmentGroupIdAndETagThrowsOnNullEnrollmentGroupId() throws ProvisioningServiceClientException
     {
@@ -502,7 +502,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_032: [The delete shall throws IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_032: [The delete shall throw IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void deleteEnrollmentGroupIdAndETagThrowsOnEmptyEnrollmentGroupId() throws ProvisioningServiceClientException
     {
@@ -591,7 +591,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_036: [The delete shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_036: [The delete shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void deleteEnrollmentGroupIdAndETagRequestTransportFailed()
             throws ProvisioningServiceClientException
@@ -616,7 +616,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_037: [The delete shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_037: [The delete shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
     @Test (expected = ProvisioningServiceClientException.class)
     public void deleteEnrollmentGroupIdAndETagRequestServiceReportedFail()
             throws ProvisioningServiceClientException
@@ -641,7 +641,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_038: [The createQuery shall throws IllegalArgumentException if the provided querySpecification is null.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_038: [The createQuery shall throw IllegalArgumentException if the provided querySpecification is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void createQueryThrowsOnNullQuerySpecification() throws ProvisioningServiceClientException
     {
@@ -655,7 +655,7 @@ public class EnrollmentGroupManagerTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_MANAGER_21_039: [The createQuery shall throws IllegalArgumentException if the provided pageSize is negative.] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_039: [The createQuery shall throw IllegalArgumentException if the provided pageSize is negative.] */
     @Test (expected = IllegalArgumentException.class)
     public void createQueryThrowsOnNegativePageSize(@Mocked final QuerySpecification mockedQuerySpecification) throws ProvisioningServiceClientException
     {

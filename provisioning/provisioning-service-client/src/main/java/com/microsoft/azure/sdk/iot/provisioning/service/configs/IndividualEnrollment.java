@@ -328,7 +328,7 @@ public class IndividualEnrollment extends Serializable
      */
     protected void setRegistrationId(String registrationId)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throws IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throw IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
         ParserUtility.validateId(registrationId);
 
         /* SRS_INDIVIDUAL_ENROLLMENT_21_018: [The setRegistrationId shall store the provided registrationId.] */
@@ -361,7 +361,7 @@ public class IndividualEnrollment extends Serializable
      */
     public void setDeviceId(String deviceId)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throws IllegalArgumentException if the provided deviceId is null, empty, or invalid.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId is null, empty, or invalid.] */
         ParserUtility.validateId(deviceId);
 
         /* SRS_INDIVIDUAL_ENROLLMENT_21_021: [The setDeviceId shall store the provided deviceId.] */
@@ -389,7 +389,7 @@ public class IndividualEnrollment extends Serializable
      */
     protected void setRegistrationState(DeviceRegistrationState registrationState)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_023: [The setRegistrationState shall throws IllegalArgumentException if the provided registrationState is null.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_023: [The setRegistrationState shall throw IllegalArgumentException if the provided registrationState is null.] */
         ParserUtility.validateObject(registrationState);
 
         /* SRS_INDIVIDUAL_ENROLLMENT_21_024: [The setRegistrationState shall store the provided registrationState.] */
@@ -585,7 +585,7 @@ public class IndividualEnrollment extends Serializable
     protected void setCreatedDateTimeUtc(String createdDateTimeUtc)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_038: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
         this.createdDateTimeUtcDate = ParserUtility.getDateTimeUtc(createdDateTimeUtc);
     }
 
@@ -616,7 +616,7 @@ public class IndividualEnrollment extends Serializable
     protected void setLastUpdatedDateTimeUtc(String lastUpdatedDateTimeUtc)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_041: [The setLastUpdatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
         this.lastUpdatedDateTimeUtcDate = ParserUtility.getDateTimeUtc(lastUpdatedDateTimeUtc);
     }
 

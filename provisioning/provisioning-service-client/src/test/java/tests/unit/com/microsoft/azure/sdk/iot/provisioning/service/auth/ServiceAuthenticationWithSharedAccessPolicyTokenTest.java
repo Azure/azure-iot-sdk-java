@@ -41,7 +41,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyTokenTest
         assertEquals(token, Deencapsulation.getField(authenticationMethodResult, "token"));
     }
 
-    /* Tests_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_002: [If the provided policyName is null or empty, the constructor shall throws IllegalArgumentException.] */
+    /* Tests_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_002: [If the provided policyName is null or empty, the constructor shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullPolicyName()
     {
@@ -58,7 +58,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyTokenTest
         // assert
     }
 
-    /* Tests_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_002: [If the provided policyName is null or empty, the constructor shall throws IllegalArgumentException.] */
+    /* Tests_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_002: [If the provided policyName is null or empty, the constructor shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyPolicyName()
     {
@@ -75,7 +75,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyTokenTest
         // assert
     }
 
-    /* Tests_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_003: [If the provided token is null or empty, the constructor shall throws IllegalArgumentException.] */
+    /* Tests_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_003: [If the provided token is null or empty, the constructor shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullToken()
     {
@@ -92,7 +92,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyTokenTest
         // assert
     }
 
-    /* Tests_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_003: [If the provided token is null or empty, the constructor shall throws IllegalArgumentException.] */
+    /* Tests_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_003: [If the provided token is null or empty, the constructor shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyToken()
     {
@@ -109,7 +109,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyTokenTest
         // assert
     }
 
-    /* Tests_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_004: [If the provided provisioningConnectionString is null, the populateWithAuthenticationProperties shall throws IllegalArgumentException.] */
+    /* Tests_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_TOKEN_21_004: [If the provided provisioningConnectionString is null, the populateWithAuthenticationProperties shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void populateThrowsOnNullConnectionString()
     {

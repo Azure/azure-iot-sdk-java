@@ -749,7 +749,7 @@ public class EnrollmentGroupTest
         assertEquals(VALID_PARSED_ETAG, enrollmentGroup.getEtag());
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throws IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
+    /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setEnrollmentGroupIdThrowsOnNull()
     {
@@ -762,7 +762,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throws IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
+    /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setEnrollmentGroupIdThrowsOnEmpty()
     {
@@ -775,7 +775,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throws IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
+    /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setEnrollmentGroupIdThrowsOnNotUtf8()
     {
@@ -788,7 +788,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throws IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
+    /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setEnrollmentGroupIdThrowsOnInvalidChar()
     {
@@ -1140,7 +1140,7 @@ public class EnrollmentGroupTest
         Helpers.assertDateWithError((Date)Deencapsulation.getField(enrollmentGroup, "createdDateTimeUtcDate"), VALID_DATE_AS_STRING);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setCreatedDateTimeUtcThrowsOnNull()
     {
@@ -1153,7 +1153,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setCreatedDateTimeUtcThrowsOnEmpty()
     {
@@ -1166,7 +1166,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setCreatedDateTimeUtcThrowsOnInvalid()
     {
@@ -1194,7 +1194,7 @@ public class EnrollmentGroupTest
         Helpers.assertDateWithError((Date)Deencapsulation.getField(enrollmentGroup, "lastUpdatedDateTimeUtcDate"), VALID_DATE_AS_STRING);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
+    /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setLastUpdatedDateTimeUtcThrowsOnNull()
     {
@@ -1207,7 +1207,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
+    /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setLastUpdatedDateTimeUtcThrowsOnEmpty()
     {
@@ -1220,7 +1220,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
+    /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setLastUpdatedDateTimeUtcThrowsOnInvalid()
     {

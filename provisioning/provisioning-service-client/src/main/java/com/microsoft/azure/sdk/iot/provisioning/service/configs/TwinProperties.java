@@ -86,7 +86,7 @@ public class TwinProperties
      */
     TwinProperties(TwinCollection desired)
     {
-        /* SRS_TWIN_PROPERTIES_21_001: [The constructor shall throws IllegalArgumentException if the provided desired property is null.] */
+        /* SRS_TWIN_PROPERTIES_21_001: [The constructor shall throw IllegalArgumentException if the provided desired property is null.] */
         if(desired == null)
         {
             throw new IllegalArgumentException("Desired property cannot be null.");

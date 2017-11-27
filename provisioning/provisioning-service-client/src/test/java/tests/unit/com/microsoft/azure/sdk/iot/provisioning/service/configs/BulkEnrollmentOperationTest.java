@@ -102,7 +102,7 @@ public class BulkEnrollmentOperationTest
         Helpers.assertJson(result, VALID_JSON_BULK);
     }
 
-    /* SRS_BULK_OPERATION_21_002: [The toJson shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_002: [The toJson shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toJsonThrowsOnNullOperationMode()
     {
@@ -115,7 +115,7 @@ public class BulkEnrollmentOperationTest
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_002: [The toJson shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_002: [The toJson shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toJsonThrowsOnNullListOfEnrollments()
     {
@@ -128,7 +128,7 @@ public class BulkEnrollmentOperationTest
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_002: [The toJson shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_002: [The toJson shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toJsonThrowsOnEmptyListOfEnrollments()
     {
@@ -155,7 +155,7 @@ public class BulkEnrollmentOperationTest
         Helpers.assertJson(result, VALID_JSON_BULK);
     }
 
-    /* SRS_BULK_OPERATION_21_004: [The toString shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_004: [The toString shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toStringThrowsOnNullOperationMode()
     {
@@ -168,7 +168,7 @@ public class BulkEnrollmentOperationTest
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_004: [The toString shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_004: [The toString shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toStringThrowsOnNullListOfEnrollments()
     {
@@ -181,7 +181,7 @@ public class BulkEnrollmentOperationTest
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_004: [The toString shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_004: [The toString shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toStringThrowsOnEmptyListOfEnrollments()
     {
@@ -194,7 +194,7 @@ public class BulkEnrollmentOperationTest
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toJsonElementThrowsOnNullOperationMode()
     {
@@ -207,7 +207,7 @@ public class BulkEnrollmentOperationTest
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toJsonElementThrowsOnNullListOfEnrollments()
     {
@@ -220,7 +220,7 @@ public class BulkEnrollmentOperationTest
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toJsonElementThrowsOnEmptyListOfEnrollments()
     {

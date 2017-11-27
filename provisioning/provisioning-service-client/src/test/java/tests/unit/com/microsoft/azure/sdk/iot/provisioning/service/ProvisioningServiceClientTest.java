@@ -103,7 +103,7 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_002: [The constructor shall throws IllegalArgumentException if the provided connectionString is null or empty.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_002: [The constructor shall throw IllegalArgumentException if the provided connectionString is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnConnectionStringNull()
     {
@@ -114,7 +114,7 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_002: [The constructor shall throws IllegalArgumentException if the provided connectionString is null or empty.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_002: [The constructor shall throw IllegalArgumentException if the provided connectionString is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnConnectionStringEmpty()
     {
@@ -125,7 +125,7 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The constructor shall throws IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The constructor shall throw IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnProvisioningConnectionStringFail()
     {
@@ -146,7 +146,7 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The constructor shall throws IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The constructor shall throw IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnContractApiHttpFail()
     {
@@ -170,7 +170,7 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The constructor shall throws IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The constructor shall throw IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnIndividualEnrollmentManagerFail()
     {
@@ -197,7 +197,7 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The constructor shall throws IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The constructor shall throw IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnEnrollmentGroupManagerFail()
     {
@@ -227,7 +227,7 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The constructor shall throws IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The constructor shall throw IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnRegistrationStatusManagerFail()
     {
@@ -284,7 +284,7 @@ public class ProvisioningServiceClientTest
         assertNotNull(result);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_009: [The runBulkEnrollmentOperation shall do a Provisioning operation over individual enrollment by calling the bulkOperation in the individualEnrollmentManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_009: [The runBulkEnrollmentOperation shall do a Provisioning operation over individualEnrollment by calling the bulkOperation in the individualEnrollmentManager.] */
     @Test
     public void runBulkEnrollmentOperationSucceed(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment,
@@ -311,7 +311,7 @@ public class ProvisioningServiceClientTest
         assertNotNull(result);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_010: [The getIndividualEnrollment shall retrieve the individual enrollment information for the provided registrationId by calling the get in the individualEnrollmentManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_010: [The getIndividualEnrollment shall retrieve the individualEnrollment information for the provided registrationId by calling the get in the individualEnrollmentManager.] */
     @Test
     public void getIndividualEnrollmentSucceed(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment)
@@ -336,7 +336,7 @@ public class ProvisioningServiceClientTest
         assertNotNull(result);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_011: [The deleteIndividualEnrollment shall delete the individual enrollment for the provided enrollment by calling the delete in the individualEnrollmentManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_011: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided enrollment by calling the delete in the individualEnrollmentManager.] */
     @Test
     public void deleteIndividualEnrollmentWithEnrollmentSucceed(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment)
@@ -358,7 +358,7 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_012: [The deleteIndividualEnrollment shall delete the individual enrollment for the provided registrationId by calling the delete in the individualEnrollmentManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_012: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided registrationId by calling the delete in the individualEnrollmentManager.] */
     @Test
     public void deleteIndividualEnrollmentWithRegistrationIdSucceed()
             throws ProvisioningServiceClientException
@@ -380,7 +380,7 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_013: [The deleteIndividualEnrollment shall delete the individual enrollment for the provided registrationId and etag by calling the delete in the individualEnrollmentManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_013: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided registrationId and etag by calling the delete in the individualEnrollmentManager.] */
     @Test
     public void deleteIndividualEnrollmentWithRegistrationIdAndEtagSucceed()
             throws ProvisioningServiceClientException

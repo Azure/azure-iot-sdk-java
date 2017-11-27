@@ -218,7 +218,7 @@ public class ContractApiHttpTest
         };
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_008: [If the provided path is null or empty, the request shall throws IllegalArgumentException.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_008: [If the provided path is null or empty, the request shall throw IllegalArgumentException.*/
     @Test (expected = IllegalArgumentException.class)
     public void requestThrowsOnNullPath() throws ProvisioningServiceClientException, IOException
     {
@@ -248,7 +248,7 @@ public class ContractApiHttpTest
         // assert
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_009: [If the provided path contains not valid characters, the request shall throws IllegalArgumentException.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_009: [If the provided path contains not valid characters, the request shall throw IllegalArgumentException.*/
     @Test (expected = IllegalArgumentException.class)
     public void requestThrowsOnEmptyPath() throws ProvisioningServiceClientException, IOException
     {
@@ -278,7 +278,7 @@ public class ContractApiHttpTest
         // assert
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_009: [If the provided path contains not valid characters, the request shall throws IllegalArgumentException.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_009: [If the provided path contains not valid characters, the request shall throw IllegalArgumentException.*/
     @Test (expected = IllegalArgumentException.class)
     public void requestThrowsOnWrongPath() throws ProvisioningServiceClientException, IOException
     {
@@ -335,7 +335,7 @@ public class ContractApiHttpTest
         };
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_011: [If the request get problem creating the HttpRequest, it shall throws ProvisioningServiceClientTransportException.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_011: [If the request get problem creating the HttpRequest, it shall throw ProvisioningServiceClientTransportException.*/
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void requestThrowsOnHttpRequestFailed() throws ProvisioningServiceClientException, IOException
     {
@@ -463,7 +463,7 @@ public class ContractApiHttpTest
         };
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [If the HttpRequest failed send the message, the request shall throws ProvisioningServiceClientTransportException, threw by the callee.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [If the HttpRequest failed send the message, the request shall throw ProvisioningServiceClientTransportException, threw by the callee.*/
     @Test (expected = ProvisioningServiceClientException.class)
     public void requestThrowsOnSendHttpRequestFailed() throws ProvisioningServiceClientException, IOException
     {
@@ -499,7 +499,7 @@ public class ContractApiHttpTest
         // assert
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_016: [If the Device Provisioning Service respond to the HttpRequest with any error code, the request shall throws the appropriated ProvisioningServiceClientException, by calling ProvisioningServiceClientExceptionManager.responseVerification().*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_016: [If the Device Provisioning Service respond to the HttpRequest with any error code, the request shall throw the appropriated ProvisioningServiceClientException, by calling ProvisioningServiceClientExceptionManager.responseVerification().*/
     @Test (expected = ProvisioningServiceClientException.class)
     public void requestThrowsOnDeviceProvisioningServiceError() throws ProvisioningServiceClientException, IOException
     {

@@ -17,7 +17,7 @@ import java.util.List;
  * Representation of a single Device Provisioning Service bulk operation with a JSON serializer.
  * 
  * <p> It is an internal class that creates a JSON for the bulk operations
- *     over the Individual Enrollments. To use bulk operations, please use
+ *     over the IndividualEnrollment. To use bulk operations, please use
  *     the external API {@link ProvisioningServiceClient#runBulkEnrollmentOperation(BulkOperationMode, Collection)}.
  *
  * <p> The following JSON is an example of the result of this serializer.
@@ -73,14 +73,14 @@ public final class BulkEnrollmentOperation
      *     individualEnrollments in a JSON format.
      *
      * @param mode the {@link BulkOperationMode} that defines the single operation to do over the individualEnrollments.
-     * @param individualEnrollments the collection of {@link IndividualEnrollment} that contains the description of each individual enrollment.
+     * @param individualEnrollments the collection of {@link IndividualEnrollment} that contains the description of each individualEnrollment.
      * @return The {@code String} with the content of this class.
      * @throws IllegalArgumentException if one of the parameters is invalid.
      */
     public static String toJson(BulkOperationMode mode, Collection<IndividualEnrollment> individualEnrollments)
     {
         /* SRS_BULK_OPERATION_21_001: [The toJson shall return a String with the mode and the collection of individualEnrollments using a JSON format.] */
-        /* SRS_BULK_OPERATION_21_002: [The toJson shall throws IllegalArgumentException if the provided mode is null or the collection of individualEnrollments is null or empty.] */
+        /* SRS_BULK_OPERATION_21_002: [The toJson shall throw IllegalArgumentException if the provided mode is null or the collection of individualEnrollments is null or empty.] */
         return BulkEnrollmentOperation.toJsonElement(mode, individualEnrollments).toString();
     }
 
@@ -91,14 +91,14 @@ public final class BulkEnrollmentOperation
      *     individualEnrollments in a pretty print JSON format.
      *
      * @param mode the {@link BulkOperationMode} that defines the single operation to do over the individualEnrollments.
-     * @param individualEnrollments the collection of {@link IndividualEnrollment} that contains the description of each individual enrollment.
+     * @param individualEnrollments the collection of {@link IndividualEnrollment} that contains the description of each individualEnrollment.
      * @return The {@code String} with the content of this class.
      * @throws IllegalArgumentException if one of the parameters is invalid.
      */
     public static String toString(BulkOperationMode mode, Collection<IndividualEnrollment> individualEnrollments)
     {
         /* SRS_BULK_OPERATION_21_003: [The toString shall return a String with the mode and the collection of individualEnrollments using a pretty print JSON format.] */
-        /* SRS_BULK_OPERATION_21_004: [The toString shall throws IllegalArgumentException if the provided mode is null or the collection of individualEnrollments is null or empty.] */
+        /* SRS_BULK_OPERATION_21_004: [The toString shall throw IllegalArgumentException if the provided mode is null or the collection of individualEnrollments is null or empty.] */
         Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
         return gson.toJson(BulkEnrollmentOperation.toJsonElement(mode, individualEnrollments));
     }
@@ -113,13 +113,13 @@ public final class BulkEnrollmentOperation
      *     to generate a consolidated JSON.
      *
      * @param mode the {@link BulkOperationMode} that defines the single operation to do over the individualEnrollments.
-     * @param individualEnrollments the collection of {@link IndividualEnrollment} that contains the description of each individual enrollment.
+     * @param individualEnrollments the collection of {@link IndividualEnrollment} that contains the description of each individualEnrollment.
      * @return The {@code JsonElement} with the content of this class.
      * @throws IllegalArgumentException if one of the parameters is invalid.
      */
     public static JsonElement toJsonElement(BulkOperationMode mode, Collection<IndividualEnrollment> individualEnrollments)
     {
-        /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throws IllegalArgumentException if the provided mode is null or the collection of individualEnrollments is null or empty.] */
+        /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throw IllegalArgumentException if the provided mode is null or the collection of individualEnrollments is null or empty.] */
         if(mode == null)
         {
             throw new IllegalArgumentException("mode cannot be null");
