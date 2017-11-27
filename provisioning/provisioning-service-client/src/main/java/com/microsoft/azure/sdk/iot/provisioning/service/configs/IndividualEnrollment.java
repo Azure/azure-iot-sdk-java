@@ -25,7 +25,7 @@ import java.util.Date;
  *     {@code attestation}.
  *
  * <p> A new device can be provisioned by two attestation mechanisms, Trust Platform Module (see {@link TpmAttestation})
- *     or DICE (see {@link X509Attestation}). The definition of each one you should use depending on the
+ *     or X509 (see {@link X509Attestation}). The definition of each one you should use depending on the
  *     physical authentication hardware that the device contains.
  *
  * <p> The content of this class will be serialized in a JSON format and sent as a body of the rest API to the

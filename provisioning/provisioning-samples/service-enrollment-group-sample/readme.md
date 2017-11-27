@@ -34,7 +34,7 @@ Note that the samples for Windows and Linux use Maven.
         private static final String PROVISIONING_CONNECTION_STRING = "[Provisioning Connection String]";
         ```
     2. You must copy the root certificate for the group of devices. If you don't have it, you can use the 
-        [provisioning DICE cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-dice-cert-generator).
+        [provisioning X509 cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-x509-cert-generator).
         Fill the `PUBLIC_KEY_CERTIFICATE_STRING` with the root certificate.
         ```java
         private static final String PUBLIC_KEY_CERTIFICATE_STRING =
@@ -191,7 +191,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
     private static final String PROVISIONING_CONNECTION_STRING = "{Provisioning Connection String}";
     ```
 13. You must copy the root certificate for the group of devices. If you don't have it, you can use the 
-    [provisioning DICE cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-dice-cert-generator).
+    [provisioning X509 cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-x509-cert-generator).
     Add the follow class-level variable to the **App**, and fill the `PUBLIC_KEY_CERTIFICATE_STRING` with the 
     root certificate.
     ```java

@@ -24,7 +24,7 @@ import java.util.Date;
  *     The minimum information required by the provisioning service is the {@link #enrollmentGroupId} and the
  *     {@link #attestation}.
  *
- * <p> To provision a device using EnrollmentGroup, it must contain a DICE chip with a signingCertificate for the
+ * <p> To provision a device using EnrollmentGroup, it must contain a X509 chip with a signingCertificate for the
  *     {@link X509Attestation} mechanism.
  *
  * <p> The content of this class will be serialized in a JSON format and sent as a body of the rest API to the

@@ -46,7 +46,7 @@ Note that the samples for Windows and Linux use Maven.
     ```
 7. Navigate to the folder containing the executable JAR file for the sample and run the sample as follows:
 
-    The executable JAR file for registering a device using DICE emulator can be found at:
+    The executable JAR file for registering a device using X509 emulator can be found at:
     ```
     {sample root}/target/provisioning-tpm-sample-{version}-with-deps.jar
     ```
