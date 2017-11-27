@@ -18,7 +18,7 @@ public class TpmAttestationTest
     private static final String VALID_ENDORSEMENT_KEY = "validEndorsementKey";
     private static final String VALID_STORAGE_ROOT_KEY = "validStorageRootKey";
 
-    /* SRS_TPM_ATTESTATION_21_001: [The constructor shall throws IllegalArgumentException if the provided endorsementKey is null or empty.] */
+    /* SRS_TPM_ATTESTATION_21_001: [The constructor shall throw IllegalArgumentException if the provided endorsementKey is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullEndorsementKey()
     {
@@ -29,7 +29,7 @@ public class TpmAttestationTest
         // assert
     }
 
-    /* SRS_TPM_ATTESTATION_21_001: [The constructor shall throws IllegalArgumentException if the provided endorsementKey is null or empty.] */
+    /* SRS_TPM_ATTESTATION_21_001: [The constructor shall throw IllegalArgumentException if the provided endorsementKey is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyEndorsementKey()
     {
@@ -41,7 +41,7 @@ public class TpmAttestationTest
     }
 
     /* SRS_TPM_ATTESTATION_21_002: [The constructor shall store the provided endorsementKey.] */
-    /* SRS_TPM_ATTESTATION_21_003: [The constructor shall store the provided endorsementKey.] */
+    /* SRS_TPM_ATTESTATION_21_003: [The constructor shall store the provided storageRootKey.] */
     @Test
     public void constructorStoresEndorsementKey()
     {
@@ -54,7 +54,7 @@ public class TpmAttestationTest
         assertEquals(VALID_STORAGE_ROOT_KEY, Deencapsulation.getField(tpmAttestation, "storageRootKey"));
     }
 
-    /* SRS_TPM_ATTESTATION_21_004: [The constructor shall throws IllegalArgumentException if the provided endorsementKey is null or empty.] */
+    /* SRS_TPM_ATTESTATION_21_004: [The constructor shall throw IllegalArgumentException if the provided endorsementKey is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorOnlyEndorsementKeyThrowsOnNullEndorsementKey()
     {
@@ -65,7 +65,7 @@ public class TpmAttestationTest
         // assert
     }
 
-    /* SRS_TPM_ATTESTATION_21_004: [The constructor shall throws IllegalArgumentException if the provided endorsementKey is null or empty.] */
+    /* SRS_TPM_ATTESTATION_21_004: [The constructor shall throw IllegalArgumentException if the provided endorsementKey is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorOnlyEndorsementKeyThrowsOnEmptyEndorsementKey()
     {
@@ -88,7 +88,7 @@ public class TpmAttestationTest
         assertEquals(VALID_ENDORSEMENT_KEY, Deencapsulation.getField(tpmAttestation, "endorsementKey"));
     }
 
-    /* SRS_TPM_ATTESTATION_21_006: [The constructor shall throws IllegalArgumentException if the provided tpm is null.] */
+    /* SRS_TPM_ATTESTATION_21_006: [The constructor shall throw IllegalArgumentException if the provided tpm is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorCopyThrowsOnNullTPM()
     {

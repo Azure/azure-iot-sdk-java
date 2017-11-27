@@ -34,7 +34,7 @@ public class X509CertificatesTest
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "-----END CERTIFICATE-----\n";
 
-    /* SRS_X509_CERTIFICATES_21_001: [The constructor shall throws IllegalArgumentException if the primary certificate is null or empty.] */
+    /* SRS_X509_CERTIFICATES_21_001: [The constructor shall throw IllegalArgumentException if the primary certificate is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnPrimaryNull()
     {
@@ -93,7 +93,7 @@ public class X509CertificatesTest
         assertNotNull(Deencapsulation.getField(x509Certificates, "secondary"));
     }
 
-    /* SRS_X509_CERTIFICATES_21_004: [The constructor shall throws IllegalArgumentException if the provide X509Certificates is null or if its primary certificate is null.] */
+    /* SRS_X509_CERTIFICATES_21_004: [The constructor shall throw IllegalArgumentException if the provide X509Certificates is null or if its primary certificate is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorCopyThrowsOnNull()
             throws IllegalArgumentException
@@ -105,7 +105,7 @@ public class X509CertificatesTest
         // assert
     }
 
-    /* SRS_X509_CERTIFICATES_21_004: [The constructor shall throws IllegalArgumentException if the provide X509Certificates is null or if its primary certificate is null.] */
+    /* SRS_X509_CERTIFICATES_21_004: [The constructor shall throw IllegalArgumentException if the provide X509Certificates is null or if its primary certificate is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorCopyThrowsOnPrimaryCertNull()
             throws IllegalArgumentException

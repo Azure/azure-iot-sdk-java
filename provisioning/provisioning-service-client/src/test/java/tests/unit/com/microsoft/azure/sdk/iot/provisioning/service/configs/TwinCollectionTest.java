@@ -511,7 +511,7 @@ public class TwinCollectionTest
         assertEquals(Deencapsulation.getField(twinCollection, "version") ,VERSION);
     }
 
-    /* SRS_TWIN_COLLECTION_21_013: [The constructor shall throws IllegalArgumentException if the entity contains the key `$version` and its value is not a integer.] */
+    /* SRS_TWIN_COLLECTION_21_013: [The constructor shall throw IllegalArgumentException if the entity contains the key `$version` and its value is not a integer.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructor2LevelsWithInvalidVersionFailed()
     {
@@ -589,7 +589,7 @@ public class TwinCollectionTest
         assertEquals(2L, (long)twinCollection.getTwinMetadata(VALID_KEY_NAME).getLastUpdatedVersion());
     }
 
-    /* SRS_TWIN_COLLECTION_21_024: [The constructor shall throws IllegalArgumentException if the metadata is inconsistent with the TwinCollection.] */
+    /* SRS_TWIN_COLLECTION_21_024: [The constructor shall throw IllegalArgumentException if the metadata is inconsistent with the TwinCollection.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorInconsistentMetadataFailed()
     {
@@ -643,7 +643,7 @@ public class TwinCollectionTest
         // assert
     }
 
-    /* SRS_TWIN_COLLECTION_21_015: [The constructor shall throws IllegalArgumentException if the Twin collection contains more than 5 levels.] */
+    /* SRS_TWIN_COLLECTION_21_015: [The constructor shall throw IllegalArgumentException if the Twin collection contains more than 5 levels.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnMoreThan5Levels()
     {
@@ -689,7 +689,7 @@ public class TwinCollectionTest
         // assert
     }
 
-    /* SRS_TWIN_COLLECTION_21_015: [The constructor shall throws IllegalArgumentException if the Twin collection contains more than 5 levels.] */
+    /* SRS_TWIN_COLLECTION_21_015: [The constructor shall throw IllegalArgumentException if the Twin collection contains more than 5 levels.] */
     @Test
     public void constructorSucceedOn5Levels()
     {

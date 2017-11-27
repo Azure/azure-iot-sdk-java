@@ -19,7 +19,7 @@ import java.util.List;
  * Representation of a single Device Provisioning Service bulk operation result with a JSON deserializer.
  *
  * <p> This result is returned as a result of the
- *     {@link ProvisioningServiceClient#runBulkOperation(BulkOperationMode, Collection)}.
+ *     {@link ProvisioningServiceClient#runBulkEnrollmentOperation(BulkOperationMode, Collection)}.
  *
  * <p> The provisioning service provides general bulk result in the isSuccessful, and a individual error result
  *     for each enrolment in the bulk.
@@ -47,7 +47,7 @@ import java.util.List;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
-public class BulkOperationResult
+public class BulkEnrollmentOperationResult
 {
     // the is bulk operation success
     private static final String IS_SUCCESSFUL_TAG = "isSuccessful";
@@ -59,7 +59,7 @@ public class BulkOperationResult
     private static final String ERRORS_TAG = "errors";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(ERRORS_TAG)
-    private DeviceRegistrationOperationError[] errors;
+    private BulkEnrollmentOperationError[] errors;
 
     /**
      * CONSTRUCTOR
@@ -70,7 +70,7 @@ public class BulkOperationResult
      * @param json the {@code String} with the JSON received from the provisioning service.
      * @throws IllegalArgumentException If the provided JSON is null, empty, or invalid.
      */
-    public BulkOperationResult(String json)
+    public BulkEnrollmentOperationResult(String json)
     {
         /* SRS_BULK_OPERATION_RESULT_21_001: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
         if(Tools.isNullOrEmpty(json))
@@ -81,13 +81,13 @@ public class BulkOperationResult
         /* SRS_BULK_OPERATION_RESULT_21_002: [The constructor shall throw JsonSyntaxException if the JSON is invalid.] */
         /* SRS_BULK_OPERATION_RESULT_21_003: [The constructor shall deserialize the provided JSON for the enrollment class and subclasses.] */
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
-        BulkOperationResult result = gson.fromJson(json, BulkOperationResult.class);
+        BulkEnrollmentOperationResult result = gson.fromJson(json, BulkEnrollmentOperationResult.class);
 
         /* SRS_BULK_OPERATION_RESULT_21_004: [The constructor shall throw IllegalArgumentException if the JSON do not contains isSuccessful.] */
         ParserUtility.validateObject(result.isSuccessful);
 
         /* SRS_BULK_OPERATION_RESULT_21_005: [The constructor shall throw IllegalArgumentException if the JSON contains invalid error.] */
-        for (DeviceRegistrationOperationError error:result.errors)
+        for (BulkEnrollmentOperationError error:result.errors)
         {
             error.validateError();
         }
@@ -112,11 +112,11 @@ public class BulkOperationResult
     /**
      * Getter for the bulk of errors.
      *
-     * @return The {@code DeviceRegistrationOperationError} with the errors content. It can be {@code null}.
+     * @return The {@code BulkEnrollmentOperationError} with the errors content. It can be {@code null}.
      */
-    public List<DeviceRegistrationOperationError> getErrors()
+    public List<BulkEnrollmentOperationError> getErrors()
     {
-        /* SRS_BULK_OPERATION_RESULT_21_009: [The getErrors shall return the stored errors as List of DeviceRegistrationOperationError.] */
+        /* SRS_BULK_OPERATION_RESULT_21_009: [The getErrors shall return the stored errors as List of BulkEnrollmentOperationError.] */
         return Arrays.asList(this.errors);
     }
 
@@ -141,8 +141,8 @@ public class BulkOperationResult
      * </p>
      */
     @SuppressWarnings("unused")
-    protected BulkOperationResult()
+    protected BulkEnrollmentOperationResult()
     {
-        /* SRS_BULK_OPERATION_RESULT_21_011: [The BulkOperationResult shall provide an empty constructor to make GSON happy.] */
+        /* SRS_BULK_OPERATION_RESULT_21_011: [The BulkEnrollmentOperationResult shall provide an empty constructor to make GSON happy.] */
     }
 }

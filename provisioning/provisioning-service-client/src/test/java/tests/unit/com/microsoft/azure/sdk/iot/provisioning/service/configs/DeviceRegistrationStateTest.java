@@ -5,7 +5,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.JsonSyntaxException;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceRegistrationStatus;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceRegistrationState;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.EnrollmentStatus;
 import mockit.Deencapsulation;
 import org.junit.Test;
@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
  * Unit tests for Device Provisioning Service bulk operation result deserializer
  * 100% methods, 100% lines covered
  */
-public class DeviceRegistrationStatusTest
+public class DeviceRegistrationStateTest
 {
     private static final String VALID_REGISTRATION_ID = "8be9cd0e-8934-4991-9cbf-cc3b6c7ac647";
     private static final String VALID_DEVICE_ID = "19adff39-9cb4-4dcc-8f66-ac36ca2bdb15";
@@ -47,37 +47,37 @@ public class DeviceRegistrationStatusTest
             "}";
 
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_001: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_001: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullJson()
     {
         // arrange
         // act
-        new DeviceRegistrationStatus(null);
+        new DeviceRegistrationState(null);
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_001: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_001: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyJson()
     {
         // arrange
         // act
-        new DeviceRegistrationStatus("");
+        new DeviceRegistrationState("");
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_002: [The constructor shall throw JsonSyntaxException if the JSON is invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_002: [The constructor shall throw JsonSyntaxException if the JSON is invalid.] */
     @Test (expected =  JsonSyntaxException.class)
     public void constructorThrowsOnInvalidJson()
     {
         // arrange
         // act
-        new DeviceRegistrationStatus("{\"a\":\"b\",}");
+        new DeviceRegistrationState("{\"a\":\"b\",}");
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_002: [The constructor shall throw JsonSyntaxException if the JSON is invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_002: [The constructor shall throw JsonSyntaxException if the JSON is invalid.] */
     @Test (expected =  JsonSyntaxException.class)
     public void constructorThrowsOnInvalidErrorCode()
     {
@@ -95,25 +95,25 @@ public class DeviceRegistrationStatusTest
                         "    \"etag\": \"" + VALID_ETAG + "\"\n" +
                         "}";
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_003: [The constructor shall deserialize the provided JSON for the DeviceRegistrationStatus class.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_003: [The constructor shall deserialize the provided JSON for the DeviceRegistrationState class.] */
     @Test
     public void constructorParserJson()
     {
         // arrange
 
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(VALID_JSON);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(VALID_JSON);
 
         // assert
-        assertNotNull(deviceRegistrationStatus);
+        assertNotNull(deviceRegistrationState);
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_004: [The constructor shall throws IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_004: [The constructor shall throw IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullRegistrationId()
     {
@@ -131,12 +131,12 @@ public class DeviceRegistrationStatusTest
                 "}";
 
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_004: [The constructor shall throws IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_004: [The constructor shall throw IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyRegistrationId()
     {
@@ -155,12 +155,12 @@ public class DeviceRegistrationStatusTest
                 "}";
 
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_004: [The constructor shall throws IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_004: [The constructor shall throw IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidRegistrationId()
     {
@@ -179,24 +179,24 @@ public class DeviceRegistrationStatusTest
                 "}";
 
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_005: [The constructor shall store the provided registrationId.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_005: [The constructor shall store the provided registrationId.] */
     @Test
     public void constructorStoreRegistrationId()
     {
         // arrange
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(VALID_JSON);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(VALID_JSON);
 
         // assert
-        assertEquals(VALID_REGISTRATION_ID, Deencapsulation.getField(deviceRegistrationStatus, "registrationId"));
+        assertEquals(VALID_REGISTRATION_ID, Deencapsulation.getField(deviceRegistrationState, "registrationId"));
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_006: [The constructor shall throws IllegalArgumentException if the provided deviceId is empty, or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_006: [The constructor shall throw IllegalArgumentException if the provided deviceId is empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyDeviceId()
     {
@@ -215,12 +215,12 @@ public class DeviceRegistrationStatusTest
                 "}";
 
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_006: [The constructor shall throws IllegalArgumentException if the provided deviceId is empty, or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_006: [The constructor shall throw IllegalArgumentException if the provided deviceId is empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidDeviceId()
     {
@@ -239,24 +239,24 @@ public class DeviceRegistrationStatusTest
                 "}";
 
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_007: [The constructor shall store the provided deviceId.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_007: [The constructor shall store the provided deviceId.] */
     @Test
     public void constructorStoreDeviceId()
     {
         // arrange
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(VALID_JSON);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(VALID_JSON);
 
         // assert
-        assertEquals(VALID_DEVICE_ID, Deencapsulation.getField(deviceRegistrationStatus, "deviceId"));
+        assertEquals(VALID_DEVICE_ID, Deencapsulation.getField(deviceRegistrationState, "deviceId"));
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_008: [If the createdDateTimeUtc is provided, the constructor shall parse it as date and time UTC.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_008: [If the createdDateTimeUtc is provided, the constructor shall parse it as date and time UTC.] */
     @Test
     public void constructorIgnoreNullCreatedDateTimeUtc()
     {
@@ -273,13 +273,13 @@ public class DeviceRegistrationStatusTest
                 "    \"etag\": \"" + VALID_ETAG + "\"\n" +
                 "}";
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(json);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(json);
 
         // assert
-        assertNull(Deencapsulation.getField(deviceRegistrationStatus, "createdDateTimeUtcDate"));
+        assertNull(Deencapsulation.getField(deviceRegistrationState, "createdDateTimeUtcDate"));
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_031: [Te constructor shall throws IllegalArgumentException if the createdDateTimeUtc is empty or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_031: [Te constructor shall throw IllegalArgumentException if the createdDateTimeUtc is empty or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyCreatedDateTimeUtc()
     {
@@ -297,12 +297,12 @@ public class DeviceRegistrationStatusTest
                         "    \"etag\": \"" + VALID_ETAG + "\"\n" +
                         "}";
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_031: [Te constructor shall throws IllegalArgumentException if the createdDateTimeUtc is empty or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_031: [Te constructor shall throw IllegalArgumentException if the createdDateTimeUtc is empty or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidCreatedDateTimeUtc()
     {
@@ -320,24 +320,24 @@ public class DeviceRegistrationStatusTest
                         "    \"etag\": \"" + VALID_ETAG + "\"\n" +
                         "}";
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_008: [If the createdDateTimeUtc is provided, the constructor shall parse it as date and time UTC.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_008: [If the createdDateTimeUtc is provided, the constructor shall parse it as date and time UTC.] */
     @Test
     public void constructorStoreCreatedDateTimeUtc()
     {
         // arrange
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(VALID_JSON);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(VALID_JSON);
 
         // assert
-        Helpers.assertDateWithError((Date)Deencapsulation.getField(deviceRegistrationStatus, "createdDateTimeUtcDate"), VALID_DATE_AS_STRING);
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(deviceRegistrationState, "createdDateTimeUtcDate"), VALID_DATE_AS_STRING);
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_009: [If the lastUpdatedDateTimeUtc is provided, the constructor shall parse it as date and time UTC.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_009: [If the lastUpdatedDateTimeUtc is provided, the constructor shall parse it as date and time UTC.] */
     @Test
     public void constructorIgnoreNullLastUpdatedDateTimeUtc()
     {
@@ -354,13 +354,13 @@ public class DeviceRegistrationStatusTest
                         "    \"etag\": \"" + VALID_ETAG + "\"\n" +
                         "}";
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(json);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(json);
 
         // assert
-        assertNull(Deencapsulation.getField(deviceRegistrationStatus, "lastUpdatedDateTimeUtcDate"));
+        assertNull(Deencapsulation.getField(deviceRegistrationState, "lastUpdatedDateTimeUtcDate"));
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_032: [Te constructor shall throws IllegalArgumentException if the lastUpdatedDateTimeUtc is empty or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_032: [Te constructor shall throw IllegalArgumentException if the lastUpdatedDateTimeUtc is empty or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyLastUpdatedDateTimeUtc()
     {
@@ -378,12 +378,12 @@ public class DeviceRegistrationStatusTest
                         "    \"etag\": \"" + VALID_ETAG + "\"\n" +
                         "}";
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_032: [Te constructor shall throws IllegalArgumentException if the lastUpdatedDateTimeUtc is empty or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_032: [Te constructor shall throw IllegalArgumentException if the lastUpdatedDateTimeUtc is empty or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidLastUpdatedDateTimeUtc()
     {
@@ -401,36 +401,36 @@ public class DeviceRegistrationStatusTest
                         "    \"etag\": \"" + VALID_ETAG + "\"\n" +
                         "}";
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_009: [If the lastUpdatedDateTimeUtc is provided, the constructor shall parse it as date and time UTC.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_009: [If the lastUpdatedDateTimeUtc is provided, the constructor shall parse it as date and time UTC.] */
     @Test
     public void constructorStoreLastUpdatedDateTimeUtc()
     {
         // arrange
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(VALID_JSON);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(VALID_JSON);
 
         // assert
-        Helpers.assertDateWithError((Date)Deencapsulation.getField(deviceRegistrationStatus, "lastUpdatedDateTimeUtcDate"), VALID_DATE_AS_STRING);
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(deviceRegistrationState, "lastUpdatedDateTimeUtcDate"), VALID_DATE_AS_STRING);
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_010: [If the assignedHub is not null, the constructor shall judge and store it.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_010: [If the assignedHub is not null, the constructor shall judge and store it.] */
     @Test
     public void constructorStoreAssignedHub()
     {
         // arrange
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(VALID_JSON);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(VALID_JSON);
 
         // assert
-        assertEquals(Deencapsulation.getField(deviceRegistrationStatus, "assignedHub"), VALID_ASSIGNED_HUB);
+        assertEquals(Deencapsulation.getField(deviceRegistrationState, "assignedHub"), VALID_ASSIGNED_HUB);
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_010: [If the assignedHub is not null, the constructor shall judge and store it.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_010: [If the assignedHub is not null, the constructor shall judge and store it.] */
     @Test
     public void constructorSucceedOnNullAssignedHub()
     {
@@ -447,13 +447,13 @@ public class DeviceRegistrationStatusTest
                         "    \"etag\": \"" + VALID_ETAG + "\"\n" +
                         "}";
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(json);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(json);
 
         // assert
-        assertNull(Deencapsulation.getField(deviceRegistrationStatus, "assignedHub"));
+        assertNull(Deencapsulation.getField(deviceRegistrationState, "assignedHub"));
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_011: [The constructor shall throw IllegalArgumentException if an provided assignedHub is empty or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_011: [The constructor shall throw IllegalArgumentException if an provided assignedHub is empty or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyAssignedHub()
     {
@@ -471,12 +471,12 @@ public class DeviceRegistrationStatusTest
                         "    \"etag\": \"" + VALID_ETAG + "\"\n" +
                         "}";
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_011: [The constructor shall throw IllegalArgumentException if an provided assignedHub is empty or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_011: [The constructor shall throw IllegalArgumentException if an provided assignedHub is empty or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidAssignedHub()
     {
@@ -494,12 +494,12 @@ public class DeviceRegistrationStatusTest
                         "    \"etag\": \"" + VALID_ETAG + "\"\n" +
                         "}";
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(json);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_014: [The constructor shall throws IllegalArgumentException if the provided status is invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_014: [The constructor shall throw IllegalArgumentException if the provided status is invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidStatus()
     {
@@ -517,24 +517,24 @@ public class DeviceRegistrationStatusTest
                 "    \"etag\": \"" + VALID_ETAG + "\"\n" +
                 "}";
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_015: [If the errorCode is not null, the constructor shall store the provided status.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_015: [If the errorCode is not null, the constructor shall store the provided status.] */
     @Test
     public void constructorStoreStatus()
     {
         // arrange
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(VALID_JSON);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(VALID_JSON);
 
         // assert
-        assertEquals(EnrollmentStatus.ASSIGNED, Deencapsulation.getField(deviceRegistrationStatus, "status"));
+        assertEquals(EnrollmentStatus.ASSIGNED, Deencapsulation.getField(deviceRegistrationState, "status"));
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_016: [If the errorCode is not null, the constructor shall store it.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_016: [If the errorCode is not null, the constructor shall store it.] */
     @Test
     public void constructorSucceedOnNullErrorCode()
     {
@@ -551,25 +551,25 @@ public class DeviceRegistrationStatusTest
                         "    \"etag\": \"" + VALID_ETAG + "\"\n" +
                         "}";
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(json);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(json);
 
         // assert
-        assertNull(Deencapsulation.getField(deviceRegistrationStatus, "errorCode"));
+        assertNull(Deencapsulation.getField(deviceRegistrationState, "errorCode"));
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_016: [If the errorCode is not null, the constructor shall store it.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_016: [If the errorCode is not null, the constructor shall store it.] */
     @Test
     public void constructorStoreErrorCode()
     {
         // arrange
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(VALID_JSON);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(VALID_JSON);
 
         // assert
-        assertEquals(Deencapsulation.getField(deviceRegistrationStatus, "errorCode"), VALID_ERROR_CODE);
+        assertEquals(Deencapsulation.getField(deviceRegistrationState, "errorCode"), VALID_ERROR_CODE);
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_017: [If the errorMessage is not null, the constructor shall store it.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_017: [If the errorMessage is not null, the constructor shall store it.] */
     @Test
     public void constructorSucceedOnNullErrorMessage()
     {
@@ -586,25 +586,25 @@ public class DeviceRegistrationStatusTest
                         "    \"etag\": \"" + VALID_ETAG + "\"\n" +
                         "}";
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(json);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(json);
 
         // assert
-        assertNull(Deencapsulation.getField(deviceRegistrationStatus, "errorMessage"));
+        assertNull(Deencapsulation.getField(deviceRegistrationState, "errorMessage"));
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_017: [If the errorMessage is not null, the constructor shall store it.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_017: [If the errorMessage is not null, the constructor shall store it.] */
     @Test
     public void constructorStoreErrorMessage()
     {
         // arrange
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(VALID_JSON);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(VALID_JSON);
 
         // assert
-        assertEquals(Deencapsulation.getField(deviceRegistrationStatus, "errorMessage"), VALID_ERROR_MESSAGE);
+        assertEquals(Deencapsulation.getField(deviceRegistrationState, "errorMessage"), VALID_ERROR_MESSAGE);
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_018: [If the etag is not null, the constructor shall judge and store it.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_018: [If the etag is not null, the constructor shall judge and store it.] */
     @Test
     public void constructorSucceedOnNullEtag()
     {
@@ -621,25 +621,25 @@ public class DeviceRegistrationStatusTest
                         "    \"errorMessage\":\"" + VALID_ERROR_MESSAGE + "\"\n" +
                         "}";
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(json);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(json);
 
         // assert
-        assertNull(Deencapsulation.getField(deviceRegistrationStatus, "etag"));
+        assertNull(Deencapsulation.getField(deviceRegistrationState, "etag"));
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_018: [If the etag is not null, the constructor shall judge and store it.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_018: [If the etag is not null, the constructor shall judge and store it.] */
     @Test
     public void constructorStoreEtag()
     {
         // arrange
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(VALID_JSON);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(VALID_JSON);
 
         // assert
-        assertEquals(Deencapsulation.getField(deviceRegistrationStatus, "etag"), VALID_PARSED_ETAG);
+        assertEquals(Deencapsulation.getField(deviceRegistrationState, "etag"), VALID_PARSED_ETAG);
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_019: [The constructor shall throw IllegalArgumentException if an provided etag is empty or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_019: [The constructor shall throw IllegalArgumentException if an provided etag is empty or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyEtag()
     {
@@ -657,12 +657,12 @@ public class DeviceRegistrationStatusTest
                         "    \"etag\": \"\"\n" +
                         "}";
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_019: [The constructor shall throw IllegalArgumentException if an provided etag is empty or invalid.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_019: [The constructor shall throw IllegalArgumentException if an provided etag is empty or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidEtag()
     {
@@ -680,49 +680,49 @@ public class DeviceRegistrationStatusTest
                         "    \"etag\": \"\u1234InvalidEtag\"\n" +
                         "}";
         // act
-        new DeviceRegistrationStatus(json);
+        new DeviceRegistrationState(json);
 
         // assert
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_020: [The getRegistrationId shall return a String with the stored registrationId.] */
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_021: [The getDeviceId shall return a String with the stored deviceId.] */
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_022: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtc.] */
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_023: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtc.] */
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_024: [The getAssignedHub shall return a String with the stored assignedHub.] */
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_026: [The getStatus shall return an EnrollmentStatus with the stored status.] */
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_027: [The getErrorCode shall return a Integer with the stored errorCode.] */
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_028: [The getErrorMessage shall return a String with the stored errorMessage.] */
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_029: [The getEtag shall return a String with the stored etag.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_020: [The getRegistrationId shall return a String with the stored registrationId.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_021: [The getDeviceId shall return a String with the stored deviceId.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_022: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtc.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_023: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtc.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_024: [The getAssignedHub shall return a String with the stored assignedHub.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_026: [The getStatus shall return an EnrollmentStatus with the stored status.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_027: [The getErrorCode shall return a Integer with the stored errorCode.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_028: [The getErrorMessage shall return a String with the stored errorMessage.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_029: [The getEtag shall return a String with the stored etag.] */
     @Test
     public void gettersSucceed()
     {
         // arrange
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = new DeviceRegistrationStatus(VALID_JSON);
+        DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(VALID_JSON);
 
         // assert
-        assertEquals(VALID_REGISTRATION_ID, deviceRegistrationStatus.getRegistrationId());
-        assertEquals(VALID_DEVICE_ID, deviceRegistrationStatus.getDeviceId());
-        Helpers.assertDateWithError((Date)deviceRegistrationStatus.getCreatedDateTimeUtc(), VALID_DATE_AS_STRING);
-        Helpers.assertDateWithError((Date)deviceRegistrationStatus.getLastUpdatedDateTimeUtc(), VALID_DATE_AS_STRING);
-        assertEquals(VALID_ASSIGNED_HUB, deviceRegistrationStatus.getAssignedHub());
-        assertEquals(EnrollmentStatus.ASSIGNED, deviceRegistrationStatus.getStatus());
-        assertEquals(VALID_ERROR_CODE, deviceRegistrationStatus.getErrorCode());
-        assertEquals(VALID_ERROR_MESSAGE, deviceRegistrationStatus.getErrorMessage());
-        assertEquals(VALID_PARSED_ETAG, deviceRegistrationStatus.getEtag());
+        assertEquals(VALID_REGISTRATION_ID, deviceRegistrationState.getRegistrationId());
+        assertEquals(VALID_DEVICE_ID, deviceRegistrationState.getDeviceId());
+        Helpers.assertDateWithError((Date)deviceRegistrationState.getCreatedDateTimeUtc(), VALID_DATE_AS_STRING);
+        Helpers.assertDateWithError((Date)deviceRegistrationState.getLastUpdatedDateTimeUtc(), VALID_DATE_AS_STRING);
+        assertEquals(VALID_ASSIGNED_HUB, deviceRegistrationState.getAssignedHub());
+        assertEquals(EnrollmentStatus.ASSIGNED, deviceRegistrationState.getStatus());
+        assertEquals(VALID_ERROR_CODE, deviceRegistrationState.getErrorCode());
+        assertEquals(VALID_ERROR_MESSAGE, deviceRegistrationState.getErrorMessage());
+        assertEquals(VALID_PARSED_ETAG, deviceRegistrationState.getEtag());
     }
 
-    /* SRS_DEVICE_REGISTRATION_STATUS_21_030: [The DeviceRegistrationStatus shall provide an empty constructor to make GSON happy.] */
+    /* SRS_DEVICE_REGISTRATION_STATE_21_030: [The DeviceRegistrationState shall provide an empty constructor to make GSON happy.] */
     @Test
     public void emptyConstructorExists()
     {
         // arrange
 
         // act
-        DeviceRegistrationStatus deviceRegistrationStatus = Deencapsulation.newInstance(DeviceRegistrationStatus.class);
+        DeviceRegistrationState deviceRegistrationState = Deencapsulation.newInstance(DeviceRegistrationState.class);
 
         // assert
-        assertNotNull(deviceRegistrationStatus);
+        assertNotNull(deviceRegistrationState);
     }
 }

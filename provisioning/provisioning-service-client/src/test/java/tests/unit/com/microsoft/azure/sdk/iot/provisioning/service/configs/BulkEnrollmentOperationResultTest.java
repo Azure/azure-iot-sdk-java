@@ -4,8 +4,8 @@
 package tests.unit.com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.JsonSyntaxException;
-import com.microsoft.azure.sdk.iot.provisioning.service.configs.BulkOperationResult;
-import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceRegistrationOperationError;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.BulkEnrollmentOperationResult;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.BulkEnrollmentOperationError;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
  * Unit tests for Device Provisioning Service bulk operation result deserializer
  * 100% methods, 100% lines covered
  */
-public class BulkOperationResultTest
+public class BulkEnrollmentOperationResultTest
 {
     private static final String VALID_REGISTRATION_ID_1 = "8be9cd0e-8934-4991-9cbf-cc3b6c7ac647";
     private static final Integer VALID_ERROR_CODE_1 = 201;
@@ -59,7 +59,7 @@ public class BulkOperationResultTest
         // arrange
 
         // act
-        new BulkOperationResult(null);
+        new BulkEnrollmentOperationResult(null);
 
         // assert
     }
@@ -71,7 +71,7 @@ public class BulkOperationResultTest
         // arrange
 
         // act
-        new BulkOperationResult("");
+        new BulkEnrollmentOperationResult("");
 
         // assert
     }
@@ -83,7 +83,7 @@ public class BulkOperationResultTest
         // arrange
 
         // act
-        new BulkOperationResult("{\"isSuccessful\": \"true\",}");
+        new BulkEnrollmentOperationResult("{\"isSuccessful\": \"true\",}");
 
         // assert
     }
@@ -103,7 +103,7 @@ public class BulkOperationResultTest
                         "}";
 
         // act
-        new BulkOperationResult(missingSuccessful);
+        new BulkEnrollmentOperationResult(missingSuccessful);
 
         // assert
     }
@@ -111,25 +111,25 @@ public class BulkOperationResultTest
     /* SRS_BULK_OPERATION_RESULT_21_005: [The constructor shall throw IllegalArgumentException if the JSON contains invalid error.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnErrorsWithFail(
-            @Mocked final DeviceRegistrationOperationError mockedDeviceRegistrationOperationError)
+            @Mocked final BulkEnrollmentOperationError mockedBulkEnrollmentOperationError)
     {
         // arrange
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockedDeviceRegistrationOperationError, "validateError");
+                Deencapsulation.invoke(mockedBulkEnrollmentOperationError, "validateError");
                 result = new IllegalArgumentException();
             }
         };
 
         // act
-        new BulkOperationResult(VALID_JSON);
+        new BulkEnrollmentOperationResult(VALID_JSON);
 
         // assert
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedDeviceRegistrationOperationError, "validateError");
+                Deencapsulation.invoke(mockedBulkEnrollmentOperationError, "validateError");
                 times = 1;
             }
         };
@@ -143,10 +143,10 @@ public class BulkOperationResultTest
         // arrange
 
         // act
-        BulkOperationResult bulkOperationResult = new BulkOperationResult(VALID_JSON);
+        BulkEnrollmentOperationResult bulkEnrollmentOperationResult = new BulkEnrollmentOperationResult(VALID_JSON);
 
         // assert
-        assertTrue(Deencapsulation.getField(bulkOperationResult, "isSuccessful"));
+        assertTrue(Deencapsulation.getField(bulkEnrollmentOperationResult, "isSuccessful"));
     }
 
     /* SRS_BULK_OPERATION_RESULT_21_003: [The constructor shall deserialize the provided JSON for the enrollment class and subclasses.] */
@@ -157,10 +157,10 @@ public class BulkOperationResultTest
         // arrange
 
         // act
-        BulkOperationResult bulkOperationResult = new BulkOperationResult(VALID_JSON);
+        BulkEnrollmentOperationResult bulkEnrollmentOperationResult = new BulkEnrollmentOperationResult(VALID_JSON);
 
         // assert
-        DeviceRegistrationOperationError[] errors = Deencapsulation.getField(bulkOperationResult, "errors");
+        BulkEnrollmentOperationError[] errors = Deencapsulation.getField(bulkEnrollmentOperationResult, "errors");
         assertEquals(2, errors.length);
         assertEquals(VALID_REGISTRATION_ID_1, errors[0].getRegistrationId());
         assertEquals(VALID_ERROR_CODE_1, errors[0].getErrorCode());
@@ -175,36 +175,36 @@ public class BulkOperationResultTest
     public void getSuccessfulReturnsSuccessful()
     {
         // arrange
-        BulkOperationResult bulkOperationResult = new BulkOperationResult(VALID_JSON);
+        BulkEnrollmentOperationResult bulkEnrollmentOperationResult = new BulkEnrollmentOperationResult(VALID_JSON);
 
         // act
-        Boolean successful = bulkOperationResult.getSuccessful();
+        Boolean successful = bulkEnrollmentOperationResult.getSuccessful();
 
         // assert
         assertTrue(successful);
     }
 
-    /* SRS_BULK_OPERATION_RESULT_21_009: [The getErrors shall return the stored errors as List of DeviceRegistrationOperationError.] */
+    /* SRS_BULK_OPERATION_RESULT_21_009: [The getErrors shall return the stored errors as List of BulkEnrollmentOperationError.] */
     @Test
     public void getErrorsReturnsErrors()
     {
         // arrange
-        BulkOperationResult bulkOperationResult = new BulkOperationResult(VALID_JSON);
+        BulkEnrollmentOperationResult bulkEnrollmentOperationResult = new BulkEnrollmentOperationResult(VALID_JSON);
 
         // act
-        List<DeviceRegistrationOperationError> errors = bulkOperationResult.getErrors();
+        List<BulkEnrollmentOperationError> errors = bulkEnrollmentOperationResult.getErrors();
 
         // assert
         assertNotNull(errors);
         assertEquals(2, errors.size());
-        DeviceRegistrationOperationError deviceRegistrationOperationError = errors.get(0);
-        assertEquals(VALID_REGISTRATION_ID_1, deviceRegistrationOperationError.getRegistrationId());
-        assertEquals(VALID_ERROR_CODE_1, deviceRegistrationOperationError.getErrorCode());
-        assertEquals(VALID_ERROR_STATUS_1, deviceRegistrationOperationError.getErrorStatus());
-        deviceRegistrationOperationError = errors.get(1);
-        assertEquals(VALID_REGISTRATION_ID_2, deviceRegistrationOperationError.getRegistrationId());
-        assertEquals(VALID_ERROR_CODE_2, deviceRegistrationOperationError.getErrorCode());
-        assertEquals(VALID_ERROR_STATUS_2, deviceRegistrationOperationError.getErrorStatus());
+        BulkEnrollmentOperationError bulkEnrollmentOperationError = errors.get(0);
+        assertEquals(VALID_REGISTRATION_ID_1, bulkEnrollmentOperationError.getRegistrationId());
+        assertEquals(VALID_ERROR_CODE_1, bulkEnrollmentOperationError.getErrorCode());
+        assertEquals(VALID_ERROR_STATUS_1, bulkEnrollmentOperationError.getErrorStatus());
+        bulkEnrollmentOperationError = errors.get(1);
+        assertEquals(VALID_REGISTRATION_ID_2, bulkEnrollmentOperationError.getRegistrationId());
+        assertEquals(VALID_ERROR_CODE_2, bulkEnrollmentOperationError.getErrorCode());
+        assertEquals(VALID_ERROR_STATUS_2, bulkEnrollmentOperationError.getErrorStatus());
     }
 
     /* SRS_BULK_OPERATION_RESULT_21_010: [The toString shall return a String with the information into this class in a pretty print JSON.] */
@@ -212,25 +212,25 @@ public class BulkOperationResultTest
     public void toStringReturnsErrors()
     {
         // arrange
-        BulkOperationResult bulkOperationResult = new BulkOperationResult(VALID_JSON);
+        BulkEnrollmentOperationResult bulkEnrollmentOperationResult = new BulkEnrollmentOperationResult(VALID_JSON);
 
         // act
-        String result = bulkOperationResult.toString();
+        String result = bulkEnrollmentOperationResult.toString();
 
         // assert
         Helpers.assertJson(result, VALID_JSON);
     }
 
-    /* SRS_BULK_OPERATION_RESULT_21_011: [The BulkOperationResult shall provide an empty constructor to make GSON happy.] */
+    /* SRS_BULK_OPERATION_RESULT_21_011: [The BulkEnrollmentOperationResult shall provide an empty constructor to make GSON happy.] */
     @Test
     public void emptyConstructorSucceeded()
     {
         // arrange
 
         // act
-        BulkOperationResult bulkOperationResult =  Deencapsulation.newInstance(BulkOperationResult.class);
+        BulkEnrollmentOperationResult bulkEnrollmentOperationResult =  Deencapsulation.newInstance(BulkEnrollmentOperationResult.class);
 
         // assert
-        assertNotNull(bulkOperationResult);
+        assertNotNull(bulkEnrollmentOperationResult);
     }
 }

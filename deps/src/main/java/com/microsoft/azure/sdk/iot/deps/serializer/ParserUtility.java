@@ -54,12 +54,12 @@ public class ParserUtility
         {
             if(str.getBytes("UTF-8").length != str.length())
             {
-                throw new IllegalArgumentException("invalid parameter");
+                throw new IllegalArgumentException("parameter contains non UTF-8 character");
             }
         }
         catch(UnsupportedEncodingException e)
         {
-            throw new IllegalArgumentException("invalid parameter");
+            throw new IllegalArgumentException("parameter contains non UTF-8 character");
         }
 
         /* Codes_SRS_PARSER_UTILITY_21_001: [The validateStringUTF8 shall do nothing if the string is valid.] */

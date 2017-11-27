@@ -36,7 +36,7 @@ public class QueryTest
     @Mocked
     private HttpResponse mockedHttpResponse;
 
-    /* SRS_QUERY_21_001: [The constructor shall throws IllegalArgumentException if the provided contractApiHttp is null.] */
+    /* SRS_QUERY_21_001: [The constructor shall throw IllegalArgumentException if the provided contractApiHttp is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnContractApiHttpNull()
     {
@@ -53,7 +53,7 @@ public class QueryTest
         // assert
     }
 
-    /* SRS_QUERY_21_002: [The constructor shall throws IllegalArgumentException if the provided targetPath is null or empty.] */
+    /* SRS_QUERY_21_002: [The constructor shall throw IllegalArgumentException if the provided targetPath is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnTargetPathNull()
     {
@@ -70,7 +70,7 @@ public class QueryTest
         // assert
     }
 
-    /* SRS_QUERY_21_002: [The constructor shall throws IllegalArgumentException if the provided targetPath is null or empty.] */
+    /* SRS_QUERY_21_002: [The constructor shall throw IllegalArgumentException if the provided targetPath is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnTargetPathEmpty()
     {
@@ -87,7 +87,7 @@ public class QueryTest
         // assert
     }
 
-    /* SRS_QUERY_21_003: [The constructor shall throws IllegalArgumentException if the provided querySpecification is null.] */
+    /* SRS_QUERY_21_003: [The constructor shall throw IllegalArgumentException if the provided querySpecification is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnQuerySpecificationNull()
     {
@@ -104,7 +104,7 @@ public class QueryTest
         // assert
     }
 
-    /* SRS_QUERY_21_004: [The constructor shall throws IllegalArgumentException if the provided pageSize is negative.] */
+    /* SRS_QUERY_21_004: [The constructor shall throw IllegalArgumentException if the provided pageSize is negative.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnPageSizeNegative()
     {
@@ -224,7 +224,7 @@ public class QueryTest
         assertFalse(query.hasNext());
     }
 
-    /* SRS_QUERY_21_011: [The next shall throws NoSuchElementException if the hasNext is false.] */
+    /* SRS_QUERY_21_011: [The next shall throw NoSuchElementException if the hasNext is false.] */
     @Test (expected = NoSuchElementException.class)
     public void nextThrowsOnFalseHasNext() throws ProvisioningServiceClientException
     {
@@ -362,7 +362,7 @@ public class QueryTest
         // assert
     }
 
-    /* SRS_QUERY_21_015: [The next shall throws IllegalArgumentException if the Http request throws any ProvisioningServiceClientException.] */
+    /* SRS_QUERY_21_015: [The next shall throw IllegalArgumentException if the Http request throws any ProvisioningServiceClientException.] */
     @Test (expected = IllegalArgumentException.class)
     public void nextThrowsOnRequestFailed() throws ProvisioningServiceClientException
     {
@@ -535,7 +535,7 @@ public class QueryTest
         assertFalse(query.hasNext());
     }
 
-    /* SRS_QUERY_21_024: [The next shall throws IllegalArgumentException if the heepResponse contains a null body.] */
+    /* SRS_QUERY_21_024: [The next shall throw IllegalArgumentException if the heepResponse contains a null body.] */
     @Test (expected = IllegalArgumentException.class)
     public void nextThrowsOnNullBody() throws ProvisioningServiceClientException
     {
@@ -614,7 +614,7 @@ public class QueryTest
         assertFalse(query.hasNext());
     }
 
-    /* SRS_QUERY_21_018: [The next shall throws NoSuchElementException if the provided continuationToken is null or empty.] */
+    /* SRS_QUERY_21_018: [The next shall throw NoSuchElementException if the provided continuationToken is null or empty.] */
     @Test (expected = NoSuchElementException.class)
     public void nextThrowsOnNullContinuationToken() throws ProvisioningServiceClientException
     {
@@ -640,7 +640,7 @@ public class QueryTest
         // assert
     }
 
-    /* SRS_QUERY_21_018: [The next shall throws NoSuchElementException if the provided continuationToken is null or empty.] */
+    /* SRS_QUERY_21_018: [The next shall throw NoSuchElementException if the provided continuationToken is null or empty.] */
     @Test (expected = NoSuchElementException.class)
     public void nextThrowsOnEmptyContinuationToken() throws ProvisioningServiceClientException
     {
@@ -734,7 +734,7 @@ public class QueryTest
         assertEquals(pageSize, query.getPageSize());
     }
 
-    /* SRS_QUERY_21_022: [The setPageSize shall throws IllegalArgumentException if the provided pageSize is negative.] */
+    /* SRS_QUERY_21_022: [The setPageSize shall throw IllegalArgumentException if the provided pageSize is negative.] */
     @Test (expected = IllegalArgumentException.class)
     public void setPageSizeThrowsOnNegativePageSize()
     {

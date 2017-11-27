@@ -37,7 +37,7 @@ public class EnrollmentGroupManager
      */
     private EnrollmentGroupManager(ContractApiHttp contractApiHttp)
     {
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_001: [The constructor shall throws IllegalArgumentException if the provided ContractApiHttp is null.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_001: [The constructor shall throw IllegalArgumentException if the provided ContractApiHttp is null.] */
         if(contractApiHttp == null)
         {
             throw new IllegalArgumentException("ContractApiHttp cannot be null");
@@ -71,7 +71,7 @@ public class EnrollmentGroupManager
      */
     EnrollmentGroup createOrUpdate(EnrollmentGroup enrollmentGroup) throws ProvisioningServiceClientException
     {
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_005: [The createOrUpdate shall throws IllegalArgumentException if the provided enrollmentGroup is null.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_005: [The createOrUpdate shall throw IllegalArgumentException if the provided enrollmentGroup is null.] */
         if(enrollmentGroup == null)
         {
             throw new IllegalArgumentException("enrollmentGroup cannot be null.");
@@ -84,8 +84,8 @@ public class EnrollmentGroupManager
         String enrollmentGroupPayload = enrollmentGroup.toJson();
 
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_008: [The createOrUpdate shall send a Http request with a Http verb `PUT`.] */
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_009: [The createOrUpdate shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_010: [The createOrUpdate shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_009: [The createOrUpdate shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_010: [The createOrUpdate shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
         HttpResponse httpResponse =
                     contractApiHttp.request(
                             HttpMethod.PUT,
@@ -93,7 +93,7 @@ public class EnrollmentGroupManager
                             null,
                             enrollmentGroupPayload);
 
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_042: [The createOrUpdate shall throws ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_042: [The createOrUpdate shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
         byte[] body = httpResponse.getBody();
         if(body == null)
         {
@@ -116,7 +116,7 @@ public class EnrollmentGroupManager
      */
     EnrollmentGroup get(String enrollmentGroupId) throws ProvisioningServiceClientException
     {
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_020: [The get shall throws IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_020: [The get shall throw IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
         if(Tools.isNullOrEmpty(enrollmentGroupId))
         {
             throw new IllegalArgumentException("enrollmentGroupId cannot be null or empty.");
@@ -126,8 +126,8 @@ public class EnrollmentGroupManager
         String enrollmentGroupPath = EnrollmentGroupManager.getEnrollmentGroupPath(enrollmentGroupId);
 
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_022: [The get shall send a Http request with a Http verb `GET`.] */
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_023: [The get shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_024: [The get shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_023: [The get shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_024: [The get shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
         HttpResponse httpResponse =
                     contractApiHttp.request(
                             HttpMethod.GET,
@@ -135,7 +135,7 @@ public class EnrollmentGroupManager
                             null,
                             "");
 
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_043: [The get shall throws ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_043: [The get shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
         byte[] body = httpResponse.getBody();
         if(body == null)
         {
@@ -157,7 +157,7 @@ public class EnrollmentGroupManager
      */
     void delete(EnrollmentGroup enrollmentGroup) throws ProvisioningServiceClientException
     {
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_026: [The delete shall throws IllegalArgumentException if the provided enrollmentGroup is null.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_026: [The delete shall throw IllegalArgumentException if the provided enrollmentGroup is null.] */
         if(enrollmentGroup == null)
         {
             throw new IllegalArgumentException("enrollmentGroup cannot be null.");
@@ -174,8 +174,8 @@ public class EnrollmentGroupManager
         }
 
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_029: [The delete shall send a Http request with a Http verb `DELETE`.] */
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_030: [The delete shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_031: [The delete shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_030: [The delete shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_031: [The delete shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
         contractApiHttp.request(
                 HttpMethod.DELETE,
                 enrollmentGroupPath,
@@ -197,7 +197,7 @@ public class EnrollmentGroupManager
      */
     void delete(String enrollmentGroupId, String eTag) throws ProvisioningServiceClientException
     {
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_032: [The delete shall throws IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_032: [The delete shall throw IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
         if(Tools.isNullOrEmpty(enrollmentGroupId))
         {
             throw new IllegalArgumentException("enrollmentGroupId cannot be null.");
@@ -214,8 +214,8 @@ public class EnrollmentGroupManager
         }
 
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_035: [The delete shall send a Http request with a Http verb `DELETE`.] */
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_036: [The delete shall throws ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_037: [The delete shall throws ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_036: [The delete shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_037: [The delete shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
         contractApiHttp.request(
                 HttpMethod.DELETE,
                 enrollmentGroupPath,
@@ -236,13 +236,13 @@ public class EnrollmentGroupManager
      */
     Query createQuery(QuerySpecification querySpecification, int pageSize)
     {
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_038: [The createQuery shall throws IllegalArgumentException if the provided querySpecification is null.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_038: [The createQuery shall throw IllegalArgumentException if the provided querySpecification is null.] */
         if(querySpecification == null)
         {
             throw new IllegalArgumentException("querySpecification cannot be null.");
         }
 
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_039: [The createQuery shall throws IllegalArgumentException if the provided pageSize is negative.] */
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_039: [The createQuery shall throw IllegalArgumentException if the provided pageSize is negative.] */
         if(pageSize < 0)
         {
             throw new IllegalArgumentException("pageSize cannot be negative.");

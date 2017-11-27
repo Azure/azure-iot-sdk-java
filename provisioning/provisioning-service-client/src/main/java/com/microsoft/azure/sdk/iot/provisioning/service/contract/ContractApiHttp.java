@@ -146,7 +146,7 @@ public class ContractApiHttp
         HttpRequest request = createRequest(url, httpMethod, headerParameters, payload.getBytes(), sasTokenString);
 
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_014: [The request shall send the request to the Device Provisioning Service service by using the HttpRequest.send().*/
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [If the HttpRequest failed send the message, the request shall throws ProvisioningServiceClientTransportException, threw by the callee.*/
+        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [If the HttpRequest failed send the message, the request shall throw ProvisioningServiceClientTransportException, threw by the callee.*/
         HttpResponse httpResponse;
         try
         {
@@ -157,7 +157,7 @@ public class ContractApiHttp
             throw new ProvisioningServiceClientTransportException(e);
         }
 
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_016: [If the Device Provisioning Service service respond to the HttpRequest with any error code, the request shall throws the appropriated ProvisioningServiceClientException, by calling ProvisioningServiceClientExceptionManager.responseVerification().*/
+        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_016: [If the Device Provisioning Service service respond to the HttpRequest with any error code, the request shall throw the appropriated ProvisioningServiceClientException, by calling ProvisioningServiceClientExceptionManager.responseVerification().*/
         ProvisioningServiceClientExceptionManager.httpResponseVerification(httpResponse.getStatus(), new String(httpResponse.getErrorReason(), StandardCharsets.UTF_8));
 
         return httpResponse;
@@ -165,7 +165,7 @@ public class ContractApiHttp
 
     private HttpRequest createRequest(URL url, HttpMethod method, Map<String, String> headerParameters, byte[] payload, String sasToken) throws ProvisioningServiceClientTransportException
     {
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_011: [If the request get problem creating the HttpRequest, it shall throws ProvisioningServiceClientTransportException.*/
+        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_011: [If the request get problem creating the HttpRequest, it shall throw ProvisioningServiceClientTransportException.*/
         HttpRequest request;
         try
         {
@@ -200,7 +200,7 @@ public class ContractApiHttp
     {
         if(Tools.isNullOrEmpty(path))
         {
-            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_008: [If the provided path is null or empty, the request shall throws IllegalArgumentException.*/
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_008: [If the provided path is null or empty, the request shall throw IllegalArgumentException.*/
             throw new IllegalArgumentException("path cannot be null or empty");
         }
         StringBuilder stringBuilder = new StringBuilder();
@@ -211,7 +211,7 @@ public class ContractApiHttp
         stringBuilder.append(URL_SEPARATOR_1);
         stringBuilder.append(URL_API_VERSION);
         stringBuilder.append(SDKUtils.getServiceApiVersion());
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_009: [If the provided path contains not valid characters, the request shall throws IllegalArgumentException.*/
+        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_009: [If the provided path contains not valid characters, the request shall throw IllegalArgumentException.*/
         URL url;
         try
         {

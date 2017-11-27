@@ -8,8 +8,6 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Query;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 
-import java.util.UUID;
-
 /**
  * Create, get, query, and delete an individual enrollment on the Microsoft Azure IoT Hub Device Provisioning Service
  */
@@ -36,31 +34,31 @@ public class ServiceEnrollmentSample
         ProvisioningServiceClient provisioningServiceClient =
                 ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
 
-        // ******************************** Create a new individual enrollment config **********************************
-        System.out.println("\nCreate a new enrollment...");
+        // ******************************** Create a new individualEnrollment config **********************************
+        System.out.println("\nCreate a new individualEnrollment...");
         Attestation attestation = new TpmAttestation(TPM_ENDORSEMENT_KEY);
-        Enrollment enrollment =
-                new Enrollment(
+        IndividualEnrollment individualEnrollment =
+                new IndividualEnrollment(
                         REGISTRATION_ID,
                         attestation);
 
         // The following parameters are optional. Remove it if you don't need.
-        enrollment.setDeviceId(DEVICE_ID);
-        enrollment.setIotHubHostName(IOTHUB_HOST_NAME);
-        enrollment.setProvisioningStatus(PROVISIONING_STATUS);
+        individualEnrollment.setDeviceId(DEVICE_ID);
+        individualEnrollment.setIotHubHostName(IOTHUB_HOST_NAME);
+        individualEnrollment.setProvisioningStatus(PROVISIONING_STATUS);
 
-        // ************************************ Create the individual enrollment *************************************
-        System.out.println("\nAdd new enrollment...");
-        Enrollment enrollmentResult =  provisioningServiceClient.createOrUpdateIndividualEnrollment(enrollment);
-        System.out.println("\nEnrollment created with success...");
-        System.out.println(enrollmentResult);
+        // ************************************ Create the individualEnrollment *************************************
+        System.out.println("\nAdd new individualEnrollment...");
+        IndividualEnrollment individualEnrollmentResult =  provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
+        System.out.println("\nIndividualEnrollment created with success...");
+        System.out.println(individualEnrollmentResult);
 
-        // ************************************* Get info of individual enrollment *************************************
-        System.out.println("\nGet the enrollment information...");
-        Enrollment getResult = provisioningServiceClient.getIndividualEnrollment(REGISTRATION_ID);
+        // ************************************* Get info of individualEnrollment *************************************
+        System.out.println("\nGet the individualEnrollment information...");
+        IndividualEnrollment getResult = provisioningServiceClient.getIndividualEnrollment(REGISTRATION_ID);
         System.out.println(getResult);
 
-        // ************************************ Query info of individual enrollment ************************************
+        // ************************************ Query info of individualEnrollment ************************************
         System.out.println("\nCreate a query for enrollments...");
         QuerySpecification querySpecification =
                 new QuerySpecificationBuilder("*", QuerySpecificationBuilder.FromType.ENROLLMENTS)
@@ -74,8 +72,8 @@ public class ServiceEnrollmentSample
             System.out.println(queryResult);
         }
 
-        // *********************************** Delete info of individual enrollment ************************************
-        System.out.println("\nDelete the enrollment...");
+        // *********************************** Delete info of individualEnrollment ************************************
+        System.out.println("\nDelete the individualEnrollment...");
         provisioningServiceClient.deleteIndividualEnrollment(REGISTRATION_ID);
     }
 }

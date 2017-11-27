@@ -16,11 +16,11 @@ import java.util.Date;
 /**
  * Representation of a single Device Provisioning Service enrollment with a JSON serializer and deserializer.
  *
- * <p> This object is used to send Enrollment information to the provisioning service, or receive Enrollment
+ * <p> This object is used to send IndividualEnrollment information to the provisioning service, or receive IndividualEnrollment
  *     information from the provisioning service.
  *
- * <p> To create or update an Enrollment on the provisioning service you should fill this object and call the
- *     public API {@link ProvisioningServiceClient#createOrUpdateIndividualEnrollment(Enrollment)}.
+ * <p> To create or update an IndividualEnrollment on the provisioning service you should fill this object and call the
+ *     public API {@link ProvisioningServiceClient#createOrUpdateIndividualEnrollment(IndividualEnrollment)}.
  *     The minimum information required by the provisioning service is the {@code registrationId} and the
  *     {@code attestation}.
  *
@@ -31,7 +31,7 @@ import java.util.Date;
  * <p> The content of this class will be serialized in a JSON format and sent as a body of the rest API to the
  *     provisioning service.
  *
- * <p> When serialized, an Enrollment will look like the following example:
+ * <p> When serialized, an IndividualEnrollment will look like the following example:
  * <pre>
  *{@code
  *{
@@ -50,9 +50,9 @@ import java.util.Date;
  * </pre>
  *
  * <p> The content of this class can be filled by a JSON, received from the provisioning service, as result of a
- *     Enrollment operation like create, update, or query enrollment.
+ *     IndividualEnrollment operation like create, update, or query enrollment.
  *
- * <p> The following JSON is a sample or the Enrollment response, received from the provisioning service.
+ * <p> The following JSON is a sample or the IndividualEnrollment response, received from the provisioning service.
  * <pre>
  *{@code
  *{
@@ -75,7 +75,7 @@ import java.util.Date;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
-public class Enrollment extends Serializable
+public class IndividualEnrollment extends Serializable
 {
     // the registration identifier
     private static final String REGISTRATION_ID_TAG = "registrationId";
@@ -89,11 +89,11 @@ public class Enrollment extends Serializable
     @SerializedName(DEVICE_ID_TAG)
     private String deviceId;
 
-    // the device registration status
-    private static final String DEVICE_REGISTRATION_STATUS_TAG = "registrationStatus";
+    // the device registration state
+    private static final String DEVICE_REGISTRATION_STATE_TAG = "registrationState";
     @Expose(serialize = true, deserialize = true)
-    @SerializedName(DEVICE_REGISTRATION_STATUS_TAG)
-    private DeviceRegistrationStatus registrationStatus;
+    @SerializedName(DEVICE_REGISTRATION_STATE_TAG)
+    private DeviceRegistrationState registrationState;
 
     // the attestation
     private static final String ATTESTATION_TAG = "attestation";
@@ -108,10 +108,10 @@ public class Enrollment extends Serializable
     private String iotHubHostName;
 
     // the initial Twin state identifier (Twin is a special case and will be manually serialized).
-    private static final String INITIAL_TWIN_STATE_TAG = "initialTwinState";
+    private static final String INITIAL_TWIN_STATE_TAG = "initialTwin";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(INITIAL_TWIN_STATE_TAG)
-    private TwinState initialTwinState;
+    private TwinState initialTwin;
 
     // the provisioning status
     private static final String PROVISIONING_STATUS_TAG = "provisioningStatus";
@@ -150,7 +150,7 @@ public class Enrollment extends Serializable
      *
      * <p> Other parameters can be added by calling the setters on this class.
      *
-     * <p> When serialized, an Enrollment will look like the following example:
+     * <p> When serialized, an IndividualEnrollment will look like the following example:
      * <pre>
      *{@code
      *{
@@ -169,11 +169,11 @@ public class Enrollment extends Serializable
      * @param attestation the {@link Attestation} mechanism that can be {@link TpmAttestation} or {@link X509Attestation}.
      * @throws IllegalArgumentException If one of the provided parameters is not correct.
      */
-    public Enrollment(
+    public IndividualEnrollment(
             String registrationId,
             Attestation attestation)
     {
-        /* SRS_DEVICE_ENROLLMENT_21_001: [The constructor shall judge and store the provided parameters using the Enrollment setters.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_001: [The constructor shall judge and store the provided parameters using the IndividualEnrollment setters.] */
         this.setRegistrationId(registrationId);
         this.setAttestation(attestation);
     }
@@ -184,7 +184,7 @@ public class Enrollment extends Serializable
      * <p> This constructor creates an instance of the enrollment filling the class with the information
      *     provided in the JSON. It is used by the SDK to parse enrollment responses from the provisioning service.
      *
-     * <p> The following JSON is a sample of the Enrollment response, received from the provisioning service.
+     * <p> The following JSON is a sample of the IndividualEnrollment response, received from the provisioning service.
      * <pre>
      *{@code
      *{
@@ -208,24 +208,24 @@ public class Enrollment extends Serializable
      * @param json the {@code String} with the JSON received from the provisioning service.
      * @throws IllegalArgumentException If the provided JSON is null, empty, or invalid.
      */
-    public Enrollment(String json)
+    public IndividualEnrollment(String json)
     {
-        /* SRS_DEVICE_ENROLLMENT_21_002: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_002: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
         if(Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        /* SRS_DEVICE_ENROLLMENT_21_003: [The constructor shall throw JsonSyntaxException if the JSON is invalid.] */
-        /* SRS_DEVICE_ENROLLMENT_21_004: [The constructor shall deserialize the provided JSON for the enrollment class and subclasses.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_003: [The constructor shall throw JsonSyntaxException if the JSON is invalid.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_004: [The constructor shall deserialize the provided JSON for the enrollment class and subclasses.] */
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
-        Enrollment result = gson.fromJson(json, Enrollment.class);
+        IndividualEnrollment result = gson.fromJson(json, IndividualEnrollment.class);
 
-        /* SRS_DEVICE_ENROLLMENT_21_005: [The constructor shall judge and store the provided mandatory parameters `registrationId` and `attestation` using the Enrollment setters.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_005: [The constructor shall judge and store the provided mandatory parameters `registrationId` and `attestation` using the IndividualEnrollment setters.] */
         this.setRegistrationId(result.registrationId);
         this.setAttestation(result.attestation);
 
-        /* SRS_DEVICE_ENROLLMENT_21_006: [If the `deviceId`, `iotHubHostName`, `provisioningStatus`, or `registrationStatus` is not null, the constructor shall judge and store it using the Enrollment setter.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_006: [If the `deviceId`, `iotHubHostName`, `provisioningStatus`, or `registrationState` is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
         if(result.deviceId != null)
         {
             this.setDeviceId(result.deviceId);
@@ -238,13 +238,13 @@ public class Enrollment extends Serializable
         {
             this.setProvisioningStatus(result.provisioningStatus);
         }
-        if(result.registrationStatus != null)
+        if(result.registrationState != null)
         {
-            this.setRegistrationStatus(result.registrationStatus);
+            this.setRegistrationState(result.registrationState);
         }
 
-        /* SRS_DEVICE_ENROLLMENT_21_007: [If the initialTwinState is not null, the constructor shall convert the raw Twin and store it.] */
-        if (result.initialTwinState != null)
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_007: [If the initialTwin is not null, the constructor shall convert the raw Twin and store it.] */
+        if (result.initialTwin != null)
         {
             /*
             * During the deserialization process, the GSON will convert both tags and
@@ -252,22 +252,22 @@ public class Enrollment extends Serializable
             * as part of the collection. So, we need to reorganize this map using the
             * TwinCollection format. This constructor will do that.
             */
-            this.initialTwinState = new TwinState(result.initialTwinState.getTags(), result.initialTwinState.getDesiredProperties());
+            this.initialTwin = new TwinState(result.initialTwin.getTags(), result.initialTwin.getDesiredProperty());
         }
 
-        /* SRS_DEVICE_ENROLLMENT_21_009: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the Enrollment setter.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_009: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
         if(result.createdDateTimeUtc != null)
         {
             this.setCreatedDateTimeUtc(result.createdDateTimeUtc);
         }
 
-        /* SRS_DEVICE_ENROLLMENT_21_010: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the Enrollment setter.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_010: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
         if (result.lastUpdatedDateTimeUtc != null)
         {
             this.setLastUpdatedDateTimeUtc(result.lastUpdatedDateTimeUtc);
         }
 
-        /* SRS_DEVICE_ENROLLMENT_21_011: [If the etag is not null, the constructor shall judge and store it using the Enrollment setter.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_011: [If the etag is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
         if(result.etag != null)
         {
             this.setEtag(result.etag);
@@ -289,14 +289,14 @@ public class Enrollment extends Serializable
      */
     public JsonElement toJsonElement()
     {
-        /* SRS_DEVICE_ENROLLMENT_21_013: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_013: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         JsonObject enrollmentJson = gson.toJsonTree(this).getAsJsonObject();
 
-        /* SRS_DEVICE_ENROLLMENT_21_014: [If the initialTwinState is not null, the toJsonElement shall include its content in the final JSON.] */
-        if(initialTwinState != null)
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_014: [If the initialTwin is not null, the toJsonElement shall include its content in the final JSON.] */
+        if(initialTwin != null)
         {
-            enrollmentJson.add(INITIAL_TWIN_STATE_TAG, initialTwinState.toJsonElement());
+            enrollmentJson.add(INITIAL_TWIN_STATE_TAG, initialTwin.toJsonElement());
         }
 
         return enrollmentJson;
@@ -309,7 +309,7 @@ public class Enrollment extends Serializable
      */
     public String getRegistrationId()
     {
-        /* SRS_DEVICE_ENROLLMENT_21_016: [The getRegistrationId shall return a String with the stored registrationId.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_016: [The getRegistrationId shall return a String with the stored registrationId.] */
         return this.registrationId;
     }
 
@@ -328,10 +328,10 @@ public class Enrollment extends Serializable
      */
     protected void setRegistrationId(String registrationId)
     {
-        /* SRS_DEVICE_ENROLLMENT_21_017: [The setRegistrationId shall throws IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throw IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
         ParserUtility.validateId(registrationId);
 
-        /* SRS_DEVICE_ENROLLMENT_21_018: [The setRegistrationId shall store the provided registrationId.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_018: [The setRegistrationId shall store the provided registrationId.] */
         this.registrationId = registrationId;
     }
 
@@ -342,7 +342,7 @@ public class Enrollment extends Serializable
      */
     public String getDeviceId()
     {
-        /* SRS_DEVICE_ENROLLMENT_21_019: [The getDeviceId shall return a String with the stored deviceId.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_019: [The getDeviceId shall return a String with the stored deviceId.] */
         return this.deviceId;
     }
 
@@ -361,39 +361,39 @@ public class Enrollment extends Serializable
      */
     public void setDeviceId(String deviceId)
     {
-        /* SRS_DEVICE_ENROLLMENT_21_020: [The setDeviceId shall throws IllegalArgumentException if the provided deviceId is null, empty, or invalid.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId is null, empty, or invalid.] */
         ParserUtility.validateId(deviceId);
 
-        /* SRS_DEVICE_ENROLLMENT_21_021: [The setDeviceId shall store the provided deviceId.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_021: [The setDeviceId shall store the provided deviceId.] */
         this.deviceId = deviceId;
     }
 
     /**
-     * Getter for the registrationStatus.
+     * Getter for the registrationState.
      *
-     * @return The {@code DeviceRegistrationStatus} with the registrationStatus content. It can be {@code null}.
+     * @return The {@code DeviceRegistrationState} with the registrationState content. It can be {@code null}.
      */
-    public DeviceRegistrationStatus getRegistrationStatus()
+    public DeviceRegistrationState getDeviceRegistrationState()
     {
-        /* SRS_DEVICE_ENROLLMENT_21_022: [The getRegistrationStatus shall return a DeviceRegistrationStatus with the stored registrationStatus.] */
-        return this.registrationStatus;
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_022: [The getDeviceRegistrationState shall return a DeviceRegistrationState with the stored registrationState.] */
+        return this.registrationState;
     }
 
     /**
-     * Setter for the registrationStatus.
+     * Setter for the registrationState.
      *
-     * @see DeviceRegistrationStatus
+     * @see DeviceRegistrationState
      *
-     * @param registrationStatus the {@code DeviceRegistrationStatus} with the new registrationStatus. It cannot be {@code null}.
-     * @throws IllegalArgumentException If the provided registrationStatus is {@code null}.
+     * @param registrationState the {@code DeviceRegistrationState} with the new registrationState. It cannot be {@code null}.
+     * @throws IllegalArgumentException If the provided registrationState is {@code null}.
      */
-    protected void setRegistrationStatus(DeviceRegistrationStatus registrationStatus)
+    protected void setRegistrationState(DeviceRegistrationState registrationState)
     {
-        /* SRS_DEVICE_ENROLLMENT_21_023: [The setRegistrationStatus shall throws IllegalArgumentException if the provided registrationStatus is null.] */
-        ParserUtility.validateObject(registrationStatus);
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_023: [The setRegistrationState shall throw IllegalArgumentException if the provided registrationState is null.] */
+        ParserUtility.validateObject(registrationState);
 
-        /* SRS_DEVICE_ENROLLMENT_21_024: [The setRegistrationStatus shall store the provided registrationStatus.] */
-        this.registrationStatus = registrationStatus;
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_024: [The setRegistrationState shall store the provided registrationState.] */
+        this.registrationState = registrationState;
     }
 
     /**
@@ -404,7 +404,7 @@ public class Enrollment extends Serializable
      */
     public Attestation getAttestation() throws ProvisioningServiceClientException
     {
-        /* SRS_DEVICE_ENROLLMENT_21_025: [The getAttestation shall return a AttestationMechanism with the stored attestation.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_025: [The getAttestation shall return a AttestationMechanism with the stored attestation.] */
         return this.attestation.getAttestation();
     }
 
@@ -423,10 +423,10 @@ public class Enrollment extends Serializable
      */
     protected void setAttestation(AttestationMechanism attestationMechanism)
     {
-        /* SRS_DEVICE_ENROLLMENT_21_026: [The setAttestation shall throw IllegalArgumentException if the attestation is null or invalid.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_026: [The setAttestation shall throw IllegalArgumentException if the attestation is null or invalid.] */
         ParserUtility.validateObject(attestationMechanism);
 
-        /* SRS_DEVICE_ENROLLMENT_21_027: [The setAttestation shall store the provided attestation.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_027: [The setAttestation shall store the provided attestation.] */
         try
         {
             this.setAttestation(attestationMechanism.getAttestation());
@@ -454,13 +454,13 @@ public class Enrollment extends Serializable
      */
     public void setAttestation(Attestation attestation)
     {
-        /* SRS_DEVICE_ENROLLMENT_21_050: [The setAttestation shall throw IllegalArgumentException if the attestation is null.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_050: [The setAttestation shall throw IllegalArgumentException if the attestation is null.] */
         if(attestation == null)
         {
             throw new IllegalArgumentException("attestation cannot be null");
         }
 
-        /* SRS_DEVICE_ENROLLMENT_21_051: [The setAttestation shall store the provided attestation using the AttestationMechanism object.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_051: [The setAttestation shall store the provided attestation using the AttestationMechanism object.] */
         this.attestation = new AttestationMechanism(attestation);
     }
 
@@ -471,7 +471,7 @@ public class Enrollment extends Serializable
      */
     public String getIotHubHostName()
     {
-        /* SRS_DEVICE_ENROLLMENT_21_028: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_028: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
         return this.iotHubHostName;
     }
 
@@ -491,41 +491,41 @@ public class Enrollment extends Serializable
      */
     public void setIotHubHostName(String iotHubHostName)
     {
-        /* SRS_DEVICE_ENROLLMENT_21_029: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_029: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
         ParserUtility.validateHostName(iotHubHostName);
 
-        /* SRS_DEVICE_ENROLLMENT_21_030: [The setIotHubHostName shall store the provided iotHubHostName.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_030: [The setIotHubHostName shall store the provided iotHubHostName.] */
         this.iotHubHostName = iotHubHostName;
     }
 
     /**
-     * Getter for the initialTwinState.
+     * Getter for the initialTwin.
      *
-     * @return The {@code TwinState} with the initialTwinState content. Its optional and can be {@code null}.
+     * @return The {@code TwinState} with the initialTwin content. Its optional and can be {@code null}.
      */
-    public TwinState getInitialTwinState()
+    public TwinState getInitialTwin()
     {
-        /* SRS_DEVICE_ENROLLMENT_21_031: [The getInitialTwinState shall return a TwinState with the stored initialTwinState.] */
-        return this.initialTwinState;
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_031: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
+        return this.initialTwin;
     }
 
     /**
-     * Setter for the initialTwinState.
+     * Setter for the initialTwin.
      *
      * <p>
      *     It provides a Twin precondition for the provisioned device.
      * </p>
      *
-     * @param initialTwinState the {@code TwinState} with the new initialTwinState. It cannot be {@code null}.
-     * @throws IllegalArgumentException If the provided initialTwinState is {@code null}.
+     * @param initialTwin the {@code TwinState} with the new initialTwin. It cannot be {@code null}.
+     * @throws IllegalArgumentException If the provided initialTwin is {@code null}.
      */
-    public void setInitialTwinState(TwinState initialTwinState)
+    public void setInitialTwin(TwinState initialTwin)
     {
-        /* SRS_DEVICE_ENROLLMENT_21_032: [The setInitialTwinState shall throw IllegalArgumentException if the initialTwinState is null.] */
-        ParserUtility.validateObject(initialTwinState);
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_032: [The setInitialTwin shall throw IllegalArgumentException if the initialTwin is null.] */
+        ParserUtility.validateObject(initialTwin);
 
-        /* SRS_DEVICE_ENROLLMENT_21_033: [The setInitialTwinState shall store the provided initialTwinState.] */
-        this.initialTwinState = initialTwinState;
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_033: [The setInitialTwin shall store the provided initialTwin.] */
+        this.initialTwin = initialTwin;
     }
 
     /**
@@ -535,7 +535,7 @@ public class Enrollment extends Serializable
      */
     public ProvisioningStatus getProvisioningStatus()
     {
-        /* SRS_DEVICE_ENROLLMENT_21_034: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_034: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
         return this.provisioningStatus;
     }
 
@@ -551,10 +551,10 @@ public class Enrollment extends Serializable
      */
     public void setProvisioningStatus(ProvisioningStatus provisioningStatus)
     {
-        /* SRS_DEVICE_ENROLLMENT_21_035: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_035: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
         ParserUtility.validateObject(provisioningStatus);
 
-        /* SRS_DEVICE_ENROLLMENT_21_036: [The setProvisioningStatus shall store the provided provisioningStatus.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_036: [The setProvisioningStatus shall store the provided provisioningStatus.] */
         this.provisioningStatus = provisioningStatus;
     }
 
@@ -565,7 +565,7 @@ public class Enrollment extends Serializable
      */
     public Date getCreatedDateTimeUtc()
     {
-        /* SRS_DEVICE_ENROLLMENT_21_037: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_037: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
         return this.createdDateTimeUtcDate;
     }
 
@@ -584,8 +584,8 @@ public class Enrollment extends Serializable
      */
     protected void setCreatedDateTimeUtc(String createdDateTimeUtc)
     {
-        /* SRS_DEVICE_ENROLLMENT_21_038: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
-        /* SRS_DEVICE_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_038: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
         this.createdDateTimeUtcDate = ParserUtility.getDateTimeUtc(createdDateTimeUtc);
     }
 
@@ -596,7 +596,7 @@ public class Enrollment extends Serializable
      */
     public Date getLastUpdatedDateTimeUtc()
     {
-        /* SRS_DEVICE_ENROLLMENT_21_040: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_040: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
         return this.lastUpdatedDateTimeUtcDate;
     }
 
@@ -615,8 +615,8 @@ public class Enrollment extends Serializable
      */
     protected void setLastUpdatedDateTimeUtc(String lastUpdatedDateTimeUtc)
     {
-        /* SRS_DEVICE_ENROLLMENT_21_041: [The setLastUpdatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
-        /* SRS_DEVICE_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_041: [The setLastUpdatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
         this.lastUpdatedDateTimeUtcDate = ParserUtility.getDateTimeUtc(lastUpdatedDateTimeUtc);
     }
 
@@ -627,7 +627,7 @@ public class Enrollment extends Serializable
      */
     public String getEtag()
     {
-        /* SRS_DEVICE_ENROLLMENT_21_046: [The getEtag shall return a String with the stored etag.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_046: [The getEtag shall return a String with the stored etag.] */
         return this.etag;
     }
 
@@ -639,10 +639,10 @@ public class Enrollment extends Serializable
      */
     public void setEtag(String etag)
     {
-        /* SRS_DEVICE_ENROLLMENT_21_047: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_047: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
         ParserUtility.validateStringUTF8(etag);
 
-        /* SRS_DEVICE_ENROLLMENT_21_048: [The setEtag shall store the provided etag.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_048: [The setEtag shall store the provided etag.] */
         this.etag = etag;
     }
 
@@ -654,9 +654,9 @@ public class Enrollment extends Serializable
      * </p>
      */
     @SuppressWarnings("unused")
-    protected Enrollment()
+    protected IndividualEnrollment()
     {
-        /* SRS_DEVICE_ENROLLMENT_21_049: [The Enrollment shall provide an empty constructor to make GSON happy.] */
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_049: [The IndividualEnrollment shall provide an empty constructor to make GSON happy.] */
     }
 
 }

@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 
 /**
- * Representation of a single Device Provisioning Service Attestation mechanism in the Enrollment and EnrollmentGroup.
+ * Representation of a single Device Provisioning Service Attestation mechanism in the IndividualEnrollment and EnrollmentGroup.
  *
  * <p> It is an internal class that converts one of the attestations into JSON format. To configure
  *     the attestation mechanism, see the external API {@link Attestation}.
@@ -104,7 +104,7 @@ public final class AttestationMechanism
                 /* SRS_ATTESTATION_MECHANISM_21_011: [If the type is `X509`, the getAttestation shall return the stored X509Attestation.] */
                 return new X509Attestation(this.x509);
             default:
-                /* SRS_ATTESTATION_MECHANISM_21_012: [If the type is not `X509` or `TPM`, the getAttestation shall throws ProvisioningServiceClientException.] */
+                /* SRS_ATTESTATION_MECHANISM_21_012: [If the type is not `X509` or `TPM`, the getAttestation shall throw ProvisioningServiceClientException.] */
                 throw new ProvisioningServiceClientException("Unknown attestation mechanism");
         }
     }

@@ -5,11 +5,8 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
-import mockit.Deencapsulation;
 import org.junit.Test;
 import tests.unit.com.microsoft.azure.sdk.iot.provisioning.service.Helpers;
-
-import static org.junit.Assert.*;
 
 import java.util.*;
 
@@ -17,7 +14,7 @@ import java.util.*;
  * Unit tests for Device Provisioning Service bulk operation serializer
  * 100% methods, 100% lines covered
  */
-public class BulkOperationTest
+public class BulkEnrollmentOperationTest
 {
     private static final String VALID_REGISTRATION_ID_1 = "8be9cd0e-8934-4991-9cbf-cc3b6c7ac647";
     private static final String VALID_REGISTRATION_ID_2 = "818B129D-20C4-4E91-8EEA-955776DB4340";
@@ -65,186 +62,186 @@ public class BulkOperationTest
                     "    ]\n" +
                     "}";
 
-    private List<Enrollment> makeBulkEnrollment()
+    private List<IndividualEnrollment> makeBulkEnrollment()
     {
-        Enrollment enrollment1 = new Enrollment(
+        IndividualEnrollment individualEnrollment1 = new IndividualEnrollment(
                 VALID_REGISTRATION_ID_1,
                 new TpmAttestation(VALID_ENDORSEMENT_KEY, VALID_STORAGE_ROOT_KEY));
-        enrollment1.setDeviceId(VALID_DEVICE_ID);
-        enrollment1.setIotHubHostName(VALID_IOTHUB_HOST_NAME);
-        enrollment1.setProvisioningStatus(ProvisioningStatus.ENABLED);
+        individualEnrollment1.setDeviceId(VALID_DEVICE_ID);
+        individualEnrollment1.setIotHubHostName(VALID_IOTHUB_HOST_NAME);
+        individualEnrollment1.setProvisioningStatus(ProvisioningStatus.ENABLED);
 
-        Enrollment enrollment2 = new Enrollment(
+        IndividualEnrollment individualEnrollment2 = new IndividualEnrollment(
                 VALID_REGISTRATION_ID_2,
                 new TpmAttestation(VALID_ENDORSEMENT_KEY, null));
-        enrollment2.setDeviceId(VALID_DEVICE_ID);
-        enrollment2.setIotHubHostName(VALID_IOTHUB_HOST_NAME);
-        enrollment2.setProvisioningStatus(ProvisioningStatus.DISABLED);
+        individualEnrollment2.setDeviceId(VALID_DEVICE_ID);
+        individualEnrollment2.setIotHubHostName(VALID_IOTHUB_HOST_NAME);
+        individualEnrollment2.setProvisioningStatus(ProvisioningStatus.DISABLED);
 
-        List<Enrollment> enrollments = new LinkedList<Enrollment>()
+        List<IndividualEnrollment> individualEnrollments = new LinkedList<IndividualEnrollment>()
         {
             {
-                add(enrollment1);
-                add(enrollment2);
+                add(individualEnrollment1);
+                add(individualEnrollment2);
             }
         };
-        return enrollments;
+        return individualEnrollments;
     }
 
     /* SRS_BULK_OPERATION_21_001: [The toJson shall return a String with the mode and the collection of enrollments using a JSON format.] */
     @Test
-    public void toJsonSimpleBulkOperation()
+    public void toJsonSimpleBulkEnrollmentOperation()
     {
         // arrange
-        final List<Enrollment> enrollments = makeBulkEnrollment();
+        final List<IndividualEnrollment> individualEnrollments = makeBulkEnrollment();
 
         // act
-        String result = BulkOperation.toJson(BulkOperationMode.CREATE, enrollments);
+        String result = BulkEnrollmentOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
         Helpers.assertJson(result, VALID_JSON_BULK);
     }
 
-    /* SRS_BULK_OPERATION_21_002: [The toJson shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_002: [The toJson shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toJsonThrowsOnNullOperationMode()
     {
         // arrange
-        final List<Enrollment> enrollments = makeBulkEnrollment();
+        final List<IndividualEnrollment> individualEnrollments = makeBulkEnrollment();
 
         // act
-        BulkOperation.toJson(null, enrollments);
+        BulkEnrollmentOperation.toJson(null, individualEnrollments);
 
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_002: [The toJson shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_002: [The toJson shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toJsonThrowsOnNullListOfEnrollments()
     {
         // arrange
-        final List<Enrollment> enrollments = null;
+        final List<IndividualEnrollment> individualEnrollments = null;
 
         // act
-        BulkOperation.toJson(BulkOperationMode.CREATE, enrollments);
+        BulkEnrollmentOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_002: [The toJson shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_002: [The toJson shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toJsonThrowsOnEmptyListOfEnrollments()
     {
         // arrange
-        final List<Enrollment> enrollments = new LinkedList<>();
+        final List<IndividualEnrollment> individualEnrollments = new LinkedList<>();
 
         // act
-        BulkOperation.toJson(BulkOperationMode.CREATE, enrollments);
+        BulkEnrollmentOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
     }
 
     /* SRS_BULK_OPERATION_21_003: [The toString shall return a String with the mode and the collection of enrollments using a pretty print JSON format.] */
     @Test
-    public void toStringSimpleBulkOperation()
+    public void toStringSimpleBulkEnrollmentOperation()
     {
         // arrange
-        final List<Enrollment> enrollments = makeBulkEnrollment();
+        final List<IndividualEnrollment> individualEnrollments = makeBulkEnrollment();
 
         // act
-        String result = BulkOperation.toString(BulkOperationMode.CREATE, enrollments);
+        String result = BulkEnrollmentOperation.toString(BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
         Helpers.assertJson(result, VALID_JSON_BULK);
     }
 
-    /* SRS_BULK_OPERATION_21_004: [The toString shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_004: [The toString shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toStringThrowsOnNullOperationMode()
     {
         // arrange
-        final List<Enrollment> enrollments = makeBulkEnrollment();
+        final List<IndividualEnrollment> individualEnrollments = makeBulkEnrollment();
 
         // act
-        BulkOperation.toString(null, enrollments);
+        BulkEnrollmentOperation.toString(null, individualEnrollments);
 
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_004: [The toString shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_004: [The toString shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toStringThrowsOnNullListOfEnrollments()
     {
         // arrange
-        final List<Enrollment> enrollments = null;
+        final List<IndividualEnrollment> individualEnrollments = null;
 
         // act
-        BulkOperation.toString(BulkOperationMode.CREATE, enrollments);
+        BulkEnrollmentOperation.toString(BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_004: [The toString shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_004: [The toString shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toStringThrowsOnEmptyListOfEnrollments()
     {
         // arrange
-        final List<Enrollment> enrollments = new LinkedList<>();
+        final List<IndividualEnrollment> individualEnrollments = new LinkedList<>();
 
         // act
-        BulkOperation.toString(BulkOperationMode.CREATE, enrollments);
+        BulkEnrollmentOperation.toString(BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toJsonElementThrowsOnNullOperationMode()
     {
         // arrange
-        final List<Enrollment> enrollments = makeBulkEnrollment();
+        final List<IndividualEnrollment> individualEnrollments = makeBulkEnrollment();
 
         // act
-        BulkOperation.toJsonElement(null, enrollments);
+        BulkEnrollmentOperation.toJsonElement(null, individualEnrollments);
 
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toJsonElementThrowsOnNullListOfEnrollments()
     {
         // arrange
-        final List<Enrollment> enrollments = null;
+        final List<IndividualEnrollment> individualEnrollments = null;
 
         // act
-        BulkOperation.toJsonElement(BulkOperationMode.CREATE, enrollments);
+        BulkEnrollmentOperation.toJsonElement(BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
     }
 
-    /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+    /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throw IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void toJsonElementThrowsOnEmptyListOfEnrollments()
     {
         // arrange
-        final List<Enrollment> enrollments = new LinkedList<>();
+        final List<IndividualEnrollment> individualEnrollments = new LinkedList<>();
 
         // act
-        BulkOperation.toJsonElement(BulkOperationMode.CREATE, enrollments);
+        BulkEnrollmentOperation.toJsonElement(BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
     }
 
     /* SRS_BULK_OPERATION_21_006: [The toJsonElement shall return a JsonElement with the mode and the collection of enrollments using a JSON format.] */
     @Test
-    public void toJsonElementSimpleBulkOperation()
+    public void toJsonElementSimpleBulkEnrollmentOperation()
     {
         // arrange
-        final List<Enrollment> enrollments = makeBulkEnrollment();
+        final List<IndividualEnrollment> individualEnrollments = makeBulkEnrollment();
 
         // act
-        JsonElement result = BulkOperation.toJsonElement(BulkOperationMode.CREATE, enrollments);
+        JsonElement result = BulkEnrollmentOperation.toJsonElement(BulkOperationMode.CREATE, individualEnrollments);
 
         // assert
         Helpers.assertJson(result.toString(), VALID_JSON_BULK);

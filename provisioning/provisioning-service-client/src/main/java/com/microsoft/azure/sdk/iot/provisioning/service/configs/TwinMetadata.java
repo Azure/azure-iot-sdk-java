@@ -70,7 +70,7 @@ public class TwinMetadata
         if(!Tools.isNullOrEmpty(lastUpdated))
         {
             /* SRS_TWIN_METADATA_21_001: [The constructor shall parse the provided `lastUpdated` String to the Date and store it as the TwinMetadata lastUpdated.] */
-            /* SRS_TWIN_METADATA_21_002: [The constructor shall throws IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date.] */
+            /* SRS_TWIN_METADATA_21_002: [The constructor shall throw IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date.] */
             this.lastUpdated = ParserUtility.getDateTimeUtc(lastUpdated);
         }
 
@@ -124,7 +124,7 @@ public class TwinMetadata
         }
 
         /* SRS_TWIN_METADATA_21_005: [If the provide metadata contains date or version, the tryExtractFromMap shall return a new instance of TwinMetadata with this information.] */
-        /* SRS_TWIN_METADATA_21_006: [The tryExtractFromMap shall throws IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date or the version in a Number.] */
+        /* SRS_TWIN_METADATA_21_006: [The tryExtractFromMap shall throw IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date or the version in a Number.] */
         String lastUpdated = null;
         Integer lastUpdatedVersion = null;
         for(Map.Entry<? extends String, Object> entry: ((Map<? extends String, Object>)metadata).entrySet())

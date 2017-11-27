@@ -17,8 +17,8 @@ import java.util.List;
  * Representation of a single Device Provisioning Service bulk operation with a JSON serializer.
  * 
  * <p> It is an internal class that creates a JSON for the bulk operations
- *     over the Individual Enrollments. To use bulk operations, please use
- *     the external API {@link ProvisioningServiceClient#runBulkOperation(BulkOperationMode, Collection)}.
+ *     over the IndividualEnrollment. To use bulk operations, please use
+ *     the external API {@link ProvisioningServiceClient#runBulkEnrollmentOperation(BulkOperationMode, Collection)}.
  *
  * <p> The following JSON is an example of the result of this serializer.
  * <pre>
@@ -58,7 +58,7 @@ import java.util.List;
  * 
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
-public final class BulkOperation
+public final class BulkEnrollmentOperation
 {
     // the is bulk operation mode
     private static final String BULK_OPERATION_MODE_TAG = "mode";
@@ -70,75 +70,75 @@ public final class BulkOperation
      * Serializer
      *
      * <p> Creates a {@code String}, whose content represents the mode and the collection of
-     *     enrollments in a JSON format.
+     *     individualEnrollments in a JSON format.
      *
-     * @param mode the {@link BulkOperationMode} that defines the single operation to do over the enrollments.
-     * @param enrollments the collection of {@link Enrollment} that contains the description of each individual enrollment.
+     * @param mode the {@link BulkOperationMode} that defines the single operation to do over the individualEnrollments.
+     * @param individualEnrollments the collection of {@link IndividualEnrollment} that contains the description of each individualEnrollment.
      * @return The {@code String} with the content of this class.
      * @throws IllegalArgumentException if one of the parameters is invalid.
      */
-    public static String toJson(BulkOperationMode mode, Collection<Enrollment> enrollments)
+    public static String toJson(BulkOperationMode mode, Collection<IndividualEnrollment> individualEnrollments)
     {
-        /* SRS_BULK_OPERATION_21_001: [The toJson shall return a String with the mode and the collection of enrollments using a JSON format.] */
-        /* SRS_BULK_OPERATION_21_002: [The toJson shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
-        return BulkOperation.toJsonElement(mode, enrollments).toString();
+        /* SRS_BULK_OPERATION_21_001: [The toJson shall return a String with the mode and the collection of individualEnrollments using a JSON format.] */
+        /* SRS_BULK_OPERATION_21_002: [The toJson shall throw IllegalArgumentException if the provided mode is null or the collection of individualEnrollments is null or empty.] */
+        return BulkEnrollmentOperation.toJsonElement(mode, individualEnrollments).toString();
     }
 
     /**
      * Convert the class in a pretty print string.
      *
      * <p> Creates a {@code String}, whose content represents the mode and the collection of
-     *     enrollments in a pretty print JSON format.
+     *     individualEnrollments in a pretty print JSON format.
      *
-     * @param mode the {@link BulkOperationMode} that defines the single operation to do over the enrollments.
-     * @param enrollments the collection of {@link Enrollment} that contains the description of each individual enrollment.
+     * @param mode the {@link BulkOperationMode} that defines the single operation to do over the individualEnrollments.
+     * @param individualEnrollments the collection of {@link IndividualEnrollment} that contains the description of each individualEnrollment.
      * @return The {@code String} with the content of this class.
      * @throws IllegalArgumentException if one of the parameters is invalid.
      */
-    public static String toString(BulkOperationMode mode, Collection<Enrollment> enrollments)
+    public static String toString(BulkOperationMode mode, Collection<IndividualEnrollment> individualEnrollments)
     {
-        /* SRS_BULK_OPERATION_21_003: [The toString shall return a String with the mode and the collection of enrollments using a pretty print JSON format.] */
-        /* SRS_BULK_OPERATION_21_004: [The toString shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+        /* SRS_BULK_OPERATION_21_003: [The toString shall return a String with the mode and the collection of individualEnrollments using a pretty print JSON format.] */
+        /* SRS_BULK_OPERATION_21_004: [The toString shall throw IllegalArgumentException if the provided mode is null or the collection of individualEnrollments is null or empty.] */
         Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
-        return gson.toJson(BulkOperation.toJsonElement(mode, enrollments));
+        return gson.toJson(BulkEnrollmentOperation.toJsonElement(mode, individualEnrollments));
     }
 
     /**
      * Serializer
      *
      * <p> Creates a {@code JsonElement}, whose content represents the mode and the collection of
-     *     enrollments in a JSON format.
+     *     individualEnrollments in a JSON format.
      *
      * <p> This is useful if the caller will integrate this JSON with JSON from other classes
      *     to generate a consolidated JSON.
      *
-     * @param mode the {@link BulkOperationMode} that defines the single operation to do over the enrollments.
-     * @param enrollments the collection of {@link Enrollment} that contains the description of each individual enrollment.
+     * @param mode the {@link BulkOperationMode} that defines the single operation to do over the individualEnrollments.
+     * @param individualEnrollments the collection of {@link IndividualEnrollment} that contains the description of each individualEnrollment.
      * @return The {@code JsonElement} with the content of this class.
      * @throws IllegalArgumentException if one of the parameters is invalid.
      */
-    public static JsonElement toJsonElement(BulkOperationMode mode, Collection<Enrollment> enrollments)
+    public static JsonElement toJsonElement(BulkOperationMode mode, Collection<IndividualEnrollment> individualEnrollments)
     {
-        /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throws IllegalArgumentException if the provided mode is null or the collection of enrollments is null or empty.] */
+        /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throw IllegalArgumentException if the provided mode is null or the collection of individualEnrollments is null or empty.] */
         if(mode == null)
         {
             throw new IllegalArgumentException("mode cannot be null");
         }
-        if((enrollments == null) || enrollments.isEmpty())
+        if((individualEnrollments == null) || individualEnrollments.isEmpty())
         {
-            throw new IllegalArgumentException("enrollments cannot be null or empty");
+            throw new IllegalArgumentException("individualEnrollments cannot be null or empty");
         }
 
-        /* SRS_BULK_OPERATION_21_006: [The toJsonElement shall return a JsonElement with the mode and the collection of enrollments using a JSON format.] */
+        /* SRS_BULK_OPERATION_21_006: [The toJsonElement shall return a JsonElement with the mode and the collection of individualEnrollments using a JSON format.] */
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         JsonObject twinJson = new JsonObject();
 
         twinJson.add(BULK_OPERATION_MODE_TAG, gson.toJsonTree(mode));
 
         List<JsonElement> listOfJsonElements = new LinkedList<>();
-        for (Enrollment enrollment:enrollments)
+        for (IndividualEnrollment individualEnrollment : individualEnrollments)
         {
-            listOfJsonElements.add(enrollment.toJsonElement());
+            listOfJsonElements.add(individualEnrollment.toJsonElement());
         }
 
         JsonElement jsonElementOfEnrollmentList = gson.toJsonTree(listOfJsonElements);

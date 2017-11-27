@@ -31,7 +31,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
  *                         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
  *                         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
  *                         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
- *                         "-----END CERTIFICATE-----\n";
+ *                         "-----END CERTIFICATE-----\n"
  *      },
  *      "secondary": {
  *          "certificate": "-----BEGIN CERTIFICATE-----\n" +
@@ -45,7 +45,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
  *                         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
  *                         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
  *                         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
- *                         "-----END CERTIFICATE-----\n";
+ *                         "-----END CERTIFICATE-----\n"
  *      }
  *  }
  * }
@@ -122,17 +122,17 @@ public class X509Certificates
      * "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
      * "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
      * "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
-     * "-----END CERTIFICATE-----\n";
+     * "-----END CERTIFICATE-----\n"
      * }
      * </pre>
      *
      * @param primary the {@code String} with the primary certificate.
-     * @param secondary the {@code String} with the primary certificate.
+     * @param secondary the {@code String} with the secondary certificate.
      * @throws IllegalArgumentException if the primary certificate is {@code null} or empty.
      */
     X509Certificates(String primary, String secondary)
     {
-        /* SRS_X509_CERTIFICATES_21_001: [The constructor shall throws IllegalArgumentException if the primary certificate is null or empty.] */
+        /* SRS_X509_CERTIFICATES_21_001: [The constructor shall throw IllegalArgumentException if the primary certificate is null or empty.] */
         if(Tools.isNullOrEmpty(primary))
         {
             throw new IllegalArgumentException("primary certificate cannot be null or empty");
@@ -157,7 +157,7 @@ public class X509Certificates
      */
     public X509Certificates(X509Certificates x509Certificates)
     {
-        /* SRS_X509_CERTIFICATES_21_004: [The constructor shall throws IllegalArgumentException if the provide X509Certificates is null or if its primary certificate is null.] */
+        /* SRS_X509_CERTIFICATES_21_004: [The constructor shall throw IllegalArgumentException if the provide X509Certificates is null or if its primary certificate is null.] */
         if((x509Certificates == null) || (x509Certificates.getPrimary() == null))
         {
             throw new IllegalArgumentException("original x509Certificates cannot be null and its primary certificate cannot be null.");
@@ -175,7 +175,7 @@ public class X509Certificates
     /**
      * Getter for the primary.
      *
-     * @return the {@code String} with the stored primary. It cannot be {@code null}.
+     * @return the {@link X509CertificateWithInfo} with the stored primary. It cannot be {@code null}.
      */
     public X509CertificateWithInfo getPrimary()
     {
@@ -186,7 +186,7 @@ public class X509Certificates
     /**
      * Getter for the secondary.
      *
-     * @return the {@code String} with the stored secondary. It can be {@code null}.
+     * @return the {@link X509CertificateWithInfo} with the stored secondary. It can be {@code null}.
      */
     public X509CertificateWithInfo getSecondary()
     {

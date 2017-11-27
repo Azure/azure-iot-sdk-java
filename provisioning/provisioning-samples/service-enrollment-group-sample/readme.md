@@ -61,7 +61,7 @@ Note that the samples for Windows and Linux use Maven.
     ```
 6. Navigate to the folder containing the executable JAR file for the sample and run the sample as follows:
 
-    The executable JAR file for create a single enrollment can be found at:
+    The executable JAR file for create an enrollmentGroup can be found at:
     ```
     {sample root}/target/service-enrollment-group-sample-{version}-with-deps.jar
     ```
@@ -299,7 +299,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
         System.out.println(getResult);
         ```
     2. Use the [createEnrollmentGroupQuery](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.createenrollmentgroupquery#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_createEnrollmentGroupQuery_QuerySpecification_) 
-       to create a **query** for the individual enrollments in the provisioning service. The [QuerySpecificationBuilder](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification_Builder)
+       to create a **query** for the enrollmentGroups in the provisioning service. The [QuerySpecificationBuilder](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification_Builder)
        will help you to create a correct [QuerySpecification](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification).
        For this sample, we will query all **`"*"`** enrollmentGroups is the provisioning service.
         ```java

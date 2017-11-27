@@ -30,7 +30,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
  * </dl>
  *
  * <p> And the body is a JSON list of the specific <b>type</b>. For instance, if the system
- *     property type is Enrollment, the body will look like:
+ *     property type is IndividualEnrollment, the body will look like:
  * <pre>
  * {@code
  * [
@@ -90,11 +90,11 @@ public class QueryResult
      */
     public QueryResult(String type, String body, String continuationToken)
     {
-        /* SRS_QUERY_RESULT_21_001: [The constructor shall throws IllegalArgumentException if the provided type is null, empty, or not parsed to QueryResultType.] */
+        /* SRS_QUERY_RESULT_21_001: [The constructor shall throw IllegalArgumentException if the provided type is null, empty, or not parsed to QueryResultType.] */
         QueryResultType queryResultType = QueryResultType.fromString(type);
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
 
-        /* SRS_QUERY_RESULT_21_002: [The constructor shall throws IllegalArgumentException if the provided body is null or empty and the type is not `unknown`.] */
+        /* SRS_QUERY_RESULT_21_002: [The constructor shall throw IllegalArgumentException if the provided body is null or empty and the type is not `unknown`.] */
         if((queryResultType != QueryResultType.UNKNOWN) && Tools.isNullOrEmpty(body))
         {
             throw new IllegalArgumentException("body cannot be null or empty");
@@ -104,16 +104,16 @@ public class QueryResult
         switch(queryResultType)
         {
             case ENROLLMENT:
-                /* SRS_QUERY_RESULT_21_004: [If the type is `enrollment`, the constructor shall parse the body as Enrollment[].] */
-                this.items = gson.fromJson(body, Enrollment[].class);
+                /* SRS_QUERY_RESULT_21_004: [If the type is `enrollment`, the constructor shall parse the body as IndividualEnrollment[].] */
+                this.items = gson.fromJson(body, IndividualEnrollment[].class);
                 break;
             case ENROLLMENT_GROUP:
                 /* SRS_QUERY_RESULT_21_005: [If the type is `enrollmentGroup`, the constructor shall parse the body as EnrollmentGroup[].] */
                 this.items = gson.fromJson(body, EnrollmentGroup[].class);
                 break;
             case DEVICE_REGISTRATION:
-                /* SRS_QUERY_RESULT_21_006: [If the type is `deviceRegistration`, the constructor shall parse the body as DeviceRegistrationStatus[].] */
-                this.items = gson.fromJson(body, DeviceRegistrationStatus[].class);
+                /* SRS_QUERY_RESULT_21_006: [If the type is `deviceRegistration`, the constructor shall parse the body as DeviceRegistrationState[].] */
+                this.items = gson.fromJson(body, DeviceRegistrationState[].class);
                 break;
             default:
                 if(body == null)
