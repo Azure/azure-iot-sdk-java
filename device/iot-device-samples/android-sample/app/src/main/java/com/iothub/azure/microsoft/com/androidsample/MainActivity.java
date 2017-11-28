@@ -5,36 +5,38 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.Message;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
-import com.microsoft.azure.sdk.iot.device.*;
 
 public class MainActivity extends AppCompatActivity {
 
-    String connString = "[device connection string]";
-    String deviceId = "MyAndroidDevice";
-    double temperature;
-    double humidity;
+    private final String connString = "[device connection string]";
+    private final String deviceId = "MyAndroidDevice";
+    private double temperature;
+    private double humidity;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         try {
             SendMessage();
-        }
-        catch(IOException e1)
-        {
-            System.out.println("Exception while opening IoTHub connection: " + e1.toString());
-        }
-        catch(Exception e2)
+        } catch (Exception e2)
         {
             System.out.println("Exception while opening IoTHub connection: " + e2.toString());
         }
     }
 
-    public void SendMessage() throws URISyntaxException, IOException
+    private void SendMessage() throws URISyntaxException, IOException
     {
         // Comment/uncomment from lines below to use HTTPS or MQTT protocol
         // IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
@@ -42,16 +44,12 @@ public class MainActivity extends AppCompatActivity {
 
         DeviceClient client = new DeviceClient(connString, protocol);
 
-        try {
+        try
+        {
             client.open();
-        }
-        catch(IOException e1)
+        } catch (Exception e2)
         {
-            System.out.println("Exception while opening IoTHub connection: " + e1.toString());
-        }
-        catch(Exception e2)
-        {
-            System.out.println("Exception while opening IoTHub connection: " + e2.toString());
+            System.err.println("Exception while opening IoTHub connection: " + e2.toString());
         }
 
         for (int i = 0; i < 5; ++i)
@@ -59,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
             temperature = 20.0 + Math.random() * 10;
             humidity = 30.0 + Math.random() * 20;
 
-            String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\":"+ humidity +"}";
+            String msgStr = "{\"deviceId\":\"" + deviceId + "\",\"messageId\":" + i + ",\"temperature\":" + temperature + ",\"humidity\":" + humidity + "}";
             try
             {
                 Message msg = new Message(msgStr);
@@ -68,21 +66,24 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println(msgStr);
                 EventCallback eventCallback = new EventCallback();
                 client.sendEventAsync(msg, eventCallback, i);
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
+                System.err.println("Exception while sending event: " + e.getMessage());
             }
-            try {
+            try
+            {
                 Thread.sleep(2000);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException e)
+            {
                 e.printStackTrace();
             }
         }
 
-        client.close();
+        client.closeNow();
     }
 
-    public void btnReceiveOnClick(View v) throws URISyntaxException, IOException {
+    public void btnReceiveOnClick(View v) throws URISyntaxException, IOException
+    {
         Button button = (Button) v;
 
         // Comment/uncomment from lines below to use HTTPS or MQTT protocol
@@ -96,38 +97,35 @@ public class MainActivity extends AppCompatActivity {
             MessageCallbackMqtt callback = new MessageCallbackMqtt();
             Counter counter = new Counter(0);
             client.setMessageCallback(callback, counter);
-        }
-        else
-        {
+        } else
+            {
             MessageCallback callback = new MessageCallback();
             Counter counter = new Counter(0);
             client.setMessageCallback(callback, counter);
         }
 
-        try {
-            client.open();
-        }
-        catch(IOException e1)
+        try
         {
-            System.out.println("Exception while opening IoTHub connection: " + e1.toString());
-        }
-        catch(Exception e2)
+            client.open();
+        } catch (Exception e2)
         {
             System.out.println("Exception while opening IoTHub connection: " + e2.toString());
         }
 
-        try {
+        try
+        {
             Thread.sleep(2000);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException e)
+        {
             e.printStackTrace();
         }
 
-        client.close();
+        client.closeNow();
     }
 
     // Our MQTT doesn't support abandon/reject, so we will only display the messaged received
     // from IoTHub and return COMPLETE
-    protected static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
+    static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
         public IotHubMessageResult execute(Message msg, Object context)
         {
@@ -142,15 +140,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    protected static class EventCallback implements IotHubEventCallback {
-        public void execute(IotHubStatusCode status, Object context){
+    static class EventCallback implements IotHubEventCallback
+    {
+        public void execute(IotHubStatusCode status, Object context)
+        {
             Integer i = (Integer) context;
-            System.out.println("IoT Hub responded to message "+i.toString()
+            System.out.println("IoT Hub responded to message " + i.toString()
                     + " with status " + status.name());
         }
     }
 
-    protected static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
+    static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
         public IotHubMessageResult execute(Message msg, Object context)
         {
@@ -185,29 +185,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /** Used as a counter in the message callback. */
-    protected static class Counter
+    /**
+     * Used as a counter in the message callback.
+     */
+    static class Counter
     {
-        protected int num;
+        int num;
 
-        public Counter(int num)
-        {
+        Counter(int num) {
             this.num = num;
         }
 
-        public int get()
-        {
+        int get() {
             return this.num;
         }
 
-        public void increment()
-        {
+        void increment() {
             this.num++;
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             return Integer.toString(this.num);
         }
     }
