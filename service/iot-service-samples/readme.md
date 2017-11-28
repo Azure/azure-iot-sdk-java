@@ -56,7 +56,7 @@ You need to first clone the repository or download the sample project folder on 
 
    To run the Device Manager Sample application using Maven, execute the following command.
    ```
-   mvn exec:java -Dexec.mainClass="DeviceManagerSample"
+   mvn exec:java -Dexec.mainClass="samples.com.microsoft.azure.sdk.iot.DeviceManagerSample"
    ```
 
    You can verify the result of your operation by using [Device Explorer or iothub-explorer tool][lnk-manage-iot-hub].
@@ -93,7 +93,7 @@ You need to first clone the repository or download the sample project folder on 
 	To run the Service Client Sample application using Maven, execute the following command.
     
     ```
-    mvn exec:java -Dexec.mainClass="ServiceClientSample"
+    mvn exec:java -Dexec.mainClass="samples.com.microsoft.azure.sdk.iot.ServiceClientSample"
     ```
 
 	You can verify the result of your operation by using [Device Explorer or iothub-explorer tool][lnk-manage-iot-hub].
