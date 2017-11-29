@@ -66,18 +66,24 @@ public class MqttMessage
      */
     public static int retrieveQosValue(MqttQos qos)
     {
-        switch (qos)
+        int result;
+        if (qos == MqttQos.DELIVER_AT_MOST_ONCE)
         {
-            case DELIVER_AT_MOST_ONCE:
-                return 0;
-            case DELIVER_AT_LEAST_ONCE:
-                return 1;
-            case DELIVER_EXACTLY_ONCE:
-                return 2;
-            default:
-            case DELIVER_FAILURE:
-                return 128;
+            result = 0;
         }
+        else if (qos == MqttQos.DELIVER_AT_LEAST_ONCE)
+        {
+            result = 1;
+        }
+        else if (qos == MqttQos.DELIVER_EXACTLY_ONCE)
+        {
+            result = 2;
+        }
+        else
+        {
+            result = 128;
+        }
+        return result;
     }
 
     /**
