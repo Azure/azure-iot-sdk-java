@@ -38,6 +38,11 @@
             <version>[0.15.0,)</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.2.0</version>
+        </dependency>
         <!-- test dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
