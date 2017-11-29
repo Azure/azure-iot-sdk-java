@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.*;
 import mockit.*;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -78,6 +79,7 @@ public class EnrollmentGroupManagerTest
     /* SRS_ENROLLMENT_GROUP_MANAGER_21_007: [The createOrUpdate shall send a Http request with a body with the enrollmentGroup content in JSON format.] */
     /* SRS_ENROLLMENT_GROUP_MANAGER_21_008: [The createOrUpdate shall send a Http request with a Http verb `PUT`.] */
     /* SRS_ENROLLMENT_GROUP_MANAGER_21_011: [The createOrUpdate shall return an EnrollmentGroup object created from the body of the response for the Http request .] */
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_045: [If the enrollmentGroup contains eTag, the createOrUpdate shall send a Http request with `If-Match` the eTag in the header.] */
     @Test
     public void createOrUpdateRequestSucceed(
             @Mocked final EnrollmentGroup mockedEnrollmentGroup,
@@ -99,7 +101,61 @@ public class EnrollmentGroupManagerTest
                 mockedEnrollmentGroup.toJson();
                 result = enrollmentGroupPayload;
                 times = 1;
-                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentGroupPath, null, enrollmentGroupPayload);
+                mockedEnrollmentGroup.getEtag();
+                result = null;
+                times = 1;
+                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentGroupPath, (Map)any, enrollmentGroupPayload);
+                result = mockedHttpResponse;
+                times = 1;
+                mockedHttpResponse.getBody();
+                result = resultPayload.getBytes();
+                times = 1;
+                Deencapsulation.newInstance(EnrollmentGroup.class, resultPayload);
+                result = mockedEnrollmentGroupResponse;
+                times = 1;
+            }
+        };
+
+        // act
+        EnrollmentGroup response = Deencapsulation.invoke(enrollmentGroupManager, "createOrUpdate", new Class[] {EnrollmentGroup.class}, mockedEnrollmentGroup);
+
+        // assert
+        assertNotNull(response);
+    }
+
+    /* SRS_ENROLLMENT_GROUP_MANAGER_21_045: [If the enrollmentGroup contains eTag, the createOrUpdate shall send a Http request with `If-Match` the eTag in the header.] */
+    @Test
+    public void createOrUpdateRequestWithEtagSucceed(
+            @Mocked final EnrollmentGroup mockedEnrollmentGroup,
+            @Mocked final EnrollmentGroup mockedEnrollmentGroupResponse)
+            throws ProvisioningServiceClientException
+    {
+        // arrange
+        final String enrollmentGroupId = "enrollmentGroupId-1";
+        final String enrollmentGroupPath = "enrollmentGroups/" + enrollmentGroupId;
+        final String enrollmentGroupPayload = "validJson";
+        final String resultPayload = "validJson";
+        final String eTag = "validEtag";
+        final Map<String, String> headerParameters = new HashMap<String, String>()
+        {
+            {
+                put("If-Match", eTag);
+            }
+        };
+        EnrollmentGroupManager enrollmentGroupManager = createEnrollmentGroupManager();
+        new StrictExpectations()
+        {
+            {
+                mockedEnrollmentGroup.getEnrollmentGroupId();
+                result = enrollmentGroupId;
+                times = 1;
+                mockedEnrollmentGroup.toJson();
+                result = enrollmentGroupPayload;
+                times = 1;
+                mockedEnrollmentGroup.getEtag();
+                result = eTag;
+                times = 2;
+                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentGroupPath, headerParameters, enrollmentGroupPayload);
                 result = mockedHttpResponse;
                 times = 1;
                 mockedHttpResponse.getBody();
@@ -139,7 +195,10 @@ public class EnrollmentGroupManagerTest
                 mockedEnrollmentGroup.toJson();
                 result = enrollmentGroupPayload;
                 times = 1;
-                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentGroupPath, null, enrollmentGroupPayload);
+                mockedEnrollmentGroup.getEtag();
+                result = null;
+                times = 1;
+                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentGroupPath, (Map)any, enrollmentGroupPayload);
                 result = mockedHttpResponse;
                 times = 1;
                 mockedHttpResponse.getBody();
@@ -172,7 +231,9 @@ public class EnrollmentGroupManagerTest
                 result = enrollmentGroupId;
                 mockedEnrollmentGroup.toJson();
                 result = enrollmentGroupPayload;
-                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentGroupPath, null, enrollmentGroupPayload);
+                mockedEnrollmentGroup.getEtag();
+                result = null;
+                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentGroupPath, (Map)any, enrollmentGroupPayload);
                 result = new ProvisioningServiceClientTransportException();
                 times = 1;
             }
@@ -202,7 +263,9 @@ public class EnrollmentGroupManagerTest
                 result = enrollmentGroupId;
                 mockedEnrollmentGroup.toJson();
                 result = enrollmentGroupPayload;
-                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentGroupPath, null, enrollmentGroupPayload);
+                mockedEnrollmentGroup.getEtag();
+                result = null;
+                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentGroupPath, (Map)any, enrollmentGroupPayload);
                 result = new ProvisioningServiceClientInternalServerErrorException();
                 times = 1;
             }
@@ -375,6 +438,12 @@ public class EnrollmentGroupManagerTest
         final String enrollmentGroupId = "enrollmentGroupId-1";
         final String eTag = "validETag";
         final String enrollmentGroupPath = "enrollmentGroups/" + enrollmentGroupId;
+        final Map<String, String> headerParameters = new HashMap<String, String>()
+        {
+            {
+                put("If-Match", eTag);
+            }
+        };
         EnrollmentGroupManager enrollmentGroupManager = createEnrollmentGroupManager();
         new StrictExpectations()
         {
@@ -385,7 +454,7 @@ public class EnrollmentGroupManagerTest
                 mockedEnrollmentGroup.getEtag();
                 result = eTag;
                 times = 2;
-                mockedContractApiHttp.request(HttpMethod.DELETE, enrollmentGroupPath, (Map)any, "");
+                mockedContractApiHttp.request(HttpMethod.DELETE, enrollmentGroupPath, headerParameters, "");
                 result = mockedHttpResponse;
                 times = 1;
             }

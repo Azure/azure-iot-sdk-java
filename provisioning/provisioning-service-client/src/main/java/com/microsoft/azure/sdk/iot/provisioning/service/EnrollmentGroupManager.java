@@ -83,6 +83,13 @@ public class EnrollmentGroupManager
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_007: [The createOrUpdate shall send a Http request with a body with the enrollmentGroup content in JSON format.] */
         String enrollmentGroupPayload = enrollmentGroup.toJson();
 
+        /* SRS_ENROLLMENT_GROUP_MANAGER_21_045: [If the enrollmentGroup contains eTag, the createOrUpdate shall send a Http request with `If-Match` the eTag in the header.] */
+        Map<String, String> headerParameters = new HashMap<>();
+        if(!Tools.isNullOrEmpty(enrollmentGroup.getEtag()))
+        {
+            headerParameters.put(CONDITION_KEY, enrollmentGroup.getEtag());
+        }
+
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_008: [The createOrUpdate shall send a Http request with a Http verb `PUT`.] */
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_009: [The createOrUpdate shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_010: [The createOrUpdate shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
@@ -90,7 +97,7 @@ public class EnrollmentGroupManager
                     contractApiHttp.request(
                             HttpMethod.PUT,
                             enrollmentGroupPath,
-                            null,
+                            headerParameters,
                             enrollmentGroupPayload);
 
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_042: [The createOrUpdate shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */

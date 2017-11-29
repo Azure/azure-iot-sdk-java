@@ -84,6 +84,13 @@ public class IndividualEnrollmentManager
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_007: [The createOrUpdate shall send a Http request with a body with the individualEnrollment content in JSON format.] */
         String enrollmentPayload = individualEnrollment.toJson();
 
+        /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_045: [If the individualEnrollment contains eTag, the createOrUpdate shall send a Http request with `If-Match` the eTag in the header.] */
+        Map<String, String> headerParameters = new HashMap<>();
+        if(!Tools.isNullOrEmpty(individualEnrollment.getEtag()))
+        {
+            headerParameters.put(CONDITION_KEY, individualEnrollment.getEtag());
+        }
+
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_008: [The createOrUpdate shall send a Http request with a Http verb `PUT`.] */
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_009: [The createOrUpdate shall throw ProvisioningServiceClientTransportException if the request failed. Threw by the callee.] */
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_010: [The createOrUpdate shall throw ProvisioningServiceClientException if the Device Provisioning Service could not successfully execute the request. Threw by the callee.] */
@@ -91,7 +98,7 @@ public class IndividualEnrollmentManager
                     contractApiHttp.request(
                             HttpMethod.PUT,
                             enrollmentPath,
-                            null,
+                            headerParameters,
                             enrollmentPayload);
 
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_042: [The createOrUpdate shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */

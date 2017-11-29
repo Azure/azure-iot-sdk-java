@@ -13,6 +13,7 @@ import mockit.*;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -80,6 +81,7 @@ public class IndividualEnrollmentManagerTest
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_007: [The createOrUpdate shall send a Http request with a body with the enrollment content in JSON format.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_008: [The createOrUpdate shall send a Http request with a Http verb `PUT`.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_011: [The createOrUpdate shall return an IndividualEnrollment object created from the body of the response for the Http request .] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_045: [If the individualEnrollment contains eTag, the createOrUpdate shall send a Http request with `If-Match` the eTag in the header.] */
     @Test
     public void createOrUpdateRequestSucceed(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment,
@@ -101,7 +103,10 @@ public class IndividualEnrollmentManagerTest
                 mockedIndividualEnrollment.toJson();
                 result = enrollmentPayload;
                 times = 1;
-                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentPath, null, enrollmentPayload);
+                mockedIndividualEnrollment.getEtag();
+                result = null;
+                times = 1;
+                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentPath, (Map)any, enrollmentPayload);
                 result = mockedHttpResponse;
                 times = 1;
                 mockedHttpResponse.getBody();
@@ -110,6 +115,53 @@ public class IndividualEnrollmentManagerTest
                 Deencapsulation.newInstance(IndividualEnrollment.class, resultPayload);
                 result = mockedIndividualEnrollmentResponse;
                 times = 1;
+            }
+        };
+
+        // act
+        IndividualEnrollment response = Deencapsulation.invoke(individualEnrollmentManager, "createOrUpdate", new Class[] {IndividualEnrollment.class}, mockedIndividualEnrollment);
+
+        // assert
+        assertNotNull(response);
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_045: [If the individualEnrollment contains eTag, the createOrUpdate shall send a Http request with `If-Match` the eTag in the header.] */
+    @Test
+    public void createOrUpdateRequestWithEtagSucceed(
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment,
+            @Mocked final IndividualEnrollment mockedIndividualEnrollmentResponse)
+            throws ProvisioningServiceClientException
+    {
+        // arrange
+        final String registrationId = "registrationId-1";
+        final String enrollmentPath = "enrollments/" + registrationId;
+        final String enrollmentPayload = "validJson";
+        final String resultPayload = "validJson";
+        final String eTag = "validEtag";
+        final Map<String, String> headerParameters = new HashMap<String, String>()
+        {
+            {
+                put("If-Match", eTag);
+            }
+        };
+        IndividualEnrollmentManager individualEnrollmentManager = createIndividualEnrollmentManager();
+        new StrictExpectations()
+        {
+            {
+                mockedIndividualEnrollment.getRegistrationId();
+                result = registrationId;
+                mockedIndividualEnrollment.toJson();
+                result = enrollmentPayload;
+                mockedIndividualEnrollment.getEtag();
+                result = eTag;
+                times = 2;
+                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentPath, headerParameters, enrollmentPayload);
+                result = mockedHttpResponse;
+                times = 1;
+                mockedHttpResponse.getBody();
+                result = resultPayload.getBytes();
+                Deencapsulation.newInstance(IndividualEnrollment.class, resultPayload);
+                result = mockedIndividualEnrollmentResponse;
             }
         };
 
@@ -140,7 +192,10 @@ public class IndividualEnrollmentManagerTest
                 mockedIndividualEnrollment.toJson();
                 result = enrollmentPayload;
                 times = 1;
-                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentPath, null, enrollmentPayload);
+                mockedIndividualEnrollment.getEtag();
+                result = null;
+                times = 1;
+                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentPath, (Map)any, enrollmentPayload);
                 result = mockedHttpResponse;
                 times = 1;
                 mockedHttpResponse.getBody();
@@ -173,7 +228,9 @@ public class IndividualEnrollmentManagerTest
                 result = registrationId;
                 mockedIndividualEnrollment.toJson();
                 result = enrollmentPayload;
-                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentPath, null, enrollmentPayload);
+                mockedIndividualEnrollment.getEtag();
+                result = null;
+                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentPath, (Map)any, enrollmentPayload);
                 result = new ProvisioningServiceClientTransportException();
                 times = 1;
             }
@@ -203,7 +260,9 @@ public class IndividualEnrollmentManagerTest
                 result = registrationId;
                 mockedIndividualEnrollment.toJson();
                 result = enrollmentPayload;
-                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentPath, null, enrollmentPayload);
+                mockedIndividualEnrollment.getEtag();
+                result = null;
+                mockedContractApiHttp.request(HttpMethod.PUT, enrollmentPath, (Map)any, enrollmentPayload);
                 result = new ProvisioningServiceClientInternalServerErrorException();
                 times = 1;
             }
@@ -560,6 +619,12 @@ public class IndividualEnrollmentManagerTest
         final String registrationId = "registrationId-1";
         final String eTag = "validETag";
         final String enrollmentPath = "enrollments/" + registrationId;
+        final Map<String, String> headerParameters = new HashMap<String, String>()
+        {
+            {
+                put("If-Match", eTag);
+            }
+        };
         IndividualEnrollmentManager individualEnrollmentManager = createIndividualEnrollmentManager();
         new StrictExpectations()
         {
@@ -570,7 +635,7 @@ public class IndividualEnrollmentManagerTest
                 mockedIndividualEnrollment.getEtag();
                 result = eTag;
                 times = 2;
-                mockedContractApiHttp.request(HttpMethod.DELETE, enrollmentPath, (Map)any, "");
+                mockedContractApiHttp.request(HttpMethod.DELETE, enrollmentPath, headerParameters, "");
                 result = mockedHttpResponse;
                 times = 1;
             }
