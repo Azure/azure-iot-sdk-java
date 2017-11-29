@@ -56,7 +56,8 @@ Note that the samples for Windows and Linux use Maven.
             Answer `Y` to provide your common name, the Client Cert commonName is your registrationId. For this sample, 
             you probably want to generate, at least, two certificates.
         2. Fill the `DEVICE_MAP` with the pairs registrationId and clientCertificate that you copied from the hardware 
-            or emulator. If you need more that two, just add more `put` lines.
+            or emulator. Be careful to do **not** change your certificate, _adding_ or _removing_ characters like spaces, 
+            tabs or new lines (`\n`). If you need more that two, just add more `put` lines.
             ```java
             private static final Map<String, String> DEVICE_MAP = new HashMap<String, String>()
             {
@@ -78,7 +79,8 @@ Note that the samples for Windows and Linux use Maven.
             Attestation attestation = X509Attestation.createFromClientCertificates(device.getValue());
             ```
             
-5. In a command line, build your sample:
+5. In a command line, navigate to the directory `azure-iot-sdk-java/provisioning/provisioning-samples/service-bulkoperation-sample` 
+    where the `pom.xml` file for this test lives, and build your sample:
     ```
     {sample root}/>mvn install -DskipTests
     ```

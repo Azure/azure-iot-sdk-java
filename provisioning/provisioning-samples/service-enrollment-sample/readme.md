@@ -42,13 +42,21 @@ Note that the samples for Windows and Linux use Maven.
             private static final String REGISTRATION_ID = "[RegistrationId]";
             private static final String TPM_ENDORSEMENT_KEY = "[TPM Endorsement Key]";
             ```
-        3. Optionally, provide the `IOTHUB_HOST_NAME`, and the `DEVICE_ID`. The `IOTHUB_HOST_NAME` must fit one of the
-            IoT Hubs that you linked to your provisioning service. If you will not provide these parameters, you must
-            remove the lines #47 to #50 from your sample.
+        3. Optionally, provide other parameters like `IOTHUB_HOST_NAME`, `DEVICE_ID`, and `PROVISIONING_STATUS`. The 
+            `IOTHUB_HOST_NAME` must fit one of the IoT Hubs that you linked to your provisioning service.
             ```java
             // Optional parameters
             private static final String IOTHUB_HOST_NAME = "[Host name].azure-devices.net";
             private static final String DEVICE_ID = "myJavaDevice";
+            private static final ProvisioningStatus PROVISIONING_STATUS = ProvisioningStatus.ENABLED;
+            ```
+           **Note:** If you will not provide these parameters, you must **remove** the lines #45 to #48, which add it to 
+           the individualEnrollment configuration, from your sample.
+            ```java
+            // The following parameters are optional. Remove it if you don't need.
+            individualEnrollment.setDeviceId(DEVICE_ID);
+            individualEnrollment.setIotHubHostName(IOTHUB_HOST_NAME);
+            individualEnrollment.setProvisioningStatus(PROVISIONING_STATUS);
             ```
 
     3. For **X509** attestation:
@@ -56,7 +64,8 @@ Note that the samples for Windows and Linux use Maven.
             a physical device with X509, you can use the [provisioning X509 cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-x509-cert-generator).
             Answer `Y` to provide your common name, the Client Cert commonName is your registrationId.
         2. Fill the `REGISTRATION_ID` with the device commonName, and replace the `TPM_ENDORSEMENT_KEY` by the
-            `PUBLIC_KEY_CERTIFICATE_STRING` that contains your client certificate.
+            `PUBLIC_KEY_CERTIFICATE_STRING` that contains your client certificate. Be careful to do **not** change your
+            certificate, _adding_ or _removing_ characters like spaces, tabs or new lines (`\n`).
             ```java
             private static final String REGISTRATION_ID = "[RegistrationId]";
             private static final String PUBLIC_KEY_CERTIFICATE_STRING =
@@ -85,7 +94,8 @@ Note that the samples for Windows and Linux use Maven.
             Attestation attestation = X509Attestation.createFromClientCertificates(device.getValue());
             ```
             
-5. In a command line, build your sample:
+5. In a command line, navigate to the directory `azure-iot-sdk-java/provisioning/provisioning-samples/service-enrollment-sample` 
+    where the `pom.xml` file for this test lives, and build your sample:
     ```
     {sample root}/>mvn install -DskipTests
     ```

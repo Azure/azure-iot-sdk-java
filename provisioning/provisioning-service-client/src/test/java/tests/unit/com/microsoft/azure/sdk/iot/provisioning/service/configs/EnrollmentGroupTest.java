@@ -126,7 +126,7 @@ public class EnrollmentGroupTest
         }
 
         @Mock
-        protected void setEtag(String etag)
+        public void setEtag(String etag)
         {
             mockedEtag = etag;
         }
