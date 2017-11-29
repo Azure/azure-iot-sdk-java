@@ -589,7 +589,7 @@ public class EnrollmentGroup extends Serializable
      * @param etag the {@code String} with the new etag. It cannot be {@code null}, empty or invalid.
      * @throws IllegalArgumentException If the provided etag is {@code null}, empty or invalid.
      */
-    protected void setEtag(String etag)
+    public void setEtag(String etag)
     {
         /* SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
         ParserUtility.validateStringUTF8(etag);
