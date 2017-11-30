@@ -91,13 +91,16 @@ public void stop() throws IOException;
 
 **SRS_MqttMessaging_25_024: [**send method shall publish a message to the IOT Hub on the publish topic by calling method publish().**]**
 
-**SRS_MqttMessaging_25_026: [**send method shall append the message properties to publishTopic before publishing.**]**
-
 **SRS_MqttMessaging_25_025: [**send method shall throw an exception if the message is null.**]**
+
+**SRS_MqttMessaging_34_026: [**This method shall append each custom property's name and value to the publishTopic before publishing.**]**
 
 **SRS_MqttMessaging_21_027: [**send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.**]**
 
+**SRS_MqttMessaging_34_028: [**If the message has a correlationId, this method shall append that correlationid to publishTopic before publishing using the key name `$.cid`.**]**
 
-    
+**SRS_MqttMessaging_34_029: [**If the message has a To, this method shall append that To to publishTopic before publishing using the key name `$.to`.**]**
+
+**SRS_MqttMessaging_34_030: [**If the message has a UserId, this method shall append that userId to publishTopic before publishing using the key name `$.uid`.**]**
     
    

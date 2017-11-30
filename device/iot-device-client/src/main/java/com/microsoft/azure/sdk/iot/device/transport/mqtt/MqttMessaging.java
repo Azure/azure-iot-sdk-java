@@ -67,92 +67,84 @@ public class MqttMessaging extends Mqtt
             throw new IOException("Message cannot be null");
         }
 
-        MessageProperty[] messageProperties = message.getProperties();
-        String messagePublishTopic;
-        if(messageProperties.length > 0)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(this.publishTopic);
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(this.publishTopic);
 
-            boolean separatorNeeded = false;
+        boolean separatorNeeded = false;
+
+        if (message.getMessageId() != null)
+        {
+            //Codes_SRS_MqttMessaging_21_027: [send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.]
+            stringBuilder.append(MESSAGE_ID);
+            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+            stringBuilder.append(message.getMessageId());
+
+            separatorNeeded = true;
+        }
+
+        if (message.getCorrelationId() != null)
+        {
+            if (separatorNeeded)
+            {
+                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+            }
+
+            //Codes_SRS_MqttMessaging_34_028: [If the message has a correlationId, this method shall append that correlationid to publishTopic before publishing using the key name `$.cid`.]
+            stringBuilder.append(CORRELATION_ID);
+            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+            stringBuilder.append(message.getCorrelationId());
+
+            separatorNeeded = true;
+        }
+
+        if (message.getUserId() != null)
+        {
+            if (separatorNeeded)
+            {
+                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+            }
+
+            //Codes_SRS_MqttMessaging_34_030: [If the message has a UserId, this method shall append that userId to publishTopic before publishing using the key name `$.uid`.]
+            stringBuilder.append(USER_ID);
+            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+            stringBuilder.append(message.getUserId());
+
+            separatorNeeded = true;
+        }
+
+        if (message.getTo() != null)
+        {
+            if (separatorNeeded)
+            {
+                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+            }
+
+            //Codes_SRS_MqttMessaging_34_029: [If the message has a To, this method shall append that To to publishTopic before publishing using the key name `$.to`.]
+            stringBuilder.append(TO);
+            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+            stringBuilder.append(message.getTo());
+
+            separatorNeeded = true;
+        }
+
+        for(MessageProperty property : message.getProperties())
+        {
+            if (separatorNeeded)
+            {
+                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+            }
 
             /*
-             **Tests_SRS_MqttMessaging_21_027: [**send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.**]**
-             */
-            if (message.getMessageId() != null)
-            {
-                stringBuilder.append(MESSAGE_ID);
-                stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-                stringBuilder.append(message.getMessageId());
+            **Codes_SRS_MqttMessaging_34_026: [This method shall append each custom property's name and value to the publishTopic before publishing.]
+            */
+            stringBuilder.append(property.getName());
+            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+            stringBuilder.append(property.getValue());
 
-                separatorNeeded = true;
-            }
-
-            if (message.getCorrelationId() != null)
-            {
-                if (separatorNeeded)
-                {
-                    stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
-                }
-
-                stringBuilder.append(CORRELATION_ID);
-                stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-                stringBuilder.append(message.getCorrelationId());
-
-                separatorNeeded = true;
-            }
-
-            if (message.getUserId() != null)
-            {
-                if (separatorNeeded)
-                {
-                    stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
-                }
-
-                stringBuilder.append(USER_ID);
-                stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-                stringBuilder.append(message.getUserId());
-
-                separatorNeeded = true;
-            }
-
-            if (message.getTo() != null)
-            {
-                if (separatorNeeded)
-                {
-                    stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
-                }
-
-                stringBuilder.append(TO);
-                stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-                stringBuilder.append(message.getTo());
-
-                separatorNeeded = true;
-            }
-
-            for(MessageProperty property : message.getProperties())
-            {
-                if (separatorNeeded)
-                {
-                    stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
-                }
-
-                /*
-                **Codes_SRS_MqttMessaging_25_026: [send method shall append the message properties to publishTopic before publishing.]
-                 */
-                stringBuilder.append(property.getName());
-                stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-                stringBuilder.append(property.getValue());
-
-                separatorNeeded = true;
-            }
-
-            messagePublishTopic = stringBuilder.toString();
+            separatorNeeded = true;
         }
-        else
-        {
-            messagePublishTopic = this.publishTopic;
-        }
+
+        String messagePublishTopic = stringBuilder.toString();
 
         //Codes_SRS_MqttMessaging_25_024: [send method shall publish a message to the IOT Hub on the publish topic by calling method publish().]
         this.publish(messagePublishTopic, message.getBytes());
