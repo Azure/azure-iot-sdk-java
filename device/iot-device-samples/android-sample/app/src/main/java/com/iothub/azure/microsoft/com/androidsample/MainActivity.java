@@ -23,48 +23,58 @@ public class MainActivity extends AppCompatActivity {
     private double humidity;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         try {
             SendMessage();
-        } catch (Exception e2) {
+        } catch (Exception e2)
+        {
             System.out.println("Exception while opening IoTHub connection: " + e2.toString());
         }
     }
 
-    private void SendMessage() throws URISyntaxException, IOException {
+    private void SendMessage() throws URISyntaxException, IOException
+    {
         // Comment/uncomment from lines below to use HTTPS or MQTT protocol
         // IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
         IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
         DeviceClient client = new DeviceClient(connString, protocol);
 
-        try {
+        try
+        {
             client.open();
-        } catch (Exception e2) {
+        } catch (Exception e2)
+        {
             System.err.println("Exception while opening IoTHub connection: " + e2.toString());
         }
 
-        for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 5; ++i)
+        {
             temperature = 20.0 + Math.random() * 10;
             humidity = 30.0 + Math.random() * 20;
 
             String msgStr = "{\"deviceId\":\"" + deviceId + "\",\"messageId\":" + i + ",\"temperature\":" + temperature + ",\"humidity\":" + humidity + "}";
-            try {
+            try
+            {
                 Message msg = new Message(msgStr);
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 System.out.println(msgStr);
                 EventCallback eventCallback = new EventCallback();
                 client.sendEventAsync(msg, eventCallback, i);
-            } catch (Exception e) {
+            } catch (Exception e)
+            {
                 System.err.println("Exception while sending event: " + e.getMessage());
             }
-            try {
+            try
+            {
                 Thread.sleep(2000);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException e)
+            {
                 e.printStackTrace();
             }
         }
@@ -72,7 +82,8 @@ public class MainActivity extends AppCompatActivity {
         client.closeNow();
     }
 
-    public void btnReceiveOnClick(View v) throws URISyntaxException, IOException {
+    public void btnReceiveOnClick(View v) throws URISyntaxException, IOException
+    {
         Button button = (Button) v;
 
         // Comment/uncomment from lines below to use HTTPS or MQTT protocol
@@ -81,25 +92,31 @@ public class MainActivity extends AppCompatActivity {
 
         DeviceClient client = new DeviceClient(connString, protocol);
 
-        if (protocol == IotHubClientProtocol.MQTT) {
+        if (protocol == IotHubClientProtocol.MQTT)
+        {
             MessageCallbackMqtt callback = new MessageCallbackMqtt();
             Counter counter = new Counter(0);
             client.setMessageCallback(callback, counter);
-        } else {
+        } else
+            {
             MessageCallback callback = new MessageCallback();
             Counter counter = new Counter(0);
             client.setMessageCallback(callback, counter);
         }
 
-        try {
+        try
+        {
             client.open();
-        } catch (Exception e2) {
+        } catch (Exception e2)
+        {
             System.out.println("Exception while opening IoTHub connection: " + e2.toString());
         }
 
-        try {
+        try
+        {
             Thread.sleep(2000);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException e)
+        {
             e.printStackTrace();
         }
 
@@ -108,8 +125,10 @@ public class MainActivity extends AppCompatActivity {
 
     // Our MQTT doesn't support abandon/reject, so we will only display the messaged received
     // from IoTHub and return COMPLETE
-    static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback {
-        public IotHubMessageResult execute(Message msg, Object context) {
+    static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
+    {
+        public IotHubMessageResult execute(Message msg, Object context)
+        {
             Counter counter = (Counter) context;
             System.out.println(
                     "Received message " + counter.toString()
@@ -121,16 +140,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    static class EventCallback implements IotHubEventCallback {
-        public void execute(IotHubStatusCode status, Object context) {
+    static class EventCallback implements IotHubEventCallback
+    {
+        public void execute(IotHubStatusCode status, Object context)
+        {
             Integer i = (Integer) context;
             System.out.println("IoT Hub responded to message " + i.toString()
                     + " with status " + status.name());
         }
     }
 
-    static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback {
-        public IotHubMessageResult execute(Message msg, Object context) {
+    static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
+    {
+        public IotHubMessageResult execute(Message msg, Object context)
+        {
             Counter counter = (Counter) context;
             System.out.println(
                     "Received message " + counter.toString()
@@ -138,7 +161,8 @@ public class MainActivity extends AppCompatActivity {
 
             int switchVal = counter.get() % 3;
             IotHubMessageResult res;
-            switch (switchVal) {
+            switch (switchVal)
+            {
                 case 0:
                     res = IotHubMessageResult.COMPLETE;
                     break;
@@ -164,7 +188,8 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Used as a counter in the message callback.
      */
-    static class Counter {
+    static class Counter
+    {
         int num;
 
         Counter(int num) {
