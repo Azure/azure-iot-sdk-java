@@ -111,12 +111,6 @@ Note that the samples for Windows and Linux use Maven.
     java -jar ./service-enrollment-sample-{version}-with-deps.jar
     ```
 
-**Note:** For X509, you must replace the `TPM_ENDORSEMENT_KEY` by a `PUBLIC_KEY_CERTIFICATE_STRING` that will contains
-the String with the client certificate, and create the Attestation for the X509 client certificate:
-```java
-Attestation attestation = X509Attestation.createFromClientCertificates(PUBLIC_KEY_CERTIFICATE_STRING);
-```
-
 ## How to create a new provisioning App, step by step
 
 If you prefer to create and populate your own java app, this section will guide you step by step. 
