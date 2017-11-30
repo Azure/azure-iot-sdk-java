@@ -31,6 +31,8 @@ a set of enrollments in the provisioning service using the BulkOperation on the 
 * [Enrollment group operations on the service client](service-enrollment-group-sample): Shows how to create, get, query, 
 and delete a single EnrollmentGroup in the provisioning service using the EnrollmentGroup on the Provisioning Service 
 Client.
+* [Update enrollment on the service client](service-update-enrollment-sample): Shows how to update the information in
+a single enrollment using the IndividualEnrollment on the Provisioning Service Client.
 
 
 [lnk-devbox-setup]: ../../doc/java-devbox-setup.md
