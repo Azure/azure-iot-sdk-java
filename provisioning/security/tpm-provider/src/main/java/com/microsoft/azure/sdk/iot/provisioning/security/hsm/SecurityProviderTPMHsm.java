@@ -8,7 +8,7 @@
 package com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import tss.*;
 import tss.tpm.*;
 
@@ -53,9 +53,9 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
     /**
      * Constructor for creating a Security Provider on TPM hardware
-     * @throws SecurityClientException If the constructor could not start the TPM
+     * @throws SecurityProviderException If the constructor could not start the TPM
      */
-    public SecurityProviderTPMHsm() throws SecurityClientException
+    public SecurityProviderTPMHsm() throws SecurityProviderException
     {
         //SRS_SecurityProviderTPMHsm_25_001: [ The constructor shall start the tpm, clear persistent for EK and SRK if it exist, create persistent primary for EK and SRK. ]
         tpm = TpmFactory.platformTpm();
@@ -70,9 +70,9 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
     /**
      * Constructor for creating a Security Provider on TPM hardware with the supplied Registration ID
      * @param registrationId A non {@code null} or empty value tied to this registration
-     * @throws SecurityClientException If the constructor could not start the TPM
+     * @throws SecurityProviderException If the constructor could not start the TPM
      */
-    public SecurityProviderTPMHsm(String registrationId) throws SecurityClientException
+    public SecurityProviderTPMHsm(String registrationId) throws SecurityProviderException
     {
         if (registrationId == null || registrationId.isEmpty())
         {
@@ -98,10 +98,10 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
     /**
      * Getter for the Registration ID if it was provided. Default is returned otherwise.
      * @return The registration ID tied to this registration instance
-     * @throws SecurityClientException If registration ID could not be extracted
+     * @throws SecurityProviderException If registration ID could not be extracted
      */
     @Override
-    public String getRegistrationId() throws SecurityClientException
+    public String getRegistrationId() throws SecurityProviderException
     {
         if (this.registrationId != null)
         {
@@ -115,12 +115,12 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         }
     }
 
-    private TPMT_PUBLIC createPersistentPrimary(Tpm tpm, TPM_HANDLE hPersistent, TPM_RH hierarchy, TPMT_PUBLIC inPub, String primaryRole) throws SecurityClientException
+    private TPMT_PUBLIC createPersistentPrimary(Tpm tpm, TPM_HANDLE hPersistent, TPM_RH hierarchy, TPMT_PUBLIC inPub, String primaryRole) throws SecurityProviderException
     {
         ReadPublicResponse rpResp = tpm._allowErrors().ReadPublic(hPersistent);
         if (rpResp == null)
         {
-            throw new SecurityClientException("ReadPublicResponse cannot be null");
+            throw new SecurityProviderException("ReadPublicResponse cannot be null");
         }
         TPM_RC	rc = tpm._getLastResponseCode();
 
@@ -131,7 +131,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         }
         if (rc != TPM_RC.HANDLE)
         {
-            throw new SecurityClientException("Unexpected failure {" +  rc.name() + "} of TPM2_ReadPublic for {" + primaryRole + "}");
+            throw new SecurityProviderException("Unexpected failure {" +  rc.name() + "} of TPM2_ReadPublic for {" + primaryRole + "}");
         }
 
         TPMS_SENSITIVE_CREATE sens = new TPMS_SENSITIVE_CREATE(new byte[0], new byte[0]);
@@ -140,7 +140,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         if (cpResp == null)
         {
-            throw new SecurityClientException("CreatePrimaryResponse cannot be null");
+            throw new SecurityProviderException("CreatePrimaryResponse cannot be null");
         }
 
         tpm.EvictControl(TPM_HANDLE.from(TPM_RH.OWNER), cpResp.handle, hPersistent);
@@ -148,7 +148,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         return cpResp.outPublic;
     }
 
-    private void clearPersistent(Tpm tpm, TPM_HANDLE hPersistent, String keyRole) throws SecurityClientException
+    private void clearPersistent(Tpm tpm, TPM_HANDLE hPersistent, String keyRole) throws SecurityProviderException
     {
         tpm._allowErrors().ReadPublic(hPersistent);
         TPM_RC	rc = tpm._getLastResponseCode();
@@ -158,12 +158,12 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         }
         else if (rc != TPM_RC.HANDLE)
         {
-            throw new SecurityClientException("Unexpected failure for {" + rc.name() + "} of TPM2_ReadPublic for " + keyRole + " 0x" + hPersistent.handle);
+            throw new SecurityProviderException("Unexpected failure for {" + rc.name() + "} of TPM2_ReadPublic for " + keyRole + " 0x" + hPersistent.handle);
         }
     }
 
     // NOTE: For now only HMAC signing is supported.
-    private byte[] signData(Tpm tpm, TPMT_PUBLIC idKeyPub, byte[] tokenData) throws SecurityClientException
+    private byte[] signData(Tpm tpm, TPMT_PUBLIC idKeyPub, byte[] tokenData) throws SecurityProviderException
     {
         TPM_ALG_ID	idKeyHashAlg = ((TPMS_SCHEME_HMAC)((TPMS_KEYEDHASH_PARMS)idKeyPub.parameters).scheme).hashAlg;
         int 		MaxInputBuffer = TpmHelpers.getTpmProperty(tpm, TPM_PT.INPUT_BUFFER);
@@ -180,7 +180,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         if (hSeq == null)
         {
-            throw new SecurityClientException("hSeq cannot be null");
+            throw new SecurityProviderException("hSeq cannot be null");
         }
 
         do
@@ -197,10 +197,10 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
      * Activates the Identity with the nonce provided from the service
      * @param key Key for activating the TPM
      * @return {@code null} value is returned. Place holder for eventual returns.
-     * @throws SecurityClientException If activation was not successful.
+     * @throws SecurityProviderException If activation was not successful.
      */
     @Override
-    public byte[] activateIdentityKey(byte[] key) throws SecurityClientException
+    public byte[] activateIdentityKey(byte[] key) throws SecurityProviderException
     {
         InByteBuf actBlob = new InByteBuf(Arrays.copyOfRange(key, 0, key.length));
 
@@ -213,8 +213,8 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         if (idKeyPub == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_008: [ This method shall throw SecurityClientException if ID Key Public could not be extracted form TPM. ]
-            throw new SecurityClientException("Id Key Public cannot be null");
+            //SRS_SecurityProviderTPMHsm_25_008: [ This method shall throw SecurityProviderException if ID Key Public could not be extracted form TPM. ]
+            throw new SecurityProviderException("Id Key Public cannot be null");
         }
 
         //
@@ -227,8 +227,8 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         if (sasResp == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_010: [ This method shall throw  SecurityClientException if Authorization session with TPM could not be started. ]
-            throw new SecurityClientException("StartAuthSessionResponse cannot be null");
+            //SRS_SecurityProviderTPMHsm_25_010: [ This method shall throw  SecurityProviderException if Authorization session with TPM could not be started. ]
+            throw new SecurityProviderException("StartAuthSessionResponse cannot be null");
         }
 
         //SRS_SecurityProviderTPMHsm_25_011: [ This method shall set the policy secret on to TPM using the endorsement. ]
@@ -243,8 +243,8 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         if (innerWrapKey == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_013: [ This method shall throw SecurityClientException if activating the credential for the session fails. ]
-            throw new SecurityClientException("innerWrapKey cannot be null");
+            //SRS_SecurityProviderTPMHsm_25_013: [ This method shall throw SecurityProviderException if activating the credential for the session fails. ]
+            throw new SecurityProviderException("innerWrapKey cannot be null");
         }
 
         // Initialize parameters of the symmetric key used by Service
@@ -259,8 +259,8 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         if (idKeyPrivate == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_015: [ This method shall throw SecurityClientException if importing the activated credential onto TPM fails. ]
-            throw new SecurityClientException("idKeyPrivate cannot be null");
+            //SRS_SecurityProviderTPMHsm_25_015: [ This method shall throw SecurityProviderException if importing the activated credential onto TPM fails. ]
+            throw new SecurityProviderException("idKeyPrivate cannot be null");
         }
 
         //
@@ -271,8 +271,8 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         if (hIdKey == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_017: [ This method shall throw SecurityClientException if loading SRK onto TPM fails. ]
-            throw new SecurityClientException("hIdKey cannot be null");
+            //SRS_SecurityProviderTPMHsm_25_017: [ This method shall throw SecurityProviderException if loading SRK onto TPM fails. ]
+            throw new SecurityProviderException("hIdKey cannot be null");
         }
 
         //SRS_SecurityProviderTPMHsm_25_018: [ This method shall clear the persistent for key role "ID Key" . ]
@@ -293,8 +293,8 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         if (encUriData.buffer.length > maxUriDataSize)
         {
-            //SRS_SecurityProviderTPMHsm_25_021: [ This method shall throw SecurityClientException if the encoded Uri length is greater than Maximum Uri Length . ]
-            throw new SecurityClientException("Too long encrypted URI data string. Max supported length is " + Integer.toString(maxUriDataSize));
+            //SRS_SecurityProviderTPMHsm_25_021: [ This method shall throw SecurityProviderException if the encoded Uri length is greater than Maximum Uri Length . ]
+            throw new SecurityProviderException("Too long encrypted URI data string. Max supported length is " + Integer.toString(maxUriDataSize));
         }
 
         // The template of the symmetric key used by the Service
@@ -317,8 +317,8 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         if (crResp == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_023: [ This method shall throw SecurityClientException if creating TPMS_SENSITIVE_CREATE for the inner wrap key fails. ]
-            throw new SecurityClientException("CreateResponse cannot be null");
+            //SRS_SecurityProviderTPMHsm_25_023: [ This method shall throw SecurityProviderException if creating TPMS_SENSITIVE_CREATE for the inner wrap key fails. ]
+            throw new SecurityProviderException("CreateResponse cannot be null");
         }
 
         //SRS_SecurityProviderTPMHsm_25_024: [ This method shall load the created response private onto TPM. ]
@@ -328,7 +328,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         if (hSymKey == null)
         {
             //SRS_SecurityProviderTPMHsm_25_025: [ This method shall throw if loading the created response private onto TPM fails. ]
-            throw new SecurityClientException("hSymKey cannot be null");
+            throw new SecurityProviderException("hSymKey cannot be null");
         }
 
         byte[] iv = new byte[innerWrapKey.length];
@@ -339,7 +339,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         if (edResp == null)
         {
             //SRS_SecurityProviderTPMHsm_25_0027: [ This method shall throw if Encrypt Decrypt the symmetric Key fails. ]
-            throw new SecurityClientException("EncryptDecryptResponse cannot be null");
+            throw new SecurityProviderException("EncryptDecryptResponse cannot be null");
         }
 
         //SRS_SecurityProviderTPMHsm_25_028: [ This method shall flush the context for the symmetric Key. ]
@@ -351,10 +351,10 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
      * This method signs the TPM with the provided device ID
      * @param deviceIdData A non {@code null} or empty value for the device ID
      * @return The signature after signing data.
-     * @throws SecurityClientException If signing was not successful
+     * @throws SecurityProviderException If signing was not successful
      */
     @Override
-    public byte[] signWithIdentity(byte[] deviceIdData) throws SecurityClientException
+    public byte[] signWithIdentity(byte[] deviceIdData) throws SecurityProviderException
     {
         if (deviceIdData == null || deviceIdData.length == 0)
         {
@@ -364,8 +364,8 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         if (idKeyPub == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_030: [ This method shall throw SecurityClientException if ID KEY public was not instantiated. ]
-            throw new SecurityClientException("activateIdentityKey first before signing");
+            //SRS_SecurityProviderTPMHsm_25_030: [ This method shall throw SecurityProviderException if ID KEY public was not instantiated. ]
+            throw new SecurityProviderException("activateIdentityKey first before signing");
         }
         //
         // Generate token data, and sign it using the new Device ID key
@@ -377,10 +377,10 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
     /**
      * Getter for extracting EndorsementKey from TPM
      * @return The Endorsement Key from TPM
-     * @throws SecurityClientException If endorsement key could not be extracted.
+     * @throws SecurityProviderException If endorsement key could not be extracted.
      */
     @Override
-    public byte[] getEndorsementKey() throws SecurityClientException
+    public byte[] getEndorsementKey() throws SecurityProviderException
     {
         //SRS_SecurityProviderTPMHsm_25_032: [ This method shall return the TPM2B_PUBLIC form of EK. ]
         return (new TPM2B_PUBLIC(ekPublic)).toTpm();
@@ -389,10 +389,10 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
     /**
      * Getter for extracting StorageRootKey from TPM
      * @return The StorageRootKey from TPM
-     * @throws SecurityClientException If StorageRootKey could not be extracted.
+     * @throws SecurityProviderException If StorageRootKey could not be extracted.
      */
     @Override
-    public byte[] getStorageRootKey() throws SecurityClientException
+    public byte[] getStorageRootKey() throws SecurityProviderException
     {
         //SRS_SecurityProviderTPMHsm_25_033: [ This method shall return the TPM2B_PUBLIC form of SRK. ]
         return (new TPM2B_PUBLIC(srkPublic)).toTpm();

@@ -8,7 +8,7 @@
 package com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMReader;
 
@@ -37,7 +37,7 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
     /**
      * Constructor to build the DICE certs from the simulator
      */
-    public SecurityProviderX509Cert(String leafPublicPem, String leafPrivateKey, Collection<String> signerCertificates) throws SecurityClientException
+    public SecurityProviderX509Cert(String leafPublicPem, String leafPrivateKey, Collection<String> signerCertificates) throws SecurityProviderException
     {
         if (leafPublicPem == null || leafPublicPem.isEmpty())
         {
@@ -65,11 +65,11 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
         }
         catch (IOException | CertificateException e)
         {
-            throw new SecurityClientException(e);
+            throw new SecurityProviderException(e);
         }
     }
 
-    private String getCommonName(X509Certificate certificate) throws SecurityClientException
+    private String getCommonName(X509Certificate certificate) throws SecurityProviderException
     {
         //Expected format CN=<CNName>,O=<>,C=<US>
         String cnName = certificate.getSubjectDN().getName();
@@ -83,7 +83,7 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
             }
         }
 
-        throw new SecurityClientException("CN name could not be found");
+        throw new SecurityProviderException("CN name could not be found");
     }
 
     private X509Certificate convertPemToCertificate(String pem) throws IOException, CertificateException
@@ -177,12 +177,12 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
      * @param uniqueId Unique ID to be used in common name. Cannot be {@code null} or empty
      * @return A PEM formatted leaf cert with unique ID as common name
      */
-    public String generateLeafCert(String uniqueId) throws SecurityClientException
+    public String generateLeafCert(String uniqueId) throws SecurityProviderException
     {
-        //SRS_SecurityClientDiceEmulator_25_012: [ This method shall throw SecurityClientException if unique id is null or empty ]
+        //SRS_SecurityClientDiceEmulator_25_012: [ This method shall throw SecurityProviderException if unique id is null or empty ]
         if (uniqueId == null || uniqueId.isEmpty())
         {
-            throw new SecurityClientException(new IllegalArgumentException("unique id cannot be null or empty"));
+            throw new SecurityProviderException(new IllegalArgumentException("unique id cannot be null or empty"));
         }
 
         throw new UnsupportedOperationException("This method is not supported, use other means to validate certificate");

@@ -7,7 +7,7 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.security;
 
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 
 import javax.net.ssl.SSLContext;
 import java.io.ByteArrayInputStream;
@@ -136,17 +136,17 @@ public abstract class SecurityProvider
     /**
      * Unique id required for registration
      * @return Returns the registration Id used needed for the service
-     * @throws SecurityClientException If registration id with the underlying implementation could not be retrieved
+     * @throws SecurityProviderException If registration id with the underlying implementation could not be retrieved
      */
-    abstract public String getRegistrationId() throws SecurityClientException;
+    abstract public String getRegistrationId() throws SecurityProviderException;
 
     /**
      * Retrieves the SSL context loaded with trusted certs. In case of X509 SSL context shall be loaded with complete chain
      * all the way till the leaf along with its private key.
      * @return The SSLContext relevant to the flow
-     * @throws SecurityClientException If ssl context could not be generated for any of the reason
+     * @throws SecurityProviderException If ssl context could not be generated for any of the reason
      */
-    abstract public SSLContext getSSLContext() throws SecurityClientException;
+    abstract public SSLContext getSSLContext() throws SecurityProviderException;
 
     KeyStore getKeyStoreWithTrustedCerts() throws NoSuchAlgorithmException, IOException, CertificateException, KeyStoreException
     {

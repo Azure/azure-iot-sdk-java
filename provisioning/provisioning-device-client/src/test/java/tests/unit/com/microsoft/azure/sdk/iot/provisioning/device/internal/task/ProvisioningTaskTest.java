@@ -20,7 +20,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationResultParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.*;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
@@ -88,7 +88,7 @@ public class ProvisioningTaskTest
     @Mocked
     ProvisioningDeviceClientException mockProvisioningDeviceClientException;
     @Mocked
-    SecurityClientException mockSecurityClientException;
+    SecurityProviderException mockSecurityProviderException;
 
     private void constructorExpectations()
     {
@@ -2126,7 +2126,7 @@ public class ProvisioningTaskTest
                 mockedDeviceRegistrationResultParser.getTpm();
                 result = mockedTpm;
                 mockedTpm.getAuthenticationKey();
-                result = mockSecurityClientException;
+                result = mockSecurityProviderException;
                 mockedProvisioningDeviceClientConfig.getSecurityProvider();
                 result = mockedSecurityProviderTpm;
             }
@@ -2140,7 +2140,7 @@ public class ProvisioningTaskTest
         new Verifications()
         {
             {
-                mockedProvisioningDeviceClientRegistrationCallback.run((RegistrationResult) any, mockSecurityClientException, any);
+                mockedProvisioningDeviceClientRegistrationCallback.run((RegistrationResult) any, mockSecurityProviderException, any);
                 times = 1;
             }
         };

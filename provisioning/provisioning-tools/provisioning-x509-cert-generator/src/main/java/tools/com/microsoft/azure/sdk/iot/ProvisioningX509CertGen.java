@@ -3,7 +3,7 @@
 
 package tools.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderDiceEmulator;
 
 import java.util.Scanner;
@@ -65,7 +65,7 @@ public class ProvisioningX509CertGen
                     }
                 }
             }
-            catch (SecurityClientException e)
+            catch (SecurityProviderException e)
             {
                 e.printStackTrace();
             }

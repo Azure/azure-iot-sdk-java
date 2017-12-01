@@ -11,7 +11,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.IOException;
 
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import org.apache.commons.codec.binary.Base32;
 
 import java.security.*;
@@ -21,13 +21,13 @@ public abstract class SecurityProviderTpm extends SecurityProvider
 {
     private static final String SHA_256 = "SHA-256";
     private static final String EQUALS = "=";
-    abstract public byte[] activateIdentityKey(byte[] key) throws SecurityClientException;
-    abstract public byte[] getEndorsementKey() throws SecurityClientException;
-    abstract public byte[] getStorageRootKey() throws SecurityClientException;
-    abstract public byte[] signWithIdentity(byte[] data) throws SecurityClientException;
+    abstract public byte[] activateIdentityKey(byte[] key) throws SecurityProviderException;
+    abstract public byte[] getEndorsementKey() throws SecurityProviderException;
+    abstract public byte[] getStorageRootKey() throws SecurityProviderException;
+    abstract public byte[] signWithIdentity(byte[] data) throws SecurityProviderException;
 
     @Override
-    public String getRegistrationId() throws SecurityClientException
+    public String getRegistrationId() throws SecurityProviderException
     {
         try
         {
@@ -51,13 +51,13 @@ public abstract class SecurityProviderTpm extends SecurityProvider
         }
         catch (NoSuchAlgorithmException e)
         {
-            //SRS_SecurityClientTpm_25_008: [ This method shall throw SecurityClientException if any of the underlying API's in generating registration Id. ]
-            throw new SecurityClientException(e);
+            //SRS_SecurityClientTpm_25_008: [ This method shall throw SecurityProviderException if any of the underlying API's in generating registration Id. ]
+            throw new SecurityProviderException(e);
         }
     }
 
     @Override
-    public SSLContext getSSLContext() throws SecurityClientException
+    public SSLContext getSSLContext() throws SecurityProviderException
     {
         try
         {
@@ -66,8 +66,8 @@ public abstract class SecurityProviderTpm extends SecurityProvider
         }
         catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException | KeyManagementException e)
         {
-            //SRS_SecurityClientTpm_25_005: [ This method shall throw SecurityClientException if any of the underlying API's in generating SSL context fails. ]
-            throw new SecurityClientException(e);
+            //SRS_SecurityClientTpm_25_005: [ This method shall throw SecurityProviderException if any of the underlying API's in generating SSL context fails. ]
+            throw new SecurityProviderException(e);
         }
     }
 

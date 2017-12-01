@@ -13,7 +13,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.Respons
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 
 import javax.net.ssl.SSLContext;
 import java.util.concurrent.Callable;
@@ -120,7 +120,7 @@ public class StatusTask implements Callable
                 throw new ProvisioningDeviceClientException("Did not receive DPS Status information");
             }
         }
-        catch (InterruptedException | SecurityClientException e)
+        catch (InterruptedException | SecurityProviderException e)
         {
             throw new ProvisioningDeviceClientException(e);
         }

@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.*;
 import org.junit.Test;
 
@@ -576,7 +576,7 @@ public class DeviceClientConfigTest
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_082: [If the provided security provider is a SecurityProviderX509 instance, this function shall set its auth type to X509 and create its IotHubX509AuthenticationProvider instance using the security provider's ssl context.]
     @Test
-    public void securityProviderConstructorWithX509Success() throws SecurityClientException
+    public void securityProviderConstructorWithX509Success() throws SecurityProviderException
     {
         //arrange
         new NonStrictExpectations()
@@ -607,7 +607,7 @@ public class DeviceClientConfigTest
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security provider is a SecurityProviderTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthenticationProvider instance using the security provider.]
     @Test
-    public void securityClientConstructorWithTPMSuccess() throws SecurityClientException, IOException
+    public void securityClientConstructorWithTPMSuccess() throws SecurityProviderException, IOException
     {
         //arrange
         new NonStrictExpectations()
@@ -644,7 +644,7 @@ public class DeviceClientConfigTest
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security provider is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
     @Test (expected = UnsupportedOperationException.class)
-    public void securityProviderConstructorThrowsForUnknownSecurityProviderImplementation() throws SecurityClientException
+    public void securityProviderConstructorThrowsForUnknownSecurityProviderImplementation() throws SecurityProviderException
     {
         //arrange
         new NonStrictExpectations()

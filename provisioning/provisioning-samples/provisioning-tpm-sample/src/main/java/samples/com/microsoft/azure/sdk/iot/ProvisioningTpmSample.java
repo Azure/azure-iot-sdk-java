@@ -12,7 +12,7 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMEmulator;
 
 import java.io.IOException;
@@ -78,7 +78,7 @@ public class ProvisioningTpmSample
                                        "Press enter when you are ready to run registration after enrolling with the service");
             scanner.nextLine();
         }
-        catch (SecurityClientException e)
+        catch (SecurityProviderException e)
         {
             e.printStackTrace();
         }

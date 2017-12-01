@@ -8,7 +8,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.provisioning.security;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -71,37 +71,37 @@ public class SecurityProviderTpmTest
         }
 
         @Override
-        public byte[] activateIdentityKey(byte[] key) throws SecurityClientException
+        public byte[] activateIdentityKey(byte[] key) throws SecurityProviderException
         {
             return TEST_ACTIVATION;
         }
 
         @Override
-        public byte[] getEndorsementKey() throws SecurityClientException
+        public byte[] getEndorsementKey() throws SecurityProviderException
         {
             return ek;
         }
 
         @Override
-        public byte[] getStorageRootKey() throws SecurityClientException
+        public byte[] getStorageRootKey() throws SecurityProviderException
         {
             return STORAGE_ROOT_KEY;
         }
 
         @Override
-        public byte[] signWithIdentity(byte[] data) throws SecurityClientException
+        public byte[] signWithIdentity(byte[] data) throws SecurityProviderException
         {
             return TEST_SIGN_DATA;
         }
 
         @Override
-        public String getRegistrationId() throws SecurityClientException
+        public String getRegistrationId() throws SecurityProviderException
         {
             return super.getRegistrationId();
         }
 
         @Override
-        public SSLContext getSSLContext() throws SecurityClientException
+        public SSLContext getSSLContext() throws SecurityProviderException
         {
             return super.getSSLContext();
         }
@@ -111,7 +111,7 @@ public class SecurityProviderTpmTest
     //SRS_SecurityClientTpm_25_002: [ This method shall hash the EnrollmentKey using SHA-256. ]
     //SRS_SecurityClientTpm_25_003: [ This method shall convert the resultant hash to Base32 to convert all the data to be case agnostic and remove "=" from the string. ]
     @Test
-    public void getRegistrationIdSucceeds() throws SecurityClientException, EncoderException
+    public void getRegistrationIdSucceeds() throws SecurityProviderException, EncoderException
     {
         //arrange
         SecurityProviderTpm securityClientTpm = new SecurityProviderTPMTestImpl(ENROLLMENT_KEY);
@@ -132,9 +132,9 @@ public class SecurityProviderTpmTest
         };
     }
 
-    //SRS_SecurityClientTpm_25_008: [ This method shall throw SecurityClientException if any of the underlying API's in generating registration Id. ]
-    @Test (expected = SecurityClientException.class)
-    public void getRegistrationIdThrowsSecurityClientException() throws SecurityClientException, NoSuchAlgorithmException
+    //SRS_SecurityClientTpm_25_008: [ This method shall throw SecurityProviderException if any of the underlying API's in generating registration Id. ]
+    @Test (expected = SecurityProviderException.class)
+    public void getRegistrationIdThrowsSecurityClientException() throws SecurityProviderException, NoSuchAlgorithmException
     {
         //arrange
         SecurityProviderTpm securityClientTpm = new SecurityProviderTPMTestImpl(ENROLLMENT_KEY);
@@ -157,7 +157,7 @@ public class SecurityProviderTpmTest
     //SRS_SecurityClient_25_002: [ This method shall retrieve the default CertificateFactory instance. ]
     //SRS_SecurityClient_25_003: [ This method shall load all the trusted certificates to the keystore. ]
     @Test
-    public void getSSLContextSucceeds() throws SecurityClientException, KeyManagementException, KeyStoreException, CertificateException
+    public void getSSLContextSucceeds() throws SecurityProviderException, KeyManagementException, KeyStoreException, CertificateException
     {
         //arrange
         SecurityProviderTpm securityClientTpm = new SecurityProviderTPMTestImpl(ENROLLMENT_KEY);
@@ -176,9 +176,9 @@ public class SecurityProviderTpmTest
         };
     }
 
-    //SRS_SecurityClientTpm_25_005: [ This method shall throw SecurityClientException if any of the underlying API's in generating SSL context fails. ]
-    @Test (expected = SecurityClientException.class)
-    public void getSSLContextThrowsUnderlyingException() throws SecurityClientException, KeyStoreException
+    //SRS_SecurityClientTpm_25_005: [ This method shall throw SecurityProviderException if any of the underlying API's in generating SSL context fails. ]
+    @Test (expected = SecurityProviderException.class)
+    public void getSSLContextThrowsUnderlyingException() throws SecurityProviderException, KeyStoreException
     {
         //arrange
         SecurityProviderTpm securityClientTpm = new SecurityProviderTPMTestImpl(ENROLLMENT_KEY);

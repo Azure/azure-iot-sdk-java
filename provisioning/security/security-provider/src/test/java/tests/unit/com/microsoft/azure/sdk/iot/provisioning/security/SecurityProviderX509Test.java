@@ -8,7 +8,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.provisioning.security;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.*;
 import org.junit.Test;
 
@@ -102,13 +102,13 @@ public class SecurityProviderX509Test
         }
 
         @Override
-        public String getRegistrationId() throws SecurityClientException
+        public String getRegistrationId() throws SecurityProviderException
         {
             return super.getRegistrationId();
         }
 
         @Override
-        public SSLContext getSSLContext() throws SecurityClientException
+        public SSLContext getSSLContext() throws SecurityProviderException
         {
             return super.getSSLContext();
         }
@@ -116,7 +116,7 @@ public class SecurityProviderX509Test
 
     //SRS_SecurityClientX509_25_001: [ This method shall retrieve the commonName of the client certificate and return as registration Id. ]
     @Test
-    public void getRegistrationIdSucceeds() throws SecurityClientException
+    public void getRegistrationIdSucceeds() throws SecurityProviderException
     {
 
         //arrange
@@ -139,7 +139,7 @@ public class SecurityProviderX509Test
     //SRS_SecurityClient_25_002: [ This method shall retrieve the default CertificateFactory instance. ]
     //SRS_SecurityClient_25_003: [ This method shall load all the trusted certificates to the keystore. ]
     @Test
-    public void getSslContextSucceeds() throws SecurityClientException, KeyManagementException, KeyStoreException
+    public void getSslContextSucceeds() throws SecurityProviderException, KeyManagementException, KeyStoreException
     {
         //arrange
         Collection<X509Certificate> certificates = new LinkedList<>();
@@ -173,7 +173,7 @@ public class SecurityProviderX509Test
 
     //SRS_SecurityClientX509_25_006: [ This method shall throw IllegalArgumentException if input parameters are null. ]
     @Test (expected = IllegalArgumentException.class)
-    public void getSslContextThrowsOnNullLeaf() throws SecurityClientException, KeyManagementException, KeyStoreException
+    public void getSslContextThrowsOnNullLeaf() throws SecurityProviderException, KeyManagementException, KeyStoreException
     {
         //arrange
         Collection<X509Certificate> certificates = new LinkedList<>();
@@ -187,7 +187,7 @@ public class SecurityProviderX509Test
 
 
     @Test (expected = IllegalArgumentException.class)
-    public void getSslContextThrowsOnNullPrivateKey() throws SecurityClientException, KeyManagementException, KeyStoreException
+    public void getSslContextThrowsOnNullPrivateKey() throws SecurityProviderException, KeyManagementException, KeyStoreException
     {
         //arrange
         Collection<X509Certificate> certificates = new LinkedList<>();
@@ -200,7 +200,7 @@ public class SecurityProviderX509Test
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void getSslContextThrowsOnNullIntermediates() throws SecurityClientException, KeyManagementException, KeyStoreException
+    public void getSslContextThrowsOnNullIntermediates() throws SecurityProviderException, KeyManagementException, KeyStoreException
     {
         //arrange
         SecurityProviderX509 securityClientX509Test = new SecurityProviderX509TestImpl(TEST_COMMON_NAME, mockedX509Certificate, mockedKey, null);
@@ -210,9 +210,9 @@ public class SecurityProviderX509Test
 
     }
 
-    //SRS_SecurityClientX509_25_005: [ This method shall throw SecurityClientException if X509 Key Manager is not found. ]
-    @Test (expected = SecurityClientException.class)
-    public void getSslContextThrowsIfX509KeyManagerNotFound() throws SecurityClientException, KeyManagementException, KeyStoreException
+    //SRS_SecurityClientX509_25_005: [ This method shall throw SecurityProviderException if X509 Key Manager is not found. ]
+    @Test (expected = SecurityProviderException.class)
+    public void getSslContextThrowsIfX509KeyManagerNotFound() throws SecurityProviderException, KeyManagementException, KeyStoreException
     {
 
         //arrange
@@ -232,9 +232,9 @@ public class SecurityProviderX509Test
         securityClientX509Test.getSSLContext();
     }
 
-    //SRS_SecurityClientX509_25_004: [ This method shall throw SecurityClientException if X509 Trust Manager is not found. ]
-    @Test (expected = SecurityClientException.class)
-    public void getSslContextThrowsIfX509TrustManagerNotFound() throws SecurityClientException, KeyManagementException, KeyStoreException
+    //SRS_SecurityClientX509_25_004: [ This method shall throw SecurityProviderException if X509 Trust Manager is not found. ]
+    @Test (expected = SecurityProviderException.class)
+    public void getSslContextThrowsIfX509TrustManagerNotFound() throws SecurityProviderException, KeyManagementException, KeyStoreException
     {
         //arrange
         Collection<X509Certificate> certificates = new LinkedList<>();
@@ -255,9 +255,9 @@ public class SecurityProviderX509Test
         securityClientX509Test.getSSLContext();
     }
 
-    //SRS_SecurityClientX509_25_003: [ This method shall throw SecurityClientException chained with the exception thrown from underlying API calls to SSL library. ]
-    @Test (expected = SecurityClientException.class)
-    public void getSslContextThrowsIfAnyOfTheUnderlyingAPIFails() throws SecurityClientException, KeyManagementException, KeyStoreException
+    //SRS_SecurityClientX509_25_003: [ This method shall throw SecurityProviderException chained with the exception thrown from underlying API calls to SSL library. ]
+    @Test (expected = SecurityProviderException.class)
+    public void getSslContextThrowsIfAnyOfTheUnderlyingAPIFails() throws SecurityProviderException, KeyManagementException, KeyStoreException
     {
         //arrange
         Collection<X509Certificate> certificates = new LinkedList<>();

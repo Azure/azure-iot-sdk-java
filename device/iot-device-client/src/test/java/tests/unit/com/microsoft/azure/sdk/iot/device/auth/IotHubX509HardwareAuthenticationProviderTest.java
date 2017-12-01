@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubX509AuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509HardwareAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -77,7 +77,7 @@ public class IotHubX509HardwareAuthenticationProviderTest
 
     //Tests_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_004: [If the security provider throws a SecurityProviderException while generating an SSLContext, this function shall throw an IOException.]
     @Test (expected = IOException.class)
-    public void getSSLContextThrowsIOExceptionIfExceptionEncountered() throws SecurityClientException, IOException
+    public void getSSLContextThrowsIOExceptionIfExceptionEncountered() throws SecurityProviderException, IOException
     {
         //arrange
         IotHubX509AuthenticationProvider authentication = new IotHubX509HardwareAuthenticationProvider(mockSecurityProviderX509);
@@ -86,7 +86,7 @@ public class IotHubX509HardwareAuthenticationProviderTest
         {
             {
                 mockSecurityProviderX509.getSSLContext();
-                result = new SecurityClientException("");
+                result = new SecurityProviderException("");
             }
         };
 
@@ -97,7 +97,7 @@ public class IotHubX509HardwareAuthenticationProviderTest
     //Tests_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_003: [If this object's ssl context has not been generated yet, this function shall generate it from the saved security provider.]
     //Tests_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_005: [This function shall return the saved IotHubSSLContext.]
     @Test
-    public void getSSLContextSuccess() throws SecurityClientException, IOException
+    public void getSSLContextSuccess() throws SecurityProviderException, IOException
     {
         //arrange
         IotHubX509AuthenticationProvider authentication = new IotHubX509HardwareAuthenticationProvider(mockSecurityProviderX509);

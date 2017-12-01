@@ -7,19 +7,19 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.security.exceptions;
 
-public class SecurityClientException extends Exception
+public class SecurityProviderException extends Exception
 {
-    public SecurityClientException(Throwable e)
+    public SecurityProviderException(Throwable e)
     {
         super(e);
     }
 
-    public SecurityClientException(String message, Throwable e)
+    public SecurityProviderException(String message, Throwable e)
     {
         super(message, e);
     }
 
-    public SecurityClientException(String message)
+    public SecurityProviderException(String message)
     {
         super(message);
     }

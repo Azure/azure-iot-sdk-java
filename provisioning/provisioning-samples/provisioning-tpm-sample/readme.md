@@ -181,7 +181,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=provisioning-tpm
     import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
     import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
     import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
-    import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+    import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
     import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMEmulator;
     import com.microsoft.azure.sdk.iot.provisioning.device.*;
     import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;

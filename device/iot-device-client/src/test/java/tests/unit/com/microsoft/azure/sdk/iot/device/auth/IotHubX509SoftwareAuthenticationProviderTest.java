@@ -8,7 +8,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509AuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509SoftwareAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -248,9 +248,9 @@ public class IotHubX509SoftwareAuthenticationProviderTest
         assertTrue(sslContextNeedsRenewal);
     }
 
-    //Tests_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_004: [If the security provider throws a SecurityClientException while generating an SSLContext, this function shall throw an IOException.]
+    //Tests_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_004: [If the security provider throws a SecurityProviderException while generating an SSLContext, this function shall throw an IOException.]
     @Test (expected = IOException.class)
-    public void getSSLContextThrowsIOExceptionIfExceptionEncountered() throws SecurityClientException, IOException
+    public void getSSLContextThrowsIOExceptionIfExceptionEncountered() throws SecurityProviderException, IOException
     {
         //arrange
         IotHubX509AuthenticationProvider authentication = new IotHubX509SoftwareAuthenticationProvider(publicKeyCertificate, false, privateKey, false);
@@ -273,7 +273,7 @@ public class IotHubX509SoftwareAuthenticationProviderTest
     //Tests_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_003: [If this object's ssl context has not been generated yet, this function shall generate it from the saved security provider.]
     //Tests_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_005: [This function shall return the saved IotHubSSLContext.]
     @Test
-    public void getSSLContextSuccess() throws SecurityClientException, IOException
+    public void getSSLContextSuccess() throws SecurityProviderException, IOException
     {
         //arrange
         IotHubX509AuthenticationProvider authentication = new IotHubX509SoftwareAuthenticationProvider(publicKeyCertificate, false, privateKey, false);

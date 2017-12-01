@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubX509AuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.*;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
@@ -260,7 +260,7 @@ public class DeviceClientTest
 
     //Tests_SRS_DEVICECLIENT_34_064: [If the provided protocol is null, this function shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
-    public void createFromSecurityProviderThrowsForNullProtocol() throws URISyntaxException, SecurityClientException, IOException
+    public void createFromSecurityProviderThrowsForNullProtocol() throws URISyntaxException, SecurityProviderException, IOException
     {
         //act
         DeviceClient.createFromSecurityProvider("some uri", "some device id", mockSecurityProvider, null);
@@ -270,7 +270,7 @@ public class DeviceClientTest
     //Tests_SRS_DEVICECLIENT_34_066: [The provided security provider will be saved in config.]
     //Tests_SRS_DEVICECLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
     @Test
-    public void createFromSecurityProviderUsesUriAndDeviceIdAndSavesSecurityProviderAndCreatesDeviceIO() throws URISyntaxException, SecurityClientException, IOException
+    public void createFromSecurityProviderUsesUriAndDeviceIdAndSavesSecurityProviderAndCreatesDeviceIO() throws URISyntaxException, SecurityProviderException, IOException
     {
         //arrange
         final String expectedUri = "some uri";

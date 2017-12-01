@@ -21,7 +21,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 
 import java.util.concurrent.*;
 
@@ -168,7 +168,8 @@ public class ProvisioningTask implements Callable
     }
 
     private void executeStateMachineForStatus(RegistrationOperationStatusParser registrationOperationStatusParser)
-            throws TimeoutException, InterruptedException, ExecutionException, ProvisioningDeviceClientException, SecurityClientException
+            throws TimeoutException, InterruptedException, ExecutionException, ProvisioningDeviceClientException, SecurityProviderException
+
     {
         boolean isContinue = false;
         RegistrationOperationStatusParser statusRegistrationOperationStatusParser = registrationOperationStatusParser;
@@ -284,7 +285,7 @@ public class ProvisioningTask implements Callable
             this.executeStateMachineForStatus(registrationOperationStatusParser);
             this.close();
         }
-        catch (ExecutionException | TimeoutException | ProvisioningDeviceClientException | SecurityClientException e)
+        catch (ExecutionException | TimeoutException | ProvisioningDeviceClientException | SecurityProviderException e)
         {
             //SRS_ProvisioningTask_25_006: [ This method shall invoke the status callback, if any of the task fail or throw any exception. ]
             this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;

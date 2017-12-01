@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class IotHubX509HardwareAuthenticationProvider extends IotHubX509Authenti
                 //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_003: [If this object's ssl context has not been generated yet, this function shall generate it from the saved security provider.]
                 this.iotHubSSLContext = new IotHubSSLContext(securityProviderX509.getSSLContext());
             }
-            catch (SecurityClientException e)
+            catch (SecurityProviderException e)
             {
                 //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_004: [If the security provider throws a SecurityProviderException while generating an SSLContext, this function shall throw an IOException.]
                 throw new IOException(e);

@@ -20,7 +20,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.TpmRegist
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -145,13 +145,13 @@ public class RegisterTask implements Callable
                 throw new ProvisioningDeviceClientException("Did not receive DPS registration successfully");
             }
         }
-        catch (InterruptedException | SecurityClientException e)
+        catch (InterruptedException | SecurityProviderException e)
         {
             throw new ProvisioningDeviceClientException(e);
         }
     }
 
-    private String constructSasToken(String registrationId, int expiryTime) throws ProvisioningDeviceClientException, UnsupportedEncodingException, SecurityClientException
+    private String constructSasToken(String registrationId, int expiryTime) throws ProvisioningDeviceClientException, UnsupportedEncodingException, SecurityProviderException
     {
         if (expiryTime <= 0)
         {
@@ -179,7 +179,8 @@ public class RegisterTask implements Callable
     private RegistrationOperationStatusParser processWithNonce(ResponseData responseDataForNonce,
                                                                SecurityProviderTpm securityClientTpm,
                                                                RequestData requestData)
-            throws IOException, InterruptedException, ProvisioningDeviceClientException,SecurityClientException
+            throws IOException, InterruptedException, ProvisioningDeviceClientException,SecurityProviderException
+
     {
 
         TpmRegistrationResultParser registerResponseTPMParser = TpmRegistrationResultParser.createFromJson(new String(responseDataForNonce.getResponseData()));
@@ -201,7 +202,7 @@ public class RegisterTask implements Callable
             {
                 sasToken = this.constructSasToken(securityClientTpm.getRegistrationId(), DEFAULT_EXPIRY_TIME_IN_SECS);
             }
-            catch (SecurityClientException e)
+            catch (SecurityProviderException e)
             {
                 throw new ProvisioningDeviceSecurityException(e);
             }
@@ -282,7 +283,7 @@ public class RegisterTask implements Callable
                 throw new ProvisioningDeviceClientException("Did not receive DPS registration nonce successfully");
             }
         }
-        catch (IOException | InterruptedException | SecurityClientException e)
+        catch (IOException | InterruptedException | SecurityProviderException e)
         {
             throw new ProvisioningDeviceClientException(e);
         }
@@ -305,7 +306,7 @@ public class RegisterTask implements Callable
                 throw new ProvisioningDeviceSecurityException("Unknown Security client received");
             }
         }
-        catch (SecurityClientException e)
+        catch (SecurityProviderException e)
         {
             throw new ProvisioningDeviceSecurityException(e);
         }

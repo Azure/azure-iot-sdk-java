@@ -59,7 +59,7 @@ public class IotHubX509SoftwareAuthenticationProvider extends IotHubX509Authenti
         }
         catch (CertificateException | UnrecoverableKeyException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException e)
         {
-            //Codes_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_004: [If the security provider throws a SecurityClientException while generating an SSLContext, this function shall throw an IOException.]
+            //Codes_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_004: [If the security provider throws a SecurityProviderException while generating an SSLContext, this function shall throw an IOException.]
             throw new IOException(e);
         }
     }

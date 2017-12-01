@@ -7,7 +7,7 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.security;
 
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 
 import javax.net.ssl.*;
 import java.io.IOException;
@@ -27,14 +27,14 @@ public abstract class SecurityProviderX509 extends SecurityProvider
     abstract public Collection<X509Certificate> getIntermediateCertificatesChain();
 
     @Override
-    public String getRegistrationId() throws SecurityClientException
+    public String getRegistrationId() throws SecurityProviderException
     {
         //SRS_SecurityClientX509_25_001: [ This method shall retrieve the commonName of the client certificate and return as registration Id. ]
         return this.getClientCertificateCommonName();
     }
 
     @Override
-    public SSLContext getSSLContext() throws SecurityClientException
+    public SSLContext getSSLContext() throws SecurityProviderException
     {
         try
         {
@@ -43,12 +43,12 @@ public abstract class SecurityProviderX509 extends SecurityProvider
         }
         catch (NoSuchProviderException | UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException | IOException | CertificateException e)
         {
-            //SRS_SecurityClientX509_25_003: [ This method shall throw SecurityClientException chained with the exception thrown from underlying API calls to SSL library. ]
-            throw new SecurityClientException(e);
+            //SRS_SecurityClientX509_25_003: [ This method shall throw SecurityProviderException chained with the exception thrown from underlying API calls to SSL library. ]
+            throw new SecurityProviderException(e);
         }
     }
 
-    private TrustManager getDefaultX509TrustManager(KeyStore keyStore) throws NoSuchAlgorithmException, KeyStoreException, SecurityClientException
+    private TrustManager getDefaultX509TrustManager(KeyStore keyStore) throws NoSuchAlgorithmException, KeyStoreException, SecurityProviderException
     {
         // obtain X509 trust manager
         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
@@ -61,11 +61,11 @@ public abstract class SecurityProviderX509 extends SecurityProvider
             }
         }
 
-        //SRS_SecurityClientX509_25_004: [ This method shall throw SecurityClientException if X509 Trust Manager is not found. ]
-        throw new SecurityClientException("Could not retrieve X509 trust manager");
+        //SRS_SecurityClientX509_25_004: [ This method shall throw SecurityProviderException if X509 Trust Manager is not found. ]
+        throw new SecurityProviderException("Could not retrieve X509 trust manager");
     }
 
-    private KeyManager getDefaultX509KeyManager(KeyStore keyStore, String password) throws NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException, SecurityClientException
+    private KeyManager getDefaultX509KeyManager(KeyStore keyStore, String password) throws NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException, SecurityProviderException
     {
         // create key manager factory and obtain x509 key manager
 
@@ -80,11 +80,11 @@ public abstract class SecurityProviderX509 extends SecurityProvider
             }
         }
 
-        //SRS_SecurityClientX509_25_005: [ This method shall throw SecurityClientException if X509 Key Manager is not found. ]
-        throw new SecurityClientException("Could not retrieve X509 Key Manager");
+        //SRS_SecurityClientX509_25_005: [ This method shall throw SecurityProviderException if X509 Key Manager is not found. ]
+        throw new SecurityProviderException("Could not retrieve X509 Key Manager");
     }
 
-    private SSLContext generateSSLContext(X509Certificate leafCertificate, Key leafPrivateKey, Collection<X509Certificate> signerCertificates) throws NoSuchProviderException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException, SecurityClientException
+    private SSLContext generateSSLContext(X509Certificate leafCertificate, Key leafPrivateKey, Collection<X509Certificate> signerCertificates) throws NoSuchProviderException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException, SecurityProviderException
     {
         if (leafCertificate == null || leafPrivateKey == null || signerCertificates == null)
         {
@@ -103,7 +103,7 @@ public abstract class SecurityProviderX509 extends SecurityProvider
 
         if (keyStore == null)
         {
-            throw new SecurityClientException("Key store with trusted certs cannot be null");
+            throw new SecurityProviderException("Key store with trusted certs cannot be null");
         }
 
         // Load Alias cert and private key to key store

@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.device.auth;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -53,7 +53,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
 
             this.sslContextNeedsUpdate = false;
         }
-        catch (SecurityClientException e)
+        catch (SecurityProviderException e)
         {
             //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_023: [If the security provider throws an exception while retrieving a sas token or ssl context from it, this function shall throw an IOException.]
             throw new IOException(e);
@@ -138,9 +138,9 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
             String base64UrlEncodedSignature = URLEncoder.encode(new String(base64Signature), ENCODING_FORMAT_NAME);
             return String.format(SASTOKEN_FORMAT, encodedTokenScope, base64UrlEncodedSignature, expiryTimeUTC);
         }
-        catch (UnsupportedEncodingException | SecurityClientException e)
+        catch (UnsupportedEncodingException | SecurityProviderException e)
         {
-            //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_011: [When generating the sas token signature from the security provider, if an UnsupportedEncodingException or SecurityClientException is thrown, this function shall throw an IOException.]
+            //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_011: [When generating the sas token signature from the security provider, if an UnsupportedEncodingException or SecurityProviderException is thrown, this function shall throw an IOException.]
             throw new IOException(e);
         }
     }

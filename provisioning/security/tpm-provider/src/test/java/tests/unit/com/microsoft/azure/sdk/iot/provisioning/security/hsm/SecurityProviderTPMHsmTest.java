@@ -7,7 +7,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMHsm;
 import mockit.*;
 import org.junit.Test;
@@ -169,7 +169,7 @@ public class SecurityProviderTPMHsmTest
         };
     }
 
-    @Test (expected = SecurityClientException.class)
+    @Test (expected = SecurityProviderException.class)
     public void constructorThrowsOnReadPublicResponseNull() throws Exception
     {
         //arrange
@@ -188,7 +188,7 @@ public class SecurityProviderTPMHsmTest
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
     }
 
-    @Test (expected = SecurityClientException.class)
+    @Test (expected = SecurityProviderException.class)
     public void constructorThrowsOnResponseCodeNotSuccessNotHandle() throws Exception
     {
         //arrange
@@ -210,7 +210,7 @@ public class SecurityProviderTPMHsmTest
     }
 
 
-    @Test (expected = SecurityClientException.class)
+    @Test (expected = SecurityProviderException.class)
     public void constructorThrowsOnResponseCodeNotSuccessNotHandleOnClear() throws Exception
     {
         //arrange
@@ -229,7 +229,7 @@ public class SecurityProviderTPMHsmTest
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
     }
 
-    @Test (expected = SecurityClientException.class)
+    @Test (expected = SecurityProviderException.class)
     public void constructorThrowsOnCreatePrimaryResponseNull() throws Exception
     {
         //arrange
@@ -418,8 +418,8 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.activateIdentityKey(testKey);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_008: [ This method shall throw SecurityClientException if ID Key Public could not be extracted form TPM. ]
-    @Test (expected = SecurityClientException.class)
+    //SRS_SecurityProviderTPMHsm_25_008: [ This method shall throw SecurityProviderException if ID Key Public could not be extracted form TPM. ]
+    @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnNullIdKeyPub() throws Exception
     {
         //arrange
@@ -441,8 +441,8 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.activateIdentityKey(testKey);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_010: [ This method shall throw  SecurityClientException if Authorization session with TPM could not be started. ]
-    @Test (expected = SecurityClientException.class)
+    //SRS_SecurityProviderTPMHsm_25_010: [ This method shall throw  SecurityProviderException if Authorization session with TPM could not be started. ]
+    @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnStartAuthSessionFail() throws Exception
     {
         //arrange
@@ -470,8 +470,8 @@ public class SecurityProviderTPMHsmTest
 
     }
 
-    //SRS_SecurityProviderTPMHsm_25_013: [ This method shall throw SecurityClientException if activating the credential for the session fails. ]
-    @Test (expected = SecurityClientException.class)
+    //SRS_SecurityProviderTPMHsm_25_013: [ This method shall throw SecurityProviderException if activating the credential for the session fails. ]
+    @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnInnerWrapKeyNull() throws Exception
     {
         //arrange
@@ -505,8 +505,8 @@ public class SecurityProviderTPMHsmTest
 
     }
 
-    //SRS_SecurityProviderTPMHsm_25_015: [ This method shall throw SecurityClientException if importing the activated credential onto TPM fails. ]
-    @Test (expected = SecurityClientException.class)
+    //SRS_SecurityProviderTPMHsm_25_015: [ This method shall throw SecurityProviderException if importing the activated credential onto TPM fails. ]
+    @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnIdKeyPrivateNull() throws Exception
     {
         //arrange
@@ -544,8 +544,8 @@ public class SecurityProviderTPMHsmTest
 
     }
 
-    //SRS_SecurityProviderTPMHsm_25_017: [ This method shall throw SecurityClientException if loading SRK onto TPM fails. ]
-    @Test (expected = SecurityClientException.class)
+    //SRS_SecurityProviderTPMHsm_25_017: [ This method shall throw SecurityProviderException if loading SRK onto TPM fails. ]
+    @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnHIdKeyNull() throws Exception
     {
         //arrange
@@ -585,8 +585,8 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.activateIdentityKey(testKey);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_021: [ This method shall throw SecurityClientException if the encoded Uri length is greater than Maximum Uri Length . ]
-    @Test (expected = SecurityClientException.class)
+    //SRS_SecurityProviderTPMHsm_25_021: [ This method shall throw SecurityProviderException if the encoded Uri length is greater than Maximum Uri Length . ]
+    @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnInvalidLengthOfEncUriData() throws Exception
     {
         //arrange
@@ -644,8 +644,8 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.activateIdentityKey(testKey);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_023: [ This method shall throw SecurityClientException if creating TPMS_SENSITIVE_CREATE for the inner wrap key fails. ]
-    @Test (expected = SecurityClientException.class)
+    //SRS_SecurityProviderTPMHsm_25_023: [ This method shall throw SecurityProviderException if creating TPMS_SENSITIVE_CREATE for the inner wrap key fails. ]
+    @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnCreateResponseNull() throws Exception
     {
         //arrange
@@ -707,7 +707,7 @@ public class SecurityProviderTPMHsmTest
     }
 
     //SRS_SecurityProviderTPMHsm_25_025: [ This method shall throw if loading the created response private onto TPM fails. ]
-    @Test (expected = SecurityClientException.class)
+    @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnHSymKeyNull() throws Exception
     {
         //arrange
@@ -787,7 +787,7 @@ public class SecurityProviderTPMHsmTest
     }
 
     //SRS_SecurityProviderTPMHsm_25_0027: [ This method shall throw if Encrypt Decrypt the symmetric Key fails. ]
-    @Test (expected = SecurityClientException.class)
+    @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnEncryptDecryptResponseNull() throws Exception
     {
         //arrange
@@ -897,8 +897,8 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.signWithIdentity(deviceIdData);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_030: [ This method shall throw SecurityClientException if ID KEY public was not instantiated. ]
-    @Test (expected = SecurityClientException.class)
+    //SRS_SecurityProviderTPMHsm_25_030: [ This method shall throw SecurityProviderException if ID KEY public was not instantiated. ]
+    @Test (expected = SecurityProviderException.class)
     public void signWithIdentityThrowsOnNullIdKeyPub() throws Exception
     {
         //arrange
@@ -972,7 +972,7 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.signWithIdentity(deviceIdData);
     }
 
-    @Test (expected =  SecurityClientException.class)
+    @Test (expected =  SecurityProviderException.class)
     public void signWithIdentityThrowsOnNullHandle(@Mocked TPM_ALG_ID mockedTpmAlgId,
                                                    @Mocked TPMU_ASYM_SCHEME mockedTpmuAsymScheme,
                                                    @Mocked TPMU_PUBLIC_PARMS mockedTpmuPublicParms,
