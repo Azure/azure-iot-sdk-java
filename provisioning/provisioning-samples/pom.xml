@@ -34,7 +34,7 @@
     </properties>
     <modules>
         <module>provisioning-tpm-sample</module>
-        <module>provisioning-x509-sample</module>
+        <module>provisioning-X509-sample</module>
         <module>service-enrollment-sample</module>
         <module>service-update-enrollment-sample</module>
         <module>service-bulkoperation-sample</module>
