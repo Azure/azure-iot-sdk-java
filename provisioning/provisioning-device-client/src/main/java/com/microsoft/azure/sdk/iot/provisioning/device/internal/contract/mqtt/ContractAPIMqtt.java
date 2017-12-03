@@ -4,6 +4,8 @@
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.mqtt;
 
 import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
@@ -120,7 +122,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
 
         try
         {
-            String username = String.format(MQTT_USERNAME_FMT, this.scopeId, registrationId, "api_ver", "client_version");
+            String username = String.format(MQTT_USERNAME_FMT, this.scopeId, registrationId, SDKUtils.getServiceApiVersion(), SDKUtils.getServiceApiVersion());
 
             this.mqttConnection = new MqttConnection(this.hostname, registrationId, username, null, sslContext, this, false);
             this.mqttConnection.connect();

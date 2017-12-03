@@ -16,9 +16,10 @@ import java.util.Map;
 
 public class AmqpDeviceOperations
 {
-    protected static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
-    protected static final String API_VERSION_KEY = "com.microsoft.azure.sdk.provisioning-client/0.1.0";
-    protected static final String API_VERSION_VALUE = "2016-11-14";
+    protected static final String CLIENT_VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
+    protected static final String CLIENT_VERSION_VALUE = "com.microsoft.azure.sdk.provisioning-client/0.1.0";
+    protected static final String API_VERSION_KEY = "com.microsoft:api-version";
+    protected static final String API_VERSION_VALUE = "2017-11-15";
 
     protected String senderLinkTag;
     protected String receiverLinkTag;
@@ -36,7 +37,7 @@ public class AmqpDeviceOperations
     public AmqpDeviceOperations()
     {
         this.amqpProperties = new HashMap<>();
-        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), API_VERSION_KEY);
+        this.amqpProperties.put(Symbol.getSymbol(API_VERSION_KEY), API_VERSION_VALUE);
 
         this.senderLinkTag = "provision_sender_link";
         this.receiverLinkTag = "provision_receiver_link";
