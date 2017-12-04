@@ -304,7 +304,7 @@ abstract public class Mqtt implements MqttCallback
                 throw new InvalidParameterException("Mqtt client should be initialised at least once before using it");
             }
 
-            // Codes_SRS_Mqtt_34_023: [This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.]
+            // Codes_SRS_Mqtt_34_023: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
             Pair<String, byte[]> messagePair = peekMessage();
             if (messagePair != null)
             {

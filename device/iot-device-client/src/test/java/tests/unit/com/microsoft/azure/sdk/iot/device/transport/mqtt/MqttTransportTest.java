@@ -24,8 +24,8 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for MqttTransport.java
- * Method: 100%
- * Lines: 95%
+ * Method: 90%
+ * Lines: 94%
  */
 public class MqttTransportTest
 {
@@ -69,7 +69,7 @@ public class MqttTransportTest
                 expectedConnection.open();
             }
         };
-
+        
         Field sendMessagesLock = transport.getClass().getDeclaredField("sendMessagesLock");
         sendMessagesLock.setAccessible(true);
         assertNotNull(sendMessagesLock.get(transport));
@@ -381,16 +381,6 @@ public class MqttTransportTest
                 result = mockConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
-                mockPacket.getCallback();
-                result = mockCallback;
-                mockPacket.getContext();
-                result = context;
-                mockConnection.sendEvent((Message) any);
-                returns(IotHubStatusCode.OK_EMPTY, IotHubStatusCode.ERROR);
-                new IotHubCallbackPacket(IotHubStatusCode.UNAUTHORIZED, mockCallback, context);
-                result = mockCallbackPacket;
-                mockCallbackPacket.getStatus();
-                result = IotHubStatusCode.UNAUTHORIZED;
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication();
@@ -411,13 +401,58 @@ public class MqttTransportTest
         //assert
         Queue<IotHubCallbackPacket> callbackList = Deencapsulation.getField(transport, "callbackList");
         assertEquals(1, callbackList.size());
-        assertEquals(IotHubStatusCode.UNAUTHORIZED, callbackList.remove().getStatus());
         new VerificationsInOrder()
         {
             {
                 mockConnection.sendEvent((Message) any);
                 times = 0;
+                new IotHubCallbackPacket(IotHubStatusCode.UNAUTHORIZED, (IotHubEventCallback) any, any);
+                times = 1;
                 mockConnectionStateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, null);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MQTTTRANSPORT_34_027: [If the packet to be sent contains a message that has expired, the message shall not be sent, but shall be added to the callback list with IotHubStatusCode MESSAGE_EXPIRED.]
+    @Test
+    public void sendMessagesWithExpiredMessageAddsMessageExpiredToCallbackQueue(
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubEventCallback mockCallback,
+            @Mocked final IotHubOutboundPacket mockPacket,
+            @Mocked final IotHubCallbackPacket mockCallbackPacket)
+            throws IOException
+    {
+        //arrange
+        final Map<String, Object> context = new HashMap<>();
+        new NonStrictExpectations()
+        {
+            {
+                new MqttIotHubConnection(mockConfig);
+                result = mockConnection;
+                new IotHubOutboundPacket(mockMsg, mockCallback, context);
+                result = mockPacket;
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                mockPacket.getMessage().isExpired();
+                result = true;
+            }
+        };
+
+        MqttTransport transport = new MqttTransport(mockConfig);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, context);
+
+        //act
+        transport.sendMessages();
+
+        //assert
+        Queue<IotHubCallbackPacket> callbackList = Deencapsulation.getField(transport, "callbackList");
+        assertEquals(1, callbackList.size());
+        new Verifications()
+        {
+            {
+                new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_EXPIRED, (IotHubEventCallback) any, any);
                 times = 1;
             }
         };

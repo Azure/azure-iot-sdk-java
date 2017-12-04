@@ -80,7 +80,7 @@ public void stop() throws IOException;
  public Message receive() throws IOException;
 ```
 
-**SRS_MQTTDEVICEMETHOD_25_026: [**This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
+**SRS_MQTTDEVICEMETHOD_25_026: [**This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.**]**
 
 **SRS_MQTTDEVICEMETHOD_34_027: [**This method shall parse message to look for Post topic ($iothub/methods/POST/) and return null other wise.**]**
 

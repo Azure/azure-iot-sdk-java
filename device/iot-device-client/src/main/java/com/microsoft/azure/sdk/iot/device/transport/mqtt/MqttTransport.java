@@ -224,6 +224,12 @@ public final class MqttTransport implements IotHubTransport
                         this.stateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, this.stateCallbackContext);
                     }
                 }
+                else if (packet.getMessage().isExpired())
+                {
+                    //Codes_SRS_MQTTTRANSPORT_34_027: [If the packet to be sent contains a message that has expired, the message shall not be sent, but shall be added to the callback list with IotHubStatusCode MESSAGE_EXPIRED.]
+                    IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_EXPIRED, packet.getCallback(), packet.getContext());
+                    this.callbackList.add(callbackPacket);
+                }
                 else
                 {
                     try

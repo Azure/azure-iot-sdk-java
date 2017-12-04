@@ -87,9 +87,9 @@ public void stop() throws IOException;
 
 **SRS_MQTTDEVICETWIN_34_034: [**If the call peekMessage returns null or empty string then this method shall do nothing and return null**]**
 
-**SRS_MQTTDEVICETWIN_25_035: [**This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
+**SRS_MQTTDEVICETWIN_25_035: [**This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.**]**
 
-**SRS_MQTTDEVICETWIN_25_035: [**This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
+**SRS_MQTTDEVICETWIN_25_035: [**This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.**]**
 
 **SRS_MQTTDEVICETWIN_25_037: [**This method shall parse topic to look for only either twin response topic or twin patch topic and thorw unsupportedoperation exception other wise.**]**
 

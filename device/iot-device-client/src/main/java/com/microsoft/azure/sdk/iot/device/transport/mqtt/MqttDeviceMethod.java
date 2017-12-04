@@ -167,7 +167,7 @@ public class MqttDeviceMethod extends Mqtt
 
                 if (topic != null && topic.length() > 0)
                 {
-                    // Codes_SRS_MQTTDEVICEMETHOD_25_026: [This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.]
+                    // Codes_SRS_MQTTDEVICEMETHOD_25_026: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
                     byte[] data = messagePair.getValue();
 
                     if (topic.length() > METHOD.length() && topic.startsWith(METHOD))

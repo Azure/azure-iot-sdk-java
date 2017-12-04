@@ -113,6 +113,8 @@ public void sendMessages() throws IOException;
 
 **SRS_HTTPSTRANSPORT_34_034: [**If the sas token saved in this config has expired and the config has no device key saved, this function shall trigger a connection status callback with status SAS_TOKEN_EXPIRED.**]**
 
+**SRS_HTTPSTRANSPORT_34_039: [**If any packet in the waiting list contains a message that has expired, that packet shall be removed from the waiting list and added to the callback list with status MESSAGE_EXPIRED.**]**
+
 
 ### invokeCallbacks
 

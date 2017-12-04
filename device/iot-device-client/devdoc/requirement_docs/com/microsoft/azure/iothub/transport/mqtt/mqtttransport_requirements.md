@@ -107,6 +107,8 @@ public void sendMessages() throws IllegalStateException;
 
 **SRS_MQTTTRANSPORT_34_024: [**If the config is using sas token auth, its token has expired, and the connection status callback is not null, the connection status callback will be fired with SAS_TOKEN_EXPIRED.**]**
 
+**SRS_MQTTTRANSPORT_34_027: [**If the packet to be sent contains a message that has expired, the message shall not be sent, but shall be added to the callback list with IotHubStatusCode MESSAGE_EXPIRED.**]**
+
 
 ### invokeCallbacks
 

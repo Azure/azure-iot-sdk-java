@@ -117,7 +117,7 @@ public Message receive() throws IOException;
 
 **SRS_Mqtt_34_022: [**If the call peekMessage returns a null or empty string then this method shall do nothing and return null**]**
 
-**SRS_Mqtt_34_023: [**This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
+**SRS_Mqtt_34_023: [**This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.**]**
 
 **SRS_Mqtt_34_024: [**This method shall construct new Message with the bytes obtained from peekMessage and return the message.**]**
 

@@ -23,7 +23,7 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for HttpsTransport.
- * Methods: 100%
+ * Methods: 94%
  * Lines: 92%
  */
 public class HttpsTransportTest
@@ -300,6 +300,40 @@ public class HttpsTransportTest
                 mockBatch.addMessage(expectedSingleMsg);
                 times = 3;
                 mockConn.sendEvent(expectedMsg);
+            }
+        };
+    }
+
+    //Tests_SRS_HTTPSTRANSPORT_34_039: [If any packet in the waiting list contains a message that has expired, that packet shall be removed from the waiting list and added to the callback list with status MESSAGE_EXPIRED.]
+    @Test
+    public void sendMessagesDoesNotMoveExpiredMessagePacketsToInProgressList(
+            @Mocked final Message mockMsg,
+            @Mocked final IotHubEventCallback mockCallback,
+            @Mocked IotHubCallbackPacket mockIotHubCallbackPacket)
+            throws URISyntaxException, IOException, IotHubSizeExceededException
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockMsg.isExpired();
+                result = true;
+            }
+        };
+
+        HttpsTransport transport = new HttpsTransport(mockConfig);
+        transport.open();
+        transport.addMessage(mockMsg, mockCallback, null);
+
+        //act
+        transport.sendMessages();
+
+        //assert
+        new Verifications()
+        {
+            {
+                new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_EXPIRED, (IotHubEventCallback) any, any);
+                times = 1;
             }
         };
     }
