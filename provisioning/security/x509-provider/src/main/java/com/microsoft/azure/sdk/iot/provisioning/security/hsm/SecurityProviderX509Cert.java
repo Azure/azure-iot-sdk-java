@@ -10,13 +10,20 @@ package com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMException;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.security.Key;
+import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -55,15 +62,15 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
         this.signerCertificates = new LinkedList<>();
         try
         {
-            this.leafCertificatePublic = this.convertPemToCertificate(leafCertificatePublicPem);
-            this.leafPrivateKey = this.convertPemToPrivateKey(leafPrivateKeyPem);
+            this.leafCertificatePublic = SecurityProviderX509Cert.parsePublicKeyCertificate(leafCertificatePublicPem);
+            this.leafPrivateKey = SecurityProviderX509Cert.parsePrivateKey(leafPrivateKeyPem);
             for (String cert : signerCertificates)
             {
-                this.signerCertificates.add(this.convertPemToCertificate(cert));
+                this.signerCertificates.add(SecurityProviderX509Cert.parsePublicKeyCertificate(cert));
             }
             this.commonNameLeaf = this.getCommonName(this.leafCertificatePublic);
         }
-        catch (IOException | CertificateException e)
+        catch (CertificateException e)
         {
             throw new SecurityProviderException(e);
         }
@@ -84,30 +91,6 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
         }
 
         throw new SecurityProviderException("CN name could not be found");
-    }
-
-    private X509Certificate convertPemToCertificate(String pem) throws IOException, CertificateException
-    {
-        Security.addProvider(new BouncyCastleProvider());
-        PEMReader pemCert = new PEMReader(new StringReader(pem));
-        Object possiblePemCert = pemCert.readObject();
-        if (!(possiblePemCert instanceof X509Certificate))
-        {
-            throw new CertificateException("Unexpected format for public certificate");
-        }
-        return (X509Certificate) possiblePemCert;
-    }
-
-    private Key convertPemToPrivateKey(String pem) throws IOException, CertificateException
-    {
-        Security.addProvider(new BouncyCastleProvider());
-        PEMReader pemCert = new PEMReader(new StringReader(pem));
-        Object possiblePemKey = pemCert.readObject();
-        if (!(possiblePemKey instanceof Key))
-        {
-            throw new CertificateException("Unexpected format for Pem Key");
-        }
-        return (Key) possiblePemKey;
     }
 
      /**
@@ -186,5 +169,46 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
         }
 
         throw new UnsupportedOperationException("This method is not supported, use other means to validate certificate");
+    }
+
+    private static Key parsePrivateKey(String privateKeyString) throws CertificateException
+    {
+        try
+        {
+            // Codes_SRS_SecurityClientDiceEmulator_34_001: [This function shall return a Private Key instance created by the provided PEM formatted privateKeyString.]
+            Security.addProvider(new BouncyCastleProvider());
+            PEMParser privateKeyParser = new PEMParser(new StringReader(privateKeyString));
+            Object possiblePrivateKey = privateKeyParser.readObject();
+            PEMKeyPair ukp = (PEMKeyPair) possiblePrivateKey;
+            return SecurityProviderX509Cert.getPrivateKeyFromPEMKeyPair(ukp);
+        }
+        catch (Exception e)
+        {
+            // Codes_SRS_SecurityClientDiceEmulator_34_002: [If any exception is encountered while attempting to create the private key instance, this function shall throw a CertificateException.]
+            throw new CertificateException(e);
+        }
+    }
+
+    private static X509Certificate parsePublicKeyCertificate(String publicKeyCertificateString) throws CertificateException
+    {
+        try
+        {
+            // Codes_SRS_SecurityClientDiceEmulator_34_003: [This function shall return an X509Certificate instance created by the provided PEM formatted publicKeyCertificateString.]
+            Security.addProvider(new BouncyCastleProvider());
+            PemReader publicKeyCertificateReader = new PemReader(new StringReader(publicKeyCertificateString));
+            PemObject possiblePublicKeyCertificate = publicKeyCertificateReader.readPemObject();
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            return (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(possiblePublicKeyCertificate.getContent()));
+        }
+        catch (Exception e)
+        {
+            // Codes_SRS_SecurityClientDiceEmulator_34_004: [If any exception is encountered while attempting to create the public key certificate instance, this function shall throw a CertificateException.]
+            throw new CertificateException(e);
+        }
+    }
+
+    private static Key getPrivateKeyFromPEMKeyPair(PEMKeyPair ukp) throws PEMException
+    {
+        return new JcaPEMKeyConverter().setProvider("BC").getKeyPair(ukp).getPrivate();
     }
 }
