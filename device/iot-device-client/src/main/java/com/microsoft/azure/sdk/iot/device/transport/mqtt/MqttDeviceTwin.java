@@ -54,7 +54,7 @@ public class MqttDeviceTwin extends Mqtt
         /*
         **Codes_SRS_MQTTDEVICETWIN_25_001: [**The constructor shall instantiate super class without any parameters.**]**
          */
-        super(mqttConnection);
+        super(mqttConnection, null);
         /*
         **Codes_SRS_MQTTDEVICETWIN_25_002: [**The constructor shall construct device twin response subscribeTopic.**]**
          */

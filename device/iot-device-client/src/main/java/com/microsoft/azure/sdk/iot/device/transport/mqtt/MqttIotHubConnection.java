@@ -3,10 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.MessageType;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
@@ -15,7 +12,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URLEncoder;
 
-public class MqttIotHubConnection
+public class MqttIotHubConnection implements MqttConnectionStateListener
 {
     /** The MQTT connection lock. */
     private final Object MQTT_CONNECTION_LOCK = new Object();
@@ -43,6 +40,9 @@ public class MqttIotHubConnection
     private MqttMessaging deviceMessaging;
     private MqttDeviceTwin deviceTwin;
     private MqttDeviceMethod deviceMethod;
+
+    private IotHubConnectionStateCallback stateCallback;
+    private Object stateCallbackContext;
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -150,11 +150,12 @@ public class MqttIotHubConnection
                             this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword, sslContext);
                 }
 
-                this.deviceMessaging = new MqttMessaging(mqttConnection, this.config.getDeviceId());
-                mqttConnection.setMqttCallback(this.deviceMessaging);
+                //Codes_SRS_MQTTIOTHUBCONNECTION_34_030: [This function shall instantiate this object's MqttMessaging object with this object as the listener.]
+                this.deviceMessaging = new MqttMessaging(mqttConnection, this.config.getDeviceId(), this);
+                this.mqttConnection.setMqttCallback(this.deviceMessaging);
                 this.deviceMethod = new MqttDeviceMethod(mqttConnection);
                 this.deviceTwin = new MqttDeviceTwin(mqttConnection);
-                
+
                 // Codes_SRS_MQTTIOTHUBCONNECTION_99_017 : [The function shall set DeviceClientConfig object needed for SAS token renewal.]
                 this.deviceMessaging.setDeviceClientConfig(this.config);
 
@@ -180,7 +181,6 @@ public class MqttIotHubConnection
                 }
                 throw new IOException(e);
             }
-
         }
     }
 
@@ -216,7 +216,6 @@ public class MqttIotHubConnection
         {
             this.state = State.CLOSED;
         }
-
     }
 
     /**
@@ -235,7 +234,10 @@ public class MqttIotHubConnection
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_010: [If the message is null or empty,
             // the function shall return status code BAD_FORMAT.]
             if (message == null || message.getBytes() == null ||
-                    ((message.getMessageType() != MessageType.DEVICE_TWIN && message.getMessageType() != MessageType.DEVICE_METHODS) && message.getBytes().length == 0))
+                    (
+                            (message.getMessageType() != MessageType.DEVICE_TWIN
+                                    && message.getMessageType() != MessageType.DEVICE_METHODS)
+                                    && message.getBytes().length == 0))
             {
                 return IotHubStatusCode.BAD_FORMAT;
             }
@@ -252,6 +254,18 @@ public class MqttIotHubConnection
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_011: [If the message was successfully received by the service,
             // the function shall return status code OK_EMPTY.]
             IotHubStatusCode result = IotHubStatusCode.OK_EMPTY;
+
+            if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isRenewalNecessary())
+            {
+                if (this.stateCallback != null)
+                {
+                    //Codes_SRS_MQTTIOTHUBCONNECTION_34_036: [If the sas token saved in the config has expired and needs to be renewed and if there is a connection state callback saved, this function shall invoke that callback with Status SAS_TOKEN_EXPIRED.]
+                    this.stateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, this.stateCallbackContext);
+                }
+
+                //Codes_SRS_MQTTIOTHUBCONNECTION_34_035: [If the sas token saved in the config has expired and needs to be renewed, this function shall return UNAUTHORIZED.]
+                return IotHubStatusCode.UNAUTHORIZED;
+            }
 
             try
             {
@@ -300,13 +314,11 @@ public class MqttIotHubConnection
                     "to receive a message.");
         }
 
-        Message message = null;
 
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_014: [The function shall attempt to consume a message
         // from various messaging clients.]
         // Codes_SRS__MQTTIOTHUBCONNECTION_34_016: [If any of the messaging clients throw an exception, The associated message will be removed from the queue and the exception will be propagated up to the receive task.]
-
-        message = this.deviceMethod.receive();
+        Message message = this.deviceMethod.receive();
         if (message == null)
         {
             message = deviceTwin.receive();
@@ -316,6 +328,44 @@ public class MqttIotHubConnection
         {
             message = deviceMessaging.receive();
         }
+
         return message;
+    }
+
+    /**
+     * Saves the provided callback and callbackContext objects to be used for connection state updates
+     * @param callback the callback to fire
+     * @param callbackContext the context to include
+     * @throws IllegalArgumentException if the provided callback object is null
+     */
+    void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
+    {
+        if (callback == null)
+        {
+            //Codes_SRS_MQTTIOTHUBCONNECTION_34_033: [If the provided callback object is null, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+
+        //Codes_SRS_MQTTIOTHUBCONNECTION_34_034: [This function shall save the provided callback and callback context.]
+        this.stateCallback = callback;
+        this.stateCallbackContext = callbackContext;
+    }
+
+    public void connectionLost()
+    {
+        if (this.stateCallback != null)
+        {
+            //Codes_SRS_MQTTIOTHUBCONNECTION_34_028: [If this object's connection state callback is not null, this function shall fire that callback with the saved context and status CONNECTION_DROP.]
+            this.stateCallback.execute(IotHubConnectionState.CONNECTION_DROP, this.stateCallbackContext);
+        }
+    }
+
+    public void connectionEstablished()
+    {
+        if (this.stateCallback != null)
+        {
+            //Codes_SRS_MQTTIOTHUBCONNECTION_34_029: [If this object's connection state callback is not null, this function shall fire that callback with the saved context and status CONNECTION_SUCCESS.]
+            this.stateCallback.execute(IotHubConnectionState.CONNECTION_SUCCESS, this.stateCallbackContext);
+        }
     }
 }

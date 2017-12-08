@@ -14,46 +14,34 @@ public class MqttMessaging extends Mqtt
     private String publishTopic;
     private String parseTopic;
 
-    public MqttMessaging(MqttConnection mqttConnection, String deviceId) throws IOException
+    public MqttMessaging(MqttConnection mqttConnection, String deviceId, MqttConnectionStateListener listener) throws IOException
     {
-        /*
-        **Codes_SRS_MqttMessaging_25_001: [**The constructor shall throw InvalidParameter Exception if any of the parameters are null or empty .**]**
-         */
-        /*
-        **Codes_SRS_MqttMessaging_25_002: [**The constructor shall use the configuration to instantiate super class and passing the parameters.**]**
-         */
-        super(mqttConnection);
+        //Codes_SRS_MqttMessaging_25_002: [The constructor shall use the configuration to instantiate super class and passing the parameters.]
+        super(mqttConnection, listener);
 
         if (deviceId == null || deviceId.isEmpty())
         {
             throw new IllegalArgumentException("Device id cannot be null or empty");
         }
-        /*
-        **Codes_SRS_MqttMessaging_25_003: [**The constructor construct publishTopic and subscribeTopic from deviceId.**]**
-         */
+
+        //Codes_SRS_MqttMessaging_25_003: [The constructor construct publishTopic and subscribeTopic from deviceId.]
+        //Codes_SRS_MqttMessaging_25_004: [The constructor shall save the provided listener.]
         this.publishTopic = "devices/" + deviceId + "/messages/events/";
         this.subscribeTopic = "devices/" + deviceId + "/messages/devicebound/#";
         this.parseTopic = "devices/" + deviceId + "/messages/devicebound/";
-
     }
 
     public void start() throws IOException
     {
-        /*
-        **Codes_SRS_MqttMessaging_25_020: [**start method shall be call connect to establish a connection to IOT Hub with the given configuration.**]**
-
-        **Codes_SRS_MqttMessaging_25_021: [**start method shall subscribe to messaging subscribe topic once connected.**]**
-         */
-
+        //Codes_SRS_MqttMessaging_25_020: [start method shall be call connect to establish a connection to IOT Hub with the given configuration.]
+        //Codes_SRS_MqttMessaging_25_021: [start method shall subscribe to messaging subscribe topic once connected.]
         this.connect();
         this.subscribe(subscribeTopic);
     }
 
     public void stop() throws IOException
     {
-       /*
-       **Codes_SRS_MqttMessaging_25_022: [**stop method shall be call disconnect to tear down a connection to IOT Hub with the given configuration.**]**
-       */
+       //Codes_SRS_MqttMessaging_25_022: [stop method shall be call disconnect to tear down a connection to IOT Hub with the given configuration.]
        this.disconnect();
     }
 
@@ -61,9 +49,7 @@ public class MqttMessaging extends Mqtt
     {
         if (message == null || message.getBytes() == null)
         {
-            /*
-            **Codes_SRS_MqttMessaging_25_025: [**send method shall throw an exception if the message is null.**]**
-             */
+            //Codes_SRS_MqttMessaging_25_025: [send method shall throw an exception if the message is null.]
             throw new IOException("Message cannot be null");
         }
 
@@ -134,9 +120,7 @@ public class MqttMessaging extends Mqtt
                 stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
             }
 
-            /*
-            **Codes_SRS_MqttMessaging_34_026: [This method shall append each custom property's name and value to the publishTopic before publishing.]
-            */
+            //Codes_SRS_MqttMessaging_34_026: [This method shall append each custom property's name and value to the publishTopic before publishing.]
             stringBuilder.append(property.getName());
             stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
             stringBuilder.append(property.getValue());

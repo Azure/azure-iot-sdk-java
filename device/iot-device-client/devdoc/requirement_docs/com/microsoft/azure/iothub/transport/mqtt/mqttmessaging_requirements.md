@@ -2,8 +2,7 @@
 
 ## Overview
 
-MqttMessaging is a concrete class extending Mqtt. This class implements all the abstract methods from MQTT and
-overrides the onReconnect and onReconnectComplete events.
+MqttMessaging is a concrete class extending Mqtt.
 
 ## References
 
@@ -12,23 +11,18 @@ overrides the onReconnect and onReconnectComplete events.
 ```java
 public final class MqttMessaging extends Mqtt
 {
-    public MqttMessaging(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext) throws IOException;
-        
-    public Message receive() throws IOException;
-    void onReconnect() throws IOException;
-    void onReconnectComplete(boolean status) throws IOException;
+    public MqttMessaging(MqttConnection mqttConnection, String deviceId, MqttConnectionStateListener listener) throws IOException;
 
     public void start() throws IOException;
     public void stop() throws IOException;
     public void send(Message message) throws IOException;
-
 }
 ```
 
 ### MqttMessaging
 
 ```java
-public MqttMessaging(String serverURI, String clientId, String userName, String password, IotHubSSLContext iotHubSSLContext);
+public MqttMessaging(MqttConnection mqttConnection, String deviceId, MqttConnectionStateListener listener) throws IOException
 ```
 
 **SRS_MqttMessaging_25_001: [**The constructor shall throw InvalidParameter Exception if any of the parameters are null or empty .**]**
@@ -37,29 +31,7 @@ public MqttMessaging(String serverURI, String clientId, String userName, String 
 
 **SRS_MqttMessaging_25_003: [**The constructor construct publishTopic and subscribeTopic from deviceId.**]**
 
-
-### onReconnect
-
-```java
-abstract void onReconnect() throws IOException;
-```
-
-**SRS_MqttMessaging_25_015: [**onReconnect method shall be implemeted by MqttMessaging class.**]**
-
-**SRS_MqttMessaging_25_016: [**This onReconnect method shall put the entire operation of the MqttMessaging class on hold by waiting on the lock.**]**
-
-
-### onReconnectComplete
-
-```java
-abstract void onReconnectComplete(boolean status) throws IOException;
-```
-
-**SRS_MqttMessaging_25_017: [**This onReconnectComplete method shall be implemeted by MqttMessaging class.**]**
-
-**SRS_MqttMessaging_25_018: [**If the status is true, onReconnectComplete method shall release all the operation of the MqttMessaging class put on hold by notifying the users of the lock.**]**
-
-**SRS_MqttMessaging_25_019: [**If the status is false, onReconnectComplete method shall throw IOException**]**
+**SRS_MqttMessaging_25_004: [**The constructor shall save the provided listener.**]**
 
 
 ### start
@@ -102,5 +74,3 @@ public void stop() throws IOException;
 **SRS_MqttMessaging_34_029: [**If the message has a To, this method shall append that To to publishTopic before publishing using the key name `$.to`.**]**
 
 **SRS_MqttMessaging_34_030: [**If the message has a UserId, this method shall append that userId to publishTopic before publishing using the key name `$.uid`.**]**
-    
-   

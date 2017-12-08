@@ -41,7 +41,7 @@ public class MqttDeviceMethod extends Mqtt
         /*
         Codes_SRS_MqttDeviceMethod_25_001: [**The constructor shall instantiate super class without any parameters.**]**
          */
-        super(mqttConnection);
+        super(mqttConnection, null);
         /*
         Codes_SRS_MqttDeviceMethod_25_002: [**The constructor shall create subscribe and response topics strings for device methods as per the spec.**]**
          */

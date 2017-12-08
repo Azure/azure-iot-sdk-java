@@ -44,9 +44,6 @@ public final class MqttTransport implements IotHubTransport
     /** Messages whose callbacks that are waiting to be invoked. */
     private final Queue<IotHubCallbackPacket> callbackList;
 
-    private IotHubConnectionStateCallback stateCallback;
-    private Object stateCallbackContext;
-
     private final DeviceClientConfig config;
 
     /**
@@ -65,6 +62,7 @@ public final class MqttTransport implements IotHubTransport
         this.callbackList = new LinkedBlockingDeque<>();
         this.config = config;
         this.state = State.CLOSED;
+        this.mqttIotHubConnection = new MqttIotHubConnection(this.config);
     }
 
     /**
@@ -81,9 +79,7 @@ public final class MqttTransport implements IotHubTransport
             return;
         }
 
-        // Codes_SRS_MQTTTRANSPORT_15_003: [The function shall establish an MQTT connection
-        // with the IoT Hub given in the configuration.]
-        this.mqttIotHubConnection = new MqttIotHubConnection(this.config);
+        //Codes_SRS_MQTTTRANSPORT_34_003: [This function shall open the connection of the saved MqttIotHubConnection object.]
         this.mqttIotHubConnection.open();
 
         this.state = State.OPEN;
@@ -118,7 +114,7 @@ public final class MqttTransport implements IotHubTransport
         }
        
         // Codes_SRS_MQTTTRANSPORT_99_021: [The method will invoke the callback list]
-        invokeCallbacks(); 
+        invokeCallbacks();
 
         // Codes_SRS_MQTTTRANSPORT_15_005: [The function shall close the MQTT connection
         // with the IoT Hub given in the configuration.]
@@ -211,20 +207,7 @@ public final class MqttTransport implements IotHubTransport
             while (!this.waitingList.isEmpty())
             {
                 IotHubOutboundPacket packet = this.waitingList.remove();
-
-                if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isRenewalNecessary())
-                {
-                    //Codes_SRS_MQTTTRANSPORT_34_023: [If the config is using sas token auth and its token has expired, the message shall not be sent, but shall be added to the callback list with IotHubStatusCode UNAUTHORIZED.]
-                    IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.UNAUTHORIZED, packet.getCallback(), packet.getContext());
-                    this.callbackList.add(callbackPacket);
-
-                    //Codes_SRS_MQTTTRANSPORT_34_024: [If the config is using sas token auth, its token has expired, and the connection status callback is not null, the connection status callback will be fired with SAS_TOKEN_EXPIRED.]
-                    if (this.stateCallback != null)
-                    {
-                        this.stateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, this.stateCallbackContext);
-                    }
-                }
-                else if (packet.getMessage().isExpired())
+                if (packet.getMessage().isExpired())
                 {
                     //Codes_SRS_MQTTTRANSPORT_34_027: [If the packet to be sent contains a message that has expired, the message shall not be sent, but shall be added to the callback list with IotHubStatusCode MESSAGE_EXPIRED.]
                     IotHubCallbackPacket callbackPacket = new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_EXPIRED, packet.getCallback(), packet.getContext());
@@ -383,14 +366,7 @@ public final class MqttTransport implements IotHubTransport
      */
     public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
     {
-        if (callback == null)
-        {
-            //Codes_SRS_MQTTTRANSPORT_34_025: [If the provided callback is null, an IllegalArgumentException shall be thrown.]
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-
-        //Codes_SRS_MQTTTRANSPORT_34_026: [This function shall register the connection state callback.]
-        this.stateCallback = callback;
-        this.stateCallbackContext = callbackContext;
+        //Codes_SRS_MQTTTRANSPORT_34_025: [This function shall register the provided connection state callback and context with the saved mqtt iot hub connection.]
+        this.mqttIotHubConnection.registerConnectionStateCallback(callback, callbackContext);
     }
 }

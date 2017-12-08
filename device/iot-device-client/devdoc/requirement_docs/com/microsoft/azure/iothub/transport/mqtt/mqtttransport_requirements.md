@@ -49,10 +49,9 @@ public MqttTransport(DeviceClientConfig config);
 public void open() throws IOException;
 ```
 
-**SRS_MQTTTRANSPORT_15_003: [**The function shall establish an MQTT connection with IoT Hub given in the configuration.**]**
-
 **SRS_MQTTTRANSPORT_15_004: [**If the MQTT connection is already open, the function shall do nothing.**]**
 
+**SRS_MQTTTRANSPORT_34_003: [**This function shall open the connection of the saved MqttIotHubConnection object.**]**
 
 ### close
 
@@ -146,10 +145,9 @@ public boolean isEmpty();
 
 
 ### registerConnectionStateCallback
+
 ```java
 public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
 ```
 
-**SRS_MQTTTRANSPORT_34_025: [**If the provided callback is null, an IllegalArgumentException shall be thrown.**]**
-
-**SRS_MQTTTRANSPORT_34_026: [**This function shall register the connection state callback.**]**
+**SRS_MQTTTRANSPORT_34_025: [**This function shall register the provided connection state callback and context with the saved mqtt iot hub connection.**]**
