@@ -64,7 +64,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
         {
             AmqpMessage outgoingMessage = new AmqpMessage();
 
-            Map<String, String> userProperties = new HashMap<>();
+            Map<String, Object> userProperties = new HashMap<>();
             userProperties.put(AMQP_OP_TYPE_PROPERTY, msgType);
 
             if (operationId != null && !operationId.isEmpty())

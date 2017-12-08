@@ -17,8 +17,7 @@ abstract public class Device implements PropertyCallBack<String, Object>
     public HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> getDesiredProp();    
     public void hasDesiredProperty(Property desiredProp, PropertyCallBack<String, Object> desiredPropCallBack, Object desiredPropCallBackContext);
 
-    public void free();   
-    
+    public void clean();
 }
 ```
 
@@ -66,11 +65,11 @@ public void hasDesiredProperty(Property desiredProp, PropertyCallBack<String, Ob
 
 **SRS_DEVICE_25_008: [**This method shall add the parameters to the map even if callback and object pair are null**]**
 
-### free
+### clean
 
 ```java
-public void free();
+public void clean();
 ```
 
-**SRS_DEVICE_25_009: [**The method shall remove all the reported and desired properties set by the user so far and mark existing collections as null to be garbage collected.**]**
+**SRS_DEVICE_34_009: [**The method shall remove all the reported and desired properties set by the user so far.**]**
 
