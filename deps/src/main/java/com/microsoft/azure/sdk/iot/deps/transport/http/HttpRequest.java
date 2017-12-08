@@ -40,11 +40,6 @@ public class HttpRequest
         this.connection.writeOutput(body);
     }
 
-    public void updateBody(byte[] body)
-    {
-        this.connection.writeOutput(body);
-    }
-
     /**
      * Executes the HTTPS request.
      *
@@ -133,11 +128,6 @@ public class HttpRequest
         this.connection.setSSLContext(sslContext);
         return this;
     }
-
-/*    public void disconnect() throws IOException
-    {
-        this.connection.disconnect();
-    }*/
 
     protected HttpRequest()
     {
