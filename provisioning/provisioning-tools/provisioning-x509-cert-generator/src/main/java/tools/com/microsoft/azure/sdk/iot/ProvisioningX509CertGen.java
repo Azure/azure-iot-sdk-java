@@ -44,6 +44,8 @@ public class ProvisioningX509CertGen
             System.out.println(securityClient.getAliasCertPem());
             System.out.println("Client Cert Private Key");
             System.out.println(securityClient.getAliasCertPrivateKeyPem());
+            System.out.println("Signer (Intermediate) Cert");
+            System.out.println(securityClient.getSignerCertPem());
             System.out.println("Root Cert");
             System.out.println(securityClient.getRootCertPem());
             System.out.println("Do you want to input Verification Code Y/N");
