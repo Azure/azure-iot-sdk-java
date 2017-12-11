@@ -30,9 +30,10 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
 
     private MqttConnection mqttConnection;
     private String hostname;
-    private String scopeId;
+    private String idScope;
 
     private int packetId;
+    private boolean useWebSockets;
 
     private final ObjectLock receiveLock = new ObjectLock();
     private final Queue<MqttMessage> receivedMessages = new LinkedBlockingQueue<>();
@@ -41,24 +42,30 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
 
     /**
      * This constructor creates an instance of Mqtt class and initializes member variables
-     * @param scopeId scope id used with the service Cannot be {@code null} or empty.
-     * @param hostName host name for the service Cannot be {@code null} or empty.
+     * @param provisioningDeviceClientConfig Config used for provisioning Cannot be {@code null}.
      * @throws ProvisioningDeviceClientException is thrown when any of the input parameters are invalid
      */
-    public ContractAPIMqtt(String scopeId, String hostName) throws ProvisioningDeviceClientException
+    public ContractAPIMqtt(ProvisioningDeviceClientConfig provisioningDeviceClientConfig) throws ProvisioningDeviceClientException
     {
-        if ((scopeId == null) || (scopeId.isEmpty()))
+        // SRS_ContractAPIMqtt_07_024: [ If provisioningDeviceClientConfig is null, this method shall throw ProvisioningDeviceClientException. ]
+        if (provisioningDeviceClientConfig == null)
         {
-            throw new ProvisioningDeviceClientException("The scopeId cannot be null or empty.");
+            throw new ProvisioningDeviceClientException("ProvisioningDeviceClientConfig cannot be NULL.");
         }
-
+        String idScope = provisioningDeviceClientConfig.getIdScope();
+        if ((idScope == null) || (idScope.isEmpty()))
+        {
+            throw new ProvisioningDeviceClientException("The idScope cannot be null or empty.");
+        }
+        String hostName = provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint();
         if ((hostName == null) || (hostName.isEmpty()))
         {
             throw new ProvisioningDeviceClientException("The hostName cannot be null or empty.");
         }
 
+        this.useWebSockets = provisioningDeviceClientConfig.getUseWebSockets();
         this.hostname = hostName;
-        this.scopeId = scopeId;
+        this.idScope = idScope;
         this.packetId = 1;
     }
 
@@ -122,9 +129,9 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
 
         try
         {
-            String username = String.format(MQTT_USERNAME_FMT, this.scopeId, registrationId, SDKUtils.getServiceApiVersion(), SDKUtils.getServiceApiVersion());
+            String username = String.format(MQTT_USERNAME_FMT, this.idScope, registrationId, SDKUtils.getServiceApiVersion(), SDKUtils.getServiceApiVersion());
 
-            this.mqttConnection = new MqttConnection(this.hostname, registrationId, username, null, sslContext, this, false);
+            this.mqttConnection = new MqttConnection(this.hostname, registrationId, username, null, sslContext, this, this.useWebSockets);
             this.mqttConnection.connect();
 
             this.mqttConnection.subscribe(MQTT_PROVISIONING_TOPIC_NAME, MqttQos.DELIVER_AT_LEAST_ONCE);
@@ -138,7 +145,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
 
     /**
      * Indicates to close the connection
-     * @throws ProvisioningDeviceConnectionException
+     * @throws ProvisioningDeviceConnectionException thrown if a failure in disconnect
      */
     public synchronized void close() throws ProvisioningDeviceConnectionException
     {

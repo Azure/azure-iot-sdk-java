@@ -11,7 +11,7 @@ An AMQP connection between a device and an IoT Hub for exercising the contract w
 ```java
 public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 {
-    public ContractAPIAmqp(String idScope, String hostName) throws ProvisioningDeviceClientException;
+    public ContractAPIAmqp(ProvisioningDeviceClientConfig provisioningDeviceClientConfig) throws ProvisioningDeviceClientException;
 
     public synchronized void open(RequestData requestData) throws ProvisioningDeviceConnectionException;
 
@@ -28,7 +28,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 ### ContractAPIAmqp
 
 ```java
-public ContractAPIAmqp(String idScope, String hostName) throws ProvisioningDeviceClientException;
+public ContractAPIAmqp(ProvisioningDeviceClientConfig provisioningDeviceClientConfig) throws ProvisioningDeviceClientException;
 ```
 
 **SRS_ContractAPIAmqp_07_001: [**The constructor shall save the scope id and hostname.**]**
@@ -42,6 +42,8 @@ public synchronized void authenticateWithProvisioningService(RequestData request
 ```
 
 **SRS_ContractAPIAmqp_07_003: [**If `responseCallback` is null, this method shall throw ProvisioningDeviceClientException.**]**
+
+**SRS_ContractAPIAmqp_07_024: [** If `provisioningDeviceClientConfig` is null, this method shall throw ProvisioningDeviceClientException. **]**
 
 **SRS_ContractAPIAmqp_07_004: [**If amqpConnection is null or not connected, this method shall throw ProvisioningDeviceConnectionException.**]**
 

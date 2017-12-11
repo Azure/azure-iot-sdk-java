@@ -62,21 +62,9 @@ public class ProvisioningDeviceClientContractTest
     public void createContractThrowsIfLowerLayerThrowsHttp() throws Exception
     {
         //arrange
-        new NonStrictExpectations()
-        {
-            {
-
-                mockedProvisioningDeviceClientConfig.getIdScope();
-                result = new ProvisioningDeviceClientException("lower layer Exception");
-                mockedProvisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint();
-                result = TEST_URI;
-                mockedProvisioningDeviceClientConfig.getProtocol();
-                result = ProvisioningDeviceClientTransportProtocol.HTTPS;
-            }
-        };
 
         //act
-        ProvisioningDeviceClientContract clientContract = ProvisioningDeviceClientContract.createProvisioningContract(mockedProvisioningDeviceClientConfig);
+        ProvisioningDeviceClientContract clientContract = ProvisioningDeviceClientContract.createProvisioningContract(null);
 
         //assert
     }

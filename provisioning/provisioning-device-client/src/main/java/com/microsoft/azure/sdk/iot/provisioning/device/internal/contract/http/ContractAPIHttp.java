@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
@@ -58,18 +59,18 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
 
     /**
      * Constructor for Contract API HTTP
-     * @param idScope scope id used with the service Cannot be {@code null} or empty.
-     * @param hostName host name for the service Cannot be {@code null} or empty.
+     * @param provisioningDeviceClientConfig Config used for provisioning Cannot be {@code null}.
      * @throws ProvisioningDeviceClientException is thrown when any of the input parameters are invalid
      */
-    public ContractAPIHttp(String idScope, String hostName) throws ProvisioningDeviceClientException
+    public ContractAPIHttp(ProvisioningDeviceClientConfig provisioningDeviceClientConfig) throws ProvisioningDeviceClientException
     {
         //SRS_ContractAPIHttp_25_002: [The constructor shall throw ProvisioningDeviceClientException if either idScope and hostName are null or empty.]
+        String idScope = provisioningDeviceClientConfig.getIdScope();
         if (idScope == null || idScope.isEmpty())
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("scope id cannot be null or empty"));
         }
-
+        String hostName = provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint();
         if (hostName == null || hostName.isEmpty())
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("host name cannot be null or empty"));
