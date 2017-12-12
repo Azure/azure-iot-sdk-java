@@ -26,9 +26,6 @@ public class AmqpsSessionManagerTest
     DeviceClientConfig mockDeviceClientConfig;
 
     @Mocked
-    AmqpsDeviceAuthenticationSAS mockAmqpsDeviceAuthenticationSAS;
-
-    @Mocked
     AmqpsDeviceAuthenticationCBS mockAmqpsDeviceAuthenticationCBS;
 
     @Mocked
@@ -100,7 +97,6 @@ public class AmqpsSessionManagerTest
         assertEquals(mockDeviceClientConfig, actualDeviceClientConfig);
     }
 
-    // Tests_SRS_AMQPSESSIONMANAGER_12_003: [The constructor shall create AmqpsDeviceAuthenticationSAS if the authentication type is SAS.]
     // Tests_SRS_AMQPSESSIONMANAGER_12_007: [The constructor shall add the create a AmqpsSessionDeviceOperation with the given deviceClientConfig.]
     @Test
     public void constructorCreatesSAS() throws IllegalArgumentException
@@ -111,9 +107,9 @@ public class AmqpsSessionManagerTest
             {
                 mockDeviceClientConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                new AmqpsDeviceAuthenticationSAS(mockDeviceClientConfig);
-                result = mockAmqpsDeviceAuthenticationSAS;
-                new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationSAS);
+                new AmqpsDeviceAuthenticationCBS(mockDeviceClientConfig);
+                result = mockAmqpsDeviceAuthenticationCBS;
+                new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationCBS);
                 result = mockAmqpsSessionDeviceOperation;
             }
         };
@@ -125,15 +121,6 @@ public class AmqpsSessionManagerTest
         // assert
         ArrayList<AmqpsSessionDeviceOperation> actualList =  Deencapsulation.getField(amqpsSessionManager, "amqpsDeviceSessionList");
         assertEquals(actualList.size(), 1);
-
-        new Verifications()
-        {
-            {
-                new AmqpsDeviceAuthenticationSAS(mockDeviceClientConfig);
-                times = 1;
-            }
-        };
-
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_004: [The constructor shall create AmqpsDeviceAuthenticationCBS if the authentication type is CBS.]
@@ -148,7 +135,7 @@ public class AmqpsSessionManagerTest
         {
             {
                 mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.CBS;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 new AmqpsDeviceAuthenticationCBS(mockDeviceClientConfig);
                 result = mockAmqpsDeviceAuthenticationCBS;
                 new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationCBS);
@@ -303,7 +290,7 @@ public class AmqpsSessionManagerTest
         {
             {
                 mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.CBS;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockAmqpsDeviceAuthenticationCBS.operationLinksOpened();
                 result = true;
             }

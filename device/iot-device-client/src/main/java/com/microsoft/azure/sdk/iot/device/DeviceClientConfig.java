@@ -55,8 +55,7 @@ public final class DeviceClientConfig
     public enum AuthType
     {
         X509_CERTIFICATE,
-        SAS_TOKEN,
-        CBS
+        SAS_TOKEN
     }
 
     private AuthType authenticationType;

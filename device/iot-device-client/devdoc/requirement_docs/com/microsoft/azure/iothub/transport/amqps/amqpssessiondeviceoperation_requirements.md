@@ -75,8 +75,6 @@ public void authenticate() throws IOException;
 
 **SRS_AMQPSESSIONDEVICEOPERATION_12_006: [**The function shall start the authentication if the authentication type is CBS.**]**
 
-**SRS_AMQPSESSIONDEVICEOPERATION_12_049: [**The function shall set the authentication state to authenticated if the authentication type is not CBS.**]**
-
 **SRS_AMQPSESSIONDEVICEOPERATION_12_060: [**The function shall create a new UUID and add it to the correlationIdList if the authentication type is CBS.**]**
 
 **SRS_AMQPSESSIONDEVICEOPERATION_12_061: [**The function shall use the correlationID to call authenticate on the authentication object if the authentication type is CBS.**]**

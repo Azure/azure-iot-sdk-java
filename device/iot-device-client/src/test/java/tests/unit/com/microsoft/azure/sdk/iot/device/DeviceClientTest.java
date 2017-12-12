@@ -104,7 +104,7 @@ public class DeviceClientTest
             {
                 IotHubConnectionString iotHubConnectionString = Deencapsulation.newInstance(IotHubConnectionString.class, connString);
                 times = 1;
-                Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.CBS);
+                Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
                 times = 1;
 
                 IoTHubConnectionType ioTHubConnectionType = Deencapsulation.getField(client, "ioTHubConnectionType");
@@ -2269,7 +2269,7 @@ public class DeviceClientTest
                 result = TransportClient.TransportClientState.CLOSED;
 
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.CBS;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication();
                 result = mockIotHubSasTokenAuthenticationProvider;
                 mockIotHubSasTokenAuthenticationProvider.setPathToIotHubTrustedCert(value);
@@ -2289,7 +2289,7 @@ public class DeviceClientTest
         {
             {
                 mockConfig.getAuthenticationType();
-                times = 2;
+                times = 1;
                 mockConfig.getSasTokenAuthentication();
                 times = 1;
                 mockIotHubSasTokenAuthenticationProvider.setPathToIotHubTrustedCert(value);
@@ -2430,7 +2430,7 @@ public class DeviceClientTest
         {
             {
                 mockConfig.getAuthenticationType();
-                times = 3;
+                times = 2;
                 mockConfig.getX509Authentication();
                 times = 1;
                 mockIotHubX509AuthenticationProvider.setPathToIotHubTrustedCert(value);
@@ -2966,9 +2966,9 @@ public class DeviceClientTest
     // Tests_SRS_DEVICECLIENT_34_066: [If this function is called when the device client is using x509 authentication, an UnsupportedOperationException shall be thrown.]
     @Test (expected = UnsupportedOperationException.class)
     public void startFileUploadUploadToBlobAsyncAuthTypeThrows(@Mocked final FileUpload mockedFileUpload,
-                                                       @Mocked final InputStream mockInputStream,
-                                                       @Mocked final IotHubEventCallback mockedStatusCB,
-                                                       @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                               @Mocked final InputStream mockInputStream,
+                                                               @Mocked final IotHubEventCallback mockedStatusCB,
+                                                               @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"

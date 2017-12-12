@@ -309,9 +309,7 @@ public class ReceiveMessagesIT
     {
         public IotHubMessageResult execute(Message msg, Object context)
         {
-            Success messageReceived = (Success)context;
             messageIdListStoredOnReceive.add(msg.getMessageId()); // add received messsage id to messageList
-            messageReceived.setResult(true);
             return IotHubMessageResult.COMPLETE;
         }
     }

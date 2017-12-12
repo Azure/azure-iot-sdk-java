@@ -13,7 +13,7 @@ import java.util.concurrent.*;
 /**
  * Manage multiple device clients and the authentication 
  * mechanism 
- * 
+ *
  */
 public class AmqpsSessionManager
 {
@@ -33,7 +33,7 @@ public class AmqpsSessionManager
 
     /**
      * Constructor that takes a device configuration.
-     * 
+     *
      * @param deviceClientConfig the device configuration to use for 
      *                           session management.
      */
@@ -52,10 +52,6 @@ public class AmqpsSessionManager
         switch (this.deviceClientConfig.getAuthenticationType())
         {
             case SAS_TOKEN:
-                // Codes_SRS_AMQPSESSIONMANAGER_12_004: [The constructor shall create AmqpsDeviceAuthenticationCBS if the authentication type is CBS.]
-                this.amqpsDeviceAuthentication = new AmqpsDeviceAuthenticationSAS(this.deviceClientConfig);
-                break;
-            case CBS:
                 // Codes_SRS_AMQPSESSIONMANAGER_12_005: [The constructor shall create AmqpsDeviceAuthenticationCBSTokenRenewalTask if the authentication type is CBS.]
                 this.amqpsDeviceAuthentication = new AmqpsDeviceAuthenticationCBS(this.deviceClientConfig);
 
@@ -76,7 +72,7 @@ public class AmqpsSessionManager
 
     /**
      * Register the given device to the manager.
-     * 
+     *
      * @param deviceClientConfig the device to register.
      */
     void addDeviceOperationSession(DeviceClientConfig deviceClientConfig)
@@ -93,9 +89,9 @@ public class AmqpsSessionManager
     }
 
     /**
-     * Close the Proton objects and the schedulers. 
-     * After calling this function all resource freed. 
-     * 
+     * Close the Proton objects and the schedulers.
+     * After calling this function all resource freed.
+     *
      */
     void closeNow()
     {
@@ -129,7 +125,7 @@ public class AmqpsSessionManager
      */
     public void authenticate() throws IOException
     {
-        if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.CBS)
+        if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
             // Codes_SRS_AMQPSESSIONMANAGER_12_014: [The function shall do nothing if the authentication is not open.]
             if (this.isAuthenticationOpened())
@@ -184,7 +180,7 @@ public class AmqpsSessionManager
     /**
      * Event handler for connection initialization. 
      * Open the session and the links. 
-     * 
+     *
      * @param connection the Proton connection object to work with.
      */
     void onConnectionInit(Connection connection) throws IOException
@@ -221,7 +217,7 @@ public class AmqpsSessionManager
     /**
      * Event handler for connection bond. 
      * Set the SSL domain and the SSL context.
-     * 
+     *
      * @param transport the Proton transport object to work with.
      */
     void onConnectionBound(Transport transport)
@@ -239,7 +235,7 @@ public class AmqpsSessionManager
      * authentication links. 
      * If the manager is in opened state initialize the operation 
      * links. 
-     * 
+     *
      * @param link the link to initialize.
      */
     void onLinkInit(Link link) throws IOException, IllegalArgumentException
@@ -268,9 +264,9 @@ public class AmqpsSessionManager
      * links state. 
      * If the manager is in opened state check the operation links 
      * state. 
-     * 
+     *
      * @param event Proton Event object to get the link name.
-     * 
+     *
      * @return Boolean true if all links open, false otherwise.
      */
     boolean onLinkRemoteOpen(Event event)
@@ -317,13 +313,13 @@ public class AmqpsSessionManager
      * Delegate the send call to device operation objects. 
      * Loop through the device operation list and find the sender 
      * object by message type and deviceId (connection string). 
-     * 
+     *
      * @param message the message to send.
      * @param messageType the message type to find the sender. 
      * @param iotHubConnectionString the deviceconnection string to 
      *                               find the sender.
-     * 
-     * @return Integer 
+     *
+     * @return Integer
      */
     Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws IOException
     {
@@ -349,9 +345,9 @@ public class AmqpsSessionManager
      * Delegate the onDelivery call to device operation objects.
      * Loop through the device operation list and find the receiver 
      * object by link name. 
-     * 
+     *
      * @param linkName the link name to identify the receiver.
-     * 
+     *
      * @return AmqpsMessage if the receiver found the received 
      *         message, otherwise null.
      */
@@ -386,9 +382,9 @@ public class AmqpsSessionManager
 
     /**
      * Find the link by link name in the managed device operations. 
-     * 
+     *
      * @param linkName the name to find.
-     * 
+     *
      * @return Boolean true if found, false otherwise.
      */
     boolean isLinkFound(String linkName)
@@ -418,7 +414,7 @@ public class AmqpsSessionManager
 
     /**
      * Get the status of the authentication links.
-     * 
+     *
      * @return Boolean true if all link open, false otherwise.
      */
     Boolean isAuthenticationOpened()
@@ -430,9 +426,9 @@ public class AmqpsSessionManager
     /**
      * Find the converter to convert from IoTHub message to Proton 
      * message.
-     *  
+     *
      * @param message the message to convert.
-     * 
+     *
      * @return AmqpsConvertToProtonReturnValue the result of the 
      *         conversion containing the Proton message.
      */
@@ -457,12 +453,12 @@ public class AmqpsSessionManager
      * Find the converter to convert Proton message to IoTHub 
      * message. Loop through the managed devices and find the 
      * converter. 
-     * 
+     *
      * @param amqpsMessage the Proton message to convert.
      * @param deviceClientConfig the device client configuration for
      *                           add identification data to the
      *                           message.
-     * 
+     *
      * @return AmqpsConvertFromProtonReturnValue the result of the 
      *         conversion containing the IoTHub message.
      */

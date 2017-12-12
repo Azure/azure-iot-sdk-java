@@ -60,7 +60,7 @@ public class AmqpsSessionDeviceOperation
         this.amqpsDeviceOperationsList.add(new AmqpsDeviceMethods(this.deviceClientConfig));
         this.amqpsDeviceOperationsList.add(new AmqpsDeviceTwin(this.deviceClientConfig));
 
-        if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.CBS)
+        if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
             // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_004: [The constructor shall set the authentication state to not authenticated if the authentication type is CBS.]
             this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.NOT_AUTHENTICATED;
@@ -88,7 +88,7 @@ public class AmqpsSessionDeviceOperation
         this.shutDownScheduler();
         this.closeLinks();
 
-        if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.CBS)
+        if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
             this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.NOT_AUTHENTICATED;
         }
@@ -105,7 +105,7 @@ public class AmqpsSessionDeviceOperation
     public void authenticate() throws IOException
     {
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_006: [The function shall start the authentication if the authentication type is CBS.]
-        if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.CBS)
+        if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
             // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_060: [The function shall create a new UUID and add it to the correlationIdList if the authentication type is CBS.]
             UUID correlationId = UUID.randomUUID();
@@ -124,8 +124,7 @@ public class AmqpsSessionDeviceOperation
                 {
                     // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_062: [The function shall start the authentication process and start the lock wait if the authentication type is CBS.]
                     this.authenticationLock.waitLock(MAX_WAIT_TO_AUTHENTICATE);
-                }
-                catch (InterruptedException e)
+                } catch (InterruptedException e)
                 {
                     cbsCorrelationIdList.remove(correlationId);
 
@@ -133,11 +132,6 @@ public class AmqpsSessionDeviceOperation
                     throw new IOException("Waited too long for the authentication message reply.");
                 }
             }
-        }
-        else
-        {
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_049: [The function shall set the authentication state to authenticated if the authentication type is not CBS.]
-            this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.AUTHENTICATED;
         }
     }
 
@@ -148,7 +142,7 @@ public class AmqpsSessionDeviceOperation
      */
     public void renewToken() throws IOException
     {
-        if ((this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.CBS) &&
+        if ((this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN) &&
                 (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED))
         {
             // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_050: [The function shall renew the sas token if the authentication type is CBS and the authentication state is authenticated.]
@@ -315,14 +309,14 @@ public class AmqpsSessionDeviceOperation
      * Delegate the send call to device operation objects.
      * Loop through the device operation list and find the sender 
      * object by message type. 
-     * 
+     *
      * @param messageType the message type to identify the sender.
      * @param msgData the binary content of the message.
      * @param offset the start index to read the binary.
      * @param length the length of the binary to read.
      * @param deliveryTag the message delivery tag.
-     * 
-     * @return Integer 
+     *
+     * @return Integer
      */
     private Integer sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException, IOException
     {
@@ -345,9 +339,9 @@ public class AmqpsSessionDeviceOperation
      * Delegate the onDelivery call to device operation objects.
      * Loop through the device operation list and find the receiver 
      * object by link name. 
-     * 
+     *
      * @param linkName the link name to identify the receiver.
-     * 
+     *
      * @return AmqpsMessage if the receiver found the received 
      *         message, otherwise null.
      */
@@ -409,9 +403,9 @@ public class AmqpsSessionDeviceOperation
 
     /**
      * Find the link by link name in the managed device operations. 
-     * 
+     *
      * @param linkName the name to find.
-     * 
+     *
      * @return Boolean true if found, false otherwise.
      */
     Boolean isLinkFound(String linkName)
@@ -433,9 +427,9 @@ public class AmqpsSessionDeviceOperation
     /**
      * Convert from IoTHub message to Proton using operation 
      * specific converter. 
-     *  
+     *
      * @param message the message to convert.
-     * 
+     *
      * @return AmqpsConvertToProtonReturnValue the result of the 
      *         conversion containing the Proton message.
      */
@@ -462,11 +456,11 @@ public class AmqpsSessionDeviceOperation
     /**
      * Convert from IoTHub message to Proton using operation 
      * specific converter. 
-     *  
+     *
      * @param amqpsMessage the message to convert.
      * @param deviceClientConfig the device client configuration to 
      *                           identify the converter..
-     * 
+     *
      * @return AmqpsConvertToProtonReturnValue the result of the 
      *         conversion containing the Proton message.
      */

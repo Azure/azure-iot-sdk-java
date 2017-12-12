@@ -64,7 +64,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
     private int currentReconnectionAttempt = 1;
     private CustomLogger logger;
 
-	public AmqpsSessionManager amqpsSessionManager;
+    public AmqpsSessionManager amqpsSessionManager;
 
     /**
      * Constructor to set up connection parameters using the {@link DeviceClientConfig}.
@@ -92,8 +92,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         {
             throw new IllegalArgumentException("hubName cannot be null or empty.");
         }
-        if ((config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN) ||
-            (config.getAuthenticationType() == DeviceClientConfig.AuthType.CBS))
+        if (config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
             if (config.getIotHubConnectionString().getSharedAccessKey() == null || config.getIotHubConnectionString().getSharedAccessKey().isEmpty())
             {
@@ -225,8 +224,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         {
             this.sasToken = null;
         }
-        else if ((this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN) ||
-                (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.CBS))
+        else if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
             this.sasToken = this.deviceClientConfig.getSasTokenAuthentication().getRenewedSasToken();
         }
@@ -640,7 +638,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         logger.LogDebug("Entered in method %s", logger.getMethodName());
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_040: [The event handler shall save the remaining link credit.]
         this.linkCredit = event.getLink().getCredit();
-		logger.LogDebug("The link credit value is %s, method name is %s", this.linkCredit, logger.getMethodName());
+        logger.LogDebug("The link credit value is %s, method name is %s", this.linkCredit, logger.getMethodName());
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 

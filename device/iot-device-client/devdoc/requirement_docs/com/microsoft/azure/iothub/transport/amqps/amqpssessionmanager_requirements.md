@@ -40,10 +40,6 @@ AmqpsSessionManager(DeviceClientConfig deviceClientConfig);
 
 **SRS_AMQPSESSIONMANAGER_12_002: [**The constructor shall save the deviceClientConfig parameter value to a member variable.**]**
 
-**SRS_AMQPSESSIONMANAGER_12_003: [**The constructor shall create AmqpsDeviceAuthenticationSAS if the authentication type is SAS.**]**
-
-**SRS_AMQPSESSIONMANAGER_12_004: [**The constructor shall create AmqpsDeviceAuthenticationCBS if the authentication type is CBS.**]**
-
 **SRS_AMQPSESSIONMANAGER_12_005: [**The constructor shall create AmqpsDeviceAuthenticationCBSSendTask if the authentication type is CBS.**]**
 
 **SRS_AMQPSESSIONMANAGER_12_006: [**The constructor shall create and start a scheduler for AmqpsDeviceAuthenticationCBSSendTask if the authentication type is CBS.**]**

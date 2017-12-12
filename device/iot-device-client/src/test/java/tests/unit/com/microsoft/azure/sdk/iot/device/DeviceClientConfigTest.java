@@ -431,11 +431,11 @@ public class DeviceClientConfigTest
         };
 
         //act
-        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.CBS);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
 
         //assert
         DeviceClientConfig.AuthType actualAuthType = Deencapsulation.getField(config, "authenticationType");
-        assertEquals(DeviceClientConfig.AuthType.CBS, actualAuthType);
+        assertEquals(DeviceClientConfig.AuthType.SAS_TOKEN, actualAuthType);
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_069: [If the provided connection string is null or does not use x509 auth, and IllegalArgumentException shall be thrown.]

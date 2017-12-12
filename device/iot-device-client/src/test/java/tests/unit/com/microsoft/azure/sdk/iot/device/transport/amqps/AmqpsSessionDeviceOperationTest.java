@@ -41,9 +41,6 @@ public class AmqpsSessionDeviceOperationTest
     AmqpsDeviceAuthenticationCBS mockAmqpsDeviceAuthenticationCBS;
 
     @Mocked
-    AmqpsDeviceAuthenticationSAS mockAmqpsDeviceAuthenticationSAS;
-
-    @Mocked
     AmqpsDeviceOperations mockAmqpsDeviceOperations;
 
     @Mocked
@@ -129,7 +126,7 @@ public class AmqpsSessionDeviceOperationTest
     public void constructorSuccessSAS() throws IllegalArgumentException
     {
         // act
-        AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationSAS);
+        AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationCBS);
 
         // assert
         DeviceClientConfig actualDeviceClientConfig = Deencapsulation.getField(amqpsSessionDeviceOperation, "deviceClientConfig");
@@ -137,7 +134,7 @@ public class AmqpsSessionDeviceOperationTest
         AmqpsDeviceAuthenticationState authenticatorState = Deencapsulation.getField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState");
 
         assertEquals(mockDeviceClientConfig, actualDeviceClientConfig);
-        assertEquals(mockAmqpsDeviceAuthenticationSAS, actualAmqpsDeviceAuthentication);
+        assertEquals(mockAmqpsDeviceAuthenticationCBS, actualAmqpsDeviceAuthentication);
         assertEquals(AmqpsDeviceAuthenticationState.AUTHENTICATED, authenticatorState);
         new Verifications()
         {
@@ -170,7 +167,7 @@ public class AmqpsSessionDeviceOperationTest
         {
             {
                 mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.CBS;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockDeviceClientConfig.getSasTokenAuthentication();
                 result = mockIotHubSasTokenAuthenticationProvider;
                 mockIotHubSasTokenAuthenticationProvider.getTokenValidSecs();
@@ -259,7 +256,7 @@ public class AmqpsSessionDeviceOperationTest
         {
             {
                 mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.CBS;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 UUID.randomUUID();
                 result = mockUUID;
             }
@@ -284,30 +281,6 @@ public class AmqpsSessionDeviceOperationTest
         };
     }
 
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_049: [The function shall set the authentication state to authenticated if the authentication type is not CBS.]
-    @Test
-    public void authenticateSAS() throws IllegalArgumentException, IOException
-    {
-        // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-            }
-        };
-
-        // act
-        amqpsSessionDeviceOperation.authenticate();
-
-        // assert
-        AmqpsDeviceAuthenticationState authenticatorState = Deencapsulation.getField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState");
-
-        assertEquals(AmqpsDeviceAuthenticationState.AUTHENTICATED, authenticatorState);
-    }
-
     @Test (expected = IOException.class)
     public void authenticateLockThrows() throws IllegalArgumentException, IOException, InterruptedException
     {
@@ -320,7 +293,7 @@ public class AmqpsSessionDeviceOperationTest
         {
             {
                 mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.CBS;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockLock.waitLock(MAX_WAIT_TO_AUTHENTICATE);
                 result = new InterruptedException();
             }
@@ -347,7 +320,7 @@ public class AmqpsSessionDeviceOperationTest
         {
             {
                 mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.CBS;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockDeviceClientConfig.getSasTokenAuthentication();
                 result = mockIotHubSasTokenAuthenticationProvider;
                 mockIotHubSasTokenAuthenticationProvider.getTokenValidSecs();
@@ -391,7 +364,7 @@ public class AmqpsSessionDeviceOperationTest
         {
             {
                 mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.CBS;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockDeviceClientConfig.getSasTokenAuthentication();
                 result = mockIotHubSasTokenAuthenticationProvider;
                 mockIotHubSasTokenAuthenticationProvider.getTokenValidSecs();
@@ -419,11 +392,6 @@ public class AmqpsSessionDeviceOperationTest
             }
         };
     }
-
-
-
-
-
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_007: [The function shall return the current authentication state.]
     @Test

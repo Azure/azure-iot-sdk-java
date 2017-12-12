@@ -154,7 +154,7 @@ public final class DeviceClient implements Closeable
 
         // Codes_SRS_DEVICECLIENT_12_009: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
         IotHubConnectionString iotHubConnectionString = new IotHubConnectionString(connString);
-        this.config = new DeviceClientConfig(iotHubConnectionString, DeviceClientConfig.AuthType.CBS);
+        this.config = new DeviceClientConfig(iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
 
         // Codes_SRS_DEVICECLIENT_12_011: [The constructor shall set the deviceIO to null.]
         this.deviceIO = null;
@@ -895,8 +895,7 @@ public final class DeviceClient implements Closeable
 
         if (value != null)
         {
-            if ((this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN) ||
-                (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.CBS))
+            if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
             {
                 this.config.getSasTokenAuthentication().setPathToIotHubTrustedCert((String) value);
             }
@@ -911,8 +910,7 @@ public final class DeviceClient implements Closeable
     {
         logger.LogInfo("Setting SASTokenExpiryTime as %s seconds, method name is %s ", value, logger.getMethodName());
 
-        if ((this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN) &&
-                ((this.config.getAuthenticationType() != DeviceClientConfig.AuthType.CBS)))
+        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
         {
             //Codes_SRS_DEVICECLIENT_34_065: [""SetSASTokenExpiryTime" if this option is called when not using sas token authentication, an IllegalStateException shall be thrown.]
             throw new IllegalStateException("Cannot set sas token validity time when not using sas token authentication");
@@ -960,7 +958,7 @@ public final class DeviceClient implements Closeable
                                 this.deviceIO.close();
                             }
                         }
-                    } 
+                    }
                     catch (IOException e)
                     {
                         // Codes_SRS_DEVICECLIENT_12_027: [The function shall throw IOError if either the deviceIO or the tranportClient's open() or closeNow() throws.]
@@ -981,7 +979,7 @@ public final class DeviceClient implements Closeable
                         {
                             this.deviceIO.open();
                         }
-                    } 
+                    }
                     catch (IOException e)
                     {
                         throw new IOError(e);
@@ -1163,7 +1161,7 @@ public final class DeviceClient implements Closeable
     public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
     {
         //Codes_SRS_DEVICECLIENT_99_003: [If the callback is null the method shall throw an IllegalArgument exception.]
-        if (null == callback) 
+        if (null == callback)
         {
             throw new IllegalArgumentException("Callback object cannot be null");
         }
