@@ -139,7 +139,7 @@ public final class ProvisioningDeviceClientConfig
      */
     public void setUseWebSockets(boolean useWebSocket)
     {
-        this.useWebSockets = useWebSockets;
+        this.useWebSockets = useWebSocket;
     }
 
     /**

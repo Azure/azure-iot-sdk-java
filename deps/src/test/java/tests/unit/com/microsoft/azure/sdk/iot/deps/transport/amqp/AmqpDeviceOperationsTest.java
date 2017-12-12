@@ -73,7 +73,7 @@ public class AmqpDeviceOperationsTest
         };
 
         // Act
-        AmqpMessage result = amqpDeviceOperation.ReceiverMessageFromLink(null);
+        AmqpMessage result = amqpDeviceOperation.receiverMessageFromLink(null);
 
         //assert
         Assert.assertNull(result);
@@ -92,7 +92,7 @@ public class AmqpDeviceOperationsTest
         };
 
         // Act
-        AmqpMessage result = amqpDeviceOperation.ReceiverMessageFromLink("");
+        AmqpMessage result = amqpDeviceOperation.receiverMessageFromLink("");
 
         //assert
         Assert.assertNull(result);
@@ -111,7 +111,7 @@ public class AmqpDeviceOperationsTest
         };
 
         // Act
-        AmqpMessage result = amqpDeviceOperation.ReceiverMessageFromLink(TEST_SENDER_LINK_NAME);
+        AmqpMessage result = amqpDeviceOperation.receiverMessageFromLink(TEST_SENDER_LINK_NAME);
 
         //assert
         Assert.assertNull(result);
@@ -145,7 +145,7 @@ public class AmqpDeviceOperationsTest
         };
 
         // Act
-        AmqpMessage result = amqpDeviceOperation.ReceiverMessageFromLink("WRONG_LINK_NAME");
+        AmqpMessage result = amqpDeviceOperation.receiverMessageFromLink("WRONG_LINK_NAME");
 
         //assert
         Assert.assertNull(result);
@@ -179,7 +179,7 @@ public class AmqpDeviceOperationsTest
         };
 
         // Act
-        AmqpMessage result = amqpDeviceOperation.ReceiverMessageFromLink(TEST_RECEIVER_LINK_NAME);
+        AmqpMessage result = amqpDeviceOperation.receiverMessageFromLink(TEST_RECEIVER_LINK_NAME);
 
         //assert
         Assert.assertNotNull(result);

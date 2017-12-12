@@ -1,6 +1,7 @@
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp;
 
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.*;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
@@ -24,6 +25,8 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
     private static final String AMQP_OP_TYPE_PROPERTY = "iotdps-operation-type";
 
     private static final String AMQP_OPERATION_ID = "iotdps-operation-id";
+    private static final String API_VERSION_KEY = "com.microsoft:api-version";
+    private static final String CLIENT_VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
 
     private static final int MAX_WAIT_TO_SEND_MSG = 1*60*1000; // 1 minute timeout
 
@@ -38,7 +41,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
      * Constructor for ProvisioningAmqpOperation that handle the AMQP transport for provisioning
      * @param idScope The Scope ID associated with this provisioning client
      * @param hostName The Provisioning Endpoint
-     * @throws ProvisioningDeviceClientException
+     * @throws ProvisioningDeviceClientException Exception thrown if parameter is not provided
      */
     public ProvisioningAmqpOperations(String idScope, String hostName) throws ProvisioningDeviceClientException
     {
@@ -96,7 +99,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
 
     /**
      * Determines if the AMQP connect is up
-     * @return boolean
+     * @return boolean true is connected false otherwise
      */
     public boolean isAmqpConnected()
     {
@@ -115,7 +118,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
      * @param isX509Cert Indicates if using x509 or TPM
      * @throws ProvisioningDeviceConnectionException if connection could not succeed for any reason.
      */
-    public void open(String registrationId, SSLContext sslContext, boolean isX509Cert) throws ProvisioningDeviceConnectionException
+    public void open(String registrationId, SSLContext sslContext, boolean isX509Cert, boolean useWebSockets) throws ProvisioningDeviceConnectionException
     {
         // SRS_ProvisioningAmqpOperations_07_003: [If amqpConnection is not null and is connected, open shall do nothing .]
         if (this.amqpConnection == null || !this.amqpConnection.isConnected())
@@ -132,10 +135,13 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
 
             try
             {
+                addAmqpLinkProperty(API_VERSION_KEY, SDKUtils.getServiceApiVersion() );
+                addAmqpLinkProperty(CLIENT_VERSION_IDENTIFIER_KEY, SDKUtils.getUserAgentString() );
+
                 // SRS_ProvisioningAmqpOperations_07_005: [This method shall construct the Link Address with /<scopeId>/registrations/<registrationId>.]
                 this.amqpLinkAddress = String.format(AMQP_ADDRESS_FMT, this.idScope, registrationId);
 
-                this.amqpConnection = new AmqpsConnection(this.hostName, this, sslContext, !isX509Cert, false);
+                this.amqpConnection = new AmqpsConnection(this.hostName, this, sslContext, !isX509Cert, useWebSockets);
 
                 this.amqpConnection.setListener(this);
 

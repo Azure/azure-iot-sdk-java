@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp;
 
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
@@ -14,25 +15,34 @@ import java.io.IOException;
 public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 {
     private ProvisioningAmqpOperations provisioningAmqpOperations;
+    private boolean useWebSockets;
 
     /**
      * This constructor creates an instance of DpsAPIAmqps class and initializes member variables
-     * @param idScope scope id used with the service Cannot be {@code null} or empty.
-     * @param hostName host name for the service Cannot be {@code null} or empty.
+     * @param provisioningDeviceClientConfig Config used for provisioning Cannot be {@code null}.
      * @throws ProvisioningDeviceClientException is thrown when any of the input parameters are invalid
      */
-    public ContractAPIAmqp(String idScope, String hostName) throws ProvisioningDeviceClientException
+    public ContractAPIAmqp(ProvisioningDeviceClientConfig provisioningDeviceClientConfig) throws ProvisioningDeviceClientException
     {
+        // SRS_ContractAPIAmqp_07_024: [ If provisioningDeviceClientConfig is null, this method shall throw ProvisioningDeviceClientException. ]
+        if (provisioningDeviceClientConfig == null)
+        {
+            throw new ProvisioningDeviceClientException("ProvisioningDeviceClientConfig cannot be NULL.");
+        }
         // SRS_ContractAPIAmqp_07_002: [The constructor shall throw ProvisioningDeviceClientException if either idScope and hostName are null or empty.]
+        String idScope = provisioningDeviceClientConfig.getIdScope();
         if ((idScope == null) || (idScope.isEmpty()))
         {
             throw new ProvisioningDeviceClientException("The idScope cannot be null or empty.");
         }
 
+        String hostName = provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint();
         if ((hostName == null) || (hostName.isEmpty()))
         {
             throw new ProvisioningDeviceClientException("The hostName cannot be null or empty.");
         }
+
+        this.useWebSockets = provisioningDeviceClientConfig.getUseWebSockets();
 
         // SRS_ContractAPIAmqp_07_001: [The constructor shall save the scope id and hostname.]
         provisioningAmqpOperations = new ProvisioningAmqpOperations(idScope, hostName);
@@ -62,7 +72,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
             throw new ProvisioningDeviceConnectionException(new IllegalArgumentException("sslContext cannot be null"));
         }
 
-        this.provisioningAmqpOperations.open(registrationId, sslContext, requestData.isX509() );
+        this.provisioningAmqpOperations.open(registrationId, sslContext, requestData.isX509(), this.useWebSockets);
     }
 
     /**
@@ -147,7 +157,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 
     /**
      * Requests hub to provide a device key to begin authentication over AMQP (Only for TPM)
-     * @param responseCallback A non {@code null} value for the callback
+     * @param requestData A non {@code null} value for the RequestData to be used
      * @param responseCallback A non {@code null} value for the callback
      * @param authorizationCallbackContext An object for context. Can be {@code null}
      * @throws ProvisioningDeviceClientException If any of the parameters are invalid ({@code null} or empty)

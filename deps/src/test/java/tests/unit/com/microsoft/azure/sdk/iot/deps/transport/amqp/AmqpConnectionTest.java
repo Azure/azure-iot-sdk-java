@@ -598,7 +598,7 @@ public class AmqpConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockedProvisionOperations.ReceiverMessageFromLink(anyString);
+                mockedProvisionOperations.receiverMessageFromLink(anyString);
                 result = mockedMessage;
 
                 mockedEvent.getType();
@@ -622,7 +622,7 @@ public class AmqpConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockedProvisionOperations.ReceiverMessageFromLink(anyString);
+                mockedProvisionOperations.receiverMessageFromLink(anyString);
                 result = null;
 
                 mockedEvent.getType();

@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http.ContractAPIHttp;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
@@ -69,6 +70,22 @@ public class ContractAPIHttpTest
     @Mocked
     RequestData mockedRequestData;
 
+    @Mocked
+    ProvisioningDeviceClientConfig mockedProvisioningDeviceClientConfig;
+
+    private ContractAPIHttp createContractClass() throws ProvisioningDeviceClientException
+    {
+        new NonStrictExpectations()
+        {
+            {
+                mockedProvisioningDeviceClientConfig.getIdScope();
+                result = TEST_SCOPE_ID;
+                mockedProvisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint();
+                result = TEST_HOST_NAME;
+            }
+        };
+        return new ContractAPIHttp(mockedProvisioningDeviceClientConfig);
+    }
 
     private void prepareRequestExpectations() throws IOException
     {
@@ -99,9 +116,18 @@ public class ContractAPIHttpTest
     public void constructorSucceeds() throws ProvisioningDeviceClientException
     {
         //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockedProvisioningDeviceClientConfig.getIdScope();
+                result = TEST_SCOPE_ID;
+                mockedProvisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint();
+                result = TEST_HOST_NAME;
+            }
+        };
 
         //act
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(mockedProvisioningDeviceClientConfig);
 
         //assert
         assertEquals(TEST_SCOPE_ID, Deencapsulation.getField(contractAPIHttp, "idScope"));
@@ -113,9 +139,16 @@ public class ContractAPIHttpTest
     public void constructorThrowsOnNullScopeID() throws ProvisioningDeviceClientException
     {
         //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockedProvisioningDeviceClientConfig.getIdScope();
+                result = null;
+            }
+        };
 
         //act
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(null, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(mockedProvisioningDeviceClientConfig);
 
         //assert
     }
@@ -124,9 +157,16 @@ public class ContractAPIHttpTest
     public void constructorThrowsOnEmptyScopeID() throws ProvisioningDeviceClientException
     {
         //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockedProvisioningDeviceClientConfig.getIdScope();
+                result = "";
+            }
+        };
 
         //act
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp("", TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(mockedProvisioningDeviceClientConfig);
 
         //assert
     }
@@ -135,9 +175,18 @@ public class ContractAPIHttpTest
     public void constructorThrowsOnNullHostName() throws ProvisioningDeviceClientException
     {
         //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockedProvisioningDeviceClientConfig.getIdScope();
+                result = TEST_SCOPE_ID;
+                mockedProvisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint();
+                result = null;
+            }
+        };
 
         //act
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, null);
+        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(mockedProvisioningDeviceClientConfig);
 
         //assert
 
@@ -147,9 +196,18 @@ public class ContractAPIHttpTest
     public void constructorThrowsOnEmptyHostName() throws ProvisioningDeviceClientException
     {
         //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockedProvisioningDeviceClientConfig.getIdScope();
+                result = TEST_SCOPE_ID;
+                mockedProvisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint();
+                result = "";
+            }
+        };
 
         //act
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, "");
+        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(mockedProvisioningDeviceClientConfig);
 
         //assert
     }
@@ -163,7 +221,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
         {
@@ -213,7 +271,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -236,7 +294,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -259,7 +317,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -282,7 +340,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -305,7 +363,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -328,7 +386,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -351,7 +409,7 @@ public class ContractAPIHttpTest
     public void requestNonceWithDPSTPMThrowsHubExceptionWithStatusOtherThan404Throws() throws IOException, ProvisioningDeviceClientException
     {
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
 
         new NonStrictExpectations()
@@ -397,7 +455,7 @@ public class ContractAPIHttpTest
     public void requestNonceWithDPSTPMThrowsHubExceptionWithStatusLessThan300Throws() throws IOException, ProvisioningDeviceClientException
     {
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
         {
@@ -440,7 +498,7 @@ public class ContractAPIHttpTest
     public void requestNonceWithDPSTPMThrowsTransportExceptionIfAnyOfTheTransportCallsFails() throws IOException, ProvisioningDeviceClientException
     {
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -484,7 +542,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
         {
@@ -532,7 +590,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
         {
@@ -579,7 +637,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
         {
@@ -626,7 +684,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
         {
@@ -674,7 +732,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -696,7 +754,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -717,7 +775,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -738,7 +796,7 @@ public class ContractAPIHttpTest
     {
         //arrange
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -759,7 +817,7 @@ public class ContractAPIHttpTest
     public void authenticateWithDPSThrowsTransportExceptionIfAnyOfTheTransportCallsFails() throws ProvisioningDeviceClientException
     {
         final byte[] expectedPayload = "testByte".getBytes();
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -801,7 +859,7 @@ public class ContractAPIHttpTest
     public void getRegistrationStatusWithAuthSucceeds() throws IOException, ProvisioningDeviceClientException
     {
         //arrange
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
         {
@@ -844,7 +902,7 @@ public class ContractAPIHttpTest
     public void getRegistrationStatusWithOutAuthSucceeds() throws IOException, ProvisioningDeviceClientException
     {
         //arrange
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
         {
@@ -888,7 +946,7 @@ public class ContractAPIHttpTest
     public void getRegistrationStatusThrowsOnFailureStatus() throws IOException, ProvisioningDeviceClientException
     {
         //arrange
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
         {
@@ -939,7 +997,7 @@ public class ContractAPIHttpTest
     public void getRegistrationStatusThrowsOnNullOperationId() throws ProvisioningDeviceClientException
     {
         //arrange
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -962,7 +1020,7 @@ public class ContractAPIHttpTest
     public void getRegistrationStatusThrowsOnEmptyOperationId() throws ProvisioningDeviceClientException
     {
         //arrange
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -985,7 +1043,7 @@ public class ContractAPIHttpTest
     public void getRegistrationStatusThrowsOnNullRegistrationId() throws ProvisioningDeviceClientException
     {
         //arrange
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
 
         new NonStrictExpectations()
         {
@@ -1009,7 +1067,7 @@ public class ContractAPIHttpTest
     public void getRegistrationStatusThrowsOnEmptyRegistrationId() throws ProvisioningDeviceClientException
     {
         //arrange
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
 
         new NonStrictExpectations()
         {
@@ -1034,7 +1092,7 @@ public class ContractAPIHttpTest
     public void getRegistrationStatusThrowsOnNullSSLContext() throws ProvisioningDeviceClientException
     {
         //arrange
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
 
         new NonStrictExpectations()
         {
@@ -1057,7 +1115,7 @@ public class ContractAPIHttpTest
     public void getRegistrationStatusThrowsOnNullResponseCallback() throws ProvisioningDeviceClientException
     {
         //arrange
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -1079,7 +1137,7 @@ public class ContractAPIHttpTest
     @Test (expected = ProvisioningDeviceTransportException.class)
     public void getRegistrationStatusThrowsTransportExceptionIfAnyOfTheTransportCallsFails() throws ProvisioningDeviceClientException
     {
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {
@@ -1120,7 +1178,7 @@ public class ContractAPIHttpTest
         //arrange
         final byte[] expectedPayload = "TestBytes".getBytes();
         final String expectedUserAgentValue = "TestUserAgent";
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
 
         //act
         Deencapsulation.invoke(contractAPIHttp, "prepareRequest", new Class[] {URL.class, HttpMethod.class, byte[].class, Integer.class, Map.class, String.class}, null, HttpMethod.PUT, expectedPayload, 0, null, expectedUserAgentValue);
@@ -1133,7 +1191,7 @@ public class ContractAPIHttpTest
         //arrange
         final byte[] expectedPayload = "TestBytes".getBytes();
         final String expectedUserAgentValue = "TestUserAgent";
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
 
         //act
         Deencapsulation.invoke(contractAPIHttp, "prepareRequest", new Class[] {URL.class, HttpMethod.class, byte[].class, Integer.class, Map.class, String.class}, mockedUrl, null, expectedPayload, 0, null, expectedUserAgentValue);
@@ -1146,7 +1204,7 @@ public class ContractAPIHttpTest
         //arrange
         final byte[] expectedPayload = null;
         final String expectedUserAgentValue = "TestUserAgent";
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
 
         //act
         Deencapsulation.invoke(contractAPIHttp, "prepareRequest", new Class[] {URL.class, HttpMethod.class, byte[].class, Integer.class, Map.class, String.class}, mockedUrl, HttpMethod.PUT, expectedPayload, 0, null, expectedUserAgentValue);
@@ -1159,7 +1217,7 @@ public class ContractAPIHttpTest
         //arrange
         final byte[] expectedPayload = "TestBytes".getBytes();
         final String expectedUserAgentValue = "TestUserAgent";
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
 
         //act
         Deencapsulation.invoke(contractAPIHttp, "prepareRequest", new Class[] {URL.class, HttpMethod.class, byte[].class, Integer.class, Map.class, String.class}, mockedUrl, HttpMethod.PUT, expectedPayload, -2, null, expectedUserAgentValue);
@@ -1169,7 +1227,7 @@ public class ContractAPIHttpTest
     @Test (expected = IOException.class)
     public void sendRequestThrowsOnSendFailure() throws Exception
     {
-        ContractAPIHttp contractAPIHttp = new ContractAPIHttp(TEST_SCOPE_ID, TEST_HOST_NAME);
+        ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
             {

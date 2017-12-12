@@ -32,19 +32,21 @@ public abstract class ProvisioningDeviceClientContract
         switch (provisioningDeviceClientConfig.getProtocol())
         {
             case MQTT:
-                return new ContractAPIMqtt(provisioningDeviceClientConfig.getIdScope(), provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint());
+                return new ContractAPIMqtt(provisioningDeviceClientConfig);
 
             case MQTT_WS:
-                throw new UnsupportedOperationException("MQTT is still work in progress");
+                provisioningDeviceClientConfig.setUseWebSockets(true);
+                return new ContractAPIMqtt(provisioningDeviceClientConfig);
 
             case AMQPS:
-                return new ContractAPIAmqp(provisioningDeviceClientConfig.getIdScope(), provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint());
+                return new ContractAPIAmqp(provisioningDeviceClientConfig);
 
             case AMQPS_WS:
-                throw new UnsupportedOperationException("Amqp over websocket is still work in progress");
+                provisioningDeviceClientConfig.setUseWebSockets(true);
+                return new ContractAPIAmqp(provisioningDeviceClientConfig);
 
             case HTTPS:
-                return new ContractAPIHttp(provisioningDeviceClientConfig.getIdScope(), provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint());
+                return new ContractAPIHttp(provisioningDeviceClientConfig);
 
             default:
                 throw new ProvisioningDeviceClientException("Unknown protocol");

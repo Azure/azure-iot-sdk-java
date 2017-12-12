@@ -47,6 +47,8 @@ public ContractAPIMqtt(String idScope, String hostName) throws ProvisioningDevic
 
 **SRS_ContractAPIMqtt_07_003: [**If `responseCallback` is null, this method shall throw ProvisioningDeviceClientException.**]**
 
+**SRS_ContractAPIMqtt_07_024: [** If `provisioningDeviceClientConfig` is null, this method shall throw  **]**ProvisioningDeviceClientException.
+
 **SRS_ContractAPIMqtt_07_004: [**If mqttConnection is null or not connected, this method shall throw ProvisioningDeviceConnectionException.**]**
 
 **SRS_ContractAPIMqtt_07_005: [**This method shall send an MQTT message with the payload of `$dps/registrations/PUT/iotdps-register/?$rid=<ID>`.**]**
