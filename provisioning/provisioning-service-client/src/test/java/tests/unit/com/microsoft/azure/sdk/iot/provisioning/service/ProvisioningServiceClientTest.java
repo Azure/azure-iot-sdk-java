@@ -611,7 +611,7 @@ public class ProvisioningServiceClientTest
         assertNotNull(query);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_023: [The getDeviceRegistrationState shall retrieve the registrationStatus information for the provided id by calling the get in the registrationStatusManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_023: [The getDeviceRegistrationState shall retrieve the deviceRegistrationState information for the provided id by calling the get in the registrationStatusManager.] */
     @Test
     public void getDeviceRegistrationStateSucceed(
             @Mocked final DeviceRegistrationState mockedDeviceRegistrationState)
@@ -636,9 +636,9 @@ public class ProvisioningServiceClientTest
         assertNotNull(result);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_024: [The deleteDeviceRegistrationStatus shall delete the registrationStatus for the provided DeviceRegistrationState by calling the delete in the registrationStatusManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_024: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided DeviceRegistrationState by calling the delete in the registrationStatusManager.] */
     @Test
-    public void deleteDeviceRegistrationStatusWithDeviceRegistrationStateSucceed(
+    public void deleteDeviceRegistrationStateWithDeviceRegistrationStateSucceed(
             @Mocked final DeviceRegistrationState mockedDeviceRegistrationState)
             throws ProvisioningServiceClientException
     {
@@ -653,14 +653,14 @@ public class ProvisioningServiceClientTest
         };
 
         // act
-        provisioningServiceClient.deleteDeviceRegistrationStatus(mockedDeviceRegistrationState);
+        provisioningServiceClient.deleteDeviceRegistrationState(mockedDeviceRegistrationState);
 
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_025: [The deleteDeviceRegistrationStatus shall delete the registrationStatus for the provided id by calling the delete in the registrationStatusManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_025: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided id by calling the delete in the registrationStatusManager.] */
     @Test
-    public void deleteDeviceRegistrationStatusWithIdSucceed()
+    public void deleteDeviceRegistrationStateWithIdSucceed()
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -675,14 +675,14 @@ public class ProvisioningServiceClientTest
         };
 
         // act
-        provisioningServiceClient.deleteDeviceRegistrationStatus(id);
+        provisioningServiceClient.deleteDeviceRegistrationState(id);
 
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_026: [The deleteDeviceRegistrationStatus shall delete the registrationStatus for the provided id and eTag by calling the delete in the registrationStatusManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_026: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided id and eTag by calling the delete in the registrationStatusManager.] */
     @Test
-    public void deleteDeviceRegistrationStatusWithIdAndEtagSucceed()
+    public void deleteDeviceRegistrationStateWithIdAndEtagSucceed()
             throws ProvisioningServiceClientException
     {
         // arrange
@@ -698,14 +698,14 @@ public class ProvisioningServiceClientTest
         };
 
         // act
-        provisioningServiceClient.deleteDeviceRegistrationStatus(id, eTag);
+        provisioningServiceClient.deleteDeviceRegistrationState(id, eTag);
 
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_027: [The createEnrollmentGroupRegistrationStatusQuery shall create a new registrationStatus query by calling the createQuery in the registrationStatusManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_027: [The createEnrollmentGroupRegistrationStateQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
     @Test
-    public void createRegistrationStatusQuerySucceed(
+    public void createRegistrationStateQuerySucceed(
             @Mocked final QuerySpecification mockedQuerySpecification)
             throws ProvisioningServiceClientException
     {
@@ -721,15 +721,15 @@ public class ProvisioningServiceClientTest
         };
 
         // act
-        Query query = provisioningServiceClient.createEnrollmentGroupRegistrationStatusQuery(mockedQuerySpecification, enrollmentGroupId);
+        Query query = provisioningServiceClient.createEnrollmentGroupRegistrationStateQuery(mockedQuerySpecification, enrollmentGroupId);
 
         // assert
         assertNotNull(query);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_028: [The createEnrollmentGroupRegistrationStatusQuery shall create a new registrationStatus query by calling the createQuery in the registrationStatusManager.] */
+    /* SRS_PROVISIONING_SERVICE_CLIENT_21_028: [The createEnrollmentGroupRegistrationStateQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
     @Test
-    public void createRegistrationStatusQueryWithPageSizeSucceed(
+    public void createRegistrationStateQueryWithPageSizeSucceed(
             @Mocked final QuerySpecification mockedQuerySpecification)
             throws ProvisioningServiceClientException
     {
@@ -745,7 +745,7 @@ public class ProvisioningServiceClientTest
         };
 
         // act
-        Query query = provisioningServiceClient.createEnrollmentGroupRegistrationStatusQuery(mockedQuerySpecification, enrollmentGroupId,10);
+        Query query = provisioningServiceClient.createEnrollmentGroupRegistrationStateQuery(mockedQuerySpecification, enrollmentGroupId,10);
 
         // assert
         assertNotNull(query);

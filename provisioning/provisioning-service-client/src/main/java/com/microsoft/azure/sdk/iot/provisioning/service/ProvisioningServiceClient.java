@@ -863,8 +863,8 @@ public final class ProvisioningServiceClient
     /**
      * Retrieve the registration status information.
      *
-     * <p> This method will return the registrationStatus for the provided id. It will retrieve
-     *     the correspondent registrationStatus from the Device Provisioning Service, and return it in the
+     * <p> This method will return the {@link DeviceRegistrationState} for the provided id. It will retrieve
+     *     the correspondent deviceRegistrationState from the Device Provisioning Service, and return it in the
      *     {@link DeviceRegistrationState} object.
      *
      * <p> If the id do not exists, this method will throw
@@ -873,7 +873,7 @@ public final class ProvisioningServiceClient
      *     {@link ProvisioningServiceClientExceptionManager}
      *
      * <p> <b>Sample:</b>
-     * <p> The follow code will get and print the information about the registrationStatus "registrationId-1".
+     * <p> The follow code will get and print the information about the deviceRegistrationState "registrationId-1".
      * <pre>
      * {@code
      * // Registration status information.
@@ -888,31 +888,31 @@ public final class ProvisioningServiceClient
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
      *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
      *
-     *     // Get the registrationStatus information.
+     *     // Get the deviceRegistrationState information.
      *     DeviceRegistrationState registrationStateResult =  deviceProvisioningServiceClient.getDeviceRegistrationState(REGISTRATION_ID);
      *     System.out.println(registrationStateResult.toString());
      * }
      * }
      * </pre>
      *
-     * @param id the {@code String} that identifies the registrationStatus. It cannot be {@code null} or empty.
-     * @return The {@link DeviceRegistrationState} with the content of the registrationStatus in the Provisioning Device Service.
+     * @param id the {@code String} that identifies the deviceRegistrationState. It cannot be {@code null} or empty.
+     * @return The {@link DeviceRegistrationState} with the content of the deviceRegistrationState in the Provisioning Device Service.
      * @throws ProvisioningServiceClientException if the Provisioning Device Service was not able to retrieve the
-     *                                            registrationStatus information for the provided registrationId.
+     *                                            deviceRegistrationState information for the provided registrationId.
      */
     public DeviceRegistrationState getDeviceRegistrationState(String id) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_023: [The getDeviceRegistrationState shall retrieve the registrationStatus information for the provided id by calling the get in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_023: [The getDeviceRegistrationState shall retrieve the deviceRegistrationState information for the provided id by calling the get in the registrationStatusManager.] */
         return registrationStatusManager.get(id);
     }
 
     /**
      * Delete the Registration Status information.
      *
-     * <p> This method will remove the registrationStatus from the Device Provisioning Service using the
+     * <p> This method will remove the {@link DeviceRegistrationState} from the Device Provisioning Service using the
      *     provided {@link DeviceRegistrationState} information. The Device Provisioning Service will care about the
-     *     id and the eTag on the DeviceRegistrationState. If you want to delete the registrationStatus regardless the
-     *     eTag, you can use the {@link #deleteDeviceRegistrationStatus(String)} passing only the id.
+     *     id and the eTag on the DeviceRegistrationState. If you want to delete the deviceRegistrationState regardless the
+     *     eTag, you can use the {@link #deleteDeviceRegistrationState(String)} passing only the id.
      *
      * <p> If the id does not exists or the eTag does not matches, this method will throw
      *     {@link ProvisioningServiceClientNotFoundException}.
@@ -920,7 +920,7 @@ public final class ProvisioningServiceClient
      *     {@link ProvisioningServiceClientExceptionManager}
      *
      * <p> <b>Sample:</b>
-     * <p> The follow code will delete the information about the registrationStatus "registrationId-1".
+     * <p> The follow code will delete the information about the deviceRegistrationState "registrationId-1".
      * <pre>
      * {@code
      * // Registration Status information.
@@ -939,27 +939,40 @@ public final class ProvisioningServiceClient
      *     DeviceRegistrationState registrationStateResult =  deviceProvisioningServiceClient.getDeviceRegistrationState(REGISTRATION_ID);
      *
      *     // Delete the registration status information.
-     *     deviceProvisioningServiceClient.deleteDeviceRegistrationStatus(registrationStateResult);
+     *     deviceProvisioningServiceClient.deleteDeviceRegistrationState(registrationStateResult);
      * }
      * }
      * </pre>
      *
-     * @param deviceRegistrationState the {@link DeviceRegistrationState} that identifies the registrationStatus. It cannot be {@code null}.
+     * @param deviceRegistrationState the {@link DeviceRegistrationState} that identifies the deviceRegistrationState. It cannot be {@code null}.
      * @throws ProvisioningServiceClientException if the Provisioning Device Service was not able to delete the
      *                                            registration status information for the provided DeviceRegistrationState.
      */
+    public void deleteDeviceRegistrationState(DeviceRegistrationState deviceRegistrationState) throws ProvisioningServiceClientException
+    {
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_024: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided DeviceRegistrationState by calling the delete in the registrationStatusManager.] */
+        registrationStatusManager.delete(deviceRegistrationState);
+    }
+
+    /**
+     * @deprecated As of release 1.0.0, replaced by {@link #deleteDeviceRegistrationState(DeviceRegistrationState)} ()}
+     * @param deviceRegistrationState the {@link DeviceRegistrationState} that identifies the deviceRegistrationState. It cannot be {@code null}.
+     * @throws ProvisioningServiceClientException if the Provisioning Device Service was not able to delete the
+     *                                            registration status information for the provided DeviceRegistrationState.
+     */
+    @Deprecated
     public void deleteDeviceRegistrationStatus(DeviceRegistrationState deviceRegistrationState) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_024: [The deleteDeviceRegistrationStatus shall delete the registrationStatus for the provided DeviceRegistrationState by calling the delete in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_024: [The deleteDeviceRegistrationStatus shall delete the deviceRegistrationState for the provided DeviceRegistrationState by calling the delete in the registrationStatusManager.] */
         registrationStatusManager.delete(deviceRegistrationState);
     }
 
     /**
      * Delete the registration status information.
      *
-     * <p> This method will remove the registrationStatus from the Device Provisioning Service using the
+     * <p> This method will remove the {@link DeviceRegistrationState} from the Device Provisioning Service using the
      *     provided id. It will delete the registration status regardless the eTag. It means that this API
-     *     correspond to the {@link #deleteDeviceRegistrationStatus(String, String)} with the {@code eTag="*"}.
+     *     correspond to the {@link #deleteDeviceRegistrationState(String, String)} with the {@code eTag="*"}.
      *
      * <p> If the id does not exists, this method will throw
      *     {@link ProvisioningServiceClientNotFoundException}.
@@ -970,7 +983,7 @@ public final class ProvisioningServiceClient
      * <p> The follow code will delete the information about the registration status "registrationId-1".
      * <pre>
      * {@code
-     * // RegistrationStatus information.
+     * // deviceRegistrationState information.
      * private static final String PROVISIONING_CONNECTION_STRING = "HostName=ContosoProvisioning.azure-devices-provisioning.net;" +
      *                                                              "SharedAccessKeyName=contosoprovisioningserviceowner;" +
      *                                                              "SharedAccessKey=0000000000000000000000000000000000000000000=";
@@ -983,18 +996,31 @@ public final class ProvisioningServiceClient
      *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
      *
      *     // Delete the registration status information.
-     *     deviceProvisioningServiceClient.deleteDeviceRegistrationStatus(REGISTRATION_ID);
+     *     deviceProvisioningServiceClient.deleteDeviceRegistrationState(REGISTRATION_ID);
      * }
      * }
      * </pre>
      *
-     * @param id the {@code String} that identifies the registrationStatus. It cannot be {@code null} or empty.
+     * @param id the {@code String} that identifies the deviceRegistrationState. It cannot be {@code null} or empty.
      * @throws ProvisioningServiceClientException if the Provisioning Device Service was not able to delete the
-     *                                            registrationStatus information for the provided registrationId.
+     *                                            deviceRegistrationState information for the provided registrationId.
      */
+    public void deleteDeviceRegistrationState(String id) throws ProvisioningServiceClientException
+    {
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_025: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided id by calling the delete in the registrationStatusManager.] */
+        registrationStatusManager.delete(id, null);
+    }
+
+    /**
+     * @deprecated As of release 1.0.0, replaced by {@link #deleteDeviceRegistrationState(String)} ()}
+     * @param id the {@code String} that identifies the deviceRegistrationState. It cannot be {@code null} or empty.
+     * @throws ProvisioningServiceClientException if the Provisioning Device Service was not able to delete the
+     *                                            deviceRegistrationState information for the provided registrationId.
+     */
+    @Deprecated
     public void deleteDeviceRegistrationStatus(String id) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_025: [The deleteDeviceRegistrationStatus shall delete the registrationStatus for the provided id by calling the delete in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_025: [The deleteDeviceRegistrationStatus shall delete the deviceRegistrationState for the provided id by calling the delete in the registrationStatusManager.] */
         registrationStatusManager.delete(id, null);
     }
 
@@ -1003,7 +1029,7 @@ public final class ProvisioningServiceClient
      *
      * <p> This method will remove the registration status from the Device Provisioning Service using the
      *     provided id and eTag. If you want to delete the registration status regardless the eTag, you can
-     *     use {@link #deleteDeviceRegistrationStatus(String)} or you can pass the eTag as {@code null}, empty, or
+     *     use {@link #deleteDeviceRegistrationState(String)} or you can pass the eTag as {@code null}, empty, or
      *     {@code "*"}.
      *
      * <p> If the id does not exists or the eTag does not matches, this method will throw
@@ -1012,7 +1038,7 @@ public final class ProvisioningServiceClient
      *     {@link ProvisioningServiceClientExceptionManager}
      *
      * <p> <b>Sample:</b>
-     * <p> The follow code will delete the information about the registrationStatus "registrationId-1" regardless the eTag.
+     * <p> The follow code will delete the information about the deviceRegistrationState "registrationId-1" regardless the eTag.
      * <pre>
      * {@code
      * // Registration Status information.
@@ -1028,21 +1054,36 @@ public final class ProvisioningServiceClient
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
      *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
      *
-     *     // Delete the registrationStatus information.
-     *     deviceProvisioningServiceClient.deleteDeviceRegistrationStatus(REGISTRATION_ID, ANY_ETAG);
+     *     // Delete the deviceRegistrationState information.
+     *     deviceProvisioningServiceClient.deleteDeviceRegistrationState(REGISTRATION_ID, ANY_ETAG);
      * }
      * }
      * </pre>
      *
-     * @param id the {@code String} that identifies the registrationStatus. It cannot be {@code null} or empty.
-     * @param eTag the {@code String} with the registrationStatus eTag. It can be {@code null} or empty.
+     * @param id the {@code String} that identifies the deviceRegistrationState. It cannot be {@code null} or empty.
+     * @param eTag the {@code String} with the deviceRegistrationState eTag. It can be {@code null} or empty.
      *             The Device Provisioning Service will ignore it in all of these cases.
      * @throws ProvisioningServiceClientException if the Provisioning Device Service was not able to delete the
-     *                                            registrationStatus information for the provided registrationId and eTag.
+     *                                            deviceRegistrationState information for the provided registrationId and eTag.
      */
+    public void deleteDeviceRegistrationState(String id, String eTag) throws ProvisioningServiceClientException
+    {
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_026: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided id and eTag by calling the delete in the registrationStatusManager.] */
+        registrationStatusManager.delete(id, eTag);
+    }
+
+    /**
+     * @deprecated As of release 1.0.0, replaced by {@link #deleteDeviceRegistrationState(String, String)} ()}
+     * @param id the {@code String} that identifies the deviceRegistrationState. It cannot be {@code null} or empty.
+     * @param eTag the {@code String} with the deviceRegistrationState eTag. It can be {@code null} or empty.
+     *             The Device Provisioning Service will ignore it in all of these cases.
+     * @throws ProvisioningServiceClientException if the Provisioning Device Service was not able to delete the
+     *                                            deviceRegistrationState information for the provided registrationId and eTag.
+     */
+    @Deprecated
     public void deleteDeviceRegistrationStatus(String id, String eTag) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_026: [The deleteDeviceRegistrationStatus shall delete the registrationStatus for the provided id and eTag by calling the delete in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_026: [The deleteDeviceRegistrationStatus shall delete the deviceRegistrationState for the provided id and eTag by calling the delete in the registrationStatusManager.] */
         registrationStatusManager.delete(id, eTag);
     }
 
@@ -1059,9 +1100,22 @@ public final class ProvisioningServiceClient
      * @param enrollmentGroupId the {@code String} that identifies the enrollmentGroup. It cannot be {@code null} or empty.
      * @return The {@link Query} iterator.
      */
+    public Query createEnrollmentGroupRegistrationStateQuery(QuerySpecification querySpecification, String enrollmentGroupId)
+    {
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_027: [The createEnrollmentGroupRegistrationStateQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
+        return registrationStatusManager.createEnrollmentGroupQuery(querySpecification, enrollmentGroupId,0);
+    }
+
+    /**
+     * @deprecated As of release 1.0.0, replaced by {@link #createEnrollmentGroupRegistrationStateQuery(QuerySpecification, String)} ()}
+     * @param querySpecification the {@link QuerySpecification} with the SQL query. It cannot be {@code null}.
+     * @param enrollmentGroupId the {@code String} that identifies the enrollmentGroup. It cannot be {@code null} or empty.
+     * @return The {@link Query} iterator.
+     */
+    @Deprecated
     public Query createEnrollmentGroupRegistrationStatusQuery(QuerySpecification querySpecification, String enrollmentGroupId)
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_027: [The createEnrollmentGroupRegistrationStatusQuery shall create a new registrationStatus query by calling the createQuery in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_027: [The createEnrollmentGroupRegistrationStatusQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
         return registrationStatusManager.createEnrollmentGroupQuery(querySpecification, enrollmentGroupId,0);
     }
 
@@ -1084,9 +1138,24 @@ public final class ProvisioningServiceClient
      * @return The {@link Query} iterator.
      * @throws IllegalArgumentException if the provided parameters are not correct.
      */
+    public Query createEnrollmentGroupRegistrationStateQuery(QuerySpecification querySpecification, String enrollmentGroupId, int pageSize)
+    {
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_028: [The createEnrollmentGroupRegistrationStateQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
+        return registrationStatusManager.createEnrollmentGroupQuery(querySpecification, enrollmentGroupId, pageSize);
+    }
+
+    /**
+     * @deprecated As of release 1.0.0, replaced by {@link #createEnrollmentGroupRegistrationStateQuery(QuerySpecification, String, int)} ()}
+     * @param querySpecification the {@link QuerySpecification} with the SQL query. It cannot be {@code null}.
+     * @param enrollmentGroupId the {@code String} that identifies the enrollmentGroup. It cannot be {@code null} or empty.
+     * @param pageSize the {@code int} with the maximum number of items per iteration. It can be 0 for default, but not negative.
+     * @return The {@link Query} iterator.
+     * @throws IllegalArgumentException if the provided parameters are not correct.
+     */
+    @Deprecated
     public Query createEnrollmentGroupRegistrationStatusQuery(QuerySpecification querySpecification, String enrollmentGroupId, int pageSize)
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_028: [The createEnrollmentGroupRegistrationStatusQuery shall create a new registrationStatus query by calling the createQuery in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_028: [The createEnrollmentGroupRegistrationStatusQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
         return registrationStatusManager.createEnrollmentGroupQuery(querySpecification, enrollmentGroupId, pageSize);
     }
 }
