@@ -16,6 +16,7 @@ public final class ProvisioningDeviceClientConfig
     private String idScope;
     private ProvisioningDeviceClientTransportProtocol protocol;
     private SecurityProvider securityProvider;
+    private boolean useWebSockets = false;
 
     private ProvisioningDeviceClientRegistrationCallback registrationCallback;
     private Object registrationCallbackContext;
@@ -130,5 +131,23 @@ public final class ProvisioningDeviceClientConfig
     {
         //SRS_ProvisioningDeviceClientConfig_25_011: [ This method shall set securityProvider. ]
         this.securityProvider = securityProvider;
+    }
+
+    /**
+     * Setter for Using Web Sockets
+     * @param useWebSocket flag to determine to use web sockets
+     */
+    public void setUseWebSockets(boolean useWebSocket)
+    {
+        this.useWebSockets = useWebSocket;
+    }
+
+    /**
+     * Getter for Using Web Sockets
+     * @return flag to determine to use web sockets
+     */
+    public boolean getUseWebSockets()
+    {
+        return this.useWebSockets;
     }
 }

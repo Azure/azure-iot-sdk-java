@@ -3,7 +3,7 @@
 
 package tools.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderDiceEmulator;
 
 import java.util.Scanner;
@@ -44,6 +44,8 @@ public class ProvisioningX509CertGen
             System.out.println(securityClient.getAliasCertPem());
             System.out.println("Client Cert Private Key");
             System.out.println(securityClient.getAliasCertPrivateKeyPem());
+            System.out.println("Signer (Intermediate) Cert");
+            System.out.println(securityClient.getSignerCertPem());
             System.out.println("Root Cert");
             System.out.println(securityClient.getRootCertPem());
             System.out.println("Do you want to input Verification Code Y/N");
@@ -65,7 +67,7 @@ public class ProvisioningX509CertGen
                     }
                 }
             }
-            catch (SecurityClientException e)
+            catch (SecurityProviderException e)
             {
                 e.printStackTrace();
             }

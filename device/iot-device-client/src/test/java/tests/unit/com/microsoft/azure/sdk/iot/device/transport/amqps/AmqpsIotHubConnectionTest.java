@@ -8,7 +8,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
@@ -23,16 +23,13 @@ import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
-import org.apache.qpid.proton.reactor.ReactorOptions;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
@@ -156,7 +153,7 @@ public class AmqpsIotHubConnectionTest {
     AmqpsSessionManager mockAmqpsSessionManager;
 
     @Mocked
-    IotHubSasTokenAuthentication mockIotHubSasTokenAuthentication;
+    IotHubSasTokenAuthenticationProvider mockIotHubSasTokenAuthenticationProvider;
 
     @Mocked
     List<ServerListener> mockServerListenerList;
@@ -1364,8 +1361,8 @@ public class AmqpsIotHubConnectionTest {
                 mockConfig.isUseWebsocket();
                 result = false;
                 mockConfig.getSasTokenAuthentication();
-                result = mockIotHubSasTokenAuthentication;
-                mockIotHubSasTokenAuthentication.getSSLContext();
+                result = mockIotHubSasTokenAuthenticationProvider;
+                mockIotHubSasTokenAuthenticationProvider.getSSLContext();
                 result =  mockSSLContext;
                 mockEvent.getConnection();
                 result = mockConnection;
@@ -1401,8 +1398,8 @@ public class AmqpsIotHubConnectionTest {
                 mockConfig.isUseWebsocket();
                 result = false;
                 mockConfig.getSasTokenAuthentication();
-                result = mockIotHubSasTokenAuthentication;
-                mockIotHubSasTokenAuthentication.getSSLContext();
+                result = mockIotHubSasTokenAuthenticationProvider;
+                mockIotHubSasTokenAuthenticationProvider.getSSLContext();
                 result =  mockSSLContext;
                 mockEvent.getConnection();
                 result = mockConnection;

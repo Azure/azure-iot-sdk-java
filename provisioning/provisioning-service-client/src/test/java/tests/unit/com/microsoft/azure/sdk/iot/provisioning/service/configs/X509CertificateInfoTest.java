@@ -38,7 +38,7 @@ public class X509CertificateInfoTest
             "    \"version\": " + VERSION + "\n" +
             "}\n";
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorCopyThrowsOnNull()
     {
@@ -49,7 +49,7 @@ public class X509CertificateInfoTest
         // assert
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullSubjectName()
     {
@@ -73,7 +73,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptySubjectName()
     {
@@ -98,7 +98,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullSha1Thumbprint()
     {
@@ -122,7 +122,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptySha1Thumbprint()
     {
@@ -147,7 +147,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullSha256Thumbprint()
     {
@@ -171,7 +171,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptySha256Thumbprint()
     {
@@ -196,7 +196,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullIssuerName()
     {
@@ -220,7 +220,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyIssuerName()
     {
@@ -245,7 +245,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullNotBeforeUtc()
     {
@@ -269,7 +269,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyNotBeforeUtc()
     {
@@ -294,7 +294,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidNotBeforeUtc()
     {
@@ -319,7 +319,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullNotAfterUtc()
     {
@@ -343,7 +343,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyNotAfterUtc()
     {
@@ -368,7 +368,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidNotAfterUtc()
     {
@@ -393,7 +393,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullSerialNumber()
     {
@@ -417,7 +417,7 @@ public class X509CertificateInfoTest
         // arrange
     }
 
-    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+    /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptySerialNumber()
     {

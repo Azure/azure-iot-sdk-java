@@ -404,20 +404,28 @@ public final class HttpsTransport implements IotHubTransport
         while (!this.waitingList.isEmpty())
         {
             IotHubOutboundPacket packet = this.waitingList.peek();
-            try
-            {
-                HttpsSingleMessage httpsMsg =
-                        HttpsSingleMessage.parseHttpsMessage(
-                                packet.getMessage());
-                batch.addMessage(httpsMsg);
-            }
-            catch (IotHubSizeExceededException e)
-            {
-                break;
-            }
 
-            this.waitingList.remove();
-            this.inProgressList.add(packet);
+            if (packet.getMessage().isExpired())
+            {
+                //Codes_SRS_HTTPSTRANSPORT_34_039: [If any packet in the waiting list contains a message that has expired, that packet shall be removed from the waiting list and added to the callback list with status MESSAGE_EXPIRED.]
+                this.waitingList.remove();
+                this.callbackList.add(new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_EXPIRED, packet.getCallback(), packet.getContext()));
+            }
+            else
+            {
+                try
+                {
+                    HttpsSingleMessage httpsMsg = HttpsSingleMessage.parseHttpsMessage(packet.getMessage());
+                    batch.addMessage(httpsMsg);
+                }
+                catch (IotHubSizeExceededException e)
+                {
+                    break;
+                }
+
+                this.waitingList.remove();
+                this.inProgressList.add(packet);
+            }
         }
 
         if (!this.waitingList.isEmpty() && batch.numMessages() <= 0)

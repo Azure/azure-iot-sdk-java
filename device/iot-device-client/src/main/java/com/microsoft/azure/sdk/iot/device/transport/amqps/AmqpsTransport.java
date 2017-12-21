@@ -399,7 +399,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             throw new IllegalStateException("Cannot handle messages when AMQPS transport is closed.");
         }
         
-        logger.LogInfo("Get the callback function for the received message, method name is %s ", logger.getMethodName());
+        logger.LogDebug("Get the callback function for the received message, method name is %s ", logger.getMethodName());
 
         // Codes_SRS_AMQPSTRANSPORT_15_023: [The function shall attempt to consume a message from the IoT Hub.]
         // Codes_SRS_AMQPSTRANSPORT_15_024: [If no message was received from IotHub, the function shall return.]

@@ -4,7 +4,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
@@ -24,45 +24,44 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for MqttTransport.java
- * Method: 100%
- * Lines: 95%
+ * Method: 90%
+ * Lines: 94%
  */
 public class MqttTransportTest
 {
     @Mocked
-    DeviceClientConfig mockConfig;
+    DeviceClientConfig mockedConfig;
 
     @Mocked
-    MqttIotHubConnection mockConnection;
+    MqttIotHubConnection mockedConnection;
 
     @Mocked
-    IotHubSasTokenAuthentication mockSasTokenAuthentication;
+    IotHubSasTokenAuthenticationProvider mockedSasTokenAuthentication;
 
     @Mocked
-    IotHubConnectionStateCallback mockConnectionStateCallback;
+    IotHubConnectionStateCallback mockedConnectionStateCallback;
 
     @Mocked
-    ConnectionStateCallbackContext mockConnectionStateCallbackContext;
+    ConnectionStateCallbackContext mockedConnectionStateCallbackContext;
 
     private class ConnectionStateCallbackContext {}
 
-    // Tests_SRS_MQTTTRANSPORT_15_003: [The function shall establish an MQTT connection
-    // with IoT Hub given in the configuration.]
+    //Tests_SRS_MQTTTRANSPORT_34_003: [This function shall open the connection of the saved MqttIotHubConnection object.]
     @Test
     public void openOpensMqttConnection() throws IOException, NoSuchFieldException, IllegalAccessException
     {
         new NonStrictExpectations()
         {
             {
-                new MqttIotHubConnection(mockConfig);
-                result = mockConnection;
+                new MqttIotHubConnection(mockedConfig);
+                result = mockedConnection;
             }
         };
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
 
-        final MqttIotHubConnection expectedConnection = mockConnection;
+        final MqttIotHubConnection expectedConnection = mockedConnection;
         new Verifications()
         {
             {
@@ -83,11 +82,11 @@ public class MqttTransportTest
     @Test
     public void openDoesNothingIfAlreadyOpened() throws IOException
     {
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.open();
 
-        final MqttIotHubConnection expectedConnection = mockConnection;
+        final MqttIotHubConnection expectedConnection = mockedConnection;
         new Verifications()
         {
             {
@@ -102,11 +101,11 @@ public class MqttTransportTest
     @Test
     public void closeClosesMqttConnection() throws IOException
     {
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.close();
 
-        final MqttIotHubConnection expectedConnection = mockConnection;
+        final MqttIotHubConnection expectedConnection = mockedConnection;
         new Verifications()
         {
             {
@@ -119,10 +118,10 @@ public class MqttTransportTest
     @Test
     public void closeDoesNothingIfConnectionNeverOpened() throws IOException
     {
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.close();
 
-        final MqttIotHubConnection expectedConnection = mockConnection;
+        final MqttIotHubConnection expectedConnection = mockedConnection;
         new Verifications()
         {
             {
@@ -136,12 +135,12 @@ public class MqttTransportTest
     @Test
     public void closeDoesNothingIfConnectionAlreadyClosed() throws IOException
     {
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.close();
         transport.close();
 
-        final MqttIotHubConnection expectedConnection = mockConnection;
+        final MqttIotHubConnection expectedConnection = mockedConnection;
         new Verifications()
         {
             {
@@ -160,8 +159,8 @@ public class MqttTransportTest
                                                              @Mocked final IotHubEventCallback mockCallback,
                                                              @Mocked final IotHubOutboundPacket mockedPacket) throws IOException, InterruptedException
     {
-        final MqttTransport transport = new MqttTransport (mockConfig);
-        final MqttIotHubConnection expectedConnection = mockConnection;
+        final MqttTransport transport = new MqttTransport (mockedConfig);
+        final MqttIotHubConnection expectedConnection = mockedConnection;
         
         new NonStrictExpectations()
         {
@@ -211,7 +210,7 @@ public class MqttTransportTest
         }.getMockInstance();
         final Map<String, Object> context = new HashMap<>();
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
 
@@ -233,7 +232,7 @@ public class MqttTransportTest
     {
         final Map<String, Object> context = new HashMap<>();
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.addMessage(mockMsg, mockCallback, context);
     }
 
@@ -246,7 +245,7 @@ public class MqttTransportTest
     {
         final Map<String, Object> context = new HashMap<>();
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.close();
         transport.addMessage(mockMsg, mockCallback, context);
@@ -264,7 +263,7 @@ public class MqttTransportTest
         }.getMockInstance();
         final Map<String, Object> context = new HashMap<>();
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
 
         // act
@@ -285,7 +284,7 @@ public class MqttTransportTest
         new NonStrictExpectations()
         {
             {
-                new MqttIotHubConnection(mockConfig);
+                new MqttIotHubConnection(mockedConfig);
                 result = mockConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
@@ -294,7 +293,7 @@ public class MqttTransportTest
             }
         };
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -328,15 +327,15 @@ public class MqttTransportTest
         new NonStrictExpectations()
         {
             {
-                new MqttIotHubConnection(mockConfig);
-                result = mockConnection;
+                new MqttIotHubConnection(mockedConfig);
+                result = mockedConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
                 mockPacket.getCallback();
                 result = mockCallback;
                 mockPacket.getContext();
                 result = context;
-                mockConnection.sendEvent((Message) any);
+                mockedConnection.sendEvent((Message) any);
                 returns(IotHubStatusCode.OK_EMPTY, IotHubStatusCode.ERROR);
                 new IotHubCallbackPacket(IotHubStatusCode.OK_EMPTY, mockCallback, context);
                 result = mockCallbackPacket;
@@ -345,7 +344,7 @@ public class MqttTransportTest
             }
         };
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -362,10 +361,9 @@ public class MqttTransportTest
         };
     }
 
-    //Tests_SRS_MQTTTRANSPORT_34_023: [If the config is using sas token auth and its token has expired, the message shall not be sent, but shall be added to the callback list with IotHubStatusCode UNAUTHORIZED.]
-    //Tests_SRS_MQTTTRANSPORT_34_024: [If the config is using sas token auth, its token has expired, and the connection status callback is not null, the connection status callback will be fired with SAS_TOKEN_EXPIRED.]
+    //Tests_SRS_MQTTTRANSPORT_34_027: [If the packet to be sent contains a message that has expired, the message shall not be sent, but shall be added to the callback list with IotHubStatusCode MESSAGE_EXPIRED.]
     @Test
-    public void sendMessagesWithExpiredSasTokenAddsToCallbackQueue(
+    public void sendMessagesWithExpiredMessageAddsMessageExpiredToCallbackQueue(
             @Mocked final Message mockMsg,
             @Mocked final IotHubEventCallback mockCallback,
             @Mocked final IotHubOutboundPacket mockPacket,
@@ -377,33 +375,20 @@ public class MqttTransportTest
         new NonStrictExpectations()
         {
             {
-                new MqttIotHubConnection(mockConfig);
-                result = mockConnection;
+                new MqttIotHubConnection(mockedConfig);
+                result = mockedConnection;
                 new IotHubOutboundPacket(mockMsg, mockCallback, context);
                 result = mockPacket;
-                mockPacket.getCallback();
-                result = mockCallback;
-                mockPacket.getContext();
-                result = context;
-                mockConnection.sendEvent((Message) any);
-                returns(IotHubStatusCode.OK_EMPTY, IotHubStatusCode.ERROR);
-                new IotHubCallbackPacket(IotHubStatusCode.UNAUTHORIZED, mockCallback, context);
-                result = mockCallbackPacket;
-                mockCallbackPacket.getStatus();
-                result = IotHubStatusCode.UNAUTHORIZED;
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.getSasTokenAuthentication();
-                result = mockSasTokenAuthentication;
-                mockSasTokenAuthentication.isRenewalNecessary();
+                mockedConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                mockPacket.getMessage().isExpired();
                 result = true;
             }
         };
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
-        transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
 
         //act
         transport.sendMessages();
@@ -411,48 +396,16 @@ public class MqttTransportTest
         //assert
         Queue<IotHubCallbackPacket> callbackList = Deencapsulation.getField(transport, "callbackList");
         assertEquals(1, callbackList.size());
-        assertEquals(IotHubStatusCode.UNAUTHORIZED, callbackList.remove().getStatus());
-        new VerificationsInOrder()
+        new Verifications()
         {
             {
-                mockConnection.sendEvent((Message) any);
-                times = 0;
-                mockConnectionStateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, null);
+                new IotHubCallbackPacket(IotHubStatusCode.MESSAGE_EXPIRED, (IotHubEventCallback) any, any);
                 times = 1;
             }
         };
     }
 
-    //Tests_SRS_MQTTTRANSPORT_34_025: [If the provided callback is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void registerConnectionStateCallbackThrowsForNullCallback()
-    {
-        //arrange
-        MqttTransport transport = new MqttTransport(mockConfig);
-
-        //act
-        transport.registerConnectionStateCallback(null, mockConnectionStateCallbackContext);
-    }
-
-    //Tests_SRS_MQTTTRANSPORT_34_026: [This function shall register the connection state callback.]
-    @Test
-    public void registerConnectionStateCallbackSuccess()
-    {
-        //arrange
-        MqttTransport transport = new MqttTransport(mockConfig);
-
-        //act
-        transport.registerConnectionStateCallback(mockConnectionStateCallback, mockConnectionStateCallbackContext);
-
-        //assert
-        IotHubConnectionStateCallback registeredCallback = Deencapsulation.getField(transport, "stateCallback");
-        Object registeredConnectionStateCallbackContext = Deencapsulation.getField(transport, "stateCallbackContext");
-
-        assertEquals(registeredCallback, mockConnectionStateCallback);
-        assertEquals(registeredConnectionStateCallbackContext, mockConnectionStateCallbackContext);
-    }
-
-    // Tests_SRS_MQTTTRANSPORT_15_011: [If the IoT Hub could not be reached, 
+    // Tests_SRS_MQTTTRANSPORT_15_011: [If the IoT Hub could not be reached,
     // the message shall be buffered to be sent again next time.]
     @Test
     public void sendMessagesBuffersFailedMessages(
@@ -464,19 +417,19 @@ public class MqttTransportTest
         new NonStrictExpectations()
         {
             {
-                mockConnection.sendEvent((Message) any);
+                mockedConnection.sendEvent((Message) any);
                 result = new IllegalStateException(anyString);
                 result = IotHubStatusCode.OK_EMPTY;
             }
         };
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
         transport.sendMessages();
 
-        final MqttIotHubConnection expectedConnection = mockConnection;
+        final MqttIotHubConnection expectedConnection = mockedConnection;
         new Verifications()
         {
             {
@@ -491,7 +444,7 @@ public class MqttTransportTest
     @Test(expected = IllegalStateException.class)
     public void sendMessagesFailsIfTransportNeverOpened() throws IOException
     {
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.sendMessages();
     }
 
@@ -500,7 +453,7 @@ public class MqttTransportTest
     @Test(expected = IllegalStateException.class)
     public void sendMessagesFailsIfTransportClosed() throws IOException
     {
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.close();
         transport.sendMessages();
@@ -518,8 +471,8 @@ public class MqttTransportTest
         new NonStrictExpectations()
         {
             {
-                new MqttIotHubConnection(mockConfig);
-                result = mockConnection;
+                new MqttIotHubConnection(mockedConfig);
+                result = mockedConnection;
                 mockCallbackPacket.getStatus();
                 returns(IotHubStatusCode.OK_EMPTY, IotHubStatusCode.ERROR);
                 mockCallbackPacket.getCallback();
@@ -529,7 +482,7 @@ public class MqttTransportTest
             }
         };
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -551,7 +504,7 @@ public class MqttTransportTest
     @Test(expected = IllegalStateException.class)
     public void invokeCallbacksFailsIfTransportNeverOpened() throws IOException
     {
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.invokeCallbacks();
     }
 
@@ -559,7 +512,7 @@ public class MqttTransportTest
     @Test(expected = IllegalStateException.class)
     public void invokeCallbacksFailsIfTransportAlreadyClosed() throws IOException
     {
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.close();
         transport.invokeCallbacks();
@@ -578,8 +531,8 @@ public class MqttTransportTest
         new NonStrictExpectations()
         {
             {
-                new MqttIotHubConnection(mockConfig);
-                result = mockConnection;
+                new MqttIotHubConnection(mockedConfig);
+                result = mockedConnection;
                 mockCallbackPacket.getStatus();
                 result = IotHubStatusCode.OK_EMPTY;
                 mockCallbackPacket.getCallback();
@@ -592,7 +545,7 @@ public class MqttTransportTest
             }
         };
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
@@ -625,7 +578,7 @@ public class MqttTransportTest
     {
         final Map<String, Object> context = new HashMap<>();
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
         boolean testIsEmpty = transport.isEmpty();
@@ -644,7 +597,7 @@ public class MqttTransportTest
     {
         final Map<String, Object> context = new HashMap<>();
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -666,7 +619,7 @@ public class MqttTransportTest
     {
         final Map<String, Object> context = new HashMap<>();
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -687,18 +640,18 @@ public class MqttTransportTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getDeviceTelemetryMessageCallback();
+                mockedConfig.getDeviceTelemetryMessageCallback();
                 result = mockCallback;
-                mockConfig.getDeviceTelemetryMessageContext();
+                mockedConfig.getDeviceTelemetryMessageContext();
                 result = context;
             }
         };
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.handleMessage();
 
-        final MqttIotHubConnection expectedConnection = mockConnection;
+        final MqttIotHubConnection expectedConnection = mockedConnection;
         new Verifications()
         {
             {
@@ -718,16 +671,16 @@ public class MqttTransportTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getDeviceTelemetryMessageCallback();
+                mockedConfig.getDeviceTelemetryMessageCallback();
                 result = mockCallback;
-                mockConfig.getDeviceTelemetryMessageContext();
+                mockedConfig.getDeviceTelemetryMessageContext();
                 result = context;
-                mockConnection.receiveMessage();
+                mockedConnection.receiveMessage();
                 result = mockMsg;
             }
         };
 
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.handleMessage();
 
@@ -747,7 +700,7 @@ public class MqttTransportTest
     @Test(expected = IllegalStateException.class)
     public void handleMessageFailsIfTransportNeverOpened() throws IOException
     {
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.handleMessage();
     }
 
@@ -756,9 +709,36 @@ public class MqttTransportTest
     @Test(expected = IllegalStateException.class)
     public void handleMessageFailsIfTransportAlreadyClosed() throws IOException
     {
-        MqttTransport transport = new MqttTransport(mockConfig);
+        MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
         transport.close();
         transport.handleMessage();
+    }
+
+    //Tests_SRS_MQTTTRANSPORT_34_025: [This function shall register the provided connection state callback and context with the saved mqtt iot hub connection.]
+    @Test
+    public void registerConnectionStateCallbackRegistersWithMqttConnection()
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                new MqttIotHubConnection(mockedConfig);
+                result = mockedConnection;
+            }
+        };
+        MqttTransport transport = new MqttTransport(mockedConfig);
+
+        //act
+        transport.registerConnectionStateCallback(mockedConnectionStateCallback, mockedConnectionStateCallbackContext);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedConnection, "registerConnectionStateCallback", mockedConnectionStateCallback, mockedConnectionStateCallbackContext);
+                times = 1;
+            }
+        };
     }
 }

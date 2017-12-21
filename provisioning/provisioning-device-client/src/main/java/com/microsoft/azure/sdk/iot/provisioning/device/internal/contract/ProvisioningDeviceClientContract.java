@@ -10,6 +10,7 @@ package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http.ContractAPIHttp;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.ContractAPIAmqp;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.mqtt.ContractAPIMqtt;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
@@ -31,19 +32,21 @@ public abstract class ProvisioningDeviceClientContract
         switch (provisioningDeviceClientConfig.getProtocol())
         {
             case MQTT:
-                throw new UnsupportedOperationException("MQTT is still work in progress");
+                return new ContractAPIMqtt(provisioningDeviceClientConfig);
 
             case MQTT_WS:
-                throw new UnsupportedOperationException("MQTT is still work in progress");
+                provisioningDeviceClientConfig.setUseWebSockets(true);
+                return new ContractAPIMqtt(provisioningDeviceClientConfig);
 
             case AMQPS:
-                return new ContractAPIAmqp(provisioningDeviceClientConfig.getIdScope(), provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint());
+                return new ContractAPIAmqp(provisioningDeviceClientConfig);
 
             case AMQPS_WS:
-                throw new UnsupportedOperationException("Amqp over websocket is still work in progress");
+                provisioningDeviceClientConfig.setUseWebSockets(true);
+                return new ContractAPIAmqp(provisioningDeviceClientConfig);
 
             case HTTPS:
-                return new ContractAPIHttp(provisioningDeviceClientConfig.getIdScope(), provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint());
+                return new ContractAPIHttp(provisioningDeviceClientConfig);
 
             default:
                 throw new ProvisioningDeviceClientException("Unknown protocol");

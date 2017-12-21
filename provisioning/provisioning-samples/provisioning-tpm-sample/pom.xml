@@ -8,7 +8,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.samples</groupId>
     <artifactId>provisioning-tpm-sample</artifactId>
-    <version>0.0.1</version>
+    <version>1.0.0</version>
     <name>Provisioning TPM Sample for Device Client</name>
     <developers>
         <developer>
@@ -22,13 +22,18 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>tpm-client-emulator</artifactId>
-            <version>0.0.1</version>
+            <artifactId>tpm-provider-emulator</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
             <artifactId>provisioning-device-client</artifactId>
-            <version>0.0.1</version>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-device-client</artifactId>
+            <version>1.6.0</version>
         </dependency>
     </dependencies>
     <build>

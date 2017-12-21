@@ -16,6 +16,11 @@ import java.util.HashSet;
 
 import static org.junit.Assert.*;
 
+/**
+ * Unit tests for Device.java
+ * Methods: 100%
+ * Lines: 100%
+ */
 public class DeviceTest
 {
     @Test
@@ -275,9 +280,7 @@ public class DeviceTest
 
     }
 
-    /*
-    **Tests_SRS_DEVICE_25_009: [**The method shall remove all the reported and desired properties set by the user so far and mark existing collections as null to be garbage collected.**]**
-     */
+    //Tests_SRS_DEVICE_34_009: [The method shall remove all the reported and desired properties set by the user so far.]
     @Test
     public void freeEmptiesAllProperties()
     {
@@ -303,8 +306,8 @@ public class DeviceTest
         HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
         HashSet<Property> testRepMap = testDev.getReportedProp();
 
-        assertNull(testDesiredMap);
-        assertNull(testRepMap);
+        assertTrue(testDesiredMap.isEmpty());
+        assertTrue(testRepMap.isEmpty());
     }
 
 }

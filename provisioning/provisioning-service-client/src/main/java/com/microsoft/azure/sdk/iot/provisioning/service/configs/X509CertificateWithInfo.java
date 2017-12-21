@@ -103,7 +103,7 @@ public class X509CertificateWithInfo
      */
     X509CertificateWithInfo(String certificate)
     {
-        /* SRS_X509_CERTIFICATE_WITH_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided certificate is null or empty.] */
+        /* SRS_X509_CERTIFICATE_WITH_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided certificate is null or empty.] */
         if(Tools.isNullOrEmpty(certificate))
         {
             throw new IllegalArgumentException("certificate cannot be null or empty.");
@@ -123,7 +123,7 @@ public class X509CertificateWithInfo
      */
     public X509CertificateWithInfo(X509CertificateWithInfo x509CertificateWithInfo)
     {
-        /* SRS_X509_CERTIFICATE_WITH_INFO_21_003: [The constructor shall throws IllegalArgumentException if the provided x509CertificateWithInfo is null.] */
+        /* SRS_X509_CERTIFICATE_WITH_INFO_21_003: [The constructor shall throw IllegalArgumentException if the provided x509CertificateWithInfo is null.] */
         if(x509CertificateWithInfo == null)
         {
             throw new IllegalArgumentException("x509CertificateWithInfo cannot be null");

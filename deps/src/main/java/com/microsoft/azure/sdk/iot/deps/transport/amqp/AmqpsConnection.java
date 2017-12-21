@@ -477,7 +477,7 @@ public class AmqpsConnection extends BaseHandler
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
-        AmqpMessage message = amqpDeviceOperations.ReceiverMessageFromLink(event.getLink().getName());
+        AmqpMessage message = amqpDeviceOperations.receiverMessageFromLink(event.getLink().getName());
         if (message == null)
         {
             //Sender specific section for dispositions it receives

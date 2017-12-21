@@ -23,8 +23,8 @@ public final class DeviceClientConfig
 
     private boolean useWebsocket;
 
-    private IotHubX509Authentication x509Authentication;
-    private IotHubSasTokenAuthentication sasTokenAuthentication;
+    private IotHubX509AuthenticationProvider x509Authentication;
+    private IotHubSasTokenAuthenticationProvider sasTokenAuthentication;
 
     /* information in the connection string that unique identify the device */
     private IotHubConnectionString iotHubConnectionString;
@@ -99,7 +99,7 @@ public final class DeviceClientConfig
         this.authenticationType = authType;
         this.iotHubConnectionString = iotHubConnectionString;
 
-        this.sasTokenAuthentication = new IotHubSasTokenSoftwareAuthentication(
+        this.sasTokenAuthentication = new IotHubSasTokenSoftwareAuthenticationProvider(
                 this.iotHubConnectionString.getHostName(),
                 this.iotHubConnectionString.getDeviceId(),
                 this.iotHubConnectionString.getSharedAccessKey(),
@@ -138,7 +138,7 @@ public final class DeviceClientConfig
         this.iotHubConnectionString = iotHubConnectionString;
 
         //Codes_SRS_DEVICECLIENTCONFIG_34_069: [This function shall generate a new SSLContext and set this to using X509 authentication.]
-        this.x509Authentication = new IotHubX509SoftwareAuthentication(publicKeyCertificate, isPathForPublic, privateKey, isPathForPrivate);
+        this.x509Authentication = new IotHubX509SoftwareAuthenticationProvider(publicKeyCertificate, isPathForPublic, privateKey, isPathForPrivate);
 
         this.logger = new CustomLogger(this.getClass());
         logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
@@ -146,40 +146,41 @@ public final class DeviceClientConfig
     }
 
     /**
-     * Constructor for a device client config that retrieves the authentication method from a security client instance
+     * Constructor for a device client config that retrieves the authentication method from a security provider instance
      * @param connectionString The connection string for the iot hub to connect with
-     * @param securityProvider The security client instance to be used for authentication of this device
-     * @throws IOException if the provided security client throws an exception while authenticating
+     * @param securityProvider The security provider instance to be used for authentication of this device
+     * @throws IOException if the provided security provider throws an exception while authenticating
      */
     DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider) throws IOException
     {
         if (connectionString == null)
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security client is null, an IllegalArgumentException shall be thrown.]
+            //Codes_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security provider is null, an IllegalArgumentException shall be thrown.]
             throw new IllegalArgumentException("The provided connection string cannot be null");
         }
 
         if (securityProvider == null)
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security client is null, an IllegalArgumentException shall be thrown.]
-            throw new IllegalArgumentException("security client cannot be null");
+            //Codes_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security provider is null, an IllegalArgumentException shall be thrown.]
+            throw new IllegalArgumentException("security provider cannot be null");
         }
 
         if (securityProvider instanceof SecurityProviderTpm)
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security client is a SecurityProviderTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthentication instance using the security client.]
-            throw new UnsupportedOperationException("This type of security client is not supported currently");
+            //Codes_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security provider is a SecurityProviderTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthenticationProvider instance using the security provider.]
+            this.authenticationType = AuthType.SAS_TOKEN;
+            this.sasTokenAuthentication = new IotHubSasTokenHardwareAuthenticationProvider(connectionString.getHostName(), connectionString.getDeviceId(), securityProvider);
         }
         else if (securityProvider instanceof SecurityProviderX509)
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_082: [If the provided security client is a SecurityProviderX509 instance, this function shall set its auth type to X509 and create its IotHubX509Authentication instance using the security client's ssl context.]
+            //Codes_SRS_DEVICECLIENTCONFIG_34_082: [If the provided security provider is a SecurityProviderX509 instance, this function shall set its auth type to X509 and create its IotHubX509AuthenticationProvider instance using the security provider's ssl context.]
             this.authenticationType = AuthType.X509_CERTIFICATE;
-            this.x509Authentication = new IotHubX509HardwareAuthentication(securityProvider);
+            this.x509Authentication = new IotHubX509HardwareAuthenticationProvider(securityProvider);
         }
         else
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security client is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
-            throw new UnsupportedOperationException("The provided security client is not supported.");
+            //Codes_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security provider is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
+            throw new UnsupportedOperationException("The provided security provider is not supported.");
         }
 
         this.useWebsocket = false;
@@ -197,9 +198,9 @@ public final class DeviceClientConfig
      *
      * @return The value of X509Authentication
      */
-    public IotHubX509Authentication getX509Authentication()
+    public IotHubX509AuthenticationProvider getX509Authentication()
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_34_077: [This function shall return the saved IotHubX509Authentication object.]
+        // Codes_SRS_DEVICECLIENTCONFIG_34_077: [This function shall return the saved IotHubX509AuthenticationProvider object.]
         return this.x509Authentication;
     }
 
@@ -208,9 +209,9 @@ public final class DeviceClientConfig
      *
      * @return The value of SasTokenAuthentication
      */
-    public IotHubSasTokenAuthentication getSasTokenAuthentication()
+    public IotHubSasTokenAuthenticationProvider getSasTokenAuthentication()
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_34_078: [This function shall return the saved IotHubSasTokenAuthentication object.]
+        // Codes_SRS_DEVICECLIENTCONFIG_34_078: [This function shall return the saved IotHubSasTokenAuthenticationProvider object.]
         return this.sasTokenAuthentication;
     }
 

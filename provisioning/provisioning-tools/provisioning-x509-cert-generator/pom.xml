@@ -4,7 +4,7 @@
     <groupId>com.microsoft.azure.sdk.iot.provisioning.tools</groupId>
     <artifactId>provisioning-x509-cert-generator</artifactId>
     <name>Provisioning X509 cert generator</name>
-    <version>0.0.1</version>
+    <version>1.0.0</version>
     <description>The Microsoft Azure IoT Provisioning Cert Generator for Java</description>
     <developers>
         <developer>
@@ -18,8 +18,8 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>dice-client-emulator</artifactId>
-            <version>0.0.1</version>
+            <artifactId>dice-provider-emulator</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
     <build>

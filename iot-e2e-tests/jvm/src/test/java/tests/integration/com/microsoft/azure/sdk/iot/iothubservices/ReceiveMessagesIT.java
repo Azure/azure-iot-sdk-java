@@ -24,9 +24,14 @@ import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import static org.junit.Assert.assertEquals;
 
 public class ReceiveMessagesIT
 {
@@ -34,6 +39,11 @@ public class ReceiveMessagesIT
 
     private final static String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
     private final static Long ONE_SECOND_POLLING_INTERVAL = 1000L;
+    
+    // variables used in E2E test for sending back to back messages using C2D sendAsync method
+    private static final int MAX_COMMANDS_TO_SEND = 5; // maximum commands to be sent in a loop
+    private static final List messageIdListStoredOnC2DSend = new ArrayList(); // store the message id list on sending C2D commands using service client
+    private static final List messageIdListStoredOnReceive = new ArrayList(); // store the message id list on receiving C2D commands using device client
 
     private static final String PUBLIC_KEY_CERTIFICATE_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_CERT_BASE64";
     private static final String PRIVATE_KEY_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_PRIVATE_KEY_BASE64";
@@ -242,6 +252,67 @@ public class ReceiveMessagesIT
         client.closeNow();
     }
 
+    @Test
+    public void receiveBackToBackUniqueC2DCommandsOverAmqpsUsingSendAsync() throws Exception
+    {
+        // This E2E test is for testing multiple C2D sends and make sure buffers are not getting overwritten
+        List<CompletableFuture<Void>> futureList = new ArrayList<>();
+        
+        // set device to receive back to back different commands using AMQPS protocol
+        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqps), IotHubClientProtocol.AMQPS);
+        client.open();
+        
+        // set call back for device client for receiving message
+        com.microsoft.azure.sdk.iot.device.MessageCallback callBackOnRx = new MessageCallbackForBackToBackC2DMessages();
+        client.setMessageCallback(callBackOnRx, null);
+       
+        // send back to back unique commands from service client using sendAsync operation.
+        for (int i = 0; i < MAX_COMMANDS_TO_SEND; i++)
+        {
+            String messageString = Integer.toString(i);
+            com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(messageString);
+            
+            // set message id
+            serviceMessage.setMessageId(Integer.toString(i));
+            
+            // set expected list of messaged id's
+            messageIdListStoredOnC2DSend.add(Integer.toString(i));
+            
+            // send the message. Service client uses AMQPS protocol
+            CompletableFuture<Void> future = serviceClient.sendAsync(deviceAmqps.getDeviceId(),serviceMessage);
+            futureList.add(future);
+
+        }
+        
+        for (CompletableFuture<Void> future : futureList)
+        {
+            try
+            {
+                future.get();
+            }
+            catch (ExecutionException e)
+            {
+                Assert.fail("Exception : " + e.getMessage());
+            }
+        }
+        
+        // Now wait for messages to be received in the device client
+        waitForBackToBackC2DMessagesToBeReceived();
+        client.closeNow(); //close the device client connection
+        assertEquals(true,messageIdListStoredOnReceive.containsAll(messageIdListStoredOnC2DSend)); // check if the received list is same as the actual list that was created on sending the messages
+    }
+
+    private static class MessageCallbackForBackToBackC2DMessages implements com.microsoft.azure.sdk.iot.device.MessageCallback
+    {
+        public IotHubMessageResult execute(Message msg, Object context)
+        {
+            Success messageReceived = (Success)context;
+            messageIdListStoredOnReceive.add(msg.getMessageId()); // add received messsage id to messageList
+            messageReceived.setResult(true);
+            return IotHubMessageResult.COMPLETE;
+        }
+    }
+    
     private static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
         public IotHubMessageResult execute(Message msg, Object context)
@@ -352,6 +423,32 @@ public class ReceiveMessagesIT
         catch (InterruptedException e)
         {
             Assert.fail("Receiving message over " + protocolName + " protocol failed");
+        }
+    }
+
+    private void waitForBackToBackC2DMessagesToBeReceived()
+    {
+        try
+        {
+            int waitDuration = 0;
+        
+            // check if all messages are received.
+            while ( (messageIdListStoredOnReceive.size() != MAX_COMMANDS_TO_SEND) && (waitDuration <= receiveTimeout))
+            {
+                Thread.sleep(100);
+                waitDuration += 100;
+            }
+
+            if (waitDuration > receiveTimeout)
+            {
+                Assert.fail("Receiving messages timed out.");
+            }
+
+        }
+  
+        catch (InterruptedException e)
+        {
+            Assert.fail("Receiving message failed");
         }
     }
 }

@@ -58,6 +58,8 @@ protected void connect() throws IOException;
 
 **SRS_Mqtt_25_008: [**If the MQTT connection is already open, the function shall do nothing.**]**
 
+**SRS_Mqtt_34_020: [**If the MQTT connection is established successfully, this function shall notify its listener that connection was established.**]**
+
 
 ### disconnect
 
@@ -117,7 +119,7 @@ public Message receive() throws IOException;
 
 **SRS_Mqtt_34_022: [**If the call peekMessage returns a null or empty string then this method shall do nothing and return null**]**
 
-**SRS_Mqtt_34_023: [**This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.**]**
+**SRS_Mqtt_34_023: [**This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.**]**
 
 **SRS_Mqtt_34_024: [**This method shall construct new Message with the bytes obtained from peekMessage and return the message.**]**
 
@@ -145,6 +147,7 @@ public void connectionLost(Throwable throwable);
 
 **SRS_Mqtt_25_029: [**The function shall notify all its concrete classes by calling abstract method onReconnectComplete at the exit of the function**]**
 
+**SRS_Mqtt_34_045: [**If this object has a saved listener, this function shall notify the listener that connection was lost.**]**
 
 ### messageArrived
 
@@ -177,7 +180,6 @@ private void assignPropertiesToMessage(Message message, String propertiesString)
 **SRS_Mqtt_34_053: [**A property's key and value may include unusual characters such as &, %, $**]**
 
 **SRS_Mqtt_34_054: [**A message may have 0 to many custom properties**]**
-
 
 
 ### peekMessage

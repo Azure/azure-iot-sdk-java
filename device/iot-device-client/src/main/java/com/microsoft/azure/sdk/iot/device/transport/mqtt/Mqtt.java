@@ -47,11 +47,13 @@ abstract public class Mqtt implements MqttCallback
     final static String DIAGNOSTIC_CONTEXT = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".diagctx";
     private final static String IOTHUB_ACK = "iothub-ack";
 
+    private MqttConnectionStateListener listener;
+
     /**
      * Constructor to instantiate mqtt broker connection.
      * @param mqttConnection the connection to use
      */
-    public Mqtt(MqttConnection mqttConnection) throws IllegalArgumentException
+    public Mqtt(MqttConnection mqttConnection, MqttConnectionStateListener listener) throws IllegalArgumentException
     {
         if (mqttConnection == null)
         {
@@ -64,6 +66,7 @@ abstract public class Mqtt implements MqttCallback
         this.allReceivedMessages = mqttConnection.getAllReceivedMessages();
         this.mqttLock = mqttConnection.getMqttLock();
         this.userSpecifiedSASTokenExpiredOnRetry = false;
+        this.listener = listener;
     }
 
     /**
@@ -95,6 +98,12 @@ abstract public class Mqtt implements MqttCallback
                      */
                     IMqttToken connectToken = this.mqttConnection.getMqttAsyncClient().connect(Mqtt.this.mqttConnection.getConnectionOptions());
                     connectToken.waitForCompletion();
+
+                    //Codes_SRS_Mqtt_34_020: [If the MQTT connection is established successfully, this function shall notify its listener that connection was established.]
+                    if (this.listener != null)
+                    {
+                        this.listener.connectionEstablished();
+                    }
                 }
             }
             catch (MqttException e)
@@ -105,7 +114,6 @@ abstract public class Mqtt implements MqttCallback
                 throw new IOException("Unable to connect to service" + e.getCause(), e);
             }
         }
-
     }
 
     /**
@@ -306,7 +314,7 @@ abstract public class Mqtt implements MqttCallback
                 throw new InvalidParameterException("Mqtt client should be initialised at least once before using it");
             }
 
-            // Codes_SRS_Mqtt_34_023: [This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.]
+            // Codes_SRS_Mqtt_34_023: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
             Pair<String, byte[]> messagePair = peekMessage();
             if (messagePair != null)
             {
@@ -347,6 +355,12 @@ abstract public class Mqtt implements MqttCallback
     @Override
     public void connectionLost(Throwable throwable)
     {
+        if (this.listener != null)
+        {
+            //Codes_SRS_Mqtt_34_045: [If this object has a saved listener, this function shall notify the listener that connection was lost.]
+            this.listener.connectionLost();
+        }
+
         synchronized (this.mqttLock)
         {
             if (this.mqttConnection != null && this.mqttConnection.getMqttAsyncClient() != null)

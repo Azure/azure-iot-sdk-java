@@ -8,16 +8,19 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttConnection;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttConnectionStateListener;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttMessaging;
 import mockit.*;
 import org.junit.Test;
 
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-/* Unit tests for MqttMessaging
- * Code coverage: 100% methods, 78% lines
+/*
+ * Unit tests for MqttMessaging.java
+ * Code coverage: 100% methods, 100% lines
  */
 public class MqttMessagingTest
 {
@@ -25,25 +28,25 @@ public class MqttMessagingTest
     private static final String MOCK_PARSE_TOPIC = "testTopic";
 
     @Mocked
-    private IOException mockIOException;
+    private IOException mockedIOException;
 
     @Mocked
-    private Message mockMessage;
+    private Message mockedMessage;
 
     @Mocked
     private MqttConnection mockedMqttConnection;
 
-    /*
-    **Tests_SRS_MqttMessaging_25_002: [**The constructor shall use the configuration to instantiate super class and passing the parameters.**]**
-    */
-    /*
-    **Tests_SRS_MqttMessaging_25_003: [**The constructor construct publishTopic and subscribeTopic from deviceId.**]**
-    */
+    @Mocked
+    private MqttConnectionStateListener mockedMqttConnectionStateListener;
+
+    //Tests_SRS_MqttMessaging_25_002: [The constructor shall use the configuration to instantiate super class and passing the parameters.]
+    //Tests_SRS_MqttMessaging_25_003: [The constructor construct publishTopic and subscribeTopic from deviceId.]
+    //Tests_SRS_MqttMessaging_25_004: [The constructor shall save the provided listener.]
     @Test
     public void constructorCallsBaseConstructorWithArguments(@Mocked final Mqtt mockMqtt) throws IOException
     {
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
 
         String actualPublishTopic = Deencapsulation.getField(testMqttMessaging, "publishTopic");
         assertNotNull(actualPublishTopic);
@@ -59,31 +62,26 @@ public class MqttMessagingTest
     @Test (expected = IllegalArgumentException.class)
     public void constructorFailsIfMqttConnectionIsNull() throws IOException
     {
-
-        MqttMessaging testMqttMessaging = new MqttMessaging(null, CLIENT_ID);
+        MqttMessaging testMqttMessaging = new MqttMessaging(null, CLIENT_ID, mockedMqttConnectionStateListener);
     }
 
     /*
     **Tests_SRS_MqttMessaging_25_001: [**The constructor shall throw InvalidParameter Exception if any of the parameters are null or empty .**]**
      */
-
     @Test (expected = IllegalArgumentException.class)
     public void constructorFailsIfDeviceIDIsEmpty() throws IOException
     {
-
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, "");
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, "", mockedMqttConnectionStateListener);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void constructorFailsIfDeviceIDIsNull() throws IOException
     {
-
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, null);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, null, mockedMqttConnectionStateListener);
     }
 
     /*
     **Tests_SRS_MqttMessaging_25_020: [**start method shall be call connect to establish a connection to IOT Hub with the given configuration.**]**
-
     **Tests_SRS_MqttMessaging_25_021: [**start method shall subscribe to messaging subscribe topic once connected.**]**
      */
     @Test
@@ -98,7 +96,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
 
         testMqttMessaging.start();
         new Verifications()
@@ -120,11 +118,11 @@ public class MqttMessagingTest
         {
             {
                 Deencapsulation.invoke(mockMqtt, "connect");
-                result = mockIOException;
+                result = mockedIOException;
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
         testMqttMessaging.start();
 
         new Verifications()
@@ -148,11 +146,11 @@ public class MqttMessagingTest
             {
                 Deencapsulation.invoke(mockMqtt, "connect");
                 Deencapsulation.invoke(mockMqtt, "subscribe", anyString);
-                result = mockIOException;
+                result = mockedIOException;
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
         testMqttMessaging.start();
 
         new Verifications()
@@ -183,7 +181,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
         testMqttMessaging.start();
         testMqttMessaging.stop();
 
@@ -205,11 +203,11 @@ public class MqttMessagingTest
                 Deencapsulation.invoke(mockMqtt, "connect");
                 Deencapsulation.invoke(mockMqtt, "subscribe", anyString);
                 Deencapsulation.invoke(mockMqtt, "disconnect");
-                result = mockIOException;
+                result = mockedIOException;
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
         testMqttMessaging.start();
         testMqttMessaging.stop();
 
@@ -232,19 +230,19 @@ public class MqttMessagingTest
         new NonStrictExpectations()
         {
             {
-                mockMessage.getBytes();
+                mockedMessage.getBytes();
                 result = messageBody;
                 Deencapsulation.invoke(mockMqtt, "publish", anyString, messageBody);
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID);;
-        testMqttMessaging.send(mockMessage);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
+        testMqttMessaging.send(mockedMessage);
 
         new Verifications()
         {
             {
-                mockMessage.getBytes();
+                mockedMessage.getBytes();
                 times = 2;
                 Deencapsulation.invoke(mockMqtt, "publish", anyString, messageBody);
                 times = 1;
@@ -261,20 +259,20 @@ public class MqttMessagingTest
         new NonStrictExpectations()
         {
             {
-                mockMessage.getBytes();
+                mockedMessage.getBytes();
                 result = messageBody;
                 Deencapsulation.invoke(mockMqtt, "publish", anyString, messageBody);
-                result = mockIOException;
+                result = mockedIOException;
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID);;
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
         testMqttMessaging.send(null);
 
         new Verifications()
         {
             {
-                mockMessage.getBytes();
+                mockedMessage.getBytes();
                 times = 1;
                 Deencapsulation.invoke(mockMqtt, "publish", MOCK_PARSE_TOPIC, new byte[1]);
                 times = 1;
@@ -289,13 +287,13 @@ public class MqttMessagingTest
     public void sendShallThrowIOExceptionIfMessageIsNull(@Mocked final Mqtt mockMqtt) throws IOException
     {
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID);;
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
         testMqttMessaging.send(null);
 
         new Verifications()
         {
             {
-                mockMessage.getBytes();
+                mockedMessage.getBytes();
                 times = 0;
                 Deencapsulation.invoke(mockMqtt, "publish", MOCK_PARSE_TOPIC, new byte[1]);
                 times = 0;
@@ -303,27 +301,26 @@ public class MqttMessagingTest
         };
     }
 
-    /*
-     **Tests_SRS_MqttMessaging_25_026: [**send method shall append the message properties to publishTopic before publishing.**]**
-     */
+    //Tests_SRS_MqttMessaging_34_026: [This method shall append each custom property's name and value to the publishTopic before publishing.]
     @Test
-    public void sendShallMessageWithPropertiesToLowerLayer(@Mocked final Mqtt mockMqtt) throws IOException
+    public void sendShallIncludeAllCustomPropertiesInPublishTopic(@Mocked final Mqtt mockMqtt) throws IOException
     {
         final byte[] messageBody = {0x61, 0x62, 0x63};
-        final String propertyName = "key";
-        final String propertyValue = "value";
-        final String expectedCorrelationId = "1234";
-        final String expectedMessageId = "5678";
+        final String propertyName1 = "key1";
+        final String propertyValue1 = "value1";
+        final String propertyName2 = "key2";
+        final String propertyValue2 = "value2";
         final MessageProperty[] messageProperties = new MessageProperty[]
                 {
-                        new MessageProperty(propertyName, propertyValue)
+                        new MessageProperty(propertyName1, propertyValue1),
+                        new MessageProperty(propertyName2, propertyValue2)
                 };
         new NonStrictExpectations()
         {
             {
-                mockMessage.getBytes();
+                mockedMessage.getBytes();
                 result = messageBody;
-                mockMessage.getProperties();
+                mockedMessage.getProperties();
                 result = messageProperties;
                 Deencapsulation.invoke(mockMqtt, "publish", anyString, messageBody);
                 mockMessage.getCorrelationId();
@@ -335,45 +332,202 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
+        final String publishTopicWithCustomProperties = String.format(
+                "devices/%s/messages/events/%s=%s&%s=%s", CLIENT_ID, propertyName1, propertyValue1, propertyName2, propertyValue2);
 
         // act
-        testMqttMessaging.send(mockMessage);
+        testMqttMessaging.send(mockedMessage);
 
-        final String publishTopicWithProperties = String.format(
-                "devices/%s/messages/events/$.mid=%s&$.cid=%s&%s=%s", CLIENT_ID, expectedMessageId, expectedCorrelationId, propertyName, propertyValue);
         new Verifications()
         {
             {
-                mockMessage.getBytes();
-                times = 2;
-                mockMessage.getProperties();
-                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithProperties,  messageBody);
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithCustomProperties,  messageBody);
                 times = 1;
             }
         };
     }
 
-    /*
-     **Tests_SRS_MqttMessaging_21_027: [**send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.**]**
-     */
+    //Tests_SRS_MqttMessaging_21_027: [send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.]
     @Test
-    public void sendShallMessageWithPropsAndMessageIdToLowerLayer(@Mocked final Mqtt mockMqtt) throws IOException
+    public void sendShallIncludeMessageIdInPublishTopic(@Mocked final Mqtt mockMqtt) throws IOException
     {
+        //arrange
         final byte[] messageBody = {0x61, 0x62, 0x63};
-        final String propertyName = "key";
-        final String propertyValue = "value";
-        final MessageProperty[] messageProperties = new MessageProperty[]
-                {
-                        new MessageProperty(propertyName, propertyValue)
-                };
-        final String messageidValue = "test-message-id";
+        final MessageProperty[] messageProperties = new MessageProperty[]{};
+        final String messageId = "test-message-id";
+        final String publishTopicWithMessageId = String.format("devices/%s/messages/events/$.mid=%s", CLIENT_ID, messageId);
         new NonStrictExpectations()
         {
             {
-                mockMessage.getBytes();
+                mockedMessage.getBytes();
                 result = messageBody;
-                mockMessage.getProperties();
+                mockedMessage.getProperties();
+                result = messageProperties;
+                mockedMessage.getMessageId();
+                result = messageId;
+            }
+        };
+
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
+
+        //act
+        testMqttMessaging.send(mockedMessage);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithMessageId, messageBody);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MqttMessaging_34_028: [If the message has a correlationId, this method shall append that correlationid to publishTopic before publishing using the key name `$.cid`.]
+    @Test
+    public void sendShallIncludeCorrelationIdInPublishTopic(@Mocked final Mqtt mockMqtt) throws IOException
+    {
+        //arrange
+        final byte[] messageBody = {0x61, 0x62, 0x63};
+        final MessageProperty[] messageProperties = new MessageProperty[]{};
+        final String correlationId = "test-correlation-id";
+        final String publishTopicWithCorrelationId = String.format("devices/%s/messages/events/$.cid=%s", CLIENT_ID, correlationId);
+        new NonStrictExpectations()
+        {
+            {
+                mockedMessage.getBytes();
+                result = messageBody;
+                mockedMessage.getProperties();
+                result = messageProperties;
+                mockedMessage.getCorrelationId();
+                result = correlationId;
+            }
+        };
+
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
+
+        //act
+        testMqttMessaging.send(mockedMessage);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithCorrelationId, messageBody);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MqttMessaging_34_030: [If the message has a UserId, this method shall append that userId to publishTopic before publishing using the key name `$.uid`.]
+    @Test
+    public void sendShallIncludeUserIdInPublishTopic(@Mocked final Mqtt mockMqtt) throws IOException
+    {
+        //arrange
+        final byte[] messageBody = {0x61, 0x62, 0x63};
+        final MessageProperty[] messageProperties = new MessageProperty[]{};
+        final String userId = "test-user-id";
+        final String publishTopicWithUserId = String.format("devices/%s/messages/events/$.uid=%s", CLIENT_ID, userId);
+        new NonStrictExpectations()
+        {
+            {
+                mockedMessage.getBytes();
+                result = messageBody;
+                mockedMessage.getProperties();
+                result = messageProperties;
+                mockedMessage.getUserId();
+                result = userId;
+            }
+        };
+
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
+
+        //act
+        testMqttMessaging.send(mockedMessage);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithUserId, messageBody);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MqttMessaging_34_029: [If the message has a To, this method shall append that To to publishTopic before publishing using the key name `$.to`.]
+    @Test
+    public void sendShallIncludeToInPublishTopic(@Mocked final Mqtt mockMqtt) throws IOException
+    {
+        //arrange
+        final byte[] messageBody = {0x61, 0x62, 0x63};
+        final MessageProperty[] messageProperties = new MessageProperty[]{};
+        final String to = "test-to";
+        final String publishTopicWithTo = String.format("devices/%s/messages/events/$.to=%s", CLIENT_ID, to);
+        new NonStrictExpectations()
+        {
+            {
+                mockedMessage.getBytes();
+                result = messageBody;
+                mockedMessage.getProperties();
+                result = messageProperties;
+                mockedMessage.getTo();
+                result = to;
+            }
+        };
+
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
+
+        //act
+        testMqttMessaging.send(mockedMessage);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithTo, messageBody);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MqttMessaging_34_029: [If the message has a To, this method shall append that To to publishTopic before publishing using the key name `$.to`.]
+    //Tests_SRS_MqttMessaging_34_030: [If the message has a UserId, this method shall append that userId to publishTopic before publishing using the key name `$.uid`.]
+    //Tests_SRS_MqttMessaging_34_028: [If the message has a correlationId, this method shall append that correlationid to publishTopic before publishing using the key name `$.cid`.]
+    //Tests_SRS_MqttMessaging_21_027: [send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.]
+    //Tests_SRS_MqttMessaging_34_026: [This method shall append each custom property's name and value to the publishTopic before publishing.]
+    @Test
+    public void sendShallIncludeAllSystemPropertiesAndAllCustomPropertiesInPublishTopic(@Mocked final Mqtt mockMqtt) throws IOException
+    {
+        final byte[] messageBody = {0x61, 0x62, 0x63};
+        final String propertyName1 = "key1";
+        final String propertyValue1 = "value1";
+        final String propertyName2 = "key2";
+        final String propertyValue2 = "value2";
+        final String messageId = "test-message-id";
+        final String correlationId = "test-correlation-id";
+        final String userId = "test-user-id";
+        final String to = "test-to";
+        final MessageProperty[] messageProperties = new MessageProperty[]
+                {
+                        new MessageProperty(propertyName1, propertyValue1),
+                        new MessageProperty(propertyName2, propertyValue2)
+                };
+        new NonStrictExpectations()
+        {
+            {
+                mockedMessage.getBytes();
+                result = messageBody;
+                mockedMessage.getMessageId();
+                result = messageId;
+                mockedMessage.getCorrelationId();
+                result = correlationId;
+                mockedMessage.getUserId();
+                result = userId;
+                mockedMessage.getTo();
+                result = to;
+                mockedMessage.getProperties();
                 result = messageProperties;
                 mockMessage.getMessageId();
                 result = messageidValue;
@@ -383,21 +537,18 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID);;
-        testMqttMessaging.send(mockMessage);
-        final String publishTopicWithProperties = String.format(
-                "devices/%s/messages/events/$.mid=%s&%s=%s", CLIENT_ID, messageidValue, propertyName, propertyValue);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
+        final String publishTopicWithAllSystemAndCustomProperties = String.format(
+                "devices/%s/messages/events/$.mid=%s&$.cid=%s&$.uid=%s&$.to=%s&%s=%s&%s=%s", CLIENT_ID, messageId, correlationId, userId, to, propertyName1, propertyValue1, propertyName2, propertyValue2);
+
+        // act
+        testMqttMessaging.send(mockedMessage);
 
         new Verifications()
         {
             {
-                mockMessage.getBytes();
-                times = 2;
-                mockMessage.getProperties();
-                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithProperties, messageBody);
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithAllSystemAndCustomProperties,  messageBody);
                 times = 1;
-                mockMessage.getMessageId();
-                times = 2;
             }
         };
     }

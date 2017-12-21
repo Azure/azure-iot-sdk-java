@@ -54,7 +54,7 @@ public class MqttDeviceTwin extends Mqtt
         /*
         **Codes_SRS_MQTTDEVICETWIN_25_001: [**The constructor shall instantiate super class without any parameters.**]**
          */
-        super(mqttConnection);
+        super(mqttConnection, null);
         /*
         **Codes_SRS_MQTTDEVICETWIN_25_002: [**The constructor shall construct device twin response subscribeTopic.**]**
          */
@@ -302,7 +302,7 @@ public class MqttDeviceTwin extends Mqtt
         {
             IotHubTransportMessage messsage = null;
 
-            // Codes_SRS_MQTTDEVICETWIN_25_035: [This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.]
+            // Codes_SRS_MQTTDEVICETWIN_25_035: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
             Pair<String, byte[]> messagePair = peekMessage();
 
             if (messagePair != null)

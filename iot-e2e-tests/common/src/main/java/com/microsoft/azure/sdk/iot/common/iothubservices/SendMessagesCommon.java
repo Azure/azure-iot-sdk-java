@@ -23,9 +23,11 @@ public class SendMessagesCommon
     /*
      * method to send message over given DeviceClient
      */
-    public static void sendMessages(DeviceClient client, IotHubClientProtocol protocol, final int NUM_MESSAGES_PER_CONNECTION,
-                                    final Integer RETRY_MILLISECONDS, final Integer SEND_TIMEOUT_MILLISECONDS)
-        throws URISyntaxException, IOException, InterruptedException
+    public static void sendMessages(DeviceClient client,
+                                    IotHubClientProtocol protocol,
+                                    final int NUM_MESSAGES_PER_CONNECTION,
+                                    final Integer RETRY_MILLISECONDS,
+                                    final Integer SEND_TIMEOUT_MILLISECONDS) throws IOException
     {
         String messageString = "Java client e2e test message over " + protocol + " protocol";
         Message msg = new Message(messageString);
@@ -53,7 +55,8 @@ public class SendMessagesCommon
                 {
                     Assert.fail("Sending message over " + protocol + " protocol failed");
                 }
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 Assert.fail("Sending message over " + protocol + " protocol failed");
             }
@@ -67,7 +70,11 @@ public class SendMessagesCommon
      * @param client the client to send the messages from
      * @param protocol the protocol the client is using
      */
-    public static void sendMessagesExpectingSASTokenExpiration(DeviceClient client, String protocol, int numberOfMessages, Integer retryMilliseconds, long timeoutMilliseconds)
+    public static void sendMessagesExpectingSASTokenExpiration(DeviceClient client,
+                                                               String protocol,
+                                                               int numberOfMessages,
+                                                               Integer retryMilliseconds,
+                                                               long timeoutMilliseconds)
     {
         for (int i = 0; i < numberOfMessages; ++i)
         {
@@ -110,9 +117,11 @@ public class SendMessagesCommon
     /*
      * method to send message over given DeviceClient
      */
-    public static void sendMessagesMultiplex(DeviceClient client, IotHubClientProtocol protocol, final int NUM_MESSAGES_PER_CONNECTION,
-                                    final Integer RETRY_MILLISECONDS, final Integer SEND_TIMEOUT_MILLISECONDS)
-            throws URISyntaxException, IOException, InterruptedException
+    public static void sendMessagesMultiplex(DeviceClient client,
+                                             IotHubClientProtocol protocol,
+                                             final int NUM_MESSAGES_PER_CONNECTION,
+                                             final Integer RETRY_MILLISECONDS,
+                                             final Integer SEND_TIMEOUT_MILLISECONDS) throws IOException
     {
         String messageString = "Java client e2e test message over " + protocol + " protocol";
         Message msg = new Message(messageString);
@@ -139,10 +148,50 @@ public class SendMessagesCommon
                 {
                     Assert.fail("Sending message over " + protocol + " protocol failed");
                 }
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 Assert.fail("Sending message over " + protocol + " protocol failed");
             }
+        }
+    }
+
+    public static void sendExpiredMessageExpectingMessageExpiredCallback(String iotHubConnectionString,
+                                                                         IotHubClientProtocol protocol,
+                                                                         final Integer RETRY_MILLISECONDS,
+                                                                         final Integer SEND_TIMEOUT_MILLISECONDS) throws IOException, URISyntaxException
+    {
+        DeviceClient client = new DeviceClient(iotHubConnectionString, protocol);
+        try
+        {
+            Message expiredMessage = new Message("This message has expired");
+            expiredMessage.setAbsoluteExpiryTime(1); //setting this to 0 causes the message to never expire
+            Success messageSentExpiredCallback = new Success();
+
+            client.open();
+            client.sendEventAsync(expiredMessage, new EventCallback(IotHubStatusCode.MESSAGE_EXPIRED), messageSentExpiredCallback);
+
+            Integer waitDuration = 0;
+            while (!messageSentExpiredCallback.getResult())
+            {
+                Thread.sleep(RETRY_MILLISECONDS);
+                if ((waitDuration += RETRY_MILLISECONDS) > SEND_TIMEOUT_MILLISECONDS)
+                {
+                    break;
+                }
+            }
+
+            client.closeNow();
+
+            if (!messageSentExpiredCallback.getResult())
+            {
+                Assert.fail("Sending expired message over " + protocol + " protocol failed");
+            }
+        }
+        catch (Exception e)
+        {
+            client.closeNow();
+            Assert.fail("Sending expired message over " + protocol + " protocol failed");
         }
     }
 }

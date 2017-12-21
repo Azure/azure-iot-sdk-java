@@ -49,10 +49,9 @@ public MqttTransport(DeviceClientConfig config);
 public void open() throws IOException;
 ```
 
-**SRS_MQTTTRANSPORT_15_003: [**The function shall establish an MQTT connection with IoT Hub given in the configuration.**]**
-
 **SRS_MQTTTRANSPORT_15_004: [**If the MQTT connection is already open, the function shall do nothing.**]**
 
+**SRS_MQTTTRANSPORT_34_003: [**This function shall open the connection of the saved MqttIotHubConnection object.**]**
 
 ### close
 
@@ -107,6 +106,8 @@ public void sendMessages() throws IllegalStateException;
 
 **SRS_MQTTTRANSPORT_34_024: [**If the config is using sas token auth, its token has expired, and the connection status callback is not null, the connection status callback will be fired with SAS_TOKEN_EXPIRED.**]**
 
+**SRS_MQTTTRANSPORT_34_027: [**If the packet to be sent contains a message that has expired, the message shall not be sent, but shall be added to the callback list with IotHubStatusCode MESSAGE_EXPIRED.**]**
+
 
 ### invokeCallbacks
 
@@ -144,10 +145,9 @@ public boolean isEmpty();
 
 
 ### registerConnectionStateCallback
+
 ```java
 public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
 ```
 
-**SRS_MQTTTRANSPORT_34_025: [**If the provided callback is null, an IllegalArgumentException shall be thrown.**]**
-
-**SRS_MQTTTRANSPORT_34_026: [**This function shall register the connection state callback.**]**
+**SRS_MQTTTRANSPORT_34_025: [**This function shall register the provided connection state callback and context with the saved mqtt iot hub connection.**]**

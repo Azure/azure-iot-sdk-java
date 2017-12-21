@@ -24,7 +24,7 @@ import java.util.Date;
  *     The minimum information required by the provisioning service is the {@link #enrollmentGroupId} and the
  *     {@link #attestation}.
  *
- * <p> To provision a device using EnrollmentGroup, it must contain a DICE chip with a signingCertificate for the
+ * <p> To provision a device using EnrollmentGroup, it must contain a X509 chip with a signingCertificate for the
  *     {@link X509Attestation} mechanism.
  *
  * <p> The content of this class will be serialized in a JSON format and sent as a body of the rest API to the
@@ -107,10 +107,10 @@ public class EnrollmentGroup extends Serializable
     private String iotHubHostName;
 
     // the initial Twin state identifier (Twin is a special case and will be manually serialized).
-    private static final String INITIAL_TWIN_STATE_TAG = "initialTwinState";
+    private static final String INITIAL_TWIN_STATE_TAG = "initialTwin";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(INITIAL_TWIN_STATE_TAG)
-    private TwinState initialTwinState;
+    private TwinState initialTwin;
 
     // the provisioning status
     private static final String PROVISIONING_STATUS_TAG = "provisioningStatus";
@@ -234,7 +234,7 @@ public class EnrollmentGroup extends Serializable
         this.setEnrollmentGroupId(result.enrollmentGroupId);
         this.setAttestation(result.attestation);
 
-        /* SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwinState`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
+        /* SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwin`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
         if(result.iotHubHostName != null)
         {
             this.setIotHubHostName(result.iotHubHostName);
@@ -243,9 +243,9 @@ public class EnrollmentGroup extends Serializable
         {
             this.setProvisioningStatus(result.provisioningStatus);
         }
-        if (result.initialTwinState != null)
+        if (result.initialTwin != null)
         {
-            this.setInitialTwinState(result.initialTwinState);
+            this.setInitialTwin(result.initialTwin);
         }
 
         /* SRS_ENROLLMENT_GROUP_21_007: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
@@ -286,10 +286,10 @@ public class EnrollmentGroup extends Serializable
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         JsonObject enrollmentGroupJson = gson.toJsonTree(this).getAsJsonObject();
 
-        /* SRS_ENROLLMENT_GROUP_21_012: [If the initialTwinState is not null, the toJsonElement shall include its content in the final JSON.] */
-        if(initialTwinState != null)
+        /* SRS_ENROLLMENT_GROUP_21_012: [If the initialTwin is not null, the toJsonElement shall include its content in the final JSON.] */
+        if(initialTwin != null)
         {
-            enrollmentGroupJson.add(INITIAL_TWIN_STATE_TAG, initialTwinState.toJsonElement());
+            enrollmentGroupJson.add(INITIAL_TWIN_STATE_TAG, initialTwin.toJsonElement());
         }
 
         return enrollmentGroupJson;
@@ -321,7 +321,7 @@ public class EnrollmentGroup extends Serializable
      */
     protected void setEnrollmentGroupId(String enrollmentGroupId)
     {
-        /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throws IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
+        /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
         ParserUtility.validateId(enrollmentGroupId);
 
         /* SRS_ENROLLMENT_GROUP_21_016: [The setEnrollmentGroupId shall store the provided enrollmentGroupId.] */
@@ -379,7 +379,7 @@ public class EnrollmentGroup extends Serializable
      * <p> Attestation mechanism is mandatory parameter that provides the mechanism
      *     type and the necessary certificates.
      *
-     * <p> EnrollmentGroup only accept {@link X509Attestation} with the IntermediateCertificatesChain. You can create it
+     * <p> EnrollmentGroup only accept {@link X509Attestation} with the RootCertificates. You can create it
      *     providing the <b>.pem</b> content to {@link X509Attestation#createFromRootCertificates(String, String)}
      *
      * @see Attestation
@@ -401,7 +401,7 @@ public class EnrollmentGroup extends Serializable
         {
             throw new IllegalArgumentException("attestation for EnrollmentGroup shall be X509");
         }
-        if(((X509Attestation)attestation).getIntermediateCertificatesChain() == null)
+        if(((X509Attestation)attestation).getRootCertificates() == null)
         {
             throw new IllegalArgumentException("attestation for EnrollmentGroup shall be X509 signingCertificate");
         }
@@ -445,36 +445,36 @@ public class EnrollmentGroup extends Serializable
     }
 
     /**
-     * Getter for the initialTwinState.
+     * Getter for the initialTwin.
      *
-     * @return The {@code TwinState} with the initialTwinState content. Its optional and can be {@code null}.
+     * @return The {@code TwinState} with the initialTwin content. Its optional and can be {@code null}.
      */
-    public TwinState getInitialTwinState()
+    public TwinState getInitialTwin()
     {
-        /* SRS_ENROLLMENT_GROUP_21_023: [The getInitialTwinState shall return a TwinState with the stored initialTwinState.] */
-        return this.initialTwinState;
+        /* SRS_ENROLLMENT_GROUP_21_023: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
+        return this.initialTwin;
     }
 
     /**
-     * Setter for the initialTwinState.
+     * Setter for the initialTwin.
      *
      * <p>
      *     It provides a Twin precondition for the provisioned device.
      * </p>
      *
-     * @param initialTwinState the {@code TwinState} with the new initialTwinState. It cannot be {@code null}.
-     * @throws IllegalArgumentException If the provided initialTwinState is {@code null}.
+     * @param initialTwin the {@code TwinState} with the new initialTwin. It cannot be {@code null}.
+     * @throws IllegalArgumentException If the provided initialTwin is {@code null}.
      */
-    public void setInitialTwinState(TwinState initialTwinState)
+    public void setInitialTwin(TwinState initialTwin)
     {
-        /* SRS_ENROLLMENT_GROUP_21_024: [The setInitialTwinState shall throw IllegalArgumentException if the initialTwinState is null.] */
-        if(initialTwinState == null)
+        /* SRS_ENROLLMENT_GROUP_21_024: [The setInitialTwin shall throw IllegalArgumentException if the initialTwin is null.] */
+        if(initialTwin == null)
         {
-            throw new IllegalArgumentException("initialTwinState cannot be null");
+            throw new IllegalArgumentException("initialTwin cannot be null");
         }
 
-        /* SRS_ENROLLMENT_GROUP_21_025: [The setInitialTwinState shall store the provided initialTwinState.] */
-        this.initialTwinState = initialTwinState;
+        /* SRS_ENROLLMENT_GROUP_21_025: [The setInitialTwin shall store the provided initialTwin.] */
+        this.initialTwin = initialTwin;
     }
 
     /**
@@ -537,7 +537,7 @@ public class EnrollmentGroup extends Serializable
     protected void setCreatedDateTimeUtc(String createdDateTimeUtc)
     {
         /* SRS_ENROLLMENT_GROUP_21_030: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
-        /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+        /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
         this.createdDateTimeUtcDate = ParserUtility.getDateTimeUtc(createdDateTimeUtc);
     }
 
@@ -568,7 +568,7 @@ public class EnrollmentGroup extends Serializable
     protected void setLastUpdatedDateTimeUtc(String lastUpdatedDateTimeUtc)
     {
         /* SRS_ENROLLMENT_GROUP_21_033: [The setLastUpdatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
-        /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throws IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
+        /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
         this.lastUpdatedDateTimeUtcDate = ParserUtility.getDateTimeUtc(lastUpdatedDateTimeUtc);
     }
 
@@ -589,7 +589,7 @@ public class EnrollmentGroup extends Serializable
      * @param etag the {@code String} with the new etag. It cannot be {@code null}, empty or invalid.
      * @throws IllegalArgumentException If the provided etag is {@code null}, empty or invalid.
      */
-    protected void setEtag(String etag)
+    public void setEtag(String etag)
     {
         /* SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
         ParserUtility.validateStringUTF8(etag);

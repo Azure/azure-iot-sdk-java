@@ -34,8 +34,9 @@ Note that the samples for Windows and Linux use Maven.
         private static final String PROVISIONING_CONNECTION_STRING = "[Provisioning Connection String]";
         ```
     2. You must copy the root certificate for the group of devices. If you don't have it, you can use the 
-        [provisioning DICE cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-dice-cert-generator).
-        Fill the `PUBLIC_KEY_CERTIFICATE_STRING` with the root certificate.
+        [provisioning X509 cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-x509-cert-generator).
+        Fill the `PUBLIC_KEY_CERTIFICATE_STRING` with the root certificate. Be careful to do **not** change your
+        certificate, _adding_ or _removing_ characters like spaces, tabs or new lines (`\n`).
         ```java
         private static final String PUBLIC_KEY_CERTIFICATE_STRING =
                 "-----BEGIN CERTIFICATE-----\n" +
@@ -55,13 +56,20 @@ Note that the samples for Windows and Linux use Maven.
         ```java
         private static final String IOTHUB_HOST_NAME = "[Host name].azure-devices.net";
         ```
-5. In a command line, build your sample:
+       **Note:** If you will not provide these parameters, you must **remove** the lines #62 and #63, which add it to 
+       the enrollmentGroup configuration, from your sample.
+        ```java
+        enrollmentGroup.setIotHubHostName(IOTHUB_HOST_NAME);                // Optional parameter.
+        enrollmentGroup.setProvisioningStatus(ProvisioningStatus.ENABLED);  // Optional parameter.
+        ```
+5. In a command line, navigate to the directory `azure-iot-sdk-java/provisioning/provisioning-samples/service-enrollment-group-sample` 
+    where the `pom.xml` file for this test lives, and build your sample:
     ```
     {sample root}/>mvn install -DskipTests
     ```
 6. Navigate to the folder containing the executable JAR file for the sample and run the sample as follows:
 
-    The executable JAR file for create a single enrollment can be found at:
+    The executable JAR file for create an enrollmentGroup can be found at:
     ```
     {sample root}/target/service-enrollment-group-sample-{version}-with-deps.jar
     ```
@@ -191,7 +199,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
     private static final String PROVISIONING_CONNECTION_STRING = "{Provisioning Connection String}";
     ```
 13. You must copy the root certificate for the group of devices. If you don't have it, you can use the 
-    [provisioning DICE cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-dice-cert-generator).
+    [provisioning X509 cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-x509-cert-generator).
     Add the follow class-level variable to the **App**, and fill the `PUBLIC_KEY_CERTIFICATE_STRING` with the 
     root certificate.
     ```java
@@ -299,7 +307,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
         System.out.println(getResult);
         ```
     2. Use the [createEnrollmentGroupQuery](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.createenrollmentgroupquery#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_createEnrollmentGroupQuery_QuerySpecification_) 
-       to create a **query** for the individual enrollments in the provisioning service. The [QuerySpecificationBuilder](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification_Builder)
+       to create a **query** for the enrollmentGroups in the provisioning service. The [QuerySpecificationBuilder](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification_Builder)
        will help you to create a correct [QuerySpecification](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification).
        For this sample, we will query all **`"*"`** enrollmentGroups is the provisioning service.
         ```java

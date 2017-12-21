@@ -24,12 +24,12 @@ class ServiceAuthenticationWithSharedAccessPolicyKey extends AuthenticationMetho
      */
     ServiceAuthenticationWithSharedAccessPolicyKey(String policyName, String key)
     {
-        /* Codes_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_KEY_21_002: [If the provided policyName is null or empty, the constructor shall throws IllegalArgumentException.] */
+        /* Codes_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_KEY_21_002: [If the provided policyName is null or empty, the constructor shall throw IllegalArgumentException.] */
         if (Tools.isNullOrEmpty(policyName))
         {
             throw new IllegalArgumentException("policyName cannot be null or empty");
         }
-        /* Codes_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_KEY_21_003: [If the provided key is null or empty, the constructor shall throws IllegalArgumentException.] */
+        /* Codes_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_KEY_21_003: [If the provided key is null or empty, the constructor shall throw IllegalArgumentException.] */
         if (Tools.isNullOrEmpty(key))
         {
             throw new IllegalArgumentException("key cannot be null or empty");
@@ -52,7 +52,7 @@ class ServiceAuthenticationWithSharedAccessPolicyKey extends AuthenticationMetho
             ProvisioningConnectionString provisioningConnectionString)
             throws IllegalArgumentException
     {
-        /* Codes_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_KEY_21_004: [If the provided provisioningConnectionString is null, the populateWithAuthenticationProperties shall throws IllegalArgumentException.] */
+        /* Codes_SRS_SERVICE_AUTHENTICATION_WITH_SHARED_ACCESS_POLICY_KEY_21_004: [If the provided provisioningConnectionString is null, the populateWithAuthenticationProperties shall throw IllegalArgumentException.] */
         if (provisioningConnectionString == null)
         {
             throw new IllegalArgumentException("Input parameter \"ProvisioningConnectionString\" is null");

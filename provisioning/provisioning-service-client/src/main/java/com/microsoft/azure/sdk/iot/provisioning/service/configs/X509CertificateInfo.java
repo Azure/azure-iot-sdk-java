@@ -100,7 +100,7 @@ public class X509CertificateInfo
      */
     public X509CertificateInfo(X509CertificateInfo x509CertificateInfo)
     {
-        /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throws IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
+        /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
         if(x509CertificateInfo == null)
         {
             throw new IllegalArgumentException("x509CertificateInfo cannot be null");

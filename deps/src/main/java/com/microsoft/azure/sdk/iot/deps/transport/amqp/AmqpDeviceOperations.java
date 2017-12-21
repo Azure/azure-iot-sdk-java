@@ -16,14 +16,10 @@ import java.util.Map;
 
 public class AmqpDeviceOperations
 {
-    protected static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
-    protected static final String API_VERSION_KEY = "com.microsoft.azure.sdk.provisioning-client/0.1.0";
-    protected static final String API_VERSION_VALUE = "2016-11-14";
-
     protected String senderLinkTag;
     protected String receiverLinkTag;
 
-    Map<Symbol, Object> amqpProperties;
+    protected Map<Symbol, Object> amqpProperties = new HashMap<>();
 
     protected Sender senderLink;
     protected Receiver receiverLink;
@@ -35,9 +31,6 @@ public class AmqpDeviceOperations
      */
     public AmqpDeviceOperations()
     {
-        this.amqpProperties = new HashMap<>();
-        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), API_VERSION_KEY);
-
         this.senderLinkTag = "provision_sender_link";
         this.receiverLinkTag = "provision_receiver_link";
 
@@ -50,7 +43,7 @@ public class AmqpDeviceOperations
      * @param linkName The name of the link to receive
      * @return The Amqp Message from the specified link
      */
-    public AmqpMessage ReceiverMessageFromLink(String linkName)
+    public AmqpMessage receiverMessageFromLink(String linkName)
     {
         AmqpMessage result;
         if (linkName == null || linkName.isEmpty())
@@ -191,5 +184,15 @@ public class AmqpDeviceOperations
         {
             this.senderLink.close();
         }
+    }
+
+    protected void addAmqpLinkProperty(String key, String value)
+    {
+        this.amqpProperties.put(Symbol.getSymbol(key), value);
+    }
+
+    protected void clearAmqpLinkProperty()
+    {
+        this.amqpProperties.clear();
     }
 }

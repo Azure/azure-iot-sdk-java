@@ -11,13 +11,14 @@ import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegisterRequestParser;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
@@ -58,18 +59,18 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
 
     /**
      * Constructor for Contract API HTTP
-     * @param idScope scope id used with the service Cannot be {@code null} or empty.
-     * @param hostName host name for the service Cannot be {@code null} or empty.
+     * @param provisioningDeviceClientConfig Config used for provisioning Cannot be {@code null}.
      * @throws ProvisioningDeviceClientException is thrown when any of the input parameters are invalid
      */
-    public ContractAPIHttp(String idScope, String hostName) throws ProvisioningDeviceClientException
+    public ContractAPIHttp(ProvisioningDeviceClientConfig provisioningDeviceClientConfig) throws ProvisioningDeviceClientException
     {
         //SRS_ContractAPIHttp_25_002: [The constructor shall throw ProvisioningDeviceClientException if either idScope and hostName are null or empty.]
+        String idScope = provisioningDeviceClientConfig.getIdScope();
         if (idScope == null || idScope.isEmpty())
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("scope id cannot be null or empty"));
         }
-
+        String hostName = provisioningDeviceClientConfig.getProvisioningServiceGlobalEndpoint();
         if (hostName == null || hostName.isEmpty())
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("host name cannot be null or empty"));
@@ -185,7 +186,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             String base64EncodedEk = new String(Base64.encodeBase64Local(requestData.getEndorsementKey()));
             String base64EncodedSrk = new String(Base64.encodeBase64Local(requestData.getStorageRootKey()));
             //SRS_ContractAPIHttp_25_025: [ This method shall build the required Json input using parser. ]
-            byte[] payload = new RegisterRequestParser(requestData.getRegistrationId(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
+            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
             //SRS_ContractAPIHttp_25_005: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8".]
             HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.PUT, payload, DEFAULT_HTTP_TIMEOUT_MS, null, SDKUtils.getUserAgentString());
             //SRS_ContractAPIHttp_25_006: [This method shall set the SSLContext for the Http Request.]
@@ -266,11 +267,11 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
                 //SRS_ContractAPIHttp_25_027: [ This method shall base 64 encoded endorsement key, storage root key. ]
                 String base64EncodedEk = new String(Base64.encodeBase64Local(requestData.getEndorsementKey()));
                 String base64EncodedSrk = new String(Base64.encodeBase64Local(requestData.getStorageRootKey()));
-                payload = new RegisterRequestParser(requestData.getRegistrationId(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
+                payload = new DeviceRegistrationParser(requestData.getRegistrationId(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
             }
             else
             {
-                payload = new RegisterRequestParser(requestData.getRegistrationId()).toJson().getBytes();
+                payload = new DeviceRegistrationParser(requestData.getRegistrationId()).toJson().getBytes();
             }
 
             //SRS_ContractAPIHttp_25_013: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8" 4. Authorization: specified sas token as authorization if a non null value is given.]

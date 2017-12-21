@@ -9,14 +9,22 @@ An MQTT connection between a device and an IoT Hub. The connection talks to vari
 ## Exposed API
 
 ```java
-public final class MqttIotHubConnection
+public final class MqttIotHubConnection implements MqttConnectionStateListener
 {
-    public MqttIotHubConnection(DeviceClientConfig config);
+    public MqttIotHubConnection(DeviceClientConfig config) throws IllegalArgumentException;
 
     public void open() throws IOException;
     public void close();
     public IotHubStatusCode sendEvent(Message msg) throws IllegalStateException;
     public Message receiveMessage() throws IllegalStateException;
+    
+    void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
+    
+    @Override
+    public void connectionEstablished();
+
+    @Override
+    public void connectionLost();
 
 }
 ```
@@ -25,7 +33,7 @@ public final class MqttIotHubConnection
 ### MqttIotHubConnection
 
 ```java
-public MqttIotHubConnection(DeviceClientConfig config)
+public MqttIotHubConnection(DeviceClientConfig config) throws IllegalArgumentException;
 ```
 
 **SRS_MQTTIOTHUBCONNECTION_15_001: [**The constructor shall save the configuration.**]**
@@ -54,6 +62,8 @@ public void open() throws IOException, IllegalArgumentException;
 **SRS_MQTTIOTHUBCONNECTION_99_017: [**The function shall set DeviceClientConfig object needed for SAS token renewal.**]**
 
 **SRS_MQTTIOTHUBCONNECTION_34_027: [**If this function is called while using websockets and x509 authentication, an UnsupportedOperation shall be thrown.**]**
+
+**SRS_MQTTIOTHUBCONNECTION_34_030: [**This function shall instantiate this object's MqttMessaging object with this object as the listener.**]**
 
 
 ### close
@@ -86,6 +96,10 @@ public IotHubStatusCode sendEvent(Message msg) throws IllegalStateException
 
 **SRS_MQTTIOTHUBCONNECTION_15_013: [**If the MQTT connection is closed, the function shall throw an IllegalStateException.**]**
 
+**SRS_MQTTIOTHUBCONNECTION_34_035: [**If the sas token saved in the config has expired and needs to be renewed, this function shall return UNAUTHORIZED.**]**
+
+**SRS_MQTTIOTHUBCONNECTION_34_036: [**If the sas token saved in the config has expired and needs to be renewed and if there is a connection state callback saved, this function shall invoke that callback with Status SAS_TOKEN_EXPIRED.**]**
+
 
 ### receiveMessage
 
@@ -100,3 +114,31 @@ public Message receiveMessage() throws IllegalStateException, IOException;
 **SRS_MQTTIOTHUBCONNECTION_34_016: [**If any of the messaging clients throw an exception, The associated message will be removed from the queue and the exception will be propagated up to the receive task.**]**
 
 **SRS_MQTTIOTHUBCONNECTION_34_017: [**If all of the messaging clients fail to receive, the function shall throw an UnsupportedOperationException.**]**
+
+
+### registerConnectionStateCallback
+```java
+void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
+```
+
+**SRS_MQTTIOTHUBCONNECTION_34_033: [**If the provided callback object is null, this function shall throw an IllegalArgumentException.**]**
+
+**SRS_MQTTIOTHUBCONNECTION_34_034: [**This function shall save the provided callback and callback context.**]**
+
+
+### connectionLost
+
+```java
+public void connectionLost();
+```
+
+**SRS_MQTTIOTHUBCONNECTION_34_028: [**If this object's connection state callback is not null, this function shall fire that callback with the saved context and status CONNECTION_DROP.**]**
+
+
+### connectionEstablished
+
+```java
+public void connectionEstablished();
+```
+
+**SRS_MQTTIOTHUBCONNECTION_34_029: [**If this object's connection state callback is not null, this function shall fire that callback with the saved context and status CONNECTION_SUCCESS.**]**

@@ -93,7 +93,7 @@ public class AmqpMessageTest
             }
         };
 
-        Map<String, String> userProperties = new HashMap<>();
+        Map<String, Object> userProperties = new HashMap<>();
         amqpMessage.setApplicationProperty(userProperties);
     }
 

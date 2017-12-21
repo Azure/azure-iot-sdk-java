@@ -4,16 +4,23 @@
 package com.microsoft.azure.sdk.iot.device.auth;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMException;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.UUID;
 
@@ -164,24 +171,8 @@ public class IotHubSSLContext
     private void generateSSLContextWithKeys(String publicKeyCertificateString, String privateKeyString, IotHubCertificateManager certificateManager)
             throws KeyManagementException, IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException
     {
-        Security.addProvider(new BouncyCastleProvider());
-
-        PEMReader privateKeyReader = new PEMReader(new StringReader(privateKeyString));
-        PEMReader publicKeyReader = new PEMReader(new StringReader(publicKeyCertificateString));
-
-        Object possiblePrivateKey = privateKeyReader.readObject();
-        if (!(possiblePrivateKey instanceof KeyPair))
-        {
-            throw new CertificateException("Unexpected format for private key");
-        }
-        KeyPair certPairWithPrivate = (KeyPair) possiblePrivateKey;
-
-        Object possiblePublicKey = publicKeyReader.readObject();
-        if (!(possiblePublicKey instanceof X509Certificate))
-        {
-            throw new CertificateException("Unexpected format for public key certificate");
-        }
-        X509Certificate certPairWithPublic = (X509Certificate) possiblePublicKey;
+        Key privateKey = IotHubSSLContext.parsePrivateKey(privateKeyString);
+        X509Certificate certPairWithPublic = IotHubSSLContext.parsePublicKeyCertificate(publicKeyCertificateString);
 
 
         //Codes_SRS_IOTHUBSSLCONTEXT_34_018: [This constructor shall generate a temporary password to protect the created keystore holding the private key.]
@@ -191,7 +182,7 @@ public class IotHubSSLContext
         KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
         keystore.load(null);
         keystore.setCertificateEntry(CERTIFICATE_ALIAS, certPairWithPublic);
-        keystore.setKeyEntry(PRIVATE_KEY_ALIAS, certPairWithPrivate.getPrivate(), temporaryPassword, new Certificate[] {certPairWithPublic});
+        keystore.setKeyEntry(PRIVATE_KEY_ALIAS, privateKey, temporaryPassword, new Certificate[] {certPairWithPublic});
 
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         kmf.init(keystore, temporaryPassword);
@@ -274,5 +265,46 @@ public class IotHubSSLContext
     private char[] generateTemporaryPassword()
     {
         return UUID.randomUUID().toString().toCharArray();
+    }
+
+    private static Key parsePrivateKey(String privateKeyString) throws CertificateException
+    {
+        try
+        {
+            // Codes_SRS_IOTHUBSSLCONTEXT_34_031: [This function shall return a Private Key instance created by the provided PEM formatted privateKeyString.]
+            Security.addProvider(new BouncyCastleProvider());
+            PEMParser privateKeyParser = new PEMParser(new StringReader(privateKeyString));
+            Object possiblePrivateKey = privateKeyParser.readObject();
+            PEMKeyPair ukp = (PEMKeyPair) possiblePrivateKey;
+            return getPrivateKeyFromPEMKeyPair(ukp);
+        }
+        catch (Exception e)
+        {
+            // Codes_SRS_IOTHUBSSLCONTEXT_34_032: [If any exception is encountered while attempting to create the private key instance, this function shall throw a CertificateException.]
+            throw new CertificateException(e);
+        }
+    }
+
+    private static X509Certificate parsePublicKeyCertificate(String publicKeyCertificateString) throws CertificateException
+    {
+        try
+        {
+            // Codes_SRS_IOTHUBSSLCONTEXT_34_033: [This function shall return an X509Certificate instance created by the provided PEM formatted publicKeyCertificateString.]
+            Security.addProvider(new BouncyCastleProvider());
+            PemReader publicKeyCertificateReader = new PemReader(new StringReader(publicKeyCertificateString));
+            PemObject possiblePublicKeyCertificate = publicKeyCertificateReader.readPemObject();
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            return (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(possiblePublicKeyCertificate.getContent()));
+        }
+        catch (Exception e)
+        {
+            // Codes_SRS_IOTHUBSSLCONTEXT_34_034: [If any exception is encountered while attempting to create the public key certificate instance, this function shall throw a CertificateException.]
+            throw new CertificateException(e);
+        }
+    }
+
+    private static Key getPrivateKeyFromPEMKeyPair(PEMKeyPair ukp) throws PEMException
+    {
+        return new JcaPEMKeyConverter().setProvider("BC").getKeyPair(ukp).getPrivate();
     }
 }

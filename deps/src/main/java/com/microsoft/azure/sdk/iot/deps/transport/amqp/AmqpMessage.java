@@ -56,7 +56,7 @@ public class AmqpMessage
      * Set the application property for the message
      * @param userProperties
      */
-    public void setApplicationProperty(Map<String, String> userProperties)
+    public void setApplicationProperty(Map<String, Object> userProperties)
     {
         ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
         this.messageImpl.setApplicationProperties(applicationProperties);

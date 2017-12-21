@@ -1,7 +1,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthentication;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -30,7 +30,7 @@ public class TransportClientTest
     DeviceClientConfig mockDeviceClientConfig;
 
     @Mocked
-    IotHubSasTokenAuthentication mockIotHubSasTokenAuthentication;
+    IotHubSasTokenAuthenticationProvider mockIotHubSasTokenAuthenticationProvider;
 
     // Tests_SRS_TRANSPORTCLIENT_12_001: [If the `protocol` is not valid, the constructor shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
@@ -159,8 +159,8 @@ public class TransportClientTest
                 mockDeviceClient.getConfig();
                 result = mockDeviceClientConfig;
                 mockDeviceClientConfig.getSasTokenAuthentication();
-                result = mockIotHubSasTokenAuthentication;
-                mockIotHubSasTokenAuthentication.isRenewalNecessary();
+                result = mockIotHubSasTokenAuthenticationProvider;
+                mockIotHubSasTokenAuthenticationProvider.isRenewalNecessary();
                 result = true;
             }
         };
@@ -176,7 +176,7 @@ public class TransportClientTest
         new Verifications()
         {
             {
-                mockIotHubSasTokenAuthentication.getRenewedSasToken();
+                mockIotHubSasTokenAuthenticationProvider.getRenewedSasToken();
                 times = 1;
                 Deencapsulation.invoke(mockDeviceClient, "setDeviceIO", actualDeviceIO);
                 times = 1;

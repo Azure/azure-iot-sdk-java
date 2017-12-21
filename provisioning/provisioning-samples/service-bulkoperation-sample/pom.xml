@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.sample</groupId>
     <artifactId>service-bulkoperation-sample</artifactId>
-    <version>0.0.1</version>
-    <name>Provisioning bulk enrollments using service Sample</name>
+    <version>1.0.0</version>
+    <name>Provisioning bulk individual enrollments using service Sample</name>
     <developers>
         <developer>
             <id>microsoft</id>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
             <artifactId>provisioning-service-client</artifactId>
-            <version>0.0.1</version>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
     <build>

@@ -12,19 +12,19 @@ import com.google.gson.annotations.SerializedName;
  * Representation of a single Twin initial state for the Device Provisioning Service.
  *
  * <p> The TwinState can contain one {@link TwinCollection} of <b>Tags</b>, and one
- *     {@link TwinCollection} of <b>desiredProperties</b>.
+ *     {@link TwinCollection} of <b>properties.desired</b>.
  *
  * <p> Each entity in the collections can contain a associated {@link TwinMetadata}.
  *
  * <p> These metadata are provided by the Service and contains information about the last
  *     updated date time, and version.
  *
- * <p> For instance, the follow is a valid TwinState, represented as
- *     {@code initialTwinState} in the rest API.
+ * <p> For instance, the following is a valid TwinState, represented as
+ *     {@code initialTwin} in the rest API.
  * <pre>
  *     {@code
  *      {
- *          "initialTwinState": {
+ *          "initialTwin": {
  *              "tags":{
  *                  "SpeedUnity":"MPH",
  *                  "$metadata":{
@@ -37,28 +37,30 @@ import com.google.gson.annotations.SerializedName;
  *                  },
  *                  "$version":4
  *              }
- *              "desiredProperties":{
- *                  "MaxSpeed":{
- *                      "Value":500,
- *                      "NewValue":300
- *                  },
- *                  "$metadata":{
- *                      "$lastUpdated":"2017-09-21T02:07:44.238Z",
- *                      "$lastUpdatedVersion":4,
+ *              "properties":{
+ *                  "desired": {
  *                      "MaxSpeed":{
+ *                          "Value":500,
+ *                          "NewValue":300
+ *                      },
+ *                      "$metadata":{
  *                          "$lastUpdated":"2017-09-21T02:07:44.238Z",
  *                          "$lastUpdatedVersion":4,
- *                          "Value":{
+ *                          "MaxSpeed":{
  *                              "$lastUpdated":"2017-09-21T02:07:44.238Z",
- *                              "$lastUpdatedVersion":4
- *                          },
- *                          "NewValue":{
- *                              "$lastUpdated":"2017-09-21T02:07:44.238Z",
- *                              "$lastUpdatedVersion":4
+ *                              "$lastUpdatedVersion":4,
+ *                              "Value":{
+ *                                  "$lastUpdated":"2017-09-21T02:07:44.238Z",
+ *                                  "$lastUpdatedVersion":4
+ *                              },
+ *                              "NewValue":{
+ *                                  "$lastUpdated":"2017-09-21T02:07:44.238Z",
+ *                                  "$lastUpdatedVersion":4
+ *                              }
  *                          }
- *                      }
- *                  },
- *                  "$version":4
+ *                      },
+ *                      "$version":4
+ *                  }
  *              }
  *          }
  *      }
@@ -79,10 +81,10 @@ public class TwinState
     private TwinCollection tags;
 
     // the twin desired properties
-    private static final String DESIRED_PROPERTIES_TAG = "desiredProperties";
+    private static final String DESIRED_PROPERTIES_TAG = "properties";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(DESIRED_PROPERTIES_TAG)
-    private TwinCollection desiredProperties;
+    private TwinProperties properties;
 
     /**
      * CONSTRUCTOR
@@ -93,17 +95,19 @@ public class TwinState
      * <p> When serialized, this class will looks like the following example:
      * <pre>
      *     {@code
-     *          "initialTwinState": {
+     *          "initialTwin": {
      *              "tags":{
      *                  "SpeedUnity":"MPH",
      *                  "$version":4
      *              }
-     *              "desiredProperties":{
-     *                  "MaxSpeed":{
-     *                      "Value":500,
-     *                      "NewValue":300
-     *                  },
-     *                  "$version":4
+     *              "properties":{
+     *                  "desired":{
+     *                      "MaxSpeed":{
+     *                          "Value":500,
+     *                          "NewValue":300
+     *                      },
+     *                      "$version":4
+     *                  }
      *              }
      *          }
      *      }
@@ -111,18 +115,18 @@ public class TwinState
      * </pre>
      *
      * @param tags the {@link TwinCollection} with the initial tags state. It can be {@code null}.
-     * @param desiredProperties the {@link TwinCollection} with the initial desired properties. It can be {@code null}.
+     * @param desiredProperty the {@link TwinCollection} with the initial desired properties. It can be {@code null}.
      */
-    public TwinState(TwinCollection tags, TwinCollection desiredProperties)
+    public TwinState(TwinCollection tags, TwinCollection desiredProperty)
     {
-        /* SRS_TWIN_STATE_21_001: [The constructor shall store the provided tags and desiredProperties.] */
+        /* SRS_TWIN_STATE_21_001: [The constructor shall store the provided tags and desiredProperty.] */
         if(tags != null)
         {
             this.tags = TwinCollection.createFromRawCollection(tags);
         }
-        if(desiredProperties != null)
+        if(desiredProperty != null)
         {
-            this.desiredProperties = TwinCollection.createFromRawCollection(desiredProperties);
+            this.properties = new TwinProperties(desiredProperty);
         }
     }
 
@@ -150,10 +154,10 @@ public class TwinState
             twinJson.add(TAGS_TAG, this.tags.toJsonElement());
         }
 
-        /* SRS_TWIN_STATE_21_004: [If the desiredProperties is null, the toJsonElement shall not include the `desiredProperties` in the final JSON.] */
-        if(this.desiredProperties != null)
+        /* SRS_TWIN_STATE_21_004: [If the property is null, the toJsonElement shall not include the `properties` in the final JSON.] */
+        if(this.properties != null)
         {
-            twinJson.add(DESIRED_PROPERTIES_TAG, this.desiredProperties.toJsonElement());
+            twinJson.add(DESIRED_PROPERTIES_TAG, this.properties.toJsonElement());
         }
 
         return twinJson;
@@ -171,14 +175,18 @@ public class TwinState
     }
 
     /**
-     * Getter for the desiredProperties.
+     * Getter for the desired property.
      *
-     * @return The {@code TwinCollection} with the desiredProperties content. It can be {@code null}.
+     * @return The {@code TwinCollection} with the desired property content. It can be {@code null}.
      */
-    public TwinCollection getDesiredProperties()
+    public TwinCollection getDesiredProperty()
     {
-        /* SRS_TWIN_STATE_21_006: [The getDesiredProperties shall return a TwinCollection with the stored desiredProperties.] */
-        return this.desiredProperties;
+        /* SRS_TWIN_STATE_21_006: [The getDesiredProperty shall return a TwinCollection with the stored desired property.] */
+        if(this.properties == null)
+        {
+            return null;
+        }
+        return this.properties.getDesired();
     }
 
     /**
@@ -198,10 +206,10 @@ public class TwinState
             twinJson.add(TAGS_TAG, this.tags.toJsonElementWithMetadata());
         }
 
-        /* SRS_TWIN_STATE_21_009: [If the desiredProperties is null, the JSON shall not include the `desiredProperties`.] */
-        if(this.desiredProperties != null)
+        /* SRS_TWIN_STATE_21_009: [If the properties is null, the JSON shall not include the `properties`.] */
+        if(this.properties != null)
         {
-            twinJson.add(DESIRED_PROPERTIES_TAG, this.desiredProperties.toJsonElementWithMetadata());
+            twinJson.add(DESIRED_PROPERTIES_TAG, this.properties.toJsonElementWithMetadata());
         }
 
         return twinJson.toString();

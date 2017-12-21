@@ -206,7 +206,7 @@ public class TwinCollection extends HashMap<String, Object>
     /**
      * Internal Constructor from raw map.
      *
-     * <p> This internal constructor is used by the Enrollment and EnrollmentGroup
+     * <p> This internal constructor is used by the IndividualEnrollment and EnrollmentGroup
      *     after the deserialization process.
      *
      * <p> During the deserialization process, the GSON will convert both tags and
@@ -265,7 +265,7 @@ public class TwinCollection extends HashMap<String, Object>
             /* SRS_TWIN_COLLECTION_21_012: [If the entity contain the key `$version`, the constructor shall set the version with the value of this entity.] */
             if(entry.getKey().equals(VERSION_TAG))
             {
-                /* SRS_TWIN_COLLECTION_21_013: [The constructor shall throws IllegalArgumentException if the entity contain the key `$version` and its value is not a integer.] */
+                /* SRS_TWIN_COLLECTION_21_013: [The constructor shall throw IllegalArgumentException if the entity contain the key `$version` and its value is not a integer.] */
                 if(!(entry.getValue() instanceof Number))
                 {
                     throw new IllegalArgumentException("version is not a number");
@@ -279,7 +279,7 @@ public class TwinCollection extends HashMap<String, Object>
             }
             else
             {
-                /* SRS_TWIN_COLLECTION_21_015: [The constructor shall throws IllegalArgumentException if the Twin collection contain more than 5 levels.] */
+                /* SRS_TWIN_COLLECTION_21_015: [The constructor shall throw IllegalArgumentException if the Twin collection contain more than 5 levels.] */
                 twinCollection.put(entry.getKey(), entry.getValue());
             }
         }
@@ -310,7 +310,7 @@ public class TwinCollection extends HashMap<String, Object>
             }
             else
             {
-                /* SRS_TWIN_COLLECTION_21_024: [The constructor shall throws IllegalArgumentException if the metadata is inconsistent with the TwinCollection.] */
+                /* SRS_TWIN_COLLECTION_21_024: [The constructor shall throw IllegalArgumentException if the metadata is inconsistent with the TwinCollection.] */
                 Object valueInCollection = twinCollection.get(key);
                 if(valueInCollection == null)
                 {

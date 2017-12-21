@@ -455,4 +455,44 @@ public class SendMessagesIT
         SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.AMQPS_WS.toString(), NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
         client.closeNow();
     }
+
+    @Test
+    public void expiredMessagesAreNotSentMQTT() throws URISyntaxException, IOException, InterruptedException
+    {
+        IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+        String connectionString = DeviceConnectionString.get(iotHubConnectionString, deviceMqtt);
+        SendMessagesCommon.sendExpiredMessageExpectingMessageExpiredCallback(connectionString, protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+    }
+
+    @Test
+    public void expiredMessagesAreNotSentMQTTWS() throws URISyntaxException, IOException, InterruptedException
+    {
+        IotHubClientProtocol protocol = IotHubClientProtocol.MQTT_WS;
+        String connectionString = DeviceConnectionString.get(iotHubConnectionString, deviceMqttWs);
+        SendMessagesCommon.sendExpiredMessageExpectingMessageExpiredCallback(connectionString, protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+    }
+
+    @Test
+    public void expiredMessagesAreNotSentAMQPS() throws URISyntaxException, IOException, InterruptedException
+    {
+        IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        String connectionString = DeviceConnectionString.get(iotHubConnectionString, deviceAmqps);
+        SendMessagesCommon.sendExpiredMessageExpectingMessageExpiredCallback(connectionString, protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+    }
+
+    @Test
+    public void expiredMessagesAreNotSentAMQPSWS() throws URISyntaxException, IOException, InterruptedException
+    {
+        IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
+        String connectionString = DeviceConnectionString.get(iotHubConnectionString, deviceAmqpsWs);
+        SendMessagesCommon.sendExpiredMessageExpectingMessageExpiredCallback(connectionString, protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+    }
+
+    @Test
+    public void expiredMessagesAreNotSentHTTPS() throws URISyntaxException, IOException, InterruptedException
+    {
+        IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+        String connectionString = DeviceConnectionString.get(iotHubConnectionString, deviceHttps);
+        SendMessagesCommon.sendExpiredMessageExpectingMessageExpiredCallback(connectionString, protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+    }
 }

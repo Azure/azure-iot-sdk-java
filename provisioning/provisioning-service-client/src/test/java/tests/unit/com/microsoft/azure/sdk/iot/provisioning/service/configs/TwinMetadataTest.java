@@ -64,7 +64,7 @@ public class TwinMetadataTest
         assertNull(Deencapsulation.getField(twinMetadata, "lastUpdated"));
     }
 
-    /* SRS_TWIN_METADATA_21_002: [The constructor shall throws IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date.] */
+    /* SRS_TWIN_METADATA_21_002: [The constructor shall throw IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorLastUpdatedInvalidSucceed()
     {
@@ -254,7 +254,7 @@ public class TwinMetadataTest
         assertNull(twinMetadata);
     }
 
-    /* SRS_TWIN_METADATA_21_006: [The tryExtractFromMap shall throws IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date or the version in a Number.] */
+    /* SRS_TWIN_METADATA_21_006: [The tryExtractFromMap shall throw IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date or the version in a Number.] */
     @Test (expected = IllegalArgumentException.class)
     public void tryExtractFromMapValidDateAndInvalidVersionSucceed()
     {
@@ -280,7 +280,7 @@ public class TwinMetadataTest
         assertNull(Deencapsulation.getField(twinMetadata, "lastUpdatedVersion"));
     }
 
-    /* SRS_TWIN_METADATA_21_006: [The tryExtractFromMap shall throws IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date or the version in a Number.] */
+    /* SRS_TWIN_METADATA_21_006: [The tryExtractFromMap shall throw IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date or the version in a Number.] */
     @Test (expected = IllegalArgumentException.class)
     public void tryExtractFromMapThrowsOnInvalidDateAndValidVersion()
     {
@@ -303,7 +303,7 @@ public class TwinMetadataTest
         // assert
     }
 
-    /* SRS_TWIN_METADATA_21_006: [The tryExtractFromMap shall throws IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date or the version in a Number.] */
+    /* SRS_TWIN_METADATA_21_006: [The tryExtractFromMap shall throw IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date or the version in a Number.] */
     @Test (expected = IllegalArgumentException.class)
     public void tryExtractFromMapInvalidDateAndInvalidVersionSucceed()
     {

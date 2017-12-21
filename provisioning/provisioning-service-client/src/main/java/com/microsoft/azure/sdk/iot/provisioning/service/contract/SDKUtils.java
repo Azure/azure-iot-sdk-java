@@ -8,9 +8,9 @@ package com.microsoft.azure.sdk.iot.provisioning.service.contract;
  */
 class SDKUtils
 {
-    private static final String SERVICE_API_VERSION = "2017-08-31-preview";
-    private static final String PROVISIONING_DEVICE_CLIENT = "com.microsoft.azure.sdk.iot.provisioning.provisioning-device-client/";
-    private static final String PROVISIONING_DEVICE_CLIENT_VERSION = "0.0.1";
+    private static final String SERVICE_API_VERSION = "2017-11-15";
+    private static final String PROVISIONING_SERVICE_CLIENT = "com.microsoft.azure.sdk.iot.provisioning.service.provisioning-service-client/";
+    private static final String PROVISIONING_SERVICE_CLIENT_VERSION = "1.0.0";
 
     /**
      * Getter for the rest API version
@@ -31,6 +31,6 @@ class SDKUtils
     static String getUserAgentString()
     {
         /* SRS_SDK_UTILS_21_002: [The getUserAgentString shall return a string with the SDK name and version separated by `/`.] */
-        return PROVISIONING_DEVICE_CLIENT + PROVISIONING_DEVICE_CLIENT_VERSION;
+        return PROVISIONING_SERVICE_CLIENT + PROVISIONING_SERVICE_CLIENT_VERSION;
     }
 }

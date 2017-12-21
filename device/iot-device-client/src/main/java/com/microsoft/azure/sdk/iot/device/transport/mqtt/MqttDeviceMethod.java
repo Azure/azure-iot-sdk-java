@@ -41,7 +41,7 @@ public class MqttDeviceMethod extends Mqtt
         /*
         Codes_SRS_MqttDeviceMethod_25_001: [**The constructor shall instantiate super class without any parameters.**]**
          */
-        super(mqttConnection);
+        super(mqttConnection, null);
         /*
         Codes_SRS_MqttDeviceMethod_25_002: [**The constructor shall create subscribe and response topics strings for device methods as per the spec.**]**
          */
@@ -167,7 +167,7 @@ public class MqttDeviceMethod extends Mqtt
 
                 if (topic != null && topic.length() > 0)
                 {
-                    // Codes_SRS_MQTTDEVICEMETHOD_25_026: [This method shall call peekMessage to get the message payload from the recevived Messages queue corresponding to the messaging client's operation.]
+                    // Codes_SRS_MQTTDEVICEMETHOD_25_026: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
                     byte[] data = messagePair.getValue();
 
                     if (topic.length() > METHOD.length() && topic.startsWith(METHOD))
