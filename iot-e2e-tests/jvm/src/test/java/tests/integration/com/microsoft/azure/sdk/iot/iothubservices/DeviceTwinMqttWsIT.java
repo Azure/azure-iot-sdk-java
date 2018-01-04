@@ -332,7 +332,7 @@ public class DeviceTwinMqttWsIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                     assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
                 }
@@ -423,7 +423,7 @@ public class DeviceTwinMqttWsIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                     assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
                 }
@@ -545,7 +545,7 @@ public class DeviceTwinMqttWsIT
                     }
                     catch (IotHubException | IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                 }
             });

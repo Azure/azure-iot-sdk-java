@@ -364,7 +364,7 @@ public class DeviceTwinIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                     assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
                 }
@@ -455,7 +455,7 @@ public class DeviceTwinIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                     assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
                 }
@@ -534,7 +534,7 @@ public class DeviceTwinIT
         assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
         for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
         {
-            assertTrue(propertyState.property.toString(), propertyState.callBackTriggered);
+            assertTrue("Callback was not triggered for one or more properties", propertyState.callBackTriggered);
             assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
             assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
         }
@@ -576,7 +576,7 @@ public class DeviceTwinIT
                     }
                     catch (IotHubException | IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                 }
             });
@@ -904,7 +904,7 @@ public class DeviceTwinIT
                 }
                 catch (Exception e)
                 {
-                    assertTrue(e.getMessage(), true);
+                    fail(e.getMessage());
                 }
 
             }
@@ -938,7 +938,7 @@ public class DeviceTwinIT
                 }
                 catch (Exception e)
                 {
-                    assertTrue(e.getMessage(), true);
+                    fail(e.getMessage());
                 }
             }
         });
@@ -1121,7 +1121,7 @@ public class DeviceTwinIT
                         }
                         catch (Exception e)
                         {
-                            assertTrue(e.getMessage(), true);
+                            fail(e.getMessage());
                         }
 
                         assertFalse(sCDeviceTwin.hasNextDeviceTwin(twinQuery));
@@ -1129,7 +1129,7 @@ public class DeviceTwinIT
                 }
                 catch (Exception e)
                 {
-                    assertTrue(e.getMessage(), true);
+                    fail(e.getMessage());
                 }
             }
         });
@@ -1164,7 +1164,7 @@ public class DeviceTwinIT
                         }
                         catch (Exception e)
                         {
-                            assertTrue(e.getMessage(), true);
+                            fail(e.getMessage());
                         }
 
                         assertFalse(sCDeviceTwin.hasNextDeviceTwin(twinQueryEven));
@@ -1172,7 +1172,7 @@ public class DeviceTwinIT
                 }
                 catch (Exception e)
                 {
-                    assertTrue(e.getMessage(), true);
+                    fail(e.getMessage());
                 }
             }
         });

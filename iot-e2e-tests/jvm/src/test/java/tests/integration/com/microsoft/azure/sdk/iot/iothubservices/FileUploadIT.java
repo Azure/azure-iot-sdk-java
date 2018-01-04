@@ -317,7 +317,7 @@ public class FileUploadIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                 }
             });
@@ -366,7 +366,7 @@ public class FileUploadIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                 }
             });
@@ -426,7 +426,7 @@ public class FileUploadIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                 }
             });
@@ -485,7 +485,7 @@ public class FileUploadIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                 }
             });
@@ -544,7 +544,7 @@ public class FileUploadIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                 }
             });

@@ -32,6 +32,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ReceiveMessagesIT
 {
@@ -66,7 +67,7 @@ public class ReceiveMessagesIT
     private static ServiceClient serviceClient;
 
     // How much to wait until receiving a message from the server, in milliseconds
-    private Integer receiveTimeout = 180000;
+    private Integer receiveTimeout = 240000; // 4 minutes
 
     private static String expectedCorrelationId = "1234";
     private static String expectedMessageId = "5678";
@@ -299,7 +300,7 @@ public class ReceiveMessagesIT
         // Now wait for messages to be received in the device client
         waitForBackToBackC2DMessagesToBeReceived();
         client.closeNow(); //close the device client connection
-        assertEquals(true,messageIdListStoredOnReceive.containsAll(messageIdListStoredOnC2DSend)); // check if the received list is same as the actual list that was created on sending the messages
+        assertTrue("Received messages don't match up with sent messages", messageIdListStoredOnReceive.containsAll(messageIdListStoredOnC2DSend)); // check if the received list is same as the actual list that was created on sending the messages
     }
 
     private static class MessageCallbackForBackToBackC2DMessages implements com.microsoft.azure.sdk.iot.device.MessageCallback

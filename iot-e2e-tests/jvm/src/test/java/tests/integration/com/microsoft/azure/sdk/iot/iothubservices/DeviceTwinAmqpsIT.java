@@ -34,19 +34,20 @@ import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class DeviceTwinAmqpsIT
 {
     // Max time to wait to see it on Hub
-    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 200; // 0.2 sec
+    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 1000; // 1 sec
 
-    private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB*10; // 2 sec
+    private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB*10; // 10 sec
 
     //Max time to wait before timing out test
-    private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB + 50000; // 50 secs
+    private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB + 50000; // 51 secs
 
     // Max reported properties to be tested
-    private static final Integer MAX_PROPERTIES_TO_TEST = 5;
+    private static final Integer MAX_PROPERTIES_TO_TEST = 3;
 
     //Max devices to test
     private static final Integer MAX_DEVICES = 3;
@@ -172,31 +173,6 @@ public class DeviceTwinAmqpsIT
                 }
                 i++;
             }
-        }
-    }
-
-    private void addMultipleDevices() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
-    {
-        devicesUnderTest = new DeviceState[MAX_DEVICES];
-
-        for (int i = 0 ; i < MAX_DEVICES; i++)
-        {
-            devicesUnderTest[i] = new DeviceState();
-            String deviceIdAmqps = "java-device-twin-e2e-test-amqps".concat(UUID.randomUUID().toString());
-            devicesUnderTest[i].sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceIdAmqps, null, null);
-            devicesUnderTest[i].sCDeviceForRegistryManager = registryManager.addDevice(devicesUnderTest[i].sCDeviceForRegistryManager);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-            setUpTwin(devicesUnderTest[i]);
-        }
-    }
-
-    private void removeMultipleDevices() throws IOException, IotHubException, InterruptedException
-    {
-        for (int i = 0 ; i < MAX_DEVICES; i++)
-        {
-            tearDownTwin(devicesUnderTest[i]);
-            registryManager.removeDevice(devicesUnderTest[i].sCDeviceForRegistryManager.getDeviceId());
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
         }
     }
 
@@ -342,7 +318,7 @@ public class DeviceTwinAmqpsIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                     assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
                 }
@@ -433,7 +409,7 @@ public class DeviceTwinAmqpsIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                     assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
                 }
@@ -510,12 +486,12 @@ public class DeviceTwinAmqpsIT
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         // assert
-        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+        assertEquals(STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
         for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
         {
-            assertTrue(propertyState.property.toString(), propertyState.callBackTriggered);
+            assertTrue("The callback for one or more properties was not fired", propertyState.callBackTriggered);
             assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
-            assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+            assertEquals(STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
         }
     }
 
@@ -555,7 +531,7 @@ public class DeviceTwinAmqpsIT
                     }
                     catch (IotHubException | IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                 }
             });
@@ -573,7 +549,7 @@ public class DeviceTwinAmqpsIT
         {
             assertTrue(propertyState.property.toString(), propertyState.callBackTriggered);
             assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
-            assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+            assertEquals(STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
         }
     }
 
@@ -606,7 +582,7 @@ public class DeviceTwinAmqpsIT
         // assert
         for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
         {
-            assertTrue(propertyState.property.toString(), propertyState.callBackTriggered);
+            assertTrue("Callback was not triggered for one or more properties", propertyState.callBackTriggered);
             assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
             assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
         }
@@ -667,7 +643,7 @@ public class DeviceTwinAmqpsIT
         // verify if they are received by SC
         Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
         int actualReportedPropFound = readReportedProperties(x509DeviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE);
-        assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
+        assertEquals("Properties were not reported before a timeout", MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
 
         tearDownTwin(x509DeviceUnderTest);
         registryManager.removeDevice(x509DeviceUnderTest.sCDeviceForRegistryManager.getDeviceId());

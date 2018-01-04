@@ -34,15 +34,15 @@ import static org.junit.Assert.*;
 public class DeviceTwinAmqpsWsIT
 {
     // Max time to wait to see it on Hub
-    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 200; // 0.2 sec
+    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 1000; // 1 sec
 
-    private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB*10; // 2 sec
+    private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB*10; // 10 sec
 
     //Max time to wait before timing out test
-    private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB + 50000; // 50 secs
+    private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB + 50000; // 51 secs
 
     // Max reported properties to be tested
-    private static final Integer MAX_PROPERTIES_TO_TEST = 5;
+    private static final Integer MAX_PROPERTIES_TO_TEST = 3;
 
     //Max devices to test
     private static final Integer MAX_DEVICES = 3;
@@ -332,7 +332,7 @@ public class DeviceTwinAmqpsWsIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                     assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
                 }
@@ -423,7 +423,7 @@ public class DeviceTwinAmqpsWsIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                     assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
                 }
@@ -442,7 +442,7 @@ public class DeviceTwinAmqpsWsIT
         // verify if they are received by SC
         Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
         int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
-        assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
+        assertEquals("Properties not reported before timeout", MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
     }
 
 
@@ -545,7 +545,7 @@ public class DeviceTwinAmqpsWsIT
                     }
                     catch (IotHubException | IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                 }
             });
@@ -561,7 +561,7 @@ public class DeviceTwinAmqpsWsIT
         // assert
         for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
         {
-            assertTrue(propertyState.property.toString(), propertyState.callBackTriggered);
+            assertTrue("The callback for one or more properties was not triggered", propertyState.callBackTriggered);
             assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
             assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
         }
@@ -596,7 +596,7 @@ public class DeviceTwinAmqpsWsIT
         // assert
         for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
         {
-            assertTrue(propertyState.property.toString(), propertyState.callBackTriggered);
+            assertTrue("The callback for one or more properties was not triggered", propertyState.callBackTriggered);
             assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
             assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
         }

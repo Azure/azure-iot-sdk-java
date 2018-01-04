@@ -267,7 +267,7 @@ public class TransportClientFileUploadIT
                             clientArrayList.get(indexJ).uploadToBlobAsync(fileUploadState[indexI].blobName, fileUploadState[indexI].fileInputStream, fileUploadState[indexI].fileLength, new TransportClientFileUploadIT.FileUploadCallback(), fileUploadState[indexI]);
                         } catch (IOException e)
                         {
-                            assertTrue(e.getMessage(), true);
+                            fail(e.getMessage());
                         }
                     }
                 });
@@ -337,7 +337,7 @@ public class TransportClientFileUploadIT
                             clientArrayList.get(indexJ).uploadToBlobAsync(fileUploadState[indexI].blobName, fileUploadState[indexI].fileInputStream, fileUploadState[indexI].fileLength, new TransportClientFileUploadIT.FileUploadCallback(), fileUploadState[indexI]);
                         } catch (IOException e)
                         {
-                            assertTrue(e.getMessage(), true);
+                            fail(e.getMessage());
                         }
                     }
                 });

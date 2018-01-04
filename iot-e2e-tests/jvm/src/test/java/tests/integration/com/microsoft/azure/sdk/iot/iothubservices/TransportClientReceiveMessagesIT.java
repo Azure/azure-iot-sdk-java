@@ -35,7 +35,7 @@ public class TransportClientReceiveMessagesIT
     private static Device[] deviceListAmqps = new Device[MAX_DEVICE_MULTIPLEX];
 
     // How much to wait until receiving a message from the server, in milliseconds
-    private Integer receiveTimeout = 60000;
+    private int receiveTimeout = 240000; //4 minutes
 
     private static String expectedCorrelationId = "1234";
     private static String expectedMessageId = "5678";

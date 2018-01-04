@@ -21,6 +21,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class TransportClientDeviceTwinIT
 {
@@ -268,12 +269,12 @@ public class TransportClientDeviceTwinIT
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
             // assert
-            assertEquals(devicesUnderTest.get(i).deviceTwinStatus, TransportClientDeviceTwinIT.STATUS.SUCCESS);
+            assertEquals(TransportClientDeviceTwinIT.STATUS.SUCCESS, devicesUnderTest.get(i).deviceTwinStatus);
             for (TransportClientDeviceTwinIT.PropertyState propertyState : devicesUnderTest.get(i).dCDeviceForTwin.propertyStateList)
             {
-                assertTrue(propertyState.property.toString(), propertyState.callBackTriggered);
+                assertTrue("One or more property callbacks were not triggered", propertyState.callBackTriggered);
                 assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
-                assertEquals(devicesUnderTest.get(i).deviceTwinStatus, TransportClientDeviceTwinIT.STATUS.SUCCESS);
+                assertEquals(TransportClientDeviceTwinIT.STATUS.SUCCESS, devicesUnderTest.get(i).deviceTwinStatus);
             }
         }
 
@@ -318,7 +319,7 @@ public class TransportClientDeviceTwinIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                     assertEquals(devicesUnderTest.get(finalI).deviceTwinStatus, TransportClientDeviceTwinIT.STATUS.SUCCESS);
 
@@ -330,7 +331,7 @@ public class TransportClientDeviceTwinIT
                     }
                     catch (IOException e)
                     {
-                        assertTrue(e.getMessage(), true);
+                        fail(e.getMessage());
                     }
                     assertEquals(devicesUnderTest.get(finalI).deviceTwinStatus, TransportClientDeviceTwinIT.STATUS.SUCCESS);
                 }
