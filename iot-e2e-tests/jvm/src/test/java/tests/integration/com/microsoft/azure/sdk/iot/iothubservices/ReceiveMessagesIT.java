@@ -66,7 +66,7 @@ public class ReceiveMessagesIT
     private static ServiceClient serviceClient;
 
     // How much to wait until receiving a message from the server, in milliseconds
-    private Integer receiveTimeout = 60000;
+    private Integer receiveTimeout = 180000;
 
     private static String expectedCorrelationId = "1234";
     private static String expectedMessageId = "5678";

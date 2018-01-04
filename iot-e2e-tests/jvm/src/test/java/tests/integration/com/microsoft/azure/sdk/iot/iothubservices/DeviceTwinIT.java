@@ -47,7 +47,7 @@ public class DeviceTwinIT
     private static final Integer MAX_PROPERTIES_TO_TEST = 5;
 
     //Max devices to test
-    private static final Integer MAX_DEVICES = 5;
+    private static final Integer MAX_DEVICES = 3;
 
     //Default Page Size for Query
     private static final Integer PAGE_SIZE = 2;
