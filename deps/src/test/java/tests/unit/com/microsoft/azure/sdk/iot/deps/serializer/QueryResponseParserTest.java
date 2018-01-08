@@ -14,7 +14,7 @@ import org.junit.Test;
 import java.util.LinkedList;
 import java.util.List;
 
-import static tests.unit.com.microsoft.azure.sdk.iot.deps.serializer.Helpers.assertListEquals;
+import static tests.unit.com.microsoft.azure.sdk.iot.deps.Helpers.assertListEquals;
 
 /*
     Unit tests for QueryResponseParser

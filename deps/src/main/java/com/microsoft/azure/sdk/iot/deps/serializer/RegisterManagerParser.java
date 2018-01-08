@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.deps.serializer;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -20,26 +21,34 @@ public class RegisterManagerParser
      * of ASCII 7-bit alphanumeric chars
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      */
-    @SerializedName("deviceId")
+    private static final String DEVICE_ID_TAG = "deviceId";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(DEVICE_ID_TAG)
     protected String deviceId = null;
 
     /**
      * Device generation Id
      */
-    @SerializedName("generationId")
+    private static final String GENERATION_ID_TAG = "generationId";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(GENERATION_ID_TAG)
     protected String generationId = null;
 
     /**
      * A string representing a weak ETAG version
      * of this JSON description. This is a hash.
      */
-    @SerializedName("etag")
+    private static final String ETAG_TAG = "etag";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(ETAG_TAG)
     protected String eTag = null;
 
     /**
      * An Integer representing a Twin version.
      */
-    @SerializedName("version")
+    private static final String VERSION_TAG = "version";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(VERSION_TAG)
     protected Integer version = null;
 
     /**
@@ -47,39 +56,51 @@ public class RegisterManagerParser
      * If "enabled", this device is authorized to connect.
      * If "disabled" this device cannot receive or send messages, and statusReason must be set.
      */
-    @SerializedName("status")
+    private static final String STATUS_TAG = "status";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(STATUS_TAG)
     protected TwinStatus status = null;
 
     /**
      * A 128 char long string storing the reason of suspension.
      * (all UTF-8 chars allowed).
      */
-    @SerializedName("statusReason")
+    private static final String STATUS_REASON_TAG = "statusReason";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(STATUS_REASON_TAG)
     protected String statusReason = null;
 
     /**
      * Datetime of last time the state was updated.
      */
-    @SerializedName("statusUpdatedTime")
+    private static final String STATUS_UPDATED_TIME_TAG = "statusUpdatedTime";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(STATUS_UPDATED_TIME_TAG)
     protected String statusUpdatedTime = null;
 
     /**
      * Status of the device:
      * {"connected" | "disconnected"}
      */
-    @SerializedName("connectionState")
+    private static final String CONNECTION_STATE_TAG = "connectionState";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(CONNECTION_STATE_TAG)
     protected TwinConnectionState connectionState = null;
 
     /**
      * Datetime of last time the connection state was updated.
      */
-    @SerializedName("connectionStateUpdatedTime")
+    private static final String CONNECTION_STATE_UPDATED_TIME_TAG = "connectionStateUpdatedTime";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(CONNECTION_STATE_UPDATED_TIME_TAG)
     protected String connectionStateUpdatedTime = null;
 
     /**
      * Datetime of last time the device authenticated, received, or sent a message.
      */
-    @SerializedName("lastActivityTime")
+    private static final String LAST_ACTIVITY_TIME_TAG = "lastActivityTime";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(LAST_ACTIVITY_TIME_TAG)
     protected String lastActivityTime = null;
 
 
