@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import mockit.Deencapsulation;
 import org.junit.Test;
+import tests.unit.com.microsoft.azure.sdk.iot.deps.Helpers;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

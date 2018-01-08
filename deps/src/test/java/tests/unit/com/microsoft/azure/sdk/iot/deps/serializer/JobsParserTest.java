@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
+import tests.unit.com.microsoft.azure.sdk.iot.deps.Helpers;
 
 import java.util.Date;
 
