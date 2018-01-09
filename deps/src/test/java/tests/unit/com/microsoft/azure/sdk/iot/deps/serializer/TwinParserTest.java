@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.deps.serializer.*;
 import mockit.Deencapsulation;
 import org.junit.Test;
+import tests.unit.com.microsoft.azure.sdk.iot.deps.Helpers;
 
 import java.io.IOException;
 import java.util.HashMap;

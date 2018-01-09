@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
+package tests.unit.com.microsoft.azure.sdk.iot.deps;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -41,7 +41,7 @@ public class Helpers
      * @param <k> it the key type, normally a String.
      * @param <v> is the value type, normally an Object.
      */
-    protected static <k,v> void assertMap(Map<k, v> actual, Map<k, v> expected)
+    public static <k,v> void assertMap(Map<k, v> actual, Map<k, v> expected)
     {
         assertMap(actual, expected, null);
     }
@@ -56,7 +56,7 @@ public class Helpers
      * @param <v> is the value type, normally an Object.
      * @param message is the string with the error message.
      */
-    protected static <k,v> void assertMap(Map<k, v> actual, Map<k, v> expected, String message)
+    public static <k,v> void assertMap(Map<k, v> actual, Map<k, v> expected, String message)
     {
         if(expected == null)
         {
@@ -151,7 +151,7 @@ public class Helpers
      * @param actualJson is a String with a json to compared
      * @param expectedJson is a String with a valid json
      */
-    protected static void assertJson(String actualJson, String expectedJson)
+    public static void assertJson(String actualJson, String expectedJson)
     {
         Gson gson = new GsonBuilder().create();
 
@@ -181,7 +181,7 @@ public class Helpers
      * @param dt1Str is the first string with data and time
      * @param dt2Str is the second string with data and time.
      */
-    protected static void assertDateWithError(String dt1Str, String dt2Str)
+    public static void assertDateWithError(String dt1Str, String dt2Str)
     {
         Date dt1 = null;
         Date dt2 = null;
@@ -208,7 +208,7 @@ public class Helpers
      * @param dt1 is the data and time
      * @param dt2Str is the string with data and time.
      */
-    protected static void assertDateWithError(Date dt1, String dt2Str)
+    public static void assertDateWithError(Date dt1, String dt2Str)
     {
         Date dt2 = null;
 
@@ -232,7 +232,7 @@ public class Helpers
      *              data and time is bigger than 100 milliseconds.
      * @param dt1Str is the string with data and time
      */
-    protected static void assertNowWithError(String dt1Str)
+    public static void assertNowWithError(String dt1Str)
     {
         Date dt1 = null;
         Date dt2 = new Date();
@@ -257,7 +257,7 @@ public class Helpers
      * @param date is the date and time to be format in the string.
      * @return String with the date and time in UTC format.
      */
-    protected static String formatUTC(Date date)
+    public static String formatUTC(Date date)
     {
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
         dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
@@ -270,7 +270,7 @@ public class Helpers
      * @param expected expected list to verify
      * @param test  list to test
      */
-    protected static void assertListEquals(List expected, List test)
+    public static void assertListEquals(List expected, List test)
     {
         assertNotNull(expected);
         assertNotNull(test);

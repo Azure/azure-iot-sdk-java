@@ -6,6 +6,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
+import tests.unit.com.microsoft.azure.sdk.iot.deps.Helpers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
