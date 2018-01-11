@@ -4,16 +4,15 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Device Twin Sample for an IoT Hub. Default protocol is to use
@@ -21,49 +20,67 @@ import java.util.Scanner;
  */
 public class DeviceTwinSample
 {
-    private static IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
-
     private enum LIGHTS{ ON, OFF, DISABLED }
-
     private enum CAMERA{ DETECTED_BURGLAR, SAFELY_WORKING }
-
     private static final int MAX_EVENTS_TO_REPORT = 5;
+
+    private static AtomicBoolean Succeed = new AtomicBoolean(false);
 
     protected static class DeviceTwinStatusCallBack implements IotHubEventCallback
     {
+        @Override
         public void execute(IotHubStatusCode status, Object context)
         {
+            if((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY))
+            {
+                Succeed.set(true);
+            }
+            else
+            {
+                Succeed.set(false);
+            }
             System.out.println("IoT Hub responded to device twin operation with status " + status.name());
         }
     }
 
-    protected static class onHomeTempChange implements PropertyCallBack
+    /*
+     * If you don't care about version, you can use the PropertyCallBack.
+     */
+    protected static class onHomeTempChange implements TwinPropertyCallBack
     {
         @Override
-        public void PropertyCall(Object propertyKey, Object propertyValue, Object context)
+        public void TwinPropertyCallBack(Property property, Object context)
         {
-            if (propertyValue.equals(80))
-            {
-                System.out.println("Cooling down home, temp changed to " + propertyValue);
-            }
+            System.out.println(
+                    "onHomeTempChange change " + property.getKey() +
+                            " to " + property.getValue() +
+                            ", Properties version:" + property.getVersion());
         }
-
     }
 
-    protected static class onCameraActivity implements PropertyCallBack
+    protected static class onCameraActivity implements TwinPropertyCallBack
     {
         @Override
-        public void PropertyCall(Object propertyKey, Object propertyValue, Object context)
+        public void TwinPropertyCallBack(Property property, Object context)
         {
-            System.out.println(propertyKey + " changed to " + propertyValue);
-            if (propertyValue.equals(CAMERA.DETECTED_BURGLAR))
-            {
-                System.out.println("Triggering alarm, burglar detected");
-            }
+            System.out.println(
+                    "onCameraActivity change " + property.getKey() +
+                            " to " + property.getValue() +
+                            ", Properties version:" + property.getVersion());
         }
-
     }
 
+    protected static class onProperty implements TwinPropertyCallBack
+    {
+        @Override
+        public void TwinPropertyCallBack(Property property, Object context)
+        {
+            System.out.println(
+                    "generic onProperty change " + property.getKey() +
+                            " to " + property.getValue() +
+                            ", Properties version:" + property.getVersion());
+        }
+    }
 
     /**
      * Reports properties to IotHub, receives desired property notifications from IotHub. Default protocol is to use
@@ -72,7 +89,6 @@ public class DeviceTwinSample
      * @param args 
      * args[0] = IoT Hub connection string
      */
-  
     public static void main(String[] args)
             throws IOException, URISyntaxException
     {
@@ -134,69 +150,73 @@ public class DeviceTwinSample
                 protocol.name());
 
         DeviceClient client = new DeviceClient(connString, protocol);
-
-        if (client == null)
-        {
-            System.out.println("Could not create an IoT Hub client.");
-            return;
-        }
-
         System.out.println("Successfully created an IoT Hub client.");
-
-        Device homeKit = new Device()
-        {
-            @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
-            {
-                System.out.println(propertyKey + " changed to " + propertyValue);
-            }
-        };
 
         try
         {
+            System.out.println("Open connection to IoT Hub.");
             client.open();
 
-            System.out.println("Opened connection to IoT Hub.");
+            System.out.println("Start device Twin and get remaining properties...");
+            // Properties already set in the Service will shows up in the generic onProperty callback, with value and version.
+            Succeed.set(false);
+            client.startDeviceTwin(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
+            do
+            {
+                Thread.sleep(1000);
+            }
+            while(!Succeed.get());
 
-            client.startDeviceTwin(new DeviceTwinStatusCallBack(), null, homeKit, null);
 
-            System.out.println("Starting to device Twin...");
+            System.out.println("Subscribe to Desired properties on device Twin...");
+            Map<Property, Pair<TwinPropertyCallBack, Object>> desiredProperties = new HashMap<Property, Pair<TwinPropertyCallBack, Object>>()
+            {
+                {
+                    put(new Property("HomeTemp(F)", null), new Pair<TwinPropertyCallBack, Object>(new onHomeTempChange(), null));
+                    put(new Property("LivingRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
+                    put(new Property("BedroomRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
+                    put(new Property("HomeSecurityCamera", null), new Pair<TwinPropertyCallBack, Object>(new onCameraActivity(), null));
+                }
+            };
+            client.subscribeToTwinDesiredProperties(desiredProperties);
 
-            homeKit.setDesiredPropertyCallback(new Property("HomeTemp(F)", null), new onHomeTempChange(), null);
-            homeKit.setDesiredPropertyCallback(new Property("LivingRoomLights", null), homeKit, null);
-            homeKit.setDesiredPropertyCallback(new Property("BedroomRoomLights", null), homeKit, null);
-            homeKit.setDesiredPropertyCallback(new Property("HomeSecurityCamera", null), new onCameraActivity(), null);
+            System.out.println("Get device Twin...");
+            client.getDeviceTwin(); // For each desired property in the Service, the SDK will call the appropriate callback with the value and version.
 
-            homeKit.setReportedProp(new Property("HomeTemp(F)", 70));
-            homeKit.setReportedProp(new Property("LivingRoomLights", LIGHTS.ON));
-            homeKit.setReportedProp(new Property("BedroomRoomLights", LIGHTS.OFF));
+            System.out.println("Update reported properties...");
+            Set<Property> reportProperties = new HashSet<Property>()
+            {
+                {
+                    add(new Property("HomeTemp(F)", 70));
+                    add(new Property("LivingRoomLights", LIGHTS.ON));
+                    add(new Property("BedroomRoomLights", LIGHTS.OFF));
+                }
+            };
+            client.sendReportedProperties(reportProperties);
 
             for(int i = 0; i < MAX_EVENTS_TO_REPORT; i++)
             {
 
                 if (Math.random() % MAX_EVENTS_TO_REPORT == 3)
                 {
-                    homeKit.setReportedProp(new Property("HomeSecurityCamera", CAMERA.DETECTED_BURGLAR));
+                    client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.DETECTED_BURGLAR)); }});
                 }
                 else
                 {
-                    homeKit.setReportedProp(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING));
+                    client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING)); }});
                 }
                 if(i == MAX_EVENTS_TO_REPORT-1)
                 {
-                    homeKit.setReportedProp(new Property("BedroomRoomLights", null));
+                    client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("BedroomRoomLights", null)); }});
                 }
-                client.sendReportedProperties(homeKit.getReportedProp());
                 System.out.println("Updating reported properties..");
             }
 
-            client.subscribeToDesiredProperties(homeKit.getDesiredProp());
             System.out.println("Waiting for Desired properties");
         }
         catch (Exception e)
         {
             System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
-            homeKit.clean();
             client.closeNow();
             System.out.println("Shutting down...");
         }
@@ -206,7 +226,6 @@ public class DeviceTwinSample
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
 
-        homeKit.clean();
         client.closeNow();
 
         System.out.println("Shutting down...");

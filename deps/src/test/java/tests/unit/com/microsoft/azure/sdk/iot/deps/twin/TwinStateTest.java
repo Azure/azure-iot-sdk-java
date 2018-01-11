@@ -237,6 +237,20 @@ public class TwinStateTest
         assertEquals(PROPERTIES, twinState.getReportedProperty());
     }
 
+    /* SRS_TWIN_STATE_21_006: [The getDesiredProperty shall return a TwinCollection with the stored desired property.] */
+    /* SRS_TWIN_STATE_21_007: [The getReportedProperty shall return a TwinCollection with the stored reported property.] */
+    @Test
+    public void gettersWithNullSucceed()
+    {
+        // arrange
+        TwinState twinState = new TwinState(TAGS, null, null);
+
+        // act - assert
+        assertEquals(TAGS, twinState.getTags());
+        assertNull(twinState.getDesiredProperty());
+        assertNull(twinState.getReportedProperty());
+    }
+
     /* SRS_TWIN_STATE_21_008: [The toString shall return a String with the information in this class in a pretty print JSON.] */
     @Test
     public void toStringSucceed()
@@ -485,7 +499,63 @@ public class TwinStateTest
         Helpers.assertJson(twinState.getReportedProperty().toJsonElement().toString(), json);
     }
 
-    /* SRS_TWIN_STATE_21_020: [The TwinState shall provide an empty constructor to make GSON happy.] */
+    /* SRS_TWIN_STATE_21_020: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
+    @Test (expected = IllegalArgumentException.class)
+    public void createFromPropertiesJsonThrowsOnNull()
+    {
+        // arrange
+        final String json = null;
+
+        // act
+        TwinState.createFromPropertiesJson(json);
+
+        // assert
+    }
+
+    /* SRS_TWIN_STATE_21_020: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
+    @Test (expected = IllegalArgumentException.class)
+    public void createFromPropertiesJsonThrowsOnEmpty()
+    {
+        // arrange
+        final String json = "";
+
+        // act
+        TwinState.createFromPropertiesJson(json);
+
+        // assert
+    }
+
+    /* SRS_TWIN_STATE_21_021: [The factory shall throw JsonSyntaxException if the JSON is invalid.] */
+    @Test (expected = JsonSyntaxException.class)
+    public void createFromPropertiesJsonThrowsOnInvalidJSON()
+    {
+        // arrange
+        final String json =
+                "{" +
+                        "\"reported\":," +
+                        "}";
+
+        // act
+        TwinState.createFromPropertiesJson(json);
+
+        // assert
+    }
+
+    /* SRS_TWIN_STATE_21_022: [The factory shall deserialize the provided JSON for the Twin class and subclasses.] */
+    @Test
+    public void createFromPropertiesJsonSucceed()
+    {
+        // arrange
+        final String json =  "{" + DESIRED_PROPERTY_SAMPLE + ", " + REPORTED_PROPERTY_SAMPLE + "}";
+
+        // act
+        TwinState twinState = TwinState.createFromPropertiesJson(json);
+
+        // assert
+        Helpers.assertJson(Deencapsulation.invoke(twinState, "toJsonElement").toString(),"{" + PROPERTIES_SAMPLE + "}");
+    }
+
+    /* SRS_TWIN_STATE_21_023: [The TwinState shall provide an empty constructor to make GSON happy.] */
     @Test
     public void constructorSucceed()
     {

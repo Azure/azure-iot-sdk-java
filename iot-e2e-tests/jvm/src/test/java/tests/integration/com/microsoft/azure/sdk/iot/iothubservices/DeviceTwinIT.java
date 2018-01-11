@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
@@ -111,6 +112,7 @@ public class DeviceTwinIT
         com.microsoft.azure.sdk.iot.service.Device sCDeviceForRegistryManager;
         DeviceTwinDevice sCDeviceForTwin;
         DeviceExtension dCDeviceForTwin;
+        OnProperty dCOnProperty = new OnProperty();
         STATUS deviceTwinStatus;
     }
 
@@ -119,6 +121,22 @@ public class DeviceTwinIT
         boolean callBackTriggered;
         Property property;
         Object propertyNewValue;
+        Integer propertyNewVersion;
+    }
+
+    class OnProperty implements TwinPropertyCallBack
+    {
+        @Override
+        public void TwinPropertyCallBack(Property property,  Object context)
+        {
+            PropertyState propertyState = (PropertyState) context;
+            if (property.getKey().equals(propertyState.property.getKey()))
+            {
+                propertyState.callBackTriggered = true;
+                propertyState.propertyNewValue = property.getValue();
+                propertyState.propertyNewVersion = property.getVersion();
+            }
+        }
     }
 
     class DeviceExtension extends Device
@@ -535,6 +553,90 @@ public class DeviceTwinIT
         for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
         {
             assertTrue("Callback was not triggered for one or more properties", propertyState.callBackTriggered);
+            assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
+            assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+        }
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testSubscribeToDesiredPropertiesWithVersion() throws IOException, InterruptedException, IotHubException
+    {
+        // arrange
+        Map<Property, com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
+        for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
+        {
+            PropertyState propertyState = new PropertyState();
+            propertyState.callBackTriggered = false;
+            propertyState.propertyNewVersion = -1;
+            propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
+            deviceUnderTest.dCDeviceForTwin.propertyStateList.add(propertyState);
+            desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>(deviceUnderTest.dCOnProperty, propertyState));
+        }
+
+        // act
+        deviceClient.subscribeToTwinDesiredProperties(desiredPropertiesCB);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        Set<Pair> desiredProperties = new HashSet<>();
+        for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
+        {
+            desiredProperties.add(new Pair(PROPERTY_KEY + i, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
+        }
+        deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
+        sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        // assert
+        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
+        {
+            assertTrue("Callback was not triggered for one or more properties", propertyState.callBackTriggered);
+            assertNotEquals("Version was not set in the callback", (int)propertyState.propertyNewVersion, -1);
+            assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
+            assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+        }
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException
+    {
+        // arrange
+        Map<Property, com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
+        for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
+        {
+            PropertyState propertyState = new PropertyState();
+            propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
+            deviceUnderTest.dCDeviceForTwin.propertyStateList.add(propertyState);
+            desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>(deviceUnderTest.dCOnProperty, propertyState));
+        }
+        deviceClient.subscribeToTwinDesiredProperties(desiredPropertiesCB);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        Set<Pair> desiredProperties = new HashSet<>();
+        for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
+        {
+            desiredProperties.add(new Pair(PROPERTY_KEY + i, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
+        }
+        deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
+        sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
+        {
+            propertyState.callBackTriggered = false;
+            propertyState.propertyNewVersion = -1;
+        }
+
+        // act
+        deviceClient.getDeviceTwin();
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        // assert
+        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
+        {
+            assertTrue("Callback was not triggered for one or more properties", propertyState.callBackTriggered);
+            assertNotEquals("Version was not set in the callback", (int)propertyState.propertyNewVersion, -1);
             assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
             assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
         }

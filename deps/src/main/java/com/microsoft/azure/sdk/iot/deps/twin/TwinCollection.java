@@ -122,8 +122,7 @@ public class TwinCollection extends HashMap<String, Object>
     /**
      * Constructor
      *
-     * <p> Creates a new Twin collection coping the provided Map. Once TwinCollection extends Map,
-     *     this method can copy another TwinCollection.
+     * <p> Creates a new Twin collection coping the provided Map.
      *
      * @param map the Map of {@code ? extends String} and {@code Object} with the Twin collection
      */
@@ -134,6 +133,37 @@ public class TwinCollection extends HashMap<String, Object>
         {
             /* SRS_TWIN_COLLECTION_21_003: [The constructor shall create a new instance of the super class and add the provided Map by calling putAll.] */
             this.putAll(map);
+        }
+    }
+
+    /**
+     * Constructor
+     *
+     * <p> Creates a new Twin collection coping the provided collection.
+     *
+     * @param collection the Collection of {@code ? extends String} and {@code Object} with the Twin collection
+     */
+    public TwinCollection(TwinCollection collection)
+    {
+        /* SRS_TWIN_COLLECTION_21_025: [If the Collection is null or empty, the constructor shall create a new empty instance.] */
+        if((collection != null) && !collection.isEmpty())
+        {
+            /* SRS_TWIN_COLLECTION_21_026: [The constructor shall create a new instance of the super class and add the provided Map.] */
+            /* SRS_TWIN_COLLECTION_21_027: [The constructor shall copy the version and metadata from the provided TwinCollection.] */
+            this.version = collection.getVersion();
+            this.twinMetadata = collection.getTwinMetadata();
+            for (TwinCollection.Entry entry: collection.entrySet())
+            {
+                if(entry.getValue() instanceof TwinCollection)
+                {
+                    super.put((String)entry.getKey(), new TwinCollection((TwinCollection)entry.getValue()));
+                }
+                else
+                {
+                    super.put((String)entry.getKey(), entry.getValue());
+                }
+                this.metadataMap.put((String)entry.getKey(), collection.getTwinMetadata((String)entry.getKey()));
+            }
         }
     }
 
@@ -418,7 +448,11 @@ public class TwinCollection extends HashMap<String, Object>
     public TwinMetadata getTwinMetadata()
     {
         /* SRS_TWIN_COLLECTION_21_022: [The getTwinMetadata shall return the metadata of the whole TwinCollection.] */
-        return this.twinMetadata;
+        if(this.twinMetadata == null)
+        {
+            return null;
+        }
+        return new TwinMetadata(this.twinMetadata);
     }
 
     /**
@@ -430,7 +464,22 @@ public class TwinCollection extends HashMap<String, Object>
     public TwinMetadata getTwinMetadata(String key)
     {
         /* SRS_TWIN_COLLECTION_21_023: [The getTwinMetadata shall return the metadata of the entry that correspond to the provided key.] */
-        return this.metadataMap.get(key);
+        if(this.metadataMap.get(key) == null)
+        {
+            return null;
+        }
+        return new TwinMetadata(this.metadataMap.get(key));
     }
 
+    /**
+     * Creates a pretty print JSON with the content of this class and subclasses.
+     *
+     * @return The {@code String} with the pretty print JSON.
+     */
+    @Override
+    public String toString()
+    {
+        /* SRS_TWIN_COLLECTION_21_024: [The toString shall return a String with the information in this class in a pretty print JSON.] */
+        return toJsonElementWithMetadata().toString();
+    }
 }

@@ -512,7 +512,6 @@ public final class DeviceClient implements Closeable
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IOException if called when client is not opened
      */
-
     public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
                                 PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
             throws IOException
@@ -551,6 +550,79 @@ public final class DeviceClient implements Closeable
     }
 
     /**
+     * Starts the device twin.
+     *
+     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
+     * @param genericPropertyCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     *
+     * @throws IllegalArgumentException if the callback is {@code null}
+     * @throws UnsupportedOperationException if called more than once on the same device
+     * @throws IOException if called when client is not opened
+     */
+    public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
+                                TwinPropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+            throws IOException
+    {
+        if (!this.deviceIO.isOpen())
+        {
+            /*
+             **Codes_SRS_DEVICECLIENT_25_027: [**If the client has not been open, the function shall throw an IOException.**]**
+             */
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        if (deviceTwinStatusCallback == null || genericPropertyCallBack == null)
+        {
+            /*
+             **Codes_SRS_DEVICECLIENT_25_026: [**If the deviceTwinStatusCallback or genericPropertyCallBack is null, the function shall throw an IllegalArgumentException.**]**
+             */
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+        if (this.deviceTwin == null)
+        {
+            /*
+             **Codes_SRS_DEVICECLIENT_25_025: [**The function shall create a new instance of class Device Twin and request all twin properties by calling getDeviceTwin**]**
+             */
+            deviceTwin = new DeviceTwin(this.deviceIO, this.config, deviceTwinStatusCallback, deviceTwinStatusCallbackContext,
+                    genericPropertyCallBack, genericPropertyCallBackContext);
+            deviceTwin.getDeviceTwin();
+        }
+        else
+        {
+            /*
+             **Codes_SRS_DEVICECLIENT_25_028: [**If this method is called twice on the same instance of the client then this method shall throw UnsupportedOperationException.**]**
+             */
+            throw new UnsupportedOperationException("You have already initialised twin");
+        }
+    }
+
+    public void getDeviceTwin() throws IOException
+    {
+        if (this.deviceTwin == null)
+        {
+            /*
+             **Codes_SRS_DEVICECLIENT_21_040: [**If the client has not started twin before calling this method, the function shall throw an IOException.**]**
+             */
+            throw new IOException("Start twin before using it");
+        }
+
+        if (!this.deviceIO.isOpen())
+        {
+            /*
+             **Codes_SRS_DEVICECLIENT_21_041: [**If the client has not been open, the function shall throw an IOException.**]**
+             */
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        /*
+         **Codes_SRS_DEVICECLIENT_21_042: [**The function shall get all desired properties by calling getDeviceTwin.**]**
+         */
+        this.deviceTwin.getDeviceTwin();
+    }
+
+    /**
      * Subscribes to desired properties
      *
      * @param onDesiredPropertyChange the Map for desired properties and their corresponding callback and context. Can be {@code null}.
@@ -579,6 +651,37 @@ public final class DeviceClient implements Closeable
         **Tests_SRS_DEVICECLIENT_25_031: [**This method shall subscribe to desired properties by calling subscribeDesiredPropertiesNotification on the twin object.**]**
          */
         this.deviceTwin.subscribeDesiredPropertiesNotification(onDesiredPropertyChange);
+    }
+
+    /**
+     * Subscribes to desired properties
+     *
+     * @param onDesiredPropertyChange the Map for desired properties and their corresponding callback and context. Can be {@code null}.
+     *
+     * @throws IOException if called when client is not opened or called before starting twin.
+     */
+    public void subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange) throws IOException
+    {
+        if (this.deviceTwin == null)
+        {
+            /*
+             **Codes_SRS_DEVICECLIENT_25_029: [**If the client has not started twin before calling this method, the function shall throw an IOException.**]**
+             */
+            throw new IOException("Start twin before using it");
+        }
+
+        if (!this.deviceIO.isOpen())
+        {
+            /*
+             **Codes_SRS_DEVICECLIENT_25_030: [**If the client has not been open, the function shall throw an IOException.**]**
+             */
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        /*
+         **Tests_SRS_DEVICECLIENT_25_031: [**This method shall subscribe to desired properties by calling subscribeDesiredPropertiesNotification on the twin object.**]**
+         */
+        this.deviceTwin.subscribeDesiredPropertiesTwinPropertyNotification(onDesiredPropertyChange);
     }
 
     /**

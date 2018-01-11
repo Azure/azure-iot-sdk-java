@@ -239,6 +239,18 @@ public class TwinProperties
     }
 
     /**
+     * Creates a pretty print JSON with the content of this class and subclasses.
+     *
+     * @return The {@code String} with the pretty print JSON.
+     */
+    @Override
+    public String toString()
+    {
+        /* SRS_TWIN_PROPERTIES_21_011: [The toString shall return a String with the information in this class in a pretty print JSON.] */
+        return toJsonElementWithMetadata().toString();
+    }
+
+    /**
      * Empty constructor
      *
      * <p>
@@ -248,6 +260,6 @@ public class TwinProperties
     @SuppressWarnings("unused")
     protected TwinProperties()
     {
-        /* SRS_TWIN_PROPERTIES_21_011: [The TwinProperties shall provide an empty constructor to make GSON happy.] */
+        /* SRS_TWIN_PROPERTIES_21_012: [The TwinProperties shall provide an empty constructor to make GSON happy.] */
     }
 }

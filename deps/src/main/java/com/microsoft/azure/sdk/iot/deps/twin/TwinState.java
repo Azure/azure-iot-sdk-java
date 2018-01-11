@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.deps.twin;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.serializer.RegisterManagerParser;
@@ -100,13 +101,13 @@ public class TwinState extends RegisterManagerParser
 {
     // the twin tags
     private static final String TAGS_TAG = "tags";
-    @Expose(serialize = true, deserialize = true)
+    @Expose(serialize = false, deserialize = true)
     @SerializedName(TAGS_TAG)
     private TwinCollection tags;
 
     // the twin desired properties
     private static final String PROPERTIES_TAG = "properties";
-    @Expose(serialize = true, deserialize = true)
+    @Expose(serialize = false, deserialize = true)
     @SerializedName(PROPERTIES_TAG)
     private TwinProperties properties;
 
@@ -228,10 +229,22 @@ public class TwinState extends RegisterManagerParser
     public String toString()
     {
         /* SRS_TWIN_STATE_21_008: [The toString shall return a String with the information in this class in a pretty print JSON.] */
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().disableHtmlEscaping().create();
+        JsonObject jsonObject = gson.toJsonTree(this).getAsJsonObject();
+
         /* SRS_TWIN_STATE_21_009: [If the tags is null, the JSON shall not include the `tags`.] */
+        if(this.tags != null)
+        {
+            jsonObject.add(TAGS_TAG, this.tags.toJsonElementWithMetadata());
+        }
+
         /* SRS_TWIN_STATE_21_010: [If the properties is null, the JSON shall not include the `properties`.] */
-        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-        return gson.toJson(this);
+        if(this.properties != null)
+        {
+            jsonObject.add(PROPERTIES_TAG, this.properties.toJsonElementWithMetadata());
+        }
+
+        return jsonObject.toString();
     }
 
     /**
@@ -319,6 +332,30 @@ public class TwinState extends RegisterManagerParser
     }
 
     /**
+     * Factory
+     *
+     * <p> Create a new instance of the TwinState parsing the provided string as a JSON with only desired properties information.
+     *
+     * @param json the {@code String} with the JSON received from the service. It cannot be {@code null} or empty.
+     * @return The new instance of the {@code TwinState}.
+     */
+    public static TwinState createFromPropertiesJson(String json)
+    {
+        /* SRS_TWIN_STATE_21_020: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
+        if(Tools.isNullOrEmpty(json))
+        {
+            throw new IllegalArgumentException("JSON with result is null or empty");
+        }
+
+        /* SRS_TWIN_STATE_21_021: [The factory shall throw JsonSyntaxException if the JSON is invalid.] */
+        /* SRS_TWIN_STATE_21_022: [The factory shall deserialize the provided JSON for the Twin class and subclasses.] */
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        TwinProperties result = gson.fromJson(json, TwinProperties.class);
+
+        return new TwinState(null, result.getDesired(), result.getReported());
+    }
+
+    /**
      * Empty constructor
      *
      * <p>
@@ -328,6 +365,6 @@ public class TwinState extends RegisterManagerParser
     @SuppressWarnings("unused")
     protected TwinState()
     {
-        /* SRS_TWIN_STATE_21_020: [The TwinState shall provide an empty constructor to make GSON happy.] */
+        /* SRS_TWIN_STATE_21_023: [The TwinState shall provide an empty constructor to make GSON happy.] */
     }
 }

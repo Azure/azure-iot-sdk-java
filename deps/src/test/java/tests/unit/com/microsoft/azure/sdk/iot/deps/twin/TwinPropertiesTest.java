@@ -111,7 +111,10 @@ public class TwinPropertiesTest
     {
         // arrange
         // act
-        Deencapsulation.newInstance(TwinProperties.class, new Class[]{TwinCollection.class}, new Class[]{TwinCollection.class, TwinCollection.class}, (TwinCollection)null, (TwinCollection)null);
+        Deencapsulation.newInstance(
+                TwinProperties.class,
+                new Class[]{TwinCollection.class, TwinCollection.class},
+                (TwinCollection)null, (TwinCollection)null);
 
         // assert
     }
@@ -291,7 +294,38 @@ public class TwinPropertiesTest
         Helpers.assertMap((TwinCollection)Deencapsulation.invoke(twinProperties, "getReported"), PROPERTIES);
     }
 
-    /* SRS_TWIN_PROPERTIES_21_011: [The TwinProperties shall provide an empty constructor to make GSON happy.] */
+    /* SRS_TWIN_PROPERTIES_21_009: [The getDesired shall return a TwinCollection with the stored desired property.] */
+    /* SRS_TWIN_PROPERTIES_21_010: [The getReported shall return a TwinCollection with the stored reported property.] */
+    @Test
+    public void getDesiredReturnsDesiredPropertyNull()
+    {
+        // arrange
+        TwinProperties twinProperties = Deencapsulation.newInstance(TwinProperties.class);
+
+        // act - assert
+        assertNull((TwinCollection)Deencapsulation.invoke(twinProperties, "getDesired"));
+        assertNull((TwinCollection)Deencapsulation.invoke(twinProperties, "getReported"));
+    }
+
+    /* SRS_TWIN_PROPERTIES_21_011: [The toString shall return a String with the information in this class in a pretty print JSON.] */
+    @Test
+    public void toStringReturnsJsonElement()
+    {
+        // arrange
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        TwinCollection rawMap = gson.fromJson(JSON_FULL_SAMPLE, TwinCollection.class);
+        TwinProperties twinProperties = Deencapsulation.newInstance(TwinProperties.class, new Class[]{TwinCollection.class, TwinCollection.class}, rawMap, rawMap);
+        String expectedJson = "{\"desired\":" + JSON_FULL_SAMPLE + ", \"reported\":" + JSON_FULL_SAMPLE + "}";
+
+        // act
+        String jsonElement = twinProperties.toString();
+
+        // assert
+        Helpers.assertJson(jsonElement, expectedJson);
+    }
+
+
+    /* SRS_TWIN_PROPERTIES_21_012: [The TwinProperties shall provide an empty constructor to make GSON happy.] */
     @Test
     public void constructorSucceed()
     {

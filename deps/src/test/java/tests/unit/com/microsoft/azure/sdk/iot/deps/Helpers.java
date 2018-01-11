@@ -5,6 +5,8 @@ package tests.unit.com.microsoft.azure.sdk.iot.deps;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinMetadata;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -134,6 +136,143 @@ public class Helpers
                     if(message == null)
                     {
                         assertEquals("Map failed on " + key + ": <" + actualValue + "> != <" + expectedValue + ">", actualValue.toString(), expectedValue.toString());
+                    }
+                    else
+                    {
+                        assertTrue(message, actualValue.equals(expectedValue));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Test helper, will throw if the actual TwinCollection do not fits the expected one. This helper will
+     *              test maps and sub-maps, version, and metadata.
+     *
+     * @param actual is the resulted TwinCollection.
+     * @param expected is the expected result TwinCollection.
+     */
+    public static void assertTwinCollection(TwinCollection actual, TwinCollection expected)
+    {
+        assertTwinCollection(actual, expected, null);
+    }
+
+    /**
+     * Test helper, will throw if the actual TwinCollection do not fits the expected one. This helper will
+     *              test maps and sub-maps, version, and metadata.
+     *
+     * @param actual is the resulted TwinCollection.
+     * @param expected is the expected result TwinCollection.
+     * @param message is the string with the error message.
+     */
+    public static void assertTwinCollection(TwinCollection actual, TwinCollection expected, String message)
+    {
+        if(expected == null)
+        {
+            assertNull((message==null?"Expected null TwinCollection, received " + actual : message), actual);
+        }
+        else
+        {
+            if(message == null)
+            {
+                assertEquals(expected.size(), actual.size());
+            }
+            else
+            {
+                assertEquals(message, expected.size(), actual.size());
+            }
+
+            assertEquals(expected.getVersion(), actual.getVersion());
+            {
+                TwinMetadata expectedTwinMetadata = expected.getTwinMetadata();
+                TwinMetadata actualTwinMetadata = actual.getTwinMetadata();
+                if (expectedTwinMetadata == null)
+                {
+                    assertNull((message == null ? "Expected null TwinMetadata, received " + actualTwinMetadata : message), actualTwinMetadata);
+                }
+                else
+                {
+                    assertEquals(expectedTwinMetadata.getLastUpdated(), actualTwinMetadata.getLastUpdated());
+                    assertEquals(expectedTwinMetadata.getLastUpdatedVersion(), actualTwinMetadata.getLastUpdatedVersion());
+                }
+            }
+
+            for (TwinCollection.Entry entry : expected.entrySet())
+            {
+                String key = (String)entry.getKey();
+                Object actualValue = actual.get(key);
+                Object expectedValue = expected.get(key);
+                {
+                    TwinMetadata expectedKeyTwinMetadata = expected.getTwinMetadata(key);
+                    TwinMetadata actualKeyTwinMetadata = actual.getTwinMetadata(key);
+                    if (expectedKeyTwinMetadata == null)
+                    {
+                        assertNull((message == null ? "Expected null TwinMetadata, received " + actualKeyTwinMetadata : message), actualKeyTwinMetadata);
+                    }
+                    else
+                    {
+                        assertEquals(expectedKeyTwinMetadata.getLastUpdated(), actualKeyTwinMetadata.getLastUpdated());
+                        assertEquals(expectedKeyTwinMetadata.getLastUpdatedVersion(), actualKeyTwinMetadata.getLastUpdatedVersion());
+                    }
+                }
+
+                if(expectedValue == null)
+                {
+                    if(message == null)
+                    {
+                        assertNull(actualValue);
+                    }
+                    else
+                    {
+                        assertNull(message, actualValue);
+                    }
+                }
+                else if(actualValue == null)
+                {
+                    if(message == null)
+                    {
+                        assertTrue("Expected key:" + key + " does not exist in Actual TwinCollection", false);
+                    }
+                    else
+                    {
+                        assertTrue(message, false);
+                    }
+                }
+                else if(expectedValue instanceof TwinCollection)
+                {
+                    if(actualValue instanceof TwinCollection)
+                    {
+                        assertTwinCollection((TwinCollection)actualValue, (TwinCollection)expectedValue, message);
+                    }
+                    else
+                    {
+                        if(message == null)
+                        {
+                            assertTrue("TwinCollection contains invalid Object", false);
+                        }
+                        else
+                        {
+                            assertTrue(message, false);
+                        }
+                    }
+                }
+                else if(expectedValue instanceof ArrayList)
+                {
+                    if(message == null)
+                    {
+                        assertTrue("TwinCollection failed on " + key + ": " + actualValue + " != " + expectedValue, actualValue.toString().equals(expectedValue.toString()));
+                    }
+                    else
+                    {
+                        assertTrue(message, actualValue.toString().equals(expectedValue.toString()));
+                    }
+                }
+                else
+                {
+                    if(message == null)
+                    {
+                        assertEquals("TwinCollection failed on " + key + ": <" + actualValue + "> != <" + expectedValue + ">", actualValue.toString(), expectedValue.toString());
                     }
                     else
                     {

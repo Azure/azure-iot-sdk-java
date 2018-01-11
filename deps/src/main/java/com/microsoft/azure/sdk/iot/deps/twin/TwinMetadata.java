@@ -76,10 +76,31 @@ public class TwinMetadata
         /* SRS_TWIN_METADATA_21_003: [The constructor shall store the provided lastUpdatedVersion as is.] */
         this.lastUpdatedVersion = lastUpdatedVersion;
 
+        /* SRS_TWIN_METADATA_21_012: [The constructor shall throw IllegalArgumentException if both lastUpdated and lastUpdatedVersion are null.] */
         if((this.lastUpdatedVersion == null) && (this.lastUpdated == null))
         {
             throw new IllegalArgumentException("no valid data to create a TwinMetadata.");
         }
+    }
+
+    /**
+     * CONSTRUCTOR (copy)
+     *
+     * <P> This private constructor will create a new instance of the TwinMetadata coping the information from the provided one.
+     *
+     * @param metadata the original {@code TwinMetadata} to copy.
+     */
+    TwinMetadata(TwinMetadata metadata)
+    {
+        /* SRS_TWIN_METADATA_21_010: [The constructor shall throw IllegalArgumentException if the provided metadata is null.] */
+        if(metadata == null)
+        {
+            throw new IllegalArgumentException("metadata to copy cannot be null");
+        }
+
+        /* SRS_TWIN_METADATA_21_011: [The constructor shall copy the content of the provided metadata.] */
+        this.lastUpdated = metadata.getLastUpdated();
+        this.lastUpdatedVersion = metadata.getLastUpdatedVersion();
     }
 
     /**
@@ -157,7 +178,11 @@ public class TwinMetadata
     public Integer getLastUpdatedVersion()
     {
         /* SRS_TWIN_METADATA_21_007: [The getLastUpdatedVersion shall return the stored lastUpdatedVersion.] */
-        return this.lastUpdatedVersion;
+        if(this.lastUpdatedVersion == null)
+        {
+            return null;
+        }
+        return new Integer(this.lastUpdatedVersion);
     }
 
     /**
@@ -168,7 +193,11 @@ public class TwinMetadata
     public Date getLastUpdated()
     {
         /* SRS_TWIN_METADATA_21_008: [The getLastUpdated shall return the stored lastUpdated.] */
-        return this.lastUpdated;
+        if(this.lastUpdated == null)
+        {
+            return null;
+        }
+        return new Date(this.lastUpdated.getTime());
     }
 
     /**
@@ -197,5 +226,17 @@ public class TwinMetadata
             jsonObject.addProperty(LAST_UPDATE_VERSION_TAG, this.lastUpdatedVersion);
         }
         return jsonObject;
+    }
+
+    /**
+     * Creates a pretty print JSON with the content of this class and subclasses.
+     *
+     * @return The {@code String} with the pretty print JSON.
+     */
+    @Override
+    public String toString()
+    {
+        /* SRS_TWIN_METADATA_21_010: [The toString shall return a String with the information in this class in a pretty print JSON.] */
+        return toJsonElement().toString();
     }
 }

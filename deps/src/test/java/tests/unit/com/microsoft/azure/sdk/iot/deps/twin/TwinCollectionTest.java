@@ -117,7 +117,7 @@ public class TwinCollectionTest
     {
         // arrange
         // act
-        TwinCollection twinCollection = new TwinCollection(null);
+        TwinCollection twinCollection = new TwinCollection((HashMap<String, Object>)null);
 
         // assert
         assertNotNull(twinCollection);
@@ -162,6 +162,118 @@ public class TwinCollectionTest
 
         // assert
         assertNotNull(twinCollection.mockedMap);
+    }
+
+    /* SRS_TWIN_COLLECTION_21_025: [If the Collection is null or empty, the constructor shall create a new empty instance.] */
+    @Test
+    public void constructorCollectionCreatesEmptySuperOnNullSucceed()
+    {
+        // arrange
+        // act
+        TwinCollection twinCollection = new TwinCollection((TwinCollection)null);
+
+        // assert
+        assertNotNull(twinCollection);
+        assertEquals(0, twinCollection.size());
+    }
+
+    /* SRS_TWIN_COLLECTION_21_025: [If the Collection is null or empty, the constructor shall create a new empty instance.] */
+    @Test
+    public void constructorCollectionCreatesEmptySuperOnEmptySucceed()
+    {
+        // arrange
+        // act
+        TwinCollection twinCollection = new TwinCollection(new TwinCollection());
+
+        // assert
+        assertNotNull(twinCollection);
+        assertEquals(0, twinCollection.size());
+    }
+
+    /* SRS_TWIN_COLLECTION_21_026: [The constructor shall create a new instance of the super class and add the provided Map by calling putAll.] */
+    @Test
+    public void constructorWithPureCollectionSucceed()
+    {
+        // arrange
+        TwinCollection oldTwinCollection = new TwinCollection(PROPERTIES_SAMPLE);
+
+        // act
+        TwinCollection twinCollection = new TwinCollection(oldTwinCollection);
+
+        // assert
+        Helpers.assertMap(twinCollection, oldTwinCollection);
+        assertNull(twinCollection.getVersion());
+        assertNull(twinCollection.getTwinMetadata());
+    }
+
+    /* SRS_TWIN_COLLECTION_21_027: [The constructor shall copy the version and metadata from the provided TwinCollection.] */
+    @Test
+    public void constructorWithCollectionWithVersionAndMetadataSucceed()
+    {
+        // arrange
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        TwinCollection rawMap = gson.fromJson(JSON_FULL_SAMPLE, TwinCollection.class);
+        TwinCollection oldTwinCollection = Deencapsulation.invoke(TwinCollection.class, "createFromRawCollection", rawMap);
+
+        // act
+        TwinCollection twinCollection = new TwinCollection(oldTwinCollection);
+
+        // assert
+        Helpers.assertTwinCollection(twinCollection, oldTwinCollection);
+    }
+
+    /* SRS_TWIN_COLLECTION_21_027: [The constructor shall copy the version and metadata from the provided TwinCollection.] */
+    @Test
+    public void constructorWithCollectionWithVersionAndIncompletedMetadataSucceed()
+    {
+        // arrange
+        final String json =
+                "    {  \n" +
+                "      \"Brand\":\"NiceCar\",\n" +
+                "      \"MaxSpeed\":{  \n" +
+                "        \"Value\":500,\n" +
+                "        \"NewValue\":300,\n" +
+                "        \"Inner1\":{" +
+                "          \"Inner2\":\"FinalInnerValue\"" +
+                "        }\n" +
+                "      },\n" +
+                "      \"$metadata\":{  \n" +
+                "        \"Brand\":{" +
+                "          \"$lastUpdated\":\"2017-08-09T02:07:44.238Z\",\n" +
+                "          \"$lastUpdatedVersion\":2" +
+                "        },\n" +
+                "        \"MaxSpeed\":{  \n" +
+                "          \"$lastUpdated\":\"2017-10-21T02:07:44.238Z\",\n" +
+                "          \"$lastUpdatedVersion\":3,\n" +
+                "          \"Value\":{  \n" +
+                "            \"$lastUpdated\":\"2017-11-21T02:07:44.238Z\",\n" +
+                "            \"$lastUpdatedVersion\":4\n" +
+                "          },\n" +
+                "          \"NewValue\":{  \n" +
+                "            \"$lastUpdated\":\"2017-09-21T02:07:44.238Z\",\n" +
+                "            \"$lastUpdatedVersion\":5\n" +
+                "          },\n" +
+                "          \"Inner1\":{  \n" +
+                "            \"$lastUpdated\":\"2017-09-21T02:07:44.238Z\",\n" +
+                "            \"$lastUpdatedVersion\":6,\n" +
+                "            \"Inner2\":{  \n" +
+                "              \"$lastUpdated\":\"2017-09-21T02:07:44.238Z\",\n" +
+                "              \"$lastUpdatedVersion\":7\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"$version\":" + VERSION + "\n" +
+                "    }\n";
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        TwinCollection rawMap = gson.fromJson(json, TwinCollection.class);
+        TwinCollection oldTwinCollection = Deencapsulation.invoke(TwinCollection.class, "createFromRawCollection", rawMap);
+
+        // act
+        TwinCollection twinCollection = new TwinCollection(oldTwinCollection);
+
+        // assert
+        Helpers.assertTwinCollection(twinCollection, oldTwinCollection);
     }
 
     /* SRS_TWIN_COLLECTION_21_004: [The putAll shall throw IllegalArgumentException if the provided Map is null, empty or invalid.] */
@@ -558,6 +670,52 @@ public class TwinCollectionTest
         assertEquals(4L, (long)innerMaxSpeed.getTwinMetadata("Value").getLastUpdatedVersion());
     }
 
+    @Test
+    public void constructorWithNullPropertiesSucceed()
+    {
+        // arrange
+        final TwinCollection expected = new TwinCollection()
+        {
+            {
+                put(VALID_KEY_NAME, VALID_VALUE_NAME);
+                put("MaxSpeed", new TwinCollection()
+                {
+                    {
+                        put("Value", null);
+                        put("NewValue", 300.0);
+                        put("Inner1", new TwinCollection()
+                        {
+                            {
+                                put("Inner2", "FinalInnerValue");
+                            }
+                        });
+                    }
+                });
+            }
+        };
+        final String json =
+                "    {  \n" +
+                "      \"Brand\":\"NiceCar\",\n" +
+                "      \"MaxSpeed\":{  \n" +
+                "        \"Value\":null,\n" +
+                "        \"NewValue\":300,\n" +
+                "        \"Inner1\":{" +
+                "          \"Inner2\":\"FinalInnerValue\"" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n";
+
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        TwinCollection rawMap = gson.fromJson(json, TwinCollection.class);
+
+        // act
+        TwinCollection twinCollection = Deencapsulation.invoke(TwinCollection.class, "createFromRawCollection", rawMap);
+
+        // assert
+        assertNotNull(twinCollection);
+        Helpers.assertMap(twinCollection, expected);
+    }
+
     /* SRS_TWIN_COLLECTION_21_014: [If the entity contains the key `$metadata`, the constructor shall create a TwinMetadata with the value of this entity.] */
     @Test
     public void constructorTwinCollectionWithoutBaseMetadataSucceed()
@@ -763,6 +921,48 @@ public class TwinCollectionTest
         Helpers.assertJson(jsonElement.toString(), JSON_SAMPLE);
     }
 
+    @Test
+    public void toJsonElementSerializeNullPropertySucceed()
+    {
+        // arrange
+        final TwinCollection twinCollection = new TwinCollection()
+        {
+            {
+                put(VALID_KEY_NAME, VALID_VALUE_NAME);
+                put("MaxSpeed", new TwinCollection()
+                {
+                    {
+                        put("Value", null);
+                        put("NewValue", 300.0);
+                        put("Inner1", new TwinCollection()
+                        {
+                            {
+                                put("Inner2", "FinalInnerValue");
+                            }
+                        });
+                    }
+                });
+            }
+        };
+        final String json =
+                "    {  \n" +
+                "      \"Brand\":\"NiceCar\",\n" +
+                "      \"MaxSpeed\":{  \n" +
+                "        \"Value\":null,\n" +
+                "        \"NewValue\":300,\n" +
+                "        \"Inner1\":{" +
+                "          \"Inner2\":\"FinalInnerValue\"" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n";
+
+        // act
+        JsonElement jsonElement = twinCollection.toJsonElement();
+
+        // assert
+        Helpers.assertJson(jsonElement.toString(), json);
+    }
+
     /* SRS_TWIN_COLLECTION_21_017: [The toJsonElement shall not include any metadata in the returned JsonElement.] */
     @Test
     public void toJsonElementNotIncludeMetadataOrVersion()
@@ -808,5 +1008,18 @@ public class TwinCollectionTest
 
         // assert
         Helpers.assertJson(jsonElement.toString(), JSON_SAMPLE);
+    }
+
+    /* SRS_TWIN_COLLECTION_21_024: [The toString shall return a String with the information in this class in a pretty print JSON.] */
+    @Test
+    public void toStringSucceed()
+    {
+        // arrange
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        TwinCollection rawMap = gson.fromJson(JSON_FULL_SAMPLE, TwinCollection.class);
+        TwinCollection twinCollection = Deencapsulation.invoke(TwinCollection.class, "createFromRawCollection", rawMap);
+
+        // act - assert
+        Helpers.assertJson(twinCollection.toString(), JSON_FULL_SAMPLE);
     }
 }

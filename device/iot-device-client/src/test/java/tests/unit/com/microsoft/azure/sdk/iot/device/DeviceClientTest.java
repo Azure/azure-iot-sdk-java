@@ -975,7 +975,7 @@ public class DeviceClientTest
         client.open();
 
         //act
-        client.startDeviceTwin(mockedStatusCB, null, null, null);
+        client.startDeviceTwin(mockedStatusCB, null, (PropertyCallBack) null, null);
 
     }
 
