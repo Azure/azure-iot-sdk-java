@@ -179,7 +179,6 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
             throw new ProvisioningDeviceClientException("responseCallback cannot be null");
         }
 
-        // SRS_ContractAPIAmqp_07_004: [If amqpConnection is null or not connected, this method shall throw ProvisioningDeviceConnectionException.]
         if (this.mqttConnection == null || !this.mqttConnection.isMqttConnected())
         {
             throw new ProvisioningDeviceConnectionException("Mqtt is not connected");

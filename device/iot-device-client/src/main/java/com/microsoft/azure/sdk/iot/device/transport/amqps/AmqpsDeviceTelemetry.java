@@ -253,13 +253,13 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_011: [The function shall copy the Proton application properties to IoTHubMessage properties excluding the reserved property names.]
         if (protonMsg.getApplicationProperties() != null)
         {
-            Map<String, String> applicationProperties = protonMsg.getApplicationProperties().getValue();
-            for (Map.Entry<String, String> entry : applicationProperties.entrySet())
+            Map<String, Object> applicationProperties = protonMsg.getApplicationProperties().getValue();
+            for (Map.Entry<String, Object> entry : applicationProperties.entrySet())
             {
                 String propertyKey = entry.getKey();
                 if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(propertyKey))
                 {
-                    message.setProperty(entry.getKey(), entry.getValue());
+                    message.setProperty(entry.getKey(), entry.getValue().toString());
                 }
             }
         }
@@ -295,7 +295,7 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_017: [The function shall copy the user properties to Proton message application properties excluding the reserved property names.]
         if (message.getProperties().length > 0)
         {
-            Map<String, String> userProperties = new HashMap<>(message.getProperties().length);
+            Map<String, Object> userProperties = new HashMap<>(message.getProperties().length);
             for(MessageProperty messageProperty : message.getProperties())
             {
                 if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(messageProperty.getName()))

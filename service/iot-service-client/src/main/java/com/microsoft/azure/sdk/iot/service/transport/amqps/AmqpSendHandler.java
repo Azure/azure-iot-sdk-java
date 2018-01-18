@@ -143,7 +143,7 @@ public class AmqpSendHandler extends BaseHandler
         // the application properties on the Proton Message object]
         if (message.getProperties() != null && message.getProperties().size() > 0)
         {
-            Map<String, String> applicationPropertiesMap = new HashMap<>(message.getProperties().size());
+            Map<String, Object> applicationPropertiesMap = new HashMap<>(message.getProperties().size());
             for(Map.Entry<String, String> entry : message.getProperties().entrySet())
             {
                 applicationPropertiesMap.put(entry.getKey(), entry.getValue());

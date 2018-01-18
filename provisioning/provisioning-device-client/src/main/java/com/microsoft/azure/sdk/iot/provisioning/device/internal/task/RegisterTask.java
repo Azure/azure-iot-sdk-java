@@ -7,18 +7,17 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientAuthenticationException;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser;
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientAuthenticationException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.TpmRegistrationResultParser;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 
@@ -33,7 +32,8 @@ import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.Cont
 
 public class RegisterTask implements Callable
 {
-    private static final int MAX_WAIT_FOR_REGISTRATION_RESPONSE = 100;
+    private static final int MAX_WAIT_FOR_REGISTRATION_RESPONSE = 90*1000; // 90 seconds
+    private static final int SLEEP_INTERVAL_WHEN_WAITING_FOR_RESPONSE = 4*1000; //4 seconds
     private static final int DEFAULT_EXPIRY_TIME_IN_SECS = 3600; // 1 Hour
     private static final String SASTOKEN_FORMAT = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=";
     private ResponseCallback responseCallback = null;
@@ -49,7 +49,6 @@ public class RegisterTask implements Callable
         {
             if (context instanceof ResponseData)
             {
-
                 ResponseData data = (ResponseData) context;
                 data.setResponseData(responseData.getResponseData());
                 data.setContractState(responseData.getContractState());
@@ -130,10 +129,7 @@ public class RegisterTask implements Callable
             ResponseData dpsRegistrationData = new ResponseData();
             this.provisioningDeviceClientContract.authenticateWithProvisioningService(requestData, responseCallback, dpsRegistrationData);
 
-            if (dpsRegistrationData.getResponseData() == null || dpsRegistrationData.getContractState() != DPS_REGISTRATION_RECEIVED)
-            {
-                Thread.sleep(MAX_WAIT_FOR_REGISTRATION_RESPONSE);
-            }
+            waitForResponse(dpsRegistrationData);
 
             if (dpsRegistrationData.getResponseData() != null && dpsRegistrationData.getContractState() == DPS_REGISTRATION_RECEIVED)
             {
@@ -176,19 +172,15 @@ public class RegisterTask implements Callable
         return String.format(SASTOKEN_FORMAT, tokenScope, base64UrlEncodedSignature, expiryTimeUTC);
     }
 
-    private RegistrationOperationStatusParser processWithNonce(ResponseData responseDataForNonce,
+    private RegistrationOperationStatusParser processWithNonce(byte[] base64DecodedAuthKey,
                                                                SecurityProviderTpm securityClientTpm,
                                                                RequestData requestData)
             throws IOException, InterruptedException, ProvisioningDeviceClientException,SecurityProviderException
 
     {
-
-        TpmRegistrationResultParser registerResponseTPMParser = TpmRegistrationResultParser.createFromJson(new String(responseDataForNonce.getResponseData()));
-
-        if (registerResponseTPMParser.getAuthenticationKey() != null)
+        if (base64DecodedAuthKey != null)
         {
             //SRS_RegisterTask_25_018: [ If the provided security client is for Key then, this method shall import the Base 64 encoded Authentication Key into the HSM using the security client and pass the exception to the user on failure. ]
-            byte[] base64DecodedAuthKey = Base64.decodeBase64Local(registerResponseTPMParser.getAuthenticationKey().getBytes());
             securityClientTpm.activateIdentityKey(base64DecodedAuthKey);
 
             /*SRS_RegisterTask_25_014: [ If the provided security client is for Key then, this method shall construct SasToken by doing the following
@@ -213,11 +205,7 @@ public class RegisterTask implements Callable
             ResponseData responseDataForSasTokenAuth = new ResponseData();
             this.provisioningDeviceClientContract.authenticateWithProvisioningService(requestData, responseCallback,
                                                                                       responseDataForSasTokenAuth);
-            if (responseDataForSasTokenAuth.getResponseData() == null ||
-                    responseDataForSasTokenAuth.getContractState() != DPS_REGISTRATION_RECEIVED)
-            {
-                Thread.sleep(MAX_WAIT_FOR_REGISTRATION_RESPONSE);
-            }
+            waitForResponse(responseDataForSasTokenAuth);
 
             if (responseDataForSasTokenAuth.getResponseData() != null &&
                     responseDataForSasTokenAuth.getContractState() == DPS_REGISTRATION_RECEIVED)
@@ -268,14 +256,11 @@ public class RegisterTask implements Callable
             ResponseData nonceResponseData = new ResponseData();
             this.provisioningDeviceClientContract.requestNonceForTPM(requestData, responseCallback, nonceResponseData);
 
-            if (nonceResponseData.getResponseData() == null || nonceResponseData.getContractState() != DPS_REGISTRATION_RECEIVED)
-            {
-                Thread.sleep(MAX_WAIT_FOR_REGISTRATION_RESPONSE);
-            }
+            waitForResponse(nonceResponseData);
 
-            if (nonceResponseData.getResponseData() != null && nonceResponseData.getContractState() == DPS_REGISTRATION_RECEIVED)
+            if (nonceResponseData.getContractState() == DPS_REGISTRATION_RECEIVED)
             {
-                return processWithNonce(nonceResponseData, securityClientTpm, requestData);
+                return processWithNonce(nonceResponseData.getResponseData(), securityClientTpm, requestData);
             }
             else
             {
@@ -321,5 +306,22 @@ public class RegisterTask implements Callable
     public RegistrationOperationStatusParser call() throws Exception
     {
         return this.authenticateWithDPS();
+    }
+
+    /**
+     * Busy waits for the provided responseData to be populated or for a timeout to occur
+     * @param responseData the responseData object to periodically check for response data
+     * @throws InterruptedException if an interrupted exception is thrown while this thread sleeps
+     */
+    private void waitForResponse(ResponseData responseData) throws InterruptedException
+    {
+        long millisecondsElapsed = 0;
+        long waitTimeStart = System.currentTimeMillis();
+        while (responseData.getContractState() != DPS_REGISTRATION_RECEIVED
+                && millisecondsElapsed < MAX_WAIT_FOR_REGISTRATION_RESPONSE)
+        {
+            Thread.sleep(SLEEP_INTERVAL_WHEN_WAITING_FOR_RESPONSE);
+            millisecondsElapsed = System.currentTimeMillis() - waitTimeStart;
+        }
     }
 }

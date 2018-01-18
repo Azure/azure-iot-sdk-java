@@ -324,7 +324,7 @@ public class AmqpsDeviceTelemetryTest
         final String toKey = "to";
         final String userIdKey = "userId";
 
-        Map<String, String> applicationPropertiesMap = new HashMap<String, String>();
+        Map<String, Object> applicationPropertiesMap = new HashMap();
         applicationPropertiesMap.put(customPropertyKey, customPropertyValue);
 
         final ApplicationProperties applicationProperties = new ApplicationProperties(applicationPropertiesMap);
@@ -442,7 +442,7 @@ public class AmqpsDeviceTelemetryTest
                         new MessageProperty("key1", "value1"),
                         new MessageProperty("key2", "value2")
                 };
-        final Map<String, String> userProperties = new HashMap<>(2);
+        final Map<String, Object> userProperties = new HashMap<>(2);
         userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
         userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
 

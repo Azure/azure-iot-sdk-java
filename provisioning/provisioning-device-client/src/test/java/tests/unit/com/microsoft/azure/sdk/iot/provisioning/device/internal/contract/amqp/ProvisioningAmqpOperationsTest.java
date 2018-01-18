@@ -23,10 +23,10 @@ import mockit.integration.junit4.JMockit;
 import org.apache.qpid.proton.amqp.Binary;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import java.io.IOException;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.Assert.assertEquals;
 
@@ -67,7 +67,7 @@ public class ProvisioningAmqpOperationsTest
     private ObjectLock mockedObjectLock = new ObjectLock();
 
 
-    private void setupSendReceiveMocks() throws ProvisioningDeviceClientException, IOException, InterruptedException
+    private void setupSendReceiveMocks() throws Exception
     {
         new NonStrictExpectations()
         {
@@ -130,7 +130,7 @@ public class ProvisioningAmqpOperationsTest
     }
 
     @Test
-    public void isAmqpConnectedNotConnectedSucceeds() throws ProvisioningDeviceClientException
+    public void isAmqpConnectedNotConnectedSucceeds() throws Exception
     {
         //arrange
         ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
@@ -143,7 +143,7 @@ public class ProvisioningAmqpOperationsTest
     }
 
     @Test
-    public void isAmqpConnectedSucceeds() throws ProvisioningDeviceClientException, IOException
+    public void isAmqpConnectedSucceeds() throws Exception
     {
         //arrange
         ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
@@ -155,7 +155,7 @@ public class ProvisioningAmqpOperationsTest
             }
         };
 
-        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, true, false);
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, null, false);
         new NonStrictExpectations()
         {
             {
@@ -179,7 +179,7 @@ public class ProvisioningAmqpOperationsTest
         ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
 
         //act
-        provisioningAmqpOperations.open(null, mockedSSLContext, true, false);
+        provisioningAmqpOperations.open(null, mockedSSLContext, null, false);
 
         //assert
     }
@@ -192,7 +192,7 @@ public class ProvisioningAmqpOperationsTest
         ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
 
         //act
-        provisioningAmqpOperations.open("", mockedSSLContext, true, false);
+        provisioningAmqpOperations.open("", mockedSSLContext, null, false);
 
         //assert
     }
@@ -205,7 +205,7 @@ public class ProvisioningAmqpOperationsTest
         ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
 
         //act
-        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, null, true, false);
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, null, null, false);
 
         //assert
     }
@@ -221,13 +221,13 @@ public class ProvisioningAmqpOperationsTest
         {
             {
                 mockedAmqpConnection.setListener((AmqpListener)any);
-                mockedAmqpConnection.open();
+                mockedAmqpConnection.openAmqpAsync();
                 result = new Exception();
             }
         };
 
         //act
-        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, true, false);
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, null, false);
     }
 
     // SRS_ProvisioningAmqpOperations_07_005: [This method shall construct the Link Address with /<scopeId>/registrations/<registrationId>.]
@@ -242,18 +242,17 @@ public class ProvisioningAmqpOperationsTest
             {
                 mockedAmqpConnection.setListener((AmqpListener)any);
                 mockedAmqpConnection.open();
-                //result = new Exception();
             }
         };
 
         //act
-        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, true, false);
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, null, false);
 
         //assert
         new Verifications()
         {
             {
-                mockedAmqpConnection.open();
+                mockedAmqpConnection.openAmqpAsync();
                 times = 1;
             }
         };
@@ -271,7 +270,7 @@ public class ProvisioningAmqpOperationsTest
                 mockedAmqpConnection.open();
             }
         };
-        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, true, false);
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, null, false);
 
         new NonStrictExpectations()
         {
@@ -302,7 +301,7 @@ public class ProvisioningAmqpOperationsTest
                 mockedAmqpConnection.open();
             }
         };
-        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, true, false);
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, null, false);
 
         //act
         provisioningAmqpOperations.close();
@@ -359,7 +358,7 @@ public class ProvisioningAmqpOperationsTest
     // SRS_ProvisioningAmqpOperations_07_016: [This method shall send the Operation Status AMQP Provisioning message.]
     // SRS_ProvisioningAmqpOperations_07_017: [This method shall wait for the response of this message for MAX_WAIT_TO_SEND_MSG and call the responseCallback with the reply.]
     @Test
-    public void sendStatusMessageSucceeds() throws ProvisioningDeviceClientException, IOException, InterruptedException
+    public void sendStatusMessageSucceeds() throws Exception
     {
         //arrange
         ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
@@ -370,7 +369,7 @@ public class ProvisioningAmqpOperationsTest
                 mockedAmqpConnection.open();
             }
         };
-        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, true, false);
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, null, false);
 
         setupSendReceiveMocks();
 
@@ -382,7 +381,7 @@ public class ProvisioningAmqpOperationsTest
 
     // SRS_ProvisioningAmqpOperations_07_018: [This method shall throw ProvisioningDeviceClientException if any failure is encountered.]
     @Test (expected = ProvisioningDeviceClientException.class)
-    public void sendStatusMessageThrowsOnWaitLock() throws ProvisioningDeviceClientException, IOException, InterruptedException
+    public void sendStatusMessageThrowsOnWaitLock() throws Exception
     {
         //arrange
         ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
@@ -393,7 +392,7 @@ public class ProvisioningAmqpOperationsTest
                 mockedAmqpConnection.open();
             }
         };
-        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, true, false);
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, null, false);
 
         new NonStrictExpectations()
         {
@@ -427,7 +426,7 @@ public class ProvisioningAmqpOperationsTest
                 mockedAmqpConnection.open();
             }
         };
-        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, true, false);
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, null, false);
 
         new NonStrictExpectations()
         {
@@ -458,7 +457,7 @@ public class ProvisioningAmqpOperationsTest
 
     // SRS_ProvisioningAmqpOperations_07_012: [This method shall throw ProvisioningDeviceClientException if any failure is encountered.]
     @Test (expected = ProvisioningDeviceClientException.class)
-    public void sendRegisterMessageThrowsInterrruptedException() throws ProvisioningDeviceClientException, IOException, InterruptedException
+    public void sendRegisterMessageThrowsInterrruptedException() throws Exception
     {
         //arrange
         ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
@@ -469,17 +468,14 @@ public class ProvisioningAmqpOperationsTest
                 mockedAmqpConnection.open();
             }
         };
-        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, true, false);
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, null, false);
 
         new NonStrictExpectations()
         {
             {
-                new AmqpMessage();
-                result = mockedAmqpMessage;
-
                 mockedAmqpConnection.sendAmqpMessage(mockedAmqpMessage);
 
-                mockedObjectLock.waitLock(anyLong);
+                mockedAmqpConnection.isConnected();
                 result = new InterruptedException();
             }
         };
@@ -493,7 +489,7 @@ public class ProvisioningAmqpOperationsTest
     // SRS_ProvisioningAmqpOperations_07_010: [This method shall send the Register AMQP Provisioning message.]
     // SRS_ProvisioningAmqpOperations_07_011: [This method shall wait for the response of this message for MAX_WAIT_TO_SEND_MSG and call the responseCallback with the reply.]
     @Test
-    public void sendRegisterMessageSucceeds() throws ProvisioningDeviceClientException, IOException, InterruptedException
+    public void sendRegisterMessageSucceeds() throws Exception
     {
         //arrange
         ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
@@ -502,9 +498,11 @@ public class ProvisioningAmqpOperationsTest
             {
                 mockedAmqpConnection.setListener((AmqpListener)any);
                 mockedAmqpConnection.open();
+                mockedAmqpConnection.isConnected();
+                result = true;
             }
         };
-        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, true, false);
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, null, false);
 
         setupSendReceiveMocks();
 

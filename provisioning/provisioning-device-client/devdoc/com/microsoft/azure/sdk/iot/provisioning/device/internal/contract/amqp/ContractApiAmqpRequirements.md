@@ -45,8 +45,6 @@ public synchronized void authenticateWithProvisioningService(RequestData request
 
 **SRS_ContractAPIAmqp_07_024: [** If `provisioningDeviceClientConfig` is null, this method shall throw ProvisioningDeviceClientException. **]**
 
-**SRS_ContractAPIAmqp_07_004: [**If amqpConnection is null or not connected, this method shall throw ProvisioningDeviceConnectionException.**]**
-
 **SRS_ContractAPIAmqp_07_005: [**This method shall send an AMQP message with the property of `iotdps-register`.**]**
 
 **SRS_ContractAPIAmqp_07_006: [**This method shall wait `MAX_WAIT_TO_SEND_MSG` for a reply from the service.**]**

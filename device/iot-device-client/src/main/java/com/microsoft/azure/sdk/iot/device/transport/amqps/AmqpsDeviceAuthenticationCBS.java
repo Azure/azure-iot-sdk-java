@@ -163,15 +163,15 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
             Object correlationIdValue = properties.getCorrelationId();
             if (correlationIdValue.equals(authenticationCorrelationId))
             {
-                Map<String, Integer> applicationProperties = amqpsMessage.getApplicationProperties().getValue();
+                Map<String, Object> applicationProperties = amqpsMessage.getApplicationProperties().getValue();
 
                 // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_028: [The function shall read the application properties and if the status code property is not 200 return false.]
-                for (Map.Entry<String, Integer> entry : applicationProperties.entrySet())
+                for (Map.Entry<String, Object> entry : applicationProperties.entrySet())
                 {
                     String propertyKey = entry.getKey();
-                    if (propertyKey.equals(PROP_KEY_STATUS_CODE))
+                    if (propertyKey.equals(PROP_KEY_STATUS_CODE) && entry.getValue() instanceof Integer)
                     {
-                        Integer propertyValue = entry.getValue();
+                        int propertyValue = (int) entry.getValue();
                         if (propertyValue == 200)
                         {
                             // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_029: [The function shall return true If both the correlationID and status code matches.]
@@ -279,7 +279,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         outgoingMessage.setProperties(properties);
 
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_017: [The function shall set the CBS related application properties on the message.]
-        Map<String, String> userProperties = new HashMap<>(3);
+        Map<String, Object> userProperties = new HashMap<>(3);
         userProperties.put(OPERATION_KEY, OPERATION_VALUE);
         userProperties.put(TYPE_KEY, TYPE_VALUE);
 

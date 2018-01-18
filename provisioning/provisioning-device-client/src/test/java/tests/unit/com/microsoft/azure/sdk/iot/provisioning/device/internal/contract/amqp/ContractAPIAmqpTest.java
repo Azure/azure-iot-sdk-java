@@ -220,61 +220,7 @@ public class ContractAPIAmqpTest
                 mockedRequestData.isX509();
                 result = true;
 
-                mockedProvisionAmqpConnection.open(anyString, mockedSslContext, false, false);
-            }
-        };
-
-        //act
-        contractAPIAmqp.open(mockedRequestData);
-
-        //assert
-    }
-
-    @Test (expected = ProvisioningDeviceClientException.class)
-    public void openThrowsOnNullRequestData() throws ProvisioningDeviceClientException
-    {
-        //arrange
-        ContractAPIAmqp contractAPIAmqp = createContractClass();
-
-        //act
-        contractAPIAmqp.open(null);
-
-        //assert
-    }
-
-    @Test (expected = ProvisioningDeviceClientException.class)
-    public void openThrowsOnNullRegistrationId() throws ProvisioningDeviceClientException
-    {
-        //arrange
-        ContractAPIAmqp contractAPIAmqp = createContractClass();;
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedRequestData.getRegistrationId();
-                result = null;
-            }
-        };
-
-        //act
-        contractAPIAmqp.open(mockedRequestData);
-
-        //assert
-    }
-
-    @Test (expected = ProvisioningDeviceClientException.class)
-    public void openThrowsOnNullSSLContext() throws ProvisioningDeviceClientException
-    {
-        //arrange
-        ContractAPIAmqp contractAPIAmqp = createContractClass();
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedRequestData.getRegistrationId();
-                result = TEST_REGISTRATION_ID;
-                mockedRequestData.getSslContext();
-                result = null;
+                mockedProvisionAmqpConnection.open(anyString, mockedSslContext, null, false);
             }
         };
 
@@ -305,7 +251,7 @@ public class ContractAPIAmqpTest
 
     // SRS_ContractAPIAmqp_07_022: [If the amqpConnection is NULL or Is not open this method will do nothing.]
     @Test
-    public void closeNotOpenSucceeds() throws ProvisioningDeviceClientException, IOException
+    public void closeNotOpenSucceeds() throws Exception
     {
         //arrange
         ContractAPIAmqp contractAPIAmqp = createContractClass();
@@ -340,7 +286,7 @@ public class ContractAPIAmqpTest
 
     // SRS_ContractAPIAmqp_07_023: [This method will close the amqpConnection connection.]
     @Test
-    public void closeSucceeds() throws ProvisioningDeviceClientException, IOException
+    public void closeSucceeds() throws Exception
     {
         //arrange
         new NonStrictExpectations()
@@ -394,20 +340,10 @@ public class ContractAPIAmqpTest
         contractAPIAmqp.authenticateWithProvisioningService(mockedRequestData, null, null);
     }
 
-    // SRS_ContractAPIAmqp_07_004: [If amqpConnection is null or not connected, this method shall throw ProvisioningDeviceConnectionException.]
-    @Test (expected = ProvisioningDeviceClientException.class)
-    public void authenticateWithProvisioningServiceThrowsOnNotConnected() throws ProvisioningDeviceClientException, IOException, InterruptedException {
-        //arrange
-        ContractAPIAmqp contractAPIAmqp = createContractClass();
-
-        //act
-        contractAPIAmqp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
-    }
-
     // SRS_ContractAPIAmqp_07_005: [This method shall send an AMQP message with the property of iotdps-register.]
     // SRS_ContractAPIAmqp_07_006: [This method shall wait MAX_WAIT_TO_SEND_MSG for a reply from the service.]
     @Test
-    public void authenticateWithProvisioningServiceSucceeds() throws ProvisioningDeviceClientException, IOException, InterruptedException
+    public void authenticateWithProvisioningServiceSucceeds() throws Exception
     {
         //arrange
         ContractAPIAmqp contractAPIAmqp = createContractClass();
@@ -533,7 +469,8 @@ public class ContractAPIAmqpTest
 
     // SRS_ContractAPIAmqp_07_012: [If amqpConnection is null or not connected, this method shall throw ProvisioningDeviceConnectionException.]
     @Test (expected = ProvisioningDeviceClientException.class)
-    public void getRegistrationStatusThrowsOnNotConnected() throws ProvisioningDeviceClientException, IOException, InterruptedException {
+    public void getRegistrationStatusThrowsOnNotConnected() throws Exception
+    {
         //arrange
         ContractAPIAmqp contractAPIAmqp = createContractClass();
 
@@ -567,7 +504,7 @@ public class ContractAPIAmqpTest
     // SRS_ContractAPIAmqp_07_015: [If the service fails to reply in the alloted time this method shall throw ProvisioningDeviceClientException.]
     // SRS_ContractAPIAmqp_07_016: [This method shall responds to the responseCallback with amqp response data and the status DPS_REGISTRATION_RECEIVED.]
     @Test
-    public void getRegistrationStatusSuccess() throws ProvisioningDeviceClientException, IOException, InterruptedException
+    public void getRegistrationStatusSuccess() throws Exception
     {
         //arrange
         ContractAPIAmqp contractAPIAmqp = createContractClass();

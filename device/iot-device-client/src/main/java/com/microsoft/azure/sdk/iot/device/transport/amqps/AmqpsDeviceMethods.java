@@ -264,20 +264,20 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
         // Codes_SRS_AMQPSDEVICEMETHODS_12_026: [The function shall copy the Proton application properties to IotHubTransportMessage properties excluding the reserved property names.]
         if (protonMsg.getApplicationProperties() != null)
         {
-            Map<String, String> applicationProperties = protonMsg.getApplicationProperties().getValue();
-            for (Map.Entry<String, String> entry : applicationProperties.entrySet())
+            Map<String, Object> applicationProperties = protonMsg.getApplicationProperties().getValue();
+            for (Map.Entry<String, Object> entry : applicationProperties.entrySet())
             {
                 String propertyKey = entry.getKey();
 
                 if (propertyKey.equals(APPLICATION_PROPERTY_KEY_IOTHUB_METHOD_NAME))
                 {
-                    iotHubTransportMessage.setMethodName(entry.getValue());
+                    iotHubTransportMessage.setMethodName(entry.getValue().toString());
                 }
                 else
                 {
                     if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(propertyKey))
                     {
-                        iotHubTransportMessage.setProperty(entry.getKey(), entry.getValue());
+                        iotHubTransportMessage.setProperty(entry.getKey(), entry.getValue().toString());
                     }
                 }
             }

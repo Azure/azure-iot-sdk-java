@@ -29,6 +29,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
     private static final String CLIENT_VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
 
     private static final int MAX_WAIT_TO_SEND_MSG = 1*60*1000; // 1 minute timeout
+    private static final long MAX_WAIT_TO_OPEN_AMQP_CONNECTION = 1*60*1000; //1 minute timeout
 
     private AmqpsConnection amqpConnection;
     private final Queue<AmqpMessage> receivedMessages = new LinkedBlockingQueue<>();
@@ -101,12 +102,19 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
      * Determines if the AMQP connect is up
      * @return boolean true is connected false otherwise
      */
-    public boolean isAmqpConnected()
+    public boolean isAmqpConnected() throws ProvisioningDeviceClientException
     {
         boolean isConnected = false;
         if (this.amqpConnection != null)
         {
-            isConnected = this.amqpConnection.isConnected();
+            try
+            {
+                isConnected = this.amqpConnection.isConnected();
+            }
+            catch (Exception e)
+            {
+                throw new ProvisioningDeviceConnectionException(e);
+            }
         }
         return isConnected;
     }
@@ -115,43 +123,44 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
      * Opens the Amqp connection
      * @param registrationId The specified registration id for the connection
      * @param sslContext The SSLContext that will get used for this connection
-     * @param isX509Cert Indicates if using x509 or TPM
+     * @param saslHandler custom handler for sasl logic. May be null if no sasl frames are expected
      * @throws ProvisioningDeviceConnectionException if connection could not succeed for any reason.
      */
-    public void open(String registrationId, SSLContext sslContext, boolean isX509Cert, boolean useWebSockets) throws ProvisioningDeviceConnectionException
+    public void open(String registrationId, SSLContext sslContext, SaslHandler saslHandler, boolean useWebSockets) throws ProvisioningDeviceConnectionException
     {
         // SRS_ProvisioningAmqpOperations_07_003: [If amqpConnection is not null and is connected, open shall do nothing .]
-        if (this.amqpConnection == null || !this.amqpConnection.isConnected())
+        try
         {
-            // SRS_ProvisioningAmqpOperations_07_004: [open shall throw ProvisioningDeviceClientException if either registrationId or sslContext are null or empty.]
-            if (registrationId == null || registrationId.isEmpty())
+            if (this.amqpConnection == null || !this.amqpConnection.isConnected())
             {
-                throw new ProvisioningDeviceConnectionException(new IllegalArgumentException("registration Id cannot be null or empty"));
-            }
-            if (sslContext == null)
-            {
-                throw new ProvisioningDeviceConnectionException(new IllegalArgumentException("sslContext cannot be null"));
-            }
+                // SRS_ProvisioningAmqpOperations_07_004: [open shall throw ProvisioningDeviceClientException if either registrationId or sslContext are null or empty.]
+                if (registrationId == null || registrationId.isEmpty())
+                {
+                    throw new ProvisioningDeviceConnectionException(new IllegalArgumentException("registration Id cannot be null or empty"));
+                }
+                if (sslContext == null)
+                {
+                    throw new ProvisioningDeviceConnectionException(new IllegalArgumentException("sslContext cannot be null"));
+                }
 
-            try
-            {
-                addAmqpLinkProperty(API_VERSION_KEY, SDKUtils.getServiceApiVersion() );
-                addAmqpLinkProperty(CLIENT_VERSION_IDENTIFIER_KEY, SDKUtils.getUserAgentString() );
+
+                addAmqpLinkProperty(API_VERSION_KEY, SDKUtils.getServiceApiVersion());
+                addAmqpLinkProperty(CLIENT_VERSION_IDENTIFIER_KEY, SDKUtils.getUserAgentString());
 
                 // SRS_ProvisioningAmqpOperations_07_005: [This method shall construct the Link Address with /<scopeId>/registrations/<registrationId>.]
                 this.amqpLinkAddress = String.format(AMQP_ADDRESS_FMT, this.idScope, registrationId);
 
-                this.amqpConnection = new AmqpsConnection(this.hostName, this, sslContext, !isX509Cert, useWebSockets);
+                this.amqpConnection = new AmqpsConnection(this.hostName, this, sslContext, saslHandler, useWebSockets);
 
                 this.amqpConnection.setListener(this);
 
-                this.amqpConnection.open();
+                this.amqpConnection.openAmqpAsync();
             }
-            catch (Exception ex)
-            {
-                // SRS_ProvisioningAmqpOperations_07_006: [This method shall connect to the amqp connection and throw ProvisioningDeviceConnectionException on error.]
-                throw new ProvisioningDeviceConnectionException("Failure opening amqp connection", ex);
-            }
+        }
+        catch (Exception ex)
+        {
+            // SRS_ProvisioningAmqpOperations_07_006: [This method shall connect to the amqp connection and throw ProvisioningDeviceConnectionException on error.]
+            throw new ProvisioningDeviceConnectionException("Failure opening amqp connection", ex);
         }
     }
 
@@ -221,6 +230,27 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
             throw new ProvisioningDeviceClientException("responseCallback cannot be null");
         }
 
+        //wait for AMQP connection to be opened
+        long millisecondsElapsed = 0;
+        long waitStartTime = System.currentTimeMillis();
+        try
+        {
+            while (!this.amqpConnection.isConnected() && millisecondsElapsed < MAX_WAIT_TO_OPEN_AMQP_CONNECTION)
+            {
+                Thread.sleep(1000);
+                millisecondsElapsed = System.currentTimeMillis() - waitStartTime;
+            }
+        }
+        catch (Exception e)
+        {
+            throw new ProvisioningDeviceClientException("Provisioning device client encountered an exception while waiting for amqps connection to open.", e);
+        }
+
+        if (millisecondsElapsed >= MAX_WAIT_TO_OPEN_AMQP_CONNECTION)
+        {
+            throw new ProvisioningDeviceClientException("Provisioning device client timed out while waiting for amqps connection to open.");
+        }
+
         // SRS_ProvisioningAmqpOperations_07_010: [This method shall send the Register AMQP Provisioning message.]
         this.sendAmqpMessage(AMQP_REGISTER_DEVICE, null);
 
@@ -236,7 +266,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
         catch (InterruptedException e)
         {
             // SRS_ProvisioningAmqpOperations_07_012: [This method shall throw ProvisioningDeviceClientException if any failure is encountered.]
-            throw new ProvisioningDeviceClientException("Provisioning service failed to reply is alloted time.");
+            throw new ProvisioningDeviceClientException("Provisioning service failed to reply is allotted time.");
         }
     }
 

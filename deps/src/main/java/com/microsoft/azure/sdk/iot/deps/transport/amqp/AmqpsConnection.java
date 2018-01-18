@@ -5,8 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 
-import com.microsoft.azure.sdk.iot.deps.util.*;
 import com.microsoft.azure.sdk.iot.deps.util.CustomLogger;
+import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
@@ -37,12 +37,12 @@ public class AmqpsConnection extends BaseHandler
     private static final int AMQP_WEB_SOCKET_PORT = 443;
     private static final int THREAD_POOL_MAX_NUMBER = 1;
 
-    private int linkCredit = -1;
+    private int linkCredit;
 
-    private long nextTag = 0;
+    private long nextTag;
 
     private Boolean useWebSockets;
-    private Boolean isOpen = false;
+    private Boolean isOpen;
 
     private String hostName;
     private String fullHostAddress;
@@ -55,12 +55,12 @@ public class AmqpsConnection extends BaseHandler
 
     private Reactor reactor;
 
-    private boolean useTpmSasl;
+    private SaslListenerImpl saslListener;
 
     private AmqpListener msgListener;
 
-    private final ObjectLock openLock = new ObjectLock();
-    private final ObjectLock closeLock = new ObjectLock();
+    private final ObjectLock openLock;
+    private final ObjectLock closeLock;
 
     private SSLContext sslContext;
 
@@ -71,23 +71,34 @@ public class AmqpsConnection extends BaseHandler
      * @param hostName Name of the AMQP Endpoint
      * @param amqpDeviceOperations Object holding details of the links used in this connection
      * @param sslContext SSL Context to be set over TLS.
-     * @param useSasl SASL to be used or disabled
+     * @param saslHandler The sasl frame handler. This may be null if no sasl frames will be exchanged (When using x509
+     *                    authentication for example)
      * @param useWebSockets WebSockets to be used or disabled.
      * @throws IOException This exception is thrown if for any reason constructor cannot succeed.
      */
-    public AmqpsConnection(String hostName, AmqpDeviceOperations amqpDeviceOperations, SSLContext sslContext, boolean useSasl, boolean useWebSockets) throws IOException
+    public AmqpsConnection(String hostName, AmqpDeviceOperations amqpDeviceOperations, SSLContext sslContext, SaslHandler saslHandler, boolean useWebSockets) throws IOException
     {
         if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("The hostname cannot be null or empty.");
         }
 
+        this.linkCredit = -1;
+        this.nextTag = 0;
+
         this.amqpDeviceOperations = amqpDeviceOperations;
         this.useWebSockets = useWebSockets;
 
-        this.useTpmSasl = useSasl;
-        this.sslContext = sslContext;
+        if (saslHandler != null)
+        {
+            this.saslListener = new SaslListenerImpl(saslHandler);
+        }
 
+        this.openLock = new ObjectLock();
+        this.closeLock  = new ObjectLock();
+
+        this.sslContext = sslContext;
+        this.isOpen  = false;
         this.fullHostAddress = String.format("%s:%d", hostName, this.useWebSockets ? AMQP_WEB_SOCKET_PORT : AMQP_PORT );
         this.hostName = hostName;
 
@@ -96,21 +107,14 @@ public class AmqpsConnection extends BaseHandler
 
         try
         {
-            if (this.useTpmSasl)
-            {
-                reactor = Proton.reactor(this);
-            }
-            else
-            {
-                ReactorOptions options = new ReactorOptions();
-                options.setEnableSaslByDefault(false);
-                reactor = Proton.reactor(options, this);
-            }
+            ReactorOptions options = new ReactorOptions();
+            options.setEnableSaslByDefault(false);
+            reactor = Proton.reactor(options, this);
         }
         catch (IOException e)
         {
             logger.LogError(e);
-            throw new IOException("Could not create Proton reactor");
+            throw new IOException("Could not create Proton reactor", e);
         }
     }
 
@@ -131,8 +135,13 @@ public class AmqpsConnection extends BaseHandler
      * Returns the status of the connection
      * @return status of the connection
      */
-    public boolean isConnected()
+    public boolean isConnected() throws Exception
     {
+        if (this.saslListener != null && this.saslListener.getSavedException() != null)
+        {
+            throw this.saslListener.getSavedException();
+        }
+
         return this.isOpen;
     }
 
@@ -173,17 +182,20 @@ public class AmqpsConnection extends BaseHandler
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
-    private void openAmqpAsync() throws IOException
+    /**
+     * Spawns another thread that attempts to open the AMQP connection. Use {@link #isConnected()} to check when
+     * this operation has succeeded. Do not attempt to send messages before this connection has been opened
+     */
+    public void openAmqpAsync()
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         if (executorService == null)
         {
             executorService = Executors.newFixedThreadPool(THREAD_POOL_MAX_NUMBER);
         }
 
         AmqpReactor amqpReactor = new AmqpReactor(this.reactor);
-        ReactorRunner reactorRunner = new ReactorRunner(amqpReactor);
+        ReactorRunner reactorRunner = new ReactorRunner(amqpReactor, this.logger);
         executorService.submit(reactorRunner);
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
@@ -314,15 +326,7 @@ public class AmqpsConnection extends BaseHandler
         SslDomain domain = Proton.sslDomain();
         domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
         domain.init(SslDomain.Mode.CLIENT);
-
-        if (this.useTpmSasl)
-        {
-            domain.setSslContext(this.sslContext);
-        }
-        else
-        {
-            domain.setSslContext(this.sslContext);
-        }
+        domain.setSslContext(this.sslContext);
 
         return domain;
     }
@@ -334,18 +338,17 @@ public class AmqpsConnection extends BaseHandler
         Transport transport = event.getConnection().getTransport();
         if (transport != null)
         {
+            if (this.saslListener != null)
+            {
+                //Calling sasl here adds a transport layer for handling sasl negotiation
+                transport.sasl().setListener(this.saslListener);
+            }
+
             if (this.useWebSockets)
             {
                 WebSocketImpl webSocket = new WebSocketImpl();
                 webSocket.configure(this.hostName, WEB_SOCKET_PATH, 0, WEB_SOCKET_SUB_PROTOCOL, null, null);
                 ((TransportInternal)transport).addTransportLayer(webSocket);
-            }
-
-            if (this.useTpmSasl)
-            {
-                // TODO: Update for SASL TPM
-                Sasl sasl = transport.sasl();
-                sasl.plain("username", "password");
             }
 
             try
@@ -358,6 +361,7 @@ public class AmqpsConnection extends BaseHandler
                 logger.LogDebug("onConnectionBound has thrown exception while creating ssl context: %s", e.getMessage());
             }
         }
+
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
@@ -423,8 +427,13 @@ public class AmqpsConnection extends BaseHandler
      * @return true if message was sent successfully, false other wise.
      * @throws IOException If message could not be sent.
      */
-    public boolean sendAmqpMessage(AmqpMessage message) throws IOException
+    public boolean sendAmqpMessage(AmqpMessage message) throws Exception
     {
+        if (this.saslListener != null && this.saslListener.getSavedException() != null)
+        {
+            throw this.saslListener.getSavedException();
+        }
+
         boolean result;
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -528,7 +537,6 @@ public class AmqpsConnection extends BaseHandler
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
-
     /**
      * Event handler for the transport error event. This triggers reconnection attempts until successful.
      * @param event The Proton Event object.
@@ -547,16 +555,27 @@ public class AmqpsConnection extends BaseHandler
     private class ReactorRunner implements Callable
     {
         private final AmqpReactor amqpReactor;
+        private final  CustomLogger logger;
 
-        ReactorRunner(AmqpReactor reactor)
+        ReactorRunner(AmqpReactor reactor, CustomLogger logger)
         {
             this.amqpReactor = reactor;
+            this.logger = logger;
         }
 
         @Override
         public Object call()
         {
-            amqpReactor.run();
+            try
+            {
+                amqpReactor.run();
+            }
+            catch (HandlerException e)
+            {
+                logger.LogError(e);
+                throw e;
+            }
+
             return null;
         }
     }

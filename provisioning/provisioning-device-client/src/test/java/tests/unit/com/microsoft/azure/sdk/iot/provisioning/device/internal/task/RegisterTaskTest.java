@@ -631,50 +631,14 @@ public class RegisterTaskTest
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
                 result = mockedSslContext;
-                Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
-                mockedTpmRegistrationResultParser.getAuthenticationKey();
+                Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = null;
             }
         };
         //act
         registerTask.call();
-    }
-
-    @Test (expected = JsonException.class)
-    public void authenticateWithSasTokenThrowsOnParserFailure() throws Exception
-    {
-        //arrange
-        RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
-                                                                mockedSecurityProviderTpm, mockedProvisioningDeviceClientContract,
-                                                                mockedAuthorization);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedSecurityProviderTpm.getRegistrationId();
-                result = TEST_REGISTRATION_ID;
-                mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
-                mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
-                mockedDeviceRegistrationParser.toJson();
-                result = "testJson";
-                mockedSecurityProviderTpm.getSSLContext();
-                result = mockedSslContext;
-                Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
-                Deencapsulation.invoke(mockedResponseData, "getContractState");
-                result = DPS_REGISTRATION_RECEIVED;
-                TpmRegistrationResultParser.createFromJson(anyString);
-                result = new JsonException("test exception");
-            }
-        };
-        //act
-        registerTask.call();
-
     }
 
     //SRS_RegisterTask_25_018: [ If the provided security client is for Key then, this method shall import the Base 64 encoded Authentication Key into the HSM using the security client and pass the exception to the user on failure. ]
@@ -1010,16 +974,10 @@ public class RegisterTaskTest
             {
                 Deencapsulation.newInstance(ResponseData.class);
                 result = mockedResponseData;
-                Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
-                Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
-                Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
             }
         };
 
@@ -1037,13 +995,9 @@ public class RegisterTaskTest
             }
         };
 
-        new StrictExpectations()
+        new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(ResponseData.class);
-                result = mockedResponseData;
-                Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = null;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
                 result = null;
             }

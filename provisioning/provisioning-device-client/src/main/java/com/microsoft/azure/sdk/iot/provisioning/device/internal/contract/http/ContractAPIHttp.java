@@ -19,6 +19,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.Respons
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.TpmRegistrationResultParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
@@ -120,11 +121,8 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         */
 
         request.setHeaderField(USER_AGENT, userAgentValue);
-
         request.setHeaderField(ACCEPT, ACCEPT_VALUE);
-
         request.setHeaderField(CONTENT_TYPE, ACCEPT_VALUE + "; " + ACCEPT_CHARSET);
-
         if (headersMap != null)
         {
             for (Map.Entry<String, String> header : headersMap.entrySet())
@@ -132,6 +130,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
                 request.setHeaderField(header.getKey(), header.getValue());
             }
         }
+
         return request;
     }
 
@@ -191,7 +190,6 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.PUT, payload, DEFAULT_HTTP_TIMEOUT_MS, null, SDKUtils.getUserAgentString());
             //SRS_ContractAPIHttp_25_006: [This method shall set the SSLContext for the Http Request.]
             httpRequest.setSSLContext(requestData.getSslContext());
-            byte[] response = null;
             HttpResponse httpResponse = null;
             try
             {
@@ -204,8 +202,9 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
                 //SRS_ContractAPIHttp_25_008: [If service return a status as 404 then this method shall trigger the callback to the user with the response message.]
                 if (httpResponse.getStatus() == ACCEPTABLE_NONCE_HTTP_STATUS)
                 {
-                    response = e.getMessage().getBytes();
-                    responseCallback.run(new ResponseData(response, ContractState.DPS_REGISTRATION_RECEIVED, 0), dpsAuthorizationCallbackContext);
+                    TpmRegistrationResultParser registerResponseTPMParser = TpmRegistrationResultParser.createFromJson(new String(e.getMessage()));
+                    byte[] base64DecodedAuthKey = Base64.decodeBase64Local(registerResponseTPMParser.getAuthenticationKey().getBytes());
+                    responseCallback.run(new ResponseData(base64DecodedAuthKey, ContractState.DPS_REGISTRATION_RECEIVED, 0), dpsAuthorizationCallbackContext);
                     return;
                 }
                 else

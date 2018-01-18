@@ -10,6 +10,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.device.internal.cont
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
@@ -17,6 +18,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http.Co
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.TpmRegistrationResultParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
 import mockit.*;
@@ -47,6 +49,12 @@ public class ContractAPIHttpTest
     private static final byte[] TEST_SRK = "testSRK".getBytes();
 
     @Mocked
+    Base64 mockedBas64;
+
+    @Mocked
+    DeviceRegistrationParser mockedDeviceRegistrationParser;
+
+    @Mocked
     HttpRequest mockedHttpRequest;
 
     @Mocked
@@ -72,6 +80,9 @@ public class ContractAPIHttpTest
 
     @Mocked
     ProvisioningDeviceClientConfig mockedProvisioningDeviceClientConfig;
+
+    @Mocked
+    TpmRegistrationResultParser mockedTpmRegistrationResultParser;
 
     private ContractAPIHttp createContractClass() throws ProvisioningDeviceClientException
     {
@@ -240,6 +251,16 @@ public class ContractAPIHttpTest
                 result = new ProvisioningDeviceHubException("test Exception");
                 mockedHttpResponse.getStatus();
                 result = 401;
+                TpmRegistrationResultParser.createFromJson(new String(mockedHttpResponse.getBody()));
+                result = mockedTpmRegistrationResultParser;
+                mockedTpmRegistrationResultParser.getAuthenticationKey();
+                result = "some auth key";
+                Base64.decodeBase64Local((byte[]) any);
+                result = new byte[]{};
+                new DeviceRegistrationParser(anyString, anyString, anyString);
+                result = mockedDeviceRegistrationParser;
+                mockedDeviceRegistrationParser.toJson();
+                result = "some json";
             }
         };
 
@@ -428,7 +449,10 @@ public class ContractAPIHttpTest
                 ProvisioningDeviceClientExceptionManager.verifyHttpResponse(mockedHttpResponse);
                 result = new ProvisioningDeviceHubException("test Exception");
                 mockedHttpResponse.getStatus();
-                result = 400;
+                new DeviceRegistrationParser(anyString, anyString, anyString);
+                result = mockedDeviceRegistrationParser;
+                mockedDeviceRegistrationParser.toJson();
+                result = "some json";
             }
         };
 
@@ -473,6 +497,10 @@ public class ContractAPIHttpTest
                 ProvisioningDeviceClientExceptionManager.verifyHttpResponse(mockedHttpResponse);
                 mockedHttpResponse.getStatus();
                 result = 200;
+                new DeviceRegistrationParser(anyString, anyString, anyString);
+                result = mockedDeviceRegistrationParser;
+                mockedDeviceRegistrationParser.toJson();
+                result = "some json";
             }
         };
 
@@ -559,6 +587,10 @@ public class ContractAPIHttpTest
                 result = null;
                 mockedDeviceRegistrationParser.toJson();
                 result = "TEST JSON";
+                new DeviceRegistrationParser(anyString);
+                result = mockedDeviceRegistrationParser;
+                mockedDeviceRegistrationParser.toJson();
+                result = "some json";
             }
         };
 
@@ -607,6 +639,12 @@ public class ContractAPIHttpTest
                 result = mockedSslContext;
                 mockedRequestData.getSasToken();
                 result = null;
+
+                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class, String.class}, anyString, "", "");
+                result = mockedDeviceRegistrationParser;
+
+                mockedDeviceRegistrationParser.toJson();
+                result = "some json";
             }
         };
 
@@ -654,6 +692,10 @@ public class ContractAPIHttpTest
                 result = null;
                 ProvisioningDeviceClientExceptionManager.verifyHttpResponse(mockedHttpResponse);
                 result = new ProvisioningDeviceHubException("test Exception");
+                new DeviceRegistrationParser(anyString);
+                result = mockedDeviceRegistrationParser;
+                mockedDeviceRegistrationParser.toJson();
+                result = "some json";
             }
         };
 
@@ -701,6 +743,12 @@ public class ContractAPIHttpTest
                 result = TEST_SAS_TOKEN;
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
+                mockedHttpResponse.getStatus();
+                result = 400;
+                new DeviceRegistrationParser(anyString, anyString, anyString);
+                result = mockedDeviceRegistrationParser;
+                mockedDeviceRegistrationParser.toJson();
+                result = "some json";
             }
         };
 
