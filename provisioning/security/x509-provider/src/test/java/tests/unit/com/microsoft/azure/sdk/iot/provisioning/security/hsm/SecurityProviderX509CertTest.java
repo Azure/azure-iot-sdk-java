@@ -11,6 +11,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.security.hsm;
  import mockit.Deencapsulation;
  import mockit.Mocked;
  import mockit.NonStrictExpectations;
+ import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
  import org.bouncycastle.openssl.PEMKeyPair;
  import org.bouncycastle.openssl.PEMParser;
  import org.bouncycastle.util.io.pem.PemObject;
@@ -36,6 +37,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.security.hsm;
     @Mocked PrivateKey mockedPrivateKey;
     @Mocked X509Certificate mockedX509Certificate;
     @Mocked PEMKeyPair mockedPEMKeyPair;
+    @Mocked PrivateKeyInfo mockedPrivateKeyInfo;
     @Mocked PEMParser mockedPEMParser;
     @Mocked PemObject mockedPemObject;
     @Mocked PemReader mockedPemReader;
@@ -61,7 +63,36 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.security.hsm;
                 result = mockedPEMKeyPair;
 
                 //Doing this instead of just mocking JCA converter because trying to mock the JCA converter causes strange errors to be thrown.
-                Deencapsulation.invoke(SecurityProviderX509Cert.class, "getPrivateKeyFromPEMKeyPair", new Class[] {PEMKeyPair.class}, mockedPEMKeyPair);
+                Deencapsulation.invoke(SecurityProviderX509Cert.class, "getPrivateKey", new Class[] {Object.class}, mockedPEMKeyPair);
+                result = mockedPrivateKey;
+            }
+        };
+
+        //act
+        PrivateKey actualPrivateKey = Deencapsulation.invoke(SecurityProviderX509Cert.class, "parsePrivateKey", new Class[] {String.class}, expectedPrivateKeyString);
+
+        //assert
+        assertEquals(mockedPrivateKey, actualPrivateKey);
+    }
+
+    @Test
+    public void parsePrivateKeyType2Success() throws CertificateException, IOException
+    {
+        //arrange
+        new NonStrictExpectations(SecurityProviderX509Cert.class)
+        {
+            {
+                new StringReader(expectedPrivateKeyString);
+                result = mockedStringReader;
+
+                new PEMParser(mockedStringReader);
+                result = mockedPEMParser;
+
+                mockedPEMParser.readObject();
+                result = mockedPrivateKeyInfo;
+
+                //Doing this instead of just mocking JCA converter because trying to mock the JCA converter causes strange errors to be thrown.
+                Deencapsulation.invoke(SecurityProviderX509Cert.class, "getPrivateKey", new Class[] {Object.class}, mockedPrivateKeyInfo);
                 result = mockedPrivateKey;
             }
         };

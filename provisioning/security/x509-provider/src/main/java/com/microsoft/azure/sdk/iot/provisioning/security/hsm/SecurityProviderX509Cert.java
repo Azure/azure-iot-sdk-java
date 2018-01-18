@@ -9,6 +9,7 @@ package com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMException;
 import org.bouncycastle.openssl.PEMKeyPair;
@@ -18,9 +19,9 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.StringReader;
 import java.security.Key;
-import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -179,8 +180,7 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
             Security.addProvider(new BouncyCastleProvider());
             PEMParser privateKeyParser = new PEMParser(new StringReader(privateKeyString));
             Object possiblePrivateKey = privateKeyParser.readObject();
-            PEMKeyPair ukp = (PEMKeyPair) possiblePrivateKey;
-            return SecurityProviderX509Cert.getPrivateKeyFromPEMKeyPair(ukp);
+            return SecurityProviderX509Cert.getPrivateKey(possiblePrivateKey);
         }
         catch (Exception e)
         {
@@ -207,8 +207,20 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
         }
     }
 
-    private static Key getPrivateKeyFromPEMKeyPair(PEMKeyPair ukp) throws PEMException
+    private static Key getPrivateKey(Object possiblePrivateKey) throws IOException
     {
-        return new JcaPEMKeyConverter().setProvider("BC").getKeyPair(ukp).getPrivate();
+        if (possiblePrivateKey instanceof  PEMKeyPair)
+        {
+            return new JcaPEMKeyConverter().setProvider("BC").getKeyPair((PEMKeyPair) possiblePrivateKey)
+                .getPrivate();
+        }
+        else if (possiblePrivateKey instanceof PrivateKeyInfo)
+        {
+            return new JcaPEMKeyConverter().setProvider("BC").getPrivateKey((PrivateKeyInfo) possiblePrivateKey);
+        }
+        else
+        {
+            throw new IOException("Unable to parse private key, type unknown");
+        }
     }
 }

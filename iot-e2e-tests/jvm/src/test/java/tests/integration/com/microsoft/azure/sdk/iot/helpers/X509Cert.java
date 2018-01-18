@@ -22,9 +22,13 @@ import java.util.Collection;
 // Generates RSA Certs and private Keys
 public class X509Cert
 {
-    private static final String DN_ROOT = "CN=Root, L=Redmond, C=US";
-    private static final String DN_INTERMEDIATE = "CN=Intermediate_%s, L=Redmond, C=US";
-    private static final String DN_LEAF = "CN=Leaf, L=Redmond, C=US";
+    private static final String BEGIN_KEY = "-----BEGIN PRIVATE KEY-----\n";
+    private static final String END_KEY = "\n-----END PRIVATE KEY-----\n";
+    private static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----\n";
+    private static final String END_CERT = "\n-----END CERTIFICATE-----\n";
+    private static final String DN_ROOT = "CN=%s, L=Redmond, C=US";
+    private static final String DN_INTERMEDIATE = "CN=intermediate_%s, L=Redmond, C=US";
+    private static final String DN_LEAF = "CN=%s, L=Redmond, C=US";
     private static final long ONE_DAY = 1*24*60*60;
 
     private class CertKeyPair
@@ -45,7 +49,7 @@ public class X509Cert
     private boolean useDice;
 
 
-    public  X509Cert(int intermediatesCount, boolean useDice) throws NoSuchAlgorithmException
+    public  X509Cert(int intermediatesCount, boolean useDice, String cNLeaf, String cNRoot) throws NoSuchAlgorithmException
     {
         intermediatesPem = new ArrayList<>(intermediatesCount);
         intermediates = new ArrayList<>(intermediatesCount);
@@ -55,32 +59,41 @@ public class X509Cert
         {
             try
             {
-                this.root = createCertAndKey(String.format(DN_ROOT), ONE_DAY);
-                this.root.certificate = createSignedCertificate(this.root.certificate, this.root.certificate, this.root.key);
+                if (cNRoot == null)
+                {
+                    cNRoot = "root";
+                }
+                this.root = createCertAndKey(String.format(DN_ROOT, cNRoot), ONE_DAY);
+                this.root.certificate = createSignedCertificate(this.root.certificate, this.root.certificate, this.root.key, false);
                 for (int i = 0; i < intermediatesCount; i++)
                 {
                     this.intermediates.add(createCertAndKey(String.format(DN_INTERMEDIATE, i), ONE_DAY));
                     if (i == 0)
                     {
-                        this.intermediates.get(i).certificate = createSignedCertificate(this.intermediates.get(i).certificate, this.root.certificate, this.root.key);
+                        this.intermediates.get(i).certificate = createSignedCertificate(this.intermediates.get(i).certificate, this.root.certificate, this.root.key, false);
                     }
                     else
                     {
                         this.intermediates.get(i).certificate = createSignedCertificate(this.intermediates.get(i).certificate,
                                                                                     this.intermediates.get(i - 1).certificate,
-                                                                                    this.intermediates.get(i - 1).key);
+                                                                                    this.intermediates.get(i - 1).key, false);
                     }
                 }
-                this.leaf = createCertAndKey(String.format(DN_LEAF), ONE_DAY);
+                if (cNLeaf == null)
+                {
+                    cNLeaf = "leaf";
+                }
+
+                this.leaf = createCertAndKey(String.format(DN_LEAF, cNLeaf), ONE_DAY);
                 if (intermediatesCount > 0)
                 {
                     this.leaf.certificate = createSignedCertificate(this.leaf.certificate, this.intermediates.get(intermediatesCount - 1).certificate,
-                                                                    this.intermediates.get(intermediatesCount - 1).key);
+                                                                    this.intermediates.get(intermediatesCount - 1).key, true);
                 }
                 else
                 {
                     this.leaf.certificate = createSignedCertificate(this.leaf.certificate, this.root.certificate,
-                                                                    this.root.key);
+                                                                    this.root.key, true);
                 }
             }
             catch (Exception e)
@@ -91,6 +104,7 @@ public class X509Cert
         else
         {
             // use DICE to generate certs when it supports
+            throw new UnsupportedOperationException("Dice client is not yet supported");
         }
     }
 
@@ -124,53 +138,56 @@ public class X509Cert
     }
 
     private static X509Certificate createSignedCertificate(X509Certificate certificate, X509Certificate issuerCertificate,
-                                                           PrivateKey issuerPrivateKey)
+                                                           PrivateKey issuerPrivateKey, boolean isLeaf)
             throws CertificateException, IOException, NoSuchProviderException,
                    NoSuchAlgorithmException, InvalidKeyException, SignatureException
     {
 
-            Principal issuer = issuerCertificate.getSubjectDN();
-            String issuerSigAlg = issuerCertificate.getSigAlgName();
+        Principal issuer = issuerCertificate.getSubjectDN();
+        String issuerSigAlg = issuerCertificate.getSigAlgName();
 
-            byte[] inCertBytes = certificate.getTBSCertificate();
-            X509CertInfo info = new X509CertInfo(inCertBytes);
-            info.set(X509CertInfo.ISSUER, issuer);
+        byte[] inCertBytes = certificate.getTBSCertificate();
+        X509CertInfo info = new X509CertInfo(inCertBytes);
+        info.set(X509CertInfo.ISSUER, issuer);
 
-            CertificateExtensions exts=new CertificateExtensions();
+        if (!isLeaf)
+        {
+            CertificateExtensions exts = new CertificateExtensions();
             BasicConstraintsExtension bce = new BasicConstraintsExtension(true, -1);
-            exts.set(BasicConstraintsExtension.NAME,new BasicConstraintsExtension(false, bce.getExtensionValue()));
+            exts.set(BasicConstraintsExtension.NAME, new BasicConstraintsExtension(false, bce.getExtensionValue()));
             info.set(X509CertInfo.EXTENSIONS, exts);
+        }
 
-            X509CertImpl outCert = new X509CertImpl(info);
-            outCert.sign(issuerPrivateKey, issuerSigAlg);
+        X509CertImpl outCert = new X509CertImpl(info);
+        outCert.sign(issuerPrivateKey, issuerSigAlg);
 
-            return outCert;
+        return outCert;
     }
 
     public String getPrivateKeyLeafPem()
     {
         StringBuilder pem = new StringBuilder();
-        pem.append("-----BEGIN RSA PRIVATE KEY-----\n");
+        pem.append(BEGIN_KEY);
         pem.append(new String (Base64.encodeBase64Local(this.leaf.key.getEncoded())));
-        pem.append("\n-----END RSA PRIVATE KEY-----\n");
+        pem.append(END_KEY);
         return pem.toString();
     }
 
     public String getPublicCertLeafPem() throws IOException, GeneralSecurityException
     {
         StringBuilder pem = new StringBuilder();
-        pem.append("-----BEGIN CERTIFICATE-----\n");
+        pem.append(BEGIN_CERT);
         pem.append(new String (Base64.encodeBase64Local(this.leaf.certificate.getEncoded())));
-        pem.append("\n-----END CERTIFICATE-----\n");
+        pem.append(END_CERT);
         return pem.toString();
     }
 
     public String getPublicCertRootPem() throws IOException, GeneralSecurityException
     {
         StringBuilder pem = new StringBuilder();
-        pem.append("-----BEGIN CERTIFICATE-----\n");
+        pem.append(BEGIN_CERT);
         pem.append(new String (Base64.encodeBase64Local(this.root.certificate.getEncoded())));
-        pem.append("\n-----END CERTIFICATE-----\n");
+        pem.append(END_CERT);
         return pem.toString();
     }
 
@@ -179,9 +196,9 @@ public class X509Cert
         for (CertKeyPair c : this.intermediates)
         {
             StringBuilder pem = new StringBuilder();
-            pem.append("-----BEGIN CERTIFICATE-----\n");
+            pem.append(BEGIN_CERT);
             pem.append(new String(Base64.encodeBase64Local(c.certificate.getEncoded())));
-            pem.append("\n-----END CERTIFICATE-----\n");
+            pem.append(END_CERT);
             intermediatesPem.add(pem.toString());
         }
         return intermediatesPem;

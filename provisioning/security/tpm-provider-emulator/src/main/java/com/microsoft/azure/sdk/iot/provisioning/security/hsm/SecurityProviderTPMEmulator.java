@@ -12,6 +12,9 @@ import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProv
 import tss.*;
 import tss.tpm.*;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 
 public class SecurityProviderTPMEmulator extends SecurityProviderTpm
@@ -93,6 +96,69 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
         clearPersistent(tpm, SRK_PERSISTENT_HANDLE, "SRK");
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
         srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
+    }
+
+    /**
+     * Constructor for creating a Security Provider on TPM Simulator with the supplied Registration ID and
+     * ip address of the the remote where TPM simulator is running
+     * @param registrationId A non {@code null} or empty value tied to this registration
+     * @param ipAddressSimulator A non {@code null} or empty value of the ip address on which simulator is running.
+     * @throws SecurityProviderException If the constructor could not start the TPM
+     */
+    public SecurityProviderTPMEmulator(String registrationId, String ipAddressSimulator) throws SecurityProviderException
+    {
+        if (registrationId == null || registrationId.isEmpty())
+        {
+            //SRS_SecurityProviderTPMEmulator_25_003: [ The constructor shall throw IllegalArgumentException if registration id was null or empty. ]
+            throw new IllegalArgumentException("Registration Id cannot be null or empty");
+        }
+        if (!registrationId.matches(REGEX_FOR_VALID_REGISTRATION_ID))
+        {
+            //SRS_SecurityProviderTPMEmulator_25_004: [ The constructor shall validate and throw IllegalArgumentException if registration id is invalid. Valid registration Id
+            // shall be alphanumeric, lowercase, and may contain hyphens. Max characters allowed is 128 . ]
+            throw new IllegalArgumentException("The registration ID is alphanumeric, lowercase, and may contain hyphens. Max characters allowed is 128.");
+        }
+        if (ipAddressSimulator == null || ipAddressSimulator.isEmpty())
+        {
+            throw new IllegalArgumentException("ipAddress of the simulator cannot be null or empty");
+        }
+
+        InetAddress inetAddress;
+        try
+        {
+            inetAddress = InetAddress.getByName(ipAddressSimulator);
+        }
+        catch (UnknownHostException e)
+        {
+            throw new SecurityProviderException(e);
+        }
+
+        //SRS_SecurityProviderTPMEmulator_25_005: [ The constructor shall save the registration Id if it was provided. ]
+        this.registrationId = registrationId;
+        tpm = TpmFactory.remoteTpmSimulator(inetAddress.getHostName());
+        clearPersistent(tpm, EK_PERSISTENT_HANDLE, "EK");
+        clearPersistent(tpm, SRK_PERSISTENT_HANDLE, "SRK");
+        ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
+        srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
+    }
+
+    /**
+     * Closes the simulator if it were running already
+     * @throws SecurityProviderException if simulator could not be closed for any reason.
+     */
+    public void shutDown() throws SecurityProviderException
+    {
+        if (tpm != null)
+        {
+            try
+            {
+                tpm.close();
+            }
+            catch (IOException e)
+            {
+                throw new SecurityProviderException(e);
+            }
+        }
     }
 
     /**
