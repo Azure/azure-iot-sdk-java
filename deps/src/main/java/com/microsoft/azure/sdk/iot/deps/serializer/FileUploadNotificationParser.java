@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 
 import java.util.Date;
 
@@ -44,7 +43,7 @@ public class FileUploadNotificationParser
     @Expose(serialize = true, deserialize = true)
     @SerializedName(LAST_UPDATED_TIME_TAG)
     private String lastUpdatedTime = null;
-    @Ignore
+
     private Date lastUpdatedTimeDate;
 
     private static final String BLOB_SIZE_IN_BYTES_TAG = "blobSizeInBytes";
@@ -56,7 +55,7 @@ public class FileUploadNotificationParser
     @Expose(serialize = true, deserialize = true)
     @SerializedName(ENQUEUED_TIME_UTC_TAG)
     private String enqueuedTimeUtc = null;
-    @Ignore
+
     private Date enqueuedTimeUtcDate;
 
     /**

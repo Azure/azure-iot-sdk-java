@@ -11,7 +11,6 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -209,7 +208,7 @@ public class DeviceTwin
         }
 
         // Currently this is not supported by service - Please use Update twin to update desired properties
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
         /*
         **Codes_SRS_DEVICETWIN_25_024: [** The function shall create a new SAS token **]**
 
@@ -275,7 +274,7 @@ public class DeviceTwin
 
         }
 
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
 
         /*
         **Codes_SRS_DEVICETWIN_25_032: [** The function shall create a new SAS token **]**
@@ -358,7 +357,7 @@ public class DeviceTwin
         **Codes_SRS_DEVICETWIN_25_044: [** The function shall verify the response status and throw proper Exception **]**
 
          */
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
         // Currently not implemented on service
         // HttpResponse response = this.processHttpTwinRequest(url, HttpMethod.PUT, tags.getBytes(), String.valueOf(requestId++));
     }
