@@ -25,7 +25,7 @@ public class AmqpReactor
 
     /**
      * Main run function to pump Proton messages
-     * @throws HandlerException
+     * @throws HandlerException If Protonj failed.
      */
     public void run() throws HandlerException
     {

@@ -78,9 +78,9 @@ public class AmqpDeviceOperations
 
     /**
      * Open the Session links for session
-     * @param session
-     * @throws IOException
-     * @throws IllegalArgumentException
+     * @param session the {@link Session} endpoint.
+     * @throws IOException if the function failed to open the links for the provided session.
+     * @throws IllegalArgumentException if the session is {@code null}.
      */
     public void openLinks(Session session) throws IOException, IllegalArgumentException
     {

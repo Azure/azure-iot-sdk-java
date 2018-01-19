@@ -116,6 +116,7 @@ public class TwinMetadata
      *
      * <p> For instance, for the follow Map, this method will create a TwinMetadata with
      *     {@code lastUpdated = 2015-09-21T02:07:44.238Z} and {@code lastUpdatedVersion = 3}
+     *
      * <pre>
      * {@code
      * "$lastUpdated":"2015-09-21T02:07:44.238Z",
@@ -127,6 +128,7 @@ public class TwinMetadata
      * "NewValue":{
      *     "$lastUpdated":"2017-09-21T02:07:44.238Z",
      *     "$lastUpdatedVersion":5
+     * }
      * }
      * </pre>
      *

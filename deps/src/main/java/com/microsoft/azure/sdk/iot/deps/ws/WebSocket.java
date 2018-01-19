@@ -74,17 +74,27 @@ public interface WebSocket
 
     /**
      * Configure WebSocket connection
+     * @param host the hots name
+     * @param path the resource path
+     * @param port the port
+     * @param protocol the base protocol
+     * @param additionalHeaders the Map of additional headers
+     * @param webSocketHandler the web socket handler
      */
     void configure(String host, String path, int port, String protocol, Map<String, String> additionalHeaders, WebSocketHandler webSocketHandler);
 
     /**
      * Add WebSocket frame to send the given buffer
+     *
+     * @param srcBuffer the source buffer
+     * @param dstBuffer the destination buffer
      */
     void wrapBuffer(ByteBuffer srcBuffer, ByteBuffer dstBuffer);
 
     /**
      * Remove WebSocket frame from the given buffer
      *
+     * @param buffer the buffer to unwrap
      * @return The payload of the given WebSocket frame.
      */
     WebSocketHandler.WebsocketTuple unwrapBuffer(ByteBuffer buffer);

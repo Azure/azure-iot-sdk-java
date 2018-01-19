@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 
 import org.apache.qpid.proton.Proton;
@@ -22,7 +25,7 @@ public class AmqpMessage
 
     /**
      * Consule a MessageImpl object
-     * @param messageImpl
+     * @param messageImpl the ProtonJ Impl message.
      */
     public AmqpMessage(MessageImpl messageImpl)
     {
@@ -31,7 +34,7 @@ public class AmqpMessage
 
     /**
      * set the Body of the AMQP message
-     * @param msgData
+     * @param msgData the AMQP message body.
      */
     public void setBody(Data msgData)
     {
@@ -54,7 +57,7 @@ public class AmqpMessage
 
     /**
      * Set the application property for the message
-     * @param userProperties
+     * @param userProperties The user prototype.
      */
     public void setApplicationProperty(Map<String, Object> userProperties)
     {
@@ -64,9 +67,9 @@ public class AmqpMessage
 
     /**
      * Sets the data value
-     * @param data
-     * @param offset
-     * @param length
+     * @param data the {@code byte[]} to be decoded
+     * @param offset the offset in the byte[]
+     * @param length the total length
      */
     public void decode(byte[] data, int offset, int length)
     {

@@ -1,3 +1,8 @@
+/*
+ *  Copyright (c) Microsoft. All rights reserved.
+ *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
+ */
+
 package com.microsoft.azure.sdk.iot.deps.transport.mqtt;
 
 public class MqttMessage
@@ -17,8 +22,8 @@ public class MqttMessage
 
     /**
      * Constructor that takes the topic of the Message and a PAHO MqttMessage
-     * @param topic
-     * @param mqttMessage
+     * @param topic The topic of the message
+     * @param mqttMessage The mqtt message
      */
     public MqttMessage(String topic, org.eclipse.paho.client.mqttv3.MqttMessage mqttMessage)
     {
@@ -50,8 +55,8 @@ public class MqttMessage
 
     /**
      * Constructor that takes the topic of the Message and payload
-     * @param topic
-     * @param payload
+     * @param topic The topic of the message
+     * @param payload The payload of the message
      */
     public MqttMessage(String topic, byte[] payload)
     {
@@ -62,7 +67,7 @@ public class MqttMessage
     /**
      * Converts the MqttQOS value to a integer representation
      * @param qos MqttQos value
-     * @return
+     * @return the qos value
      */
     public static int retrieveQosValue(MqttQos qos)
     {
@@ -88,7 +93,7 @@ public class MqttMessage
 
     /**
      * Sets the topic of the message
-     * @param topic
+     * @param topic The topic of the message
      */
     public void setTopic(String topic)
     {
@@ -106,7 +111,7 @@ public class MqttMessage
 
     /**
      * Returns the Message Payload
-     * @return
+     * @return the message in byte[]
      */
     public byte[] getPayload()
     {
@@ -115,7 +120,7 @@ public class MqttMessage
 
     /**
      * Sets the Message Payload
-     * @param payload
+     * @param payload the message in byte[]
      */
     public void setPayload(byte[] payload)
     {
@@ -124,7 +129,7 @@ public class MqttMessage
 
     /**
      * Sets the Qos value of the Message
-     * @param qos
+     * @param qos the quality of service
      */
     public void setQos(MqttQos qos)
     {
@@ -133,7 +138,7 @@ public class MqttMessage
 
     /**
      * Gets the Qos value of the Message
-     * @return
+     * @return the quality of service
      */
     public MqttQos getQos()
     {
@@ -142,7 +147,7 @@ public class MqttMessage
 
     /**
      * Gets the PAHO MqttMessage from an existing message
-     * @return
+     * @return the mqtt message
      */
     public org.eclipse.paho.client.mqttv3.MqttMessage getMqttMessage()
     {

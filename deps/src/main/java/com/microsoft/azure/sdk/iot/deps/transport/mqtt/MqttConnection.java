@@ -46,8 +46,8 @@ public class MqttConnection implements MqttCallback
      * @param userName Username
      * @param password password
      * @param sslContext SSLContext for the connection
-     * @param listener
-     * @param useWebSockets
+     * @param listener Mqtt listener
+     * @param useWebSockets true to use Mqtt over web sockets
      * @throws IOException is thrown if any of the parameters are null or empty or client cannot be instantiated
      */
     public MqttConnection(String hostname, String clientId, String userName, String password, SSLContext sslContext, MqttListener listener, boolean useWebSockets) throws IOException
@@ -92,7 +92,7 @@ public class MqttConnection implements MqttCallback
 
     /**
      * Return whether the MQTT broker is connected to the endpoint
-     * @return
+     * @return true if connected using Mqtt
      */
     public boolean isMqttConnected()
     {
@@ -130,7 +130,7 @@ public class MqttConnection implements MqttCallback
 
     /**
      * Connects to the MQTT broker
-     * @throws IOException
+     * @throws IOException if there is a Mqtt exception.
      */
     public synchronized void connect() throws IOException
     {
@@ -154,7 +154,7 @@ public class MqttConnection implements MqttCallback
 
     /**
      * Disconnects from the MQTT broker
-     * @throws IOException
+     * @throws IOException if there is a Mqtt exception.
      */
     public synchronized void disconnect() throws IOException
     {
@@ -177,7 +177,7 @@ public class MqttConnection implements MqttCallback
      * @param topic The topic of the message
      * @param qos The QOS of the message
      * @param message The message to be sent
-     * @throws IOException
+     * @throws IOException if there is a Mqtt exception.
      */
     public synchronized void publishMessage(String topic, MqttQos qos, byte[] message) throws IOException
     {
@@ -198,7 +198,7 @@ public class MqttConnection implements MqttCallback
     /**
      * Sends a PUBLISH message to the MQTT broker
      * @param message The message to be sent
-     * @throws IOException
+     * @throws IOException if there is a Mqtt exception.
      */
     public synchronized void publishMessage(MqttMessage message) throws IOException
     {
@@ -226,7 +226,7 @@ public class MqttConnection implements MqttCallback
      * Send the SUBSCRIBE message to the MQTT broker
      * @param topic The topic of the message
      * @param qos The QOS of the message
-     * @throws IOException
+     * @throws IOException if there is a Mqtt exception.
      */
     public synchronized void subscribe(String topic, MqttQos qos) throws IOException
     {
@@ -248,8 +248,8 @@ public class MqttConnection implements MqttCallback
 
     /**
      * Send the UNSUBSCRIBE message to the MQTT broker
-     * @param topic
-     * @throws IOException
+     * @param topic Name of the Topic to unsubscribe.
+     * @throws IOException if there is a Mqtt exception.
      */
     public synchronized void unsubscribe(String topic) throws IOException
     {
@@ -286,7 +286,7 @@ public class MqttConnection implements MqttCallback
 
     /**
      * Event fired when the connection is lost on the MQTT broker
-     * @param throwable
+     * @param throwable the disconnection reason.
      */
     @Override
     public synchronized void connectionLost(Throwable throwable)
