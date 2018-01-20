@@ -45,8 +45,9 @@ public class TransportClientFileUploadIT
     private static final String REMOTE_FILE_NAME = "File";
     private static final String REMOTE_FILE_NAME_EXT = ".txt";
 
-    private static final String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
+    private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
+    private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
     // States of SDK
     private static RegistryManager registryManager;
@@ -58,7 +59,6 @@ public class TransportClientFileUploadIT
 
     private static Device[] deviceListAmqps = new Device[MAX_DEVICE_MULTIPLEX];
     private static ArrayList<String> clientConnectionStringArrayList = new ArrayList<>();
-    private ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
     enum STATUS
     {
@@ -123,7 +123,7 @@ public class TransportClientFileUploadIT
         Map<String, String> env = System.getenv();
         for (String envName : env.keySet())
         {
-            if (envName.equals(iotHubonnectionStringEnvVarName))
+            if (envName.equals(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME))
             {
                 iotHubConnectionString = env.get(envName);
             }
@@ -185,6 +185,14 @@ public class TransportClientFileUploadIT
     {
         fileUploadState = null;
         messageStates = null;
+        try
+        {
+            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
+        }
+        catch (InterruptedException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     @AfterClass
@@ -240,6 +248,7 @@ public class TransportClientFileUploadIT
     {
         // arrange
         TransportClient transportClient = new TransportClient(AMQPS);
+        final ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
@@ -310,6 +319,7 @@ public class TransportClientFileUploadIT
     {
         // arrange
         TransportClient transportClient = new TransportClient(AMQPS_WS);
+        final ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {

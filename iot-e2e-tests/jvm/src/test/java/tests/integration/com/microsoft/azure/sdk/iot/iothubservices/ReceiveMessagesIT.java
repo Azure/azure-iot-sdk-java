@@ -16,10 +16,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
@@ -71,6 +68,7 @@ public class ReceiveMessagesIT
 
     private static String expectedCorrelationId = "1234";
     private static String expectedMessageId = "5678";
+    private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
     @BeforeClass
     public static void setUp() throws Exception
@@ -131,6 +129,19 @@ public class ReceiveMessagesIT
         registryManager.removeDevice(deviceAmqpsWS.getDeviceId());
         registryManager.removeDevice(deviceMqttX509.getDeviceId());
         registryManager.close();
+    }
+
+    @After
+    public void delayTests()
+    {
+        try
+        {
+            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
+        }
+        catch (InterruptedException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test

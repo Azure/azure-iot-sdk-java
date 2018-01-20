@@ -44,6 +44,7 @@ public class TransportClientDeviceTwinIT
 
     private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
+    private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
     // Constants used in for Testing
     private static final String PROPERTY_KEY = "Key";
@@ -86,6 +87,19 @@ public class TransportClientDeviceTwinIT
             {
                 state.deviceTwinStatus = TransportClientDeviceTwinIT.STATUS.FAILURE;
             }
+        }
+    }
+
+    @After
+    public void delayTests()
+    {
+        try
+        {
+            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
+        }
+        catch (InterruptedException e)
+        {
+            throw new RuntimeException(e);
         }
     }
 

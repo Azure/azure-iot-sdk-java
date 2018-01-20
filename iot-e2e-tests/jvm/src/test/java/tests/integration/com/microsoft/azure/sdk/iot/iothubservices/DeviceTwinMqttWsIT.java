@@ -50,8 +50,9 @@ public class DeviceTwinMqttWsIT
     //Default Page Size for Query
     private static final Integer PAGE_SIZE = 2;
 
-    private static final String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
+    private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
+    private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
     // Constants used in for Testing
     private static final String PROPERTY_KEY = "Key";
@@ -234,7 +235,7 @@ public class DeviceTwinMqttWsIT
         Map<String, String> env = System.getenv();
         for (String envName : env.keySet())
         {
-            if (envName.equals(iotHubonnectionStringEnvVarName))
+            if (envName.equals(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME))
             {
                 iotHubConnectionString = env.get(envName);
             }
@@ -271,6 +272,14 @@ public class DeviceTwinMqttWsIT
     {
         tearDownTwin(deviceUnderTest);
         registryManager.removeDevice(deviceUnderTest.sCDeviceForRegistryManager.getDeviceId());
+        try
+        {
+            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
+        }
+        catch (InterruptedException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     private int readReportedProperties(DeviceState deviceState, String startsWithKey, String startsWithValue) throws IOException , IotHubException, InterruptedException

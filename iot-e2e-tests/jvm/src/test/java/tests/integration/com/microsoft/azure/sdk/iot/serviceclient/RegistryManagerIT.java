@@ -23,7 +23,7 @@ import static org.junit.Assert.*;
 
 public class RegistryManagerIT
 {
-    private static String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
+    private static String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
     private static String deviceId = "java-crud-e2e-test";
     private static RegistryManager registryManager;
@@ -35,13 +35,13 @@ public class RegistryManagerIT
     @BeforeClass
     public static void setUp() throws URISyntaxException, InvalidKeyException, StorageException, IOException
     {
-        if (System.getenv().containsKey(iotHubonnectionStringEnvVarName))
+        if (System.getenv().containsKey(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME))
         {
-            iotHubConnectionString = System.getenv().get(iotHubonnectionStringEnvVarName);
+            iotHubConnectionString = System.getenv().get(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         }
         else
         {
-            throw new IllegalArgumentException("Environment variable is not set: " + iotHubonnectionStringEnvVarName);
+            throw new IllegalArgumentException("Environment variable is not set: " + IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         }
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);

@@ -7,10 +7,7 @@ import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
@@ -42,13 +39,13 @@ public class TransportClientSendMessagesIT
 
     private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
+    private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
     private static RegistryManager registryManager;
 
     private static String hostName;
 
     private static ArrayList<String> clientConnectionStringArrayList = new ArrayList<>();
-    private ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
     protected static class multiplexRunnable implements Runnable
     {
@@ -157,10 +154,24 @@ public class TransportClientSendMessagesIT
         }
     }
 
+    @After
+    public void delayTests()
+    {
+        try
+        {
+            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
+        }
+        catch (InterruptedException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Test
     public void sendMessagesOverAmqps() throws URISyntaxException, IOException, InterruptedException
     {
         TransportClient transportClient = new TransportClient(AMQPS);
+        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
@@ -180,28 +191,25 @@ public class TransportClientSendMessagesIT
     @Test
     public void sendMessagesOverAmqpsMultithreaded() throws IOException, InterruptedException, URISyntaxException
     {
-        List<Thread> threads = new ArrayList<>(clientArrayList.size());
-        CountDownLatch cdl = new CountDownLatch(clientArrayList.size());
-
         TransportClient transportClient = new TransportClient(AMQPS);
+        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
+        CountDownLatch cdl = new CountDownLatch(clientArrayList.size());
 
         transportClient.open();
 
-        Integer count = 0;
         for (int i = 0; i < clientArrayList.size(); i++)
         {
-            Thread thread = new Thread(new TransportClientSendMessagesIT.multiplexRunnable(deviceListAmqps[i], clientArrayList.get(i), NUM_MESSAGES_PER_CONNECTION, NUM_KEYS_PER_MESSAGE, SEND_TIMEOUT_MILLISECONDS, cdl));
-            thread.start();
-            threads.add(thread);
-            count++;
-
-            cdl.await();
+            new Thread(
+                    new TransportClientSendMessagesIT.multiplexRunnable(
+                            deviceListAmqps[i], clientArrayList.get(i), NUM_MESSAGES_PER_CONNECTION, NUM_KEYS_PER_MESSAGE, SEND_TIMEOUT_MILLISECONDS, cdl))
+                    .start();
         }
+        cdl.await();
 
         if(!succeed.get())
         {
@@ -213,6 +221,7 @@ public class TransportClientSendMessagesIT
     public void sendMessagesOverAmqpsWs() throws URISyntaxException, IOException, InterruptedException
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
+        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
@@ -232,28 +241,26 @@ public class TransportClientSendMessagesIT
     @Test
     public void sendMessagesOverAmqpsWsMultithreaded() throws IOException, InterruptedException, URISyntaxException
     {
-        List<Thread> threads = new ArrayList<>(clientArrayList.size());
-        CountDownLatch cdl = new CountDownLatch(clientArrayList.size());
-
         TransportClient transportClient = new TransportClient(AMQPS_WS);
+        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
+        CountDownLatch cdl = new CountDownLatch(clientArrayList.size());
+
         transportClient.open();
 
-        Integer count = 0;
         for (int i = 0; i < clientArrayList.size(); i++)
         {
-            Thread thread = new Thread(new TransportClientSendMessagesIT.multiplexRunnable(deviceListAmqps[i], clientArrayList.get(i), NUM_MESSAGES_PER_CONNECTION, NUM_KEYS_PER_MESSAGE, SEND_TIMEOUT_MILLISECONDS, cdl));
-            thread.start();
-            threads.add(thread);
-            count++;
-
-            cdl.await();
+            new Thread(
+                    new TransportClientSendMessagesIT.multiplexRunnable(
+                            deviceListAmqps[i], clientArrayList.get(i), NUM_MESSAGES_PER_CONNECTION, NUM_KEYS_PER_MESSAGE, SEND_TIMEOUT_MILLISECONDS, cdl))
+                    .start();
         }
+        cdl.await();
 
         if(!succeed.get())
         {

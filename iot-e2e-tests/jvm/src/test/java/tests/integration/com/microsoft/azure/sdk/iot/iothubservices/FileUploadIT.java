@@ -50,8 +50,9 @@ public class FileUploadIT
     private static final String REMOTE_FILE_NAME = "File";
     private static final String REMOTE_FILE_NAME_EXT = ".txt";
 
-    private static final String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
+    private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
+    private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
     // States of SDK
     private static RegistryManager registryManager;
@@ -125,7 +126,7 @@ public class FileUploadIT
         Map<String, String> env = System.getenv();
         for (String envName : env.keySet())
         {
-            if (envName.equals(iotHubonnectionStringEnvVarName))
+            if (envName.equals(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME))
             {
                 iotHubConnectionString = env.get(envName);
             }
@@ -180,6 +181,14 @@ public class FileUploadIT
     {
         fileUploadState = null;
         messageStates = null;
+        try
+        {
+            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
+        }
+        catch (InterruptedException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     @AfterClass

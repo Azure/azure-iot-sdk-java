@@ -6,10 +6,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
@@ -39,9 +36,9 @@ public class TransportClientReceiveMessagesIT
 
     private static String expectedCorrelationId = "1234";
     private static String expectedMessageId = "5678";
+    private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
     private static ArrayList<String> clientConnectionStringArrayList = new ArrayList<>();
-    private ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
     @BeforeClass
     public static void setUp() throws Exception
@@ -87,10 +84,24 @@ public class TransportClientReceiveMessagesIT
         }
     }
 
+    @After
+    public void delayTests()
+    {
+        try
+        {
+            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
+        }
+        catch (InterruptedException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Test
     public void receiveMessagesOverAmqpsIncludingProperties() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
+        final ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
@@ -118,6 +129,7 @@ public class TransportClientReceiveMessagesIT
     public void receiveMessagesOverAmqpWSIncludingProperties() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
+        final ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {

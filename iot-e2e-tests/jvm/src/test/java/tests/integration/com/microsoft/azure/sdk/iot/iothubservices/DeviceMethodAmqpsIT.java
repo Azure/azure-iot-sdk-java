@@ -14,10 +14,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
@@ -64,6 +61,7 @@ public class DeviceMethodAmqpsIT
     private static DeviceTestManager x509Device;
 
     private static final int NUMBER_INVOKES_PARALLEL = 10;
+    private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
     @BeforeClass
     public static void setUp() throws NoSuchAlgorithmException, IotHubException, IOException, URISyntaxException, InterruptedException
@@ -100,6 +98,19 @@ public class DeviceMethodAmqpsIT
         }
 
         x509Device.clearDevice();
+    }
+
+    @After
+    public void delayTests()
+    {
+        try
+        {
+            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
+        }
+        catch (InterruptedException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     protected static class RunnableInvoke implements Runnable

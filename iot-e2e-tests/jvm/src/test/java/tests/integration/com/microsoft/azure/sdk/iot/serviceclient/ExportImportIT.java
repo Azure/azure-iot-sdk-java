@@ -32,7 +32,7 @@ import java.util.*;
 @Ignore
 public class ExportImportIT
 {
-    private static String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
+    private static String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String storageAccountConnectionStringEnvVarName = "STORAGE_ACCOUNT_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
     private static String storageAccountConnectionString = "";
@@ -50,13 +50,13 @@ public class ExportImportIT
     {
         Map<String, String> env = System.getenv();
 
-        if (env.containsKey(iotHubonnectionStringEnvVarName))
+        if (env.containsKey(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME))
         {
-            iotHubConnectionString = env.get(iotHubonnectionStringEnvVarName);
+            iotHubConnectionString = env.get(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         }
         else
         {
-            throw new IllegalArgumentException("Environment variable is not set: " + iotHubonnectionStringEnvVarName);
+            throw new IllegalArgumentException("Environment variable is not set: " + IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         }
 
         if (env.containsKey(storageAccountConnectionStringEnvVarName))

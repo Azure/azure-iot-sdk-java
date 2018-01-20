@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,6 +35,7 @@ public class TransportClientDeviceMethodIT
     private static final int METHOD_NOT_DEFINED = 404;
     public static final String METHOD_NAME = "methodName";
     public static final String METHOD_PAYLOAD = "This is a good payload";
+    private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
     protected static class SampleDeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
     {
@@ -133,7 +135,6 @@ public class TransportClientDeviceMethodIT
     private static Device[] deviceListAmqps = new Device[MAX_DEVICE_MULTIPLEX];
 
     private static ArrayList<String> clientConnectionStringArrayList = new ArrayList<>();
-    private ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
     @BeforeClass
     public static void setUp() throws NoSuchAlgorithmException, IotHubException, IOException, URISyntaxException, InterruptedException
@@ -168,10 +169,24 @@ public class TransportClientDeviceMethodIT
         }
     }
 
+    @After
+    public void delayTests()
+    {
+        try
+        {
+            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
+        }
+        catch (InterruptedException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Test
     public void invokeMethodAMQPSSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
+        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
@@ -202,6 +217,7 @@ public class TransportClientDeviceMethodIT
     public void invokeMethodAMQPSInvokeParallelSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
+        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
@@ -242,6 +258,7 @@ public class TransportClientDeviceMethodIT
     public void invokeMethodAMQPSWSSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
+        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
@@ -272,6 +289,7 @@ public class TransportClientDeviceMethodIT
     public void invokeMethodAMQPSWSInvokeParallelSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
+        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {

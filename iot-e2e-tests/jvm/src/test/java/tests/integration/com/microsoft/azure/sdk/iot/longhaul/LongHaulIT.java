@@ -40,7 +40,7 @@ public class LongHaulIT
 
     public static class LongHaulMessageTests
     {
-        private static String iotHubonnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
+        private static String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
         private static String iotHubConnectionString = "";
 
         private static String longHaulDurationEnvVarName = "IOTHUB_DEVICE_LONGHAUL_DURATION_SECONDS";
@@ -71,7 +71,7 @@ public class LongHaulIT
             Map<String, String> env = System.getenv();
             for (String envName : env.keySet())
             {
-                if (envName.equals(iotHubonnectionStringEnvVarName))
+                if (envName.equals(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME))
                 {
                     iotHubConnectionString = env.get(envName);
                 }
