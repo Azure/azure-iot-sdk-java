@@ -100,9 +100,11 @@ public final class DeviceClient implements Closeable
     private static final String SET_SEND_INTERVAL = "SetSendInterval";
     private static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
     private static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
+    private static final String SET_DIAGNOSTIC_SAMPLING_PERCENTAGE = "SetDiagnosticSamplingPercentage";
 
     private DeviceClientConfig config;
     private DeviceIO deviceIO;
+    private DeviceClientDiagnostic deviceDiagnostic;
 
     private DeviceTwin deviceTwin;
     private DeviceMethod deviceMethod;
@@ -327,6 +329,9 @@ public final class DeviceClient implements Closeable
         this.transportClient = null;
         this.deviceIO = new DeviceIO(this.config, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS);
 
+        /* Codes_SRS_DEVICECLIENT_26_001: [The constructor shall initialize device client diagnostic] */
+        this.deviceDiagnostic = new DeviceClientDiagnostic();
+
         this.logger = new CustomLogger(this.getClass());
         logger.LogInfo("DeviceClient object is created successfully, method name is %s ", logger.getMethodName());
     }
@@ -464,6 +469,7 @@ public final class DeviceClient implements Closeable
      */
     public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext)
     {
+        deviceDiagnostic.addDiagnosticInfoIfNecessary(message);
         /* Codes_SRS_DEVICECLIENT_21_010: [The sendEventAsync shall asynchronously send the message using the deviceIO connection.] */
         /* Codes_SRS_DEVICECLIENT_21_011: [If starting to send via deviceIO is not successful, the sendEventAsync shall bypass the threw exception.] */
         /* Codes_SRS_DEVICECLIENT_12_001: [The function shall call deviceIO.sendEventAsync with the client's config parameter to enable multiplexing.] */
@@ -991,6 +997,21 @@ public final class DeviceClient implements Closeable
         }
     }
 
+    private void setOption_SetDiagnosticSamplingPercentage(Object value) {
+        logger.LogInfo("Setting DiagnosticSamplingPercentage as %s %%, method name is %s ", value, logger.getMethodName());
+
+        if (value != null) {
+            // Codes_SRS_DEVICECLIENT_26_002: ["SetDiagnosticSamplingPercentage" needs to have type int].
+            if (value instanceof Integer) {
+                this.deviceDiagnostic.setDiagSamplingPercentage((Integer)value);
+            } else {
+                throw new IllegalArgumentException("value is not integer = " + value);
+            }
+        } else {
+            throw new IllegalArgumentException("value cannot be null");
+        }
+    }
+
     /**
      * Sets a runtime option identified by parameter {@code optionName}
      * to {@code value}.
@@ -1143,6 +1164,12 @@ public final class DeviceClient implements Closeable
                         //Codes__SRS_DEVICECLIENT_25_023: ["SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT/AMQPS_WS/MQTT_WS.]
                         setOption_SetSASTokenExpiryTime(value);
                     }
+                    break;
+                }
+                // Codes_SRS_DEVICECLIENT_26_003: ["SetDiagnosticSamplingPercentage" - Percentage to specify diagnostic sampling rate.]
+                case SET_DIAGNOSTIC_SAMPLING_PERCENTAGE:
+                {
+                    setOption_SetDiagnosticSamplingPercentage(value);
                     break;
                 }
                 default:

@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 
 public class MqttMessaging extends Mqtt
 {
@@ -111,6 +112,24 @@ public class MqttMessaging extends Mqtt
             stringBuilder.append(message.getTo());
 
             separatorNeeded = true;
+        }
+
+        if (message.getDiagnosticPropertyData() != null) {
+            // Codes_SRS_MQTTMESSAGING_26_001: [The function shall add diagnostic information as MQTT system properties.]
+            if (separatorNeeded) {
+                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+            }
+
+            stringBuilder.append(DIAGNOSTIC_ID);
+            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+            stringBuilder.append(message.getDiagnosticPropertyData().getDiagnosticId());
+
+            separatorNeeded = true;
+
+            stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+            stringBuilder.append(DIAGNOSTIC_CONTEXT);
+            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+            stringBuilder.append(URLEncoder.encode(message.getDiagnosticPropertyData().getCorrelationContext(), "UTF-8"));
         }
 
         for(MessageProperty property : message.getProperties())

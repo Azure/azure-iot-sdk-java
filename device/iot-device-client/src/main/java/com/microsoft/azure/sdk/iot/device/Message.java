@@ -133,6 +133,9 @@ public class Message
     private ByteArrayInputStream bodyStream;
     private CustomLogger logger;
 
+    // Diagnostic data attached to the message
+    private DiagnosticPropertyData diagnosticPropertyData;
+
     // ----- Constructors -----
 
     /**
@@ -304,6 +307,7 @@ public class Message
         this.ack = FeedbackStatusCodeEnum.none;
         this.properties = new ArrayList<>();
         this.logger = new CustomLogger(this.getClass());
+        this.diagnosticPropertyData = null;
     }
 
     /**
@@ -457,6 +461,30 @@ public class Message
     }
 
     /**
+     * Getter for the diagnostic property data
+     * @return the diagnostic property data
+     */
+    public DiagnosticPropertyData getDiagnosticPropertyData()
+    {
+        // Codes_SRS_MESSAGE_35_001: [The function shall return the message's diagnostic property data.]
+        return diagnosticPropertyData;
+    }
+
+    /**
+     * Setter for the ediagnostic property data
+     * @param diagnosticPropertyData The diagnostic property data
+     */
+    public void setDiagnosticPropertyData(DiagnosticPropertyData diagnosticPropertyData)
+    {
+        // Codes_SRS_MESSAGE_35_002: [The function shall set the message's diagnostic property data.]
+        if (diagnosticPropertyData == null)
+        {
+            throw new IllegalArgumentException("diagnosticPropertyData cannot be 'null'.");
+        }
+        this.diagnosticPropertyData = diagnosticPropertyData;
+    }
+
+    /*
      * Getter for the iotHubConnectionString property
      * @return the iotHubConnectionString value
      */

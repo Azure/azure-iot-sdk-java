@@ -3,6 +3,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.DiagnosticPropertyData;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
@@ -294,12 +295,14 @@ public class MessageTest
     // Tests_SRS_MESSAGE_34_048: [The function shall set the message's message type.]
     // Tests_SRS_MESSAGE_34_046: [The function shall set the message's correlation ID to the provided value.]
     // Tests_SRS_MESSAGE_34_044: [The function shall set the message's message ID to the provided value.]
+    // Tests_SRS_MESSAGE_34_050: [The function shall set the message's diagnosticPropertyData value.]
     // Tests_SRS_MESSAGE_34_049: [The function shall return the message's message type.]
     // Tests_SRS_MESSAGE_34_045: [The function shall return the message's correlation ID.]
     // Tests_SRS_MESSAGE_34_043: [The function shall return the message's message Id.]
     // Tests_SRS_MESSAGE_34_039: [The function shall return the message's DeliveryAcknowledgement.]
     // Tests_SRS_MESSAGE_34_037: [The function shall return the message's user ID.]
     // Tests_SRS_MESSAGE_34_041: [The function shall return the message's To value.]
+    // Tests_SRS_MESSAGE_34_051: [The function shall return the message's diagnosticPropertyData value.]
     // Tests_SRS_MESSAGE_12_001: [The function shall return the message's iotHubConnectionString object.]
     // Tests_SRS_MESSAGE_12_002: [The function shall set the message's iotHubConnectionString object to the provided value.]
     @Test
@@ -310,6 +313,9 @@ public class MessageTest
         MessageType type = MessageType.DEVICE_TELEMETRY;
         String messageId = "1234";
         String correlationId = "6789";
+        String diagnosticId = "diag";
+        String diagnosticCreationTimeUtc = "0000000000.000";
+        DiagnosticPropertyData diagnosticPropertyData = new DiagnosticPropertyData(diagnosticId, diagnosticCreationTimeUtc);
         final String iotHubHostname = "test.iothubhostname";
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
@@ -326,12 +332,14 @@ public class MessageTest
         msg.setMessageType(type);
         msg.setCorrelationId(correlationId);
         msg.setMessageId(messageId);
+        msg.setDiagnosticPropertyData(diagnosticPropertyData);
         msg.setIotHubConnectionString(iotHubConnectionString);
 
         //assert
         assertEquals(type, msg.getMessageType());
         assertEquals(correlationId, msg.getCorrelationId());
         assertEquals(messageId, msg.getMessageId());
+        assertEquals(diagnosticPropertyData,msg.getDiagnosticPropertyData());
         assertEquals(iotHubConnectionString, msg.getIotHubConnectionString());
 
         assertNull(msg.getTo());

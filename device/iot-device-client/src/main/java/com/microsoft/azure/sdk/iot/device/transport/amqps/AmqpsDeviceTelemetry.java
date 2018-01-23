@@ -10,6 +10,8 @@ import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.amqp.messaging.Section;
+import org.apache.qpid.proton.amqp.messaging.MessageAnnotations;
+import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.engine.Link;
 import org.apache.qpid.proton.engine.Session;
 import org.apache.qpid.proton.message.impl.MessageImpl;
@@ -26,6 +28,9 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
 
     private final String SENDER_LINK_TAG_PREFIX = "sender_link_telemetry-";
     private final String RECEIVER_LINK_TAG_PREFIX = "receiver_link_telemetry-";
+    
+    private final String AMQP_DIAGNOSTIC_ID_KEY = "Diagnostic-Id";
+    private final String AMQP_DIAGNOSTIC_CONTEXT_KEY = "Correlation-Context";
 
     private DeviceClientConfig deviceClientConfig;
 
@@ -307,6 +312,14 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
 
             ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
             outgoingMessage.setApplicationProperties(applicationProperties);
+        }
+
+        if (message.getDiagnosticPropertyData() != null) {
+            // Codes_SRS_AMQPSDEVICETELEMETRY_13_001: [The function shall add diagnostic information as AMQP message annotation.]
+            Map<Symbol, Object> annotationMap = new HashMap<>();
+            annotationMap.put(Symbol.getSymbol(AMQP_DIAGNOSTIC_ID_KEY), message.getDiagnosticPropertyData().getDiagnosticId());
+            annotationMap.put(Symbol.getSymbol(AMQP_DIAGNOSTIC_CONTEXT_KEY), message.getDiagnosticPropertyData().getCorrelationContext());
+            outgoingMessage.setMessageAnnotations(new MessageAnnotations(annotationMap));
         }
 
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_023: [The function shall set the proton message body using the IotHubTransportMessage body.]

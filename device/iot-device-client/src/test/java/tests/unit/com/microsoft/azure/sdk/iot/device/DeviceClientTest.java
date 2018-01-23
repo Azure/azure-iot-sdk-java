@@ -176,6 +176,8 @@ public class DeviceClientTest
                 times = 1;
                 Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
                 times = 1;
+                new DeviceClientDiagnostic();
+                times = 1;
 
                 // Tests_SRS_DEVICECLIENT_12_012: [The constructor shall set the connection type to SINGLE_CLIENT.]
                 IoTHubConnectionType ioTHubConnectionType = Deencapsulation.getField(client, "ioTHubConnectionType");
@@ -666,6 +668,36 @@ public class DeviceClientTest
         client.closeNow();
     }
 
+    /* Tests_SRS_DEVICECLIENT_26_001: [The sendEventAsync shall add diagnostic property.] */
+    @Test
+    public void sendEventShallAddDiagnosticInfo(
+            @Mocked final Message mockMessage,
+            @Mocked final IotHubEventCallback mockCallback,
+            @Mocked final DeviceClientDiagnostic mockDiagnostic)
+            throws IOException, URISyntaxException
+    {
+        // arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+        final Map<String, Object> context = new HashMap<>();
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+        client.setOption("SetDiagnosticSamplingPercentage",100);
+        // act
+        client.sendEventAsync(mockMessage, mockCallback, context);
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockDiagnostic.addDiagnosticInfoIfNecessary(mockMessage);
+                times = 1;
+            }
+        };
+    }
+
+    /* Tests_SRS_DEVICECLIENT_21_011: [If starting to send via deviceIO is not successful, the sendEventAsync shall bypass the threw exception.] */
     // Tests_SRS_DEVICECLIENT_12_021: [If the client has been initialized to use TransportClient and the TransportClient is not opened yet the function shall do nothing.]
     @Test
     public void closeNowUseTransportClientAndCalledBeforeTransportClientOpenedDoNothing() throws URISyntaxException, IOException
@@ -2535,6 +2567,78 @@ public class DeviceClientTest
         client.setOption("SetMinimumPollingInterval", "thisIsNotALong");
     }
 
+    /* Tests_SRS_DEVICECLIENT_26_002: [setDiagSamplingPercentage will be called when option SetDiagnosticSamplingPercentage is set.] */
+    @Test
+    public void setOptionDiagnosticSamplingPercentageSucceeds(@Mocked final DeviceClientDiagnostic mockDeviceDiagnostic)
+            throws URISyntaxException
+    {
+        // arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+        DeviceClient client = new DeviceClient(connString, protocol);
+        final Integer value = 30;
+
+        // act
+        client.setOption("SetDiagnosticSamplingPercentage", value);
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockDeviceDiagnostic.setDiagSamplingPercentage(value);
+                times = 1;
+            }
+        };
+    }
+
+    /* Tests_SRS_DEVICECLIENT_26_003: [Set SetDiagnosticSamplingPercentage with non-int value will throw IllegalArgumentException.] */
+    @Test(expected = IllegalArgumentException.class)
+    public void setOptionDiagnosticSamplingPercentageWithStringInsteadOfIntegerFails()
+            throws IOException, URISyntaxException
+    {
+        // arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+        final Map<String, Object> context = new HashMap<>();
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        // act
+        client.setOption("SetDiagnosticSamplingPercentage", "101");
+    }
+
+    /* Tests_SRS_DEVICECLIENT_26_004: [Set SetDiagnosticSamplingPercentage with null value will throw IllegalArgumentException.] */
+    @Test(expected = IllegalArgumentException.class)
+    public void setOptionDiagnosticSamplingPercentageWithNullFails()
+            throws IOException, URISyntaxException
+    {
+        // arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+        final Map<String, Object> context = new HashMap<>();
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        // act
+        client.setOption("SetDiagnosticSamplingPercentage", null);
+    }
+
+    /* Tests_SRS_DEVICECLIENT_26_005: [Set SetDiagnosticSamplingPercentage with value out of range [0,100] will throw IllegalArgumentException.] */
+    @Test(expected = IllegalArgumentException.class)
+    public void setOptionDiagnosticSamplingPercentageWithIllegalValueFails()
+            throws IOException, URISyntaxException
+    {
+        // arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+        final Map<String, Object> context = new HashMap<>();
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        // act
+        client.setOption("SetDiagnosticSamplingPercentage", 101);
+    }
 
     //Tests_SRS_DEVICECLIENT_34_055: [If the provided connection string contains an expired SAS token, a SecurityException shall be thrown.]
     @Test (expected = SecurityException.class)
