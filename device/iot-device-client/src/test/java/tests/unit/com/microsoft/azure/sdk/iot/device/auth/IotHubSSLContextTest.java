@@ -9,6 +9,7 @@ import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.util.io.pem.PemObject;
@@ -421,6 +422,7 @@ public class IotHubSSLContextTest
     private static final String expectedPublicKeyCertificateString = "some public key certificate string";
 
     @Mocked PEMKeyPair mockedPEMKeyPair;
+    @Mocked PrivateKeyInfo mockedPrivateKeyInfo;
     @Mocked PEMParser mockedPEMParser;
     @Mocked PemObject mockedPemObject;
     @Mocked PemReader mockedPemReader;
@@ -446,7 +448,36 @@ public class IotHubSSLContextTest
                 result = mockedPEMKeyPair;
 
                 //Doing this instead of just mocking JCA converter because trying to mock the JCA converter causes strange errors to be thrown.
-                Deencapsulation.invoke(IotHubSSLContext.class, "getPrivateKeyFromPEMKeyPair", new Class[] {PEMKeyPair.class}, mockedPEMKeyPair);
+                Deencapsulation.invoke(IotHubSSLContext.class, "getPrivateKey", new Class[] {Object.class}, mockedPEMKeyPair);
+                result = mockedPrivateKey;
+            }
+        };
+
+        //act
+        Key actualPrivateKey = Deencapsulation.invoke(IotHubSSLContext.class, "parsePrivateKey", new Class[] {String.class}, expectedPrivateKeyString);
+
+        //assert
+        assertEquals(mockedPrivateKey, actualPrivateKey);
+    }
+
+    @Test
+    public void parsePrivateKeyType2Success() throws CertificateException, IOException
+    {
+        //arrange
+        new NonStrictExpectations(IotHubSSLContext.class)
+        {
+            {
+                new StringReader(expectedPrivateKeyString);
+                result = mockedStringReader;
+
+                new PEMParser(mockedStringReader);
+                result = mockedPEMParser;
+
+                mockedPEMParser.readObject();
+                result = mockedPrivateKeyInfo;
+
+                //Doing this instead of just mocking JCA converter because trying to mock the JCA converter causes strange errors to be thrown.
+                Deencapsulation.invoke(IotHubSSLContext.class, "getPrivateKey", new Class[] {Object.class}, mockedPrivateKeyInfo);
                 result = mockedPrivateKey;
             }
         };

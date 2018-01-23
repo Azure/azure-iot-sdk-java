@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -55,11 +56,6 @@ public class SendMessagesIT
     private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
     private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
-
-    private static final String PUBLIC_KEY_CERTIFICATE_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_CERT_BASE64";
-    private static final String PRIVATE_KEY_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_PRIVATE_KEY_BASE64";
-    private static final String X509_THUMBPRINT_ENV_VAR_NAME = "IOTHUB_E2E_X509_THUMBPRINT";
-
     private static String publicKeyCert;
     private static String privateKey;
     private static String x509Thumbprint;
@@ -186,15 +182,10 @@ public class SendMessagesIT
     public static void setUp() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        String privateKeyBase64Encoded = Tools.retrieveEnvironmentVariableValue(PRIVATE_KEY_BASE64_ENCODED_ENV_VAR_NAME);
-        String publicKeyCertBase64Encoded = Tools.retrieveEnvironmentVariableValue(PUBLIC_KEY_CERTIFICATE_BASE64_ENCODED_ENV_VAR_NAME);
-        x509Thumbprint = Tools.retrieveEnvironmentVariableValue(X509_THUMBPRINT_ENV_VAR_NAME);
-
-        byte[] publicCertBytes = Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes());
-        publicKeyCert = new String(publicCertBytes);
-
-        byte[] privateKeyBytes = Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes());
-        privateKey = new String(privateKeyBytes);
+        X509Cert cert = new X509Cert(0,false, "TestLeaf", "TestRoot");
+        privateKey =  cert.getPrivateKeyLeafPem();
+        publicKeyCert = cert.getPublicCertLeafPem();
+        x509Thumbprint = cert.getThumbPrintLeaf();
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         String uuid = UUID.randomUUID().toString();

@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import sun.security.tools.keytool.CertAndKeyGen;
 import sun.security.x509.*;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
@@ -202,5 +203,14 @@ public class X509Cert
             intermediatesPem.add(pem.toString());
         }
         return intermediatesPem;
+    }
+
+    public String getThumbPrintLeaf() throws NoSuchAlgorithmException, CertificateEncodingException
+    {
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        byte[] der = this.leaf.certificate.getEncoded();
+        md.update(der);
+        byte[] digest = md.digest();
+        return DatatypeConverter.printHexBinary(digest);
     }
 }

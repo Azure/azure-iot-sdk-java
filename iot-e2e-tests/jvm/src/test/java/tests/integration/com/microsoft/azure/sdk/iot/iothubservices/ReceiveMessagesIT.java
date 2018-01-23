@@ -19,6 +19,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,10 +43,6 @@ public class ReceiveMessagesIT
     private static final int MAX_COMMANDS_TO_SEND = 5; // maximum commands to be sent in a loop
     private static final List messageIdListStoredOnC2DSend = new ArrayList(); // store the message id list on sending C2D commands using service client
     private static final List messageIdListStoredOnReceive = new ArrayList(); // store the message id list on receiving C2D commands using device client
-
-    private static final String PUBLIC_KEY_CERTIFICATE_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_CERT_BASE64";
-    private static final String PRIVATE_KEY_BASE64_ENCODED_ENV_VAR_NAME = "IOTHUB_E2E_X509_PRIVATE_KEY_BASE64";
-    private static final String X509_THUMBPRINT_ENV_VAR_NAME = "IOTHUB_E2E_X509_THUMBPRINT";
 
     private static String publicKeyCert;
     private static String privateKey;
@@ -74,16 +71,10 @@ public class ReceiveMessagesIT
     public static void setUp() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        String privateKeyBase64Encoded = Tools.retrieveEnvironmentVariableValue(PRIVATE_KEY_BASE64_ENCODED_ENV_VAR_NAME);
-        String publicKeyCertBase64Encoded = Tools.retrieveEnvironmentVariableValue(PUBLIC_KEY_CERTIFICATE_BASE64_ENCODED_ENV_VAR_NAME);
-        x509Thumbprint = Tools.retrieveEnvironmentVariableValue(X509_THUMBPRINT_ENV_VAR_NAME);
-
-        byte[] publicCertBytes = Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes());
-        publicKeyCert = new String(publicCertBytes);
-
-        byte[] privateKeyBytes = Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes());
-        privateKey = new String(privateKeyBytes);
-
+        X509Cert cert = new X509Cert(0, false, "TestLeaf", "TestRoot");
+        privateKey =  cert.getPrivateKeyLeafPem();
+        publicKeyCert = cert.getPublicCertLeafPem();
+        x509Thumbprint = cert.getThumbPrintLeaf();
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         String uuid = UUID.randomUUID().toString();
         String deviceIdHttps = "java-device-client-e2e-test-https".concat("-" + uuid);
