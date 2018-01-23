@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
+import com.microsoft.azure.sdk.iot.deps.twin.*;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -94,15 +94,15 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_011: [** The function shall deserialize the payload by calling updateTwin Api on the twin object **]**
          */
-        device.getTwinParser().updateTwin(twin);
+        TwinState twinState = TwinState.createFromTwinJson(twin);
 
         /*
         **Codes_SRS_DEVICETWIN_25_012: [** The function shall set eTag, tags, desired property map, reported property map on the user device **]**
          */
-        device.setETag(device.getTwinParser().getETag());
-        device.setTags(device.getTwinParser().getTagsMap());
-        device.setDesiredProperties(device.getTwinParser().getDesiredPropertyMap());
-        device.setReportedProperties(device.getTwinParser().getReportedPropertyMap());
+        device.setETag(twinState.getETag());
+        device.setTags(twinState.getTags());
+        device.setDesiredProperties(twinState.getDesiredProperty());
+        device.setReportedProperties(twinState.getReportedProperty());
     }
 
     /**
@@ -139,15 +139,8 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_015: [** The function shall serialize the twin map by calling updateTwin Api on the twin object for the device provided by the user**]**
          */
-        String twinJson = device.getTwinParser().updateTwin(device.getDesiredMap(), null, device.getTagsMap());
-
-        if (twinJson == null || twinJson.isEmpty())
-        {
-            /*
-            **Codes_SRS_DEVICETWIN_25_046: [** The function shall throw IOException if updateTwin Api call returned an empty or null json**]**
-             */
-            throw new IOException("Serializer cannot return null json to update");
-        }
+        TwinState twinState = new TwinState(device.getTagsMap(), device.getDesiredMap(), null);
+        String twinJson = twinState.toJsonElement().toString();
 
         /*
         **Codes_SRS_DEVICETWIN_25_016: [** The function shall create a new SAS token **]**
@@ -200,9 +193,10 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_023: [** The function shall serialize the desired properties map by calling updateDesiredProperty Api on the twin object for the device provided by the user**]**
          */
-        String desiredJson = device.getTwinParser().updateDesiredProperty(device.getDesiredMap());
+        TwinState twinState = new TwinState(null, device.getDesiredMap(), null);
+        String twinJson = twinState.toJsonElement().toString();
 
-        if (desiredJson == null)
+        if (twinJson == null)
         {
             return;
         }
@@ -263,16 +257,8 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_031: [** The function shall serialize the desired properties map by calling resetDesiredProperty Api on the twin object for the device provided by the user**]**
          */
-        String tags = device.getTwinParser().resetDesiredProperty(device.getDesiredMap());
-
-        if (tags == null || tags.length() == 0)
-        {
-            /*
-             *Codes_SRS_DEVICETWIN_25_045: [** If resetDesiredProperty call returns null or empty string then this method shall throw IOException**]**
-             */
-            throw new IOException("Serializer cannot return null or empty string");
-
-        }
+        TwinState twinState = new TwinState(null, device.getDesiredMap(), null);
+        String twinJson = twinState.toJsonElement().toString();
 
         throw new UnsupportedOperationException();
 
@@ -328,15 +314,8 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_039: [** The function shall serialize the tags map by calling resetTags Api on the twin object for the device provided by the user**]**
          */
-        String tags = device.getTwinParser().resetTags(device.getTagsMap());
-
-        if (tags == null || tags.length() == 0)
-        {
-            /*
-             **Codes_SRS_DEVICETWIN_25_046: [** If resetTags call returns null or empty string then this method shall throw IOException**]**
-             */
-            throw new IOException("Serializer cannot return null or empty");
-        }
+        TwinState twinState = new TwinState(device.getTagsMap(), null, null);
+        String twinJson = twinState.toJsonElement().toString();
 
         /*
         **Codes_SRS_DEVICETWIN_25_040: [** The function shall create a new SAS token **]**
@@ -613,16 +592,14 @@ public class DeviceTwin
 
     private DeviceTwinDevice jsonToDeviceTwinDevice(String json) throws IOException
     {
-        TwinParser twinParser = new TwinParser();
-        twinParser.enableTags();
-        twinParser.updateTwin(json);
+        TwinState twinState = TwinState.createFromTwinJson(json);
 
-        DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(twinParser.getDeviceId());
-        deviceTwinDevice.setVersion(twinParser.getVersion());
-        deviceTwinDevice.setETag(twinParser.getETag());
-        deviceTwinDevice.setTags(twinParser.getTagsMap());
-        deviceTwinDevice.setDesiredProperties(twinParser.getDesiredPropertyMap());
-        deviceTwinDevice.setReportedProperties(twinParser.getReportedPropertyMap());
+        DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(twinState.getDeviceId());
+        deviceTwinDevice.setVersion(twinState.getVersion());
+        deviceTwinDevice.setETag(twinState.getETag());
+        deviceTwinDevice.setTags(twinState.getTags());
+        deviceTwinDevice.setDesiredProperties(twinState.getDesiredProperty());
+        deviceTwinDevice.setReportedProperties(twinState.getReportedProperty());
 
         return deviceTwinDevice;
     }

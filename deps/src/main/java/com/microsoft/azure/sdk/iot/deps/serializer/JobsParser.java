@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -118,7 +119,7 @@ public class JobsParser
      * @throws IllegalArgumentException if one of the parameter is not valid.
      */
     public JobsParser(
-            String jobId, TwinParser updateTwin,
+            String jobId, TwinState updateTwin,
             String queryCondition, Date startTime, long maxExecutionTimeInSeconds)
             throws IllegalArgumentException
     {

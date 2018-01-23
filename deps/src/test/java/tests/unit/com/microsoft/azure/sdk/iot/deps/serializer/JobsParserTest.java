@@ -5,7 +5,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import mockit.Deencapsulation;
 import org.junit.Test;
 import tests.unit.com.microsoft.azure.sdk.iot.deps.Helpers;
@@ -33,16 +33,15 @@ public class JobsParserTest
     }
 
 
-    private TwinParser makeTwinSample()
+    private TwinState makeTwinSample()
     {
-        TwinParser twinParser = new TwinParser();
-        twinParser.enableTags();
-        twinParser.updateTwin("{\"tags\":{" +
-                "\"tag1\":{\"KeyChar\":\"c\",\"KeyBool\":true,\"keyString\":\"value1\",\"keyEnum\":\"val1\",\"keyDouble\":1234.456}}," +
+        TwinState twinState = TwinState.createFromTwinJson(
+                "{\"tags\":{" +
+                    "\"tag1\":{\"KeyChar\":\"c\",\"KeyBool\":true,\"keyString\":\"value1\",\"keyEnum\":\"val1\",\"keyDouble\":1234.456}}," +
                 "\"properties\":{" +
-                "\"desired\":{\"key1\":\"value1\",\"key2\":1234,\"key3\":\"value3\"}," +
-                "\"reported\":{\"key1\":\"value1\",\"key3\":\"value3\"}}}");
-        return twinParser;
+                    "\"desired\":{\"key1\":\"value1\",\"key2\":1234,\"key3\":\"value3\"}," +
+                    "\"reported\":{\"key1\":\"value1\",\"key3\":\"value3\"}}}");
+        return twinState;
     }
 
     /* Tests_SRS_JOBSPARSER_21_001: [The constructor shall evaluate and store the commons parameters using the internal function commonFields.] */
@@ -276,10 +275,10 @@ public class JobsParserTest
         String queryCondition = "testDeviceId";
         Date startTime = new Date();
         long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = makeTwinSample();
+        TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
+        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         assertEquals(jobId, Deencapsulation.getField(jobsParser, "jobId"));
@@ -297,10 +296,10 @@ public class JobsParserTest
         String queryCondition = "testDeviceId";
         Date startTime = new Date();
         long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = makeTwinSample();
+        TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
+        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         Helpers.assertDateWithError(startTime, (String)Deencapsulation.getField(jobsParser, "startTime"));
@@ -316,10 +315,10 @@ public class JobsParserTest
         String queryCondition = "testDeviceId";
         Date startTime = new Date();
         long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = makeTwinSample();
+        TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
+        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
@@ -332,10 +331,10 @@ public class JobsParserTest
         String queryCondition = "testDeviceId";
         Date startTime = new Date();
         long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = makeTwinSample();
+        TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
+        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
@@ -348,10 +347,10 @@ public class JobsParserTest
         String queryCondition = "testDeviceId";
         Date startTime = new Date();
         long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = makeTwinSample();
+        TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
+        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
@@ -364,10 +363,10 @@ public class JobsParserTest
         String queryCondition = "testDeviceId";
         Date startTime = new Date();
         long maxExecutionTimeInSeconds = -10L;
-        TwinParser twinParser = makeTwinSample();
+        TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
+        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
@@ -380,10 +379,10 @@ public class JobsParserTest
         String queryCondition = "testDeviceId";
         Date startTime = null;
         long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = makeTwinSample();
+        TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
+        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_009: [The constructor shall store the JsonElement for the updateTwin.] */
@@ -395,13 +394,13 @@ public class JobsParserTest
         String queryCondition = "testDeviceId";
         Date startTime = new Date();
         long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = makeTwinSample();
+        TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
+        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
-        Helpers.assertJson(twinParser.toJsonElement().toString(), Deencapsulation.getField(jobsParser, "updateTwin").toString());
+        Helpers.assertJson(twinState.toJsonElement().toString(), Deencapsulation.getField(jobsParser, "updateTwin").toString());
     }
 
     /* Tests_SRS_JOBSPARSER_21_010: [If the updateTwin is null, the constructor shall throws IllegalArgumentException.] */
@@ -413,10 +412,10 @@ public class JobsParserTest
         String queryCondition = "testDeviceId";
         Date startTime = new Date();
         long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = null;
+        TwinState twinState = null;
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
+        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_011: [The constructor shall set the jobType as scheduleUpdateTwin.] */
@@ -428,10 +427,10 @@ public class JobsParserTest
         String queryCondition = "testDeviceId";
         Date startTime = new Date();
         long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = makeTwinSample();
+        TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
+        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         assertEquals("scheduleUpdateTwin", Deencapsulation.getField(jobsParser, "jobType"));
@@ -446,10 +445,10 @@ public class JobsParserTest
         String queryCondition = "testDeviceId";
         Date startTime = new Date();
         long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = makeTwinSample();
+        TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
+        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         assertNull(Deencapsulation.getField(jobsParser, "cloudToDeviceMethod"));
@@ -464,14 +463,14 @@ public class JobsParserTest
         String queryCondition = "testDeviceId";
         Date startTime = new Date();
         long maxExecutionTimeInSeconds = 10L;
-        TwinParser twinParser = makeTwinSample();
-        JobsParser jobsParser= new JobsParser(jobId, twinParser, queryCondition, startTime, maxExecutionTimeInSeconds);
+        TwinState twinState = makeTwinSample();
+        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         String expectedJson =
                 "{" +
                         "\"jobId\":\"" + jobId + "\"," +
                         "\"type\":\"scheduleUpdateTwin\"," +
-                        "\"updateTwin\":" + twinParser.toJson() + "," +
+                        "\"updateTwin\":" + twinState.toJsonElement().toString() + "," +
                         "\"queryCondition\":\"" + queryCondition + "\"," +
                         "\"startTime\":\"" + Helpers.formatUTC(startTime) + "\"," +
                         "\"maxExecutionTimeInSeconds\":" + maxExecutionTimeInSeconds +

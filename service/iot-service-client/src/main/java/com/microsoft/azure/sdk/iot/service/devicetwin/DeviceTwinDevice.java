@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,10 +20,9 @@ public class DeviceTwinDevice
     private String deviceId;
     private String eTag;
     private Integer version;
-    private Map<String, Object> tag = null;
-    private Map<String, Object> reportedProperties = null;
-    private Map<String, Object> desiredProperties = null;
-    private TwinParser twinParser = null;
+    private TwinCollection tag = null;
+    private TwinCollection reportedProperties = null;
+    private TwinCollection desiredProperties = null;
 
     /**
      * Constructor to create instance for a device
@@ -36,8 +35,6 @@ public class DeviceTwinDevice
         this.deviceId = null;
         this.eTag = null;
         this.version = null;
-        this.twinParser = new TwinParser();
-        this.twinParser.enableTags();
     }
 
     /**
@@ -245,7 +242,7 @@ public class DeviceTwinDevice
      *
      * @param reportedProperties A map of validated key and value pairs for reported properties
      */
-    protected void setReportedProperties(Map<String, Object> reportedProperties)
+    protected void setReportedProperties(TwinCollection reportedProperties)
     {
         /*
         **Codes_SRS_DEVICETWINDEVICE_25_022: [** This method shall save the reportedProperties map**]**
@@ -258,7 +255,7 @@ public class DeviceTwinDevice
      *
      * @param desiredProperties A map of validated key and value pairs for desired properties
      */
-    protected void setDesiredProperties(Map<String, Object> desiredProperties)
+    protected void setDesiredProperties(TwinCollection desiredProperties)
     {
         /*
         **Codes_SRS_DEVICETWINDEVICE_25_023: [** This method shall save the desiredProperties map**]**
@@ -271,7 +268,7 @@ public class DeviceTwinDevice
      *
      * @param tag A map of validated key and value pairs for tag
      */
-    protected void setTags(Map<String, Object> tag)
+    protected void setTags(TwinCollection tag)
     {
         /*
         **Codes_SRS_DEVICETWINDEVICE_25_024: [** This method shall save the tags map**]**
@@ -284,7 +281,7 @@ public class DeviceTwinDevice
      *
      * @return  A map of validated key and value pairs for tag
      */
-    protected Map<String, Object> getTagsMap()
+    protected TwinCollection getTagsMap()
     {
         /*
         **Codes_SRS_DEVICETWINDEVICE_25_025: [** This method shall return the tags map**]**
@@ -297,7 +294,7 @@ public class DeviceTwinDevice
      *
      * @return  A map of validated key and value pairs for desired properties
      */
-    protected Map<String, Object> getDesiredMap()
+    protected TwinCollection getDesiredMap()
     {
         /*
         **Codes_SRS_DEVICETWINDEVICE_25_027: [** This method shall return the desiredProperties map**]**
@@ -310,25 +307,12 @@ public class DeviceTwinDevice
      *
      * @return  A map of validated key and value pairs for reported properties
      */
-    protected Map<String, Object> getReportedMap()
+    protected TwinCollection getReportedMap()
     {
         /*
         **Codes_SRS_DEVICETWINDEVICE_25_026: [** This method shall return the reportedProperties map**]**
          */
         return this.reportedProperties;
-    }
-
-    /**
-     * Getter for the twin serializer object for this device
-     *
-     * @return  An object for twin serializer for this device
-     */
-    protected TwinParser getTwinParser()
-    {
-        /*
-        **Codes_SRS_DEVICETWINDEVICE_25_028: [** This method shall return the twinParser for this device**]**
-         */
-        return twinParser;
     }
 
     /**
@@ -419,7 +403,7 @@ public class DeviceTwinDevice
         return thisDeviceDesProp.toString();
     }
 
-    private Set<Pair> mapToSet(Map<String, Object> map)
+    private Set<Pair> mapToSet(TwinCollection map)
     {
         Set<Pair> setPair = new HashSet<>();
 
@@ -435,9 +419,9 @@ public class DeviceTwinDevice
 
     }
 
-    private Map<String, Object> setToMap(Set<Pair> set)
+    private TwinCollection setToMap(Set<Pair> set)
     {
-        Map<String, Object> map = new HashMap<>();
+        TwinCollection map = new TwinCollection();
 
         if (set != null)
         {

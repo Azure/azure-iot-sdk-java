@@ -6,7 +6,8 @@
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
@@ -51,7 +52,7 @@ public class DeviceTwinTest
     IotHubExceptionManager mockedExceptionManager;
 
     @Mocked
-    TwinParser mockedTwinParser;
+    TwinState mockedTwinState;
 
     @Mocked
     Query mockedQuery;
@@ -180,14 +181,14 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-        Map<String, Object> testMap = new HashMap<>();
+        TwinCollection testMap = new TwinCollection();
         new NonStrictExpectations()
         {
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                Deencapsulation.invoke(mockedDevice, "getTwinParser");
-                result = mockedTwinParser;
+                TwinState.createFromTwinJson((String)any);
+                result = mockedTwinState;
             }
         };
 
@@ -206,17 +207,21 @@ public class DeviceTwinTest
                 times = 5;
                 mockedHttpRequest.send();
                 times = 1;
-                mockedTwinParser.updateTwin(anyString);
+                TwinState.createFromTwinJson((String)any);
                 times = 1;
-                Deencapsulation.invoke(mockedDevice, "getTwinParser");
-                times = 5;
-                mockedTwinParser.getTagsMap();
+                mockedTwinState.getETag();
                 times = 1;
                 Deencapsulation.invoke(mockedDevice, "setETag", anyString);
                 times = 1;
+                mockedTwinState.getTags();
+                times = 1;
                 Deencapsulation.invoke(mockedDevice, "setTags", testMap);
                 times = 1;
+                mockedTwinState.getDesiredProperty();
+                times = 1;
                 Deencapsulation.invoke(mockedDevice, "setDesiredProperties", testMap);
+                times = 1;
+                mockedTwinState.getReportedProperty();
                 times = 1;
                 Deencapsulation.invoke(mockedDevice, "setReportedProperties", testMap );
                 times = 1;
@@ -331,7 +336,7 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                mockedTwinObject.resetDesiredProperty((Map<String, Object>)any);
+                mockedTwinObject.resetDesiredProperty((TwinCollection)any);
                 result = "SomeJsonString";
             }
         };
@@ -345,7 +350,7 @@ public class DeviceTwinTest
             {
                 mockedConnectionString.getUrlTwinDesired(anyString);
                 times = 1;
-                mockedTwinObject.resetDesiredProperty((Map<String, Object>)any);
+                mockedTwinObject.resetDesiredProperty((TwinCollection)any);
                 times = 1;
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
@@ -407,74 +412,6 @@ public class DeviceTwinTest
     }
 
     /*
-     **Tests_SRS_DEVICETWIN_25_045: [** If resetDesiredProperty call returns null or empty string then this method shall throw IOException**]**
-     */
-    @Test (expected = IOException.class)
-    public void replaceDesiredPropertiesThrowsIfJsonIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
-    {
-        //arrange
-        final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-        new NonStrictExpectations()
-        {
-            {
-                mockedDevice.getDeviceId();
-                result = "SomeDevID";
-                Deencapsulation.invoke(mockedDevice, "getTwinParser");
-                result = mockedTwinParser;
-                mockedTwinParser.resetDesiredProperty((Map<String, Object>)any);
-                result = null;
-            }
-        };
-
-        //act
-        testTwin.replaceDesiredProperties(mockedDevice);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedConnectionString.getUrlTwinDesired(anyString);
-                times = 1;
-                mockedTwinParser.resetDesiredProperty((Map<String, Object>)any);
-                times = 1;
-            }
-        };
-    }
-
-    @Test (expected = IOException.class)
-    public void replaceDesiredPropertiesThrowsIfJsonIsEmpty(@Mocked DeviceTwinDevice mockedDevice) throws Exception
-    {
-        //arrange
-        final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-        new NonStrictExpectations()
-        {
-            {
-                mockedDevice.getDeviceId();
-                result = "SomeDevID";
-                Deencapsulation.invoke(mockedDevice, "getTwinParser");
-                result = mockedTwinParser;
-                mockedTwinParser.resetDesiredProperty((Map<String, Object>)any);
-                result = "";
-            }
-        };
-
-        //act
-        testTwin.replaceDesiredProperties(mockedDevice);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedConnectionString.getUrlTwinDesired(anyString);
-                times = 1;
-                mockedTwinParser.resetDesiredProperty((Map<String, Object>)any);
-                times = 1;
-            }
-        };
-    }
-    /*
         @Test (expected = IotHubException.class)
         public void replaceDesiredPropertiesThrowsVerificationThrows() throws Exception
         {
@@ -486,7 +423,7 @@ public class DeviceTwinTest
                 {
                     mockedDevice.getDeviceId();
                     result = "SomeDevID";
-                    mockedTwinObject.resetDesiredProperty((Map<String, Object>)any);
+                    mockedTwinObject.resetDesiredProperty((TwinCollection)any);
                     result = "SomeJsonString";
                     IotHubExceptionManager.httpResponseVerification(mockedHttpResponse);
                     result = new IotHubException();
@@ -502,7 +439,7 @@ public class DeviceTwinTest
                 {
                     mockedConnectionString.getUrlTwinDesired(anyString);
                     times = 1;
-                    mockedTwinObject.resetDesiredProperty((Map<String, Object>)any);
+                    mockedTwinObject.resetDesiredProperty((TwinCollection)any);
                     times = 1;
                     mockedHttpRequest.setReadTimeoutMillis(anyInt);
                     times = 1;
@@ -547,7 +484,7 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                mockedTwinObject.resetTags((Map<String, Object>)any);
+                mockedTwinObject.resetTags((TwinCollection)any);
                 result = "SomeJsonString";
             }
         };
@@ -561,7 +498,7 @@ public class DeviceTwinTest
             {
                 mockedConnectionString.getUrlTwinTags(anyString);
                 times = 1;
-                mockedTwinObject.resetTags((Map<String, Object>)any);
+                mockedTwinObject.resetTags((TwinCollection)any);
                 times = 1;
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
@@ -635,7 +572,7 @@ public class DeviceTwinTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                mockedTwinObject.resetTags((Map<String, Object>)any);
+                mockedTwinObject.resetTags((TwinCollection)any);
                 result = "SomeJsonString";
                 IotHubExceptionManager.httpResponseVerification(mockedHttpResponse);
                 result = new IotHubException();
@@ -651,7 +588,7 @@ public class DeviceTwinTest
             {
                 mockedConnectionString.getUrlTwinTags(anyString);
                 times = 1;
-                mockedTwinObject.resetTags((Map<String, Object>)any);
+                mockedTwinObject.resetTags((TwinCollection)any);
                 times = 1;
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
@@ -663,71 +600,6 @@ public class DeviceTwinTest
         };
     }
 */
-    /*
-    **Tests_SRS_DEVICETWIN_25_046: [** If resetTags call returns null or empty string then this method shall throw IOException**]**
-     */
-    @Test (expected = IOException.class)
-    public void replaceTagsThrowsJsonIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
-    {
-        //arrange
-        final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-        new NonStrictExpectations()
-        {
-            {
-                mockedDevice.getDeviceId();
-                result = "SomeDevID";
-                mockedTwinParser.resetTags((Map<String, Object>)any);
-                result = null;
-            }
-        };
-
-        //act
-        testTwin.replaceTags(mockedDevice);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedConnectionString.getUrlTwinTags(anyString);
-                times = 1;
-                mockedTwinParser.resetTags((Map<String, Object>)any);
-                times = 1;
-            }
-        };
-    }
-
-    @Test (expected = IOException.class)
-    public void replaceTagsThrowsJsonIsEmpty(@Mocked DeviceTwinDevice mockedDevice) throws Exception
-    {
-        //arrange
-        final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-        new NonStrictExpectations()
-        {
-            {
-                mockedDevice.getDeviceId();
-                result = "SomeDevID";
-                mockedTwinParser.resetTags((Map<String, Object>)any);
-                result = "";
-            }
-        };
-
-        //act
-        testTwin.replaceTags(mockedDevice);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedConnectionString.getUrlTwinTags(anyString);
-                times = 1;
-                mockedTwinParser.resetTags((Map<String, Object>)any);
-                times = 1;
-            }
-        };
-    }
-
     /*
     **Tests_SRS_DEVICETWIN_25_030: [** The function shall build the URL for this operation by calling getUrlTwinDesired **]**
     **Tests_SRS_DEVICETWIN_25_031: [** The function shall serialize the desired properties map by calling resetDesiredProperty Api on the twin object for the device provided by the user**]**
@@ -757,7 +629,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-        Map<String, Object> testMap = new HashMap<>();
+        TwinCollection testMap = new TwinCollection();
         testMap.put("TestKey", "TestValue");
         new NonStrictExpectations()
         {
@@ -768,7 +640,9 @@ public class DeviceTwinTest
                 result = testMap;
                 Deencapsulation.invoke(mockedDevice, "getTagsMap");
                 result = testMap;
-                mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
+                new TwinState((TwinCollection)any, (TwinCollection)any, null);
+                result = mockedTwinState;
+                mockedTwinState.toJsonElement().toString();
                 result = "SomeJsonString";
             }
         };
@@ -782,7 +656,7 @@ public class DeviceTwinTest
             {
                 mockedConnectionString.getUrlTwin(anyString);
                 times = 1;
-                mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
+                new TwinState((TwinCollection)any, (TwinCollection)any, null);
                 times = 1;
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
@@ -852,8 +726,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-        Map<String, Object> testMap = new HashMap<>();
-        //testMap.put("TestKey", "TestValue");
+        TwinCollection testMap = new TwinCollection();
         new NonStrictExpectations()
         {
             {
@@ -877,7 +750,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-        Map<String, Object> testMap = new HashMap<>();
+        TwinCollection testMap = new TwinCollection();
         testMap.put("TestKey", "TestValue");
         new NonStrictExpectations()
         {
@@ -888,7 +761,9 @@ public class DeviceTwinTest
                 result = testMap;
                 Deencapsulation.invoke(mockedDevice, "getTagsMap");
                 result = null;
-                mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
+                new TwinState(null, (TwinCollection)any, null);
+                result = mockedTwinState;
+                mockedTwinState.toJsonElement().toString();
                 result = "SomeJsonString";
             }
         };
@@ -902,7 +777,7 @@ public class DeviceTwinTest
             {
                 mockedConnectionString.getUrlTwin(anyString);
                 times = 1;
-                mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
+                new TwinState(null, (TwinCollection)any, null);
                 times = 1;
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
@@ -921,7 +796,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-        Map<String, Object> testMap = new HashMap<>();
+        TwinCollection testMap = new TwinCollection();
         testMap.put("TestKey", "TestValue");
         new NonStrictExpectations()
         {
@@ -932,7 +807,9 @@ public class DeviceTwinTest
                 result = null;
                 Deencapsulation.invoke(mockedDevice, "getTagsMap");
                 result = testMap;
-                mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
+                new TwinState((TwinCollection)any, null, null);
+                result = mockedTwinState;
+                mockedTwinState.toJsonElement().toString();
                 result = "SomeJsonString";
             }
         };
@@ -946,7 +823,7 @@ public class DeviceTwinTest
             {
                 mockedConnectionString.getUrlTwin(anyString);
                 times = 1;
-                mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
+                new TwinState((TwinCollection)any, null, null);
                 times = 1;
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
@@ -958,94 +835,13 @@ public class DeviceTwinTest
         };
     }
 
-    /*
-     **Tests_SRS_DEVICETWIN_25_046: [** The function shall throw IOException if updateTwin Api call returned an empty or null json**]**
-     */
-    @Test (expected = IOException.class)
-    public void updateTwinThrowsIfJsonIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
-    {
-        //arrange
-        final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-        Map<String, Object> testMap = new HashMap<>();
-        testMap.put("TestKey", "TestValue");
-        new NonStrictExpectations()
-        {
-            {
-                mockedDevice.getDeviceId();
-                result = "SomeDevID";
-                Deencapsulation.invoke(mockedDevice, "getDesiredMap");
-                result = testMap;
-                Deencapsulation.invoke(mockedDevice, "getTagsMap");
-                result = testMap;
-                Deencapsulation.invoke(mockedDevice, "getTwinParser");
-                result = mockedTwinParser;
-                mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
-                result = null;
-            }
-        };
-
-        //act
-        testTwin.updateTwin(mockedDevice);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedConnectionString.getUrlTwin(anyString);
-                times = 1;
-                mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
-                times = 1;
-            }
-        };
-    }
-
-    @Test (expected = IOException.class)
-    public void updateTwinThrowsIfJsonIsEmpty(@Mocked DeviceTwinDevice mockedDevice) throws Exception
-    {
-        //arrange
-        final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-        Map<String, Object> testMap = new HashMap<>();
-        testMap.put("TestKey", "TestValue");
-        new NonStrictExpectations()
-        {
-            {
-                mockedDevice.getDeviceId();
-                result = "SomeDevID";
-                Deencapsulation.invoke(mockedDevice, "getDesiredMap");
-                result = testMap;
-                Deencapsulation.invoke(mockedDevice, "getTagsMap");
-                result = testMap;
-                Deencapsulation.invoke(mockedDevice, "getTwinParser");
-                result = mockedTwinParser;
-                mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
-                result = "";
-            }
-        };
-
-        //act
-        testTwin.updateTwin(mockedDevice);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedConnectionString.getUrlTwinDesired(anyString);
-                times = 1;
-                mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
-                times = 1;
-            }
-        };
-    }
-
     @Test (expected = IotHubException.class)
     public void updateTwinThrowsVerificationThrows(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     {
         //arrange
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
-        Map<String, Object> testMap = new HashMap<>();
+        TwinCollection testMap = new TwinCollection();
         testMap.put("TestKey", "TestValue");
         new NonStrictExpectations()
         {
@@ -1056,9 +852,9 @@ public class DeviceTwinTest
                 result = testMap;
                 Deencapsulation.invoke(mockedDevice, "getTagsMap");
                 result = testMap;
-                Deencapsulation.invoke(mockedDevice, "getTwinParser");
-                result = mockedTwinParser;
-                mockedTwinParser.updateTwin((Map<String, Object>)any, null, (Map<String, Object>)any);
+                new TwinState((TwinCollection)any, (TwinCollection)any, null);
+                result = mockedTwinState;
+                mockedTwinState.toJsonElement().toString();
                 result = "SomeJsonString";
                 IotHubExceptionManager.httpResponseVerification(mockedHttpResponse);
                 result = new IotHubException();
@@ -1251,7 +1047,7 @@ public class DeviceTwinTest
         boolean result = testTwin.hasNextDeviceTwin(testQuery);
     }
 
-    //Tests_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinParser and provide the response on DeviceTwinDevice.]
+    //Tests_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinState and provide the response on DeviceTwinDevice.]
     @Test
     public void nextRetrievesCorrectly() throws IotHubException, IOException
     {
@@ -1261,11 +1057,11 @@ public class DeviceTwinTest
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
         final String expectedString = "testJsonAsNext";
-        Map tags = new HashMap();
+        TwinCollection tags = new TwinCollection();
         tags.put("tagsKey", "tagsValue");
-        Map rp = new HashMap();
+        TwinCollection rp = new TwinCollection();
         rp.put("rpKey", "rpValue");
-        Map dp = new HashMap();
+        TwinCollection dp = new TwinCollection();
         dp.put("dpKey", "dpValue");
 
         new NonStrictExpectations()
@@ -1277,17 +1073,17 @@ public class DeviceTwinTest
                 result = true;
                 Deencapsulation.invoke(mockedQuery, "next");
                 result = expectedString;
-                mockedTwinParser.getDeviceId();
+                mockedTwinState.getDeviceId();
                 result = "testDeviceID";
-                mockedTwinParser.getVersion();
+                mockedTwinState.getVersion();
                 result = version;
-                mockedTwinParser.getETag();
+                mockedTwinState.getETag();
                 result = etag;
-                mockedTwinParser.getTagsMap();
+                mockedTwinState.getTags();
                 result = tags;
-                mockedTwinParser.getDesiredPropertyMap();
+                mockedTwinState.getDesiredProperty();
                 result = dp;
-                mockedTwinParser.getReportedPropertyMap();
+                mockedTwinState.getReportedProperty();
                 result = rp;
             }
         };
@@ -1312,9 +1108,9 @@ public class DeviceTwinTest
 
         assertEquals(version, result.getVersion());
         assertEquals(etag, result.getETag());
-        assetEqualSetAndMap(result.getTags(), tags);
-        assetEqualSetAndMap(result.getDesiredProperties(), dp);
-        assetEqualSetAndMap(result.getReportedProperties(), rp);
+        assetEqualSetAndMap(result.getTags(), (Map)tags);
+        assetEqualSetAndMap(result.getDesiredProperties(), (Map)dp);
+        assetEqualSetAndMap(result.getReportedProperties(), (Map)rp);
     }
 
     @Test (expected = IllegalArgumentException.class)

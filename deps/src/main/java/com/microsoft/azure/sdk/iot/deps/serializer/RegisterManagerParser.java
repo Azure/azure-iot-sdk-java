@@ -104,7 +104,7 @@ public class RegisterManagerParser
     protected String lastActivityTime = null;
 
 
-    protected boolean setDeviceId(String deviceId) throws IllegalArgumentException
+    public boolean setDeviceId(String deviceId) throws IllegalArgumentException
     {
         validateDeviceManager(deviceId, null, null);
 
@@ -171,5 +171,25 @@ public class RegisterManagerParser
         {
             throw new IllegalArgumentException("StatusReason bigger than 128 chars");
         }
+    }
+
+    public void setETag(String eTag)
+    {
+        this.eTag = eTag;
+    }
+
+    public String getETag()
+    {
+        return this.eTag;
+    }
+
+    public String getDeviceId()
+    {
+        return this.deviceId;
+    }
+
+    public Integer getVersion()
+    {
+        return this.version;
     }
 }

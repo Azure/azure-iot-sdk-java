@@ -5,7 +5,8 @@ package com.microsoft.azure.sdk.iot.service.jobs;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
@@ -278,10 +279,28 @@ public class JobClient
         return new JobResult(response.getBody());
     }
 
-    private TwinParser getParserFromDevice(DeviceTwinDevice device) throws IOException
+    private TwinState getParserFromDevice(DeviceTwinDevice device) throws IOException
     {
-        TwinParser twinParser = new TwinParser();
-        twinParser.enableTags();
+        TwinCollection tags = null;
+        TwinCollection desired = null;
+        TwinCollection reported = null;
+
+        if(device.getTags() != null)
+        {
+            tags = setToMap(device.getTags());
+        }
+
+        if(device.getDesiredProperties() != null)
+        {
+            desired = setToMap(device.getDesiredProperties());
+        }
+
+        if(device.getReportedProperties() != null)
+        {
+            reported = setToMap(device.getReportedProperties());
+        }
+
+        TwinState twinParser = new TwinState(tags, desired, reported);
 
         if(device.getDeviceId() != null)
         {
@@ -297,27 +316,12 @@ public class JobClient
             twinParser.setETag(device.getETag());
         }
 
-        if(device.getTags() != null)
-        {
-            twinParser.resetTags(setToMap(device.getTags()));
-        }
-
-        if(device.getDesiredProperties() != null)
-        {
-            twinParser.resetDesiredProperty(setToMap(device.getDesiredProperties()));
-        }
-
-        if(device.getReportedProperties() != null)
-        {
-            twinParser.resetReportedProperty(setToMap(device.getReportedProperties()));
-        }
-
         return twinParser;
     }
 
-    private Map<String, Object> setToMap(Set<Pair> set)
+    private TwinCollection setToMap(Set<Pair> set)
     {
-        Map<String, Object> map = new HashMap<>();
+        TwinCollection map = new TwinCollection();
 
         if (set != null)
         {

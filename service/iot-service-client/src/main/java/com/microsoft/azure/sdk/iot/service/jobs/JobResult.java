@@ -8,7 +8,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsStatisticsParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
@@ -152,21 +152,14 @@ public class JobResult
             this.error = jobsResponseParser.getError().toJson();
         }
 
-        TwinParser twinParser = jobsResponseParser.getUpdateTwin();
-        if(twinParser != null)
+        TwinState twinState = jobsResponseParser.getUpdateTwin();
+        if(twinState != null)
         {
-            this.updateTwin = twinParser.getDeviceId() == null || twinParser.getDeviceId().isEmpty() ?
-                new DeviceTwinDevice() : new DeviceTwinDevice(twinParser.getDeviceId());
-            this.updateTwin.setETag(twinParser.getETag());
-            try
-            {
-                this.updateTwin.setTags(mapToSet(twinParser.getTagsMap()));
-            }
-            catch (IOException e)
-            {
-                /* It can happen that the response do not have tags information, just ignore it. */
-            }
-            this.updateTwin.setDesiredProperties(mapToSet(twinParser.getDesiredPropertyMap()));
+            this.updateTwin = twinState.getDeviceId() == null || twinState.getDeviceId().isEmpty() ?
+                new DeviceTwinDevice() : new DeviceTwinDevice(twinState.getDeviceId());
+            this.updateTwin.setETag(twinState.getETag());
+            this.updateTwin.setTags(mapToSet(twinState.getTags()));
+            this.updateTwin.setDesiredProperties(mapToSet(twinState.getDesiredProperty()));
         }
         this.failureReason = jobsResponseParser.getFailureReason();
         this.statusMessage = jobsResponseParser.getStatusMessage();

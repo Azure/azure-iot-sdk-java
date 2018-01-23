@@ -170,7 +170,7 @@ public class TwinState extends RegisterManagerParser
 
      * @return The {@code JsonElement} with the content of this class.
      */
-    protected JsonElement toJsonElement()
+    public JsonElement toJsonElement()
     {
         /* SRS_TWIN_STATE_21_002: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
         /* SRS_TWIN_STATE_21_003: [If the tags is null, the toJsonElement shall not include the `tags` in the final JSON.] */

@@ -9,6 +9,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 
 import java.util.Date;
 import java.util.Map;
@@ -124,7 +125,7 @@ public class JobsResponseParser
     // Ignored by the json serializer if null.
     private static final String UPDATETWIN_TAG = "updateTwin";
     @SerializedName(UPDATETWIN_TAG)
-    private TwinParser updateTwin = null;
+    private TwinState updateTwin = null;
 
     // System generated failure reason.
     // If status == failure, this represents a string containing the reason.
@@ -214,10 +215,10 @@ public class JobsResponseParser
 
         Map map = gson.fromJson(json, Map.class);
 
-        /* Codes_SRS_JOBSRESPONSEPARSER_21_003: [If the json contains `updateTwin`, the createFromJson shall parse the content of it for TwinParser class.] */
+        /* Codes_SRS_JOBSRESPONSEPARSER_21_003: [If the json contains `updateTwin`, the createFromJson shall parse the content of it for TwinState class.] */
         if(map.containsKey(UPDATETWIN_TAG))
         {
-            jobsResponseParser.updateTwin.updateTwin(gson.toJson(map.get(UPDATETWIN_TAG)));
+            jobsResponseParser.updateTwin = TwinState.createFromTwinJson(gson.toJson(map.get(UPDATETWIN_TAG)));
         }
 
         /* Codes_SRS_JOBSRESPONSEPARSER_21_004: [If the json contains `cloudToDeviceMethod`, the createFromJson shall parse the content of it for MethodParser class.] */
@@ -494,7 +495,7 @@ public class JobsResponseParser
      * @return the json of update twin. It is {@code null} if type
      * is not scheduleUpdateTwin
      */
-    public TwinParser getUpdateTwin()
+    public TwinState getUpdateTwin()
     {
         /* Codes_SRS_JOBSRESPONSEPARSER_21_022: [The getUpdateTwin shall return the updateTwin value.] */
         return this.updateTwin;

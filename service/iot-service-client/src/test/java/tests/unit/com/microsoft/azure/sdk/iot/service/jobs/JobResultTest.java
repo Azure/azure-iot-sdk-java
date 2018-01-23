@@ -7,7 +7,8 @@ import com.google.gson.JsonParseException;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsStatisticsParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatistics;
@@ -16,11 +17,10 @@ import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import mockit.*;
 import org.junit.Test;
 
+
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -51,7 +51,7 @@ public class JobResultTest
     final static String DATEFORMAT_JSON = "MMM d, yyyy h:mm:ss a";
 
 
-    private void JobsResponseParserExpectations(String json, TwinParser twinParser, MethodParser methodParser, Date date, MethodParser methodParserResponse, String jobTypeStr)
+    private void JobsResponseParserExpectations(String json, TwinState twinState, MethodParser methodParser, Date date, MethodParser methodParserResponse, String jobTypeStr)
     {
         new NonStrictExpectations()
         {
@@ -82,7 +82,7 @@ public class JobResultTest
                 mockedJobsResponseParser.getOutcome();
                 result = methodParserResponse;
                 mockedJobsResponseParser.getUpdateTwin();
-                result = twinParser;
+                result = twinState;
                 mockedJobsResponseParser.getFailureReason();
                 result = FAILURE_REASON;
                 mockedJobsResponseParser.getStatusMessage();
@@ -100,7 +100,7 @@ public class JobResultTest
         };
     }
 
-    private void jobsResponseParserWithNullDeviceIdExpectations(String json, TwinParser twinParser, MethodParser methodParser, Date date, MethodParser methodParserResponse, String jobTypeStr)
+    private void jobsResponseParserWithNullDeviceIdExpectations(String json, TwinState twinState, MethodParser methodParser, Date date, MethodParser methodParserResponse, String jobTypeStr)
     {
         new NonStrictExpectations()
         {
@@ -131,7 +131,7 @@ public class JobResultTest
                 mockedJobsResponseParser.getOutcome();
                 result = methodParserResponse;
                 mockedJobsResponseParser.getUpdateTwin();
-                result = twinParser;
+                result = twinState;
                 mockedJobsResponseParser.getFailureReason();
                 result = FAILURE_REASON;
                 mockedJobsResponseParser.getStatusMessage();
@@ -166,16 +166,14 @@ public class JobResultTest
         //arrange
         final String json = "validJson";
 
-        Map<String, Object> tags = new HashMap<>();
+        TwinCollection tags = new TwinCollection();
         tags.put("tag1", "val1");
 
-        TwinParser twinParser = new TwinParser();
-        twinParser.enableTags();
-        twinParser.setDeviceId(DEVICE_ID);
-        twinParser.setETag(ETAG);
-        twinParser.resetTags(tags);
+        TwinState twinState = new TwinState(tags, null, null);
+        twinState.setDeviceId(DEVICE_ID);
+        twinState.setETag(ETAG);
 
-        JobsResponseParserExpectations(json, twinParser, null, new Date(), null, "scheduleUpdateTwin");
+        JobsResponseParserExpectations(json, twinState, null, new Date(), null, "scheduleUpdateTwin");
 
         //act
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
@@ -217,16 +215,14 @@ public class JobResultTest
         final String json = "validJson";
         final Date now = new Date();
 
-        Map<String, Object> tags = new HashMap<>();
+        TwinCollection tags = new TwinCollection();
         tags.put("tag1", "val1");
 
-        TwinParser twinParser = new TwinParser();
-        twinParser.enableTags();
-        twinParser.setDeviceId(DEVICE_ID);
-        twinParser.setETag(ETAG);
-        twinParser.resetTags(tags);
+        TwinState twinState = new TwinState(tags, null, null);
+        twinState.setDeviceId(DEVICE_ID);
+        twinState.setETag(ETAG);
 
-        JobsResponseParserExpectations(json, twinParser, null, now, null, "scheduleUpdateTwin");
+        JobsResponseParserExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
 
         //act
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
@@ -257,15 +253,14 @@ public class JobResultTest
         final String json = "validJson";
         final Date now = new Date();
 
-        Map<String, Object> desired = new HashMap<>();
+        TwinCollection desired = new TwinCollection();
         desired.put("prop1", "val1");
 
-        TwinParser twinParser = new TwinParser();
-        twinParser.setDeviceId(DEVICE_ID);
-        twinParser.setETag(ETAG);
-        twinParser.resetDesiredProperty(desired);
+        TwinState twinState = new TwinState(null, desired, null);
+        twinState.setDeviceId(DEVICE_ID);
+        twinState.setETag(ETAG);
 
-        JobsResponseParserExpectations(json, twinParser, null, now, null, "scheduleUpdateTwin");
+        JobsResponseParserExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
 
         //act
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
@@ -295,16 +290,14 @@ public class JobResultTest
         final String json = "validJson";
         final Date now = new Date();
 
-        Map<String, Object> tags = new HashMap<>();
+        TwinCollection tags = new TwinCollection();
         tags.put("tag1", "val1");
 
-        TwinParser twinParser = new TwinParser();
-        twinParser.enableTags();
-        twinParser.setDeviceId(DEVICE_ID);
-        twinParser.setETag(ETAG);
-        twinParser.resetTags(tags);
+        TwinState twinState = new TwinState(tags, null, null);
+        twinState.setDeviceId(DEVICE_ID);
+        twinState.setETag(ETAG);
 
-        JobsResponseParserExpectations(json, twinParser, null, now, null, "scheduleUpdateTwin");
+        JobsResponseParserExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
 
         //act
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
@@ -335,15 +328,13 @@ public class JobResultTest
         final String json = "validJson";
         final Date now = new Date();
 
-        Map<String, Object> tags = new HashMap<>();
+        TwinCollection tags = new TwinCollection();
         tags.put("tag1", "val1");
 
-        TwinParser twinParser = new TwinParser();
-        twinParser.enableTags();
-        twinParser.setETag(ETAG);
-        twinParser.resetTags(tags);
+        TwinState twinState = new TwinState(tags, null, null);
+        twinState.setETag(ETAG);
 
-        jobsResponseParserWithNullDeviceIdExpectations(json, twinParser, null, now, null, "scheduleUpdateTwin");
+        jobsResponseParserWithNullDeviceIdExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
 
         //act
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
@@ -380,7 +371,7 @@ public class JobResultTest
         final int methodReturnStatus = 200;
         final Date now = new Date();
 
-        MethodParser methodParser = new MethodParser("methodName", null, null, new HashMap<String, Object>());
+        MethodParser methodParser = new MethodParser("methodName", null, null, new TwinCollection());
         MethodParser methodParserResponse = mockedMethodParser;
 
         JobsResponseParserExpectations(json, null, methodParser, now, methodParserResponse, "scheduleUpdateTwin");
@@ -436,7 +427,7 @@ public class JobResultTest
         final String json = "validJson";
         final Date now = new Date();
 
-        MethodParser methodParser = new MethodParser("methodName", null, null, new HashMap<String, Object>());
+        MethodParser methodParser = new MethodParser("methodName", null, null, new TwinCollection());
         MethodParser methodParserResponse = mockedMethodParser;
 
         JobsResponseParserExpectations(json, null, methodParser, now, methodParserResponse, "scheduleUpdateTwin");
@@ -499,25 +490,7 @@ public class JobResultTest
                 "    \"tag\": {\n" +
                 "      \"tag1\": \"val1\"\n" +
                 "    },\n" +
-                "    \"desiredProperties\": {},\n" +
-                "    \"twinParser\": {\n" +
-                "      \"tags\": {\n" +
-                "        \"tags\": {}\n" +
-                "      },\n" +
-                "      \"properties\": {\n" +
-                "        \"desired\": {\n" +
-                "          \"lock\": {},\n" +
-                "          \"property\": {},\n" +
-                "          \"reportMetadata\": false\n" +
-                "        },\n" +
-                "        \"reported\": {\n" +
-                "          \"lock\": {},\n" +
-                "          \"property\": {},\n" +
-                "          \"reportMetadata\": false\n" +
-                "        }\n" +
-                "      },\n" +
-                "      \"manager\": {}\n" +
-                "    }\n" +
+                "    \"desiredProperties\": {}\n" +
                 "  },\n" +
                 "  \"failureReason\": \"This is a valid failure reason\",\n" +
                 "  \"statusMessage\": \"This is a valid status message\",\n" +
@@ -532,16 +505,14 @@ public class JobResultTest
                 "  \"parentJobId\": \"validParentJobId\"\n" +
                 "}";
 
-        Map<String, Object> tags = new HashMap<>();
+        TwinCollection tags = new TwinCollection();
         tags.put("tag1", "val1");
 
-        TwinParser twinParser = new TwinParser();
-        twinParser.enableTags();
-        twinParser.setDeviceId(DEVICE_ID);
-        twinParser.setETag(ETAG);
-        twinParser.resetTags(tags);
+        TwinState twinState = new TwinState(tags, null, null);
+        twinState.setDeviceId(DEVICE_ID);
+        twinState.setETag(ETAG);
 
-        JobsResponseParserExpectations(json, twinParser, null, now, null, "scheduleUpdateTwin");
+        JobsResponseParserExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
 
         //act
@@ -577,24 +548,8 @@ public class JobResultTest
                         "    \"tag\": {\n" +
                         "      \"tag1\": \"val1\"\n" +
                         "    },\n" +
-                        "    \"desiredProperties\": {},\n" +
-                        "    \"twinParser\": {\n" +
-                        "      \"tags\": {\n" +
-                        "        \"tags\": {}\n" +
-                        "      },\n" +
-                        "      \"properties\": {\n" +
-                        "        \"desired\": {\n" +
-                        "          \"lock\": {},\n" +
-                        "          \"property\": {},\n" +
-                        "          \"reportMetadata\": false\n" +
-                        "        },\n" +
-                        "        \"reported\": {\n" +
-                        "          \"lock\": {},\n" +
-                        "          \"property\": {},\n" +
-                        "          \"reportMetadata\": false\n" +
-                        "        }\n" +
-                        "      },\n" +
-                        "      \"manager\": {}\n" +
+                        "    \"desiredProperties\": {\n" +
+                        "      \"key1\": \"val1\"\n" +
                         "    }\n" +
                         "  },\n" +
                         "  \"failureReason\": \"This is a valid failure reason\",\n" +
@@ -610,16 +565,16 @@ public class JobResultTest
                         "  \"parentJobId\": \"validParentJobId\"\n" +
                         "}";
 
-        Map<String, Object> tags = new HashMap<>();
+        TwinCollection tags = new TwinCollection();
         tags.put("tag1", "val1");
+        TwinCollection desired = new TwinCollection();
+        desired.put("key1", "val1");
 
-        TwinParser twinParser = new TwinParser();
-        twinParser.enableTags();
-        twinParser.setDeviceId(DEVICE_ID);
-        twinParser.setETag(ETAG);
-        twinParser.resetTags(tags);
+        TwinState twinState = new TwinState(tags, desired, null);
+        twinState.setDeviceId(DEVICE_ID);
+        twinState.setETag(ETAG);
 
-        JobsResponseParserExpectations(json, twinParser, null, now, null, "unknown");
+        JobsResponseParserExpectations(json, twinState, null, now, null, "unknown");
         JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
 
         //act

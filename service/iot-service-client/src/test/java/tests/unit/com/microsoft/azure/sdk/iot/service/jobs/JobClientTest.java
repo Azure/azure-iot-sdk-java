@@ -7,7 +7,8 @@ package tests.unit.com.microsoft.azure.sdk.iot.service.jobs;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.TwinParser;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
@@ -57,7 +58,7 @@ public class JobClientTest
     JobsParser mockedJobsParser;
 
     @Mocked
-    TwinParser mockedTwinParser;
+    TwinState mockedTwinState;
 
     @Mocked
     MethodParser mockedMethodParser;
@@ -164,15 +165,6 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new TwinParser();
-                result = mockedTwinParser;
-
-                mockedDeviceTwinDevice.getDeviceId();
-                result = deviceId;
-
-                mockedDeviceTwinDevice.getETag();
-                result = null;
-
                 mockedDeviceTwinDevice.getTags();
                 result = testTags;
 
@@ -182,7 +174,16 @@ public class JobClientTest
                 mockedDeviceTwinDevice.getReportedProperties();
                 result = null;
 
-                new JobsParser(jobId, mockedTwinParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new TwinState((TwinCollection)any, null, null);
+                result = mockedTwinState;
+
+                mockedDeviceTwinDevice.getDeviceId();
+                result = deviceId;
+
+                mockedDeviceTwinDevice.getETag();
+                result = null;
+
+                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -208,7 +209,7 @@ public class JobClientTest
         new Verifications()
         {
             {
-                new JobsParser(jobId, mockedTwinParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 times = 1;
                 mockedJobsParser.toJson();
                 times = 1;
@@ -239,15 +240,6 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new TwinParser();
-                result = mockedTwinParser;
-
-                mockedDeviceTwinDevice.getDeviceId();
-                result = deviceId;
-
-                mockedDeviceTwinDevice.getETag();
-                result = "1234";
-
                 mockedDeviceTwinDevice.getTags();
                 result = testTags;
 
@@ -257,7 +249,16 @@ public class JobClientTest
                 mockedDeviceTwinDevice.getReportedProperties();
                 result = null;
 
-                new JobsParser(jobId, mockedTwinParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new TwinState((TwinCollection)any, null, null);
+                result = mockedTwinState;
+
+                mockedDeviceTwinDevice.getDeviceId();
+                result = deviceId;
+
+                mockedDeviceTwinDevice.getETag();
+                result = "1234";
+
+                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -283,7 +284,7 @@ public class JobClientTest
         new Verifications()
         {
             {
-                new JobsParser(jobId, mockedTwinParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 times = 1;
                 mockedJobsParser.toJson();
                 times = 1;
@@ -318,15 +319,6 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new TwinParser();
-                result = mockedTwinParser;
-
-                mockedDeviceTwinDevice.getDeviceId();
-                result = deviceId;
-
-                mockedDeviceTwinDevice.getETag();
-                result = "1234";
-
                 mockedDeviceTwinDevice.getTags();
                 result = testTags;
 
@@ -336,7 +328,16 @@ public class JobClientTest
                 mockedDeviceTwinDevice.getReportedProperties();
                 result = testResponse;
 
-                new JobsParser(jobId, mockedTwinParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new TwinState((TwinCollection)any, (TwinCollection)any, (TwinCollection)any);
+                result = mockedTwinState;
+
+                mockedDeviceTwinDevice.getDeviceId();
+                result = deviceId;
+
+                mockedDeviceTwinDevice.getETag();
+                result = "1234";
+
+                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -362,7 +363,7 @@ public class JobClientTest
         new Verifications()
         {
             {
-                new JobsParser(jobId, mockedTwinParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 times = 1;
                 mockedJobsParser.toJson();
                 times = 1;
@@ -442,15 +443,6 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new TwinParser();
-                result = mockedTwinParser;
-
-                mockedDeviceTwinDevice.getDeviceId();
-                result = deviceId;
-
-                mockedDeviceTwinDevice.getETag();
-                result = null;
-
                 mockedDeviceTwinDevice.getTags();
                 result = testTags;
 
@@ -460,7 +452,16 @@ public class JobClientTest
                 mockedDeviceTwinDevice.getReportedProperties();
                 result = null;
 
-                new JobsParser(jobId, mockedTwinParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new TwinState((TwinCollection)any, null, null);
+                result = mockedTwinState;
+
+                mockedDeviceTwinDevice.getDeviceId();
+                result = deviceId;
+
+                mockedDeviceTwinDevice.getETag();
+                result = null;
+
+                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -582,15 +583,6 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new TwinParser();
-                result = mockedTwinParser;
-
-                mockedDeviceTwinDevice.getDeviceId();
-                result = deviceId;
-
-                mockedDeviceTwinDevice.getETag();
-                result = null;
-
                 mockedDeviceTwinDevice.getTags();
                 result = testTags;
 
@@ -600,7 +592,16 @@ public class JobClientTest
                 mockedDeviceTwinDevice.getReportedProperties();
                 result = null;
 
-                new JobsParser(jobId, mockedTwinParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new TwinState((TwinCollection)any, null, null);
+                result = mockedTwinState;
+
+                mockedDeviceTwinDevice.getDeviceId();
+                result = deviceId;
+
+                mockedDeviceTwinDevice.getETag();
+                result = null;
+
+                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -655,15 +656,6 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new TwinParser();
-                result = mockedTwinParser;
-
-                mockedDeviceTwinDevice.getDeviceId();
-                result = deviceId;
-
-                mockedDeviceTwinDevice.getETag();
-                result = null;
-
                 mockedDeviceTwinDevice.getTags();
                 result = testTags;
 
@@ -673,7 +665,16 @@ public class JobClientTest
                 mockedDeviceTwinDevice.getReportedProperties();
                 result = null;
 
-                new JobsParser(jobId, mockedTwinParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new TwinState((TwinCollection)any, null, null);
+                result = mockedTwinState;
+
+                mockedDeviceTwinDevice.getDeviceId();
+                result = deviceId;
+
+                mockedDeviceTwinDevice.getETag();
+                result = null;
+
+                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -729,15 +730,6 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new TwinParser();
-                result = mockedTwinParser;
-
-                mockedDeviceTwinDevice.getDeviceId();
-                result = deviceId;
-
-                mockedDeviceTwinDevice.getETag();
-                result = null;
-
                 mockedDeviceTwinDevice.getTags();
                 result = testTags;
 
@@ -747,7 +739,16 @@ public class JobClientTest
                 mockedDeviceTwinDevice.getReportedProperties();
                 result = null;
 
-                new JobsParser(jobId, mockedTwinParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new TwinState((TwinCollection)any, null, null);
+                result = mockedTwinState;
+
+                mockedDeviceTwinDevice.getDeviceId();
+                result = deviceId;
+
+                mockedDeviceTwinDevice.getETag();
+                result = null;
+
+                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -790,15 +791,6 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new TwinParser();
-                result = mockedTwinParser;
-
-                mockedDeviceTwinDevice.getDeviceId();
-                result = deviceId;
-
-                mockedDeviceTwinDevice.getETag();
-                result = null;
-
                 mockedDeviceTwinDevice.getTags();
                 result = testTags;
 
@@ -808,7 +800,16 @@ public class JobClientTest
                 mockedDeviceTwinDevice.getReportedProperties();
                 result = null;
 
-                new JobsParser(jobId, mockedTwinParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new TwinState((TwinCollection)any, null, null);
+                result = mockedTwinState;
+
+                mockedDeviceTwinDevice.getDeviceId();
+                result = deviceId;
+
+                mockedDeviceTwinDevice.getETag();
+                result = null;
+
+                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
