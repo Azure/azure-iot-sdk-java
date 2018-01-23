@@ -5,7 +5,7 @@
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-device-client</artifactId>
     <name>IoT Hub Java Device Client</name>
-    <version>1.6.0</version>
+    <version>1.7.0</version>
     <description>The Microsoft Azure IoT Device SDK for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
     <developers>
@@ -39,7 +39,7 @@
         <dependency>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <artifactId>iot-deps</artifactId>
-        <version>0.2.0</version>
+        <version>0.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
