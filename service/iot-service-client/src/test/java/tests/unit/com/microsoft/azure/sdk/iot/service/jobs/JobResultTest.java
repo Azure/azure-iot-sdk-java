@@ -81,7 +81,7 @@ public class JobResultTest
                 result = methodParser;
                 mockedJobsResponseParser.getOutcome();
                 result = methodParserResponse;
-                mockedJobsResponseParser.getUpdateTwin();
+                mockedJobsResponseParser.getUpdateTwinState();
                 result = twinState;
                 mockedJobsResponseParser.getFailureReason();
                 result = FAILURE_REASON;
@@ -130,7 +130,7 @@ public class JobResultTest
                 result = methodParser;
                 mockedJobsResponseParser.getOutcome();
                 result = methodParserResponse;
-                mockedJobsResponseParser.getUpdateTwin();
+                mockedJobsResponseParser.getUpdateTwinState();
                 result = twinState;
                 mockedJobsResponseParser.getFailureReason();
                 result = FAILURE_REASON;

@@ -117,6 +117,43 @@ public class JobsParser
      * @param startTime is the date and time to start the job. Cannot be {@code null}.
      * @param maxExecutionTimeInSeconds is the maximum time that the device can expend to execute the job. Cannot be negative
      * @throws IllegalArgumentException if one of the parameter is not valid.
+     * @deprecated As of release 0.4.0, replaced by {@link #JobsParser(String, TwinState, String, Date, long)}
+     */
+    @Deprecated
+    public JobsParser(
+            String jobId, TwinParser updateTwin,
+            String queryCondition, Date startTime, long maxExecutionTimeInSeconds)
+            throws IllegalArgumentException
+    {
+        /* Codes_SRS_JOBSPARSER_21_010: [If the updateTwin is null, the constructor shall throws IllegalArgumentException.] */
+        if (updateTwin == null)
+        {
+            throw new IllegalArgumentException("Null TwinParser parameter");
+        }
+
+        /* Codes_SRS_JOBSPARSER_21_007: [The constructor shall evaluate and store the commons parameters using the internal function validateCommonFields.] */
+        /* Codes_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
+        validateCommonFields(jobId, queryCondition, startTime, maxExecutionTimeInSeconds);
+
+        /* Codes_SRS_JOBSPARSER_21_009: [The constructor shall store the JsonElement for the updateTwin.] */
+        this.updateTwin = updateTwin.toJsonElement();
+
+        /* Codes_SRS_JOBSPARSER_21_011: [The constructor shall set the jobType as scheduleUpdateTwin.] */
+        this.jobType = SCHEDULE_UPDATE_TWIN;
+
+        /* Codes_SRS_JOBSPARSER_21_012: [The constructor shall set the cloudToDeviceMethod as null.] */
+        this.cloudToDeviceMethod = null;
+    }
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @param jobId is a string with the job identification. Cannot be {@code null} or empty.
+     * @param updateTwin is the class that contains the json for the update twin properties. Cannot be {@code null}.
+     * @param queryCondition is a string with the deviceId or an <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language">IoT Hub Query Condition</a>. Cannot be {@code null} or empty.
+     * @param startTime is the date and time to start the job. Cannot be {@code null}.
+     * @param maxExecutionTimeInSeconds is the maximum time that the device can expend to execute the job. Cannot be negative
+     * @throws IllegalArgumentException if one of the parameter is not valid.
      */
     public JobsParser(
             String jobId, TwinState updateTwin,

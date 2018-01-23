@@ -9,7 +9,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.deps.serializer.RegisterManagerParser;
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
 
 /**
@@ -97,7 +96,7 @@ import com.microsoft.azure.sdk.iot.deps.util.Tools;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins">Understand and use device twins in IoT Hub</a>
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iothub/devicetwinapi">Device Twin Api</a>
  */
-public class TwinState extends RegisterManagerParser
+public class TwinState extends RegisterManager
 {
     // the twin tags
     private static final String TAGS_TAG = "tags";

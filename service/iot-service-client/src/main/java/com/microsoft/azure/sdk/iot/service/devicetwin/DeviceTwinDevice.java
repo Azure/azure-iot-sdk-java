@@ -7,7 +7,6 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -165,9 +164,33 @@ public class DeviceTwinDevice
         return this.mapToSet(this.tag);
     }
 
+    /**
+     * Clear tags set so far
+     */
     public void clearTags()
     {
         this.tag = null;
+    }
+
+    /**
+     * Getter for the tag version.
+     *
+     * @return The {@code Integer} with the Tags Collection version.
+     * @throws IllegalArgumentException if the tags is {@code null}.
+     */
+    public Integer getTagsVersion()
+    {
+        if(this.tag == null)
+        {
+            /*
+             **Codes_SRS_DEVICETWINDEVICE_21_034: [** If the tags map is null then this method shall throw IllegalArgumentException.**]**
+             */
+            throw new IllegalArgumentException("Tags is null");
+        }
+        /*
+         **Codes_SRS_DEVICETWINDEVICE_21_035: [** The method shall return the version in the tag TwinCollection.**]**
+         */
+        return this.tag.getVersion();
     }
 
     /**
@@ -207,10 +230,30 @@ public class DeviceTwinDevice
     /**
      * Clear desired properties set so far
      */
-
     public void clearDesiredProperties()
     {
         this.desiredProperties = null;
+    }
+
+    /**
+     * Getter for the desired properties version.
+     *
+     * @return The {@code Integer} with the Desired properties Collection version.
+     * @throws IllegalArgumentException if the desired properties is {@code null}.
+     */
+    public Integer getDesiredPropertiesVersion()
+    {
+        if(this.desiredProperties == null)
+        {
+            /*
+             **Codes_SRS_DEVICETWINDEVICE_21_036: [** If the desired properties is null then this method shall throw IllegalArgumentException.**]**
+             */
+            throw new IllegalArgumentException("Desired properties is null");
+        }
+        /*
+         **Codes_SRS_DEVICETWINDEVICE_21_037: [** The method shall return the version in the desired properties TwinCollection.**]**
+         */
+        return this.desiredProperties.getVersion();
     }
 
     /**
@@ -235,6 +278,27 @@ public class DeviceTwinDevice
         **Codes_SRS_DEVICETWINDEVICE_25_006: [** If the reported properties map is null then this method shall return empty set of pairs.**]**
          */
         return this.mapToSet(this.reportedProperties);
+    }
+
+    /**
+     * Getter for the reported properties version.
+     *
+     * @return The {@code Integer} with the Desired properties Collection version.
+     * @throws IllegalArgumentException if the reported properties is {@code null}.
+     */
+    public Integer getReportedPropertiesVersion()
+    {
+        if(this.reportedProperties == null)
+        {
+            /*
+             **Codes_SRS_DEVICETWINDEVICE_21_038: [** If the reported properties is null then this method shall throw IllegalArgumentException.**]**
+             */
+            throw new IllegalArgumentException("Reported properties is null");
+        }
+        /*
+         **Codes_SRS_DEVICETWINDEVICE_21_039: [** The method shall return the version in the reported properties TwinCollection.**]**
+         */
+        return this.reportedProperties.getVersion();
     }
 
     /**

@@ -850,6 +850,8 @@ public class DeviceTwinIT
                 assertEquals(dp.getKey(), PROPERTY_KEY + i);
                 assertEquals(dp.getValue(), PROPERTY_VALUE_UPDATE + i);
             }
+            Integer version = devicesUnderTest[i].sCDeviceForTwin.getDesiredPropertiesVersion();
+            assertNotNull(version);
         }
         removeMultipleDevices(MAX_DEVICES);
     }
@@ -912,6 +914,8 @@ public class DeviceTwinIT
                 assertEquals(dp.getKey(), PROPERTY_KEY + i);
                 assertEquals(dp.getValue(), PROPERTY_VALUE_UPDATE + i);
             }
+            Integer version = devicesUnderTest[i].sCDeviceForTwin.getDesiredPropertiesVersion();
+            assertNotNull(version);
         }
         removeMultipleDevices(MAX_DEVICES);
     }

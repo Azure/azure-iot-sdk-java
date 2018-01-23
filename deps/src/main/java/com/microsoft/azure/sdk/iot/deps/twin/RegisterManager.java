@@ -1,21 +1,18 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.deps.serializer;
+package com.microsoft.azure.sdk.iot.deps.twin;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 
 /**
- * INNER TWINPARSER CLASS
- *
  * Twin management representation
  *
  * This class is part of the Twin. It contains the Device identity management.
- * @deprecated As of release 0.4.0, replaced by {@link com.microsoft.azure.sdk.iot.deps.twin.RegisterManager}
  */
-@Deprecated
-public class RegisterManagerParser
+public class RegisterManager
 {
     /**
      * Device name
@@ -106,72 +103,72 @@ public class RegisterManagerParser
     protected String lastActivityTime = null;
 
 
-    protected boolean setDeviceId(String deviceId) throws IllegalArgumentException
+    /**
+     * Setter for the DeviceId
+     *
+     * @param deviceId the {@code String} that contains the new DeviceID.
+     * @throws IllegalArgumentException If the new DeviceId do not fits the ID criteria.
+     */
+    public void setDeviceId(String deviceId) throws IllegalArgumentException
     {
-        validateDeviceManager(deviceId, null, null);
+        /* Codes_SRS_REGISTER_MANAGER_21_001: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId do not fits the criteria.] */
+        ParserUtility.validateId(deviceId);
 
-        /* Codes_SRS_TWIN_21_159: [The updateDeviceManager shall replace the `deviceId` by the provided one.] */
-        if((this.deviceId == null) || (deviceId == null) || (!this.deviceId.equals(deviceId)))
-        {
-            this.deviceId = deviceId;
-            if(this.deviceId != null)
-            {
-                return true;
-            }
-        }
-        return false;
+        /* Codes_SRS_REGISTER_MANAGER_21_002: [The setDeviceId shall replace the `deviceId` by the provided one.] */
+        this.deviceId = deviceId;
     }
 
-    protected boolean setStatus(TwinStatus status, String statusReason) throws IllegalArgumentException
+    /**
+     * Setter for the ETag
+     *
+     * @param eTag the {@code String} that contains the new ETag.
+     */
+    public void setETag(String eTag)
     {
-        validateDeviceManager(null, status, statusReason);
-
-        /* Codes_SRS_TWIN_21_162: [The updateDeviceManager shall replace the `status` by the provided one.] */
-        if(status == null)
-        {
-            if(this.status != null)
-            {
-                return true;
-            }
-            this.status = null;
-            this.statusReason = null;
-            this.statusUpdatedTime = null;
-        }
-        else
-        {
-            if(statusReason == null)
-            {
-                /* Codes_SRS_TWIN_21_165: [If the provided `status` is different than the previous one, and the `statusReason` is null, The updateDeviceManager shall throw IllegalArgumentException.] */
-                throw new IllegalArgumentException("Change status without statusReason");
-            }
-            else if((this.status == null) || (!this.status.equals(status)))
-            {
-                this.status = status;
-
-                /* Codes_SRS_TWIN_21_163: [If the provided `status` is different than the previous one, The updateDeviceManager shall replace the `statusReason` by the provided one.] */
-                this.statusReason = statusReason;
-
-                return true;
-            }
-        }
-        return false;
+        /* Codes_SRS_REGISTER_MANAGER_21_003: [The setETag shall replace the `eTag` by the provided one.] */
+        this.eTag = eTag;
     }
 
-    protected void validateDeviceManager(String deviceId, TwinStatus status, String statusReason) throws IllegalArgumentException
+    /**
+     * Getter for the ETag
+     * @return The {@code String} with the stored ETag.
+     */
+    public String getETag()
     {
-        if((deviceId != null) && (deviceId.length()>128))
-        {
-            throw new IllegalArgumentException("DeviceId bigger than 128 chars");
-        }
+        /* Codes_SRS_REGISTER_MANAGER_21_004: [The getETag shall return the stored `eTag` content.] */
+        return this.eTag;
+    }
 
-        if((status != null) && (statusReason == null))
-        {
-            throw new IllegalArgumentException("Change status without statusReason");
-        }
+    /**
+     * Getter for the DeviceId
+     * @return The {@code String} with the stored DeviceID.
+     */
+    public String getDeviceId()
+    {
+        /* Codes_SRS_REGISTER_MANAGER_21_005: [The getDeviceId shall return the stored `deviceId` content.] */
+        return this.deviceId;
+    }
 
-        if((statusReason != null) && (statusReason.length()>128))
-        {
-            throw new IllegalArgumentException("StatusReason bigger than 128 chars");
-        }
+    /**
+     * Getter for the Version
+     * @return The {@code Integer} with the stored version.
+     */
+    public Integer getVersion()
+    {
+        /* Codes_SRS_REGISTER_MANAGER_21_006: [The getVersion shall return the stored `version` content.] */
+        return this.version;
+    }
+
+    /**
+     * Empty constructor
+     *
+     * <p>
+     *     Used only by the tools that will deserialize this class.
+     * </p>
+     */
+    @SuppressWarnings("unused")
+    protected RegisterManager()
+    {
+        /* Codes_SRS_REGISTER_MANAGER_21_007: [The RegisterManager shall provide an empty constructor to make GSON happy.] */
     }
 }

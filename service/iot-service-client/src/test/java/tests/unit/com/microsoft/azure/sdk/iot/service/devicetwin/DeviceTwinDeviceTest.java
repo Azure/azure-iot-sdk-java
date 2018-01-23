@@ -9,6 +9,8 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import mockit.Deencapsulation;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -286,6 +288,62 @@ public class DeviceTwinDeviceTest
     }
 
     /*
+     **Codes_SRS_DEVICETWINDEVICE_21_034: [** If the tags map is null then this method shall throw IllegalArgumentException.**]**
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void getTagsVersionReturnsNullIfNoTags()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+
+        //act
+        Integer version = testDevice.getTagsVersion();
+
+        //assert
+    }
+
+    @Test
+    public void getTagsVersionReturnsNullIfNoVersionInTheTags()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Set<Pair> testTags = new HashSet<>();
+        testTags.add(new Pair("testTag", "tagObject"));
+        testDevice.setTags(testTags);
+
+        //act
+        Integer version = testDevice.getTagsVersion();
+
+        //assert
+        assertNull(version);
+    }
+
+    /*
+     **Codes_SRS_DEVICETWINDEVICE_21_035: [** The method shall return the version in the tag TwinCollection.**]**
+     */
+    @Test
+    public void getTagsVersionReturnsValidVersion(@Mocked final TwinCollection mockedTwinCollection)
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Deencapsulation.invoke(testDevice, "setTags", mockedTwinCollection);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedTwinCollection.getVersion();
+                result = 5;
+            }
+        };
+
+        //act
+        Integer version = testDevice.getTagsVersion();
+
+        //assert
+        assertEquals(5, (int)version);
+    }
+
+    /*
     **Tests_SRS_DEVICETWINDEVICE_25_013: [** This method shall convert the desiredProperties map to a set of pairs and return with it. **]**
      */
     @Test
@@ -369,6 +427,69 @@ public class DeviceTwinDeviceTest
     }
 
     /*
+     **Codes_SRS_DEVICETWINDEVICE_21_038: [** If the reported properties is null then this method shall throw IllegalArgumentException.**]**
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void getReportedPropertiesVersionReturnsNullIfNoReportedProperties()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+
+        //act
+        Integer version = testDevice.getReportedPropertiesVersion();
+
+        //assert
+    }
+
+    @Test
+    public void getReportedPropertiesVersionReturnsNullIfNoVersionInTheReportedProperties(@Mocked final TwinCollection mockedTwinCollection)
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Set<Pair> testReported = new HashSet<>();
+        testReported.add(new Pair("testTag", "tagObject"));
+        Deencapsulation.invoke(testDevice, "setReportedProperties", mockedTwinCollection);
+        new NonStrictExpectations()
+        {
+            {
+                mockedTwinCollection.getVersion();
+                result = null;
+            }
+        };
+
+        //act
+        Integer version = testDevice.getReportedPropertiesVersion();
+
+        //assert
+        assertNull(version);
+    }
+
+    /*
+     **Codes_SRS_DEVICETWINDEVICE_21_039: [** The method shall return the version in the reported properties TwinCollection.**]**
+     */
+    @Test
+    public void getReportedPropertiesVersionReturnsValidVersion(@Mocked final TwinCollection mockedTwinCollection)
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Deencapsulation.invoke(testDevice, "setReportedProperties", mockedTwinCollection);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedTwinCollection.getVersion();
+                result = 5;
+            }
+        };
+
+        //act
+        Integer version = testDevice.getReportedPropertiesVersion();
+
+        //assert
+        assertEquals(5, (int)version);
+    }
+
+    /*
     **Tests_SRS_DEVICETWINDEVICE_25_007: [** This method shall convert the set of pairs of tags to a map and save it. **]**
      */
     @Test
@@ -446,6 +567,62 @@ public class DeviceTwinDeviceTest
         //act
         testDevice.setDesiredProperties(testDesProp);
 
+    }
+
+    /*
+     **Codes_SRS_DEVICETWINDEVICE_21_036: [** If the desired properties is null then this method shall throw IllegalArgumentException.**]**
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void getDesiredPropertiesVersionReturnsNullIfNoDesiredProperties()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+
+        //act
+        Integer version = testDevice.getDesiredPropertiesVersion();
+
+        //assert
+    }
+
+    @Test
+    public void getDesiredPropertiesVersionReturnsNullIfNoVersionInTheDesiredProperties()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Set<Pair> testDesired = new HashSet<>();
+        testDesired.add(new Pair("testTag", "tagObject"));
+        testDevice.setDesiredProperties(testDesired);
+
+        //act
+        Integer version = testDevice.getDesiredPropertiesVersion();
+
+        //assert
+        assertNull(version);
+    }
+
+    /*
+     **Codes_SRS_DEVICETWINDEVICE_21_037: [** The method shall return the version in the desired properties TwinCollection.**]**
+     */
+    @Test
+    public void getDesiredPropertiesVersionReturnsValidVersion(@Mocked final TwinCollection mockedTwinCollection)
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Deencapsulation.invoke(testDevice, "setDesiredProperties", mockedTwinCollection);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedTwinCollection.getVersion();
+                result = 5;
+            }
+        };
+
+        //act
+        Integer version = testDevice.getDesiredPropertiesVersion();
+
+        //assert
+        assertEquals(5, (int)version);
     }
 
     @Test

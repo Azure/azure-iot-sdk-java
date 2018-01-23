@@ -152,7 +152,7 @@ public class JobResult
             this.error = jobsResponseParser.getError().toJson();
         }
 
-        TwinState twinState = jobsResponseParser.getUpdateTwin();
+        TwinState twinState = jobsResponseParser.getUpdateTwinState();
         if(twinState != null)
         {
             this.updateTwin = twinState.getDeviceId() == null || twinState.getDeviceId().isEmpty() ?

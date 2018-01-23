@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 
 /*
     Unit tests for Device Twin
-    Coverage : 94% method, 88% line
+    Coverage : 94% method, 80% line
  */
 public class DeviceTwinTest
 {

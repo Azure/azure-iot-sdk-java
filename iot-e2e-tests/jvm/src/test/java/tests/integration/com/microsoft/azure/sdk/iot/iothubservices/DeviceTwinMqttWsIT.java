@@ -297,6 +297,8 @@ public class DeviceTwinMqttWsIT
                 totalCount++;
             }
         }
+        Integer version = deviceState.sCDeviceForTwin.getReportedPropertiesVersion();
+        assertNotNull(version);
         return totalCount;
     }
 

@@ -815,7 +815,7 @@ public class JobsResponseParserTest
         assertEquals("scheduleUpdateTwin", jobsResponseParser.getType());
         assertEquals("enqueued", jobsResponseParser.getJobsStatus());
         assertNull(jobsResponseParser.getCloudToDeviceMethod());
-        assertNotNull(jobsResponseParser.getUpdateTwin());
+        assertNotNull(jobsResponseParser.getUpdateTwinState());
         assertNotNull(jobsResponseParser.getJobStatistics());
         assertEquals("Valid failure reason", jobsResponseParser.getFailureReason());
         assertEquals("Valid status message", jobsResponseParser.getStatusMessage());
@@ -852,7 +852,7 @@ public class JobsResponseParserTest
         assertEquals("completed", jobsResponseParser.getJobsStatus());
         assertNotNull(jobsResponseParser.getOutcome());
         assertNull(jobsResponseParser.getCloudToDeviceMethod());
-        assertNull(jobsResponseParser.getUpdateTwin());
+        assertNull(jobsResponseParser.getUpdateTwinState());
         assertNull(jobsResponseParser.getJobStatistics());
         assertNull(jobsResponseParser.getError());
     }

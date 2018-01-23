@@ -34,9 +34,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class DeviceTwinAmqpsIT
 {
@@ -623,6 +621,8 @@ public class DeviceTwinAmqpsIT
             assertEquals(dp.getKey(), PROPERTY_KEY);
             assertEquals(dp.getValue(), PROPERTY_VALUE_UPDATE);
         }
+        Integer version = x509DeviceUnderTest.sCDeviceForTwin.getDesiredPropertiesVersion();
+        assertNotNull(version);
 
         tearDownTwin(x509DeviceUnderTest);
         registryManager.removeDevice(x509DeviceUnderTest.sCDeviceForRegistryManager.getDeviceId());

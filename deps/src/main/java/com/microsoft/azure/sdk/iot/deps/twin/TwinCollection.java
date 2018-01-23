@@ -419,13 +419,16 @@ public class TwinCollection extends HashMap<String, Object>
 
         for(Entry<String, TwinMetadata> entry: this.metadataMap.entrySet())
         {
-            JsonObject subMapJson = entry.getValue().toJsonElement().getAsJsonObject();
-            Object value = get(entry.getKey());
-            if(value instanceof TwinCollection)
+            if(entry.getValue() != null)
             {
-                ((TwinCollection) value).fillJsonMetadata(subMapJson);
+                JsonObject subMapJson = entry.getValue().toJsonElement().getAsJsonObject();
+                Object value = get(entry.getKey());
+                if (value instanceof TwinCollection)
+                {
+                    ((TwinCollection) value).fillJsonMetadata(subMapJson);
+                }
+                jsonMetadata.add(entry.getKey(), subMapJson);
             }
-            jsonMetadata.add(entry.getKey(), subMapJson);
         }
     }
 
