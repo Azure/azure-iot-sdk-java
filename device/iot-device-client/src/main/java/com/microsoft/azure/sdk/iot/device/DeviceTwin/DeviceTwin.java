@@ -8,7 +8,6 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinMetadata;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import sun.rmi.server.InactiveGroupException;
 
 import java.io.IOException;
 import java.util.Date;
