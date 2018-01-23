@@ -78,7 +78,7 @@ public class JobsResponseParserTest
         assertEquals("enqueued", Deencapsulation.getField(jobsResponseParser, "jobsStatus").toString());
     }
 
-    /* Tests_SRS_JOBSRESPONSEPARSER_21_003: [If the json contains `updateTwin`, the createFromJson shall parse the content of it for TwinParser class.] */
+    /* Tests_SRS_JOBSRESPONSEPARSER_21_003: [If the json contains `updateTwin`, the createFromJson shall parse the content of it for TwinState class.] */
     @Test
     public void constructorTwinSucceed() throws ParseException
     {

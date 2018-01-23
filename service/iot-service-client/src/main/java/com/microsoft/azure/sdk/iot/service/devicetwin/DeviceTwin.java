@@ -453,7 +453,7 @@ public class DeviceTwin
 
         if (nextObject instanceof String)
         {
-            //Codes_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinParser and provide the response on DeviceTwinDevice.]
+            //Codes_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinState and provide the response on DeviceTwinDevice.]
             String twinJson = (String) nextObject;
             return jsonToDeviceTwinDevice(twinJson);
         }

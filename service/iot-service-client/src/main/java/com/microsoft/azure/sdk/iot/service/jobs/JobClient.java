@@ -300,23 +300,23 @@ public class JobClient
             reported = setToMap(device.getReportedProperties());
         }
 
-        TwinState twinParser = new TwinState(tags, desired, reported);
+        TwinState twinState = new TwinState(tags, desired, reported);
 
         if(device.getDeviceId() != null)
         {
-            twinParser.setDeviceId(device.getDeviceId());
+            twinState.setDeviceId(device.getDeviceId());
         }
 
         if(device.getETag() == null)
         {
-            twinParser.setETag("*");
+            twinState.setETag("*");
         }
         else
         {
-            twinParser.setETag(device.getETag());
+            twinState.setETag(device.getETag());
         }
 
-        return twinParser;
+        return twinState;
     }
 
     private TwinCollection setToMap(Set<Pair> set)

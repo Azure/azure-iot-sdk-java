@@ -126,7 +126,7 @@ public class JobsParser
         /* Codes_SRS_JOBSPARSER_21_010: [If the updateTwin is null, the constructor shall throws IllegalArgumentException.] */
         if (updateTwin == null)
         {
-            throw new IllegalArgumentException("Null twinParser parameter");
+            throw new IllegalArgumentException("Null twinState parameter");
         }
 
         /* Codes_SRS_JOBSPARSER_21_007: [The constructor shall evaluate and store the commons parameters using the internal function validateCommonFields.] */

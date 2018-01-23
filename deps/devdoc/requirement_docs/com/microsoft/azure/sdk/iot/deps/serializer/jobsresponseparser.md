@@ -25,7 +25,7 @@ public class JobsResponseParser
     public String getJobType();
     public String getJobStatus();
     public MethodParser getCloudToDeviceMethod();
-    public TwinParser getUpdateTwin();
+    public TwinState getUpdateTwin();
     public String getFailureReason();
     public String getStatusMessage();
     public JobsStatisticsParser getJobStatistics();
@@ -43,7 +43,7 @@ public static JobsResponseParser createFromJson(String json) throws IllegalArgum
 ```
 **SRS_JOBSRESPONSEPARSER_21_001: [**The createFromJson shall create a new instance of JobsResponseParser class.**]**  
 **SRS_JOBSRESPONSEPARSER_21_002: [**The createFromJson shall parse the provided string for JobsResponseParser class.**]**  
-**SRS_JOBSRESPONSEPARSER_21_003: [**If the json contains `updateTwin`, the createFromJson shall parse the content of it for TwinParser class.**]**  
+**SRS_JOBSRESPONSEPARSER_21_003: [**If the json contains `updateTwin`, the createFromJson shall parse the content of it for TwinState class.**]**
 **SRS_JOBSRESPONSEPARSER_21_004: [**If the json contains `cloudToDeviceMethod`, the createFromJson shall parse the content of it for MethodParser class.**]** 
 **SRS_JOBSRESPONSEPARSER_25_028: [**If the json contains `outcome`, the createFromJson shall parse the value of the key `deviceMethodResponse` for MethodParser class.**]** 
 **SRS_JOBSRESPONSEPARSER_25_029: [**If the json contains `outcome`, and the key `deviceMethodResponse` does not exist then this method shall create empty method parser for MethodParser class.**]** 
@@ -120,7 +120,7 @@ public MethodParser getCloudToDeviceMethod()
 
 ### getUpdateTwin
 ```java
-public TwinParser getUpdateTwin()
+public TwinState getUpdateTwin()
 ```
 **SRS_JOBSRESPONSEPARSER_21_022: [**The getUpdateTwin shall return the updateTwin value.**]**  
 

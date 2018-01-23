@@ -21,7 +21,7 @@ public class QueryResponseParser
 
     public String getType();
     public List<String> getJsonItems();
-    public List<TwinParser> getTwins() throws IllegalStateException, IllegalArgumentException;
+    public List<TwinState> getTwins() throws IllegalStateException, IllegalArgumentException;
     public List getDeviceJobs() throws IllegalStateException, IllegalArgumentException;
     public List getJobs() throws IllegalStateException, IllegalArgumentException;
     public List<String> getRawData() throws IllegalStateException;        
@@ -52,7 +52,7 @@ public List<String> getJsonItems();
 
 ### getTwins
 ```java
-public List<TwinParser> getTwins() throws IllegalStateException, IllegalArgumentException;
+public List<TwinState> getTwins() throws IllegalStateException, IllegalArgumentException;
 ```
 **SRS_QUERY_RESPONSE_PARSER_25_010: [**The getTwins shall return the collection of twin parsers as retrieved and parsed from json.**]**  
 **SRS_QUERY_RESPONSE_PARSER_25_011: [**The getTwins shall throw IllegalStateException if the type represented by json is not "twin"**]**  

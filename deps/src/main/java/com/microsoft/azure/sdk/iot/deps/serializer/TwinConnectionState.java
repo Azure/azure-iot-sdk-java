@@ -6,8 +6,6 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * INNER TWINPARSER CLASS
- *
  * Enum for device connection state
  */
 public enum TwinConnectionState

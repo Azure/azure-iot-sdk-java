@@ -7,8 +7,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * INNER TWINPARSER CLASS
- *
  * Twin management representation
  *
  * This class is part of the Twin. It contains the Device identity management.

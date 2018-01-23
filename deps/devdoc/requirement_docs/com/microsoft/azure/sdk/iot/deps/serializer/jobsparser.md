@@ -18,7 +18,7 @@ public class JobsParser
             String queryCondition, Date startTime, long maxExecutionTimeInSeconds)
             throws IllegalArgumentException;
     public JobsParser(
-            String jobId, TwinParser updateTwin,
+            String jobId, TwinState updateTwin,
             String queryCondition, Date startTime, long maxExecutionTimeInSeconds)
             throws IllegalArgumentException;
 
@@ -47,7 +47,7 @@ public JobsParser(
 ### JobsParser
 ```java
 public JobsParser(
-        String jobId, TwinParser updateTwin,
+        String jobId, TwinState updateTwin,
         String queryCondition, Date startTime, long maxExecutionTimeInSeconds)
         throws IllegalArgumentException;
 ```
