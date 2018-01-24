@@ -154,7 +154,16 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
 
                 this.amqpConnection.setListener(this);
 
-                this.amqpConnection.openAmqpAsync();
+                if (saslHandler != null)
+                {
+                    // SRS_ProvisioningAmqpOperations_34_019: [If the provided sasl handler is not null, this function shall open the underlying amqpConnection asynchronously.]
+                    this.amqpConnection.openAmqpAsync();
+                }
+                else
+                {
+                    // SRS_ProvisioningAmqpOperations_34_020: [If the provided sasl handler is null, this function shall open the underlying amqpConnection synchronously.]
+                    this.amqpConnection.open();
+                }
             }
         }
         catch (Exception ex)

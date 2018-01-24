@@ -62,7 +62,32 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
     @Override
     public synchronized void open(RequestData requestData) throws ProvisioningDeviceConnectionException
     {
-        //dummy call
+        if (requestData == null)
+        {
+            //Codes_SRS_ContractAPIAmqp_34_006: [If requestData is null, this function shall throw a ProvisioningDeviceConnectionException.]
+            throw new ProvisioningDeviceConnectionException(new IllegalArgumentException("requestData cannot be null"));
+        }
+
+        if (requestData.isX509())
+        {
+            String registrationId = requestData.getRegistrationId();
+            if (registrationId == null || registrationId.isEmpty())
+            {
+                //Codes_SRS_ContractAPIAmqp_34_007: [If requestData contains a null or empty registrationId, this function shall throw a ProvisioningDeviceConnectionException.]
+                throw new ProvisioningDeviceConnectionException(new IllegalArgumentException("registration Id cannot be null or empty"));
+            }
+
+            SSLContext sslContext = requestData.getSslContext();
+            if (sslContext == null)
+            {
+                //Codes_SRS_ContractAPIAmqp_34_008: [If requestData contains a null SSLContext, this function shall throw a ProvisioningDeviceConnectionException.]
+                throw new ProvisioningDeviceConnectionException(new IllegalArgumentException("sslContext cannot be null"));
+            }
+
+            //Codes_SRS_ContractAPIAmqp_34_014: [If the requestData is using X509, this function shall open the
+            // underlying provisioningAmqpOperations object with the provided registrationId and sslContext.]
+            this.provisioningAmqpOperations.open(registrationId, sslContext, this.amqpSaslHandler, this.useWebSockets);
+        }
     }
 
     /**

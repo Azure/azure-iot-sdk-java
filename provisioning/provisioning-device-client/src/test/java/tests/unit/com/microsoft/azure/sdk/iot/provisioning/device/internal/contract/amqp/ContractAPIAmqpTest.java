@@ -8,11 +8,13 @@
 package tests.unit.com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp;
 
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpDeviceOperations;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.SaslHandler;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.ProvisioningAmqpOperations;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.ContractAPIAmqp;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import mockit.Deencapsulation;
 import mockit.Mocked;
@@ -35,7 +37,7 @@ import static org.junit.Assert.assertEquals;
 
 /*
  * Unit tests for ContractAPIHttp
- * Code coverage : 100% methods, 100% lines
+ * Code coverage : 100% methods, 88% lines
  */
 @RunWith(JMockit.class)
 public class ContractAPIAmqpTest
@@ -675,5 +677,119 @@ public class ContractAPIAmqpTest
         contractAPIAmqp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
+    }
+
+    //Tests_SRS_ContractAPIAmqp_34_014: [If the requestData is using X509, this function shall open the underlying provisioningAmqpOperations object with the provided registrationId and sslContext.]
+    @Test
+    public void openDoesNothingIfUsingTPM() throws ProvisioningDeviceClientException
+    {
+        //arrange
+        ContractAPIAmqp contractAPIAmqp = createContractClass();
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.isX509();
+                result = false;
+            }
+        };
+
+        //act
+        contractAPIAmqp.open(mockedRequestData);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedProvisionAmqpConnection.open(anyString, (SSLContext) any, (SaslHandler) any, anyBoolean);
+                times = 0;
+            }
+        };
+    }
+
+    //Tesst_SRS_ContractAPIAmqp_34_006: [If requestData is null, this function shall throw a ProvisioningDeviceConnectionException.]
+    @Test (expected = ProvisioningDeviceConnectionException.class)
+    public void openThrowsForNullRequestData() throws ProvisioningDeviceClientException
+    {
+        //arrange
+        ContractAPIAmqp contractAPIAmqp = createContractClass();
+
+         //act
+        contractAPIAmqp.open(null);
+    }
+
+    //Tests_SRS_ContractAPIAmqp_34_007: [If requestData contains a null or empty registrationId, this function shall throw a ProvisioningDeviceConnectionException.]
+    @Test (expected = ProvisioningDeviceConnectionException.class)
+    public void openThrowsForNullRegistrationId() throws ProvisioningDeviceClientException
+    {
+        //arrange
+        ContractAPIAmqp contractAPIAmqp = createContractClass();
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.isX509();
+                result = true;
+                mockedRequestData.getRegistrationId();
+                result = null;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+            }
+        };
+
+        //act
+        contractAPIAmqp.open(mockedRequestData);
+    }
+
+    //Codes_SRS_ContractAPIAmqp_34_008: [If requestData contains a null SSLContext, this function shall throw a ProvisioningDeviceConnectionException.]
+    @Test (expected = ProvisioningDeviceConnectionException.class)
+    public void openThrowsForNullSSLContext() throws ProvisioningDeviceClientException
+    {
+        //arrange
+        ContractAPIAmqp contractAPIAmqp = createContractClass();
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.isX509();
+                result = true;
+                mockedRequestData.getSslContext();
+                result = null;
+                mockedRequestData.getRegistrationId();
+                result = "some registration id";
+            }
+        };
+
+        //act
+        contractAPIAmqp.open(mockedRequestData);
+    }
+
+    //Tests_SRS_ContractAPIAmqp_34_014: [If the requestData is using X509, this function shall open the underlying provisioningAmqpOperations object with the provided registrationId and sslContext.]
+    @Test
+    public void openCallsOpenOnProvisioningAmqpOperations() throws ProvisioningDeviceClientException
+    {
+        //arrange
+        ContractAPIAmqp contractAPIAmqp = createContractClass();
+        final String registrationId = "some registrationId";
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.isX509();
+                result = true;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getRegistrationId();
+                result = registrationId;
+            }
+        };
+
+        //act
+        contractAPIAmqp.open(mockedRequestData);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedProvisionAmqpConnection.open(registrationId, mockedSslContext, null, false);
+                times = 1;
+            }
+        };
     }
 }

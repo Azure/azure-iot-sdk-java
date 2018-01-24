@@ -10,6 +10,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.device.internal.cont
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpListener;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpMessage;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsConnection;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.SaslHandler;
 import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.ProvisioningAmqpOperations;
@@ -32,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 
 /*
  * Unit tests for ContractAPIHttp
- * Code coverage : 100% methods, 100% lines
+ * Code coverage : 100% methods, 91% lines
  */
 @RunWith(JMockit.class)
 public class ProvisioningAmqpOperationsTest
@@ -66,6 +67,8 @@ public class ProvisioningAmqpOperationsTest
     @Mocked
     private ObjectLock mockedObjectLock = new ObjectLock();
 
+    @Mocked
+    private SaslHandler mockedSaslHandler;
 
     private void setupSendReceiveMocks() throws Exception
     {
@@ -221,7 +224,7 @@ public class ProvisioningAmqpOperationsTest
         {
             {
                 mockedAmqpConnection.setListener((AmqpListener)any);
-                mockedAmqpConnection.openAmqpAsync();
+                mockedAmqpConnection.open();
                 result = new Exception();
             }
         };
@@ -252,7 +255,7 @@ public class ProvisioningAmqpOperationsTest
         new Verifications()
         {
             {
-                mockedAmqpConnection.openAmqpAsync();
+                mockedAmqpConnection.open();
                 times = 1;
             }
         };
@@ -545,5 +548,49 @@ public class ProvisioningAmqpOperationsTest
         provisioningAmqpOperations.messageSent();
 
         //assert
+    }
+
+    // SRS_ProvisioningAmqpOperations_34_020: [If the provided sasl handler is null, this function shall open the underlying amqpConnection synchronously.]
+    @Test
+    public void openOpensAmqpConnectionSynchronouslyWithoutSaslHandler() throws ProvisioningDeviceClientException, IOException
+    {
+        //arrange
+        ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
+
+        //act
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, null, false);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedAmqpConnection.open();
+                times = 1;
+                mockedAmqpConnection.openAmqpAsync();
+                times = 0;
+            }
+        };
+    }
+
+    // SRS_ProvisioningAmqpOperations_34_019: [If the provided sasl handler is not null, this function shall open the underlying amqpConnection asynchronously.]
+    @Test
+    public void openOpensAmqpConnectionAsynchronouslyWithSaslHandler() throws ProvisioningDeviceClientException, IOException
+    {
+        //arrange
+        ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
+
+        //act
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, mockedSaslHandler, false);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedAmqpConnection.open();
+                times = 0;
+                mockedAmqpConnection.openAmqpAsync();
+                times = 1;
+            }
+        };
     }
 }
