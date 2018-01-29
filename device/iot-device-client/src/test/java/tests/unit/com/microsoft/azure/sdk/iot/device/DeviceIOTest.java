@@ -16,6 +16,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -53,7 +54,11 @@ public class DeviceIOTest
     @Mocked
     Executors mockExecutors;
 
-    @Mocked ScheduledExecutorService mockScheduler;
+    @Mocked
+    ScheduledExecutorService mockScheduler;
+
+    @Mocked
+    Collection<DeviceClientConfig> mockedCollection;
 
     private final static long SEND_PERIOD_MILLIS = 10L;
     private final static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
@@ -353,7 +358,7 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                mockAmqpsTransport.open();
+                mockAmqpsTransport.open(mockedCollection);
                 times = 1;
             }
         };
@@ -377,7 +382,7 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                mockAmqpsTransport.open();
+                mockAmqpsTransport.open(mockedCollection);
                 times = 1;
                 new IotHubSendTask(mockAmqpsTransport);
                 result = mockIotHubSendTask;
@@ -418,7 +423,7 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                mockAmqpsTransport.open();
+                mockAmqpsTransport.open(mockedCollection);
                 result = new IOException();
                 times = 1;
             }
@@ -473,8 +478,8 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                mockAmqpsTransport.multiplexOpen(deviceClientList);
-                times = 1;
+                //mockAmqpsTransport.multiplexOpen(deviceClientList);
+                //times = 1;
                 new IotHubSendTask(mockAmqpsTransport);
                 result = mockIotHubSendTask;
                 times = 1;

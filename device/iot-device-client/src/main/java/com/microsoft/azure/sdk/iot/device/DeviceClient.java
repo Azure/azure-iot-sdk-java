@@ -115,6 +115,7 @@ public final class DeviceClient implements Closeable
 
     private TransportClient transportClient;
 
+
     /**
      * Constructor that takes a connection string and a transport client as an argument.
      *
@@ -155,6 +156,7 @@ public final class DeviceClient implements Closeable
         // Codes_SRS_DEVICECLIENT_12_009: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
         IotHubConnectionString iotHubConnectionString = new IotHubConnectionString(connString);
         this.config = new DeviceClientConfig(iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
+        this.config.setProtocol(this.transportClient.getIotHubClientProtocol());
 
         // Codes_SRS_DEVICECLIENT_12_011: [The constructor shall set the deviceIO to null.]
         this.deviceIO = null;
@@ -192,6 +194,7 @@ public final class DeviceClient implements Closeable
         //Codes_SRS_DEVICECLIENT_34_055: [If the provided connection string contains an expired SAS token, a SecurityException shall be thrown.]
         IotHubConnectionString iotHubConnectionString = new IotHubConnectionString(connString);
         this.config = new DeviceClientConfig(iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
+        this.config.setProtocol(protocol);
 
         //Codes_SRS_DEVICECLIENT_21_002: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
         //Codes_SRS_DEVICECLIENT_21_003: [The constructor shall save the connection configuration using the object DeviceClientConfig.]
@@ -220,6 +223,7 @@ public final class DeviceClient implements Closeable
         //Codes_SRS_DEVICECLIENT_34_063: [This function shall save the provided certificate and key within its config.]
         IotHubConnectionString iotHubConnectionString = new IotHubConnectionString(connString);
         this.config = new DeviceClientConfig(iotHubConnectionString, publicKeyCertificate, isCertificatePath, privateKey, isPrivateKeyPath);
+        this.config.setProtocol(protocol);
 
         //Codes_SRS_DEVICECLIENT_34_059: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
         //Codes_SRS_DEVICECLIENT_34_060: [The constructor shall save the connection configuration using the object DeviceClientConfig.]
@@ -266,6 +270,7 @@ public final class DeviceClient implements Closeable
         //Codes_SRS_DEVICECLIENT_34_066: [The provided security provider will be saved in config.]
         IotHubConnectionString connectionString = new IotHubConnectionString(uri, deviceId, null, null);
         this.config = new DeviceClientConfig(connectionString, securityProvider);
+        this.config.setProtocol(protocol);
 
         //Codes_SRS_DEVICECLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
         commonConstructorSetup(protocol);
@@ -325,7 +330,7 @@ public final class DeviceClient implements Closeable
 
         this.ioTHubConnectionType = IoTHubConnectionType.SINGLE_CLIENT;
         this.transportClient = null;
-        this.deviceIO = new DeviceIO(this.config, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS);
+        this.deviceIO = new DeviceIO(this.config, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS);
 
         this.logger = new CustomLogger(this.getClass());
         logger.LogInfo("DeviceClient object is created successfully, method name is %s ", logger.getMethodName());

@@ -4,15 +4,14 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import com.microsoft.azure.sdk.iot.device.transport.State;
-import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
+import com.microsoft.azure.sdk.iot.device.transport.*;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Queue;
 
-public class MqttIotHubConnection implements MqttConnectionStateListener
+public class MqttIotHubConnection implements MqttConnectionStateListener, IotHubTransportConnection
 {
     /** The MQTT connection lock. */
     private final Object MQTT_CONNECTION_LOCK = new Object();
@@ -99,8 +98,12 @@ public class MqttIotHubConnection implements MqttConnectionStateListener
      *
      * @throws IOException if a connection could not to be established.
      */
-    public void open() throws IOException
+    public void open(Queue<DeviceClientConfig> deviceClientConfigs) throws IOException
     {
+        if (deviceClientConfigs.size() > 1)
+        {
+            throw new UnsupportedOperationException("Mqtt does not support Multiplexing");
+        }
         synchronized (MQTT_CONNECTION_LOCK)
         {
             //Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [If the MQTT connection is already open,
@@ -377,5 +380,23 @@ public class MqttIotHubConnection implements MqttConnectionStateListener
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_029: [If this object's connection state callback is not null, this function shall fire that callback with the saved context and status CONNECTION_SUCCESS.]
             this.stateCallback.execute(IotHubConnectionState.CONNECTION_SUCCESS, this.stateCallbackContext);
         }
+    }
+
+    @Override
+    public void addListener(IotHubListener listener) throws IOException
+    {
+
+    }
+
+    @Override
+    public IotHubStatusCode sendMessage(Message message) throws IOException
+    {
+        return null;
+    }
+
+    @Override
+    public boolean sendMessageResult(Message message, IotHubMessageResult result) throws IOException
+    {
+        return false;
     }
 }

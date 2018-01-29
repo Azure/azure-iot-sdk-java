@@ -60,6 +60,8 @@ public final class DeviceClientConfig
 
     private AuthType authenticationType;
 
+    private IotHubClientProtocol protocol;
+
     /**
      * Constructor
      *
@@ -190,6 +192,16 @@ public final class DeviceClientConfig
         this.logger = new CustomLogger(this.getClass());
         logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
                 connectionString.getHostName(), connectionString.getDeviceId(), logger.getMethodName());
+    }
+
+    public IotHubClientProtocol getProtocol()
+    {
+        return protocol;
+    }
+
+    void setProtocol(IotHubClientProtocol protocol)
+    {
+        this.protocol = protocol;
     }
 
     /**

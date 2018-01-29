@@ -4,10 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubCallbackPacket;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
-import com.microsoft.azure.sdk.iot.device.transport.State;
+import com.microsoft.azure.sdk.iot.device.transport.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -26,7 +23,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public final class AmqpsTransport implements IotHubTransport, ServerListener
 {
-    List<DeviceClient> deviceClientList;
+    private Queue<DeviceClientConfig> deviceClientConfigs;
 
     /** The state of the AMQPS transport. */
     private State state;
@@ -41,7 +38,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     private final Map<Integer, IotHubOutboundPacket> inProgressMessages = new ConcurrentHashMap<>();
 
     /** Messages received from the IoT Hub */
-    private final Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
+    //private final Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
+    private final Queue<Message> receivedMessages = new LinkedBlockingQueue<>();
 
     /** Messages whose callbacks that are waiting to be invoked. */
     private final Queue<IotHubCallbackPacket> callbackList = new LinkedBlockingQueue<>();
@@ -51,7 +49,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     private Object stateCallbackContext;
     private final CustomLogger logger;
 
-    private final DeviceClientConfig deviceClientConfig;
+    private DeviceClientConfig defaultConfig;
 
     private int currentReconnectionAttempt = 1;
 
@@ -65,9 +63,9 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     public AmqpsTransport(final DeviceClientConfig config)
     {
         // Codes_SRS_AMQPSTRANSPORT_15_001: [The constructor shall save the input parameters into instance variables.]
-        this.deviceClientConfig = config;
+        this.defaultConfig = config;
 
-        this.deviceClientList = null;
+        this.deviceClientConfigs = null;
 
         // Codes_SRS_AMQPSTRANSPORT_15_002: [The constructor shall set the transport state to CLOSED.]
         this.state = State.CLOSED;
@@ -82,22 +80,32 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
      *
      * @throws IOException if a communication channel cannot be established.
      */
-    public synchronized void open() throws IOException
+    public synchronized void open(Collection<DeviceClientConfig> deviceClientConfigs) throws IOException
     {
+        if ((deviceClientConfigs == null) || deviceClientConfigs.isEmpty())
+        {
+            throw new IllegalArgumentException("deviceClientConfigs cannot be null or empty");
+        }
         // Codes_SRS_AMQPSTRANSPORT_15_003: [If an AMQPS connection is already onConnectionInit, the function shall do nothing.]
         if (this.state != State.OPEN)
         {
             logger.LogInfo("Opening the connection..., method name is %s ", logger.getMethodName());
 
+            this.deviceClientConfigs = new LinkedBlockingQueue<DeviceClientConfig>(deviceClientConfigs);
+            this.defaultConfig = this.deviceClientConfigs.peek();
+
             // Codes_SRS_AMQPSTRANSPORT_15_004: [The function shall open an AMQPS connection with the IoT Hub given in the configuration.]
-            this.connection = new AmqpsIotHubConnection(this.deviceClientConfig, currentReconnectionAttempt);
+            this.connection = new AmqpsIotHubConnection(this.defaultConfig, currentReconnectionAttempt);
 
             try
             {
                 // Codes_SRS_AMQPSTRANSPORT_15_005: [The function shall add the transport to the list of listeners subscribed to the connection events.]
                 this.connection.addListener(this);
 
-                this.connection.open();
+                this.connection.open(this.deviceClientConfigs);
+
+                //this.connection.authenticate();
+
             }
             catch (Exception e)
             {
@@ -119,12 +127,12 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
      *
      * @throws IOException if a communication channel cannot be established.
      */
-    public void multiplexOpen(List<DeviceClient> deviceClientList) throws IOException
+    /*public void multiplexOpen(List<DeviceClientConfig> deviceClientConfigs) throws IOException
     {
-        // Codes_SRS_AMQPSTRANSPORT_12_009: [The function shall throw IllegalArgumentException if the deviceClientList is null or empty.]
+        // Codes_SRS_AMQPSTRANSPORT_12_009: [The function shall throw IllegalArgumentException if the deviceClientConfigs is null or empty.]
         if ((deviceClientList == null) || deviceClientList.isEmpty())
         {
-            throw new IllegalArgumentException("deviceClientList cannot be null or empty");
+            throw new IllegalArgumentException("deviceClientConfigs cannot be null or empty");
         }
         // Codes_SRS_AMQPSTRANSPORT_12_010: [The function shall throw IllegalStateException if the transport state is already OPEN.]
         else if (this.state == State.OPEN)
@@ -135,10 +143,10 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         {
             logger.LogInfo("Opening the connection..., method name is %s ", logger.getMethodName());
 
-            this.deviceClientList = deviceClientList;
+            this.deviceClientConfigs = deviceClientList;
 
             // Codes_SRS_AMQPSTRANSPORT_12_011: [The function shall open an AMQPS connection with the IoT Hub given in the configuration. ]
-            this.connection = new AmqpsIotHubConnection(this.deviceClientConfig, currentReconnectionAttempt);
+            this.connection = new AmqpsIotHubConnection(this.defaultConfig, currentReconnectionAttempt);
 
             try
             {
@@ -146,9 +154,9 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                 this.connection.addListener(this);
 
                 // Codes_SRS_AMQPSTRANSPORT_12_013: [The function shall add the device clients to the underlying connection.]
-                for (int i = 1; i < this.deviceClientList.size(); i++)
+                for (int i = 1; i < this.deviceClientConfigs.size(); i++)
                 {
-                    this.connection.addDeviceOperationSession(this.deviceClientList.get(i).getConfig());
+                    this.connection.addDeviceOperationSession(this.deviceClientConfigs.get(i).getConfig());
                 }
 
                 // Codes_SRS_AMQPSTRANSPORT_12_014: [The function shall open the connection.]
@@ -166,7 +174,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
 
             logger.LogInfo("Connection has been opened, method name is %s ", logger.getMethodName());
         }
-    }
+    }*/
 
     /**
      * Closes all resources used to communicate with an IoT Hub. Once {@code close()} is
@@ -313,6 +321,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                 {
                     logger.LogInfo("Converting the IoT Hub message into AmqpsMessage, method name is %s ", logger.getMethodName());
 
+/*
                     // Codes_SRS_AMQPSTRANSPORT_12_002: [The function shall call device operation objects to convert the IoTHubMessage to Proton message.]
                     AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = this.connection.convertToProton(message);
 
@@ -322,8 +331,9 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                         // Should never happen
                         throw new IllegalStateException("No handler found for message conversion!");
                     }
+*/
 
-                    if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.deviceClientConfig.getSasTokenAuthentication().isRenewalNecessary())
+                    if (this.defaultConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.defaultConfig.getSasTokenAuthentication().isRenewalNecessary())
                     {
                         //Codes_SRS_AMQPSTRANSPORT_34_041: [If the config is using sas token authentication and its sas token has expired and cannot be renewed, the message shall not be sent, an UNAUTHORIZED message callback shall be added to the callback queue and SAS_TOKEN_EXPIRED state callback shall be fired.]
                         logger.LogInfo("Creating a callback for the message with expired sas token with UNAUTHORIZED status, method name is %s ", logger.getMethodName());
@@ -338,16 +348,24 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                     }
                     else
                     {
-                        // Codes_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
+/*                        // Codes_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
                         Integer sendHash = connection.sendMessage(amqpsConvertToProtonReturnValue.getMessageImpl(), amqpsConvertToProtonReturnValue.getMessageType(), message.getIotHubConnectionString());
 
                         // Codes_SRS_AMQPSTRANSPORT_15_016: [If the sent message hash is valid, it shall be added to the in progress map.]
                         if (sendHash != -1)
                         {
                             this.inProgressMessages.put(sendHash, packet);
-                        }
-                        // Codes_SRS_AMQPSTRANSPORT_15_017: [If the sent message hash is not valid, it shall be buffered to be sent in a subsequent attempt.]
+                        }*/
+/*                        // Codes_SRS_AMQPSTRANSPORT_15_017: [If the sent message hash is not valid, it shall be buffered to be sent in a subsequent attempt.]
                         else
+                        {
+                            failedMessages.add(packet);
+                        }*/
+                        try
+                        {
+                            this.connection.sendMessage(message);
+                        }
+                        catch (IOException e)
                         {
                             failedMessages.add(packet);
                         }
@@ -406,40 +424,55 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         if ((this.state == State.OPEN) && (this.receivedMessages.size() > 0))
         {
             logger.LogInfo("Consuming a message received from IoT Hub using receive message queue, method name is %s ", logger.getMethodName());
-            AmqpsMessage receivedMessage = this.receivedMessages.remove();
+            //AmqpsMessage receivedMessage = this.receivedMessages.remove();
 
 
             logger.LogInfo("Converting the AmqpsMessage to IoT Hub message, method name is %s ", logger.getMethodName());
 
             // Codes_SRS_AMQPSTRANSPORT_12_006: [The function shall call device operation objects to convert the Proton message to IoTHubMessage.]
-            AmqpsConvertFromProtonReturnValue amqpsHandleMessageReturnValue = this.connection.convertFromProton(receivedMessage, receivedMessage.getDeviceClientConfig());
+//            AmqpsConvertFromProtonReturnValue amqpsHandleMessageReturnValue = this.connection.convertFromProton(receivedMessage, receivedMessage.getDeviceClientConfig());
+//
+//            // Codes_SRS_AMQPSTRANSPORT_12_007: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
+//            if (amqpsHandleMessageReturnValue == null)
+//            {
+//                // Should never happen
+//                throw new IllegalStateException("No handler found for received message!");
+//            }
 
-            // Codes_SRS_AMQPSTRANSPORT_12_007: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
-            if (amqpsHandleMessageReturnValue == null)
-            {
-                // Should never happen
-                throw new IllegalStateException("No handler found for received message!");
-            }
-
-            // Codes_SRS_AMQPSTRANSPORT_12_008: [The function shall return if there is no message callback defined.]
+   /*         // Codes_SRS_AMQPSTRANSPORT_12_008: [The function shall return if there is no message callback defined.]
             if (amqpsHandleMessageReturnValue.getMessageCallback() == null)
             {
                 logger.LogError("Callback is not defined therefore response to IoT Hub cannot be generated. All received messages will be removed from receive message queue, method name is %s ", logger.getMethodName());
                 return;
             }
-
+*/
             logger.LogInfo("Executing the callback function for received message, method name is %s ", logger.getMethodName());
             // Codes_SRS_AMQPSTRANSPORT_15_026: [The function shall invoke the callback on the message.]
-            IotHubMessageResult result = amqpsHandleMessageReturnValue.getMessageCallback().execute(amqpsHandleMessageReturnValue.getMessage(), amqpsHandleMessageReturnValue.getMessageContext());
+            /*IotHubMessageResult result = amqpsHandleMessageReturnValue.getMessageCallback().execute(amqpsHandleMessageReturnValue.getMessage(), amqpsHandleMessageReturnValue.getMessageContext());*/
 
-            // Codes_SRS_AMQPSTRANSPORT_15_027: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
+            Message receivedMessage = this.receivedMessages.remove();
+            IotHubMessageResult result = null;
+            if (receivedMessage instanceof IotHubTransportMessage)
+            {
+                result = ((IotHubTransportMessage) receivedMessage).getMessageCallback().execute(receivedMessage, ((IotHubTransportMessage) receivedMessage).getMessageCallbackContext());
+            }
+            else
+            {
+                throw new IOException("Unknown transport message could not be handled");
+            }
+
+            this.connection.sendMessageResult(receivedMessage, result);
+
+/*            // Codes_SRS_AMQPSTRANSPORT_15_027: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
             Boolean ackResult = this.connection.sendMessageResult(receivedMessage, result);
             // Codes_SRS_AMQPSTRANSPORT_15_028: [If the result could not be sent to IoTHub, the message shall be put back in the received messages queue to be processed again.]
             if (!ackResult)
             {
                 logger.LogWarn("Callback did not return a response for IoT Hub. Message has been added in the queue to be processed again, method name is %s", logger.getMethodName());
                 receivedMessages.add(receivedMessage);
-            }
+            }*/
+
+            //DONE : TODO: execute callback, sendMessage result, add to received queue if acked
         }
     }
 
@@ -523,7 +556,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                 this.currentReconnectionAttempt = 0;
             }
 
-            if (this.deviceClientList == null)
+            this.open(this.deviceClientConfigs);
+           /* if (this.deviceClientConfigs == null)
             {
                 // Codes_SRS_AMQPSTRANSPORT_12_019: [**Reconnect uses single device open if the device list is null.]
                 this.open();
@@ -531,8 +565,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             else
             {
                 // Codes_SRS_AMQPSTRANSPORT_12_020: [**Reconnect uses multiplexOpen if the device list is not null.]
-                this.multiplexOpen(this.deviceClientList);
-            }
+                this.multiplexOpen(this.deviceClientConfigs);
+            }*/
         }
         catch (IOException e)
         {
@@ -550,7 +584,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     {
         logger.LogInfo("Message with hashcode %s is received from IotHub on %s, method name is %s ", message.hashCode(), new Date(), logger.getMethodName());
         // Codes_SRS_AMQPSTRANSPORT_15_034: [The message received is added to the list of messages to be processed.]
-        this.receivedMessages.add(message);
+        //this.receivedMessages.add(message);
     }
 
     /**

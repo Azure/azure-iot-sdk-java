@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -55,6 +56,12 @@ public class MqttTransportTest
 
     @Mocked
     IotHubCallbackPacket mockedCallbackPacket;
+
+    @Mocked
+    Collection<DeviceClientConfig> mockedCollection;
+
+    @Mocked
+    Queue<DeviceClientConfig> mockedQueue;
 
     private class ConnectionStateCallbackContext {}
 
@@ -158,13 +165,13 @@ public class MqttTransportTest
         };
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         final MqttIotHubConnection expectedConnection = mockedConnection;
         new Verifications()
         {
             {
-                expectedConnection.open();
+                expectedConnection.open(mockedQueue);
             }
         };
 
@@ -178,14 +185,14 @@ public class MqttTransportTest
     public void openDoesNothingIfAlreadyOpened() throws IOException
     {
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
-        transport.open();
+        transport.open(mockedCollection);
+        transport.open(mockedCollection);
 
         final MqttIotHubConnection expectedConnection = mockedConnection;
         new Verifications()
         {
             {
-                expectedConnection.open();
+                expectedConnection.open(mockedQueue);
                 times = 1;
             }
         };
@@ -197,7 +204,7 @@ public class MqttTransportTest
     public void closeClosesMqttConnection() throws IOException
     {
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
 
         final MqttIotHubConnection expectedConnection = mockedConnection;
@@ -231,7 +238,7 @@ public class MqttTransportTest
     public void closeDoesNothingIfConnectionAlreadyClosed() throws IOException
     {
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
         transport.close();
 
@@ -268,7 +275,7 @@ public class MqttTransportTest
         };
         
         
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, null);
         transport.close();
 
@@ -306,7 +313,7 @@ public class MqttTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
 
         new VerificationsInOrder()
@@ -341,7 +348,7 @@ public class MqttTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
         transport.addMessage(mockMsg, mockCallback, context);
     }
@@ -359,7 +366,7 @@ public class MqttTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         // act
         transport.addMessage(mockMsg, mockCallback, context);
@@ -389,7 +396,7 @@ public class MqttTransportTest
         };
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
@@ -440,7 +447,7 @@ public class MqttTransportTest
         };
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
@@ -482,7 +489,7 @@ public class MqttTransportTest
         };
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
 
         //act
@@ -519,7 +526,7 @@ public class MqttTransportTest
         };
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
         transport.sendMessages();
@@ -549,7 +556,7 @@ public class MqttTransportTest
     public void sendMessagesFailsIfTransportClosed() throws IOException
     {
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
         transport.sendMessages();
     }
@@ -576,7 +583,7 @@ public class MqttTransportTest
         };
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
@@ -617,7 +624,7 @@ public class MqttTransportTest
         };
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockedMessage, mockedIotHubEventCallback, context);
         transport.sendMessages();
         try
@@ -651,7 +658,7 @@ public class MqttTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         boolean testIsEmpty = transport.isEmpty();
 
@@ -670,7 +677,7 @@ public class MqttTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -692,7 +699,7 @@ public class MqttTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -720,7 +727,7 @@ public class MqttTransportTest
         };
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.handleMessage();
 
         final MqttIotHubConnection expectedConnection = mockedConnection;
@@ -753,7 +760,7 @@ public class MqttTransportTest
         };
 
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.handleMessage();
 
         final MessageCallback expectedCallback = mockCallback;
@@ -782,7 +789,7 @@ public class MqttTransportTest
     public void handleMessageFailsIfTransportAlreadyClosed() throws IOException
     {
         MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
         transport.handleMessage();
     }
@@ -823,7 +830,7 @@ public class MqttTransportTest
         final MqttTransport mqttTransport = new MqttTransport(mockedConfig);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         final int messageCount = 1000;
-        mqttTransport.open();
+        mqttTransport.open(mockedCollection);
 
         for (int i = 0; i < messageCount; i++)
         {
@@ -860,7 +867,7 @@ public class MqttTransportTest
         final MqttTransport mqttTransport = new MqttTransport(mockedConfig);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         final int messageCount = 1000;
-        mqttTransport.open();
+        mqttTransport.open(mockedCollection);
 
         for (int i = 0; i < messageCount; i++)
         {
@@ -894,7 +901,7 @@ public class MqttTransportTest
         final MqttTransport mqttTransport = new MqttTransport(mockedConfig);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         final int messageCount = 1000;
-        mqttTransport.open();
+        mqttTransport.open(mockedCollection);
 
         for (int i = 0; i < messageCount; i++)
         {
@@ -928,7 +935,7 @@ public class MqttTransportTest
         final MqttTransport mqttTransport = new MqttTransport(mockedConfig);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         final int messageCount = 1000;
-        mqttTransport.open();
+        mqttTransport.open(mockedCollection);
 
         for (int i = 0; i < messageCount; i++)
         {
@@ -976,7 +983,7 @@ public class MqttTransportTest
         final MqttTransport mqttTransport = new MqttTransport(mockedConfig);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         final int messageCount = 10000;
-        mqttTransport.open();
+        mqttTransport.open(mockedCollection);
 
         for (int i = 0; i < messageCount; i++)
         {

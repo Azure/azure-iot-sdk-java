@@ -6,8 +6,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.transport.State;
-import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
+import com.microsoft.azure.sdk.iot.device.transport.*;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
@@ -22,20 +21,20 @@ import org.apache.qpid.proton.reactor.ReactorOptions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.*;
 
 /**
  * An AMQPS IotHub connection between a device and an IoTHub. This class contains functionality for sending/receiving
  * a message, and logic to re-establish the connection with the IoTHub in case it gets lost.
  */
-public final class AmqpsIotHubConnection extends BaseHandler
+public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTransportConnection
 {
     private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 1*60*1000; // 1 minute timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
     private State state;
+    private IotHubListener iothubListener;
 
     private int linkCredit = -1;
     /** The {@link Delivery} tag. */
@@ -51,6 +50,9 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     private final Boolean useWebSockets;
     private DeviceClientConfig deviceClientConfig;
+
+    private final Map<Integer, com.microsoft.azure.sdk.iot.device.Message> inProgressMessages = new ConcurrentHashMap<>();
+    private final Map<AmqpsMessage, com.microsoft.azure.sdk.iot.device.Message> sendAckMessages = new ConcurrentHashMap<>();
 
     private final List<ServerListener> listeners = new ArrayList<>();
     private ExecutorService executorService;
@@ -174,13 +176,21 @@ public final class AmqpsIotHubConnection extends BaseHandler
      *
      * @throws IOException If the reactor could not be initialized.
      */
-    public void open() throws IOException
+    public void open(Queue<DeviceClientConfig> deviceClientConfigs) throws IOException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_007: [If the AMQPS connection is already open, the function shall do nothing.]
         if(this.state == State.CLOSED)
         {
+            if(deviceClientConfigs.size() > 1)
+            {
+                while (!deviceClientConfigs.isEmpty())
+                {
+                    this.addDeviceOperationSession(deviceClientConfigs.remove());
+                }
+            }
+
             try
             {
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
@@ -627,10 +637,31 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 logger.LogInfo("Is state of remote Delivery COMPLETE ? %s, method name is %s ", state, logger.getMethodName());
                 logger.LogInfo("Inform listener that a message has been sent to IoT Hub along with remote state, method name is %s ", logger.getMethodName());
                 //let any listener know that the message was received by the server
+
+                if (this.inProgressMessages.containsKey(d.hashCode()))
+                {
+                    if (state)
+                    {
+                        // TODO: call listener message sent with the retrieving message from in progress queue
+                        iothubListener.messageSent(inProgressMessages.remove(d.hashCode()), null);
+                    }
+                    else
+                    {
+                        // TODO: call listener message sent with the retrieving message from in progress queue along with
+                        // the exception related to error
+                        iothubListener.messageSent(inProgressMessages.remove(d.hashCode()), new IOException("Message send unsuccessful"));
+                    }
+                }
+                else
+                {
+                    System.out.println("Received a message that was not sent");
+                }
+/*
                 for (ServerListener listener : listeners)
                 {
-                    listener.messageSent(d.hashCode(), state);
-                }
+                    //listener.messageSent(d.hashCode(), state);
+
+                }*/
                 // release the delivery object which created in sendMessage().
                 d.free();
             }
@@ -693,10 +724,11 @@ public final class AmqpsIotHubConnection extends BaseHandler
         {
             this.state = State.OPEN;
             // Codes_SRS_AMQPSIOTHUBCONNECTION_99_001: [All server listeners shall be notified when that the connection has been established.]
-            for(ServerListener listener : listeners)
+/*            for(ServerListener listener : listeners)
             {
                 listener.connectionEstablished();
-            }
+            }*/
+            iothubListener.connectionEstablished(null);
 
             // Codes_SRS_AMQPSIOTHUBCONNECTION_21_051 [The open lock shall be notified when that the connection has been established.]
             synchronized (openLock)
@@ -835,10 +867,41 @@ public final class AmqpsIotHubConnection extends BaseHandler
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
         logger.LogInfo("All the listeners are informed that a message has been received, method name is %s ", logger.getMethodName());
-        for(ServerListener listener : listeners)
+/*        for(ServerListener listener : listeners)
         {
             listener.messageReceived(msg);
+        }*/
+        Exception e = null;
+        IotHubTransportMessage message = null;
+
+        try
+        {
+            AmqpsConvertFromProtonReturnValue amqpsHandleMessageReturnValue = this.convertFromProton(msg, msg.getDeviceClientConfig());
+
+            // Codes_SRS_AMQPSTRANSPORT_12_007: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
+            if (amqpsHandleMessageReturnValue == null)
+            {
+                // Should never happen
+                throw new IllegalStateException("No handler found for received message!");
+            }
+
+            // Codes_SRS_AMQPSTRANSPORT_12_008: [The function shall return if there is no message callback defined.]
+            if (amqpsHandleMessageReturnValue.getMessageCallback() == null)
+            {
+                logger.LogError("Callback is not defined therefore response to IoT Hub cannot be generated. All received messages will be removed from receive message queue, method name is %s ", logger.getMethodName());
+                throw new IOException("callback is not defined");
+            }
+
+            message = new IotHubTransportMessage(amqpsHandleMessageReturnValue.getMessage().getBytes(), amqpsHandleMessageReturnValue.getMessage().getMessageType());
+            message.setMessageCallback(amqpsHandleMessageReturnValue.getMessageCallback());
         }
+        catch (Exception messageEx)
+        {
+            e = messageEx;
+        }
+        sendAckMessages.put(msg, message);
+        this.iothubListener.messageReceived(message, e);
+
     }
 
     /**
@@ -881,6 +944,76 @@ public final class AmqpsIotHubConnection extends BaseHandler
         else
         {
             return Proton.reactor(this);
+        }
+    }
+
+    @Override
+    public void addListener(IotHubListener listener) throws IOException
+    {
+        this.iothubListener = listener;
+    }
+
+    @Override
+    public IotHubStatusCode sendMessage(com.microsoft.azure.sdk.iot.device.Message message) throws IOException
+    {
+        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = this.convertToProton(message);
+
+        // Codes_SRS_AMQPSTRANSPORT_12_003: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
+        if (amqpsConvertToProtonReturnValue == null)
+        {
+            // Should never happen
+            throw new IllegalStateException("No handler found for message conversion!");
+        }
+
+        // Codes_SRS_AMQPSTRANSPORT_15_037: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
+        Integer sendHash = this.sendMessage(amqpsConvertToProtonReturnValue.getMessageImpl(), amqpsConvertToProtonReturnValue.getMessageType(), message.getIotHubConnectionString());
+
+        // Codes_SRS_AMQPSTRANSPORT_15_016: [If the sent message hash is valid, it shall be added to the in progress map.]
+        if (sendHash != -1)
+        {
+            this.inProgressMessages.put(sendHash, message);
+        }
+        else
+        {
+            throw new IOException("Send failure");
+        }
+
+        return IotHubStatusCode.OK;
+    }
+
+    @Override
+    public boolean sendMessageResult(com.microsoft.azure.sdk.iot.device.Message message, IotHubMessageResult result) throws IOException
+    {
+        if (!sendAckMessages.isEmpty() && sendAckMessages.containsValue(message))
+        {
+            for (Map.Entry<AmqpsMessage, com.microsoft.azure.sdk.iot.device.Message> map : sendAckMessages.entrySet())
+            {
+                if (map.getValue() == message)
+                {
+                    AmqpsMessage amqpsMessage = map.getKey();
+                    boolean ack = this.sendMessageResult(amqpsMessage, result);
+                    if (!ack)
+                    {
+//                        this.iothubListener.messageReceived(map.getValue(), null);
+                        return false;
+                    }
+                    else
+                    {
+                        sendAckMessages.remove(amqpsMessage);
+                        return true;
+                    }
+                }
+            }
+
+            //this.iothubListener.messageReceived(message, null);
+            //throw new IOException("Message to send result for is not found in the queue");
+            return false;
+        }
+        else
+        {
+            //this.iothubListener.messageReceived(message, null);
+            //throw new IOException("Message to send result was never delivered in the queue");
+            return false;
         }
     }
 }

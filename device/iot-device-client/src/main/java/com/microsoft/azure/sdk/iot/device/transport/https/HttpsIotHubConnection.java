@@ -5,17 +5,21 @@ package com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.net.*;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportConnection;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * An HTTPS connection between a device and an IoT Hub. Contains functionality
  * for synchronously connecting to the different IoT Hub resource URIs.
  */
-public class HttpsIotHubConnection
+public class HttpsIotHubConnection implements IotHubTransportConnection
 {
     private static final String HTTPS_HEAD_TAG = "https://";
     private static final String HTTPS_PROPERTY_AUTHORIZATION_TAG = "authorization";
@@ -36,6 +40,7 @@ public class HttpsIotHubConnection
      * the IoT Hub.
      */
     private String messageEtag;
+    private Collection<DeviceClientConfig> deviceClientConfigs;
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -421,5 +426,35 @@ public class HttpsIotHubConnection
     private static String sanitizeEtag(String dirtyEtag)
     {
         return dirtyEtag.replace("\"", "");
+    }
+
+    @Override
+    public void open(Queue<DeviceClientConfig> deviceClientConfigs) throws IOException
+    {
+
+    }
+
+    @Override
+    public void addListener(IotHubListener listener) throws IOException
+    {
+
+    }
+
+    @Override
+    public void close() throws IOException
+    {
+
+    }
+
+    @Override
+    public IotHubStatusCode sendMessage(Message message) throws IOException
+    {
+        return null;
+    }
+
+    @Override
+    public boolean sendMessageResult(Message message, IotHubMessageResult result) throws IOException
+    {
+        return false;
     }
 }

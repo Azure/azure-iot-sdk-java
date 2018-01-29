@@ -133,7 +133,7 @@ public class TransportClientTest
         new Verifications()
         {
             {
-                mockDeviceIO.multiplexOpen(actualDeviceClientList);
+                mockDeviceIO.open();
                 times = 0;
             }
         };
@@ -180,7 +180,7 @@ public class TransportClientTest
                 times = 1;
                 Deencapsulation.invoke(mockDeviceClient, "setDeviceIO", actualDeviceIO);
                 times = 1;
-                mockDeviceIO.multiplexOpen(actualDeviceClientList);
+                mockDeviceIO.open();
                 times = 1;
             }
         };

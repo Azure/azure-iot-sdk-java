@@ -92,6 +92,12 @@ public class AmqpsTransportTest
     @Mocked
     List<DeviceClient> mockDeviceClientList;
 
+    @Mocked
+    Collection<DeviceClientConfig> mockedCollection;
+
+    @Mocked
+    Queue<DeviceClientConfig> mockedQueue;
+
     // Tests_SRS_AMQPSTRANSPORT_15_001: [The constructor shall save the input parameters into instance variables.]
     @Test
     public void constructorSavesInputParameters()
@@ -145,14 +151,14 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
-        transport.open();
+        transport.open(mockedCollection);
+        transport.open(mockedCollection);
 
         final AmqpsIotHubConnection expectedConnection = mockConnection;
         new Verifications()
         {
             {
-                expectedConnection.open();
+                expectedConnection.open(mockedQueue);
                 times = 1;
             }
         };
@@ -173,13 +179,13 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         final AmqpsIotHubConnection expectedConnection = mockConnection;
         new Verifications()
         {
             {
-                expectedConnection.open();
+                expectedConnection.open(mockedQueue);
             }
         };
     }
@@ -193,7 +199,7 @@ public class AmqpsTransportTest
             {
                 new AmqpsIotHubConnection(mockConfig, 1);
                 result = mockConnection;
-                mockConnection.open();
+                mockConnection.open(mockedQueue);
                 result = new IOException();
                 mockConfig.getDeviceId();
                 result = "deviceId";
@@ -201,7 +207,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
     }
 
     // Tests_SRS_AMQPSTRANSPORT_15_005: [The function shall add the transport to the list of listeners subscribed to the connection events.]
@@ -219,7 +225,7 @@ public class AmqpsTransportTest
         };
 
         final AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         new Verifications()
         {
@@ -245,7 +251,7 @@ public class AmqpsTransportTest
         };
 
         final AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         State state = Deencapsulation.getField(transport, "state");
         assertEquals(State.OPEN, state);
@@ -259,7 +265,7 @@ public class AmqpsTransportTest
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
 
         // act
-        transport.multiplexOpen(null);
+        //transport.multiplexOpen(null);
     }
 
     // Tests_SRS_AMQPSTRANSPORT_12_009: [The function shall throw IllegalArgumentException if the deviceClientList is null or empty.]
@@ -271,7 +277,7 @@ public class AmqpsTransportTest
         ArrayList<DeviceClient> deviceClientList = new ArrayList<>();
 
         // act
-        transport.multiplexOpen(deviceClientList);
+       // transport.multiplexOpen(deviceClientList);
     }
 
     // Tests_SRS_AMQPSTRANSPORT_12_010: [The function shall throw IllegalStateException if the transport state is already OPEN.]
@@ -285,7 +291,7 @@ public class AmqpsTransportTest
         Deencapsulation.setField(transport, "state", State.OPEN);
 
         // act
-        transport.multiplexOpen(deviceClientList);
+        //transport.multiplexOpen(deviceClientList);
     }
 
     // Tests_SRS_AMQPSTRANSPORT_12_017: [The function shall throw IOException if the underlying connection throws.]
@@ -301,13 +307,13 @@ public class AmqpsTransportTest
         new NonStrictExpectations()
         {
             {
-                mockConnection.open();
+                mockConnection.open(mockedQueue);
                 result = new IOException();
             }
         };
 
         // act
-        transport.multiplexOpen(deviceClientList);
+        //transport.multiplexOpen(deviceClientList);
     }
 
     // Tests_SRS_AMQPSTRANSPORT_12_011: [The function shall open an AMQPS connection with the IoT Hub given in the configuration. ]
@@ -337,7 +343,7 @@ public class AmqpsTransportTest
         deviceClientList.add(mockDeviceClient);
 
         // act
-        transport.multiplexOpen(deviceClientList);
+        //transport.multiplexOpen(deviceClientList);
 
         // assert
         State actualState = Deencapsulation.getField(transport, "state");
@@ -346,12 +352,12 @@ public class AmqpsTransportTest
         new Verifications()
         {
             {
-                mockConnection.open();
+                mockConnection.open(mockedQueue);
                 mockConnection.addListener(transport);
                 times = 1;
                 mockConnection.addDeviceOperationSession(deviceClientList.get(1).getConfig());
                 times = 1;
-                mockConnection.open();
+                mockConnection.open(mockedQueue);
                 times = 1;
             }
         };
@@ -370,7 +376,7 @@ public class AmqpsTransportTest
         };
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
 
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
         transport.close();
 
@@ -397,7 +403,7 @@ public class AmqpsTransportTest
         };
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
 
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
 
         final AmqpsIotHubConnection expectedConnection = mockConnection;
@@ -444,7 +450,7 @@ public class AmqpsTransportTest
         };
         Deencapsulation.setField(transport, "inProgressMessages", mockMapIntegerIotHubOutboundPacket);
 
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, null);
         transport.close();
 
@@ -482,7 +488,7 @@ public class AmqpsTransportTest
         };
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
 
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
 
         State actualState = Deencapsulation.getField(transport, "state");
@@ -530,7 +536,7 @@ public class AmqpsTransportTest
         };
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
 
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
         transport.addMessage(mockMsg, mockCallback, context);
     }
@@ -558,7 +564,7 @@ public class AmqpsTransportTest
         };
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
 
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
 
         new VerificationsInOrder()
@@ -587,7 +593,7 @@ public class AmqpsTransportTest
         };
         final Map<String, Object> context = new HashMap<>();
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         // act
         transport.addMessage(mockMsg, mockCallback, context);
@@ -624,7 +630,7 @@ public class AmqpsTransportTest
         };
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
 
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
         transport.sendMessages();
     }
@@ -641,7 +647,7 @@ public class AmqpsTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         final AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMessage, mockCallback, context);
         Deencapsulation.setField(transport, "connection", mockConnection);
 
@@ -673,7 +679,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.sendMessages();
 
         assertTrue(transport.isEmpty());
@@ -724,7 +730,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMessage, mockCallback, context);
         transport.addMessage(mockMessage, mockCallback, context);
         transport.sendMessages();
@@ -791,7 +797,7 @@ public class AmqpsTransportTest
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
 
         Deencapsulation.setField(transport, "stateCallback", mockConnectionStateCallback);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMessage, mockCallback, context);
 
         //act
@@ -840,7 +846,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
@@ -882,7 +888,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
@@ -933,7 +939,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMessage, mockCallback, context);
         transport.addMessage(mockMessage, mockCallback, context);
         transport.sendMessages();
@@ -993,7 +999,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMessage, mockCallback, context);
         transport.addMessage(mockMessage, mockCallback, context);
         transport.sendMessages();
@@ -1053,7 +1059,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMessage, mockCallback, context);
         transport.addMessage(mockMessage, mockCallback, context);
         transport.sendMessages();
@@ -1115,7 +1121,7 @@ public class AmqpsTransportTest
         };
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
 
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
         transport.invokeCallbacks();
     }
@@ -1145,7 +1151,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         Queue<IotHubCallbackPacket> callbackList = new LinkedList<>();
         callbackList.add(mockIotHubCallbackPacket);
@@ -1188,7 +1194,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.handleMessage();
 
         Queue<AmqpsMessage> receivedMessages = Deencapsulation.getField(transport, "receivedMessages");
@@ -1208,7 +1214,7 @@ public class AmqpsTransportTest
     public void handleMessageThrowsIfNoDeviceOperationEnabled() throws IOException
     {
         final AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         final Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
         receivedMessages.add(mockAmqpsMessage);
@@ -1245,7 +1251,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
         receivedMessages.add(mockAmqpsMessage);
@@ -1299,7 +1305,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
         receivedMessages.add(mockAmqpsMessage);
@@ -1348,7 +1354,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
         receivedMessages.add(mockAmqpsMessage);
@@ -1391,7 +1397,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         Map<Integer, IotHubOutboundPacket> inProgressMessages = new ConcurrentHashMap<>();
         Deencapsulation.setField(transport, "inProgressMessages", inProgressMessages);
@@ -1425,7 +1431,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         Map<Integer, IotHubOutboundPacket> inProgressMessages = new ConcurrentHashMap<>();
         inProgressMessages.put(1, new IotHubOutboundPacket(new Message(), mockIotHubEventCallback, new Object()));
@@ -1467,7 +1473,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         Map<Integer, IotHubOutboundPacket> inProgressMessages = new ConcurrentHashMap<>();
         inProgressMessages.put(1, new IotHubOutboundPacket(new Message(), mockIotHubEventCallback, new Object()));
@@ -1510,7 +1516,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         Map<Integer, IotHubOutboundPacket> inProgressMessages = new ConcurrentHashMap<>();
         inProgressMessages.put(1, new IotHubOutboundPacket(new Message(), mockIotHubEventCallback, new Object()));
@@ -1548,7 +1554,7 @@ public class AmqpsTransportTest
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
         transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
-        transport.open();
+        transport.open(mockedCollection);
 
         transport.connectionLost();
 
@@ -1593,7 +1599,7 @@ public class AmqpsTransportTest
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
         transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
-        transport.open();
+        transport.open(mockedCollection);
 
         transport.connectionEstablished();
 
@@ -1672,7 +1678,7 @@ public class AmqpsTransportTest
         };
 
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
         receivedMessages.add(mockAmqpsMessage);

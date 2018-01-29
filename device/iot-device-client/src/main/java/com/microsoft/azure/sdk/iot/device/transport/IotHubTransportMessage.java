@@ -3,10 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
-import com.microsoft.azure.sdk.iot.device.IotHubMethod;
-import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.MessageType;
 
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
 
@@ -30,6 +28,8 @@ public class IotHubTransportMessage extends Message
     private String requestId;
     private String status;
     private DeviceOperations operationType;
+    private MessageCallback messageCallback;
+    private Object messageCallbackContext;
 
     /**
      * Constructor with binary data and message type
@@ -68,6 +68,26 @@ public class IotHubTransportMessage extends Message
         this.requestId = null;
         this.status = null;
         this.operationType = DEVICE_OPERATION_UNKNOWN;
+    }
+
+    public MessageCallback getMessageCallback()
+    {
+        return messageCallback;
+    }
+
+    public void setMessageCallback(MessageCallback messageCallback)
+    {
+        this.messageCallback = messageCallback;
+    }
+
+    public Object getMessageCallbackContext()
+    {
+        return messageCallbackContext;
+    }
+
+    public void setMessageCallbackContext(Object messageCallbackContext)
+    {
+        this.messageCallbackContext = messageCallbackContext;
     }
 
     /**

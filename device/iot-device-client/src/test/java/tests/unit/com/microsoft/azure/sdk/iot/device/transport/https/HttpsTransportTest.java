@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -32,13 +33,17 @@ public class HttpsTransportTest
     DeviceClientConfig mockConfig;
     @Mocked
     HttpsIotHubConnection mockConn;
+    @Mocked
+    Queue<DeviceClientConfig> mockedQueue;
+    @Mocked
+    Collection<DeviceClientConfig> mockedCollection;
 
     // Tests_SRS_HTTPSTRANSPORT_11_021: [The function shall establish an HTTPS connection with the IoT Hub given in the configuration.]
     @Test
     public void openCreatesCorrectHttpsConnection() throws IOException
     {
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
 
         final DeviceClientConfig expectedConfig = mockConfig;
         new Verifications()
@@ -54,8 +59,8 @@ public class HttpsTransportTest
     public void openDoesNothingIfAlreadyOpen() throws IOException
     {
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
-        transport.open();
+        transport.open(mockedCollection);
+        transport.open(mockedCollection);
 
         final DeviceClientConfig expectedConfig = mockConfig;
         new Verifications()
@@ -72,9 +77,9 @@ public class HttpsTransportTest
     public void closeMarksTransportAsBeingClosed() throws IOException
     {
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
-        transport.open();
+        transport.open(mockedCollection);
 
         new Verifications()
         {
@@ -107,7 +112,7 @@ public class HttpsTransportTest
         };
         
         
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, null);
         transport.close();
 
@@ -143,7 +148,7 @@ public class HttpsTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
 
         new VerificationsInOrder()
@@ -178,7 +183,7 @@ public class HttpsTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
         transport.addMessage(mockMsg, mockCallback, context);
     }
@@ -197,7 +202,7 @@ public class HttpsTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
 
         new VerificationsInOrder()
@@ -232,7 +237,7 @@ public class HttpsTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
         transport.addMessage(mockMsg, mockCallback, context);
     }
@@ -250,7 +255,7 @@ public class HttpsTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
 
@@ -286,7 +291,7 @@ public class HttpsTransportTest
         };
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -322,7 +327,7 @@ public class HttpsTransportTest
         };
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, null);
 
         //act
@@ -363,7 +368,7 @@ public class HttpsTransportTest
         };
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -416,7 +421,7 @@ public class HttpsTransportTest
         };
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -455,7 +460,7 @@ public class HttpsTransportTest
         };
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
     }
@@ -492,7 +497,7 @@ public class HttpsTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.sendMessages();
@@ -523,7 +528,7 @@ public class HttpsTransportTest
     public void sendMessagesFailsIfTransportAlreadyClosed() throws IOException
     {
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
         transport.sendMessages();
     }
@@ -561,7 +566,7 @@ public class HttpsTransportTest
         };
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -616,7 +621,7 @@ public class HttpsTransportTest
         };
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockResponseCallback, context);
         transport.addMessage(mockMsg, mockResponseCallback, context);
         transport.addMessage(mockMsg, mockResponseCallback, context);
@@ -648,7 +653,7 @@ public class HttpsTransportTest
             throws IOException
     {
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
         transport.invokeCallbacks();
     }
@@ -658,7 +663,7 @@ public class HttpsTransportTest
     public void handleMessagePollsForMessages() throws URISyntaxException, IOException
     {
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.handleMessage();
 
         new Verifications()
@@ -690,7 +695,7 @@ public class HttpsTransportTest
         };
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.handleMessage();
 
         new Verifications()
@@ -717,7 +722,7 @@ public class HttpsTransportTest
         };
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.handleMessage();
 
         final IotHubMessageResult expectedResult = messageResult;
@@ -743,7 +748,7 @@ public class HttpsTransportTest
         };
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.handleMessage();
     }
 
@@ -761,7 +766,7 @@ public class HttpsTransportTest
             throws IOException
     {
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.close();
         transport.handleMessage();
     }
@@ -776,7 +781,7 @@ public class HttpsTransportTest
         final Map<String, Object> context = new HashMap<>();
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         boolean testIsEmpty = transport.isEmpty();
 
@@ -805,7 +810,7 @@ public class HttpsTransportTest
         };
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -838,7 +843,7 @@ public class HttpsTransportTest
         };
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
-        transport.open();
+        transport.open(mockedCollection);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
         transport.addMessage(mockMsg, mockCallback, context);
@@ -856,7 +861,7 @@ public class HttpsTransportTest
         //arrange
         HttpsTransport transport = new HttpsTransport(mockConfig);
         transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
-        transport.open();
+        transport.open(mockedCollection);
 
         //act
         Deencapsulation.invoke(transport, "invokeConnectionStateCallback", new Class[] {IotHubConnectionState.class}, IotHubConnectionState.SAS_TOKEN_EXPIRED);
@@ -893,7 +898,7 @@ public class HttpsTransportTest
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
         transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
-        transport.open();
+        transport.open(mockedCollection);
         final Map<String, Object> context = new HashMap<>();
         transport.addMessage(mockMsg, mockCallback, context);
 
@@ -930,7 +935,7 @@ public class HttpsTransportTest
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
         transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
-        transport.open();
+        transport.open(mockedCollection);
         final Map<String, Object> context = new HashMap<>();
         transport.addMessage(mockMsg, mockCallback, context);
 
@@ -966,7 +971,7 @@ public class HttpsTransportTest
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
         transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
-        transport.open();
+        transport.open(mockedCollection);
 
         //act
         transport.handleMessage();
@@ -1000,7 +1005,7 @@ public class HttpsTransportTest
 
         HttpsTransport transport = new HttpsTransport(mockConfig);
         transport.registerConnectionStateCallback(mockConnectionStateCallback, null);
-        transport.open();
+        transport.open(mockedCollection);
 
         //act
         transport.handleMessage();

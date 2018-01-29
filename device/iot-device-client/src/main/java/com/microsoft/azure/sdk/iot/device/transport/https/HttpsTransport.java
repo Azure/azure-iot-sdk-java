@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubOutboundPacket;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
@@ -51,7 +52,7 @@ public final class HttpsTransport implements IotHubTransport
     /** Messages whose callbacks that are waiting to be invoked. */
     private final Queue<IotHubCallbackPacket> callbackList;
 
-    private final DeviceClientConfig config;
+    private DeviceClientConfig config;
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -78,7 +79,7 @@ public final class HttpsTransport implements IotHubTransport
      *
      * @throws IOException if a communication channel cannot be established.
      */
-    public void open() throws IOException
+    public void open(Collection<DeviceClientConfig> deviceClientConfigs) throws IOException
     {
         // Codes_SRS_HTTPSTRANSPORT_11_022: [If the transport is already open, the function shall do nothing.]
         if (this.state == HttpsTransportState.OPEN)
@@ -86,17 +87,23 @@ public final class HttpsTransport implements IotHubTransport
             return;
         }
 
+        if (deviceClientConfigs.size() > 1)
+        {
+            throw new IOException("Multiplexing is not supported on HTTP");
+        }
+
+        this.config = new LinkedBlockingQueue<>(deviceClientConfigs).remove();
         // Codes_SRS_HTTPSTRANSPORT_11_023: [If the transport is already closed, the function shall throw an IllegalStateException.]
         // Codes_SRS_HTTPSTRANSPORT_11_021: [The function shall establish an HTTPS connection with the IoT Hub given in the configuration.]
         this.connection = new HttpsIotHubConnection(this.config);
         this.state = HttpsTransportState.OPEN;
     }
 
-    @Override
+/*    @Override
     public void multiplexOpen(List<DeviceClient> deviceClientList)
     {
         return;
-    }
+    }*/
 
     /**
      * Closes all resources used to communicate with an IoT Hub. Once {@code close()} is

@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.device.*;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 /** An interface for an IoT Hub transport. */
@@ -19,7 +20,7 @@ public interface IotHubTransport extends Closeable
      * @throws IOException if a communication channel cannot be
      * established.
      */
-    void open() throws IOException;
+    void open(Collection<DeviceClientConfig> deviceClientConfigs) throws IOException;
 
     /**
      * Establishes a communication channel usingmultiplexing with an IoT Hub. If a channel is
@@ -29,7 +30,7 @@ public interface IotHubTransport extends Closeable
      * @throws IOException if a communication channel cannot be
      * established.
      */
-    void multiplexOpen(List<DeviceClient> deviceClientList) throws IOException;
+   // void multiplexOpen(List<DeviceClient> deviceClientList) throws IOException;
 
     /**
      * Closes all resources used to communicate with an IoT Hub. Once {@code close()} is

@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import com.microsoft.azure.sdk.iot.device.transport.State;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -44,7 +45,7 @@ public final class MqttTransport implements IotHubTransport
     /** Messages whose callbacks that are waiting to be invoked. */
     private final Queue<IotHubCallbackPacket> callbackList;
 
-    private final DeviceClientConfig config;
+    private DeviceClientConfig config;
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -62,7 +63,7 @@ public final class MqttTransport implements IotHubTransport
         this.callbackList = new LinkedBlockingQueue<>();
         this.config = config;
         this.state = State.CLOSED;
-        this.mqttIotHubConnection = new MqttIotHubConnection(this.config);
+
     }
 
     /**
@@ -71,24 +72,31 @@ public final class MqttTransport implements IotHubTransport
      *
      * @throws IOException if a communication channel cannot be established.
      */
-    public void open() throws IOException
+    public void open(Collection<DeviceClientConfig> deviceClientConfigs) throws IOException
     {
+        if (deviceClientConfigs.size() > 1)
+        {
+            throw new UnsupportedOperationException("Mqtt does not support multiplexing");
+        }
         // Codes_SRS_MQTTTRANSPORT_15_004: [If the MQTT connection is already open, the function shall do nothing.]
         if(this.state == State.OPEN)
         {
             return;
         }
 
+        this.config = new LinkedBlockingQueue<>(deviceClientConfigs).remove();
+        this.mqttIotHubConnection = new MqttIotHubConnection(this.config);
+
         //Codes_SRS_MQTTTRANSPORT_34_003: [This function shall open the connection of the saved MqttIotHubConnection object.]
-        this.mqttIotHubConnection.open();
+        this.mqttIotHubConnection.open(new LinkedBlockingQueue<>(deviceClientConfigs));
         this.state = State.OPEN;
     }
 
-    @Override
+/*    @Override
     public void multiplexOpen(List<DeviceClient> deviceClientList)
     {
         return;
-    }
+    }*/
 
     /**
      * Closes all resources used to communicate with an IoT Hub. Once {@code close()} is

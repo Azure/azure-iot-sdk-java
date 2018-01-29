@@ -103,16 +103,20 @@ public class TransportClient
         if (this.deviceClientList.size() > 0)
         {
             // Codes_SRS_TRANSPORTCLIENT_12_011: [The function shall create a new DeviceIO using the first registered device client's configuration.]
-            this.deviceIO = new DeviceIO(deviceClientList.get(0).getConfig(), iotHubClientProtocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+            this.deviceIO = new DeviceIO(deviceClientList.get(0).getConfig(), SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
 
             // Codes_SRS_TRANSPORTCLIENT_12_012: [The function shall set the created DeviceIO to all registered device client.]
             for (int i = 0; i < this.deviceClientList.size(); i++)
             {
                 deviceClientList.get(i).setDeviceIO(this.deviceIO);
+                //propagate this client config to amqp connection
+                this.deviceIO.addClient(deviceClientList.get(i).getConfig());
             }
 
             // Codes_SRS_TRANSPORTCLIENT_12_013: [The function shall open the transport in multiplexing mode.]
-            this.deviceIO.multiplexOpen(deviceClientList);
+            //this.deviceIO.multiplexOpen(deviceClientList);
+            // if client is added just open to get rid of multiplex open.
+            this.deviceIO.open();
         }
 
         this.transportClientState = TransportClientState.OPENED;
@@ -196,6 +200,11 @@ public class TransportClient
         this.deviceClientList.add(deviceClient);
 
         logger.LogInfo("DeviceClient is added successfully to the transport client, method name is %s ", logger.getMethodName());
+    }
+
+    IotHubClientProtocol getIotHubClientProtocol()
+    {
+        return iotHubClientProtocol;
     }
 
     /**

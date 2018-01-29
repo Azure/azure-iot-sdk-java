@@ -6,11 +6,13 @@ package com.microsoft.azure.sdk.iot.device;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportNew;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTransport;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransport;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttTransport;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -86,19 +88,19 @@ public final class DeviceIO
     private ScheduledExecutorService taskScheduler;
     private IotHubClientState state;
 
+    private List<DeviceClientConfig> deviceClientConfigs = new LinkedList<>();
+
     /**
      * Constructor that takes a connection string as an argument.
      *
      * @param config the connection configuration.
-     * @param protocol the communication protocol used (i.e. HTTPS).
      * @param sendPeriodInMilliseconds the period of time that iot hub will try to send messages in milliseconds.
      * @param receivePeriodInMilliseconds the period of time that iot hub will try to receive messages in milliseconds.
      *
      * @throws IllegalArgumentException if any of {@code config} or
      * {@code protocol} are {@code null}.
      */
-    DeviceIO(DeviceClientConfig config, IotHubClientProtocol protocol,
-             long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
+    DeviceIO(DeviceClientConfig config, long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
     {
         /* Codes_SRS_DEVICE_IO_21_002: [If the `config` is null, the constructor shall throw an IllegalArgumentException.] */
         if(config == null)
@@ -106,17 +108,13 @@ public final class DeviceIO
             throw new IllegalArgumentException("Config cannot be null.");
         }
 
-        /* Codes_SRS_DEVICE_IO_21_004: [If the `protocol` is null, the constructor shall throw an IllegalArgumentException.] */
-        if (protocol == null)
-        {
-            throw new IllegalArgumentException("Protocol cannot be null.");
-        }
-
         /* Codes_SRS_DEVICE_IO_21_001: [The constructor shall store the provided protocol and config information.] */
+        deviceClientConfigs.add(config);
         this.config = config;
-        this.protocol = protocol;
+        this.protocol = this.config.getProtocol();
 
-        /* Codes_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
+ //Codes_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.]
+
         switch (protocol)
         {
             case HTTPS:
@@ -125,7 +123,8 @@ public final class DeviceIO
                 break;
             case AMQPS:
                 this.config.setUseWebsocket(false);
-                this.transport = new AmqpsTransport(this.config);
+                //this.transport = new AmqpsTransport(this.config);
+                this.transport = new IotHubTransportNew(this.config);
                 break;
             case AMQPS_WS:
                 this.config.setUseWebsocket(true);
@@ -140,7 +139,8 @@ public final class DeviceIO
                 this.transport = new MqttTransport(this.config);
                 break;
             default:
-                /* Codes_SRS_DEVICE_IO_21_005: [If the `protocol` is not valid, the constructor shall throw an IllegalArgumentException.] */
+ //Codes_SRS_DEVICE_IO_21_005: [If the `protocol` is not valid, the constructor shall throw an IllegalArgumentException.]
+
                 // should never happen.
                 throw new IllegalStateException("Invalid client protocol specified.");
         }
@@ -173,11 +173,18 @@ public final class DeviceIO
 
         /* Codes_SRS_DEVICE_IO_21_012: [The open shall open the transport to communicate with an IoT Hub.] */
         /* Codes_SRS_DEVICE_IO_21_015: [If an error occurs in opening the transport, the open shall throw an IOException.] */
-        this.transport.open();
+        this.transport.open(deviceClientConfigs);
 
         /* Codes_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every receivePeriodInMilliseconds milliseconds.] */
         /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `OPEN`.] */
         commonOpenSetup();
+    }
+
+    public void addClient(DeviceClientConfig config)
+    {
+        // add client to transport
+
+        deviceClientConfigs.add(config);
     }
 
     /**
@@ -188,7 +195,7 @@ public final class DeviceIO
      * @param deviceClientList the list of device clients to initialize for the transport.
      * @throws IOException if a connection to an IoT Hub cannot be established.
      */
-    public void multiplexOpen(List<DeviceClient> deviceClientList) throws IOException
+/*    public void multiplexOpen(List<DeviceClient> deviceClientList) throws IOException
     {
         // Codes_SRS_DEVICE_IO_12_002: [If the client is already open, the open shall do nothing.]
         if (this.state == IotHubClientState.OPEN)
@@ -204,7 +211,7 @@ public final class DeviceIO
         // Codes_SRS_DEVICE_IO_12_006: [If an error occurs in opening the transport, the open shall throw an IOException.]
         // Codes_SRS_DEVICE_IO_12_007: [The open shall set the `state` as `OPEN`.]
         commonOpenSetup();
-    }
+    }*/
 
     /**
      * Handles logic common to all open functions.
