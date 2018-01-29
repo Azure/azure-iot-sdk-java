@@ -334,7 +334,8 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         byte[] iv = new byte[innerWrapKey.length];
 
         //SRS_SecurityProviderTPMHsm_25_026: [ This method shall Encrypt Decrypt the symmetric Key. ]
-        EncryptDecryptResponse edResp = tpm.EncryptDecrypt(hSymKey, (byte)1, TPM_ALG_ID.CFB, iv, encUriData.buffer);
+        //TODO : Use software encryption/decryption using AES instead of TPM command to support international markets.
+        EncryptDecrypt2Response edResp = tpm.EncryptDecrypt2(hSymKey, encUriData.buffer, (byte)1, TPM_ALG_ID.CFB, iv);
 
         if (edResp == null)
         {

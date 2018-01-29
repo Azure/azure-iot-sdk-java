@@ -76,7 +76,7 @@ public class SecurityProviderTPMEmulatorTest
     CreateResponse mockedCreateResponse;
 
     @Mocked
-    EncryptDecryptResponse mockedEncryptDecryptResponse;
+    EncryptDecrypt2Response mockedEncryptDecrypt2Response;
 
     @Mocked
     ReadPublicResponse mockedReadPublicResponse;
@@ -408,8 +408,8 @@ public class SecurityProviderTPMEmulatorTest
                 mockedTpm.Load((TPM_HANDLE) any, (TPM2B_PRIVATE )any, (TPMT_PUBLIC )any);
                 result = mockedTpmHandle;
 
-                mockedTpm.EncryptDecrypt((TPM_HANDLE )any, anyByte, (TPM_ALG_ID )any, (byte[]) any, (byte[] )any);
-                result = mockedEncryptDecryptResponse;
+                mockedTpm.EncryptDecrypt2((TPM_HANDLE )any, (byte[] )any, anyByte, (TPM_ALG_ID )any, (byte[]) any);
+                result = mockedEncryptDecrypt2Response;
 
                 mockedTpm.FlushContext((TPM_HANDLE )any);
             }
@@ -846,7 +846,7 @@ public class SecurityProviderTPMEmulatorTest
                 mockedTpm.Load((TPM_HANDLE) any, (TPM2B_PRIVATE )any, (TPMT_PUBLIC )any);
                 result = mockedTpmHandle;
 
-                mockedTpm.EncryptDecrypt((TPM_HANDLE )any, anyByte, (TPM_ALG_ID )any, (byte[]) any, (byte[] )any);
+                mockedTpm.EncryptDecrypt2((TPM_HANDLE )any, (byte[] )any, anyByte, (TPM_ALG_ID )any, (byte[]) any);
                 result = null;
             }
         };
