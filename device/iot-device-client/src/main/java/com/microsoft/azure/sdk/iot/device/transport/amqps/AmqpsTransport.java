@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.device.transport.State;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -34,7 +33,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     private AmqpsIotHubConnection connection;
 
     /** Messages waiting to be sent to the IoT Hub. */
-    private final Queue<IotHubOutboundPacket> waitingMessages = new LinkedBlockingDeque<>();
+    private final Queue<IotHubOutboundPacket> waitingMessages = new LinkedBlockingQueue<>();
 
     /** Messages which are sent to the IoT Hub but did not receive ack yet. */
     private final Map<Integer, IotHubOutboundPacket> inProgressMessages = new ConcurrentHashMap<>();
@@ -43,7 +42,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     private final Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
 
     /** Messages whose callbacks that are waiting to be invoked. */
-    private final Queue<IotHubCallbackPacket> callbackList = new LinkedBlockingDeque<>();
+    private final Queue<IotHubCallbackPacket> callbackList = new LinkedBlockingQueue<>();
 
     /** Connection state change callback */
     private IotHubConnectionStateCallback stateCallback;
@@ -51,6 +50,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     private final CustomLogger logger;
 
     private final DeviceClientConfig deviceClientConfig;
+
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
      * object.
@@ -530,7 +530,6 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_15_035: [The function shall return true if the waiting list,
         // in progress list and callback list are all empty, and false otherwise.]
         return this.waitingMessages.isEmpty() && this.inProgressMessages.size() == 0 && this.callbackList.isEmpty();
-
     }
 
     /**

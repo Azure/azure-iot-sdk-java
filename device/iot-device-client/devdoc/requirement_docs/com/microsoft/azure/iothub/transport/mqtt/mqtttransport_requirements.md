@@ -61,6 +61,8 @@ public void close();
 
 **SRS_MQTTTRANSPORT_15_006: [**If the MQTT connection is closed, the function shall do nothing.**]** 
 
+**SRS_MQTTTRANSPORT_34_031: [**This function shall block and wait on the read lock before reading from the in progress list.**]**
+
 **SRS_MQTTTRANSPORT_99_020: [**The method shall remove all the messages which are in progress or waiting to be sent and add them to the callback list.**]**
 
 **SRS_MQTTTRANSPORT_99_021: [**The method shall invoke the callback list.**]**
@@ -78,6 +80,8 @@ public void addMessage(Message message, IotHubEventCallback callback, Object cal
 
 **SRS_MQTTTRANSPORT_15_008: [**If the transport is closed, the function shall throw an IllegalStateException.**]**
 
+**SRS_MQTTTRANSPORT_34_028: [**This function shall not block and wait on the read lock.**]**
+
 
 ### addMessage
 
@@ -93,6 +97,8 @@ public void addMessage(Message message, IotHubResponseCallback callback, Object 
 ```java
 public void sendMessages() throws IllegalStateException;
 ```
+
+**SRS_MQTTTRANSPORT_34_029: [**This function shall block and wait on the read lock before reading from the waiting list.**]**
 
 **SRS_MQTTTRANSPORT_15_009: [**The function shall attempt to send every message on its waiting list, one at a time.**]**
 
@@ -115,9 +121,9 @@ public void sendMessages() throws IllegalStateException;
 public void invokeCallbacks() throws IllegalStateException;
 ```
 
-**SRS_MQTTTRANSPORT_15_013: [**The function shall invoke all callbacks on the callback queue.**]**
+**SRS_MQTTTRANSPORT_34_030: [**This function shall block and wait on the read lock before reading from the callback list.**]**
 
-**SRS_MQTTTRANSPORT_15_014: [**If the transport is closed, the function shall throw an IllegalStateException.**]**
+**SRS_MQTTTRANSPORT_15_013: [**The function shall invoke all callbacks on the callback queue.**]**
 
 **SRS_MQTTTRANSPORT_15_015: [**If an exception is thrown during the callback, the function shall drop the callback from the queue.**]**
 
@@ -140,6 +146,8 @@ public void handleMessage() throws IllegalStateException;
 ```java
 public boolean isEmpty();
 ```
+
+**SRS_MQTTTRANSPORT_34_031: [**This function shall block and wait on the read lock before reading from the in progress list or the callback list.**]**
 
 **SRS_MQTTTRANSPORT_15_019: [**The function shall return true if the waiting list, in progress list, and callback list are all empty, and false otherwise.**]**
 

@@ -17,7 +17,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.Assert.*;
@@ -1541,7 +1540,7 @@ public class AmqpsTransportTest
         inProgressMessages.put(2, new IotHubOutboundPacket(new Message(), mockIotHubEventCallback, new Object()));
         Deencapsulation.setField(transport, "inProgressMessages", inProgressMessages);
 
-        Queue<IotHubOutboundPacket> waitingMessages = new LinkedBlockingDeque<>();
+        Queue<IotHubOutboundPacket> waitingMessages = new LinkedBlockingQueue<>();
         waitingMessages.add(new IotHubOutboundPacket(new Message(), mockIotHubEventCallback, new Object()));
         waitingMessages.add(new IotHubOutboundPacket(new Message(), mockIotHubEventCallback, new Object()));
         Deencapsulation.setField(transport, "waitingMessages", waitingMessages);
@@ -1697,7 +1696,7 @@ public class AmqpsTransportTest
         AmqpsTransport transport = new AmqpsTransport(mockConfig);
 
 
-        Queue<IotHubOutboundPacket> waitingMessages = new LinkedBlockingDeque<>();
+        Queue<IotHubOutboundPacket> waitingMessages = new LinkedBlockingQueue<>();
         waitingMessages.add(new IotHubOutboundPacket(new Message(), mockIotHubEventCallback, new Object()));
         Deencapsulation.setField(transport, "waitingMessages", waitingMessages);
 

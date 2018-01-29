@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * <p>
@@ -62,10 +62,10 @@ public final class HttpsTransport implements IotHubTransport
     public HttpsTransport(DeviceClientConfig config)
     {
         // Codes_SRS_HTTPSTRANSPORT_11_001: [The constructor shall initialize an empty transport queue for adding messages to be sent as a batch.]
-        this.waitingList = new LinkedBlockingDeque<>();
-        this.inProgressList = new LinkedBlockingDeque<>();
+        this.waitingList = new LinkedBlockingQueue<>();
+        this.inProgressList = new LinkedBlockingQueue<>();
         // Codes_SRS_HTTPSTRANSPORT_11_002: [The constructor shall initialize an empty queue for adding callbacks waiting to be invoked.]
-        this.callbackList = new LinkedBlockingDeque<>();
+        this.callbackList = new LinkedBlockingQueue<>();
 
         this.config = config;
 

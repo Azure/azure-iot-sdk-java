@@ -18,6 +18,9 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
@@ -25,7 +28,7 @@ import static org.junit.Assert.*;
 /**
  * Unit tests for MqttTransport.java
  * Method: 90%
- * Lines: 94%
+ * Lines: 92%
  */
 public class MqttTransportTest
 {
@@ -44,7 +47,103 @@ public class MqttTransportTest
     @Mocked
     ConnectionStateCallbackContext mockedConnectionStateCallbackContext;
 
+    @Mocked
+    IotHubEventCallback mockedIotHubEventCallback;
+
+    @Mocked
+    Message mockedMessage;
+
+    @Mocked
+    IotHubCallbackPacket mockedCallbackPacket;
+
     private class ConnectionStateCallbackContext {}
+
+    private class IsEmptyRunnable implements Runnable
+    {
+        private MqttTransport mqttTransport;
+
+        public IsEmptyRunnable(MqttTransport mqttTransport)
+        {
+            this.mqttTransport = mqttTransport;
+        }
+
+        @Override
+        public void run()
+        {
+            assertTrue("Expected isEmpty to return true, check lock structure", mqttTransport.isEmpty());
+        }
+    }
+
+    private class AddMessageRunnable implements Runnable
+    {
+        private final MqttTransport mqttTransport;
+
+        public AddMessageRunnable(MqttTransport mqttTransport)
+        {
+            this.mqttTransport = mqttTransport;
+        }
+
+        @Override
+        public void run()
+        {
+            mqttTransport.addMessage(mockedMessage, mockedIotHubEventCallback, null);
+        }
+    }
+
+    private class SendMessagesRunnable implements Runnable
+    {
+        private final MqttTransport mqttTransport;
+
+        public SendMessagesRunnable(MqttTransport mqttTransport)
+        {
+            this.mqttTransport = mqttTransport;
+        }
+
+        @Override
+        public void run()
+        {
+            this.mqttTransport.sendMessages();
+        }
+    }
+
+    private class InvokeCallbacksRunnable implements Runnable
+    {
+        private final MqttTransport mqttTransport;
+
+        public InvokeCallbacksRunnable(MqttTransport mqttTransport)
+        {
+            this.mqttTransport = mqttTransport;
+        }
+
+        @Override
+        public void run()
+        {
+            this.mqttTransport.invokeCallbacks();
+        }
+    }
+
+    private class CloseRunnable implements Runnable
+    {
+        private final MqttTransport mqttTransport;
+
+        public CloseRunnable(MqttTransport mqttTransport)
+        {
+            this.mqttTransport = mqttTransport;
+        }
+
+        @Override
+        public void run()
+        {
+            try
+            {
+                this.mqttTransport.close();
+            }
+            catch (IOException e)
+            {
+                fail("Unexpected exception thrown: " + e);
+            }
+        }
+    }
 
     //Tests_SRS_MQTTTRANSPORT_34_003: [This function shall open the connection of the saved MqttIotHubConnection object.]
     @Test
@@ -68,10 +167,6 @@ public class MqttTransportTest
                 expectedConnection.open();
             }
         };
-
-        Field sendMessagesLock = transport.getClass().getDeclaredField("sendMessagesLock");
-        sendMessagesLock.setAccessible(true);
-        assertNotNull(sendMessagesLock.get(transport));
 
         Field handleMessageLock = transport.getClass().getDeclaredField("handleMessageLock");
         handleMessageLock.setAccessible(true);
@@ -473,8 +568,6 @@ public class MqttTransportTest
             {
                 new MqttIotHubConnection(mockedConfig);
                 result = mockedConnection;
-                mockCallbackPacket.getStatus();
-                returns(IotHubStatusCode.OK_EMPTY, IotHubStatusCode.ERROR);
                 mockCallbackPacket.getCallback();
                 result = mockCallback;
                 mockCallbackPacket.getContext();
@@ -490,41 +583,19 @@ public class MqttTransportTest
         transport.invokeCallbacks();
 
         final IotHubEventCallback expectedCallback = mockCallback;
-        final Map<String, Object> expectedContext = context;
         new VerificationsInOrder()
         {
             {
-                expectedCallback.execute(IotHubStatusCode.OK_EMPTY, expectedContext);
-                expectedCallback.execute(IotHubStatusCode.ERROR, expectedContext);
+                expectedCallback.execute((IotHubStatusCode) any, any);
+                times = 2;
             }
         };
-    }
-
-    // Tests_SRS_MQTTTRANSPORT_15_014: [If the transport is closed, the function shall throw an IllegalStateException.]
-    @Test(expected = IllegalStateException.class)
-    public void invokeCallbacksFailsIfTransportNeverOpened() throws IOException
-    {
-        MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.invokeCallbacks();
-    }
-
-    // Tests_SRS_MQTTTRANSPORT_15_014: [If the transport is closed, the function shall throw an IllegalStateException.]
-    @Test(expected = IllegalStateException.class)
-    public void invokeCallbacksFailsIfTransportAlreadyClosed() throws IOException
-    {
-        MqttTransport transport = new MqttTransport(mockedConfig);
-        transport.open();
-        transport.close();
-        transport.invokeCallbacks();
     }
 
     // Tests_SRS_MQTTTRANSPORT_15_015: [If an exception is thrown during the callback,
     // the function shall drop the callback from the queue.]
     @Test
-    public void invokeCallbacksDropsFailedCallback(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback,
-            @Mocked final IotHubCallbackPacket mockCallbackPacket)
+    public void invokeCallbacksDropsFailedCallback()
             throws IOException
     {
         final Map<String, Object> context = new HashMap<>();
@@ -533,13 +604,13 @@ public class MqttTransportTest
             {
                 new MqttIotHubConnection(mockedConfig);
                 result = mockedConnection;
-                mockCallbackPacket.getStatus();
+                mockedCallbackPacket.getStatus();
                 result = IotHubStatusCode.OK_EMPTY;
-                mockCallbackPacket.getCallback();
-                result = mockCallback;
-                mockCallbackPacket.getContext();
+                mockedCallbackPacket.getCallback();
+                result = mockedIotHubEventCallback;
+                mockedCallbackPacket.getContext();
                 result = context;
-                mockCallback.execute(IotHubStatusCode.OK_EMPTY, context);
+                mockedIotHubEventCallback.execute(IotHubStatusCode.OK_EMPTY, context);
                 result = new IllegalStateException();
                 result = null;
             }
@@ -547,7 +618,7 @@ public class MqttTransportTest
 
         MqttTransport transport = new MqttTransport(mockedConfig);
         transport.open();
-        transport.addMessage(mockMsg, mockCallback, context);
+        transport.addMessage(mockedMessage, mockedIotHubEventCallback, context);
         transport.sendMessages();
         try
         {
@@ -559,12 +630,13 @@ public class MqttTransportTest
             transport.invokeCallbacks();
         }
 
-        final IotHubEventCallback expectedCallback = mockCallback;
+        final IotHubEventCallback expectedCallback = mockedIotHubEventCallback;
         final Map<String, Object> expectedContext = context;
         new VerificationsInOrder()
         {
             {
                 expectedCallback.execute(IotHubStatusCode.OK_EMPTY, expectedContext);
+                times = 1;
             }
         };
     }
@@ -738,6 +810,196 @@ public class MqttTransportTest
             {
                 Deencapsulation.invoke(mockedConnection, "registerConnectionStateCallback", mockedConnectionStateCallback, mockedConnectionStateCallbackContext);
                 times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MQTTTRANSPORT_34_029: [This function shall block and wait on the read lock before reading from the waiting list.]
+    //Tests_SRS_MQTTTRANSPORT_34_031: [This function shall block and wait on the read lock before reading from the in progress list.]
+    @Test
+    public void onlyOneThreadReadsFromWaitingListAtATimeBetweenSendMessagesAndClose() throws IOException, InterruptedException
+    {
+        //arrange
+        final MqttTransport mqttTransport = new MqttTransport(mockedConfig);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        final int messageCount = 1000;
+        mqttTransport.open();
+
+        for (int i = 0; i < messageCount; i++)
+        {
+            mqttTransport.addMessage(mockedMessage, mockedIotHubEventCallback, null);
+        }
+
+        //act
+        executorService.submit(new SendMessagesRunnable(mqttTransport));
+        executorService.submit(new CloseRunnable(mqttTransport));
+
+        //wait for all threads to finish
+        executorService.shutdown();
+        executorService.awaitTermination(60, TimeUnit.SECONDS);
+
+        //assert
+        new VerificationsInOrder()
+        {
+            {
+                //All messages should have been sent before the connection was closed
+                mockedConnection.sendEvent(mockedMessage);
+                times = messageCount;
+
+                mockedConnection.close();
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MQTTTRANSPORT_34_029: [This function shall block and wait on the read lock before reading from the waiting list.]
+    @Test
+    public void onlyOneThreadReadsFromWaitingListAtATimeBetweenSendMessagesAndIsEmpty() throws IOException, InterruptedException
+    {
+        //arrange
+        final MqttTransport mqttTransport = new MqttTransport(mockedConfig);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        final int messageCount = 1000;
+        mqttTransport.open();
+
+        for (int i = 0; i < messageCount; i++)
+        {
+            mqttTransport.addMessage(mockedMessage, mockedIotHubEventCallback, null);
+        }
+
+        //act
+        executorService.submit(new SendMessagesRunnable(mqttTransport));
+        executorService.submit(new IsEmptyRunnable(mqttTransport));
+
+        //wait for all threads to finish
+        executorService.shutdown();
+        executorService.awaitTermination(60, TimeUnit.SECONDS);
+
+        //assert
+        new Verifications()
+        {
+            {
+                //All messages should have been sent before isEmpty ran. The isEmpty runnable asserts that waitinglist is empty
+                mockedConnection.sendEvent(mockedMessage);
+                times = messageCount;
+            }
+        };
+    }
+
+    //Tests_SRS_MQTTTRANSPORT_34_031: [This function shall block and wait on the read lock before reading from the in progress list or the callback list.]
+    @Test
+    public void onlyOneThreadReadsFromWaitingListAtATimeBetweenCloseAndIsEmpty() throws IOException, InterruptedException
+    {
+        //arrange
+        final MqttTransport mqttTransport = new MqttTransport(mockedConfig);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        final int messageCount = 1000;
+        mqttTransport.open();
+
+        for (int i = 0; i < messageCount; i++)
+        {
+            mqttTransport.addMessage(mockedMessage, mockedIotHubEventCallback, null);
+        }
+
+        //act
+        executorService.submit(new CloseRunnable(mqttTransport));
+        executorService.submit(new IsEmptyRunnable(mqttTransport));
+
+        //wait for all threads to finish
+        executorService.shutdown();
+        executorService.awaitTermination(60, TimeUnit.SECONDS);
+
+        //assert
+        new Verifications()
+        {
+            {
+                //IsEmptyRunnable also asserts that the waitinglist was empty
+                mockedConnection.close();
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MQTTTRANSPORT_34_030: [This function shall block and wait on the read lock before reading from the callback list.]
+    @Test
+    public void onlyOneThreadReadsFromWaitingListAtATimeBetweenSendMessagesAndInvokeCallbacks() throws IOException, InterruptedException
+    {
+        //arrange
+        final MqttTransport mqttTransport = new MqttTransport(mockedConfig);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        final int messageCount = 1000;
+        mqttTransport.open();
+
+        for (int i = 0; i < messageCount; i++)
+        {
+            mqttTransport.addMessage(mockedMessage, mockedIotHubEventCallback, null);
+        }
+
+        new NonStrictExpectations()
+        {
+            {
+                new IotHubCallbackPacket((IotHubStatusCode) any, mockedIotHubEventCallback, null);
+                result = mockedCallbackPacket;
+
+                mockedCallbackPacket.getCallback();
+                result = mockedIotHubEventCallback;
+            }
+        };
+
+        //act
+        executorService.submit(new SendMessagesRunnable(mqttTransport));
+        executorService.submit(new InvokeCallbacksRunnable(mqttTransport));
+
+        //wait for all threads to finish
+        executorService.shutdown();
+        executorService.awaitTermination(60, TimeUnit.SECONDS);
+
+        //assert
+        new VerificationsInOrder()
+        {
+            {
+                //All added messages are sent first, and then all of their callbacks executed
+                mockedConnection.sendEvent(mockedMessage);
+                times = messageCount;
+
+                mockedIotHubEventCallback.execute((IotHubStatusCode) any, any);
+                times = messageCount;
+            }
+        };
+    }
+
+    //Tests_SRS_MQTTTRANSPORT_34_028: [This function shall not block and wait on the read lock.]
+    @Test
+    public void addMessagesDoesNotBlockAndWaitForReadOperationThreadsToFinish() throws IOException, InterruptedException
+    {
+        //arrange
+        final MqttTransport mqttTransport = new MqttTransport(mockedConfig);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        final int messageCount = 10000;
+        mqttTransport.open();
+
+        for (int i = 0; i < messageCount; i++)
+        {
+            mqttTransport.addMessage(mockedMessage, mockedIotHubEventCallback, null);
+        }
+
+        //start the thread for sending all of these messages
+        executorService.submit(new SendMessagesRunnable(mqttTransport));
+
+        //act
+        executorService.submit(new AddMessageRunnable(mqttTransport));
+
+        //wait for all threads to finish
+        executorService.shutdown();
+        executorService.awaitTermination(60, TimeUnit.SECONDS);
+
+        //assert
+        new Verifications()
+        {
+            {
+                //Message added is sent successfully when the other thread reads it from the waiting list
+                mockedConnection.sendEvent((Message) any);
+                times = messageCount + 1;
             }
         };
     }
