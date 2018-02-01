@@ -8,6 +8,7 @@ Following is a definition of a minimum set of rulers that defines the Java SDK c
 - [Comment Style](#Comment-Style)
 - [Naming Conventions](#Naming-Conventions)
 - [JavaDoc Guidelines](#JavaDoc-Guidelines)
+- [Commit Guidelines](#Commit-Guidelines)
 
 # Programming Guidelines
 * Switch statements
@@ -252,3 +253,114 @@ public class ThisIsASampleClassTest()
     }
 }
 ```
+
+# Commit Guidelines
+We have very precise rules over how our git commit messages can be formatted. This leads to more readable messages that are easy to follow when looking through the project history.
+
+**Commit Message Format**
+
+Each commit message consists of a header, a body (optional) and a footer (optional). The header has a special format that includes a type, a scope and a subject:
+
+```java
+
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+
+```
+The header is mandatory and the body and footer are optional.
+
+Any line of the commit message cannot be longer 100 characters! This allows the message to be easier to read on GitHub as well as in various git tools.
+
+Footer should contain a [closing reference](#https://help.github.com/articles/closing-issues-using-keywords/) to an issue if any.
+
+**Revert**
+
+If the commit reverts a previous commit, it should begin with revert:, followed by the header of the reverted commit. In the body it should say: This reverts commit <hash>., where the hash is the SHA of the commit being reverted.
+
+**Rebase and Squash**
+
+* Its manadatory to squash all your commits per scope (i.e package). It is also important to rebase your commits on master.
+* Optionally you can split your commits on the basis of the package you are providing code to.
+
+**Type**
+
+Must be one of the following:
+
+* build: Changes that affect the build system (eg POM changes)
+* docs: Documentation only changes (eg ReadMe)
+* feat: A new feature
+* fix: A bug fix
+* perf: A code change that improves performance
+* refactor: A code change that neither fixes a bug nor adds a feature
+
+Optionally you could also use the following scope:
+
+* style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+* test: Adding missing tests or correcting existing tests
+
+**Scope**
+
+The scope should be the name of the maven package affected as perceived by person reading changelog generated from commit messages.
+
+The following is the list of supported scopes:
+
+* iot-dev
+* iot-service
+* deps
+* prov-dev
+* prov-service
+* sec-provider
+* tpm-provider
+* tpm-emulator
+* x509-provider
+* dice-emulator
+* dice-provider
+* samples
+
+**Subject**
+
+The subject contains succinct description of the change:
+
+* use the imperative, present tense: "change" not "changed" nor "changes"
+* no dot (.) at the end
+
+**Body**
+
+Just as in the subject, use the imperative, present tense: 
+
+"change" not "changed" nor "changes". The body should include the motivation for the change and contrast this with previous behavior.
+
+**Footer**
+
+The footer should contain any information about Breaking Changes and is also the place to reference GitHub issues that this commit Closes.
+
+Breaking Changes should start with the word BREAKING CHANGE: with a space or two newlines. The rest of the commit message is then used for this.
+
+***Example commit messages***
+
+Good commit messages look like below:
+
+* fix(iot-dev, deps): Fix failure in reconnection
+
+    Fix failure in MQTT reconnection when token expires.
+
+    Github issue (fix#123)
+* feat(iot-service): Add continuation token to Query
+* docs: Update readme to reflect provisiong client
+
+Bad commit messages look like below:
+
+* fix(iot-dev): small fix
+
+    I was trying to reconnect and network dropped. Fixing such random failures
+
+* feat(iot-service): add test
+* docs: update readme 
+
+References for commit guidelines 
+* https://udacity.github.io/git-styleguide/
+* https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-guidelines
+* https://github.com/googlesamples/android-architecture/issues/300

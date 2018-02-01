@@ -1,5 +1,5 @@
 <!--
-Thank you for helping us improve the Azure IoT Node.js SDK!
+Thank you for helping us improve the Azure IoT Java SDK!
 
 Here's a little checklist of things that will help it make its way to the repository: Note that you don't have to check all the boxes, we can help you with that. 
 This being said, the more you do, the quicker it'll go through our gated build! 
