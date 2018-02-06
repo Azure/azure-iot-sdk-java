@@ -84,7 +84,7 @@ public final class MessageProperty {
         // Codes_SRS_MESSAGEPROPERTY_11_003: [If the value contains a character that is not in US-ASCII, the function shall throw an IllegalArgumentException.]
         if (!usesValidChars(value))
         {
-            logger.LogError("%s is a reserved IoT Hub message property name, method name is %s ", name, logger.getMethodName());
+            logger.LogError("%s is not a valid IoT Hub message property value, method name is %s ", value, logger.getMethodName());
             String errMsg = String.format("%s is not a valid IoT Hub message property value.%n", value);
             throw new IllegalArgumentException(errMsg);
         }
