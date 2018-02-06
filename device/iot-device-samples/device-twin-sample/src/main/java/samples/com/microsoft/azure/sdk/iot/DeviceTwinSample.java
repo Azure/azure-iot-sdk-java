@@ -76,7 +76,8 @@ public class DeviceTwinSample
         public void TwinPropertyCallBack(Property property, Object context)
         {
             System.out.println(
-                    "generic onProperty change " + property.getKey() +
+                    "onProperty callback for " + (property.getIsReported()?"reported": "desired") +
+                            " property " + property.getKey() +
                             " to " + property.getValue() +
                             ", Properties version:" + property.getVersion());
         }

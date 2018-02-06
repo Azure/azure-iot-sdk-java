@@ -38,8 +38,8 @@ public class PropertyTest
     {
         //act
         Property testProp = Deencapsulation.newInstance(Property.class,
-                new Class[]{String.class, Object.class, Integer.class, Date.class, Integer.class},
-                "TestProp", 1, null, null, null);
+                new Class[]{String.class, Object.class, Integer.class, boolean.class},
+                "TestProp", 1, null, false);
 
         //assert
         assertNotNull(testProp);
@@ -63,8 +63,8 @@ public class PropertyTest
     {
         //act
         Property testProp = Deencapsulation.newInstance(Property.class,
-                new Class[]{String.class, Object.class, Integer.class, Date.class, Integer.class},
-                null, 1, null, null, null);
+                new Class[]{String.class, Object.class, Integer.class, boolean.class},
+                null, 1, 1, false);
 
     }
 
@@ -108,8 +108,8 @@ public class PropertyTest
     {
         //act
         Property testProp = Deencapsulation.newInstance(Property.class,
-                new Class[]{String.class, Object.class, Integer.class, Date.class, Integer.class},
-                "Key with space", 1, null, null, null);
+                new Class[]{String.class, Object.class, Integer.class, boolean.class},
+                "Key with space", 1, 1, true);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -117,8 +117,8 @@ public class PropertyTest
     {
         //act
         Property testProp = Deencapsulation.newInstance(Property.class,
-                new Class[]{String.class, Object.class, Integer.class, Date.class, Integer.class},
-                "KeyWith$", 1, null, null, null);
+                new Class[]{String.class, Object.class, Integer.class, boolean.class},
+                "KeyWith$", 1, 1, true);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -126,8 +126,8 @@ public class PropertyTest
     {
         //act
         Property testProp = Deencapsulation.newInstance(Property.class,
-                new Class[]{String.class, Object.class, Integer.class, Date.class, Integer.class},
-                "KeyWith.", 1, null, null, null);
+                new Class[]{String.class, Object.class, Integer.class, boolean.class},
+                "KeyWith.", 1, 1, true);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -135,8 +135,8 @@ public class PropertyTest
     {
         //act
         Property testProp = Deencapsulation.newInstance(Property.class,
-                new Class[]{String.class, Object.class, Integer.class, Date.class, Integer.class},
-                "", 1, null, null, null);
+                new Class[]{String.class, Object.class, Integer.class, boolean.class},
+                "", 1, 1, true);
     }
 
     /*
@@ -189,8 +189,7 @@ public class PropertyTest
     /*
      **Codes_SRS_Property_21_007: [**The constructor shall store the provided version and metadata.**]**
      **Codes_SRS_Property_21_008: [**The function shall return the value for this property.**]**
-     **Codes_SRS_Property_21_009: [**The function shall return the value for this property.**]**
-     **Codes_SRS_Property_21_010: [**The function shall return the value for this property.**]**
+     **Codes_SRS_Property_21_012: [**The function shall return the stored isReported.**]**
      */
     @Test
     public void constructorWithMetadataSetsMetadata()
@@ -198,14 +197,13 @@ public class PropertyTest
         //act
         Date now = new Date();
         Property testProp = Deencapsulation.newInstance(Property.class,
-                new Class[]{String.class, Object.class, Integer.class, Date.class, Integer.class},
-                "TestProp", 1, 5, now, 10);
+                new Class[]{String.class, Object.class, Integer.class, boolean.class},
+                "TestProp", 1, 5, true);
 
         //assert
         assertNotNull(testProp);
         assertEquals((int)testProp.getVersion(), 5);
-        assertEquals(testProp.getLastUpdated(), now);
-        assertEquals((int)testProp.getLastUpdatedVersion(), 10);
+        assertEquals(true, testProp.getIsReported());
     }
 
     /* Codes_SRS_Property_21_011: [The toString shall return a String with the information in this class in a pretty print JSON.] */

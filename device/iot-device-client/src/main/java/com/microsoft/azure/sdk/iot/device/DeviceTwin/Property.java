@@ -9,8 +9,7 @@ public class Property
 {
     private Pair<String, Object> property = null;
     private Integer version = null;
-    private Date lastUpdated = null;
-    private Integer lastUpdatedVersion = null;
+    private boolean isReported = false;
 
     public Property(String key, Object value)
     {
@@ -35,7 +34,7 @@ public class Property
         this.property = new Pair<>(key, value);
     }
 
-    protected Property(String key, Object value, Integer version, Date lastUpdated, Integer lastUpdatedVersion)
+    protected Property(String key, Object value, Integer version, boolean isReported)
     {
         this(key, value);
 
@@ -43,8 +42,7 @@ public class Property
          **Codes_SRS_Property_21_007: [**The constructor shall store the provided version and metadata.**]**
          */
         this.version = version;
-        this.lastUpdated = lastUpdated;
-        this.lastUpdatedVersion = lastUpdatedVersion;
+        this.isReported = isReported;
     }
 
     public String getKey()
@@ -79,20 +77,12 @@ public class Property
         return this.version;
     }
 
-    public Date getLastUpdated()
+    public boolean getIsReported()
     {
         /*
-         **Codes_SRS_Property_21_009: [**The function shall return the value for this property.**]**
+         **Codes_SRS_Property_21_012: [**The function shall return the stored isReported.**]**
          */
-        return this.lastUpdated;
-    }
-
-    public Integer getLastUpdatedVersion()
-    {
-        /*
-         **Codes_SRS_Property_21_010: [**The function shall return the value for this property.**]**
-         */
-        return this.lastUpdatedVersion;
+        return this.isReported;
     }
 
     /**

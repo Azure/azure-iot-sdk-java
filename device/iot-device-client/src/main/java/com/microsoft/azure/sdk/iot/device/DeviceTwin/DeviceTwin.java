@@ -95,9 +95,13 @@ public class DeviceTwin
                              **Codes_SRS_DEVICETWIN_25_030: [**If the message is of type DEVICE_TWIN and DEVICE_OPERATION_TWIN_GET_RESPONSE then the payload is deserialized only if the status is ok.**]**
                              */
                             TwinState twinState = TwinState.createFromPropertiesJson(new String(dtMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
-                            if(twinState.getDesiredProperty() != null)
+                            if (twinState.getDesiredProperty() != null)
                             {
                                 OnDesiredPropertyChanged(twinState.getDesiredProperty());
+                            }
+                            if (twinState.getReportedProperty() != null)
+                            {
+                                OnReportedPropertyChanged(twinState.getReportedProperty());
                             }
                         }
                         break;
@@ -138,6 +142,75 @@ public class DeviceTwin
         }
     }
 
+    private void OnDesiredPropertyChanged(TwinCollection desiredPropertyMap)
+    {
+        synchronized (DEVICE_TWIN_LOCK)
+        {
+            if (desiredPropertyMap != null)
+            {
+                for (Iterator desiredPropertyIt = desiredPropertyMap.entrySet().iterator(); desiredPropertyIt.hasNext();)
+                {
+                    Map.Entry<String, String> desiredProperty = (Map.Entry<String, String>) desiredPropertyIt.next();
+                    Property property = this.getProperty(desiredPropertyMap, desiredProperty.getKey(), false);
+
+                    /*
+                     **Codes_SRS_DEVICETWIN_25_022: [**OnDesiredPropertyChange callback shall look for the user registered call back on the property that changed provided in desiredPropertyMap and call the user providing the desired property change key and value pair**]**
+                     */
+                    if (!reportPropertyCallback(property))
+                    {
+                        /*
+                         **Codes_SRS_DEVICETWIN_25_023: [**OnDesiredPropertyChange callback shall look for the user registered call back on the property that changed and if no callback is registered or is null then OnDesiredPropertyChange shall call the user on generic callback providing with the desired property change key and value pair**]**
+                         */
+                        reportDeviceTwinGenericPropertyCallback(property);
+                    }
+                    desiredPropertyIt.remove();
+                }
+            }
+        }
+    }
+
+    private void OnReportedPropertyChanged(TwinCollection reportedPropertyMap)
+    {
+        synchronized (DEVICE_TWIN_LOCK)
+        {
+            if (reportedPropertyMap != null)
+            {
+                for (Iterator reportedPropertyIt = reportedPropertyMap.entrySet().iterator(); reportedPropertyIt.hasNext();)
+                {
+                    Map.Entry<String, String> reportedProperty = (Map.Entry<String, String>) reportedPropertyIt.next();
+                    Property property = this.getProperty(reportedPropertyMap, reportedProperty.getKey(), true);
+
+                    /*
+                     **Codes_SRS_DEVICETWIN_25_023: [**OnReportedPropertyChanged callback shall look for the user registered call back on the property that changed and if no callback is registered or is null then OnDesiredPropertyChange shall call the user on generic callback providing with the desired property change key and value pair**]**
+                     */
+                    if(deviceTwinGenericTwinPropertyChangeCallback != null)
+                    {
+                        deviceTwinGenericTwinPropertyChangeCallback.TwinPropertyCallBack(property, deviceTwinGenericPropertyChangeCallbackContext);
+                    }
+                    reportedPropertyIt.remove();
+                }
+            }
+        }
+    }
+
+    private Property getProperty(TwinCollection twinCollection, String key, boolean isReported)
+    {
+        Object value = twinCollection.get(key);
+        Integer propertyVersion = twinCollection.getVersion();
+        TwinMetadata metadata = twinCollection.getTwinMetadata(key);
+        Date lastUpdated = null;
+        Integer lastUpdatedVersion = null;
+        if(metadata != null)
+        {
+            lastUpdated = metadata.getLastUpdated();
+            lastUpdatedVersion = metadata.getLastUpdatedVersion();
+        }
+        return new Property(
+                key, value,
+                propertyVersion,
+                isReported);
+    }
+
     /*
         Callback invoked when device twin operation request has successfully completed
     */
@@ -148,11 +221,14 @@ public class DeviceTwin
         {
             synchronized (DEVICE_TWIN_LOCK)
             {
-            /*
-                Don't worry about this....this is just delivery complete. Actual response is
-                another message received in deviceTwinResponseMessageCallback.
-             */
-                deviceTwinStatusCallback.execute(responseStatus, deviceTwinStatusCallbackContext);
+                /*
+                    Don't worry about this....this is just delivery complete. Actual response is
+                    another message received in deviceTwinResponseMessageCallback.
+                 */
+                if((responseStatus != IotHubStatusCode.OK) && (responseStatus != IotHubStatusCode.OK_EMPTY))
+                {
+                    deviceTwinStatusCallback.execute(responseStatus, deviceTwinStatusCallbackContext);
+                }
             }
         }
     }
@@ -233,10 +309,15 @@ public class DeviceTwin
         /*
          **Codes_SRS_DEVICETWIN_25_008: [**This method shall send the message to the lower transport layers by calling sendEventAsync.**]**
          */
-        this.deviceIO.sendEventAsync(getTwinRequestMessage,new deviceTwinRequestMessageCallback(), null, this.config.getIotHubConnectionString());
+        this.deviceIO.sendEventAsync(getTwinRequestMessage, new deviceTwinRequestMessageCallback(), null, this.config.getIotHubConnectionString());
     }
 
     public synchronized void updateReportedProperties(Set<Property> reportedProperties) throws IOException
+    {
+        this.updateReportedProperties(reportedProperties, null);
+    }
+
+    public synchronized void updateReportedProperties(Set<Property> reportedProperties, Integer version) throws IOException
     {
         if (reportedProperties == null)
         {
@@ -270,6 +351,14 @@ public class DeviceTwin
          **Codes_SRS_DEVICETWIN_25_014: [**This method shall set the request id for the message by calling setRequestId .**]**
          */
         updateReportedPropertiesRequest.setRequestId(String.valueOf(requestId++));
+
+        if(version != null)
+        {
+            /*
+             **Codes_SRS_DEVICETWIN_21_024: [**If the version is provided, this method shall set the version for the message by calling setVersion .**]**
+             */
+            updateReportedPropertiesRequest.setVersion(Integer.toString(version));
+        }
 
         /*
          **Codes_SRS_DEVICETWIN_25_013: [**This method shall set the message type as DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST by calling setDeviceOperationType.**]**
@@ -340,47 +429,6 @@ public class DeviceTwin
              **Codes_SRS_DEVICETWIN_25_019: [**If not already subscribed then this method shall send the message using sendEventAsync.**]**
              */
             this.deviceIO.sendEventAsync(desiredPropertiesNotificationRequest, new deviceTwinRequestMessageCallback(), null, this.config.getIotHubConnectionString());
-        }
-    }
-
-    private void OnDesiredPropertyChanged(TwinCollection desiredPropertyMap)
-    {
-        synchronized (DEVICE_TWIN_LOCK)
-        {
-            if (desiredPropertyMap != null)
-            {
-                for (Iterator desiredPropertyIt = desiredPropertyMap.entrySet().iterator(); desiredPropertyIt.hasNext();)
-                {
-                    Map.Entry<String, String> desiredProperty = (Map.Entry<String, String>) desiredPropertyIt.next();
-                    String key = desiredProperty.getKey();
-                    Object value = desiredProperty.getValue();
-                    Integer propertyVersion = desiredPropertyMap.getVersion();
-                    TwinMetadata metadata = desiredPropertyMap.getTwinMetadata();
-                    Date lastUpdated = null;
-                    Integer lastUpdatedVersion = null;
-                    if(metadata != null)
-                    {
-                        lastUpdated = metadata.getLastUpdated();
-                        lastUpdatedVersion = metadata.getLastUpdatedVersion();
-                    }
-                    Property property = new Property(
-                            key, value,
-                            propertyVersion,
-                            lastUpdated, lastUpdatedVersion);
-
-                    /*
-                     **Codes_SRS_DEVICETWIN_25_022: [**OnDesiredPropertyChange callback shall look for the user registered call back on the property that changed provided in desiredPropertyMap and call the user providing the desired property change key and value pair**]**
-                     */
-                    if (!reportPropertyCallback(property))
-                    {
-                        /*
-                         **Codes_SRS_DEVICETWIN_25_023: [**OnDesiredPropertyChange callback shall look for the user registered call back on the property that changed and if no callback is registered or is null then OnDesiredPropertyChange shall call the user on generic callback providing with the desired property change key and value pair**]**
-                         */
-                        reportDeviceTwinGenericPropertyCallback(property);
-                    }
-                    desiredPropertyIt.remove();
-                }
-            }
         }
     }
 

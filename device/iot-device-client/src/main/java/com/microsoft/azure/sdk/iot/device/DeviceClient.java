@@ -692,7 +692,6 @@ public final class DeviceClient implements Closeable
      * @throws IOException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty.
      */
-
     public void sendReportedProperties(Set<Property> reportedProperties) throws IOException
     {
         if (this.deviceTwin == null)
@@ -724,6 +723,55 @@ public final class DeviceClient implements Closeable
          */
         this.deviceTwin.updateReportedProperties(reportedProperties);
 
+    }
+
+    /**
+     * Sends reported properties
+     *
+     * @param reportedProperties the Set for desired properties and their corresponding callback and context. Cannot be {@code null}.
+     * @param version the Reported property version. Cannot be negative.
+     *
+     * @throws IOException if called when client is not opened or called before starting twin.
+     * @throws IllegalArgumentException if reportedProperties is null or empty.
+     */
+    public void sendReportedProperties(Set<Property> reportedProperties, int version) throws IOException
+    {
+        if (this.deviceTwin == null)
+        {
+            /*
+             **Codes_SRS_DEVICECLIENT_25_032: [**If the client has not started twin before calling this method, the function shall throw an IOException.**]**
+             */
+            throw new IOException("Start twin before using it");
+        }
+
+        if (!this.deviceIO.isOpen())
+        {
+            /*
+             **Codes_SRS_DEVICECLIENT_25_033: [**If the client has not been open, the function shall throw an IOException.**]**
+             */
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        if (reportedProperties == null || reportedProperties.isEmpty())
+        {
+            /*
+             **Codes_SRS_DEVICECLIENT_25_034: [**If reportedProperties is null or empty, the function shall throw an IllegalArgumentException.**]**
+             */
+            throw new IllegalArgumentException("Reported properties set cannot be null or empty.");
+        }
+
+        if(version < 0)
+        {
+            /*
+             **Codes_SRS_DEVICECLIENT_21_053: [**If version is negative, the function shall throw an IllegalArgumentException.**]**
+             */
+            throw new IllegalArgumentException("Version cannot be null.");
+        }
+
+        /*
+         **Codes_SRS_DEVICECLIENT_25_035: [**This method shall send to reported properties by calling updateReportedProperties on the twin object.**]**
+         */
+        this.deviceTwin.updateReportedProperties(reportedProperties, version);
     }
 
     /**
