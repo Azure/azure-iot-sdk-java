@@ -766,7 +766,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         if (currentReconnectionAttempt == Integer.MAX_VALUE)
             currentReconnectionAttempt = 0;
 
-        System.out.println("Lost connection to the server. Reconnection attempt " + currentReconnectionAttempt++ + "...");
+        currentReconnectionAttempt++;
         logger.LogInfo("Lost connection to the server. Reconnection attempt %s, method name is %s ", currentReconnectionAttempt, logger.getMethodName());
         try
         {
