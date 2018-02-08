@@ -218,12 +218,16 @@ public class RegistryManager
 
     /**
      * Get list of devices
+     * @deprecated as of release 1.12.0. Please use
+     * {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin#queryTwin(String sqlQuery, Integer pageSize)}
+     * to query for all devices.
      *
      * @param maxCount The requested count of devices
      * @return The array of requested device objects
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
+    @Deprecated
     public ArrayList<Device> getDevices(Integer maxCount) throws IOException, IotHubException, JsonSyntaxException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_023: [The constructor shall throw IllegalArgumentException if the input count number is less than 1]
@@ -266,11 +270,16 @@ public class RegistryManager
     /**
      * Async wrapper for getDevices() operation
      *
+     * @deprecated as of release 1.12.0. Please use
+     * {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin#queryTwin(String sqlQuery, Integer pageSize)}
+     * to query for all devices.
+     *
      * @param maxCount The requested count of devices
      * @return The future object for the requested operation
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
+    @Deprecated
     public CompletableFuture<ArrayList<Device>> getDevicesAsync(Integer maxCount) throws IOException, IotHubException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_030: [The function shall throw IllegalArgumentException if the input count number is less than 1]
@@ -329,7 +338,6 @@ public class RegistryManager
         }
         return stringBuilder.toString();
     }
-
 
     /**
      * Update device not forced

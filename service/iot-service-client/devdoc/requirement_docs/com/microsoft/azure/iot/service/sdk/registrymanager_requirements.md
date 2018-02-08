@@ -22,8 +22,13 @@ public class RegistryManager
     public CompletableFuture<Device> addDeviceAsync(Device device);
     public Device getDevice(String deviceId);
     public CompletableFuture<Device> getDeviceAsync(String deviceId);
+
+    @deprecated
     public ArrayList<Device> getDevices(Integer maxCount);
+
+    @deprecated
     public CompletableFuture<ArrayList<Device>> getDevicesAsync(Integer maxCount);
+
     public String getDeviceConnectionString(Device device);
     public Device updateDevice(Device device, Boolean forceUpdate);
     public Device updateDevice(Device device);
