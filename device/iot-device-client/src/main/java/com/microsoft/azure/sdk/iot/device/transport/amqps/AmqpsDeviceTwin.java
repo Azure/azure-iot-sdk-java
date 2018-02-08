@@ -408,6 +408,19 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
                 messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_OPERATION), MESSAGE_ANNOTATION_FIELD_VALUE_PATCH);
                 // Codes_SRS_AMQPSDEVICETWIN_12_035: [The function shall set the proton message annotation resource field to "/properties/reported" if the IotHubTransportMessage operation type is UPDATE_REPORTED_PROPERTIES_REQUEST.]
                 messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE), MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_REPORTED);
+                // Codes_SRS_AMQPSDEVICETWIN_21_049: [If the version is provided, the function shall set the proton message annotation resource field to "version" if the message version.]
+                if(deviceTwinMessage.getVersion() != null)
+                {
+                    try
+                    {
+                        messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_VERSION), Long.parseLong(deviceTwinMessage.getVersion()));
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        // Codes_SRS_AMQPSDEVICETWIN_21_050: [If the provided version is not `Long`, the function shall throw IOException.]
+                        throw new IOException("Reported version is not a Long", e);
+                    }
+                }
                 break;
             case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST:
                 // Codes_SRS_AMQPSDEVICETWIN_12_036: [The function shall set the proton message annotation operation field to PUT if the IotHubTransportMessage operation type is SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.]

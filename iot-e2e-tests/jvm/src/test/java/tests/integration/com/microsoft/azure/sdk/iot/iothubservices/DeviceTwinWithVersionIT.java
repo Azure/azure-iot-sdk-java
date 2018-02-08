@@ -468,4 +468,784 @@ public class DeviceTwinWithVersionIT
         Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(PROPERTIES, reported);
     }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testSendReportedPropertiesWithoutVersionMqttWSSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    {
+        // arrange
+        createDevice(IotHubClientProtocol.MQTT_WS);
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+
+        // act
+        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+
+        // assert
+        // test device client
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        while(testDevice.deviceTwinStatus == STATUS.UNKNOWN)
+        {
+            Thread.sleep(BREATHE_TIME);
+        }
+
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // test service client
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
+        sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        assertSetEquals(PROPERTIES, reported);
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testUpdateReportedPropertiesWithVersionMqttWSSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    {
+        // arrange
+        createDevice(IotHubClientProtocol.MQTT_WS);
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+
+        // Create the first version of the reported properties.
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
+            {
+                throw new IOException("IoTHub send Http error code");
+            }
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // New values for the reported properties
+        final Set<Property> newValues = new HashSet<Property>()
+        {
+            {
+                add(new Property(PROPERTY_KEY_1, "newValue1"));
+                add(new Property(PROPERTY_KEY_2, "newValue2"));
+            }
+        };
+        testDevice.expectedProperties = new HashSet<>(newValues);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+
+        // act
+        testDevice.deviceClient.sendReportedProperties(newValues, 2);
+
+        // assert
+        // test device client
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        while(testDevice.deviceTwinStatus == STATUS.UNKNOWN)
+        {
+            Thread.sleep(BREATHE_TIME);
+        }
+
+        do {
+            Thread.sleep(BREATHE_TIME);
+            testDevice.expectedProperties = new HashSet<>(newValues);
+            testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+            testDevice.reportedPropertyVersion = null;
+            testDevice.receivedProperties = new HashSet<>();
+            testDevice.deviceClient.getDeviceTwin();
+            while(!testDevice.expectedProperties.isEmpty())
+            {
+                Thread.sleep(BREATHE_TIME);
+                if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+                {
+                    throw new IOException(testDevice.exception);
+                }
+            }
+        }while (testDevice.reportedPropertyVersion != 3);
+
+        // test service client
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
+        sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(3, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        assertSetEquals(newValues, reported);
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testUpdateReportedPropertiesWithLowerVersionMqttWSFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    {
+        // arrange
+        createDevice(IotHubClientProtocol.MQTT_WS);
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+
+        // Create the first version of the reported properties.
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
+            {
+                throw new IOException("IoTHub send Http error code");
+            }
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // New values for the reported properties
+        final Set<Property> newValues = new HashSet<Property>()
+        {
+            {
+                add(new Property(PROPERTY_KEY_1, "newValue1"));
+                add(new Property(PROPERTY_KEY_2, "newValue2"));
+            }
+        };
+        testDevice.expectedProperties = new HashSet<>(newValues);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+
+        // act
+        testDevice.deviceClient.sendReportedProperties(newValues, 1);
+
+        // assert
+        // test device client
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        while((testDevice.deviceTwinStatus != STATUS.BAD_ANSWER) && (testDevice.deviceTwinStatus != STATUS.IOTHUB_FAILURE))
+        {
+            Thread.sleep(BREATHE_TIME);
+        }
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // test service client
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
+        sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        assertSetEquals(PROPERTIES, reported);
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testUpdateReportedPropertiesWithHigherVersionMqttWSFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    {
+        // arrange
+        createDevice(IotHubClientProtocol.MQTT_WS);
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+
+        // Create the first version of the reported properties.
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
+            {
+                throw new IOException("IoTHub send Http error code");
+            }
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // New values for the reported properties
+        final Set<Property> newValues = new HashSet<Property>()
+        {
+            {
+                add(new Property(PROPERTY_KEY_1, "newValue1"));
+                add(new Property(PROPERTY_KEY_2, "newValue2"));
+            }
+        };
+        testDevice.expectedProperties = new HashSet<>(newValues);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+
+        // act
+        testDevice.deviceClient.sendReportedProperties(newValues, 3);
+
+        // assert
+        // test device client
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        while((testDevice.deviceTwinStatus != STATUS.BAD_ANSWER) && (testDevice.deviceTwinStatus != STATUS.IOTHUB_FAILURE))
+        {
+            Thread.sleep(BREATHE_TIME);
+        }
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // test service client
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
+        sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        assertSetEquals(PROPERTIES, reported);
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testSendReportedPropertiesWithoutVersionAmqpSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    {
+        // arrange
+        createDevice(IotHubClientProtocol.AMQPS);
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+
+        // act
+        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+
+        // assert
+        // test device client
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        while(testDevice.deviceTwinStatus == STATUS.UNKNOWN)
+        {
+            Thread.sleep(BREATHE_TIME);
+        }
+
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // test service client
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
+        sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        assertSetEquals(PROPERTIES, reported);
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testUpdateReportedPropertiesWithVersionAmqpSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    {
+        // arrange
+        createDevice(IotHubClientProtocol.AMQPS);
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+
+        // Create the first version of the reported properties.
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
+            {
+                throw new IOException("IoTHub send Http error code");
+            }
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // New values for the reported properties
+        final Set<Property> newValues = new HashSet<Property>()
+        {
+            {
+                add(new Property(PROPERTY_KEY_1, "newValue1"));
+                add(new Property(PROPERTY_KEY_2, "newValue2"));
+            }
+        };
+        testDevice.expectedProperties = new HashSet<>(newValues);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+
+        // act
+        testDevice.deviceClient.sendReportedProperties(newValues, 2);
+
+        // assert
+        // test device client
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        while(testDevice.deviceTwinStatus == STATUS.UNKNOWN)
+        {
+            Thread.sleep(BREATHE_TIME);
+        }
+
+        do {
+            Thread.sleep(BREATHE_TIME);
+            testDevice.expectedProperties = new HashSet<>(newValues);
+            testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+            testDevice.reportedPropertyVersion = null;
+            testDevice.receivedProperties = new HashSet<>();
+            testDevice.deviceClient.getDeviceTwin();
+            while(!testDevice.expectedProperties.isEmpty())
+            {
+                Thread.sleep(BREATHE_TIME);
+                if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+                {
+                    throw new IOException(testDevice.exception);
+                }
+            }
+        }while (testDevice.reportedPropertyVersion != 3);
+
+        // test service client
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
+        sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(3, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        assertSetEquals(newValues, reported);
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testUpdateReportedPropertiesWithLowerVersionAmqpFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    {
+        // arrange
+        createDevice(IotHubClientProtocol.AMQPS);
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+
+        // Create the first version of the reported properties.
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
+            {
+                throw new IOException("IoTHub send Http error code");
+            }
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // New values for the reported properties
+        final Set<Property> newValues = new HashSet<Property>()
+        {
+            {
+                add(new Property(PROPERTY_KEY_1, "newValue1"));
+                add(new Property(PROPERTY_KEY_2, "newValue2"));
+            }
+        };
+        testDevice.expectedProperties = new HashSet<>(newValues);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+
+        // act
+        testDevice.deviceClient.sendReportedProperties(newValues, 1);
+
+        // assert
+        // test device client
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        while((testDevice.deviceTwinStatus != STATUS.BAD_ANSWER) && (testDevice.deviceTwinStatus != STATUS.IOTHUB_FAILURE))
+        {
+            Thread.sleep(BREATHE_TIME);
+        }
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // test service client
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
+        sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        assertSetEquals(PROPERTIES, reported);
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testUpdateReportedPropertiesWithHigherVersionAmqpFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    {
+        // arrange
+        createDevice(IotHubClientProtocol.AMQPS);
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+
+        // Create the first version of the reported properties.
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
+            {
+                throw new IOException("IoTHub send Http error code");
+            }
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // New values for the reported properties
+        final Set<Property> newValues = new HashSet<Property>()
+        {
+            {
+                add(new Property(PROPERTY_KEY_1, "newValue1"));
+                add(new Property(PROPERTY_KEY_2, "newValue2"));
+            }
+        };
+        testDevice.expectedProperties = new HashSet<>(newValues);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+
+        // act
+        testDevice.deviceClient.sendReportedProperties(newValues, 3);
+
+        // assert
+        // test device client
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        while((testDevice.deviceTwinStatus != STATUS.BAD_ANSWER) && (testDevice.deviceTwinStatus != STATUS.IOTHUB_FAILURE))
+        {
+            Thread.sleep(BREATHE_TIME);
+        }
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // test service client
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
+        sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        assertSetEquals(PROPERTIES, reported);
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testSendReportedPropertiesWithoutVersionAmqpWSSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    {
+        // arrange
+        createDevice(IotHubClientProtocol.AMQPS_WS);
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+
+        // act
+        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+
+        // assert
+        // test device client
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        while(testDevice.deviceTwinStatus == STATUS.UNKNOWN)
+        {
+            Thread.sleep(BREATHE_TIME);
+        }
+
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // test service client
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
+        sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        assertSetEquals(PROPERTIES, reported);
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testUpdateReportedPropertiesWithVersionAmqpWSSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    {
+        // arrange
+        createDevice(IotHubClientProtocol.AMQPS_WS);
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+
+        // Create the first version of the reported properties.
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
+            {
+                throw new IOException("IoTHub send Http error code");
+            }
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // New values for the reported properties
+        final Set<Property> newValues = new HashSet<Property>()
+        {
+            {
+                add(new Property(PROPERTY_KEY_1, "newValue1"));
+                add(new Property(PROPERTY_KEY_2, "newValue2"));
+            }
+        };
+        testDevice.expectedProperties = new HashSet<>(newValues);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+
+        // act
+        testDevice.deviceClient.sendReportedProperties(newValues, 2);
+
+        // assert
+        // test device client
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        while(testDevice.deviceTwinStatus == STATUS.UNKNOWN)
+        {
+            Thread.sleep(BREATHE_TIME);
+        }
+
+        do {
+            Thread.sleep(BREATHE_TIME);
+            testDevice.expectedProperties = new HashSet<>(newValues);
+            testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+            testDevice.reportedPropertyVersion = null;
+            testDevice.receivedProperties = new HashSet<>();
+            testDevice.deviceClient.getDeviceTwin();
+            while(!testDevice.expectedProperties.isEmpty())
+            {
+                Thread.sleep(BREATHE_TIME);
+                if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+                {
+                    throw new IOException(testDevice.exception);
+                }
+            }
+        }while (testDevice.reportedPropertyVersion != 3);
+
+        // test service client
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
+        sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(3, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        assertSetEquals(newValues, reported);
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testUpdateReportedPropertiesWithLowerVersionAmqpWSFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    {
+        // arrange
+        createDevice(IotHubClientProtocol.AMQPS_WS);
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+
+        // Create the first version of the reported properties.
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
+            {
+                throw new IOException("IoTHub send Http error code");
+            }
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // New values for the reported properties
+        final Set<Property> newValues = new HashSet<Property>()
+        {
+            {
+                add(new Property(PROPERTY_KEY_1, "newValue1"));
+                add(new Property(PROPERTY_KEY_2, "newValue2"));
+            }
+        };
+        testDevice.expectedProperties = new HashSet<>(newValues);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+
+        // act
+        testDevice.deviceClient.sendReportedProperties(newValues, 1);
+
+        // assert
+        // test device client
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        while((testDevice.deviceTwinStatus != STATUS.BAD_ANSWER) && (testDevice.deviceTwinStatus != STATUS.IOTHUB_FAILURE))
+        {
+            Thread.sleep(BREATHE_TIME);
+        }
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // test service client
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
+        sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        assertSetEquals(PROPERTIES, reported);
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testUpdateReportedPropertiesWithHigherVersionAmqpWSFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    {
+        // arrange
+        createDevice(IotHubClientProtocol.AMQPS_WS);
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+
+        // Create the first version of the reported properties.
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
+            {
+                throw new IOException("IoTHub send Http error code");
+            }
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // New values for the reported properties
+        final Set<Property> newValues = new HashSet<Property>()
+        {
+            {
+                add(new Property(PROPERTY_KEY_1, "newValue1"));
+                add(new Property(PROPERTY_KEY_2, "newValue2"));
+            }
+        };
+        testDevice.expectedProperties = new HashSet<>(newValues);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+
+        // act
+        testDevice.deviceClient.sendReportedProperties(newValues, 3);
+
+        // assert
+        // test device client
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        while((testDevice.deviceTwinStatus != STATUS.BAD_ANSWER) && (testDevice.deviceTwinStatus != STATUS.IOTHUB_FAILURE))
+        {
+            Thread.sleep(BREATHE_TIME);
+        }
+        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testDevice.reportedPropertyVersion = null;
+        testDevice.receivedProperties = new HashSet<>();
+        testDevice.deviceClient.getDeviceTwin();
+        while(!testDevice.expectedProperties.isEmpty())
+        {
+            Thread.sleep(BREATHE_TIME);
+            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            {
+                throw new IOException(testDevice.exception);
+            }
+        }
+        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+
+        // test service client
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
+        sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        assertSetEquals(PROPERTIES, reported);
+    }
 }
