@@ -6,7 +6,7 @@ package com.microsoft.azure.sdk.iot.device.transport;
 public class TransportUtils
 {
     public static final String JAVA_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.iot-device-client/";
-    public static final String CLIENT_VERSION = "1.7.0";
+    public static final String CLIENT_VERSION = "1.8.0";
 
     private static final byte[] SLEEP_INTERVALS = {1, 2, 4, 8, 16, 32, 60};
     /** Generates a reconnection time with an exponential backoff
