@@ -11,7 +11,7 @@ for %%i in ("%build-root%") do set build-root=%%~fi
 call RD /S /Q "c:/users/%USERNAME%/.m2"
 
 @REM -- Android Test Build --
-cd %build-root%\iot-e2e-tests\android
-call mvn install -DskipAndroidTests=false
+cd %build-root%
+call mvn install -DskipAndroidTests=false -DskipITs=true
 if errorlevel 1 goto :eof
 cd %build-root%

@@ -1,4 +1,3 @@
-import subprocess
 import os
 import time
 
@@ -12,18 +11,26 @@ def startAvd():
             isEmulatorImagePresent = True
             break
     if isEmulatorImagePresent:
+        print("Starting emulator")
         os.popen("start cmd.exe /k emulator @test")
-        time.sleep(30)
+        os.popen("adb wait-for-device")
+        waitForDeviceToComeOnline()
         writeToFile((getDeviceList()[0]).split()[0])
     else:
+        print("Creating emulator")
         os.popen("echo no | avdmanager create avd -n test -k \"system-images;android-25;google_apis;x86\"").read()
         time.sleep(10)
         startAvd()
 
+def waitForDeviceToComeOnline():
+    deviceBootCOmpleted = os.popen("adb shell getprop sys.boot_completed").read()
+    while deviceBootCOmpleted.rstrip() != "1":
+        time.sleep(2)
+        deviceBootCOmpleted = os.popen("adb shell getprop sys.boot_completed").read()
 
 def writeToFile(deviceName):
     #os.popen("echo " + deviceName + ">device_udid.txt").read()
-	os.popen("setx ANDROID_DEVICE_NAME "+deviceName).read()
+    os.popen("setx ANDROID_DEVICE_NAME "+deviceName).read()
 
 def getDeviceList():
     res = os.popen("adb devices").read()
@@ -37,6 +44,7 @@ def getDeviceList():
 def killAvd():
     hasRealDevice = False
     deviceList = getDeviceList()
+    print("Getting connected Devices")
     for device in deviceList:
         if not device.startswith('emulator'):
             hasRealDevice = True
@@ -50,7 +58,3 @@ def killAvd():
 
 
 killAvd()
-
-
-
-

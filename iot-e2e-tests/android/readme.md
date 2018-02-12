@@ -4,6 +4,7 @@ Microsoft Azure IoT Hub Java Android tests run instrumented tests to check iot s
 
 ## Prerequisites 
 
+ * download and install python 2.7.x [link](https://www.python.org/downloads/).
  * download and install android studio and sdk tools [link](https://developer.android.com/studio/index.html).
  * download avd images for android-25.
  * set path for emulator, adb and avdmanager in Environment variables 
