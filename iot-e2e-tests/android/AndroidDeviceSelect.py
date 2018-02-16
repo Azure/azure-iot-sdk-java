@@ -25,6 +25,7 @@ def startAvd():
 def waitForDeviceToComeOnline():
     deviceBootCOmpleted = os.popen("adb shell getprop sys.boot_completed").read()
     while deviceBootCOmpleted.rstrip() != "1":
+        print("sleeping 2secs for device to come online")
         time.sleep(2)
         deviceBootCOmpleted = os.popen("adb shell getprop sys.boot_completed").read()
 
@@ -48,13 +49,14 @@ def killAvd():
     for device in deviceList:
         if not device.startswith('emulator'):
             hasRealDevice = True
+            print("found real device "+device)
             writeToFile(device)
             break
     if not hasRealDevice:
         for emulator in deviceList:
             os.popen("adb -s " + emulator.split()[0] + " emu kill")
             time.sleep(30)
-    startAvd()
+        startAvd()
 
-
+print("selecting android device")
 killAvd()
