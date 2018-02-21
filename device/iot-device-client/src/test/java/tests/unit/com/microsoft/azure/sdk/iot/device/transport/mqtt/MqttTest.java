@@ -447,6 +447,8 @@ public class MqttTest
                 times = 1;
                 mockMqttToken.waitForCompletion();
                 times = 1;
+                mockMqttAsyncClient.close();
+                times = 1;
             }
         };
     }

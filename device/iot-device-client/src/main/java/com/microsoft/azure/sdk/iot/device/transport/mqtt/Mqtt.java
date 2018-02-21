@@ -133,6 +133,8 @@ abstract public class Mqtt implements MqttCallback
                 */
                 IMqttToken disconnectToken = this.mqttConnection.getMqttAsyncClient().disconnect();
                 disconnectToken.waitForCompletion();
+
+                this.mqttConnection.getMqttAsyncClient().close();
             }
             this.mqttConnection.setMqttAsyncClient(null);
         }
