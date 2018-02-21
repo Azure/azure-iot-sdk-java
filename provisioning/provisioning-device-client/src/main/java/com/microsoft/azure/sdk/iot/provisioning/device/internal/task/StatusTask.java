@@ -21,6 +21,7 @@ import java.util.concurrent.Callable;
 public class StatusTask implements Callable
 {
     private static final int MAX_WAIT_FOR_STATUS_RESPONSE = 100;
+    private static final String THREAD_NAME = "azure-iot-sdk-StatusTask";
     private ProvisioningDeviceClientContract provisioningDeviceClientContract;
     private SecurityProvider securityProvider;
     private String operationId;
@@ -135,6 +136,7 @@ public class StatusTask implements Callable
     @Override
     public RegistrationOperationStatusParser call() throws Exception
     {
-       return this.getRegistrationStatus(this.operationId, this.authorization);
+        Thread.currentThread().setName(THREAD_NAME);
+        return this.getRegistrationStatus(this.operationId, this.authorization);
     }
 }

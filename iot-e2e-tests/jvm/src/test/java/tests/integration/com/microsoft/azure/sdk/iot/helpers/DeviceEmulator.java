@@ -48,6 +48,8 @@ public class DeviceEmulator  implements Runnable
     private IotHubEventCallback deviceMethodStatusCallback;
     private Object deviceMethodStatusCallbackContext;
 
+    private final static String THREAD_NAME = "azure-iot-sdk-DeviceEmulator";
+
     /**
      * CONSTRUCTOR
      * Creates a new instance of the device emulator, and connect it to the IoTHub using the provided connectionString
@@ -86,6 +88,8 @@ public class DeviceEmulator  implements Runnable
     @Override
     public void run()
     {
+        Thread.currentThread().setName(THREAD_NAME);
+
         while(!stopDevice)
         {
             try

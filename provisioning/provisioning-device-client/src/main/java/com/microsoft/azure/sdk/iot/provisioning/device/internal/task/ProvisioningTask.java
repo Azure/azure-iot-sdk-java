@@ -32,6 +32,7 @@ public class ProvisioningTask implements Callable
     private static final int MAX_THREADS_TO_RUN = 2;
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1000000;
     private static final int MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE = 10000;
+    private static final String THREAD_NAME = "azure-iot-sdk-ProvisioningTask";
 
     private SecurityProvider securityProvider = null;
     private ProvisioningDeviceClientContract provisioningDeviceClientContract = null;
@@ -258,6 +259,8 @@ public class ProvisioningTask implements Callable
     @Override
     public Object call() throws Exception
     {
+        Thread.currentThread().setName(THREAD_NAME);
+
         try
         {
             //SRS_ProvisioningTask_25_015: [ This method shall invoke open call on the contract.]

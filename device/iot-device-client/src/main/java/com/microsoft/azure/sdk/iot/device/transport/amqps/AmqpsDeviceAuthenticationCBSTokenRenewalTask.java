@@ -4,6 +4,8 @@ import com.microsoft.azure.sdk.iot.device.CustomLogger;
 
 public final class AmqpsDeviceAuthenticationCBSTokenRenewalTask implements Runnable
 {
+    private static final String THREAD_NAME = "azure-iot-sdk-AmqpsDeviceAuthenticationCBSTokenRenewalTask";
+
     private final CustomLogger logger = new CustomLogger(this.getClass());
 
     private AmqpsSessionDeviceOperation amqpsSessionDeviceOperation;
@@ -32,6 +34,8 @@ public final class AmqpsDeviceAuthenticationCBSTokenRenewalTask implements Runna
     @Override
     public void run()
     {
+        Thread.currentThread().setName(THREAD_NAME);
+
         try
         {
             // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBSTOKENRENEWALTASK_12_003: [The function shall call the amqpsSessionDeviceOperation.renewToken.]

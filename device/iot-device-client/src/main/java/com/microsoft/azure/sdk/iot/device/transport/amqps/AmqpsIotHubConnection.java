@@ -846,6 +846,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      */
     private class ReactorRunner implements Callable
     {
+        private static final String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
         private final IotHubReactor iotHubReactor;
 
         ReactorRunner(IotHubReactor iotHubReactor)
@@ -856,6 +857,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         @Override
         public Object call()
         {
+            Thread.currentThread().setName(THREAD_NAME);
             iotHubReactor.run();
             return null;
         }

@@ -69,6 +69,8 @@ public final class FileUploadTask implements Runnable
 
     private static final ObjectLock FILE_UPLOAD_LOCK = new ObjectLock();
 
+    private static final String THREAD_NAME = "azure-iot-sdk-FileUploadTask";
+
     /**
      * Constructor
      *
@@ -131,6 +133,8 @@ public final class FileUploadTask implements Runnable
     @Override
     public void run()
     {
+        Thread.currentThread().setName(THREAD_NAME);
+
         FileUploadStatusParser fileUploadStatusParser = null;
         IotHubStatusCode resultStatus = IotHubStatusCode.OK;
 

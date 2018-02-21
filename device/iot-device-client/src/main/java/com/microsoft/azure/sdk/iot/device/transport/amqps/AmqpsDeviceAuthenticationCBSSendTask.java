@@ -4,6 +4,7 @@ import com.microsoft.azure.sdk.iot.device.CustomLogger;
 
 public final class AmqpsDeviceAuthenticationCBSSendTask implements Runnable
 {
+    private final static String THREAD_NAME = "azure-iot-sdk-AmqpsDeviceAuthenticationCBSSendTask";
     private final CustomLogger logger = new CustomLogger(this.getClass());
 
     private AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS;
@@ -32,6 +33,8 @@ public final class AmqpsDeviceAuthenticationCBSSendTask implements Runnable
     @Override
     public void run()
     {
+        Thread.currentThread().setName(THREAD_NAME);
+
         try
         {
             // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBSSENDTASK_12_003: [The function shall call the amqpsDeviceAuthenticationCBS.sendAuthenticationMessages.]

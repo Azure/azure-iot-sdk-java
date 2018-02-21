@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.CustomLogger;
  */
 public final class IotHubSendTask implements Runnable
 {
+    private static final String THREAD_NAME = "azure-iot-sdk-IotHubSendTask";
     private final IotHubTransport transport;
 
     /**
@@ -33,6 +34,8 @@ public final class IotHubSendTask implements Runnable
 
     public void run()
     {
+        Thread.currentThread().setName(THREAD_NAME);
+
         logger.LogTrace("Now sending all queued messages to IoT Hub");
 
         try

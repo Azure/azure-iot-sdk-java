@@ -36,6 +36,7 @@ public class RegisterTask implements Callable
     private static final int SLEEP_INTERVAL_WHEN_WAITING_FOR_RESPONSE = 4*1000; //4 seconds
     private static final int DEFAULT_EXPIRY_TIME_IN_SECS = 3600; // 1 Hour
     private static final String SASTOKEN_FORMAT = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=";
+    private static final String THREAD_NAME = "azure-iot-sdk-RegisterTask";
     private ResponseCallback responseCallback = null;
     private ProvisioningDeviceClientContract provisioningDeviceClientContract = null;
     private Authorization authorization = null;
@@ -305,6 +306,7 @@ public class RegisterTask implements Callable
     @Override
     public RegistrationOperationStatusParser call() throws Exception
     {
+        Thread.currentThread().setName(THREAD_NAME);
         return this.authenticateWithDPS();
     }
 
