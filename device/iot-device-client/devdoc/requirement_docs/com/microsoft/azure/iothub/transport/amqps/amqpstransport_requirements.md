@@ -177,8 +177,6 @@ public void invokeCallbacks() throws IllegalStateException;
 public void handleMessage() throws IOException;
 ```
 
-**SRS_AMQPSTRANSPORT_15_021: [**If the transport is closed, the function shall throw an IllegalStateException.**]**
-
 **SRS_AMQPSTRANSPORT_15_023: [**The function shall attempt to consume a message from the IoT Hub.**]**
 
 **SRS_AMQPSTRANSPORT_15_024: [**If no message was received from IotHub, the function shall return.**]**
@@ -229,6 +227,10 @@ public synchronized void connectionEstablished();
 ```
 
 **SRS_AMQPSTRANSPORT_99_002: [**Registered connection state callback is notified that the connection has been established.**]**
+
+**SRS_AMQPSTRANSPORT_12_019: [**Reconnect uses single device open if the device list is null.**]**
+
+**SRS_AMQPSTRANSPORT_12_020: [**Reconnect uses multiplexOpen if the device list is not null.**]**
 
 
 ### messageReceived

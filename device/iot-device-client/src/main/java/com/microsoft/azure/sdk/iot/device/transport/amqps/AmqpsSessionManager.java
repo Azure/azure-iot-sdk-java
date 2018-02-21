@@ -1,5 +1,6 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.MessageType;
@@ -31,6 +32,8 @@ public class AmqpsSessionManager
 
     private final ObjectLock openLinksLock = new ObjectLock();
 
+    private CustomLogger logger;
+
     /**
      * Constructor that takes a device configuration.
      *
@@ -44,6 +47,8 @@ public class AmqpsSessionManager
         {
             throw new IllegalArgumentException("deviceClientConfig cannot be null.");
         }
+
+        this.logger = new CustomLogger(this.getClass());
 
         // Codes_SRS_AMQPSESSIONMANAGER_12_002: [The constructor shall save the deviceClientConfig parameter value to a member variable.]
         this.deviceClientConfig = deviceClientConfig;
@@ -95,6 +100,8 @@ public class AmqpsSessionManager
      */
     void closeNow()
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         // Codes_SRS_AMQPSESSIONMANAGER_12_043: [THe function shall shut down the scheduler.]
         this.shutDownScheduler();
 
@@ -116,6 +123,8 @@ public class AmqpsSessionManager
             this.session.close();
             this.session = null;
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -125,6 +134,8 @@ public class AmqpsSessionManager
      */
     public void authenticate() throws IOException
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
             // Codes_SRS_AMQPSESSIONMANAGER_12_014: [The function shall do nothing if the authentication is not open.]
@@ -140,6 +151,8 @@ public class AmqpsSessionManager
                 }
             }
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -150,6 +163,8 @@ public class AmqpsSessionManager
      */
     public void openDeviceOperationLinks() throws IOException
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         // Codes_SRS_AMQPSESSIONMANAGER_12_018: [The function shall do nothing if the session is not open.]
         if (this.session != null)
         {
@@ -175,6 +190,8 @@ public class AmqpsSessionManager
                 }
             }
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -185,6 +202,8 @@ public class AmqpsSessionManager
      */
     void onConnectionInit(Connection connection) throws IOException
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         if (connection != null)
         {
             if (this.session == null)
@@ -212,6 +231,8 @@ public class AmqpsSessionManager
                 this.amqpsDeviceAuthentication.openLinks(this.session);
             }
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -222,11 +243,15 @@ public class AmqpsSessionManager
      */
     void onConnectionBound(Transport transport)
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         if (this.session != null)
         {
             // Codes_SRS_AMQPSESSIONMANAGER_12_026: [The function shall call setSslDomain on authentication if the session is not null.]
             this.amqpsDeviceAuthentication.setSslDomain(transport);
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -240,6 +265,8 @@ public class AmqpsSessionManager
      */
     void onLinkInit(Link link) throws IOException, IllegalArgumentException
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         if (this.session != null)
         {
             if (this.isAuthenticationOpened())
@@ -256,6 +283,8 @@ public class AmqpsSessionManager
                 this.amqpsDeviceAuthentication.initLink(link);
             }
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -271,6 +300,8 @@ public class AmqpsSessionManager
      */
     boolean onLinkRemoteOpen(Event event)
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         Boolean isLinkFound = false;
 
         String linkName = event.getLink().getName();
@@ -305,6 +336,8 @@ public class AmqpsSessionManager
                 }
             }
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
 
         return isLinkFound;
     }

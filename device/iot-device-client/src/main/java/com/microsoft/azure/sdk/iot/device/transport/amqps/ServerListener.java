@@ -30,4 +30,7 @@ public interface ServerListener
      * Method executed when the connection with the IoTHub is established
      */
     void connectionEstablished();
+
+
+    void reconnect();
 }

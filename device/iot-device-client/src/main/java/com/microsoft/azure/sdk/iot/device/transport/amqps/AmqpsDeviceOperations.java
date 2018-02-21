@@ -3,8 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
@@ -49,6 +49,8 @@ public class AmqpsDeviceOperations
     protected Sender senderLink;
     protected Receiver receiverLink;
 
+    private CustomLogger logger;
+
     /**
      * This constructor creates an instance of device operation class and initializes member variables
      */
@@ -77,6 +79,8 @@ public class AmqpsDeviceOperations
 
         this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.CLOSED;
         this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.CLOSED;
+
+        this.logger = new CustomLogger(this.getClass());
     }
 
     /**
@@ -87,6 +91,8 @@ public class AmqpsDeviceOperations
      */
     protected synchronized void openLinks(Session session) throws IOException, IllegalArgumentException
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_006: [The function shall throw IllegalArgumentException if the session argument is null.]
         if (session == null)
         {
@@ -149,6 +155,8 @@ public class AmqpsDeviceOperations
                 throw new IOException("Proton exception: " + e.getMessage());
             }
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -156,6 +164,8 @@ public class AmqpsDeviceOperations
      */
     protected void closeLinks()
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_011: [If the sender link is not null the function shall close it and sets it to null.]
         if (this.senderLink != null)
         {
@@ -170,6 +180,8 @@ public class AmqpsDeviceOperations
         }
         this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.CLOSED;
         this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.CLOSED;
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -180,6 +192,8 @@ public class AmqpsDeviceOperations
      */
     protected synchronized void initLink(Link link) throws IOException, IllegalArgumentException
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         if (link == null)
         {
             throw new IllegalArgumentException("The link cannot be null.");
@@ -231,6 +245,8 @@ public class AmqpsDeviceOperations
                 }
             }
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**

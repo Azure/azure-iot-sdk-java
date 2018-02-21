@@ -33,6 +33,8 @@ public class AmqpsSessionDeviceOperation
 
     private List<UUID> cbsCorrelationIdList = Collections.synchronizedList(new ArrayList<UUID>());
 
+    private CustomLogger logger;
+
     /**
      * Create logical device entity to handle all operation.
      *
@@ -59,6 +61,8 @@ public class AmqpsSessionDeviceOperation
         this.amqpsDeviceOperationsList.add(new AmqpsDeviceTelemetry(this.deviceClientConfig));
         this.amqpsDeviceOperationsList.add(new AmqpsDeviceMethods(this.deviceClientConfig));
         this.amqpsDeviceOperationsList.add(new AmqpsDeviceTwin(this.deviceClientConfig));
+
+        this.logger = new CustomLogger(this.getClass());
 
         if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
@@ -104,6 +108,8 @@ public class AmqpsSessionDeviceOperation
      */
     public void authenticate() throws IOException
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_006: [The function shall start the authentication if the authentication type is CBS.]
         if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
@@ -124,7 +130,8 @@ public class AmqpsSessionDeviceOperation
                 {
                     // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_062: [The function shall start the authentication process and start the lock wait if the authentication type is CBS.]
                     this.authenticationLock.waitLock(MAX_WAIT_TO_AUTHENTICATE);
-                } catch (InterruptedException e)
+                }
+                catch (InterruptedException e)
                 {
                     cbsCorrelationIdList.remove(correlationId);
 
@@ -133,6 +140,8 @@ public class AmqpsSessionDeviceOperation
                 }
             }
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -142,6 +151,8 @@ public class AmqpsSessionDeviceOperation
      */
     public void renewToken() throws IOException
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         if ((this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN) &&
                 (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED))
         {
@@ -155,6 +166,8 @@ public class AmqpsSessionDeviceOperation
                 authenticate();
             }
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -198,6 +211,8 @@ public class AmqpsSessionDeviceOperation
      */
     void openLinks(Session session) throws IOException, IllegalArgumentException
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_042: [The function shall do nothing if the session parameter is null.]
         if (session != null)
         {
@@ -205,7 +220,7 @@ public class AmqpsSessionDeviceOperation
             {
                 for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
                 {
-                    synchronized (openLock)
+                    synchronized (this.openLock)
                     {
                         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_009: [The function shall call openLinks on all device operations if the authentication state is authenticated.]
                         this.amqpsDeviceOperationsList.get(i).openLinks(session);
@@ -213,6 +228,8 @@ public class AmqpsSessionDeviceOperation
                 }
             }
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -220,11 +237,15 @@ public class AmqpsSessionDeviceOperation
      */
     void closeLinks()
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         for (int i = 0; i < amqpsDeviceOperationsList.size(); i++)
         {
             // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_010: [The function shall call closeLinks on all device operations.]
             amqpsDeviceOperationsList.get(i).closeLinks();
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -236,6 +257,8 @@ public class AmqpsSessionDeviceOperation
      */
     void initLink(Link link) throws IOException, IllegalArgumentException
     {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_043: [The function shall do nothing if the link parameter is null.]
         if (link != null)
         {
@@ -248,6 +271,8 @@ public class AmqpsSessionDeviceOperation
                 }
             }
         }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**

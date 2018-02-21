@@ -288,9 +288,17 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         outgoingMessage.setApplicationProperties(applicationProperties);
 
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_018: [The function shall set the the SAS token to the message body.]
-        Section section = new AmqpValue(deviceClientConfig.getSasTokenAuthentication().getCurrentSasToken());
-
-        outgoingMessage.setBody(section);
+        Section section = null;
+        try
+        {
+            section = new AmqpValue(deviceClientConfig.getSasTokenAuthentication().getRenewedSasToken());
+            outgoingMessage.setBody(section);
+        }
+        catch (IOException e)
+        {
+            logger.LogDebug("getRenewedSasToken has thrown exception: %s", e.getMessage());
+            outgoingMessage = null;
+        }
 
         return outgoingMessage;
     }
