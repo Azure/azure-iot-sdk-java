@@ -77,6 +77,8 @@ public class ProvisioningClientIT
     private ProvisioningServiceClient provisioningServiceClient = null;
     private RegistryManager registryManager = null;
 
+    private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
+
     @Before
     public void setUp() throws Exception
     {
@@ -94,6 +96,15 @@ public class ProvisioningClientIT
     @After
     public void tearDown() throws Exception
     {
+        try
+        {
+            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
+        }
+        catch (InterruptedException e)
+        {
+            throw new RuntimeException(e);
+        }
+
         provisioningServiceClient = null;
         registryManager = null;
         provisioningDeviceClient = null;
