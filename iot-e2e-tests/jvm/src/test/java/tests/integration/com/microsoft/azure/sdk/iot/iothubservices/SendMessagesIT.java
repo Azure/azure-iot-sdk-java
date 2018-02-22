@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon.sendMessages;
@@ -318,7 +319,7 @@ public class SendMessagesIT
             count++;
         }
 
-        cdl.await();
+        cdl.await(1, TimeUnit.MINUTES);
 
         if(!succeed.get())
         {
