@@ -10,7 +10,7 @@ class SDKUtils
 {
     private static final String SERVICE_API_VERSION = "2017-11-15";
     private static final String PROVISIONING_SERVICE_CLIENT = "com.microsoft.azure.sdk.iot.provisioning.service.provisioning-service-client/";
-    private static final String PROVISIONING_SERVICE_CLIENT_VERSION = "1.1.0";
+    private static final String PROVISIONING_SERVICE_CLIENT_VERSION = "1.2.0";
 
     /**
      * Getter for the rest API version

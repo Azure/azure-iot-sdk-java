@@ -11,7 +11,7 @@ public class SDKUtils
 {
     private static final String SERVICE_API_VERSION = "2017-11-15";
     private static final String PROVISIONING_DEVICE_CLIENT = "com.microsoft.azure.sdk.iot.dps.dps-device-client/";
-    private static final String PROVISIONING_DEVICE_CLIENT_VERSION = "1.2.0";
+    private static final String PROVISIONING_DEVICE_CLIENT_VERSION = "1.3.0";
 
 
     public static String getServiceApiVersion()
