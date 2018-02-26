@@ -422,10 +422,10 @@ public class MqttTest
     }
 
     /*
-    **Tests_SRS_Mqtt_25_009: [**The function shall close the MQTT connection.**]**
+    **Tests_SRS_Mqtt_25_009: [**The function shall close the MQTT client.**]**
      */
     @Test
-    public void disconnectSucceeds() throws IOException, MqttException
+    public void disconnectClosesMqttClient() throws IOException, MqttException
     {
         //arrange
         baseConstructorExpectations();
@@ -441,14 +441,69 @@ public class MqttTest
         new Verifications()
         {
             {
-                mockMqttAsyncClient.isConnected();
-                times = 2;
-                mockMqttAsyncClient.disconnect();
-                times = 1;
-                mockMqttToken.waitForCompletion();
-                times = 1;
                 mockMqttAsyncClient.close();
                 times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_Mqtt_34_055: [If an MQTT connection is connected, the function shall disconnect that connection.]
+    @Test
+    public void disconnectDisconnectsIfConnected() throws IOException, MqttException
+    {
+        baseConstructorExpectations();
+        baseConnectExpectation();
+        baseDisconnectExpectations();
+        Mqtt mockMqtt = instantiateMqtt(true);
+        Deencapsulation.invoke(mockMqtt, "connect");
+        new NonStrictExpectations()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                result = true;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(mockMqtt, "disconnect");
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockMqttAsyncClient.disconnect();
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_Mqtt_34_055: [If an MQTT connection is connected, the function shall disconnect that connection.]
+    @Test
+    public void disconnectDoesNotDisconnectIfNotConnected() throws IOException, MqttException
+    {
+        //arrange
+        baseConstructorExpectations();
+        baseConnectExpectation();
+        baseDisconnectExpectations();
+        Mqtt mockMqtt = instantiateMqtt(true);
+        Deencapsulation.invoke(mockMqtt, "connect");
+        new NonStrictExpectations()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                result = false;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(mockMqtt, "disconnect");
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockMqttAsyncClient.disconnect();
+                times = 0;
             }
         };
     }

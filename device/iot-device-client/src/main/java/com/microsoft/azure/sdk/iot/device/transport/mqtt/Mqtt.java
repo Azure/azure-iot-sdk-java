@@ -121,29 +121,27 @@ abstract public class Mqtt implements MqttCallback
      */
     protected void disconnect() throws IOException
     {
-        try
+        //Codes_SRS_Mqtt_25_010: [If the MQTT connection is closed, the function shall do nothing.]
+        if (this.mqttConnection.getMqttAsyncClient() != null)
         {
-            /*
-            **Codes_SRS_Mqtt_25_010: [**If the MQTT connection is closed, the function shall do nothing.**]**
-            */
-            if (this.mqttConnection.getMqttAsyncClient() != null && this.mqttConnection.getMqttAsyncClient().isConnected())
+            try
             {
-                /*
-                ** Codes_SRS_Mqtt_25_009: [**The function shall close the MQTT connection.**]**
-                */
-                IMqttToken disconnectToken = this.mqttConnection.getMqttAsyncClient().disconnect();
-                disconnectToken.waitForCompletion();
+                if (this.mqttConnection.getMqttAsyncClient().isConnected())
+                {
+                    //Codes_SRS_Mqtt_34_055: [If an MQTT connection is connected, the function shall disconnect that connection.]
+                    IMqttToken disconnectToken = this.mqttConnection.getMqttAsyncClient().disconnect();
+                    disconnectToken.waitForCompletion();
+                }
 
+                //Codes_SRS_Mqtt_25_009: [The function shall close the MQTT client.]
                 this.mqttConnection.getMqttAsyncClient().close();
+                this.mqttConnection.setMqttAsyncClient(null);
             }
-            this.mqttConnection.setMqttAsyncClient(null);
-        }
-        catch (MqttException e)
-        {
-            /*
-            ** SRS_Mqtt_25_011: [**If an MQTT connection is unable to be closed for any reason, the function shall throw an IOException.**]**
-            */
-            throw new IOException("Unable to disconnect" + "because " + e.getMessage(), e);
+            catch (MqttException e)
+            {
+                //Codes_SRS_Mqtt_25_011: [If an MQTT connection is unable to be closed for any reason, the function shall throw an IOException.]
+                throw new IOException("Unable to disconnect" + "because " + e.getMessage(), e);
+            }
         }
     }
 

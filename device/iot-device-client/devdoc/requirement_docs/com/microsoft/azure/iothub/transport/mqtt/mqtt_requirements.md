@@ -67,9 +67,11 @@ protected void connect() throws IOException;
 protected void disconnect() throws IOException;
 ```
 
-**SRS_Mqtt_25_009: [**The function shall close the MQTT connection.**]**
-
 **SRS_Mqtt_25_010: [**If the MQTT connection is closed, the function shall do nothing.**]**
+
+**SRS_Mqtt_34_055: [**If an MQTT connection is connected, the function shall disconnect that connection.**]**
+
+**SRS_Mqtt_25_009: [**The function shall close the MQTT client.**]**
 
 **SRS_Mqtt_25_011: [**If an MQTT connection is unable to be closed for any reason, the function shall throw an IOException.**]**
 
