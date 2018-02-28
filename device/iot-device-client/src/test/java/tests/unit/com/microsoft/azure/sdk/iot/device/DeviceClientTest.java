@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509AuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -52,6 +53,9 @@ public class DeviceClientTest
 
     @Mocked
     SecurityProvider mockSecurityProvider;
+
+    @Mocked
+    IotHubConnectionStatusChangeCallback mockedIotHubConnectionStatusChangeCallback;
 
     private static long SEND_PERIOD_MILLIS = 10L;
     private static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
@@ -2790,7 +2794,7 @@ public class DeviceClientTest
     public void startFileUploadSucceeds(@Mocked final FileUpload mockedFileUpload,
                                         @Mocked final InputStream mockInputStream,
                                         @Mocked final IotHubEventCallback mockedStatusCB,
-                                        @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                        @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2832,7 +2836,7 @@ public class DeviceClientTest
     public void closeNowClosesFileUploadSucceeds(@Mocked final FileUpload mockedFileUpload,
                                                  @Mocked final InputStream mockInputStream,
                                                  @Mocked final IotHubEventCallback mockedStatusCB,
-                                                 @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                 @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2871,7 +2875,7 @@ public class DeviceClientTest
     /* Tests_SRS_DEVICECLIENT_21_045: [If the `callback` is null, the uploadToBlobAsync shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void startFileUploadNullCallbackThrows(@Mocked final InputStream mockInputStream,
-                                                  @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                  @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2890,7 +2894,7 @@ public class DeviceClientTest
     /* Tests_SRS_DEVICECLIENT_21_046: [If the `inputStream` is null, the uploadToBlobAsync shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void startFileUploadNullInputStreamThrows(@Mocked final IotHubEventCallback mockedStatusCB,
-                                                     @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                     @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2910,7 +2914,7 @@ public class DeviceClientTest
     @Test (expected = IllegalArgumentException.class)
     public void startFileUploadNegativeLengthThrows(@Mocked final IotHubEventCallback mockedStatusCB,
                                                     @Mocked final InputStream mockInputStream,
-                                                    @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                    @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2929,7 +2933,7 @@ public class DeviceClientTest
     @Test (expected = IllegalArgumentException.class)
     public void startFileUploadNullBlobNameThrows(@Mocked final InputStream mockInputStream,
                                                   @Mocked final IotHubEventCallback mockedStatusCB,
-                                                  @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                  @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2948,7 +2952,7 @@ public class DeviceClientTest
     @Test (expected = IllegalArgumentException.class)
     public void startFileUploadEmptyBlobNameThrows(@Mocked final InputStream mockInputStream,
                                                    @Mocked final IotHubEventCallback mockedStatusCB,
-                                                   @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                   @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2967,7 +2971,7 @@ public class DeviceClientTest
     @Test (expected = IllegalArgumentException.class)
     public void startFileUploadInvalidUTF8BlobNameThrows(@Mocked final InputStream mockInputStream,
                                                          @Mocked final IotHubEventCallback mockedStatusCB,
-                                                         @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                         @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2987,7 +2991,7 @@ public class DeviceClientTest
     @Test (expected = IllegalArgumentException.class)
     public void startFileUploadInvalidBigBlobNameThrows(@Mocked final InputStream mockInputStream,
                                                         @Mocked final IotHubEventCallback mockedStatusCB,
-                                                        @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                        @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -3017,7 +3021,7 @@ public class DeviceClientTest
     @Test (expected = IllegalArgumentException.class)
     public void startFileUploadInvalidPathBlobNameThrows(@Mocked final InputStream mockInputStream,
                                                          @Mocked final IotHubEventCallback mockedStatusCB,
-                                                         @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                         @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -3048,7 +3052,7 @@ public class DeviceClientTest
     public void startFileUploadOneFileUploadInstanceSucceeds(@Mocked final FileUpload mockedFileUpload,
                                                              @Mocked final InputStream mockInputStream,
                                                              @Mocked final IotHubEventCallback mockedStatusCB,
-                                                             @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                             @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -3135,7 +3139,7 @@ public class DeviceClientTest
     public void startFileUploadNewInstanceThrows(@Mocked final FileUpload mockedFileUpload,
                                                  @Mocked final InputStream mockInputStream,
                                                  @Mocked final IotHubEventCallback mockedStatusCB,
-                                                 @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                 @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -3163,7 +3167,7 @@ public class DeviceClientTest
     public void startFileUploadUploadToBlobAsyncAuthTypeThrows(@Mocked final FileUpload mockedFileUpload,
                                                                @Mocked final InputStream mockInputStream,
                                                                @Mocked final IotHubEventCallback mockedStatusCB,
-                                                               @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                               @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -3192,7 +3196,7 @@ public class DeviceClientTest
     public void startFileUploadUploadToBlobAsyncThrows(@Mocked final FileUpload mockedFileUpload,
                                                        @Mocked final InputStream mockInputStream,
                                                        @Mocked final IotHubEventCallback mockedStatusCB,
-                                                       @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                       @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -3220,7 +3224,7 @@ public class DeviceClientTest
 
     //Tests_SRS_DEVICECLIENT_34_065: [""SetSASTokenExpiryTime" if this option is called when not using sas token authentication, an IllegalStateException shall be thrown.*]
     @Test (expected = IllegalStateException.class)
-    public void setOptionSASTokenExpiryTimeWhenNotUsingSasTokenAuthThrows() throws IOException, URISyntaxException
+    public void setOptionSASTokenExpiryTimeWhenNotUsingSasTokenAuthThrows() throws URISyntaxException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -3301,5 +3305,40 @@ public class DeviceClientTest
         // assert
         assertNull(Deencapsulation.getField(client, "config"));
         assertNull(Deencapsulation.getField(client, "deviceIO"));
+    }
+
+    //Tests_SRS_DEVICECLIENT_34_068: [If the callback is null the method shall throw an IllegalArgument exception.]
+    @Test (expected = IllegalArgumentException.class)
+    public void registerConnectionStatusChangeCallbackThrowsForNullCallback() throws URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;CredentialScope=Device;DeviceId=testdevice;SharedAccessKey=adjkl234j52=;";
+        DeviceClient client = new DeviceClient(connString, IotHubClientProtocol.AMQPS);
+
+        //act
+        client.registerConnectionStatusChangeCallback(null, new Object());
+    }
+
+    //Tests_SRS_DEVICECLIENT_34_069: [This function shall register the provided callback and context with its device IO instance.]
+    @Test
+    public void registerConnectionStatusChangeCallbackRegistersCallbackWithDeviceIO() throws URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;CredentialScope=Device;DeviceId=testdevice;SharedAccessKey=adjkl234j52=;";
+        DeviceClient client = new DeviceClient(connString, IotHubClientProtocol.AMQPS);
+        Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
+        final Object context = new Object();
+
+        //act
+        client.registerConnectionStatusChangeCallback(mockedIotHubConnectionStatusChangeCallback, context);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockDeviceIO.registerConnectionStatusChangeCallback(mockedIotHubConnectionStatusChangeCallback, context);
+                times = 1;
+            }
+        };
     }
 }

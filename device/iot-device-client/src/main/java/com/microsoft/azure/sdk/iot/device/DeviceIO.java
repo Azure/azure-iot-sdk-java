@@ -110,7 +110,13 @@ public final class DeviceIO
         this.config = config;
         this.protocol = this.config.getProtocol();
 
- //Codes_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.]
+        /* Codes_SRS_DEVICE_IO_21_037: [The constructor shall initialize the `sendPeriodInMilliseconds` with default value of 10 milliseconds.] */
+        this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
+        /* Codes_SRS_DEVICE_IO_21_038: [The constructor shall initialize the `receivePeriodInMilliseconds` with default value of each protocol.] */
+        this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
+
+        /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `CLOSED`.] */
+        this.state = IotHubClientState.CLOSED;
 
         if (protocol == IotHubClientProtocol.AMQPS_WS || protocol == IotHubClientProtocol.MQTT_WS)
         {
@@ -185,7 +191,8 @@ public final class DeviceIO
         }
 
         // Codes_SRS_DEVICE_IO_12_003: [The open shall open the transport in multiplex mode to communicate with an IoT Hub.]
-        this.transport.multiplexOpen(deviceClientList);
+        //TODO
+        //this.transport.multiplexOpen(deviceClientList);
 
         // Codes_SRS_DEVICE_IO_12_004: [The open shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.]
         // Codes_SRS_DEVICE_IO_12_005: [The open shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.]
@@ -477,8 +484,14 @@ public final class DeviceIO
      * @param callbackContext a context to be passed to the callback. Can be
      * {@code null} if no callback is provided.
      */
-    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) {
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
+    {
         /* Codes_SRS_DEVICE_IO_99_001: [The registerConnectionStateCallback shall register the callback with the transport.]*/
         this.transport.registerConnectionStateCallback(callback, callbackContext);
+    }
+
+    public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback statusChangeCallback, Object callbackContext)
+    {
+        //TODO
     }
 }

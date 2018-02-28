@@ -33,8 +33,11 @@ public final class DeviceClient
     public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
                                   IotHubEventCallback callback, Object callbackContext)
             throws IllegalArgumentException, IllegalStateException, IOException;
-    
+
+    @Deprecated
     public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
+    public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
+
 }
 ```
 
@@ -353,6 +356,17 @@ public void registerConnectionStateCallback(IotHubConnectionStateCallback callba
 **SRS_DEVICECLIENT_99_001: [**The registerConnectionStateCallback shall register the callback with the Device IO.**]**
 **SRS_DEVICECLIENT_99_002: [**The registerConnectionStateCallback shall register the callback even if the client is not open.**]**
 **SRS_DEVICECLIENT_99_003: [**If the callback is null the method shall throw an IllegalArgument exception.**]**
+
+
+### registerConnectionStatusChangeCallback
+```java
+public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
+```
+
+**SRS_DEVICECLIENT_34_068: [**If the callback is null the method shall throw an IllegalArgument exception.**]**
+
+**SRS_DEVICECLIENT_34_069: [**This function shall register the provided callback and context with its device IO instance.**]**
+
 
 
 ### setPrivateKey
