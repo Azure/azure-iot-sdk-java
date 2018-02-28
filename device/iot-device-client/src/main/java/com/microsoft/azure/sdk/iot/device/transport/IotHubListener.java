@@ -14,14 +14,14 @@ public interface IotHubListener
     /**
      * Method executed when a message was acknowledged by IoTHub.
      */
-    void messageSent(Message message, Throwable e);
+    void onMessageSent(Message message, Throwable e);
 
     //message received
-    void messageReceived(Message message, Throwable e);
+    void onMessageReceived(Message message, Throwable e);
 
     //connection drop
-    void connectionLost(Throwable e);
+    void onConnectionLost(Throwable e);
 
     //connection established
-    void connectionEstablished(Throwable e);
+    void onConnectionEstablished(Throwable e);
 }

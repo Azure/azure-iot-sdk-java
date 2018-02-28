@@ -6,6 +6,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttConnectionStateListener;
@@ -15,7 +16,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /*
@@ -43,7 +43,7 @@ public class MqttMessagingTest
     //Tests_SRS_MqttMessaging_25_003: [The constructor construct publishTopic and subscribeTopic from deviceId.]
     //Tests_SRS_MqttMessaging_25_004: [The constructor shall save the provided listener.]
     @Test
-    public void constructorCallsBaseConstructorWithArguments(@Mocked final Mqtt mockMqtt) throws IOException
+    public void constructorCallsBaseConstructorWithArguments(@Mocked final Mqtt mockMqtt) throws TransportException
     {
 
         MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
@@ -57,25 +57,25 @@ public class MqttMessagingTest
     }
 
     /*
-    **Tests_SRS_MqttMessaging_25_001: [**The constructor shall throw InvalidParameter Exception if any of the parameters are null or empty .**]**
+    **Tests_SRS_MqttMessaging_25_001: [**The constructor shall throw TransportException if any of the parameters are null or empty .**]**
      */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorFailsIfMqttConnectionIsNull() throws IOException
+    @Test (expected = TransportException.class)
+    public void constructorFailsIfMqttConnectionIsNull() throws TransportException
     {
         MqttMessaging testMqttMessaging = new MqttMessaging(null, CLIENT_ID, mockedMqttConnectionStateListener);
     }
 
     /*
-    **Tests_SRS_MqttMessaging_25_001: [**The constructor shall throw InvalidParameter Exception if any of the parameters are null or empty .**]**
+    **Tests_SRS_MqttMessaging_25_001: [**The constructor shall throw TransportException if any of the parameters are null or empty .**]**
      */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorFailsIfDeviceIDIsEmpty() throws IOException
+    @Test (expected = TransportException.class)
+    public void constructorFailsIfDeviceIDIsEmpty() throws TransportException
     {
         MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, "", mockedMqttConnectionStateListener);
     }
 
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorFailsIfDeviceIDIsNull() throws IOException
+    @Test (expected = TransportException.class)
+    public void constructorFailsIfDeviceIDIsNull() throws TransportException
     {
         MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, null, mockedMqttConnectionStateListener);
     }
@@ -85,7 +85,7 @@ public class MqttMessagingTest
     **Tests_SRS_MqttMessaging_25_021: [**start method shall subscribe to messaging subscribe topic once connected.**]**
      */
     @Test
-    public  void startCallsConnectAndSubscribe(@Mocked final Mqtt mockMqtt) throws IOException
+    public  void startCallsConnectAndSubscribe(@Mocked final Mqtt mockMqtt) throws TransportException
     {
 
         new NonStrictExpectations()
@@ -111,14 +111,14 @@ public class MqttMessagingTest
 
     }
 
-    @Test (expected = IOException.class)
-    public void startThrowsIoExceptionIfConnectFails(@Mocked final Mqtt mockMqtt) throws IOException
+    @Test (expected = TransportException.class)
+    public void startThrowsIoExceptionIfConnectFails(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         new StrictExpectations()
         {
             {
                 Deencapsulation.invoke(mockMqtt, "connect");
-                result = mockedIOException;
+                result = new TransportException();
             }
         };
 
@@ -138,15 +138,15 @@ public class MqttMessagingTest
 
     }
 
-    @Test (expected = IOException.class)
-    public void startThrowsIoExceptionIfSubscribeFails(@Mocked final Mqtt mockMqtt) throws IOException
+    @Test (expected = TransportException.class)
+    public void startThrowsIoExceptionIfSubscribeFails(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         new StrictExpectations()
         {
             {
                 Deencapsulation.invoke(mockMqtt, "connect");
                 Deencapsulation.invoke(mockMqtt, "subscribe", anyString);
-                result = mockedIOException;
+                result = new TransportException();
             }
         };
 
@@ -172,7 +172,7 @@ public class MqttMessagingTest
     **Tests_SRS_MqttMessaging_25_023: [**stop method shall be call restartBaseMqtt to tear down a the base class even if disconnect fails.**]**
      */
     @Test
-    public void stopCallsDisconnect(@Mocked final Mqtt mockMqtt) throws IOException
+    public void stopCallsDisconnect(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         new NonStrictExpectations()
         {
@@ -194,8 +194,8 @@ public class MqttMessagingTest
         };
     }
 
-    @Test (expected = IOException.class)
-    public void stopIfDisconnectFailsThrowsIOException(@Mocked final Mqtt mockMqtt) throws IOException
+    @Test (expected = TransportException.class)
+    public void stopIfDisconnectFailsThrowsIOException(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         new StrictExpectations()
         {
@@ -203,7 +203,7 @@ public class MqttMessagingTest
                 Deencapsulation.invoke(mockMqtt, "connect");
                 Deencapsulation.invoke(mockMqtt, "subscribe", anyString);
                 Deencapsulation.invoke(mockMqtt, "disconnect");
-                result = mockedIOException;
+                result = new TransportException();
             }
         };
 
@@ -224,7 +224,7 @@ public class MqttMessagingTest
     **Tests_SRS_MqttMessaging_25_024: [**send method shall publish a message to the IOT Hub on the publish topic by calling method publish().**]**
      */
     @Test
-    public void sendShallMessageToLowerLayer(@Mocked final Mqtt mockMqtt) throws IOException
+    public void sendShallMessageToLowerLayer(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         final byte[] messageBody = {0x61, 0x62, 0x63};
         new NonStrictExpectations()
@@ -252,8 +252,8 @@ public class MqttMessagingTest
 
     }
 
-    @Test (expected =  IOException.class)
-    public void sendShallThrowIOExceptionIfMessageIsEmpty(@Mocked final Mqtt mockMqtt) throws IOException
+    @Test (expected =  TransportException.class)
+    public void sendShallThrowIOExceptionIfMessageIsEmpty(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         final byte[] messageBody = {};
         new NonStrictExpectations()
@@ -283,8 +283,8 @@ public class MqttMessagingTest
     /*
     **Tests_SRS_MqttMessaging_25_025: [**send method shall throw an exception if the message is null.**]**
      */
-    @Test (expected = IOException.class)
-    public void sendShallThrowIOExceptionIfMessageIsNull(@Mocked final Mqtt mockMqtt) throws IOException
+    @Test (expected = TransportException.class)
+    public void sendShallThrowTransportExceptionIfMessageIsNull(@Mocked final Mqtt mockMqtt) throws TransportException
     {
 
         MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMqttConnectionStateListener);
@@ -303,7 +303,7 @@ public class MqttMessagingTest
 
     //Tests_SRS_MqttMessaging_34_026: [This method shall append each custom property's name and value to the publishTopic before publishing.]
     @Test
-    public void sendShallIncludeAllCustomPropertiesInPublishTopic(@Mocked final Mqtt mockMqtt) throws IOException
+    public void sendShallIncludeAllCustomPropertiesInPublishTopic(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         final byte[] messageBody = {0x61, 0x62, 0x63};
         final String propertyName1 = "key1";
@@ -343,7 +343,7 @@ public class MqttMessagingTest
 
     //Tests_SRS_MqttMessaging_21_027: [send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.]
     @Test
-    public void sendShallIncludeMessageIdInPublishTopic(@Mocked final Mqtt mockMqtt) throws IOException
+    public void sendShallIncludeMessageIdInPublishTopic(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
         final byte[] messageBody = {0x61, 0x62, 0x63};
@@ -379,7 +379,7 @@ public class MqttMessagingTest
 
     //Tests_SRS_MqttMessaging_34_028: [If the message has a correlationId, this method shall append that correlationid to publishTopic before publishing using the key name `$.cid`.]
     @Test
-    public void sendShallIncludeCorrelationIdInPublishTopic(@Mocked final Mqtt mockMqtt) throws IOException
+    public void sendShallIncludeCorrelationIdInPublishTopic(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
         final byte[] messageBody = {0x61, 0x62, 0x63};
@@ -415,7 +415,7 @@ public class MqttMessagingTest
 
     //Tests_SRS_MqttMessaging_34_030: [If the message has a UserId, this method shall append that userId to publishTopic before publishing using the key name `$.uid`.]
     @Test
-    public void sendShallIncludeUserIdInPublishTopic(@Mocked final Mqtt mockMqtt) throws IOException
+    public void sendShallIncludeUserIdInPublishTopic(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
         final byte[] messageBody = {0x61, 0x62, 0x63};
@@ -451,7 +451,7 @@ public class MqttMessagingTest
 
     //Tests_SRS_MqttMessaging_34_029: [If the message has a To, this method shall append that To to publishTopic before publishing using the key name `$.to`.]
     @Test
-    public void sendShallIncludeToInPublishTopic(@Mocked final Mqtt mockMqtt) throws IOException
+    public void sendShallIncludeToInPublishTopic(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
         final byte[] messageBody = {0x61, 0x62, 0x63};
@@ -491,7 +491,7 @@ public class MqttMessagingTest
     //Tests_SRS_MqttMessaging_21_027: [send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.]
     //Tests_SRS_MqttMessaging_34_026: [This method shall append each custom property's name and value to the publishTopic before publishing.]
     @Test
-    public void sendShallIncludeAllSystemPropertiesAndAllCustomPropertiesInPublishTopic(@Mocked final Mqtt mockMqtt) throws IOException
+    public void sendShallIncludeAllSystemPropertiesAndAllCustomPropertiesInPublishTopic(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         final byte[] messageBody = {0x61, 0x62, 0x63};
         final String propertyName1 = "key1";

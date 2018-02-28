@@ -7,12 +7,12 @@ import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import org.apache.commons.lang3.tuple.Pair;
-import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class MqttDeviceMethod extends Mqtt
 {
@@ -36,15 +36,12 @@ public class MqttDeviceMethod extends Mqtt
     private final int METHOD_TOKEN = 3;
     private final int REQID_TOKEN = 4;
 
-    public MqttDeviceMethod(MqttConnection mqttConnection) throws IOException
+    public MqttDeviceMethod(MqttConnection mqttConnection) throws TransportException
     {
-        /*
-        Codes_SRS_MqttDeviceMethod_25_001: [**The constructor shall instantiate super class without any parameters.**]**
-         */
+        //Codes_SRS_MqttDeviceMethod_25_001: [The constructor shall instantiate super class without any parameters.]
         super(mqttConnection, null);
-        /*
-        Codes_SRS_MqttDeviceMethod_25_002: [**The constructor shall create subscribe and response topics strings for device methods as per the spec.**]**
-         */
+
+        //Codes_SRS_MqttDeviceMethod_25_002: [The constructor shall create subscribe and response topics strings for device methods as per the spec.]
         this.subscribeTopic = POST + BACKSLASH + POUND;
         this.responseTopic = RES;
     }
@@ -53,14 +50,12 @@ public class MqttDeviceMethod extends Mqtt
     {
         if (!isStarted)
         {
-            /*
-            Codes_SRS_MqttDeviceMethod_25_014: [**start method shall just mark that this class is ready to start.**]**
-             */
+            //Codes_SRS_MqttDeviceMethod_25_014: [start method shall just mark that this class is ready to start.]
             isStarted = true;
         }
     }
 
-    public void stop() throws IOException
+    public void stop()
     {
         isStarted = false;
 
@@ -70,29 +65,23 @@ public class MqttDeviceMethod extends Mqtt
         }
     }
 
-    public void send(final IotHubTransportMessage message) throws IOException
+    public void send(final IotHubTransportMessage message) throws TransportException
     {
         if (message == null || message.getBytes() == null)
         {
-            /*
-            Codes_SRS_MqttDeviceMethod_25_016: [**send method shall throw an exception if the message is null.**]**
-             */
-            throw new IllegalArgumentException("Message cannot be null");
+            //Codes_SRS_MqttDeviceMethod_25_016: [send method shall throw an exception if the message is null.]
+            throwMethodsTransportException(new IllegalArgumentException("Message cannot be null"));
         }
 
         if(!isStarted)
         {
-            /*
-            Codes_SRS_MqttDeviceMethod_25_018: [**send method shall throw an IoException if device method has not been started yet.**]**
-             */
-            throw new IOException("Start device method before using send");
+            //Codes_SRS_MqttDeviceMethod_25_018: [send method shall throw an TransportException if device method has not been started yet.]
+            throwMethodsTransportException("Start device method before using send");
         }
 
         if (message.getMessageType() != MessageType.DEVICE_METHODS)
         {
-            /*
-            Codes_SRS_MqttDeviceMethod_25_017: [**send method shall return if the message is not of Type DeviceMethod.**]**
-             */
+            //Codes_SRS_MqttDeviceMethod_25_017: [send method shall return if the message is not of Type DeviceMethod.]
             return;
         }
 
@@ -107,10 +96,8 @@ public class MqttDeviceMethod extends Mqtt
             {
                 if (message.getRequestId() == null || message.getRequestId().isEmpty())
                 {
-                    /*
-                    Codes_SRS_MqttDeviceMethod_25_021: [**send method shall throw an IoException if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
-                     */
-                    throw new IOException("Request id cannot be null or empty");
+                    //Codes_SRS_MqttDeviceMethod_25_021: [send method shall throw a TransportException if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.]
+                    throwMethodsTransportException(new IllegalArgumentException("Request id cannot be null or empty"));
                 }
 
                 if (requestMap.containsKey(message.getRequestId()))
@@ -120,15 +107,13 @@ public class MqttDeviceMethod extends Mqtt
                         case DEVICE_OPERATION_METHOD_RECEIVE_REQUEST:
                             break;
                         default:
-                            throw new IOException("Mismatched request and response operation");
+                            throwMethodsTransportException("Mismatched request and response operation");
                     }
                 }
                 else
                 {
-                    /*
-                    Codes_SRS_MqttDeviceMethod_25_023: [**send method shall throw an exception if a response is sent without having a method invoke on the request id if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
-                     */
-                    throw new IOException("Sending a response for the method that was never invoked");
+                    //Codes_SRS_MqttDeviceMethod_25_023: [send method shall throw an exception if a response is sent without having a method invoke on the request id if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.]
+                    throwMethodsTransportException("Sending a response for the method that was never invoked");
                 }
 
                 String topic = this.responseTopic + BACKSLASH +
@@ -136,24 +121,20 @@ public class MqttDeviceMethod extends Mqtt
                         BACKSLASH +
                         REQ_ID +
                         message.getRequestId();
-                /*
-                Codes_SRS_MqttDeviceMethod_25_022: [**send method shall build the publish topic of the format mentioned in spec ($iothub/methods/res/{status}/?$rid={request id}) and publish if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
-                 */
+                //Codes_SRS_MqttDeviceMethod_25_022: [send method shall build the publish topic of the format mentioned in spec ($iothub/methods/res/{status}/?$rid={request id}) and publish if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.]
                 this.publish(topic, message.getBytes());
                 break;
             }
             default:
             {
-                /*
-                Codes_SRS_MqttDeviceMethod_25_019: [**send method shall throw an IoException if the getDeviceOperationType() is not of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST or DEVICE_OPERATION_METHOD_SEND_RESPONSE .**]**
-                 */
-                throw new IOException("Mismatched device method operation");
+                //Codes_SRS_MqttDeviceMethod_25_019: [send method shall throw a TransportException if the getDeviceOperationType() is not of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST or DEVICE_OPERATION_METHOD_SEND_RESPONSE .]
+                throwMethodsTransportException("Mismatched device method operation");
             }
         }
     }
 
     @Override
-    public Message receive() throws IOException
+    public Message receive() throws TransportException
     {
         synchronized (this.mqttLock)
         {
@@ -184,63 +165,53 @@ public class MqttDeviceMethod extends Mqtt
                             if (data != null && data.length > 0)
                             {
                                 message = new IotHubTransportMessage(data, MessageType.DEVICE_METHODS);
-
                                 message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                             }
                             else
                             {
                                 message = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
-
                                 message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                             }
 
-                            try
+                            //Codes_SRS_MqttDeviceMethod_25_028: [If the topic is of type post topic then this method shall parse further for method name and set it for the message by calling setMethodName for the message]
+                            String methodName = topicParser.getMethodName(METHOD_TOKEN);
+                            message.setMethodName(methodName);
+
+                            String reqId = topicParser.getRequestId(REQID_TOKEN);
+                            if (reqId != null)
                             {
-                            /*
-                            Codes_SRS_MqttDeviceMethod_25_028: [**If the topic is of type post topic then this method shall parse further for method name and set it for the message by calling setMethodName for the message**]**
-                            */
-                                String methodName = topicParser.getMethodName(METHOD_TOKEN);
-                                message.setMethodName(methodName);
-                            } catch (Exception e)
-                            {
-                            /*
-                            Codes_SRS_MqttDeviceMethod_25_029: [**If method name not found or is null then receive shall throw IOException **]**
-                            */
-                                throw new IOException("Method name could not be parsed");
+                                //Codes_SRS_MqttDeviceMethod_25_030: [If the topic is of type post topic then this method shall parse further to look for request id which if found is set by calling setRequestId]
+                                message.setRequestId(reqId);
+
+                                //Codes_SRS_MqttDeviceMethod_25_032: [If the topic is of type post topic and if method name and request id has been successfully parsed then this method shall set operation type as DEVICE_OPERATION_METHOD_RECEIVE_REQUEST ]
+                                message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
+                                requestMap.put(reqId, DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
                             }
-
-
-                            try
+                            else
                             {
-                                String reqId = topicParser.getRequestId(REQID_TOKEN);
-                                if (reqId != null)
-                                {
-                                    /*
-                                    Codes_SRS_MqttDeviceMethod_25_030: [**If the topic is of type post topic then this method shall parse further to look for request id which if found is set by calling setRequestId**]**
-                                    */
-                                    message.setRequestId(reqId);
-                                    /*
-                                    Codes_SRS_MqttDeviceMethod_25_032: [**If the topic is of type post topic and if method name and request id has been successfully parsed then this method shall set operation type as DEVICE_OPERATION_METHOD_RECEIVE_REQUEST **]**
-                                    */
-                                    message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
-                                    requestMap.put(reqId, DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
-                                }
-                                else
-                                {
-                                /*
-                                Codes_SRS_MqttDeviceMethod_25_031: [**If request id is not found or is null then receive shall throw IOException **]**
-                                */
-                                    throw new IOException("Request ID cannot be null");
-                                }
-                            } catch (Exception e)
-                            {
-                                throw new IOException("Method Invoke received without request ID");
+                                //Codes_SRS_MqttDeviceMethod_25_031: [If request id is not found or is null then receive shall throw TransportException]
+                                throwMethodsTransportException("Request ID cannot be null");
                             }
                         }
                     }
                 }
             }
+
             return message;
         }
+    }
+
+    private void throwMethodsTransportException(String message) throws TransportException
+    {
+        TransportException transportException = new TransportException(message);
+        transportException.setIotHubService(TransportException.IotHubService.METHODS);
+        throw transportException;
+    }
+
+    private void throwMethodsTransportException(Exception e) throws TransportException
+    {
+        TransportException transportException = new TransportException(e);
+        transportException.setIotHubService(TransportException.IotHubService.METHODS);
+        throw transportException;
     }
 }

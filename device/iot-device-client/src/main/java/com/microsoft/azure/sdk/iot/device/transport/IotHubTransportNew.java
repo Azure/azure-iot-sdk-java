@@ -8,11 +8,11 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
@@ -21,7 +21,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class IotHubTransportNew implements Closeable, IotHubListener, IotHubTransport
+public class IotHubTransportNew implements IotHubListener
 {
     private static final int MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
     private State state;
@@ -73,7 +73,7 @@ public class IotHubTransportNew implements Closeable, IotHubListener, IotHubTran
      * @param e
      */
     @Override
-    public void messageSent(Message message, Throwable e)
+    public void onMessageSent(Message message, Throwable e)
     {
         synchronized (this)
         {
@@ -100,7 +100,7 @@ public class IotHubTransportNew implements Closeable, IotHubListener, IotHubTran
     }
 
     @Override
-    public void messageReceived(Message message, Throwable e)
+    public void onMessageReceived(Message message, Throwable e)
     {
         synchronized (receiveLock)
         {
@@ -114,7 +114,7 @@ public class IotHubTransportNew implements Closeable, IotHubListener, IotHubTran
     }
 
     @Override
-    public void connectionLost(Throwable e)
+    public void onConnectionLost(Throwable e)
     {
         handleException(e);
 
@@ -133,7 +133,7 @@ public class IotHubTransportNew implements Closeable, IotHubListener, IotHubTran
     }
 
     @Override
-    public void connectionEstablished(Throwable e)
+    public void onConnectionEstablished(Throwable e)
     {
         handleException(e);
         // Inform user that connection is established
@@ -151,7 +151,7 @@ public class IotHubTransportNew implements Closeable, IotHubListener, IotHubTran
      * @throws IOException if a communication channel cannot be
      * established.
      */
-    public synchronized void open(Collection<DeviceClientConfig> deviceClientConfigs) throws IOException
+    public synchronized void open(Collection<DeviceClientConfig> deviceClientConfigs) throws DeviceClientException
     {
         if ((deviceClientConfigs == null) || deviceClientConfigs.isEmpty())
         {
@@ -166,30 +166,33 @@ public class IotHubTransportNew implements Closeable, IotHubListener, IotHubTran
         this.deviceClientConfigs = new LinkedBlockingQueue<DeviceClientConfig>(deviceClientConfigs);
         this.defaultConfig = this.deviceClientConfigs.peek();
 
-        switch (defaultConfig.getProtocol())
+        try
         {
-            case HTTPS:
-                this.iotHubTransportConnection = new HttpsIotHubConnection(defaultConfig);
-                break;
-            case MQTT:
-                this.iotHubTransportConnection = new MqttIotHubConnection(defaultConfig);
-                break;
-            case MQTT_WS:
-                this.iotHubTransportConnection = new MqttIotHubConnection(defaultConfig);
-                break;
-            case AMQPS:
-                this.iotHubTransportConnection = new AmqpsIotHubConnection(defaultConfig, 1);
-                break;
-            case AMQPS_WS:
-                this.iotHubTransportConnection = new AmqpsIotHubConnection(defaultConfig, 1);
-                break;
-            default:
-                throw new IOException("Protocol not supported");
-        }
+            switch (defaultConfig.getProtocol())
+            {
+                case HTTPS:
+                    this.iotHubTransportConnection = new HttpsIotHubConnection(defaultConfig);
+                    break;
+                case MQTT:
+                case MQTT_WS:
+                    this.iotHubTransportConnection = new MqttIotHubConnection(defaultConfig);
+                    break;
+                case AMQPS:
+                case AMQPS_WS:
+                    this.iotHubTransportConnection = new AmqpsIotHubConnection(defaultConfig, 1);
+                    break;
+                default:
+                    throw new IOException("Protocol not supported");
+            }
 
-        this.iotHubTransportConnection.addListener(this);
-        this.iotHubTransportConnection.open(this.deviceClientConfigs);
-        this.state = State.OPEN;
+            this.iotHubTransportConnection.addListener(this);
+            this.iotHubTransportConnection.open(this.deviceClientConfigs);
+            this.state = State.OPEN;
+        }
+        catch (Exception e)
+        {
+            //TODO this will be just a TransportException catch once AMQP and HTTP are also just throwing TransportExceptions
+        }
     }
 
     /**
@@ -212,7 +215,7 @@ public class IotHubTransportNew implements Closeable, IotHubListener, IotHubTran
      *
      * @throws IOException if an error occurs in closing the transport.
      */
-    public synchronized void close() throws IOException
+    public synchronized void close() throws DeviceClientException
     {
         if (this.state == State.CLOSED)
         {
@@ -247,7 +250,14 @@ public class IotHubTransportNew implements Closeable, IotHubListener, IotHubTran
         invokeCallbacks();
         inProgressMessages.clear();
 
-        this.iotHubTransportConnection.close();
+        try
+        {
+            this.iotHubTransportConnection.close();
+        }
+        catch (Exception e)
+        {
+            //TODO (Tim) this will only throw TranpsortException soon witch won't require a catch at all. Ignore this catch for now
+        }
 
         this.state = State.CLOSED;
     }
@@ -309,7 +319,7 @@ public class IotHubTransportNew implements Closeable, IotHubListener, IotHubTran
      *
      * @throws IOException if the server could not be reached.
      */
-    public synchronized void sendMessages() throws IOException
+    public synchronized void sendMessages() throws DeviceClientException
     {
 
         // Codes_SRS_AMQPSTRANSPORT_15_012: [If the AMQPS session is closed, the function shall throw an IllegalStateException.]
@@ -340,6 +350,10 @@ public class IotHubTransportNew implements Closeable, IotHubListener, IotHubTran
                     // defaulting to retry at the moment by adding it back to waiting queue
 
                     this.waitingMessages.add(packet);
+                }
+                catch (Exception e)
+                {
+                    //TODO (Tim) this will only throw TranpsortException soon witch won't require a catch at all. Ignore this catch for now
                 }
             }
         }
@@ -414,7 +428,7 @@ public class IotHubTransportNew implements Closeable, IotHubListener, IotHubTran
      *
      * @throws IOException if the server could not be reached.
      */
-    public void handleMessage() throws IOException
+    public void handleMessage() throws DeviceClientException
     {
         synchronized (receiveLock)
         {
@@ -444,12 +458,19 @@ public class IotHubTransportNew implements Closeable, IotHubListener, IotHubTran
                     else
                     {
                         // TODO : For MQTT and HTTP, make sure the message in the Queue is IotHubTransport Message else message will never be received
-                        throw new IOException("Unknown transport message could not be handled");
+                        throw new DeviceClientException("Unknown transport message could not be handled");
                     }
 
-                    if (!this.iotHubTransportConnection.sendMessageResult(receivedMessage, result))
+                    try
                     {
-                        this.receivedMessages.add(receivedMessage);
+                        if (!this.iotHubTransportConnection.sendMessageResult(receivedMessage, result))
+                        {
+                            this.receivedMessages.add(receivedMessage);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        //TODO (Tim) this will only throw TranpsortException soon witch won't require a catch at all. Ignore this catch for now
                     }
                 }
             }

@@ -19,7 +19,7 @@ public final class IotHubSendTask implements Runnable
      */
     private final CustomLogger logger = new CustomLogger(this.getClass());
 
-    public IotHubSendTask(IotHubTransport transport)
+    public IotHubSendTask(IotHubTransportNew transport)
     {
         if (transport == null)
         {

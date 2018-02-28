@@ -3,13 +3,10 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportNew;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTransport;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransport;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttTransport;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -79,7 +76,7 @@ public final class DeviceIO
     private long receivePeriodInMilliseconds;
 
     private CustomLogger logger;
-    private IotHubTransport transport;
+    private IotHubTransportNew transport;
     private DeviceClientConfig config;
     private IotHubSendTask sendTask = null;
     private IotHubReceiveTask receiveTask = null;
@@ -115,35 +112,12 @@ public final class DeviceIO
 
  //Codes_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.]
 
-        switch (protocol)
+        if (protocol == IotHubClientProtocol.AMQPS_WS || protocol == IotHubClientProtocol.MQTT_WS)
         {
-            case HTTPS:
-                this.config.setUseWebsocket(false);
-                this.transport = new HttpsTransport(this.config);
-                break;
-            case AMQPS:
-                this.config.setUseWebsocket(false);
-                //this.transport = new AmqpsTransport(this.config);
-                this.transport = new IotHubTransportNew(this.config);
-                break;
-            case AMQPS_WS:
-                this.config.setUseWebsocket(true);
-                this.transport = new AmqpsTransport(this.config);
-                break;
-            case MQTT:
-                this.config.setUseWebsocket(false);
-                this.transport = new MqttTransport(this.config);
-                break;
-            case MQTT_WS:
-                this.config.setUseWebsocket(true);
-                this.transport = new MqttTransport(this.config);
-                break;
-            default:
- //Codes_SRS_DEVICE_IO_21_005: [If the `protocol` is not valid, the constructor shall throw an IllegalArgumentException.]
-
-                // should never happen.
-                throw new IllegalStateException("Invalid client protocol specified.");
+            this.config.setUseWebsocket(true);
         }
+
+        this.transport = new IotHubTransportNew(config);
 
         /* Codes_SRS_DEVICE_IO_21_037: [The constructor shall initialize the `sendPeriodInMilliseconds` with default value of 10 milliseconds.] */
         this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
@@ -173,7 +147,14 @@ public final class DeviceIO
 
         /* Codes_SRS_DEVICE_IO_21_012: [The open shall open the transport to communicate with an IoT Hub.] */
         /* Codes_SRS_DEVICE_IO_21_015: [If an error occurs in opening the transport, the open shall throw an IOException.] */
-        this.transport.open(deviceClientConfigs);
+        try
+        {
+            this.transport.open(deviceClientConfigs);
+        }
+        catch (DeviceClientException e)
+        {
+            throw new IOException(e);
+        }
 
         /* Codes_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every receivePeriodInMilliseconds milliseconds.] */
         /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `OPEN`.] */
@@ -257,7 +238,14 @@ public final class DeviceIO
         this.taskScheduler.shutdown();
 
         /* Codes_SRS_DEVICE_IO_21_019: [The close shall close the transport.] */
-        this.transport.close();
+        try
+        {
+            this.transport.close();
+        }
+        catch (DeviceClientException e)
+        {
+            throw new IOException(e);
+        }
 
         /* Codes_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
         this.state = IotHubClientState.CLOSED;

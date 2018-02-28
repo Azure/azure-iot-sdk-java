@@ -643,13 +643,13 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                     if (state)
                     {
                         // TODO: call listener message sent with the retrieving message from in progress queue
-                        iothubListener.messageSent(inProgressMessages.remove(d.hashCode()), null);
+                        iothubListener.onMessageSent(inProgressMessages.remove(d.hashCode()), null);
                     }
                     else
                     {
                         // TODO: call listener message sent with the retrieving message from in progress queue along with
                         // the exception related to error
-                        iothubListener.messageSent(inProgressMessages.remove(d.hashCode()), new IOException("Message send unsuccessful"));
+                        iothubListener.onMessageSent(inProgressMessages.remove(d.hashCode()), new IOException("Message send unsuccessful"));
                     }
                 }
                 else
@@ -728,7 +728,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             {
                 listener.connectionEstablished();
             }*/
-            iothubListener.connectionEstablished(null);
+            iothubListener.onConnectionEstablished(null);
 
             // Codes_SRS_AMQPSIOTHUBCONNECTION_21_051 [The open lock shall be notified when that the connection has been established.]
             synchronized (openLock)
@@ -903,7 +903,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             message.setMessageCallback(amqpsHandleMessageReturnValue.getMessageCallback());
 
             this.sendAckMessages.put(msg, message);
-            this.iothubListener.messageReceived(message, e);
+            this.iothubListener.onMessageReceived(message, e);
         }
         catch (IOException messageEx)
         {

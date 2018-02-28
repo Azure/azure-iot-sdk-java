@@ -7,9 +7,9 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportNew;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTransport;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransport;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttTransport;
 import mockit.*;
 import org.junit.Test;
 
@@ -33,21 +33,22 @@ import static org.junit.Assert.*;
  */
 public class DeviceIOTest
 {
+
     @Mocked
     IotHubSendTask mockIotHubSendTask;
 
     @Mocked
     IotHubReceiveTask mockIotHubReceiveTask;
 
-    @Mocked 
+    @Mocked
     AmqpsTransport mockAmqpsTransport;
 
     @Mocked
     HttpsTransport mockHttpsTransport;
 
     @Mocked
-    MqttTransport mockMqttTransport;
-    
+    IotHubTransportNew mockedTransport;
+
     @Mocked 
     DeviceClientConfig mockConfig;
 
@@ -103,7 +104,7 @@ public class DeviceIOTest
 
     private void openDeviceIO(
             final Object deviceIO,
-            final IotHubTransport transport,
+            final IotHubTransportNew transport,
             final Executors executors,
             final ScheduledExecutorService scheduledExecutorService) throws IOException
     {
@@ -182,7 +183,6 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
     @Test
     public void constructorMqttSuccess(
-            @Mocked final MqttTransport mockMqttTransport,
             @Mocked final DeviceClientConfig mockConfig) throws URISyntaxException
     {
         // arrange
@@ -192,8 +192,8 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                new MqttTransport(mockConfig);
-                result = mockMqttTransport;
+                new IotHubTransportNew(mockConfig);
+                result = mockedTransport;
                 times = 1;
             }
         };
@@ -284,8 +284,8 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                new MqttTransport(mockConfig);
-                result = mockMqttTransport;
+                new IotHubTransportNew(mockConfig);
+                result = mockedTransport;
                 times = 1;
             }
         };
@@ -337,7 +337,7 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "open");
@@ -384,10 +384,10 @@ public class DeviceIOTest
             {
                 mockAmqpsTransport.open(mockedCollection);
                 times = 1;
-                new IotHubSendTask(mockAmqpsTransport);
+                new IotHubSendTask(mockedTransport);
                 result = mockIotHubSendTask;
                 times = 1;
-                new IotHubReceiveTask(mockAmqpsTransport);
+                new IotHubReceiveTask(mockedTransport);
                 result = mockIotHubReceiveTask;
                 times = 1;
                 mockExecutors.newScheduledThreadPool(2);
@@ -450,7 +450,7 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         ArrayList<DeviceClient> deviceClientList = new ArrayList<>();
 
         // act
@@ -480,10 +480,10 @@ public class DeviceIOTest
             {
                 //mockAmqpsTransport.multiplexOpen(deviceClientList);
                 //times = 1;
-                new IotHubSendTask(mockAmqpsTransport);
+                new IotHubSendTask(mockedTransport);
                 result = mockIotHubSendTask;
                 times = 1;
-                new IotHubReceiveTask(mockAmqpsTransport);
+                new IotHubReceiveTask(mockedTransport);
                 result = mockIotHubReceiveTask;
                 times = 1;
                 mockExecutors.newScheduledThreadPool(2);
@@ -515,7 +515,7 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "close");
@@ -537,7 +537,7 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "close");
@@ -574,7 +574,7 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
 
@@ -592,7 +592,7 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "close");
@@ -607,7 +607,7 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         new StrictExpectations()
         {
             {
@@ -634,7 +634,7 @@ public class DeviceIOTest
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
@@ -660,7 +660,7 @@ public class DeviceIOTest
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync", 
@@ -693,7 +693,7 @@ public class DeviceIOTest
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
 
@@ -711,7 +711,7 @@ public class DeviceIOTest
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
@@ -737,7 +737,7 @@ public class DeviceIOTest
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync",
@@ -770,7 +770,7 @@ public class DeviceIOTest
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
 
@@ -785,7 +785,7 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
         IotHubClientProtocol actualProtocol = Deencapsulation.invoke(deviceIO, "getProtocol") ;
@@ -839,9 +839,9 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                new IotHubSendTask(mockAmqpsTransport);
+                new IotHubSendTask(mockedTransport);
                 result = mockIotHubSendTask;
-                new IotHubReceiveTask(mockAmqpsTransport);
+                new IotHubReceiveTask(mockedTransport);
                 result = mockIotHubReceiveTask;
                 mockExecutors.newScheduledThreadPool(2);
                 result = mockScheduler;
@@ -878,7 +878,7 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.setField(deviceIO, "receiveTask", null);
 
         // act
@@ -956,9 +956,9 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                new IotHubSendTask(mockAmqpsTransport);
+                new IotHubSendTask(mockedTransport);
                 result = mockIotHubSendTask;
-                new IotHubReceiveTask(mockAmqpsTransport);
+                new IotHubReceiveTask(mockedTransport);
                 result = mockIotHubReceiveTask;
                 mockExecutors.newScheduledThreadPool(2);
                 result = mockScheduler;
@@ -995,7 +995,7 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.setField(deviceIO, "sendTask", null);
 
         // act
@@ -1033,7 +1033,7 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
-        openDeviceIO(deviceIO, mockAmqpsTransport, mockExecutors, mockScheduler);
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
         boolean isOpen = Deencapsulation.invoke(deviceIO, "isOpen" );

@@ -13,7 +13,7 @@ public class MqttConnection
 {
     MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext iotHubSSLContext) throws IOException;
 
-    void setMqttCallback(MqttCallback mqttCallback) throws IllegalArgumentException;
+    void setMqttCallback(MqttCallback mqttCallback) throws TransportException;
     MqttAsyncClient getMqttAsyncClient();
     ConcurrentLinkedQueue<Pair<String, byte[]>> getAllReceivedMessages();
     Object getMqttLock();
@@ -28,9 +28,9 @@ public class MqttConnection
 MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext iotHubSSLContext) throws IOException
 ```
 
-**SRS_MQTTCONNECTION_25_001: [**The constructor shall throw IllegalArgumentException if any of the input parameters are null other than password.**]**
+**SRS_MQTTCONNECTION_25_001: [**The constructor shall throw TransportException if any of the input parameters are null other than password.**]**
 
-**SRS_MQTTCONNECTION_25_002: [**The constructor shall throw IllegalArgumentException if serverUri, clientId, userName, password are empty.**]**
+**SRS_MQTTCONNECTION_25_002: [**The constructor shall throw TransportException if serverUri, clientId, userName, password are empty.**]**
 
 **SRS_MQTTCONNECTION_25_003: [**The constructor shall create lock, queue for this MqttConnection.**]**
 
@@ -39,12 +39,12 @@ MqttConnection(String serverURI, String clientId, String userName, String passwo
 ### setMqttCallback
 
 ```java
-void setMqttCallback(MqttCallback mqttCallback) throws IllegalArgumentException;
+void setMqttCallback(MqttCallback mqttCallback) throws TransportException;
 ```
 
 **SRS_MQTTCONNECTION_25_005: [**This method shall set the callback for Mqtt.**]**
 
-**SRS_MQTTCONNECTION_25_006: [**This method shall throw IllegalArgumentException if callback is null.**]**
+**SRS_MQTTCONNECTION_25_006: [**This method shall throw TransportException if callback is null.**]**
 
 ### getMqttAsyncClient
 

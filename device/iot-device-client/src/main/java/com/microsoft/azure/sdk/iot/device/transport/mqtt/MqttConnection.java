@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -43,18 +45,18 @@ public class MqttConnection
      * @param iotHubSSLContext SSLContext for the connection
      * @throws IOException is thrown if any of the parameters are null or empty or client cannot be instantiated
      */
-    MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext iotHubSSLContext) throws IOException
+    MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext iotHubSSLContext) throws TransportException
     {
         if (serverURI == null || clientId == null || userName == null || iotHubSSLContext == null)
         {
             //Codes_SRS_MQTTCONNECTION_25_001: [The constructor shall throw InvalidParameter Exception if any of the input parameters are null other than password.]
-            throw new IllegalArgumentException();
+            throw new TransportException(new IllegalArgumentException("ServerURI, clientId, and userName may not be null or empty"));
         }
 
         else if (serverURI.isEmpty() || clientId.isEmpty() || userName.isEmpty())
         {
             //Codes_SRS_MQTTCONNECTION_25_002: [The constructor shall throw InvalidParameter Exception if serverUri, clientId, userName, password are empty.]
-            throw new IllegalArgumentException();
+            throw new TransportException(new IllegalArgumentException("ServerURI, clientId, and userName may not be null or empty"));
         }
 
         try
@@ -68,7 +70,8 @@ public class MqttConnection
         {
             mqttAsyncClient = null;
             connectionOptions = null;
-            throw new IOException("Error initializing MQTT connection:" + e.getMessage());
+            TransportException transportException = PahoExceptionTranslator.translatePahoException(e, "Unable to create mqttAsyncClient");
+            throw transportException;
         }
 
         //Codes_SRS_MQTTCONNECTION_25_003: [The constructor shall create lock, queue for this MqttConnection.]
@@ -99,15 +102,16 @@ public class MqttConnection
     /**
      * Callback to trigger onto if any of the Paho API's triggers callback
      * @param mqttCallback callback to be set
-     * @throws IllegalArgumentException is thrown if callback is null
+     * @throws TransportException is thrown if callback is null
      */
-    void setMqttCallback(MqttCallback mqttCallback) throws IllegalArgumentException
+    void setMqttCallback(MqttCallback mqttCallback) throws TransportException
     {
         if (mqttCallback == null)
         {
             //Codes_SRS_MQTTCONNECTION_25_006: [This method shall throw IllegalArgumentException if callback is null.]
-            throw new IllegalArgumentException("callback cannot be null");
+            throw new TransportException(new IllegalArgumentException("callback cannot be null"));
         }
+
         //Codes_SRS_MQTTCONNECTION_25_005: [This method shall set the callback for Mqtt.]
         this.mqttCallback = mqttCallback;
         this.getMqttAsyncClient().setCallback(mqttCallback);
@@ -119,9 +123,8 @@ public class MqttConnection
      */
     MqttAsyncClient getMqttAsyncClient()
     {
-
         //Codes_SRS_MQTTCONNECTION_25_007: [Getter for the MqttAsyncClient.]
-        return mqttAsyncClient;
+        return this.mqttAsyncClient;
     }
 
     /**
@@ -131,7 +134,7 @@ public class MqttConnection
     ConcurrentLinkedQueue<Pair<String, byte[]>> getAllReceivedMessages()
     {
         //Codes_SRS_MQTTCONNECTION_25_008: [Getter for the Message Queue.]
-        return allReceivedMessages;
+        return this.allReceivedMessages;
     }
 
     /**
@@ -141,7 +144,7 @@ public class MqttConnection
     Object getMqttLock()
     {
         //Codes_SRS_MQTTCONNECTION_25_009: [Getter for the Mqtt Lock on this connection.]
-        return mqttLock;
+        return this.mqttLock;
     }
 
     /**
@@ -151,7 +154,7 @@ public class MqttConnection
     MqttConnectOptions getConnectionOptions()
     {
         //Codes_SRS_MQTTCONNECTION_25_010: [Getter for the MqttConnectionOptions.]
-        return connectionOptions;
+        return this.connectionOptions;
     }
 
     /**

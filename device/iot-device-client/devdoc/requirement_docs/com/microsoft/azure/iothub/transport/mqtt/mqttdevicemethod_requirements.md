@@ -61,13 +61,13 @@ public void stop() throws IOException;
 
 **SRS_MQTTDEVICEMETHOD_25_017: [**send method shall do nothing and return if the message is not of Type DeviceMethod.**]**
 
-**SRS_MQTTDEVICEMETHOD_25_018: [**send method shall throw an IOException if device method has not been started yet.**]**
+**SRS_MQTTDEVICEMETHOD_25_018: [**send method shall throw an TransportException if device method has not been started yet.**]**
 
-**SRS_MQTTDEVICEMETHOD_25_019: [**send method shall throw an IOException if the getDeviceOperationType() is not of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST or DEVICE_OPERATION_METHOD_SEND_RESPONSE .**]**
+**SRS_MQTTDEVICEMETHOD_25_019: [**send method shall throw a TransportException if the getDeviceOperationType() is not of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST or DEVICE_OPERATION_METHOD_SEND_RESPONSE .**]**
 
 **SRS_MQTTDEVICEMETHOD_25_020: [**send method shall subscribe to topic from spec ($iothub/methods/POST/#) if the operation is of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST.**]**
 
-**SRS_MQTTDEVICEMETHOD_25_021: [**send method shall throw an IOException if message contains a null or empty request id and if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
+**SRS_MQTTDEVICEMETHOD_25_021: [**send method shall throw a TransportException if message contains a null or empty request id and if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
 
 **SRS_MQTTDEVICEMETHOD_25_022: [**send method shall build the publish topic of the format mentioned in spec ($iothub/methods/res/{status}/?$rid={request id}) and publish if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
 
@@ -86,11 +86,11 @@ public void stop() throws IOException;
 
 **SRS_MQTTDEVICEMETHOD_25_028: [**If the topic is of type post topic then this method shall parse further for method name and set it for the message by calling setMethodName for the message**]**
 
-**SRS_MQTTDEVICEMETHOD_25_029: [**If method name not found or is null then receive shall throw IOException **]**
+**SRS_MQTTDEVICEMETHOD_25_029: [**If method name not found or is null then receive shall throw TransportException**]**
 
 **SRS_MQTTDEVICEMETHOD_25_030: [**If the topic is of type post topic then this method shall parse further to look for request id which if found is set by calling setRequestId**]**
 
-**SRS_MQTTDEVICEMETHOD_25_031: [**If request id is not found or is null then receive shall throw IOException **]**
+**SRS_MQTTDEVICEMETHOD_25_031: [**If request id is not found or is null then receive shall throw TransportException**]**
 
 **SRS_MQTTDEVICEMETHOD_25_032: [**If the topic is of type post topic and if method name and request id has been successfully parsed then this method shall set operation type as DEVICE_OPERATION_METHOD_RECEIVE_REQUEST **]**
 

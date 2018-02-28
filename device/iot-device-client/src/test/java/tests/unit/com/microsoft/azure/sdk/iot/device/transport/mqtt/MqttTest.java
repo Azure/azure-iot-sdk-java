@@ -5,7 +5,11 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
+import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.*;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.*;
 import mockit.*;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,13 +20,14 @@ import org.junit.Test;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.junit.Assert.*;
 
 /**
  * Unit test for Mqtt class.
- * 85% methods, 86% lines covered
+ * 92% methods, 87% lines covered
  */
 public class MqttTest
 {
@@ -62,6 +67,9 @@ public class MqttTest
     @Mocked
     private MqttConnectionStateListener mockedMqttConnectionStateListener;
 
+    @Mocked
+    private ProtocolException mockedProtocolException;
+
     @Before
     public void setUp()
     {
@@ -71,12 +79,12 @@ public class MqttTest
         expectedMessage.setCorrelationId("169c34b3-99b0-49f9-b0f6-8fa9d2c99345");
     }
 
-    private Mqtt instantiateMqtt(boolean withParameters) throws IOException
+    private Mqtt instantiateMqtt(boolean withParameters) throws IOException, TransportException
     {
         return instantiateMqtt(withParameters, null);
     }
 
-    private Mqtt instantiateMqtt(boolean withParameters, MqttConnectionStateListener listener) throws IOException
+    private Mqtt instantiateMqtt(boolean withParameters, MqttConnectionStateListener listener) throws TransportException
     {
         if (withParameters)
         {
@@ -246,7 +254,7 @@ public class MqttTest
     *  Tests_SRS_Mqtt_25_003: [The constructor shall retrieve lock, queue from the provided connection information and save the connection.]
      */
     @Test
-    public void manyExtendsOfAbstractClassDoesNotChangeConfig() throws IOException, MqttException
+    public void manyExtendsOfAbstractClassDoesNotChangeConfig() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -281,8 +289,8 @@ public class MqttTest
     /*
         Tests_SRS_Mqtt_25_002: [The constructor shall throw InvalidParameter Exception if mqttConnection is null .]
      */
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsExceptionIfConnectionIsNotInitialised() throws IOException, MqttException
+    @Test(expected = TransportException.class)
+    public void constructorThrowsExceptionIfConnectionIsNotInitialised() throws IOException, MqttException, TransportException
     {
         Mqtt mockMqtt = null;
         //act
@@ -293,7 +301,7 @@ public class MqttTest
     ** Tests_SRS_Mqtt_25_004: [**If an instance of the inner class MqttConnectionInfo is already created than it shall return doing nothing.**]**
      */
     @Test
-    public void constructorWithParametersIfCalledMultipleTimesDoesntReinitialize() throws IOException, MqttException
+    public void constructorWithParametersIfCalledMultipleTimesDoesntReinitialize() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -320,7 +328,7 @@ public class MqttTest
     //Tests_SRS_Mqtt_25_005: [The function shall establish an MQTT connection with an IoT Hub using the provided host name, user name, device ID, and sas token.]
     //Tests_SRS_Mqtt_34_020: [If the MQTT connection is established successfully, this function shall notify its listener that connection was established.]
     @Test
-    public void connectSuccess() throws IOException, MqttException
+    public void connectSuccess() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -340,7 +348,7 @@ public class MqttTest
                 times = 1;
                 mockMqttToken.waitForCompletion();
                 times = 1;
-                mockedMqttConnectionStateListener.connectionEstablished();
+                mockedMqttConnectionStateListener.onConnectionEstablished();
                 times = 1;
             }
         };
@@ -350,7 +358,7 @@ public class MqttTest
     **Tests_SRS_Mqtt_25_008: [**If the MQTT connection is already open, the function shall do nothing.**]**
      */
     @Test
-    public void connectDoesNothingIfAlreadyConnected() throws IOException, MqttException
+    public void connectDoesNothingIfAlreadyConnected() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -381,51 +389,10 @@ public class MqttTest
     }
 
     /*
-    **Tests_SRS_Mqtt_25_006: [**If the inner class MqttConnectionInfo has not been instantiated then the function shall throw IOException.**]**
-     */
-    @Test(expected = IOException.class)
-    public void connectFailsIfNoConfigIsProvided() throws IOException, MqttException
-    {
-        //arrange
-        baseConstructorExpectations();
-        Mqtt mockMqtt = instantiateMqtt(false);
-        Deencapsulation.setField(mockMqtt, "mqttConnection", null);
-
-        //act
-        Deencapsulation.invoke(mockMqtt, "connect");
-    }
-
-    /*
-    **Tests_SRS_Mqtt_25_007: [**If an MQTT connection is unable to be established for any reason, the function shall throw an IOException.**]**
-     */
-    @Test(expected = IOException.class)
-    public void connectThrowsIoExceptionOnMqttException() throws IOException, MqttException
-    {
-        //arrange
-        baseConstructorExpectations();
-        new NonStrictExpectations()
-        {
-            {
-                mockMqttAsyncClient.isConnected();
-                result = false;
-                mockMqttAsyncClient.connect(mockMqttConnectionOptions);
-                result = mockMqttException;
-            }
-        };
-        Mqtt mockMqtt = instantiateMqtt(true);
-
-        //act
-        Deencapsulation.invoke(mockMqtt, "connect");
-
-        //assert
-        baseConnectVerifications();
-    }
-
-    /*
-    **Tests_SRS_Mqtt_25_009: [**The function shall close the MQTT client.**]**
+    **Tests_SRS_Mqtt_25_009: [**The function shall close the MQTT connection.**]**
      */
     @Test
-    public void disconnectClosesMqttClient() throws IOException, MqttException
+    public void disconnectSucceeds() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -512,7 +479,7 @@ public class MqttTest
     **Tests_SRS_Mqtt_25_010: [**If the MQTT connection is closed, the function shall do nothing.**]**
      */
     @Test
-    public void disconnectDoesNothingWhenNotConnected() throws IOException, MqttException
+    public void disconnectDoesNothingWhenNotConnected() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -545,7 +512,7 @@ public class MqttTest
     **Tests_SRS_Mqtt_25_014: [**The function shall publish message payload on the publishTopic specified to the IoT Hub given in the configuration.**]**
      */
     @Test
-    public void publishSucceedsWhenConnected() throws IOException, MqttException
+    public void publishSucceedsWhenConnected() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -572,10 +539,10 @@ public class MqttTest
     }
 
     /*
-    **Tests_SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
+    **Tests_SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw a TransportException.**]**
      */
-    @Test (expected = IOException.class) 
-    public void publishThrowsExceptionIfUserSuppliedSASTokenHasExpired() throws IOException, MqttException
+    @Test (expected = TransportException.class)
+    public void publishThrowsExceptionIfUserSuppliedSASTokenHasExpired() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -589,10 +556,10 @@ public class MqttTest
     }
 
     /*
-    **Tests_SRS_Mqtt_25_012: [**If the MQTT connection is closed, the function shall throw an IOException.**]**
+    **Tests_SRS_Mqtt_25_012: [**If the MQTT connection is closed, the function shall throw a ProtocolException.**]**
      */
-    @Test(expected = IOException.class)
-    public void publishFailsWhenNotConnected() throws IOException, MqttException
+    @Test(expected = ProtocolException.class)
+    public void publishFailsWhenNotConnected() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -611,10 +578,10 @@ public class MqttTest
     }
 
     /*
-    **Tests_SRS_Mqtt_25_012: [**If the MQTT connection is closed, the function shall throw an IOException.**]**
+    **Tests_SRS_Mqtt_25_012: [**If the MQTT connection is closed, the function shall throw an ProtocolException.**]**
     */
-    @Test (expected = IOException.class)
-    public void publishFailsWhenConnectionBrokenWhilePublishing() throws IOException, MqttException
+    @Test (expected = ProtocolException.class)
+    public void publishFailsWhenConnectionBrokenWhilePublishing() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -646,7 +613,7 @@ public class MqttTest
     **Tests_SRS_Mqtt_25_014: [**The function shall publish message payload on the publishTopic specified to the IoT Hub given in the configuration.**]**
      */
     @Test
-    public void publishWithDifferentTopicsFromDifferentConcreteClassSucceeds() throws IOException, MqttException
+    public void publishWithDifferentTopicsFromDifferentConcreteClassSucceeds() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -678,10 +645,10 @@ public class MqttTest
     }
 
     /*
-     **Tests_SRS_Mqtt_25_047: [**If the Mqtt Client Async throws MqttException, the function shall throw an IOException with the message.**]**
+     **Tests_SRS_Mqtt_25_047: [**If the Mqtt Client Async throws MqttException, the function shall throw a ProtocolException with the message.**]**
      */
-    @Test(expected = IOException.class)
-    public void publishThrowsIOExceptionWhenAnyOfTheAsyncMethodsThrow() throws IOException, MqttException
+    @Test(expected = ProtocolException.class)
+    public void publishThrowsIOExceptionWhenAnyOfTheAsyncMethodsThrow() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -714,10 +681,10 @@ public class MqttTest
     }
 
     /*
-    **Tests_SRS_Mqtt_25_013: [**If the either publishTopic or payload is null or empty, the function shall throw an IOException.**]**
+    **Tests_SRS_Mqtt_25_013: [**If the either publishTopic or payload is null or empty, the function shall throw a TransportException.**]**
      */
-    @Test(expected = IOException.class)
-    public void publishThrowsExceptionWhenPublishTopicIsNull() throws IOException, MqttException
+    @Test(expected = TransportException.class)
+    public void publishThrowsExceptionWhenPublishTopicIsNull() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -746,10 +713,10 @@ public class MqttTest
     }
 
     /*
-    **Tests_SRS_Mqtt_25_013: [**If the either publishTopic or payload is null or empty, the function shall throw an IOException.**]**
+    **Tests_SRS_Mqtt_25_013: [**If the either publishTopic or payload is null or empty, the function shall throw a TransportException.**]**
     */
-    @Test(expected = IOException.class)
-    public void publishThrowsExceptionWhenPayloadIsNull() throws IOException, MqttException
+    @Test(expected = TransportException.class)
+    public void publishThrowsExceptionWhenPayloadIsNull() throws IOException, MqttException, TransportException
     {
         //arrange
 
@@ -782,7 +749,7 @@ public class MqttTest
     **Tests_SRS_Mqtt_25_017: [**The function shall subscribe to subscribeTopic specified to the IoT Hub given in the configuration.**]**
      */
     @Test
-    public void subscribeSucceeds() throws IOException, MqttException
+    public void subscribeSucceeds() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -815,10 +782,10 @@ public class MqttTest
     }
 
     /*
-    **Tests_SRS_Mqtt_25_015: [**If the MQTT connection is closed, the function shall throw an IOexception with message.**]**
+    **Tests_SRS_Mqtt_25_015: [**If the MQTT connection is closed, the function shall throw an ProtocolException with message.**]**
      */
-    @Test(expected = IOException.class)
-    public void subscribeFailsWhenNotConnected() throws IOException, MqttException
+    @Test(expected = ProtocolException.class)
+    public void subscribeFailsWhenNotConnected() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -845,8 +812,8 @@ public class MqttTest
         };
     }
 
-    @Test(expected = IOException.class)
-    public void subscribeFailsWhenConfigIsNotSet() throws IOException, MqttException
+    @Test(expected = ProtocolException.class)
+    public void subscribeFailsWhenConfigIsNotSet() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -857,10 +824,10 @@ public class MqttTest
     }
 
     /*
-    **Tests_SRS_Mqtt_25_016: [**If the subscribeTopic is null or empty, the function shall throw an InvalidParameter Exception.**]**
+    **Tests_SRS_Mqtt_25_016: [**If the subscribeTopic is null or empty, the function shall throw a TransportException.**]**
      */
-    @Test(expected = InvalidParameterException.class)
-    public void subscribeThrowsExceptionWhenTopicIsNull() throws IOException, MqttException
+    @Test(expected = TransportException.class)
+    public void subscribeThrowsExceptionWhenTopicIsNull() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -873,10 +840,10 @@ public class MqttTest
     }
 
     /*
-    **Tests_SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw an IOException.**]**
+    **Tests_SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw a TransportException.**]**
      */
-    @Test(expected = IOException.class)
-    public void subscribeThrowsExceptionWhenUserSuppliedSASTokenHasExpired() throws IOException, MqttException
+    @Test(expected = TransportException.class)
+    public void subscribeThrowsExceptionWhenUserSuppliedSASTokenHasExpired() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -890,10 +857,10 @@ public class MqttTest
     }
     
     /*
-    **Tests_SRS_Mqtt_25_048: [**If the Mqtt Client Async throws MqttException for any reason, the function shall throw an IOException with the message.**]**
+    **Tests_SRS_Mqtt_25_048: [**If the Mqtt Client Async throws MqttException for any reason, the function shall throw a ProtocolException with the message.**]**
      */
-    @Test(expected = IOException.class)
-    public void subscribeThrowsIOExceptionWhenMqttAsyncThrows() throws IOException, MqttException
+    @Test(expected = ProtocolException.class)
+    public void subscribeThrowsProtocolConnectionExceptionWhenMqttAsyncThrows() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
@@ -929,8 +896,8 @@ public class MqttTest
     // Tests_SRS_Mqtt_34_023: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
     // Tests_SRS_Mqtt_34_024: [This method shall construct new Message with the bytes obtained from peekMessage and return the message.]
    @Test
-    public void receiveSuccess() throws IOException, MqttException
-    {
+    public void receiveSuccess() throws IOException, MqttException, TransportException
+   {
         //arrange
         final byte[] payload = {0x61, 0x62, 0x63};
         baseConstructorExpectations();
@@ -975,7 +942,7 @@ public class MqttTest
 
     // Codes_SRS_Mqtt_34_022: [If the call peekMessage returns a null or empty string then this method shall do nothing and return null]
     @Test
-    public void receiveReturnsNullMessageWhenParseTopicReturnsNull() throws IOException, MqttException
+    public void receiveReturnsNullMessageWhenParseTopicReturnsNull() throws IOException, MqttException, TransportException
     {
         //arrange
         final byte[] payload = {0x61, 0x62, 0x63};
@@ -1008,9 +975,9 @@ public class MqttTest
         assertNull(receivedMessage);
     }
 
-    // Codes_SRS_Mqtt_34_025: [If the call to peekMessage returns null when topic is non-null then this method will throw IOException]
-    @Test(expected = IOException.class)
-    public void receiveThrowsIOExceptionWhenParsePayloadReturnsNull() throws IOException, MqttException
+    // Codes_SRS_Mqtt_34_025: [If the call to peekMessage returns null when topic is non-null then this method will throw a TransportException]
+    @Test(expected = TransportException.class)
+    public void receiveThrowsIotHubServiceExceptionWhenParsePayloadReturnsNull() throws IOException, MqttException, TransportException
     {
         //arrange
         final byte[] payload = {0x61, 0x62, 0x63};
@@ -1029,8 +996,9 @@ public class MqttTest
         Message receivedMessage = mockMqtt.receive();
     }
 
-    @Test(expected = InvalidParameterException.class)
-    public void receiveThrowsExceptionWhenConfigurationIsNotSet() throws IOException, MqttException
+    //Tests_SRS_Mqtt_25_002: [The constructor shall throw a TransportException if mqttConnection is null .]
+    @Test(expected = TransportException.class)
+    public void receiveThrowsExceptionWhenConfigurationIsNotSet() throws IOException, MqttException, TransportException
     {
         //arrange
         final byte[] payload = {0x61, 0x62, 0x63};
@@ -1055,7 +1023,7 @@ public class MqttTest
     **Tests_SRS_Mqtt_25_030: [**The payload of the message and the topic is added to the received messages queue .**]**
      */
     @Test
-    public void messageArrivedAddsToQueue() throws IOException, MqttException
+    public void messageArrivedAddsToQueue() throws IOException, MqttException, TransportException
     {
         //arrange
         Mqtt mockMqtt = null;
@@ -1091,43 +1059,19 @@ public class MqttTest
         }
     }
 
-    //Tests_SRS_Mqtt_99_050: [The function shall check if SAS token has already expired.]
-    //Tests_SRS_Mqtt_25_026: [The function shall notify all its concrete classes by calling abstract method onReconnect at the entry of the function]
-    //Tests_SRS_Mqtt_25_029: [The function shall notify all its concrete classes by calling abstract method onReconnectComplete at the exit of the function]
     //Tests_SRS_Mqtt_34_045: [If this object has a saved listener, this function shall notify the listener that connection was lost.]
     @Test
     public void connectionLostAttemptsToReconnectWithSASTokenStillValid() throws IOException, MqttException
     {
         //arrange
         Mqtt mockMqtt = null;
-        Throwable t = new Throwable();
+        final Throwable t = new Throwable();
         baseConstructorExpectations();
 
         new StrictExpectations()
         {
             {
-                mockedMqttConnectionStateListener.connectionLost();
-
-                mockMqttAsyncClient.isConnected();
-                result = false;
-
-                mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-
-                IotHubSasToken.isExpired(anyString);
-                result = false;
-
-                mockMqttAsyncClient.isConnected();
-                result = false;
-
-                mockMqttAsyncClient.connect(mockMqttConnectionOptions);
-                result = mockMqttToken;
-                mockMqttToken.waitForCompletion();
-
-                mockedMqttConnectionStateListener.connectionEstablished();
-
-                mockMqttAsyncClient.isConnected();
-                result = true;
+                mockedMqttConnectionStateListener.onConnectionLost((TransportException) any);
             }
         };
 
@@ -1140,189 +1084,13 @@ public class MqttTest
         }
         catch (Exception e)
         {
-            System.out.print("Completed throwing exception - " + e.getCause() + e.getMessage());
+            fail("Completed throwing exception - " + e.getCause() + e.getMessage());
         }
-    }
-
-    /*
-     **Tests_SRS_Mqtt_99_050: [**The function shall check if SAS token has already expired.**]**
-    */
-    /*
-     **Tests_SRS_Mqtt_99_051: [**The function shall check if SAS token in based on user supplied SharedAccessKey.**]**
-    */
-     /*
-     **Tests_SRS_Mqtt_99_052: [**The function shall generate a new SAS token.**]**
-    */
-    /*
-    **Tests_SRS_Mqtt_25_026: [**The function shall notify all its concrete classes by calling abstract method onReconnect at the entry of the function**]**
-     */
-    /*
-    **Tests_SRS_Mqtt_25_029: [**The function shall notify all its concrete classes by calling abstract method onReconnectComplete at the exit of the function**]**
-    */
-    @Test
-    public void connectionLostAttemptsToReconnectWithUserSuppliedSharedKeyBasedSASTokenAlreadyExpired() throws IOException, MqttException
-    {
-        //arrange
-        Mqtt mockMqtt = null;
-        Throwable t = new Throwable();
-        baseConstructorExpectations();
-
-        new StrictExpectations()
-        {
-            {
-                mockMqttAsyncClient.isConnected();
-                result = false;
-                mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockMqttConnectionOptions.getPassword();
-                result = EXPECTED_EXPIRED_SAS_TOKEN.toCharArray();
-                IotHubSasToken.isExpired(EXPECTED_EXPIRED_SAS_TOKEN);
-                result = true; // SAS token has expired
-                mockDeviceClientConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = anyString;
-
-                mockDeviceClientConfig.getSasTokenAuthentication().getRenewedSasToken();
-                result = EXPECTED_EXPIRED_SAS_TOKEN;
-
-                mockMqttConnectionOptions.setPassword((char[])any);
-                mockMqttAsyncClient.isConnected();
-                result = false;
-                mockMqttAsyncClient.connect(mockMqttConnectionOptions);
-                result = mockMqttToken;
-                mockMqttToken.waitForCompletion();
-                mockMqttAsyncClient.isConnected();
-                result = true;
-            }
-        };
-
-        //act
-        try
-        {
-            mockMqtt = instantiateMqtt(true);
-            Deencapsulation.setField(mockMqtt, "deviceClientConfig", mockDeviceClientConfig);
-            mockMqtt.connectionLost(t);
-        }
-        catch (Exception e)
-        {
-            System.out.print("Completed throwing exception - " + e.getCause() + e.getMessage());
-        }
-    }
-
-	/*
-     **Tests_SRS_Mqtt_99_050: [**The function shall check if SAS token has already expired.**]**
-    */
-	/*
-     **Tests_SRS_Mqtt_99_051: [**The function shall check if SAS token in based on user supplied SharedAccessKey.**]**
-    */
-
-    @Test(expected = IOException.class)
-    public void connectionLostAttemptsToReconnectWithUserSuppliedSASTokenAlreadyExpired() throws IOException, MqttException
-    {
-        //arrange
-        final byte[] payload = {0x61, 0x62, 0x63};
-        Mqtt mockMqtt = null;
-        Throwable t = new Throwable();
-        baseConstructorExpectations();
-        new StrictExpectations()
-        {
-            {
-                mockMqttAsyncClient.isConnected();
-                result = false;
-
-                mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-
-                IotHubSasToken.isExpired(anyString);
-                result = true; // User specified SAS token has expired
-
-                mockDeviceClientConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = null;
-            }
-        };
-
-        //act
-        mockMqtt = instantiateMqtt(true);
-        Deencapsulation.invoke(mockMqtt, "setDeviceClientConfig", mockDeviceClientConfig);
-        mockMqtt.connectionLost(t);
-        Deencapsulation.invoke(mockMqtt, "publish", MOCK_PARSE_TOPIC, payload);
-    }
-    
-    /*
-    **Tests_SRS_Mqtt_25_027: [**The function shall attempt to reconnect to the IoTHub in a loop with exponential backoff until it succeeds**]**
-     */
-    @Test
-    public void connectionLostAttemptsToReconnectAgainIfConnectFails() throws IOException, MqttException
-    {
-        //arrange
-        Mqtt mockMqtt = null;
-        Throwable t = new Throwable();
-        baseConstructorExpectations();
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockedMqttConnection, "getMqttAsyncClient");
-                result = mockMqttAsyncClient;
-                Deencapsulation.invoke(mockedMqttConnection, "getConnectionOptions");
-                result = mockMqttConnectionOptions;
-            }
-        };
-
-        new StrictExpectations()
-        {
-            {
-                mockMqttAsyncClient.isConnected();
-                result = false;
-
-                mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-
-                IotHubSasToken.isExpired(anyString);
-                result = false;
-
-                mockMqttAsyncClient.isConnected();
-                result = false;
-
-                mockMqttAsyncClient.connect(mockMqttConnectionOptions);
-                result = mockMqttException;
-
-                mockMqttAsyncClient.isConnected();
-                result = false;
-
-                mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-
-                IotHubSasToken.isExpired(anyString);
-                result = false;
-
-                mockMqttAsyncClient.isConnected();
-                result = false;
-
-                mockMqttAsyncClient.connect(mockMqttConnectionOptions);
-                result = mockMqttToken;
-
-                mockMqttToken.waitForCompletion();
-
-                mockMqttAsyncClient.isConnected();
-                result = true;
-            }
-        };
-        //act
-        try
-        {
-            mockMqtt = instantiateMqtt(true);
-            Deencapsulation.invoke(mockMqtt, "setDeviceClientConfig", mockDeviceClientConfig);
-            mockMqtt.connectionLost(t);
-        }
-        catch (Exception e)
-        {
-            System.out.print("Completed throwing exception - " + e.getCause() + e.getMessage());
-        }
-
     }
 
     // Tests_SRS_Mqtt_34_021: [If the call peekMessage returns null then this method shall do nothing and return null]
     @Test
-    public void receiveReturnsNullMessageIfTopicNotFound() throws IOException, MqttException
+    public void receiveReturnsNullMessageIfTopicNotFound() throws IOException, MqttException, TransportException
     {
         //can't be initialized to null, so set it as a default message
         baseConstructorExpectations();
@@ -1345,10 +1113,10 @@ public class MqttTest
     }
 
     /*
-    **Tests_SRS_Mqtt_34_051: [**If a topic string's property's key and value are not separated by the '=' symbol, an IllegalArgumentException shall be thrown**]**
+    **Tests_SRS_Mqtt_34_051: [**If a topic string's property's key and value are not separated by the '=' symbol, a TransportException shall be thrown**]**
      */
-    @Test (expected = IllegalArgumentException.class)
-    public void receiveFailureFromInvalidPropertyStringThrowsIllegalArgumentException() throws IOException, MqttException, IllegalArgumentException
+    @Test (expected = TransportException.class)
+    public void receiveFailureFromInvalidPropertyStringThrowsIllegalArgumentException() throws IOException, MqttException, IllegalArgumentException, TransportException
     {
         //arrange
         final byte[] payload = {0x61, 0x62, 0x63};
@@ -1383,7 +1151,7 @@ public class MqttTest
     **Test_SRS_Mqtt_34_054: [**A message may have 0 to many custom properties**]**
     */
     @Test
-    public void receiveSuccessNoCustomProperties() throws IOException, MqttException
+    public void receiveSuccessNoCustomProperties() throws IOException, MqttException, TransportException
     {
         //arrange
         final byte[] payload = {0x61, 0x62, 0x63};
@@ -1422,7 +1190,7 @@ public class MqttTest
     **Tests_SRS_Mqtt_34_053: [**A property's key and value may include unusual characters such as &, %, $**]**
     */
     @Test
-    public void receiveSuccessCustomPropertyHasUnusualCharacters() throws IOException, MqttException
+    public void receiveSuccessCustomPropertyHasUnusualCharacters() throws IOException, MqttException, TransportException
     {
         //arrange
         final byte[] payload = {0x61, 0x62, 0x63};
@@ -1469,14 +1237,36 @@ public class MqttTest
     }
 
     /*
-    ** Codes_SRS_Mqtt_99_50: [**If deviceConfig is null, the function shall throw an IllegalArgumentException**]**
+    ** Tests_SRS_Mqtt_99_50: [**If deviceConfig is null, the function shall throw a TransportException**]**
     */
-    @Test  (expected = IllegalArgumentException.class)
-    public void deviceConfigNullThrows() throws IOException, MqttException
+    @Test  (expected = TransportException.class)
+    public void deviceConfigNullThrows() throws IOException, TransportException
     {
         // Act
         Mqtt mockMqtt = instantiateMqtt(true);
 
         Deencapsulation.invoke(mockMqtt,"setDeviceClientConfig", new Class[] {DeviceClientConfig.class},(DeviceClientConfig)null);
+    }
+
+    //Tests_SRS_Mqtt_34_037: [If the provided throwable is an instance of MqttException, this function shall derive the associated TransportException and notify the listeners of that derived exception.]
+    @Test
+    public void connectionDropFiresCallbackWithMqttException() throws IOException, MqttException, TransportException
+    {
+        //arrange
+        baseConstructorExpectations();
+        Mqtt mockMqtt = instantiateMqtt(true, mockedMqttConnectionStateListener);
+        Deencapsulation.setField(mockMqtt, "mqttConnection", null);
+
+        //act
+        mockMqtt.connectionLost(new MqttException(404));
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedMqttConnectionStateListener.onConnectionLost((TransportException) any);
+                times = 1;
+            }
+        };
     }
 }

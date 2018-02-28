@@ -6,6 +6,9 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
+import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttConnection;
@@ -54,7 +57,7 @@ public class MqttDeviceMethodTest
     Tests_SRS_MqttDeviceMethod_25_002: [**The constructor shall create subscribe and response topics strings for device methods as per the spec.**]**
      */
     @Test
-    public void constructorSucceeds(@Mocked final Mqtt mockMqtt) throws IOException
+    public void constructorSucceeds(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
         String actualSubscribeTopic = "$iothub/methods/POST/#";
@@ -78,7 +81,7 @@ public class MqttDeviceMethodTest
     Tests_SRS_MqttDeviceMethod_25_014: [**start method shall just mark that this class is ready to start.**]**
      */
     @Test
-    public void startSucceedsCalls(@Mocked final Mqtt mockMqtt) throws IOException
+    public void startSucceedsCalls(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
         final MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection);
@@ -98,7 +101,7 @@ public class MqttDeviceMethodTest
 
 
     @Test
-    public void startSucceedsDoesNotCallsSubscribeIfStarted(@Mocked final Mqtt mockMqtt) throws IOException
+    public void startSucceedsDoesNotCallsSubscribeIfStarted(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
         final MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection);
@@ -120,7 +123,7 @@ public class MqttDeviceMethodTest
     Tests_SRS_MqttDeviceMethod_25_020: [**send method shall subscribe to topic from spec ($iothub/methods/POST/#) if the operation is of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST.**]**
      */
     @Test
-    public void sendSucceedsCallsSubscribe(@Mocked final Mqtt mockMqtt) throws IOException
+    public void sendSucceedsCallsSubscribe(@Mocked final Mqtt mockMqtt) throws IOException, TransportException
     {
         //arrange
         final String actualSubscribeTopic = "$iothub/methods/POST/#";
@@ -147,7 +150,7 @@ public class MqttDeviceMethodTest
     Tests_SRS_MqttDeviceMethod_25_022: [**send method shall build the publish topic of the format mentioned in spec ($iothub/methods/res/{status}/?$rid={request id}) and publish if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
      */
     @Test
-    public void sendSucceedsCallsPublish(@Mocked final Mqtt mockMqtt) throws IOException
+    public void sendSucceedsCallsPublish(@Mocked final Mqtt mockMqtt) throws IOException, TransportException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
@@ -174,8 +177,8 @@ public class MqttDeviceMethodTest
         assertTrue(testRequestMap.isEmpty());
     }
 
-    @Test (expected = IOException.class)
-    public void sendThrowsOnInvalidOperation(@Mocked final Mqtt mockMqtt) throws IOException
+    @Test (expected = TransportException.class)
+    public void sendThrowsOnInvalidOperation(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
@@ -187,11 +190,9 @@ public class MqttDeviceMethodTest
         testMethod.send(testMessage);
     }
 
-    /*
-    Tests_SRS_MqttDeviceMethod_25_018: [**send method shall throw an IoException if device method has not been started yet.**]**
-     */
-    @Test (expected = IOException.class)
-    public void sendThrowsIfNotStarted(@Mocked final Mqtt mockMqtt) throws IOException
+    //Tests_SRS_MqttDeviceMethod_25_018: [send method shall throw a TransportException if device method has not been started yet.]
+    @Test (expected = TransportException.class)
+    public void sendThrowsIfNotStarted(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
@@ -204,8 +205,8 @@ public class MqttDeviceMethodTest
     /*
     Tests_SRS_MqttDeviceMethod_25_016: [**send method shall throw an exception if the message is null.**]**
      */
-    @Test (expected = IllegalArgumentException.class)
-    public void sendThrowsOnMessageNull() throws IOException
+    @Test (expected = TransportException.class)
+    public void sendThrowsOnMessageNull() throws TransportException
     {
         MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection);
         testMethod.start();
@@ -217,7 +218,7 @@ public class MqttDeviceMethodTest
     Tests_SRS_MqttDeviceMethod_25_017: [**send method shall return if the message is not of Type DeviceMethod.**]**
      */
     @Test
-    public void sendDoesNotSendOnDifferentMessageType(@Mocked final Mqtt mockMqtt) throws IOException
+    public void sendDoesNotSendOnDifferentMessageType(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
@@ -242,11 +243,9 @@ public class MqttDeviceMethodTest
 
     }
 
-    /*
-    Tests_SRS_MqttDeviceMethod_25_021: [**send method shall throw an IoException if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
-     */
-    @Test (expected = IOException.class)
-    public void sendThrowsOnNullRequestID() throws IOException
+    //Tests_SRS_MqttDeviceMethod_25_021: [send method shall throw a TransportException if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.]
+    @Test (expected = TransportException.class)
+    public void sendThrowsOnNullRequestID() throws TransportException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
@@ -259,11 +258,9 @@ public class MqttDeviceMethodTest
         testMethod.send(testMessage);
     }
 
-    /*
-    Tests_SRS_MqttDeviceMethod_25_023: [**send method shall throw an exception if a response is sent without having a method invoke on the request id if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
-     */
-    @Test (expected = IOException.class)
-    public void sendThrowsOnSendingResponseWithoutReceivingMethodInvoke() throws IOException
+    //Tests_SRS_MqttDeviceMethod_25_023: [send method shall throw an exception if a response is sent without having a method invoke on the request id if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.]
+    @Test (expected = TransportException.class)
+    public void sendThrowsOnSendingResponseWithoutReceivingMethodInvoke() throws TransportException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
@@ -278,10 +275,10 @@ public class MqttDeviceMethodTest
     }
 
     /*
-    Tests_SRS_MqttDeviceMethod_25_019: [**send method shall throw an IoException if the getDeviceOperationType() is not of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST or DEVICE_OPERATION_METHOD_SEND_RESPONSE .**]**
+    Tests_SRS_MqttDeviceMethod_25_019: [**send method shall throw a TransportException if the getDeviceOperationType() is not of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST or DEVICE_OPERATION_METHOD_SEND_RESPONSE .**]**
      */
-    @Test (expected = IOException.class)
-    public void sendThrowsOnMismatchedRequestType() throws IOException
+    @Test (expected = TransportException.class)
+    public void sendThrowsOnMismatchedRequestType() throws TransportException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
@@ -305,7 +302,7 @@ public class MqttDeviceMethodTest
     * Tests_SRS_MQTTDEVICEMETHOD_25_032: [**If the topic is of type post topic and if method name and request id has been successfully parsed then this method shall set operation type as DEVICE_OPERATION_METHOD_RECEIVE_REQUEST **]**
     */
     @Test
-    public void receiveSucceeds() throws IOException
+    public void receiveSucceeds() throws TransportException
     {
         //arrange
         String topic = "$iothub/methods/POST/testMethod/?$rid=10";
@@ -331,7 +328,7 @@ public class MqttDeviceMethodTest
 
     // Tests_SRS_MQTTDEVICEMETHOD_25_026: [**This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.**]**
     @Test
-    public void receiveReturnsNullMessageIfTopicNotFound() throws IOException
+    public void receiveReturnsNullMessageIfTopicNotFound() throws TransportException
     {
         //arrange
         Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
@@ -350,7 +347,7 @@ public class MqttDeviceMethodTest
 
     //Tests_SRS_MqttDeviceMethod_34_027: [This method shall parse message to look for Post topic ($iothub/methods/POST/) and return null other wise.]
     @Test
-    public void receiveReturnsNullMessageIfTopicWasNotPost() throws IOException
+    public void receiveReturnsNullMessageIfTopicWasNotPost() throws TransportException
     {
         //arrange
         String topic = "$iothub/methods/Not_POST/testMethod/?$rid=10";
@@ -369,9 +366,9 @@ public class MqttDeviceMethodTest
         assertNull(actualMessage);
     }
 
-    // Tests_SRS_MQTTDEVICEMETHOD_25_029: [**If method name not found or is null then receive shall throw IOException **]**
-    @Test (expected = IOException.class)
-    public void receiveThrowsIfMethodNameCouldNotBeParsed() throws IOException
+    // Tests_SRS_MQTTDEVICEMETHOD_25_029: [**If method name not found or is null then receive shall throw TransportException **]**
+    @Test (expected = TransportException.class)
+    public void receiveThrowsIfMethodNameCouldNotBeParsed() throws TransportException
     {
         //arrange
         String topic = "$iothub/methods/POST/";
@@ -388,10 +385,10 @@ public class MqttDeviceMethodTest
     }
 
     /*
-    Tests_SRS_MqttDeviceMethod_25_031: [**If request id is not found or is null then receive shall throw IOException **]**
+    Tests_SRS_MqttDeviceMethod_25_031: [**If request id is not found or is null then receive shall throw TransportException **]**
      */
-    @Test (expected = IOException.class)
-    public void receiveThrowsIfRIDCouldNotBeParsed() throws IOException
+    @Test (expected = TransportException.class)
+    public void receiveThrowsIfRIDCouldNotBeParsed() throws TransportException
     {
         //arrange
         String topic = "$iothub/methods/POST/testMethod/";
@@ -409,7 +406,7 @@ public class MqttDeviceMethodTest
     }
 
     @Test
-    public void receiveReturnsEmptyPayLoadIfNullPayloadParsed() throws IOException
+    public void receiveReturnsEmptyPayLoadIfNullPayloadParsed() throws TransportException
     {
         //arrange
         String topic = "$iothub/methods/POST/testMethod/?$rid=10";
@@ -433,15 +430,5 @@ public class MqttDeviceMethodTest
         assertTrue(testDMMessage.getRequestId().equals(String.valueOf(10)));
         assertTrue(testDMMessage.getMethodName().equals("testMethod"));
         assertTrue(testDMMessage.getDeviceOperationType().equals(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST));
-    }
-
-    // Codes_SRS_MQTTDEVICEMETHOD_34_034: [If allReceivedMessages queue is null then this method shall throw IOException.]
-    @Test (expected = IOException.class)
-    public void nullReceivingQueueThrows() throws IOException
-    {
-        baseConstructorExpectation();
-        MqttDeviceMethod mqttDeviceMethod = new MqttDeviceMethod(mockedMqttConnection);
-        Deencapsulation.setField(mqttDeviceMethod, "allReceivedMessages", null);
-        mqttDeviceMethod.receive();
     }
 }

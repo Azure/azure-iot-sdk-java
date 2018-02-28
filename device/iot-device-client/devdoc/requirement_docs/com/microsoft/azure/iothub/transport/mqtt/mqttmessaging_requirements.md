@@ -13,19 +13,19 @@ public final class MqttMessaging extends Mqtt
 {
     public MqttMessaging(MqttConnection mqttConnection, String deviceId, MqttConnectionStateListener listener) throws IOException;
 
-    public void start() throws IOException;
-    public void stop() throws IOException;
-    public void send(Message message) throws IOException;
+    public void start() throws TransportException;
+    public void stop() throws TransportException;
+    public void send(Message message) throws TransportException;
 }
 ```
 
 ### MqttMessaging
 
 ```java
-public MqttMessaging(MqttConnection mqttConnection, String deviceId, MqttConnectionStateListener listener) throws IOException
+public MqttMessaging(MqttConnection mqttConnection, String deviceId, MqttConnectionStateListener listener) throws TransportException
 ```
 
-**SRS_MqttMessaging_25_001: [**The constructor shall throw InvalidParameter Exception if any of the parameters are null or empty .**]**
+**SRS_MqttMessaging_25_001: [**The constructor shall throw TransportException if any of the parameters are null or empty .**]**
 
 **SRS_MqttMessaging_25_002: [**The constructor shall use the configuration to instantiate super class and passing the parameters.**]**
 
@@ -37,7 +37,7 @@ public MqttMessaging(MqttConnection mqttConnection, String deviceId, MqttConnect
 ### start
 
 ```java
-public void start() throws IOException;
+public void start() throws TransportException;
 ```
 
 **SRS_MqttMessaging_25_020: [**start method shall be call connect to establish a connection to IOT Hub with the given configuration.**]**
@@ -48,7 +48,7 @@ public void start() throws IOException;
 ### stop
 
 ```java
-public void stop() throws IOException;
+public void stop() throws TransportException;
 ```
 
 **SRS_MqttMessaging_25_022: [**stop method shall be call disconnect to tear down a connection to IOT Hub with the given configuration.**]**
@@ -58,12 +58,12 @@ public void stop() throws IOException;
 ### send
 
 ```java
- public void send(Message message) throws IOException;
+ public void send(Message message) throws TransportException;
 ```
 
 **SRS_MqttMessaging_25_024: [**send method shall publish a message to the IOT Hub on the publish topic by calling method publish().**]**
 
-**SRS_MqttMessaging_25_025: [**send method shall throw an exception if the message is null.**]**
+**SRS_MqttMessaging_25_025: [**send method shall throw a TransportException if the message is null.**]**
 
 **SRS_MqttMessaging_34_026: [**This method shall append each custom property's name and value to the publishTopic before publishing.**]**
 

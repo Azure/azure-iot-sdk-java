@@ -5,10 +5,10 @@ public interface MqttConnectionStateListener
     /**
      * Method executed when the connection with the IoTHub is lost.
      */
-    void connectionLost();
+    void onConnectionLost(Throwable throwable);
 
     /**
      * Method executed when the connection with the IoTHub is established
      */
-    void connectionEstablished();
+    void onConnectionEstablished();
 }

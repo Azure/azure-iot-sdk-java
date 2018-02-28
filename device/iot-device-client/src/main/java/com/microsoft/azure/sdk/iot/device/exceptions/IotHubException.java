@@ -19,4 +19,14 @@ public class IotHubException extends Exception
     {
         super(message);
     }
+
+    public IotHubException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+
+    public IotHubException(Throwable cause)
+    {
+        super(cause);
+    }
 }

@@ -3,8 +3,9 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTransport;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportNew;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -17,12 +18,12 @@ import java.net.URISyntaxException;
 public class IotHubSendTaskTest
 {
     @Mocked
-    AmqpsTransport mockTransport;
+    IotHubTransportNew mockTransport;
 
     // Tests_SRS_IOTHUBSENDTASK_11_001: [The constructor shall save the transport.]
     // Tests_SRS_IOTHUBSENDTASK_11_002: [The function shall send all messages on the transport queue.]
     @Test
-    public void runSendsAllMessages() throws IOException, URISyntaxException
+    public void runSendsAllMessages() throws DeviceClientException
     {
         IotHubSendTask sendTask = new IotHubSendTask(mockTransport);
         sendTask.run();
@@ -37,7 +38,7 @@ public class IotHubSendTaskTest
 
     // Tests_SRS_IOTHUBSENDTASK_11_003: [The function shall invoke all callbacks on the transport's callback queue.]
     @Test
-    public void runInvokesAllCallbacks() throws IOException, URISyntaxException
+    public void runInvokesAllCallbacks()
     {
         IotHubSendTask sendTask = new IotHubSendTask(mockTransport);
         sendTask.run();
@@ -52,8 +53,7 @@ public class IotHubSendTaskTest
 
     // Tests_SRS_IOTHUBSENDTASK_11_005: [The function shall not crash because of an IOException thrown by the transport.]
     @Test
-    public void runDoesNotCrashFromIoException()
-            throws IOException, URISyntaxException
+    public void runDoesNotCrashFromIoException() throws DeviceClientException
     {
         new NonStrictExpectations()
         {
@@ -69,8 +69,7 @@ public class IotHubSendTaskTest
 
     // Tests_SRS_IOTHUBSENDTASK_11_008: [The function shall not crash because of any error or exception thrown by the transport.]
     @Test
-    public void runDoesNotCrashFromThrowable()
-            throws IOException, URISyntaxException
+    public void runDoesNotCrashFromThrowable() throws DeviceClientException
     {
         new NonStrictExpectations()
         {

@@ -9,23 +9,21 @@ An MQTT connection between a device and an IoT Hub. The connection talks to vari
 ## Exposed API
 
 ```java
-public final class MqttIotHubConnection implements MqttConnectionStateListener
+public final class MqttIotHubConnection implements MqttConnectionStateListener, IotHubTransportConnection
 {
-    public MqttIotHubConnection(DeviceClientConfig config) throws IllegalArgumentException;
+    public MqttIotHubConnection(DeviceClientConfig config) throws TransportException;
 
-    public void open() throws IOException;
-    public void close();
-    public IotHubStatusCode sendEvent(Message msg) throws IllegalStateException;
-    public Message receiveMessage() throws IllegalStateException;
+    public void open() throws TransportException;
+    public void close() throws TransportException;
+    public IotHubStatusCode sendEvent(Message msg) throws TransportException;
+    public Message receiveMessage() throws TransportException;
     
-    void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
+    void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) throws TransportException;
     
-    @Override
-    public void connectionEstablished();
+    public void onConnectionEstablished();
+    public void onConnectionLost(Throwable throwable);
 
-    @Override
-    public void connectionLost();
-
+    public void addListener(IotHubListener listener) throws TransportException
 }
 ```
 
@@ -33,20 +31,20 @@ public final class MqttIotHubConnection implements MqttConnectionStateListener
 ### MqttIotHubConnection
 
 ```java
-public MqttIotHubConnection(DeviceClientConfig config) throws IllegalArgumentException;
+public MqttIotHubConnection(DeviceClientConfig config) throws TransportException;
 ```
 
 **SRS_MQTTIOTHUBCONNECTION_15_001: [**The constructor shall save the configuration.**]**
 
-**SRS_MQTTIOTHUBCONNECTION_15_003: [**The constructor shall throw a new IllegalArgumentException if any of the parameters of the configuration is null or empty.**]**
+**SRS_MQTTIOTHUBCONNECTION_15_003: [**The constructor shall throw a new TransportException if any of the parameters of the configuration is null or empty.**]**
 
-**SRS_MQTTIOTHUBCONNECTION_34_020: [**If the config has no shared access token, device key, or x509 certificates, this constructor shall throw an IllegalArgumentException.**]**
+**SRS_MQTTIOTHUBCONNECTION_34_020: [**If the config has no shared access token, device key, or x509 certificates, this constructor shall throw a TransportException.**]**
 
 
 ### open
 
 ```java
-public void open() throws IOException, IllegalArgumentException;
+public void open() throws TransportException;
 ```
 
 **SRS_MQTTIOTHUBCONNECTION_15_004: [**The function shall establish an MQTT connection with an IoT Hub using the provided host name, user name, device ID, and sas token.**]**
@@ -55,7 +53,7 @@ public void open() throws IOException, IllegalArgumentException;
 
 **SRS_MQTTIOTHUBCONNECTION_25_019: [**The function shall establish an MQTT connection with a server uri as `ssl://<hostName>:8883` if websocket was not enabled.**]**
 
-**SRS_MQTTIOTHUBCONNECTION_15_005: [**If an MQTT connection is unable to be established for any reason, the function shall throw an IOException.**]**
+**SRS_MQTTIOTHUBCONNECTION_15_005: [**If an MQTT connection is unable to be established for any reason, the function shall throw a TransportException.**]**
 
 **SRS_MQTTIOTHUBCONNECTION_15_006: [**If the MQTT connection is already open, the function shall do nothing.**]**
 
@@ -69,7 +67,7 @@ public void open() throws IOException, IllegalArgumentException;
 ### close
 
 ```java
-public void close() throws IOException;
+public void close() throws TransportException;
 ```
 
 **SRS_MQTTIOTHUBCONNECTION_15_006: [**The function shall close the MQTT connection.**]**
@@ -83,7 +81,7 @@ public void close() throws IOException;
 ### sendEvent
 
 ```java
-public IotHubStatusCode sendEvent(Message msg) throws IllegalStateException
+public IotHubStatusCode sendEvent(Message msg) throws TransportException
 ```
 
 **SRS_MQTTIOTHUBCONNECTION_15_008: [**The function shall send an event message to the IoT Hub given in the configuration.**]**
@@ -94,53 +92,54 @@ public IotHubStatusCode sendEvent(Message msg) throws IllegalStateException
 
 **SRS_MQTTIOTHUBCONNECTION_15_011: [**If the message was successfully received by the service, the function shall return status code OK_EMPTY.**]**
 
-**SRS_MQTTIOTHUBCONNECTION_15_012: [**If the message was not successfully received by the service, the function shall return status code ERROR.**]**
-
-**SRS_MQTTIOTHUBCONNECTION_15_013: [**If the MQTT connection is closed, the function shall throw an IllegalStateException.**]**
+**SRS_MQTTIOTHUBCONNECTION_15_013: [**If the MQTT connection is closed, the function shall throw a TransportException.**]**
 
 **SRS_MQTTIOTHUBCONNECTION_34_035: [**If the sas token saved in the config has expired and needs to be renewed, this function shall return UNAUTHORIZED.**]**
-
-**SRS_MQTTIOTHUBCONNECTION_34_036: [**If the sas token saved in the config has expired and needs to be renewed and if there is a connection state callback saved, this function shall invoke that callback with Status SAS_TOKEN_EXPIRED.**]**
 
 
 ### receiveMessage
 
 ```java
-public Message receiveMessage() throws IllegalStateException, IOException;
+public Message receiveMessage() throws TransportException;
 ```
 
 **SRS_MQTTIOTHUBCONNECTION_15_014: [**The function shall attempt to consume a message from various messaging clients.**]**
 
-**SRS_MQTTIOTHUBCONNECTION_15_015: [**If the MQTT connection is closed, the function shall throw an IllegalStateException.**]**
+**SRS_MQTTIOTHUBCONNECTION_15_015: [**If the MQTT connection is closed, the function shall throw a TransportException.**]**
 
-**SRS_MQTTIOTHUBCONNECTION_34_016: [**If any of the messaging clients throw an exception, The associated message will be removed from the queue and the exception will be propagated up to the receive task.**]**
-
-**SRS_MQTTIOTHUBCONNECTION_34_017: [**If all of the messaging clients fail to receive, the function shall throw an UnsupportedOperationException.**]**
+**SRS_MQTTIOTHUBCONNECTION_34_017: [**If all of the messaging clients fail to receive, the function shall throw a TransportException.**]**
 
 
 ### registerConnectionStateCallback
 ```java
-void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext);
+void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) throws TransportException;
 ```
 
-**SRS_MQTTIOTHUBCONNECTION_34_033: [**If the provided callback object is null, this function shall throw an IllegalArgumentException.**]**
-
-**SRS_MQTTIOTHUBCONNECTION_34_034: [**This function shall save the provided callback and callback context.**]**
+**SRS_MQTTIOTHUBCONNECTION_34_033: [**If the provided callback object is null, this function shall throw a TransportException.**]**
 
 
-### connectionLost
+### onConnectionLost
 
 ```java
-public void connectionLost();
+public void onConnectionLost(Throwable throwable);
 ```
 
-**SRS_MQTTIOTHUBCONNECTION_34_028: [**If this object's connection state callback is not null, this function shall fire that callback with the saved context and status CONNECTION_DROP.**]**
+**SRS_MQTTIOTHUBCONNECTION_34_038: [**If the provided throwable is not an instance of MqttException, this function shall notify the listeners of that throwable.**]**
 
 
-### connectionEstablished
+### onConnectionEstablished
 
 ```java
-public void connectionEstablished();
+public void onConnectionEstablished();
 ```
 
-**SRS_MQTTIOTHUBCONNECTION_34_029: [**If this object's connection state callback is not null, this function shall fire that callback with the saved context and status CONNECTION_SUCCESS.**]**
+**SRS_MQTTIOTHUBCONNECTION_34_036: [**This function shall notify its listeners that connection was established successfully.**]**
+
+### addListener
+```java
+public void addListener(IotHubListener listener) throws TransportException
+```
+
+**SRS_MQTTIOTHUBCONNECTION_34_049: [**If the provided listener object is null, this function shall throw a TransportException.**]**
+
+**SRS_MQTTIOTHUBCONNECTION_34_050: [**This function shall save the provided listener object.**]**

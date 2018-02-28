@@ -11,16 +11,16 @@ import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
-import java.io.IOException;
-import java.util.Collection;
 import java.util.Queue;
 
 public interface IotHubTransportConnection
 {
-    void open(Queue<DeviceClientConfig> deviceClientConfigs) throws IOException;
-    void addListener(IotHubListener listener) throws IOException;
-    void close() throws IOException;
-    IotHubStatusCode sendMessage(Message message) throws IOException;
-    boolean sendMessageResult(Message message, IotHubMessageResult result) throws IOException;
+    //TODO (Tim) change this back to TransportException once HTTP and AMQP are done
+    void open(Queue<DeviceClientConfig> deviceClientConfigs) throws Exception;
+    void addListener(IotHubListener listener) throws Exception;
+    void close() throws Exception;
+    IotHubStatusCode sendMessage(Message message) throws Exception;
+    boolean sendMessageResult(Message message, IotHubMessageResult result) throws Exception;
 }

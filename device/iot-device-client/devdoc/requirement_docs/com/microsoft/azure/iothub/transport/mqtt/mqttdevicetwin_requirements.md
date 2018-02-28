@@ -12,13 +12,13 @@ the receive, onReconnect, and onReconnectComplete events.
 ```java
 public final class MqttDeviceTwin extends Mqtt
 {
-    public MqttDeviceTwin() throws IOException;
+    public MqttDeviceTwin() throws TransportException;
 
-    public Message receive() throws IOException;
-    public void send(DeviceTwinMessage message) throws IOException;
+    public Message receive() throws TransportException;
+    public void send(DeviceTwinMessage message) throws TransportException;
 
-    public void start() throws IOException;
-    public void stop() throws IOException;
+    public void start() throws TransportException;
+    public void stop() throws TransportException;
 
 }
 ```
@@ -35,23 +35,23 @@ public MqttDeviceTwin();
 ### start
 
 ```java
-public void start() throws IOException;
+public void start() throws TransportException;
 ```
 
-**SRS_MQTTDEVICETWIN_25_019: [**start method shall subscribe to twin response topic ($iothub/twin/res/#) if connected and throw IoException otherwise.**]**
+**SRS_MQTTDEVICETWIN_25_019: [**start method shall subscribe to twin response topic ($iothub/twin/res/#) if connected and throw TransportException otherwise.**]**
 
 
 ### stop
 
 ```java
-public void stop() throws IOException;
+public void stop() throws TransportException;
 ```
 
 
 ### send
 
 ```java
- public void send(final DeviceTwinMessage message) throws IOException;
+ public void send(final DeviceTwinMessage message) throws TransportException;
 ```
 
 **SRS_MQTTDEVICETWIN_25_021: [**send method shall throw an exception if the message is null.**]**
@@ -82,7 +82,7 @@ public void stop() throws IOException;
 ### receive
 
 ```java
- public Message receive() throws IOException;
+ public Message receive() throws TransportException;
 ```
 
 **SRS_MQTTDEVICETWIN_34_034: [**If the call peekMessage returns null or empty string then this method shall do nothing and return null**]**
@@ -91,11 +91,11 @@ public void stop() throws IOException;
 
 **SRS_MQTTDEVICETWIN_25_035: [**This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.**]**
 
-**SRS_MQTTDEVICETWIN_25_037: [**This method shall parse topic to look for only either twin response topic or twin patch topic and thorw unsupportedoperation exception other wise.**]**
+**SRS_MQTTDEVICETWIN_25_037: [**This method shall parse topic to look for only either twin response topic or twin patch topic and thorw TransportException other wise.**]**
 
 **SRS_MQTTDEVICETWIN_25_038: [**If the topic is of type response topic then this method shall parse further for status and set it for the message by calling setStatus for the message**]**
 
-**SRS_MQTTDEVICETWIN_25_039: [**If the topic is of type response topic and if status is either a non 3 digit number or not found then receive shall throw IOException **]**
+**SRS_MQTTDEVICETWIN_25_039: [**If the topic is of type response topic and if status is either a non 3 digit number or not found then receive shall throw TransportException **]**
 
 **SRS_MQTTDEVICETWIN_25_040: [**If the topic is of type response topic then this method shall parse further to look for request id which if found is set by calling setRequestId**]**
 
@@ -103,7 +103,7 @@ public void stop() throws IOException;
 
 **SRS_MQTTDEVICETWIN_25_042: [**If the topic is of type patch for desired properties then this method shall parse further to look for version which if found is set by calling setVersion**]**
 
-**SRS_MQTTDEVICETWIN_25_043: [**If the topic is not of type response for desired properties then this method shall throw unsupportedoperation exception**]**
+**SRS_MQTTDEVICETWIN_25_043: [**If the topic is not of type response for desired properties then this method shall throw TransportException**]**
 
 **SRS_MQTTDEVICETWIN_25_044: [**If the topic is of type response then this method shall set data and operation type as DEVICE_TWIN_OPERATION_GET_RESPONSE if data is not null**]**
 
@@ -111,32 +111,5 @@ public void stop() throws IOException;
 
 **SRS_MQTTDEVICETWIN_25_046: [**If the topic is of type patch for desired properties then this method shall set the data and operation type as DEVICE_TWIN_OPERATION_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE if data is not null or empty**]**
 
-**SRS_MQTTDEVICETWIN_25_047: [**If the topic is of type patch for desired properties then this method shall throw unsupportedoperation exception if data is null or empty**]**
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    
+**SRS_MQTTDEVICETWIN_25_047: [**If the topic is of type patch for desired properties then this method shall throw TransportException if data is null or empty**]**
    

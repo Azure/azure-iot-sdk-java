@@ -5,6 +5,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttConnection;
 import mockit.Deencapsulation;
 import mockit.Mocked;
@@ -114,7 +116,7 @@ public class MqttConnectionTest
         assertNotNull(actualLock);
     }
 
-    @Test (expected = IOException.class)
+    @Test (expected = ProtocolException.class)
     public void constructorThrowsOnAsyncClientFailure() throws Exception
     {
         //arrange
@@ -132,49 +134,47 @@ public class MqttConnectionTest
 
         //act
         final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, SERVER_URI, CLIENT_ID, USER_NAME, PASSWORD, mockIotHubSSLContext);
-
-        //assert
     }
 
-    //Tests_SRS_MQTTCONNECTION_25_001: [The constructor shall throw InvalidParameter Exception if any of the input parameters are null other than password.]
-    @Test (expected = IllegalArgumentException.class)
+    //Tests_SRS_MQTTCONNECTION_25_001: [The constructor shall throw TransportException if any of the input parameters are null other than password.]
+    @Test (expected = TransportException.class)
     public void constructorWithNullServerUriThrows() throws Exception
     {
         final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, null, CLIENT_ID, USER_NAME, PASSWORD, mockIotHubSSLContext);
     }
 
-    @Test (expected = IllegalArgumentException.class)
+    @Test (expected = TransportException.class)
     public void constructorWithNullClientIdThrows() throws Exception
     {
         final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, null, USER_NAME, PASSWORD, mockIotHubSSLContext);
     }
 
-    @Test (expected = IllegalArgumentException.class)
+    @Test (expected = TransportException.class)
     public void constructorWithNullUserNameThrows() throws Exception
     {
         final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, null, PASSWORD, mockIotHubSSLContext);
     }
 
-    //Tests_SRS_MQTTCONNECTION_25_002: [The constructor shall throw InvalidParameter Exception if SERVER_URI, CLIENT_ID, USER_NAME, PASSWORD are empty.]
-    @Test (expected = IllegalArgumentException.class)
+    //Tests_SRS_MQTTCONNECTION_25_002: [The constructor shall throw TransportException if SERVER_URI, CLIENT_ID, USER_NAME, PASSWORD are empty.]
+    @Test (expected = TransportException.class)
     public void constructorWithEmptyServerUriThrows() throws Exception
     {
         final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, "", CLIENT_ID, USER_NAME, PASSWORD, mockIotHubSSLContext);
     }
 
-    @Test (expected = IllegalArgumentException.class)
+    @Test (expected = TransportException.class)
     public void constructorWithEmptyClientIdThrows() throws Exception
     {
         final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, "", USER_NAME, PASSWORD, mockIotHubSSLContext);
     }
 
-    @Test (expected = IllegalArgumentException.class)
+    @Test (expected = TransportException.class)
     public void constructorWithEmptyUserNameThrows() throws Exception
     {
         final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, "", PASSWORD, mockIotHubSSLContext);
     }
 
-    @Test (expected = IllegalArgumentException.class)
+    @Test (expected = TransportException.class)
     public void constructorWithEmptySSLThrows() throws Exception
     {
         final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, USER_NAME, PASSWORD, null);
@@ -268,8 +268,8 @@ public class MqttConnectionTest
         assertEquals(actualMqttCallback, testMqttCallback);
     }
 
-    //Tests_SRS_MQTTCONNECTION_25_006: [This method shall throw IllegalArgumentException if callback is null.]
-    @Test (expected = IllegalArgumentException.class)
+    //Tests_SRS_MQTTCONNECTION_25_006: [This method shall throw TransportException if callback is null.]
+    @Test (expected = TransportException.class)
     public void setMqttCallbackThrowsOnNull(@Mocked MqttCallback mockedMqttCallback) throws Exception
     {
         //arrange
