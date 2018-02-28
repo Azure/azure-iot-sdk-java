@@ -294,6 +294,11 @@ public class DeviceTwinIT
     @AfterClass
     public static void tearDown()
     {
+        if (registryManager != null)
+        {
+            registryManager.close();
+        }
+
         registryManager = null;
         sCDeviceTwin = null;
         deviceClient = null;

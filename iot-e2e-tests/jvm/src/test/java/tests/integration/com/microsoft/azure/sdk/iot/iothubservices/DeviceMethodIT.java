@@ -43,6 +43,7 @@ public class DeviceMethodIT
     private static String x509Thumbprint;
 
     private static DeviceMethod methodServiceClient;
+    private static RegistryManager registryManager;
 
     private static final int MAX_DEVICES = 1;
 
@@ -69,7 +70,7 @@ public class DeviceMethodIT
 
         methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
         for (int i = 0; i < MAX_DEVICES; i++)
         {
@@ -168,6 +169,8 @@ public class DeviceMethodIT
         {
             x509DeviceMQTT.stop();
         }
+
+        registryManager.close();
     }
 
     @Test

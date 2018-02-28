@@ -113,13 +113,17 @@ public class ReceiveMessagesIT
     public static void tearDown() throws IOException, IotHubException
     {
         serviceClient.close();
-        registryManager.removeDevice(deviceHttps.getDeviceId());
-        registryManager.removeDevice(deviceAmqps.getDeviceId());
-        registryManager.removeDevice(deviceMqtt.getDeviceId());
-        registryManager.removeDevice(deviceMqttWs.getDeviceId());
-        registryManager.removeDevice(deviceAmqpsWS.getDeviceId());
-        registryManager.removeDevice(deviceMqttX509.getDeviceId());
-        registryManager.close();
+        if (registryManager != null)
+        {
+            registryManager.removeDevice(deviceHttps.getDeviceId());
+            registryManager.removeDevice(deviceAmqps.getDeviceId());
+            registryManager.removeDevice(deviceMqtt.getDeviceId());
+            registryManager.removeDevice(deviceMqttWs.getDeviceId());
+            registryManager.removeDevice(deviceAmqpsWS.getDeviceId());
+            registryManager.removeDevice(deviceMqttX509.getDeviceId());
+            registryManager.close();
+            registryManager = null;
+        }
     }
 
     @After

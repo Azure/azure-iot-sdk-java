@@ -81,6 +81,7 @@ public class TransportClientReceiveMessagesIT
                 registryManager.removeDevice(deviceListAmqps[i].getDeviceId());
             }
             registryManager.close();
+            registryManager = null;
         }
     }
 

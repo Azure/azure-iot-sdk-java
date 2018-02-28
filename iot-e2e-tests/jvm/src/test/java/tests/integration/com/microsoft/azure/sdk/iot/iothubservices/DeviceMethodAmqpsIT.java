@@ -45,6 +45,7 @@ public class DeviceMethodAmqpsIT
     private static String x509Thumbprint;
 
     private static DeviceMethod methodServiceClient;
+    private static RegistryManager registryManager;
 
     private static final int MAX_DEVICES = 1;
 
@@ -70,7 +71,7 @@ public class DeviceMethodAmqpsIT
         x509Thumbprint = cert.getThumbPrintLeaf();
         methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
         for (int i = 0; i < MAX_DEVICES; i++)
         {
@@ -166,6 +167,7 @@ public class DeviceMethodAmqpsIT
         }
 
         x509Device.stop();
+        registryManager.close();
     }
 
     @Test

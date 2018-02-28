@@ -252,7 +252,12 @@ public class DeviceTwinAmqpsWsIT
     @AfterClass
     public static void tearDown()
     {
-        registryManager = null;
+        if (registryManager != null)
+        {
+            registryManager.close();
+            registryManager = null;
+        }
+
         sCDeviceTwin = null;
         deviceClient = null;
     }

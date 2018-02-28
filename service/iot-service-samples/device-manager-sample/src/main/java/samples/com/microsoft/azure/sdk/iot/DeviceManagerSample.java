@@ -64,6 +64,8 @@ public class DeviceManagerSample
         {
             e.printStackTrace();
         }
+
+        registryManager.close();
     }
     
     private static void GetDevice() throws Exception
@@ -88,6 +90,8 @@ public class DeviceManagerSample
         {
             e.printStackTrace();
         }
+
+        registryManager.close();
     }
     
     private static void UpdateDevice() throws Exception
@@ -116,6 +120,8 @@ public class DeviceManagerSample
         {
             e.printStackTrace();
         }
+
+        registryManager.close();
     }
     
     private static void RemoveDevice() throws Exception
@@ -135,5 +141,7 @@ public class DeviceManagerSample
         {
             e.printStackTrace();
         }
+
+        registryManager.close();
     }
 }

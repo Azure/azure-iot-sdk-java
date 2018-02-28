@@ -152,6 +152,11 @@ public class LongHaulIT
             {
                 registryManager.removeDevice(deviceReceiveMqtt.getDeviceId());
             }
+
+            if (registryManager != null)
+            {
+                registryManager.close();
+            }
         }
 
         @Test

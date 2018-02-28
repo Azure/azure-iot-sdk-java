@@ -36,6 +36,7 @@ public class JobClientIT
     private static String iotHubConnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
     private static JobClient jobClient;
+    private static RegistryManager registryManager;
 
     private static final String STANDARD_PROPERTY_HOMETEMP = "HomeTemp(F)";
 
@@ -115,7 +116,7 @@ public class JobClientIT
 
         jobClient = JobClient.createFromConnectionString(iotHubConnectionString);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
         for (int i = 0; i < MAX_DEVICES; i++)
         {
@@ -138,6 +139,11 @@ public class JobClientIT
         for (DeviceTestManager device:devices)
         {
             device.stop();
+        }
+
+        if (registryManager != null){
+            registryManager.close();
+            registryManager = null;
         }
     }
 

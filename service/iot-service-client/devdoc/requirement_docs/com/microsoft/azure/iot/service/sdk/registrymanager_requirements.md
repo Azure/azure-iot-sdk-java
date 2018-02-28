@@ -52,6 +52,8 @@ public static RegistryManager createFromConnectionString(String connectionString
 
 **SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_003: [** The constructor shall create a new RegistryManager, stores the created IotHubConnectionString object and return with it **]**
 
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_088: [** The function shall start this object's executor service **]**
+
 ### addDevice
 
 ```java
@@ -327,3 +329,10 @@ public JobProperties exportDevices(String exportBlobContainerUri, Boolean exclud
 ```
 
 **SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_084: [** The function shall create an async wrapper around the getJob() function call, handle the return value or delegate exception **]**
+
+### close
+```java
+    public void close();
+```
+
+**SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_087: [** The function shall tell this object's executor service to shutdownNow **]**

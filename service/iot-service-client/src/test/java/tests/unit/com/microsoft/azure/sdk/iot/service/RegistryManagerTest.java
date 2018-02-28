@@ -22,14 +22,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static junit.framework.TestCase.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * Code Coverage
- * Methods: 78%
- * Lines: 76%
+ * Methods: 100%
+ * Lines: 96%
  */
 @RunWith(JMockit.class)
 public class RegistryManagerTest
@@ -50,6 +51,8 @@ public class RegistryManagerTest
     IotHubConnectionString iotHubConnectionString;
     @Mocked
     HttpRequest mockHttpRequest;
+    @Mocked
+    ExecutorService mockExecutorService;
 
     final String deviceJson = "{\"deviceId\":\"mockdevice\",\"generationId\":\"635864360921156105\",\"etag\":\"MA==\",\"" +
             "connectionState\":\"Disconnected\",\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"status\":\"" +
@@ -108,6 +111,7 @@ public class RegistryManagerTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_002: [The constructor shall create an IotHubConnectionString object from the given connection string]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_003: [The constructor shall create a new RegistryManager, stores the created IotHubConnectionString object and return with it]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_090: [The function shall start this object's executor service]
     @Test
     public void constructor_good_case() throws Exception
     {
@@ -123,8 +127,9 @@ public class RegistryManagerTest
 
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
-        assertNotEquals(null, registryManager);
-        assertNotEquals(null, Deencapsulation.getField(registryManager, "iotHubConnectionString"));
+        assertNotNull(registryManager);
+        assertNotNull(Deencapsulation.getField(registryManager, "iotHubConnectionString"));
+        assertNotNull(Deencapsulation.getField(registryManager, "executor"));
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_004: [The constructor shall throw IllegalArgumentException if the input device is null]
@@ -945,7 +950,7 @@ public class RegistryManagerTest
                 mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
-        assertNotEquals(null, statistics);
+        assertNotNull(statistics);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_060: [The function shall create an async wrapper around the getStatistics() function call, handle the return value or delegate exception]
@@ -977,7 +982,7 @@ public class RegistryManagerTest
                 mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
-        assertNotEquals(null, statistics);
+        assertNotNull(statistics);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_060: [The function shall create an async wrapper around the getStatistics() function call, handle the return value or delegate exception]
@@ -1063,7 +1068,7 @@ public class RegistryManagerTest
                 mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
-        assertNotEquals(null, jobProperties);
+        assertNotNull(jobProperties);
     }
 
     // TESTS_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_068: [The function shall create an async wrapper around
@@ -1152,7 +1157,7 @@ public class RegistryManagerTest
                 mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
-        assertNotEquals(null, jobProperties);
+        assertNotNull(jobProperties);
     }
 
     // TESTS_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_076: [The function shall create an async wrapper around
@@ -1232,7 +1237,7 @@ public class RegistryManagerTest
                 mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
-        assertNotEquals(null, jobProperties);
+        assertNotNull(jobProperties);
     }
 
     // TESTS_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_084: [The function shall create an async wrapper
@@ -1255,6 +1260,34 @@ public class RegistryManagerTest
 
         CompletableFuture<JobProperties> completableFuture =  registryManager.getJobAsync("someJobId");
         completableFuture.get();
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_087: [The function shall tell this object's executor service to shutdown]
+    @Test
+    public void closeShutsDownExecutorService() throws IOException
+    {
+        //arrange
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        new NonStrictExpectations()
+        {
+            {
+                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                result = iotHubConnectionString;
+            }
+        };
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        Deencapsulation.setField(registryManager,"executor", mockExecutorService);
+
+        //act
+        registryManager.close();
+
+        new Verifications()
+        {
+            {
+                mockExecutorService.shutdownNow();
+            }
+        };
     }
 
     private void commonExpectations(String connectionString, String deviceId) throws Exception
@@ -1294,7 +1327,7 @@ public class RegistryManagerTest
                 mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
-        assertNotEquals(null, responseDevice);
+        assertNotNull(responseDevice);
     }
 
     private void getDevicesExpectations(String connectionString, int numberOfDevices) throws Exception
@@ -1333,6 +1366,6 @@ public class RegistryManagerTest
                 mockHttpRequest.send();
             }
         };
-        assertNotEquals(null, devices);
+        assertNotNull(devices);
     }
 }

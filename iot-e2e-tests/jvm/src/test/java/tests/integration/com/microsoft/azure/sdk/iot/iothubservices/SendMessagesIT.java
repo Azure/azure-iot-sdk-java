@@ -233,17 +233,23 @@ public class SendMessagesIT
     @AfterClass
     public static void tearDown() throws IOException, IotHubException
     {
-        registryManager.removeDevice(deviceHttps.getDeviceId());
-        registryManager.removeDevice(deviceAmqps.getDeviceId());
-        registryManager.removeDevice(deviceAmqpsWs.getDeviceId());
-        registryManager.removeDevice(deviceMqtt.getDeviceId());
-        registryManager.removeDevice(deviceMqttWs.getDeviceId());
-        registryManager.removeDevice(deviceMqttX509.getDeviceId());
-        registryManager.removeDevice(deviceHttpsX509.getDeviceId());
-        registryManager.removeDevice(deviceAmqpsX509.getDeviceId());
+        if (registryManager != null)
+        {
+            registryManager.removeDevice(deviceHttps.getDeviceId());
+            registryManager.removeDevice(deviceAmqps.getDeviceId());
+            registryManager.removeDevice(deviceAmqpsWs.getDeviceId());
+            registryManager.removeDevice(deviceMqtt.getDeviceId());
+            registryManager.removeDevice(deviceMqttWs.getDeviceId());
+            registryManager.removeDevice(deviceMqttX509.getDeviceId());
+            registryManager.removeDevice(deviceHttpsX509.getDeviceId());
+            registryManager.removeDevice(deviceAmqpsX509.getDeviceId());
 
-        for (int i = 0; i < MAX_DEVICE_PARALLEL; i++) {
-            registryManager.removeDevice(deviceListAmqps[i].getDeviceId());
+            for (int i = 0; i < MAX_DEVICE_PARALLEL; i++) {
+                registryManager.removeDevice(deviceListAmqps[i].getDeviceId());
+            }
+
+            registryManager.close();
+            registryManager = null;
         }
     }
 

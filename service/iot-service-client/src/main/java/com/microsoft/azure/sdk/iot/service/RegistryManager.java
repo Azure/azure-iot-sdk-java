@@ -35,7 +35,8 @@ import java.util.concurrent.Executors;
 public class RegistryManager
 {
     private final Integer DEFAULT_HTTP_TIMEOUT_MS = 24000;
-    private final ExecutorService executor = Executors.newFixedThreadPool(10);
+    private static final int EXECUTOR_THREAD_POOL_SIZE = 10;
+    private ExecutorService executor;
     private IotHubConnectionString iotHubConnectionString;
 
     /**
@@ -58,18 +59,33 @@ public class RegistryManager
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_003: [The constructor shall create a new RegistryManager, stores the created IotHubConnectionString object and return with it]
         RegistryManager iotHubRegistryManager = new RegistryManager();
         iotHubRegistryManager.iotHubConnectionString = iotHubConnectionString;
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_090: [The function shall start this object's executor service]
+        iotHubRegistryManager.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
+
         return iotHubRegistryManager;
     }
 
     /**
-     * Placeholder for open registry operations
+     * @deprecated as of release 1.13.0 this API is no longer supported and open is done implicitly by the respective APIs
+     * Opens this registry manager's executor service after it has been closed.
      */
-    public void open() {}
+    @Deprecated
+    public void open()
+    {
+    }
 
     /**
-     * Placeholder for close registry operations
+     * Gracefully close running threads, and then shutdown the underlying executor service
      */
-    public void close() {}
+    public void close()
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_087: [The function shall tell this object's executor service to shutdown]
+        if (executor != null && !executor.isTerminated())
+        {
+            this.executor.shutdownNow();
+        }
+    }
 
     /**
      * Add device using the given Device object
@@ -509,6 +525,8 @@ public class RegistryManager
      */
     public CompletableFuture<Boolean> removeDeviceAsync(String deviceId) throws IOException, IotHubException
     {
+
+
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_052: [The function shall throw IllegalArgumentException if the input string is null or empty]
         if (Tools.isNullOrEmpty(deviceId))
         {

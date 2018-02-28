@@ -59,7 +59,8 @@ public class ServiceClientIT
         try
         {
             registryManager.removeDevice(deviceId);
-        } catch (IOException|IotHubException e)
+        }
+        catch (IOException|IotHubException e)
         {
         }
 
@@ -90,6 +91,8 @@ public class ServiceClientIT
         assertEquals(deviceGetBefore.getDeviceId(), deviceGetAfter.getDeviceId());
         assertEquals(0, deviceGetBefore.getCloudToDeviceMessageCount());
         assertEquals(1, deviceGetAfter.getCloudToDeviceMessageCount());
+
+        registryManager.close();
     }
 
     @Ignore
@@ -142,5 +145,7 @@ public class ServiceClientIT
         assertEquals(deviceGetBefore.getDeviceId(), deviceGetAfter.getDeviceId());
         assertEquals(0, deviceGetBefore.getCloudToDeviceMessageCount());
         assertEquals(1, deviceGetAfter.getCloudToDeviceMessageCount());
+
+        registryManager.close();
     }
 }

@@ -173,7 +173,11 @@ public class DeviceTwinWithVersionIT
         sCDeviceTwin = null;
 
         // Remove device from IoTHub
-        registryManager = null;
+        if (registryManager != null)
+        {
+            registryManager.close();
+            registryManager = null;
+        }
     }
 
     private void createDevice(IotHubClientProtocol protocol) throws IOException, URISyntaxException

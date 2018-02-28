@@ -252,6 +252,11 @@ public class DeviceTwinMqttWsIT
     @AfterClass
     public static void tearDown()
     {
+        if (registryManager != null)
+        {
+            registryManager.close();
+        }
+
         registryManager = null;
         sCDeviceTwin = null;
         deviceClient = null;

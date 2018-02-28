@@ -36,6 +36,7 @@ public class DeviceMethodAmqpsWsIT
     private static String iotHubConnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
     private static DeviceMethod methodServiceClient;
+    private static RegistryManager registryManager;
 
     private static final int MAX_DEVICES = 1;
 
@@ -70,7 +71,7 @@ public class DeviceMethodAmqpsWsIT
 
         methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
         for (int i = 0; i < MAX_DEVICES; i++)
         {
@@ -160,6 +161,8 @@ public class DeviceMethodAmqpsWsIT
         {
             device.stop();
         }
+
+        registryManager.close();
     }
 
     @Test

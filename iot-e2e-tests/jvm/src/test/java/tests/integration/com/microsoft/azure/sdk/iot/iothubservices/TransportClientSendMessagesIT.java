@@ -151,6 +151,7 @@ public class TransportClientSendMessagesIT
                 registryManager.removeDevice(deviceListAmqps[i].getDeviceId());
             }
             registryManager.close();
+            registryManager = null;
         }
     }
 

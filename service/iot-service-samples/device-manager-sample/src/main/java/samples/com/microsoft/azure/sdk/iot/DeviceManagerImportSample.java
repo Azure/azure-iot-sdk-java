@@ -101,5 +101,7 @@ public class DeviceManagerImportSample
                 blob.deleteIfExists();
             }
         }
+
+        registryManager.close();
     }
 }

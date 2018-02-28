@@ -107,6 +107,12 @@ public class ExportImportIT
         //Cleaning up the containers
         importContainer.deleteIfExists();
         exportContainer.deleteIfExists();
+
+        if (registryManager != null)
+        {
+            registryManager.close();
+            registryManager = null;
+        }
     }
 
     @Ignore

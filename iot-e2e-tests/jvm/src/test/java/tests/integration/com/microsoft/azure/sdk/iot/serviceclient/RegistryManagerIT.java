@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.storage.StorageException;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -46,6 +47,16 @@ public class RegistryManagerIT
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         deviceId = deviceId.concat("-" + UUID.randomUUID());
+    }
+
+    @AfterClass
+    public static void tearDown()
+    {
+        if (registryManager != null)
+        {
+            registryManager.close();
+            registryManager = null;
+        }
     }
 
     @Test
@@ -150,6 +161,8 @@ public class RegistryManagerIT
     {
         RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         registryManager.getStatistics();
+
+        registryManager.close();
     }
 
     private void deleteDeviceIfItExistsAlready(RegistryManager registryManager, String deviceId) throws IOException
