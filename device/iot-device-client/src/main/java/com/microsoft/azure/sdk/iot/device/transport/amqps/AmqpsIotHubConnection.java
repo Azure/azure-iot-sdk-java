@@ -881,8 +881,15 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             // Codes_SRS_AMQPSTRANSPORT_12_007: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
             if (amqpsHandleMessageReturnValue == null)
             {
-                // Should never happen
-                throw new IllegalStateException("No handler found for received message!");
+                if (msg.getAmqpsMessageType() == MessageType.CBS_AUTHENTICATION)
+                {
+                    //CBS messages require no acknowledgement from client side
+                    return;
+                }
+
+                // Should never happen; message type was not telemetry, twin, methods, or CBS
+                logger.LogError("No handler found for received message, method name is %s ", logger.getMethodName());
+                return;
             }
 
             // Codes_SRS_AMQPSTRANSPORT_12_008: [The function shall return if there is no message callback defined.]
@@ -894,14 +901,14 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
             message = new IotHubTransportMessage(amqpsHandleMessageReturnValue.getMessage().getBytes(), amqpsHandleMessageReturnValue.getMessage().getMessageType());
             message.setMessageCallback(amqpsHandleMessageReturnValue.getMessageCallback());
-        }
-        catch (Exception messageEx)
-        {
-            e = messageEx;
-        }
-        sendAckMessages.put(msg, message);
-        this.iothubListener.messageReceived(message, e);
 
+            this.sendAckMessages.put(msg, message);
+            this.iothubListener.messageReceived(message, e);
+        }
+        catch (IOException messageEx)
+        {
+            logger.LogError("Exception encountered while converting received message to IotHub message, method name is %s ", logger.getMethodName());
+        }
     }
 
     /**
