@@ -76,6 +76,8 @@ public void close() throws IOException;
 
 **SRS_MQTTIOTHUBCONNECTION_15_007: [**If the MQTT connection is closed, the function shall do nothing.**]**
 
+**SRS_MQTTIOTHUBCONNECTION_34_037: [**If an IOException is encountered while closing the mqtt connection, this function shall set this object's state to CLOSED and rethrow that exception.**]**
+
 
 
 ### sendEvent

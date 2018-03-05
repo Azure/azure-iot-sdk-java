@@ -1213,6 +1213,37 @@ public class MqttIotHubConnectionTest
         };
     }
 
+    //Tests_SRS_MQTTIOTHUBCONNECTION_34_037: [If an IOException is encountered while closing the mqtt connection, this function shall set this object's state to CLOSED and rethrow that exception.]
+    @Test
+    public void closeThrowsIOExceptionSetsStateToCLOSED() throws IOException
+    {
+        //arrange
+        baseExpectations();
+        MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        connection.open();
+        new NonStrictExpectations()
+        {
+            {
+                mockDeviceMessaging.stop();
+                result = new IOException();
+            }
+        };
+
+        //act
+        try
+        {
+            connection.close();
+        }
+        catch (IOException e)
+        {
+            //expecting this exception, but not testing for it, so ignore
+        }
+
+        //assert
+        State actualState = Deencapsulation.getField(connection, "state");
+        assertEquals(State.CLOSED, actualState);
+    }
+
     private void baseExpectations()
     {
         new NonStrictExpectations() {

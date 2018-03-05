@@ -189,7 +189,7 @@ public class MqttIotHubConnection implements MqttConnectionStateListener
      * If the connection is already closed, the function shall do nothing.
      *
      */
-    public void close()
+    public void close() throws IOException
     {
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_007: [If the MQTT session is closed, the function shall do nothing.]
         if (this.state == State.CLOSED)
@@ -200,21 +200,31 @@ public class MqttIotHubConnection implements MqttConnectionStateListener
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [The function shall close the MQTT connection.]
         try
         {
-            this.deviceMethod.stop();
-            this.deviceMethod = null;
+            if (this.deviceMethod != null)
+            {
+                this.deviceMethod.stop();
+                this.deviceMethod = null;
+            }
 
-            this.deviceTwin.stop();
-            this.deviceTwin = null;
+            if (this.deviceTwin != null)
+            {
+                this.deviceTwin.stop();
+                this.deviceTwin = null;
+            }
 
-            this.deviceMessaging.stop();
-            this.deviceMessaging = null;
+            if (this.deviceMessaging != null)
+            {
+                this.deviceMessaging.stop();
+                this.deviceMessaging = null;
+            }
 
             this.state = State.CLOSED;
         }
-
-        catch (Exception e)
+        catch (IOException e)
         {
+            // Codes_SRS_MQTTIOTHUBCONNECTION_34_037: [If an IOException is encountered while closing the mqtt connection, this function shall set this object's state to CLOSED and rethrow that exception.]
             this.state = State.CLOSED;
+            throw e;
         }
     }
 
