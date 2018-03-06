@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * The transport also receives messages from IoT Hub and invokes a
  * user-defined message callback if a message and callback are found.
  */
-public final class AmqpsTransport implements IotHubTransport, ServerListener
+public final class AmqpsTransport implements IotHubTransport
 {
     private Queue<DeviceClientConfig> deviceClientConfigs;
 
@@ -80,7 +81,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
      *
      * @throws IOException if a communication channel cannot be established.
      */
-    public synchronized void open(Collection<DeviceClientConfig> deviceClientConfigs) throws IOException
+    public synchronized void open(Collection<DeviceClientConfig> deviceClientConfigs) throws TransportException
     {
         if ((deviceClientConfigs == null) || deviceClientConfigs.isEmpty())
         {
@@ -100,7 +101,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             try
             {
                 // Codes_SRS_AMQPSTRANSPORT_15_005: [The function shall add the transport to the list of listeners subscribed to the connection events.]
-                this.connection.addListener(this);
+                //this.connection.addListener(this);
 
                 this.connection.open(this.deviceClientConfigs);
 
@@ -111,7 +112,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             {
                 // Codes_SRS_AMQPSTRANSPORT_12_004: [The function shall throw IOException if connection open throws.]
                 logger.LogError(e);
-                throw new IOException(e);
+                //throw new IOException(e);
             }
 
             // Codes_SRS_AMQPSTRANSPORT_15_006: [If the connection was opened successfully, the transport state shall be set to OPEN.]
@@ -224,7 +225,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         logger.LogInfo("Starting to close the connection..., method name is %s ", logger.getMethodName());
        
         // Codes_SRS_AMQPSTRANSPORT_15_008: [The function shall close an AMQPS connection with the IoT Hub given in the configuration.]
-        this.connection.close();
+        //this.connection.close();
 
         // Codes_SRS_AMQPSTRANSPORT_15_009: [The function shall set the transport state to CLOSED.]
         this.state = State.CLOSED;
@@ -361,14 +362,14 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                         {
                             failedMessages.add(packet);
                         }*/
-                        try
-                        {
-                            this.connection.sendMessage(message);
-                        }
-                        catch (IOException e)
-                        {
-                            failedMessages.add(packet);
-                        }
+                        //try
+                        //{
+                            //this.connection.sendMessage(message);
+                        //}
+                        //catch (IOException e)
+                        //{
+                        //    failedMessages.add(packet);
+                        //}
                     }
                 }
             }
@@ -461,7 +462,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
                 throw new IOException("Unknown transport message could not be handled");
             }
 
-            this.connection.sendMessageResult(receivedMessage, result);
+            //this.connection.sendMessageResult(receivedMessage, result);
 
 /*            // Codes_SRS_AMQPSTRANSPORT_15_027: [The function shall return the message result (one of COMPLETE, ABANDON, or REJECT) to the IoT Hub.]
             Boolean ackResult = this.connection.sendMessageResult(receivedMessage, result);
@@ -546,32 +547,6 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     public void reconnect()
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
-
-        try
-        {
-            this.state = State.CLOSED;
-
-            if (this.currentReconnectionAttempt++ == Integer.MAX_VALUE)
-            {
-                this.currentReconnectionAttempt = 0;
-            }
-
-            this.open(this.deviceClientConfigs);
-           /* if (this.deviceClientConfigs == null)
-            {
-                // Codes_SRS_AMQPSTRANSPORT_12_019: [**Reconnect uses single device open if the device list is null.]
-                this.open();
-            }
-            else
-            {
-                // Codes_SRS_AMQPSTRANSPORT_12_020: [**Reconnect uses multiplexOpen if the device list is not null.]
-                this.multiplexOpen(this.deviceClientConfigs);
-            }*/
-        }
-        catch (IOException e)
-        {
-            logger.LogInfo("On exception, reconnect - open.\n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
-        }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }

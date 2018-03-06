@@ -4,14 +4,13 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.amqp.messaging.Section;
-import org.apache.qpid.proton.engine.Link;
-import org.apache.qpid.proton.engine.Session;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
 import java.io.IOException;
@@ -32,12 +31,12 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
     /**
      * This constructor creates an instance of AmqpsDeviceTelemetry class and initializes member variables
      */
-    AmqpsDeviceTelemetry(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
+    AmqpsDeviceTelemetry(DeviceClientConfig deviceClientConfig) throws TransportException
     {
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig argument is null.]
         if (deviceClientConfig == null)
         {
-            throw new IllegalArgumentException("The deviceId cannot be null or empty.");
+            throwTelemetryTransportException(new IllegalArgumentException("The deviceId cannot be null or empty."));
         }
 
         this.deviceClientConfig = deviceClientConfig;
@@ -90,16 +89,24 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
      * @param length The number of bytes to be send related to the offset
      * @param deliveryTag The unique identfier of the delivery
      * @return delivery tag
-     * @throws IllegalStateException if sender link has not been initialized
-     * @throws IllegalArgumentException if deliveryTag's length is 0
+     * @throws TransportException if sender link has not been initialized
+     * @throws TransportException if deliveryTag's length is 0
      */
     @Override
-    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
+    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws TransportException
     {
         if (messageType == MessageType.DEVICE_TELEMETRY)
         {
-            // Codes_SRS_AMQPSDEVICETELEMETRY_12_007: [The function shall call the super function with the arguments and return with it's return value.]
-            return super.sendMessageAndGetDeliveryHash(messageType, msgData, offset, length, deliveryTag);
+            try
+            {
+                // Codes_SRS_AMQPSDEVICETELEMETRY_12_007: [The function shall call the super function with the arguments and return with it's return value.]
+                return super.sendMessageAndGetDeliveryHash(messageType, msgData, offset, length, deliveryTag);
+            }
+            catch (TransportException e)
+            {
+                e.setIotHubService(TransportException.IotHubService.TELEMETRY);
+                throw e;
+            }
         }
         else
         {
@@ -118,7 +125,7 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
      * @throws IOException if Proton throws
      */
     @Override
-    protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, IOException
+    protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws TransportException
     {
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_020: [The function shall call the super function.]
         AmqpsMessage amqpsMessage = super.getMessageFromReceiverLink(linkName);
@@ -302,7 +309,6 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
                 {
                     userProperties.put(messageProperty.getName(), messageProperty.getValue());
                 }
-
             }
 
             ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
@@ -314,5 +320,19 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
         Section section = new Data(binary);
         outgoingMessage.setBody(section);
         return outgoingMessage;
+    }
+
+    private void throwTelemetryTransportException(String message) throws TransportException
+    {
+        TransportException transportException = new TransportException(message);
+        transportException.setIotHubService(TransportException.IotHubService.TELEMETRY);
+        throw transportException;
+    }
+
+    private void throwTelemetryTransportException(Exception e) throws TransportException
+    {
+        TransportException transportException = new TransportException(e);
+        transportException.setIotHubService(TransportException.IotHubService.TELEMETRY);
+        throw transportException;
     }
 }

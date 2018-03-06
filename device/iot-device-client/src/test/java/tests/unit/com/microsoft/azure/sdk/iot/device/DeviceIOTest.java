@@ -4,6 +4,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
@@ -348,8 +349,7 @@ public class DeviceIOTest
 
     /* Tests_SRS_DEVICE_IO_21_008: [The open shall create default IotHubSSL context if no certificate input was provided by user and save it by calling setIotHubSSLContext.] */
     @Test
-    public void openAmqpCreateSSLContextSuccess()
-            throws URISyntaxException, IOException
+    public void openAmqpCreateSSLContextSuccess() throws URISyntaxException, IOException, TransportException
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
@@ -372,8 +372,7 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.] */
     /* Tests_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `OPEN`.] */
     @Test
-    public void openSuccess()
-            throws URISyntaxException, IOException
+    public void openSuccess() throws URISyntaxException, IOException, TransportException
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();
@@ -413,8 +412,7 @@ public class DeviceIOTest
 
     /* Tests_SRS_DEVICE_IO_21_015: [If an error occurs in opening the transport, the open shall throw an IOException.] */
     @Test
-    public void openThrowsIOExceptionIfTransportOpenThrows()
-            throws URISyntaxException, IOException
+    public void openThrowsIOExceptionIfTransportOpenThrows() throws URISyntaxException, IOException, TransportException
     {
         // arrange
         final Object deviceIO = newDeviceIOAmqp();

@@ -36,9 +36,12 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     public void onTransportError(Event event);
 
-    public void addListener(ServerListener listener);
+    public void addListener(IotHubListener listener);
     protected AmqpsConvertToProtonReturnValue convertToProton(com.microsoft.azure.sdk.iot.device.Message message) throws IOException;
     protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws IOException;
+
+    static ConnectionStatusException getConnectionStatusExceptionFromAMQPExceptionCode(String exceptionCode);
+
 }
 ```
 
@@ -242,9 +245,17 @@ public void onDelivery(Event event)
 
 **SRS_AMQPSIOTHUBCONNECTION_15_039: [**The event handler shall note the remote delivery state and use it and the Delivery (Proton) hash code to inform the AmqpsIotHubConnection of the message receipt.**]**
 
-**SRS_AMQPSIOTHUBCONNECTION_15_050: [**All the listeners shall be notified that a message was received from the server.**]**
-
 **SRS_AMQPSIOTHUBCONNECTION_12_015: [**The function shall call AmqpsSessionManager.getMessageFromReceiverLink.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_089: [**If an amqp message can be received from the receiver link, and that amqp message contains a status code that is not 200 or 204, this function shall notify this object's listeners that that message was received and provide the status code's mapped exception.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_090: [**If an amqp message can be received from the receiver link, and that amqp message contains a status code that is 200 or 204, this function shall notify this object's listeners that that message was received with a null exception.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_091: [**If an amqp message can be received from the receiver link, and that amqp message contains no status code, this function shall notify this object's listeners that that message was received with a null exception.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_092: [**If an amqp message can be received from the receiver link, and that amqp message contains no application properties, this function shall notify this object's listeners that that message was received with a null exception.**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_093: [**If an amqp message can be received from the receiver link, and that amqp message contains a status code, but that status code cannot be parsed to an integer, this function shall notify this object's listeners that that message was received with a null exception.**]**
 
 
 ## onLinkInit
@@ -287,6 +298,7 @@ public void onLinkRemoteClose(Event event)
 
 **SRS_AMQPSIOTHUBCONNECTION_15_042 [**The event handler shall attempt to reconnect to the IoTHub.**]**
 
+**SRS_AMQPSIOTHUBCONNECTION_34_061 [**If the provided event object's transport holds a remote error condition object, this function shall report the associated ConnectionStatusException to this object's listeners.**]**
 
 
 ## onTransportError
@@ -297,14 +309,14 @@ public void onTransportError(Event event)
 
 **SRS_AMQPSIOTHUBCONNECTION_15_048 [**The event handler shall attempt to reconnect to IoTHub.**]**
 
+**SRS_AMQPSIOTHUBCONNECTION_34_060 [**If the provided event object's transport holds an error condition object, this function shall report the associated ConnectionStatusException to this object's listeners.**]**
+
 
 ### addListener
 
 ```java
-public void addListener(ServerListener listener);
+public void addListener(IotHubListener listener);
 ```
-
-**SRS_AMQPSIOTHUBCONNECTION_12_053: [**The function shall do nothing if the listener parameter is null.**]**
 
 **SRS_AMQPSIOTHUBCONNECTION_12_054: [**The function shall add the given listener to the listener list.**]**
 
@@ -325,3 +337,61 @@ protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqps
 ```
 
 **SRS_AMQPSIOTHUBCONNECTION_12_056: [**The function shall call AmqpsSessionManager.convertFromProton with the given message.**]**
+
+
+### getConnectionStatusExceptionFromAMQPExceptionCode
+```java
+static ConnectionStatusException getConnectionStatusExceptionFromAMQPExceptionCode(String exceptionCode)
+```
+
+**SRS_AMQPSIOTHUBCONNECTION_34_063: [**The function shall map amqp exception code "amqp:internal-error" to ConnectionStatusException "ConnectionStatusAmqpInternalErrorException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_064: [**The function shall map amqp exception code "amqp:not-found" to ConnectionStatusException "ConnectionStatusAmqpNotFoundException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_065: [**The function shall map amqp exception code "amqp:unauthorized-access" to ConnectionStatusException "ConnectionStatusAmqpUnauthorizedAcessException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_066: [**The function shall map amqp exception code "amqp:decode-error" to ConnectionStatusException "ConnectionStatusAmqpDecodeErrorException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_067: [**The function shall map amqp exception code "amqp:resource-limit-exceeded" to ConnectionStatusException "ConnectionStatusAmqpResourceLimitExceededException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_068: [**The function shall map amqp exception code "amqp:not-allowed" to ConnectionStatusException "ConnectionStatusAmqpNotAllowedException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_069: [**The function shall map amqp exception code "amqp:invalid-field" to ConnectionStatusException "ConnectionStatusAmqpInvalidFieldException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_070: [**The function shall map amqp exception code "amqp:not-implemented" to ConnectionStatusException "ConnectionStatusAmqpNotImplementedException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_071: [**The function shall map amqp exception code "amqp:resource-locked" to ConnectionStatusException "ConnectionStatusAmqpResourceLockedException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_072: [**The function shall map amqp exception code "amqp:precondition-failed" to ConnectionStatusException "ConnectionStatusAmqpPreconditionFailedException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_073: [**The function shall map amqp exception code "amqp:resource-deleted" to ConnectionStatusException "ConnectionStatusAmqpResourceDeletedException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_074: [**The function shall map amqp exception code "amqp:illegal-state" to ConnectionStatusException "ConnectionStatusAmqpIllegalStateException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_075: [**The function shall map amqp exception code "amqp:frame-size-too-small" to ConnectionStatusException "ConnectionStatusAmqpFrameSizeTooSmallException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_076: [**The function shall map amqp exception code "amqp:connection:forced" to ConnectionStatusException "ConnectionStatusAmqpConnectionForcedException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_077: [**The function shall map amqp exception code "amqp:connection:framing-error" to ConnectionStatusException "ConnectionStatusAmqpFramingErrorException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_078: [**The function shall map amqp exception code "amqp:connection:redirect" to ConnectionStatusException "ConnectionStatusAmqpConnectionRedirectException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_079: [**The function shall map amqp exception code "amqp:session:window-violation" to ConnectionStatusException "ConnectionStatusAmqpWindowViolationException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_080: [**The function shall map amqp exception code "amqp:session:errant-link" to ConnectionStatusException "ConnectionStatusAmqpErrantLinkException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_081: [**The function shall map amqp exception code "amqp:session:handle-in-use" to ConnectionStatusException "ConnectionStatusAmqpHandleInUseException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_082: [**The function shall map amqp exception code "amqp:session:unattached-handle" to ConnectionStatusException "ConnectionStatusAmqpUnattachedHandleException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_083: [**The function shall map amqp exception code "amqp:link:detach-forced" to ConnectionStatusException "ConnectionStatusAmqpDetachForcedException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_084: [**The function shall map amqp exception code "amqp:link:transfer-limit-exceeded" to ConnectionStatusException "ConnectionStatusAmqpTransferLimitExceededException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_085: [**The function shall map amqp exception code "amqp:link:message-size-exceeded" to ConnectionStatusException "ConnectionStatusAmqpMessageSizeExceededException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_086: [**The function shall map amqp exception code "amqp:link:redirect" to ConnectionStatusException "ConnectionStatusAmqpLinkRedirectException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_087: [**The function shall map amqp exception code "amqp:link:stolen" to ConnectionStatusException "ConnectionStatusAmqpLinkStolenException".**]**
+
+**SRS_AMQPSIOTHUBCONNECTION_34_088: [**The function shall map all other amqp exception codes to the generic ConnectionStatusException "ProtocolConnectionStatusException".**]**

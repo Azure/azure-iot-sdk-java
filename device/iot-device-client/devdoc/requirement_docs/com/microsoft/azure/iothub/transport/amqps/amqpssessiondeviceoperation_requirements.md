@@ -89,8 +89,6 @@ public void authenticate() throws IOException;
 public void renewToken() throws IOException
 ```
 
-**SRS_AMQPSESSIONDEVICEOPERATION_12_050: [**The function shall renew the sas token if the authentication type is CBS and the authentication state is authenticated.**]**
-
 **SRS_AMQPSESSIONDEVICEOPERATION_12_051: [**The function start the authentication with the new token.**]**
 
 **SRS_AMQPSESSIONDEVICEOPERATION_12_052: [**The function shall restart the scheduler with the calculated renewal period if the authentication type is CBS.**]**

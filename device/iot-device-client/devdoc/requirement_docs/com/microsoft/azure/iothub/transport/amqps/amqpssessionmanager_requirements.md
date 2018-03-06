@@ -96,7 +96,7 @@ public void openDeviceOperationLinks() throws IOException;
 
 **SRS_AMQPSESSIONMANAGER_12_020: [**The function shall lock the execution with waitLock.**]**
 
-**SRS_AMQPSESSIONMANAGER_12_021: [**The function shall throw IOException if the lock throws.**]**
+**SRS_AMQPSESSIONMANAGER_12_021: [**The function shall throw IotHubServiceException if the lock throws.**]**
 
 
 ### onConnectionInit

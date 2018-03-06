@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
@@ -124,7 +125,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
      * @throws IllegalArgumentException if deliveryTag's length is 0
      */
     @Override
-    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
+    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException, TransportException
     {
         if (messageType == MessageType.DEVICE_TWIN)
         {
@@ -148,7 +149,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
      * @throws IOException if Proton throws
      */
     @Override
-    protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, IOException
+    protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, TransportException
     {
         // Codes_SRS_AMQPSDEVICETWIN_12_012: [The function shall call the super function.]
         AmqpsMessage amqpsMessage = super.getMessageFromReceiverLink(linkName);

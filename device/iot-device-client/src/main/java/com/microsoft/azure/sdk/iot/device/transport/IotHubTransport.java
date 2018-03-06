@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -20,7 +21,7 @@ public interface IotHubTransport extends Closeable
      * @throws IOException if a communication channel cannot be
      * established.
      */
-    void open(Collection<DeviceClientConfig> deviceClientConfigs) throws IOException;
+    void open(Collection<DeviceClientConfig> deviceClientConfigs) throws IOException, TransportException;
 
     /**
      * Establishes a communication channel usingmultiplexing with an IoT Hub. If a channel is

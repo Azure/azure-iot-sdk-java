@@ -51,7 +51,7 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
      * Do nothing in SAS case.
      */
     @Override
-    protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, IOException
+    protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_005: [The function shall override the default behaviour and return null.]
         return null;

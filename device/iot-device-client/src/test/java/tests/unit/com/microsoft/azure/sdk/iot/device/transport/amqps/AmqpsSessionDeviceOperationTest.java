@@ -2,6 +2,8 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import mockit.Deencapsulation;
 import mockit.Mocked;
@@ -11,18 +13,18 @@ import org.apache.qpid.proton.engine.Link;
 import org.apache.qpid.proton.engine.Session;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.nio.BufferOverflowException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for DeviceClient.
@@ -103,7 +105,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig or the amqpsDeviceAuthentication parameter is null.]
     @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsIfDeviceClientIsNull() throws IllegalArgumentException
+    public void constructorThrowsIfDeviceClientIsNull() throws IllegalArgumentException, TransportException
     {
         // arrange
         // act
@@ -112,7 +114,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig or the amqpsDeviceAuthentication parameter is null.]
     @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsIfAmqpsDeviceAuthenticationIsNull() throws IllegalArgumentException
+    public void constructorThrowsIfAmqpsDeviceAuthenticationIsNull() throws IllegalArgumentException, TransportException
     {
         // arrange
         // act
@@ -123,7 +125,7 @@ public class AmqpsSessionDeviceOperationTest
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_003: [The constructor shall create AmqpsDeviceTelemetry, AmqpsDeviceMethods and AmqpsDeviceTwin and add them to the device operations list.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_047: [The constructor shall set the authentication state to authenticated if the authentication type is not CBS.]
     @Test
-    public void constructorSuccessSAS() throws IllegalArgumentException
+    public void constructorSuccessSAS() throws IllegalArgumentException, TransportException
     {
         // act
         AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationCBS);
@@ -157,7 +159,7 @@ public class AmqpsSessionDeviceOperationTest
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_045: [The constructor shall create AmqpsDeviceAuthenticationCBSTokenRenewalTask if the authentication type is CBS.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_046: [The constructor shall create and start a scheduler with the calculated renewal period for AmqpsDeviceAuthenticationCBSTokenRenewalTask if the authentication type is CBS.]
     @Test
-    public void constructorSuccessCBS() throws IllegalArgumentException
+    public void constructorSuccessCBS() throws IllegalArgumentException, TransportException
     {
         // arrange
         final long tokenValidSecs = 3600;
@@ -214,7 +216,7 @@ public class AmqpsSessionDeviceOperationTest
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_058: [The function shall shut down the executor threads.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_059: [The function shall close the operation links.]
     @Test
-    public void close()
+    public void close() throws TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -243,7 +245,7 @@ public class AmqpsSessionDeviceOperationTest
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_061: [The function shall use the correlationID to call authenticate on the authentication object if the authentication type is CBS.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_062: [The function shall start the authentication process and start the lock wait if the authentication type is CBS.]
     @Test
-    public void authenticateCBS() throws IllegalArgumentException, IOException, InterruptedException
+    public void authenticateCBS() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
         final int MAX_WAIT_TO_AUTHENTICATE = 10*1000;
@@ -281,8 +283,8 @@ public class AmqpsSessionDeviceOperationTest
         };
     }
 
-    @Test (expected = IOException.class)
-    public void authenticateLockThrows() throws IllegalArgumentException, IOException, InterruptedException
+    @Test (expected = IotHubServiceException.class)
+    public void authenticateLockThrows() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
         final int MAX_WAIT_TO_AUTHENTICATE = 10*1000;
@@ -303,11 +305,10 @@ public class AmqpsSessionDeviceOperationTest
         amqpsSessionDeviceOperation.authenticate();
     }
 
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_050: [The function shall renew the sas token if the authentication type is CBS and the authentication state is authenticated.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_051: [The function start the authentication with the new token.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_052: [The function shall restart the scheduler with the calculated renewal period if the authentication type is CBS. ]
     @Test
-    public void renewTokenSuccess() throws IllegalArgumentException, IOException
+    public void renewTokenSuccess() throws IllegalArgumentException, TransportException
     {
         // arrange
         final long tokenValidSecs = 3600;
@@ -347,11 +348,10 @@ public class AmqpsSessionDeviceOperationTest
         };
     }
 
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_050: [The function shall renew the sas token if the authentication type is CBS and the authentication state is authenticated.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_051: [The function start the authentication with the new token.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_052: [The function shall restart the scheduler with the calculated renewal period if the authentication type is CBS. ]
     @Test (expected = IllegalArgumentException.class)
-    public void renewTokenCalculationNegative() throws IllegalArgumentException, IOException
+    public void renewTokenCalculationNegative() throws IllegalArgumentException, TransportException
     {
         // arrange
         final long tokenValidSecs = 3600;
@@ -395,7 +395,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_007: [The function shall return the current authentication state.]
     @Test
-    public void getAmqpsAuthenticatorState()
+    public void getAmqpsAuthenticatorState() throws TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -410,7 +410,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_008: [The function shall return true if all operation links are opene, otherwise return false.]
     @Test
-    public void operationLinksOpenedTrue() throws IllegalArgumentException, IOException
+    public void operationLinksOpenedTrue() throws IllegalArgumentException, TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -442,7 +442,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_008: [The function shall return true if all operation links are opene, otherwise return false.]
     @Test
-    public void operationLinksOpenedFalse() throws IllegalArgumentException, IOException
+    public void operationLinksOpenedFalse() throws IllegalArgumentException, TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -473,7 +473,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_009: [The function shall call openLinks on all device operations if the authentication state is authenticated.]
     @Test
-    public void openLinks() throws IllegalArgumentException, IOException
+    public void openLinks() throws IllegalArgumentException, TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -494,7 +494,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_010: [The function shall call closeLinks on all device operations.]
     @Test
-    public void closeLinks() throws IllegalArgumentException, IOException
+    public void closeLinks() throws IllegalArgumentException, TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -514,7 +514,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_011: [The function shall call initLink on all device operations.**]**]
     @Test
-    public void initLink() throws IllegalArgumentException, IOException
+    public void initLink() throws IllegalArgumentException, TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -535,7 +535,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_012: [The function shall return -1 if the state is not authenticated.]
     @Test
-    public void sendMessageNotAuthenticated() throws IllegalArgumentException, IOException
+    public void sendMessageNotAuthenticated() throws IllegalArgumentException, TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -550,7 +550,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_013: [The function shall return -1 if the deviceId int he connection string is not equal to the deviceId in the config.]
     @Test
-    public void sendMessageDeviceIdMismatch() throws IllegalArgumentException, IOException
+    public void sendMessageDeviceIdMismatch() throws IllegalArgumentException, TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -578,7 +578,7 @@ public class AmqpsSessionDeviceOperationTest
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryHash on all device operation objects.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_019: [The function shall return the delivery hash.]
     @Test
-    public void sendMessageNoDelivery() throws IllegalArgumentException, IOException
+    public void sendMessageNoDelivery() throws IllegalArgumentException, TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -620,7 +620,7 @@ public class AmqpsSessionDeviceOperationTest
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryHash on all device operation objects.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_019: [The function shall return the delivery hash.]
     @Test
-    public void sendMessageSuccess() throws IllegalArgumentException, IOException
+    public void sendMessageSuccess() throws IllegalArgumentException, TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -659,7 +659,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_015: [The function shall doubles the buffer if encode throws BufferOverflowException.]
     @Test
-    public void sendMessageDoublesBufferIfEncodeThrowsBufferOverflowException() throws IllegalArgumentException, IOException
+    public void sendMessageDoublesBufferIfEncodeThrowsBufferOverflowException() throws IllegalArgumentException, TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -699,7 +699,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_020: [The function shall return null if the state is not authenticated or authenticating.]
     @Test
-    public void getMessageFromReceiverLinkNotAuthenticated() throws IllegalArgumentException, IOException
+    public void getMessageFromReceiverLinkNotAuthenticated() throws IllegalArgumentException, TransportException
     {
         // arrange
         final String linkName = "linkName";
@@ -723,7 +723,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_021: [If the state is authenticated the function shall call getMessageFromReceiverLink on all device operations and return with the success if any.]
     @Test
-    public void getMessageFromReceiverLinkAuthenticated() throws IllegalArgumentException, IOException
+    public void getMessageFromReceiverLinkAuthenticated() throws IllegalArgumentException, TransportException
     {
         // arrange
         final String linkName = "linkName";
@@ -747,7 +747,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_021: [If the state is authenticated the function shall call getMessageFromReceiverLink on all device operations and return with the success if any.]
     @Test
-    public void getMessageFromReceiverLinkAuthenticatedReturnNull() throws IllegalArgumentException, IOException
+    public void getMessageFromReceiverLinkAuthenticatedReturnNull() throws IllegalArgumentException, TransportException
     {
         // arrange
         final String linkName = "linkName";
@@ -779,7 +779,7 @@ public class AmqpsSessionDeviceOperationTest
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_054: [The function shall call notify the lock if after receiving the message and the authentication is in authenticating state.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_056: [The function shall remove the correlationId from the list if it is found.]
     @Test
-    public void getMessageFromReceiverLinkAuthenticating() throws IllegalArgumentException, IOException
+    public void getMessageFromReceiverLinkAuthenticating() throws IllegalArgumentException, TransportException
     {
         // arrange
         final String linkName = "linkName";
@@ -828,7 +828,7 @@ public class AmqpsSessionDeviceOperationTest
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_054: [The function shall call notify the lock if after receiving the message and the authentication is in authenticating state.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_056: [The function shall remove the correlationId from the list if it is found.]
     @Test
-    public void getMessageFromReceiverLinkAuthenticatingNoUUID() throws IllegalArgumentException, IOException
+    public void getMessageFromReceiverLinkAuthenticatingNoUUID() throws IllegalArgumentException, TransportException
     {
         // arrange
         final String linkName = "linkName";
@@ -876,7 +876,7 @@ public class AmqpsSessionDeviceOperationTest
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_054: [The function shall call notify the lock if after receiving the message and the authentication is in authenticating state.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_056: [The function shall remove the correlationId from the list if it is found.]
     @Test
-    public void getMessageFromReceiverLinkAuthenticatingNotAuthenticationMessage() throws IllegalArgumentException, IOException
+    public void getMessageFromReceiverLinkAuthenticatingNotAuthenticationMessage() throws IllegalArgumentException, TransportException
     {
         // arrange
         final String linkName = "linkName";
@@ -921,7 +921,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_057: [If the state is other than authenticating the function shall try to read the message from the device operation objects.]
     @Test
-    public void getMessageFromReceiverLinkNotAuthenticating() throws IllegalArgumentException, IOException
+    public void getMessageFromReceiverLinkNotAuthenticating() throws IllegalArgumentException, TransportException
     {
         // arrange
         final String linkName = "linkName";
@@ -960,7 +960,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_024: [The function shall return true if any of the operation's link name is a match and return false otherwise.]
     @Test
-    public void isLinkFoundTrue()
+    public void isLinkFoundTrue() throws TransportException
     {
         // arrange
         final String linkName = "linkName";
@@ -984,7 +984,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_024: [The function shall return true if any of the operation's link name is a match and return false otherwise.]
     @Test
-    public void isLinkFoundFalse()
+    public void isLinkFoundFalse() throws TransportException
     {
         // arrange
         final String linkName = "linkName";
@@ -1009,7 +1009,7 @@ public class AmqpsSessionDeviceOperationTest
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_040: [The function shall call all device operation's convertToProton, and if any of them not null return with the value.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_041: [The function shall call all device operation's convertFromProton, and if any of them not null return with the value.]
     @Test
-    public void convertToProtonSuccess() throws IllegalArgumentException, InterruptedException
+    public void convertToProtonSuccess() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -1032,7 +1032,7 @@ public class AmqpsSessionDeviceOperationTest
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_040: [The function shall call all device operation's convertToProton, and if any of them not null return with the value.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_041: [The function shall call all device operation's convertFromProton, and if any of them not null return with the value.]
     @Test
-    public void convertFromoProtonSuccess() throws IllegalArgumentException, InterruptedException
+    public void convertFromoProtonSuccess() throws IllegalArgumentException, TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);

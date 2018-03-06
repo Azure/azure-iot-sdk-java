@@ -5,6 +5,8 @@ import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.ObjectLock;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import org.apache.qpid.proton.engine.*;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +42,7 @@ public class AmqpsSessionManager
      * @param deviceClientConfig the device configuration to use for 
      *                           session management.
      */
-    public AmqpsSessionManager(DeviceClientConfig deviceClientConfig)
+    public AmqpsSessionManager(DeviceClientConfig deviceClientConfig) throws TransportException
     {
         // Codes_SRS_AMQPSESSIONMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig parameter is null.]
         if (deviceClientConfig == null)
@@ -80,7 +82,7 @@ public class AmqpsSessionManager
      *
      * @param deviceClientConfig the device to register.
      */
-    void addDeviceOperationSession(DeviceClientConfig deviceClientConfig)
+    void addDeviceOperationSession(DeviceClientConfig deviceClientConfig) throws TransportException
     {
         // Codes_SRS_AMQPSESSIONMANAGER_12_008: [The function shall throw IllegalArgumentException if the deviceClientConfig parameter is null.]
         if (deviceClientConfig == null)
@@ -132,7 +134,7 @@ public class AmqpsSessionManager
      *
      * @throws IOException if authentication lock throws.
      */
-    public void authenticate() throws IOException
+    public void authenticate() throws TransportException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -161,7 +163,7 @@ public class AmqpsSessionManager
      *
      * @throws IOException if open lock throws.
      */
-    public void openDeviceOperationLinks() throws IOException
+    public void openDeviceOperationLinks() throws TransportException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -183,8 +185,8 @@ public class AmqpsSessionManager
                         }
                         catch (InterruptedException e)
                         {
-                            // Codes_SRS_AMQPSESSIONMANAGER_12_021: [The function shall throw IOException if the lock throws.]
-                            throw new IOException("Waited too long for the connection to onConnectionInit.");
+                            // Codes_SRS_AMQPSESSIONMANAGER_12_021: [The function shall throw IotHubServiceException if the lock throws.]
+                            throw new IotHubServiceException("Waited too long for the connection to onConnectionInit.");
                         }
                     }
                 }
@@ -200,7 +202,7 @@ public class AmqpsSessionManager
      *
      * @param connection the Proton connection object to work with.
      */
-    void onConnectionInit(Connection connection) throws IOException
+    void onConnectionInit(Connection connection) throws TransportException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -354,7 +356,7 @@ public class AmqpsSessionManager
      *
      * @return Integer
      */
-    Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws IOException
+    Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws IOException, TransportException
     {
         Integer deliveryHash = -1;
 
@@ -384,7 +386,7 @@ public class AmqpsSessionManager
      * @return AmqpsMessage if the receiver found the received 
      *         message, otherwise null.
      */
-    AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, IOException
+    AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, IOException, TransportException
     {
         AmqpsMessage amqpsMessage = null;
 
@@ -495,7 +497,7 @@ public class AmqpsSessionManager
      * @return AmqpsConvertFromProtonReturnValue the result of the 
      *         conversion containing the IoTHub message.
      */
-    AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws IOException
+    AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws IOException, TransportException
     {
         AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = null;
 
