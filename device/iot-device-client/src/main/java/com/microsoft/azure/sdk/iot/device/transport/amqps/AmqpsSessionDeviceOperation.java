@@ -5,7 +5,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import org.apache.qpid.proton.engine.*;
 
-import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -31,6 +30,9 @@ public class AmqpsSessionDeviceOperation
     private AmqpsDeviceAuthenticationCBSTokenRenewalTask tokenRenewalTask = null;
 
     private static final int MAX_WAIT_TO_AUTHENTICATE = 10*1000;
+    private static final double PERCENTAGE_FACTOR = 0.75;
+    private static final int SEC_IN_MILLISEC = 1000;
+
     private final ObjectLock authenticationLock = new ObjectLock();
 
     private List<UUID> cbsCorrelationIdList = Collections.synchronizedList(new ArrayList<UUID>());
@@ -42,8 +44,9 @@ public class AmqpsSessionDeviceOperation
      *
      * @param deviceClientConfig the configuration of teh device.
      * @param amqpsDeviceAuthentication the authentication object associated with the device.
+     * @throws IllegalArgumentException if deviceClientConfig or amqpsDeviceAuthentication is null
      */
-    public AmqpsSessionDeviceOperation(final DeviceClientConfig deviceClientConfig, AmqpsDeviceAuthentication amqpsDeviceAuthentication) throws TransportException
+    public AmqpsSessionDeviceOperation(final DeviceClientConfig deviceClientConfig, AmqpsDeviceAuthentication amqpsDeviceAuthentication) throws IllegalArgumentException
     {
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig or the amqpsDeviceAuthentication parameter is null.]
         if (deviceClientConfig == null)
@@ -103,12 +106,12 @@ public class AmqpsSessionDeviceOperation
     /**
      * Start the authentication process.
      * In SAS case it is nothing to do.
-     * In the CBS case start openeing the authentication links
+     * In the CBS case start opening the authentication links
      * and send authentication messages.
      *
-     * @throws IotHubServiceException if authentication message reply takes too long.
+     * @throws TransportException if authentication message reply takes too long.
      */
-    public void authenticate() throws IotHubServiceException
+    public void authenticate() throws TransportException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -137,8 +140,8 @@ public class AmqpsSessionDeviceOperation
                 {
                     cbsCorrelationIdList.remove(correlationId);
 
-                    // Codes_SRS_AMQPSESSIONMANAGER_12_017: [The function shall throw IOException if the lock throws.]
-                    throw new IotHubServiceException("Waited too long for the authentication message reply.");
+                    // Codes_SRS_AMQPSESSIONMANAGER_12_017: [The function shall throw TransportException if the lock throws.]
+                    throw new TransportException("Waited too long for the authentication message reply.");
                 }
             }
         }
@@ -149,9 +152,9 @@ public class AmqpsSessionDeviceOperation
     /**
      * Start the token renewal process using CBS authentication.
      *
-     * @throws IOException throw if Proton operation throws.
+     * @throws TransportException throw if Proton operation throws.
      */
-    public void renewToken() throws IotHubServiceException
+    public void renewToken() throws TransportException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -205,8 +208,7 @@ public class AmqpsSessionDeviceOperation
     /**
      *
      * @param session the Proton session to open the links on.
-     * @throws IOException throw if Proton operation throws.
-     * @throws IllegalArgumentException throw if session parameter is null.
+     * @throws TransportException throw if Proton operation throws.
      */
     void openLinks(Session session) throws TransportException
     {
@@ -251,10 +253,10 @@ public class AmqpsSessionDeviceOperation
      * Delegate the link initialization call to device operation objects.
      *
      * @param link the link ti initialize.
-     * @throws IOException throw if Proton operation throws.
+     * @throws TransportException throw if Proton operation throws.
      * @throws IllegalArgumentException throw if the link parameter is null.
      */
-    void initLink(Link link) throws IOException, IllegalArgumentException
+    void initLink(Link link) throws TransportException, IllegalArgumentException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -283,10 +285,11 @@ public class AmqpsSessionDeviceOperation
      * @param messageType the message type to find the sender.
      * @param iotHubConnectionString the deviceconnection string to
      *                               find the sender.
-     *
+     * @throws IllegalStateException if sender link has not been initialized
+     * @throws IllegalArgumentException if deliveryTag's length is 0
      * @return Integer
      */
-    Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws IOException, TransportException
+    Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws IllegalStateException, IllegalArgumentException
     {
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_012: [The function shall return -1 if the state is not authenticated.]
         if (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED)
@@ -339,10 +342,11 @@ public class AmqpsSessionDeviceOperation
      * @param offset the start index to read the binary.
      * @param length the length of the binary to read.
      * @param deliveryTag the message delivery tag.
-     *
+     * @throws IllegalStateException if sender link has not been initialized
+     * @throws IllegalArgumentException if deliveryTag's length is 0
      * @return Integer
      */
-    private Integer sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException, IOException, TransportException
+    private Integer sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
     {
         Integer deliveryHash = -1;
 
@@ -365,11 +369,12 @@ public class AmqpsSessionDeviceOperation
      * object by link name. 
      *
      * @param linkName the link name to identify the receiver.
-     *
+     * @throws IllegalArgumentException if linkName argument is empty
+     * @throws TransportException if Proton throws
      * @return AmqpsMessage if the receiver found the received 
      *         message, otherwise null.
      */
-    synchronized AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, IOException, TransportException
+    synchronized AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, TransportException
     {
         AmqpsMessage amqpsMessage = null;
 
@@ -453,11 +458,11 @@ public class AmqpsSessionDeviceOperation
      * specific converter. 
      *
      * @param message the message to convert.
-     *
+     * @throws TransportException if conversion fails.
      * @return AmqpsConvertToProtonReturnValue the result of the 
      *         conversion containing the Proton message.
      */
-    AmqpsConvertToProtonReturnValue convertToProton(Message message) throws IOException
+    AmqpsConvertToProtonReturnValue convertToProton(Message message) throws TransportException
     {
         AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = null;
 
@@ -484,11 +489,11 @@ public class AmqpsSessionDeviceOperation
      * @param amqpsMessage the message to convert.
      * @param deviceClientConfig the device client configuration to 
      *                           identify the converter..
-     *
+     * @throws TransportException if conversion fails
      * @return AmqpsConvertToProtonReturnValue the result of the 
      *         conversion containing the Proton message.
      */
-    AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws IOException, TransportException
+    AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws TransportException
     {
         AmqpsConvertFromProtonReturnValue amqpsHandleMessageReturnValue = null;
 
@@ -565,14 +570,15 @@ public class AmqpsSessionDeviceOperation
      *
      * @param validInSecs the time
      * @return 75% of the given time
+     * @throws IllegalArgumentException if validInSecs is less than 0
      */
-    private long calculateRenewalTimeInMilliSecs(long validInSecs)
+    private long calculateRenewalTimeInMilliSecs(long validInSecs) throws IllegalArgumentException
     {
-        if (validInSecs <= 0)
+        if (validInSecs < 0)
         {
-            throw new IllegalArgumentException("validInSecs cannot be null.");
+            throw new IllegalArgumentException("validInSecs cannot be less than 0.");
         }
 
-        return 3 * (validInSecs / 4) * 1000;
+        return (long)(validInSecs * PERCENTAGE_FACTOR * SEC_IN_MILLISEC);
     }
 }

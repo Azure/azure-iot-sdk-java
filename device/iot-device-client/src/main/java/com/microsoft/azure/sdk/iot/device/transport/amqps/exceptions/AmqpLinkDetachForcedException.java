@@ -12,26 +12,26 @@ import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
  *
  * See {@linktourl http://docs.oasis-open.org/amqp/core/v1.0/os/amqp-core-complete-v1.0-os.pdf}
  */
-public class AmqpDetachForcedException extends ProtocolException
+public class AmqpLinkDetachForcedException extends ProtocolException
 {
     public static final String errorCode = "amqp:link:detach-forced";
 
-    public AmqpDetachForcedException()
+    public AmqpLinkDetachForcedException()
     {
         super();
     }
 
-    public AmqpDetachForcedException(String message)
+    public AmqpLinkDetachForcedException(String message)
     {
         super(message);
     }
 
-    public AmqpDetachForcedException(String message, Throwable cause)
+    public AmqpLinkDetachForcedException(String message, Throwable cause)
     {
         super(message, cause);
     }
 
-    public AmqpDetachForcedException(Throwable cause)
+    public AmqpLinkDetachForcedException(Throwable cause)
     {
         super(cause);
     }

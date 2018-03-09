@@ -6,9 +6,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.ObjectLock;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import org.apache.qpid.proton.engine.*;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.*;
 
@@ -132,7 +130,7 @@ public class AmqpsSessionManager
     /**
      * Start the authetication process.
      *
-     * @throws IOException if authentication lock throws.
+     * @throws TransportException if authentication lock throws.
      */
     public void authenticate() throws TransportException
     {
@@ -161,7 +159,7 @@ public class AmqpsSessionManager
      * Loop through the device list and open the links. 
      * Lock the execution to wait for the open finish. 
      *
-     * @throws IOException if open lock throws.
+     * @throws TransportException if open lock throws.
      */
     public void openDeviceOperationLinks() throws TransportException
     {
@@ -185,8 +183,8 @@ public class AmqpsSessionManager
                         }
                         catch (InterruptedException e)
                         {
-                            // Codes_SRS_AMQPSESSIONMANAGER_12_021: [The function shall throw IotHubServiceException if the lock throws.]
-                            throw new IotHubServiceException("Waited too long for the connection to onConnectionInit.");
+                            // Codes_SRS_AMQPSESSIONMANAGER_12_021: [The function shall throw TransportException if the lock throws.]
+                            throw new TransportException("Waited too long for the connection to onConnectionInit.");
                         }
                     }
                 }
@@ -243,7 +241,7 @@ public class AmqpsSessionManager
      *
      * @param transport the Proton transport object to work with.
      */
-    void onConnectionBound(Transport transport)
+    void onConnectionBound(Transport transport) throws TransportException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -265,7 +263,7 @@ public class AmqpsSessionManager
      *
      * @param link the link to initialize.
      */
-    void onLinkInit(Link link) throws IOException, IllegalArgumentException
+    void onLinkInit(Link link) throws TransportException, IllegalArgumentException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -356,7 +354,7 @@ public class AmqpsSessionManager
      *
      * @return Integer
      */
-    Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws IOException, TransportException
+    Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws TransportException
     {
         Integer deliveryHash = -1;
 
@@ -386,7 +384,7 @@ public class AmqpsSessionManager
      * @return AmqpsMessage if the receiver found the received 
      *         message, otherwise null.
      */
-    AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, IOException, TransportException
+    AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, TransportException
     {
         AmqpsMessage amqpsMessage = null;
 
@@ -467,7 +465,7 @@ public class AmqpsSessionManager
      * @return AmqpsConvertToProtonReturnValue the result of the 
      *         conversion containing the Proton message.
      */
-    AmqpsConvertToProtonReturnValue convertToProton(com.microsoft.azure.sdk.iot.device.Message message) throws IOException
+    AmqpsConvertToProtonReturnValue convertToProton(com.microsoft.azure.sdk.iot.device.Message message) throws TransportException
     {
         AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = null;
 
@@ -497,7 +495,7 @@ public class AmqpsSessionManager
      * @return AmqpsConvertFromProtonReturnValue the result of the 
      *         conversion containing the IoTHub message.
      */
-    AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws IOException, TransportException
+    AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws TransportException
     {
         AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = null;
 

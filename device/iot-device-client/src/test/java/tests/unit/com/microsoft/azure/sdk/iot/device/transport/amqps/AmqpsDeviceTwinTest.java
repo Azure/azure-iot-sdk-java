@@ -6,6 +6,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import mockit.Deencapsulation;
@@ -1818,8 +1819,8 @@ public class AmqpsDeviceTwinTest
         assertEquals("/notifications/twin/properties/desired", map.get(Symbol.valueOf("resource")));
     }
 
-    // Codes_SRS_AMQPSDEVICETWIN_21_050: [If the provided version is not `Long`, the function shall throw IOException.]
-    @Test (expected = IOException.class)
+    // Codes_SRS_AMQPSDEVICETWIN_21_050: [If the provided version is not `Long`, the function shall throw TransportException.]
+    @Test (expected = TransportException.class)
     public void iotHubMessageToProtonMessageThrowsIfVersionIsNotLong(
             @Mocked final IotHubTransportMessage mockedIotHubTransportMessage)
     {

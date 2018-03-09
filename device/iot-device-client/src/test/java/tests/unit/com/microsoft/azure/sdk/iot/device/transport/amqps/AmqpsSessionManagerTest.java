@@ -324,8 +324,8 @@ public class AmqpsSessionManagerTest
         Deencapsulation.invoke(amqpsSessionManager, "openDeviceOperationLinks");
     }
 
-    // Tests_SRS_AMQPSESSIONMANAGER_12_021: [The function shall throw IotHubServiceException if the lock throws.]
-    @Test (expected = IotHubServiceException.class)
+    // Tests_SRS_AMQPSESSIONMANAGER_12_021: [The function shall throw TransportException if the lock throws.]
+    @Test (expected = TransportException.class)
     public void openDeviceOperationLinksLockThrows() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange

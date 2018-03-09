@@ -8,30 +8,30 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 
 /**
- * This exception is thrown when a amqp:session:errant-link error is encountered over an AMQP connection
+ * This exception is thrown when a amqp:unauthorized-access error is encountered over an AMQP connection
  *
  * See {@linktourl http://docs.oasis-open.org/amqp/core/v1.0/os/amqp-core-complete-v1.0-os.pdf}
  */
-public class AmqpErrantLinkException extends ProtocolException
+public class AmqpUnauthorizedAccessException extends ProtocolException
 {
-    public static final String errorCode = "amqp:session:errant-link";
+    public static final String errorCode = "amqp:unauthorized-access";
 
-    public AmqpErrantLinkException()
+    public AmqpUnauthorizedAccessException()
     {
         super();
     }
 
-    public AmqpErrantLinkException(String message)
+    public AmqpUnauthorizedAccessException(String message)
     {
         super(message);
     }
 
-    public AmqpErrantLinkException(String message, Throwable cause)
+    public AmqpUnauthorizedAccessException(String message, Throwable cause)
     {
         super(message, cause);
     }
 
-    public AmqpErrantLinkException(Throwable cause)
+    public AmqpUnauthorizedAccessException(Throwable cause)
     {
         super(cause);
     }

@@ -8,33 +8,33 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 
 /**
- * This exception is thrown when a amqp:link:transfer-limit-exceeded error is encountered over an AMQP connection
+ * This exception is thrown when a amqp:session:unattached-handle error is encountered over an AMQP connection
  *
  * See {@linktourl http://docs.oasis-open.org/amqp/core/v1.0/os/amqp-core-complete-v1.0-os.pdf}
  */
-public class AmqpTransferLimitExceededException extends ProtocolException
+public class AmqpSessionUnattachedHandleException extends ProtocolException
 {
-    public static final String errorCode = "amqp:link:transfer-limit-exceeded";
+    public static final String errorCode = "amqp:session:unattached-handle";
 
-    public AmqpTransferLimitExceededException()
+    public AmqpSessionUnattachedHandleException()
     {
         super();
         this.isRetryable = true;
     }
 
-    public AmqpTransferLimitExceededException(String message)
+    public AmqpSessionUnattachedHandleException(String message)
     {
         super(message);
         this.isRetryable = true;
     }
 
-    public AmqpTransferLimitExceededException(String message, Throwable cause)
+    public AmqpSessionUnattachedHandleException(String message, Throwable cause)
     {
         super(message, cause);
         this.isRetryable = true;
     }
 
-    public AmqpTransferLimitExceededException(Throwable cause)
+    public AmqpSessionUnattachedHandleException(Throwable cause)
     {
         super(cause);
         this.isRetryable = true;

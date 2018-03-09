@@ -10,9 +10,9 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.*;
 import mockit.*;
@@ -34,12 +34,9 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for AmqpsIotHubConnection.
@@ -163,6 +160,9 @@ public class AmqpsIotHubConnectionTest {
 
     @Mocked
     com.microsoft.azure.sdk.iot.device.Message mockIoTMessage;
+
+    @Mocked
+    com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage mockIoTTransportMessage;
 
     @Mocked
     ErrorCondition mockedErrorCondition;
@@ -1893,7 +1893,7 @@ public class AmqpsIotHubConnectionTest {
                 mockedErrorCondition.getCondition();
                 result = mockedSymbol;
                 mockedSymbol.toString();
-                result = AmqpWindowViolationException.errorCode;
+                result = AmqpSessionWindowViolationException.errorCode;
             }
         };
 
@@ -1904,7 +1904,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockedIotHubListener.onConnectionLost((AmqpWindowViolationException) any);
+                mockedIotHubListener.onConnectionLost((AmqpSessionWindowViolationException) any);
                 times = 1;
             }
         };
@@ -1944,64 +1944,6 @@ public class AmqpsIotHubConnectionTest {
         };
     }
 
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_063: [The function shall map amqp exception code "amqp:internal-error" to TransportException "AmqpInternalErrorException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_064: [The function shall map amqp exception code "amqp:not-found" to TransportException "AmqpNotFoundException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_065: [The function shall map amqp exception code "amqp:unauthorized-access" to TransportException "AmqpUnauthorizedAcessException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_066: [The function shall map amqp exception code "amqp:decode-error" to TransportException "AmqpDecodeErrorException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_067: [The function shall map amqp exception code "amqp:resource-limit-exceeded" to TransportException "AmqpResourceLimitExceededException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_068: [The function shall map amqp exception code "amqp:not-allowed" to TransportException "AmqpNotAllowedException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_069: [The function shall map amqp exception code "amqp:invalid-field" to TransportException "AmqpInvalidFieldException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_070: [The function shall map amqp exception code "amqp:not-implemented" to TransportException "AmqpNotImplementedException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_071: [The function shall map amqp exception code "amqp:resource-locked" to TransportException "AmqpResourceLockedException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_072: [The function shall map amqp exception code "amqp:precondition-failed" to TransportException "AmqpPreconditionFailedException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_073: [The function shall map amqp exception code "amqp:resource-deleted" to TransportException "AmqpResourceDeletedException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_074: [The function shall map amqp exception code "amqp:illegal-state" to TransportException "AmqpIllegalStateException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_075: [The function shall map amqp exception code "amqp:frame-size-too-small" to TransportException "AmqpFrameSizeTooSmallException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_076: [The function shall map amqp exception code "amqp:connection:forced" to TransportException "AmqpConnectionForcedException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_077: [The function shall map amqp exception code "amqp:connection:framing-error" to TransportException "AmqpFramingErrorException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_078: [The function shall map amqp exception code "amqp:connection:redirect" to TransportException "AmqpConnectionRedirectException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_079: [The function shall map amqp exception code "amqp:session:window-violation" to TransportException "AmqpWindowViolationException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_080: [The function shall map amqp exception code "amqp:session:errant-link" to TransportException "AmqpErrantLinkException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_081: [The function shall map amqp exception code "amqp:session:handle-in-use" to TransportException "AmqpHandleInUseException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_082: [The function shall map amqp exception code "amqp:session:unattached-handle" to TransportException "AmqpUnattachedHandleException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_083: [The function shall map amqp exception code "amqp:link:detach-forced" to TransportException "AmqpDetachForcedException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_084: [The function shall map amqp exception code "amqp:link:transfer-limit-exceeded" to TransportException "AmqpTransferLimitExceededException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_085: [The function shall map amqp exception code "amqp:link:message-size-exceeded" to TransportException "AmqpMessageSizeExceededException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_086: [The function shall map amqp exception code "amqp:link:redirect" to TransportException "AmqpLinkRedirectException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_087: [The function shall map amqp exception code "amqp:link:stolen" to TransportException "AmqpLinkStolenException".]
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_088: [The function shall map all other amqp exception codes to the generic TransportException "ProtocolException".]
-    @Test
-    public void getConnectionStatusExceptionFromAMQPExceptionCodeReturnsExpectedMappings()
-    {
-        //assert
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpConnectionForcedException.errorCode) instanceof AmqpConnectionForcedException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpUnauthorizedAcessException.errorCode) instanceof AmqpUnauthorizedAcessException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpFramingErrorException.errorCode) instanceof AmqpFramingErrorException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpNotFoundException.errorCode) instanceof AmqpNotFoundException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpResourceDeletedException.errorCode) instanceof AmqpResourceDeletedException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpResourceLockedException.errorCode) instanceof AmqpResourceLockedException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpConnectionRedirectException.errorCode) instanceof AmqpConnectionRedirectException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpDecodeErrorException.errorCode) instanceof AmqpDecodeErrorException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpDetachForcedException.errorCode) instanceof AmqpDetachForcedException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpErrantLinkException.errorCode) instanceof AmqpErrantLinkException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpFrameSizeTooSmallException.errorCode) instanceof AmqpFrameSizeTooSmallException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpHandleInUseException.errorCode) instanceof AmqpHandleInUseException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpIllegalStateException.errorCode) instanceof AmqpIllegalStateException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpInternalErrorException.errorCode) instanceof AmqpInternalErrorException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpInvalidFieldException.errorCode) instanceof AmqpInvalidFieldException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpWindowViolationException.errorCode) instanceof AmqpWindowViolationException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpUnattachedHandleException.errorCode) instanceof AmqpUnattachedHandleException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpTransferLimitExceededException.errorCode) instanceof AmqpTransferLimitExceededException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpResourceLimitExceededException.errorCode) instanceof AmqpResourceLimitExceededException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpPreconditionFailedException.errorCode) instanceof AmqpPreconditionFailedException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpNotImplementedException.errorCode) instanceof AmqpNotImplementedException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpNotAllowedException.errorCode) instanceof AmqpNotAllowedException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpMessageSizeExceededException.errorCode) instanceof AmqpMessageSizeExceededException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpLinkStolenException.errorCode) instanceof AmqpLinkStolenException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", AmqpLinkRedirectException.errorCode) instanceof AmqpLinkRedirectException);
-        assertTrue(Deencapsulation.invoke(AmqpsIotHubConnection.class, "getConnectionStatusExceptionFromAMQPExceptionCode", "Not a protocol standard error code") instanceof ProtocolException);
-    }
-
     //Tests_SRS_AMQPSIOTHUBCONNECTION_34_089: [If an amqp message can be received from the receiver link, and that amqp message contains a status code that is not 200 or 204, this function shall notify this object's listeners that that message was received and provide the status code's mapped exception.]
     @Test
     public void onDeliveryNotifiesListenerOfErrorCodes() throws IOException, TransportException
@@ -2025,6 +1967,8 @@ public class AmqpsIotHubConnectionTest {
                 result = mockedApplicationProperties;
                 mockedApplicationProperties.getValue();
                 result = applicationPropertiesMap;
+                new IotHubTransportMessage((byte[]) any, (MessageType) any);
+                result = mockIoTMessage;
             }
         };
 
@@ -2063,6 +2007,8 @@ public class AmqpsIotHubConnectionTest {
                 result = mockedApplicationProperties;
                 mockedApplicationProperties.getValue();
                 result = applicationPropertiesMap;
+                new IotHubTransportMessage((byte[]) any, (MessageType) any);
+                result = mockIoTMessage;
             }
         };
 
@@ -2100,6 +2046,8 @@ public class AmqpsIotHubConnectionTest {
                 result = mockedApplicationProperties;
                 mockedApplicationProperties.getValue();
                 result = applicationPropertiesMap;
+                new IotHubTransportMessage((byte[]) any, (MessageType) any);
+                result = mockIoTMessage;
             }
         };
 
@@ -2136,6 +2084,8 @@ public class AmqpsIotHubConnectionTest {
                 result = mockedApplicationProperties;
                 mockedApplicationProperties.getValue();
                 result = null;
+                new IotHubTransportMessage((byte[]) any, (MessageType) any);
+                result = mockIoTTransportMessage;
             }
         };
 
@@ -2146,7 +2096,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockedIotHubListener.onMessageReceived(mockIoTMessage, null);
+                mockedIotHubListener.onMessageReceived(mockIoTTransportMessage, null);
                 times = 1;
             }
         };
@@ -2174,6 +2124,8 @@ public class AmqpsIotHubConnectionTest {
                 result = mockedApplicationProperties;
                 mockedApplicationProperties.getValue();
                 result = applicationPropertiesMap;
+                new IotHubTransportMessage((byte[]) any, (MessageType) any);
+                result = mockIoTMessage;
             }
         };
 

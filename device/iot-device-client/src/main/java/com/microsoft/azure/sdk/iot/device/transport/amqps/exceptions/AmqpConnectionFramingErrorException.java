@@ -8,30 +8,30 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 
 /**
- * This exception is thrown when a amqp:unauthorized-access error is encountered over an AMQP connection
+ * This exception is thrown when a amqp:connection:framing-error error is encountered over an AMQP connection
  *
  * See {@linktourl http://docs.oasis-open.org/amqp/core/v1.0/os/amqp-core-complete-v1.0-os.pdf}
  */
-public class AmqpUnauthorizedAcessException extends ProtocolException
+public class AmqpConnectionFramingErrorException extends ProtocolException
 {
-    public static final String errorCode = "amqp:unauthorized-access";
+    public static final String errorCode = "amqp:connection:framing-error";
 
-    public AmqpUnauthorizedAcessException()
+    public AmqpConnectionFramingErrorException()
     {
         super();
     }
 
-    public AmqpUnauthorizedAcessException(String message)
+    public AmqpConnectionFramingErrorException(String message)
     {
         super(message);
     }
 
-    public AmqpUnauthorizedAcessException(String message, Throwable cause)
+    public AmqpConnectionFramingErrorException(String message, Throwable cause)
     {
         super(message, cause);
     }
 
-    public AmqpUnauthorizedAcessException(Throwable cause)
+    public AmqpConnectionFramingErrorException(Throwable cause)
     {
         super(cause);
     }

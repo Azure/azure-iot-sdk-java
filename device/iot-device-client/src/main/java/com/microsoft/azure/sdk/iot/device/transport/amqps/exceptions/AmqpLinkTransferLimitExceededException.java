@@ -8,33 +8,33 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 
 /**
- * This exception is thrown when a amqp:session:handle-in-use error is encountered over an AMQP connection
+ * This exception is thrown when a amqp:link:transfer-limit-exceeded error is encountered over an AMQP connection
  *
  * See {@linktourl http://docs.oasis-open.org/amqp/core/v1.0/os/amqp-core-complete-v1.0-os.pdf}
  */
-public class AmqpHandleInUseException extends ProtocolException
+public class AmqpLinkTransferLimitExceededException extends ProtocolException
 {
-    public static final String errorCode = "amqp:session:handle-in-use";
+    public static final String errorCode = "amqp:link:transfer-limit-exceeded";
 
-    public AmqpHandleInUseException()
+    public AmqpLinkTransferLimitExceededException()
     {
         super();
         this.isRetryable = true;
     }
 
-    public AmqpHandleInUseException(String message)
+    public AmqpLinkTransferLimitExceededException(String message)
     {
         super(message);
         this.isRetryable = true;
     }
 
-    public AmqpHandleInUseException(String message, Throwable cause)
+    public AmqpLinkTransferLimitExceededException(String message, Throwable cause)
     {
         super(message, cause);
         this.isRetryable = true;
     }
 
-    public AmqpHandleInUseException(Throwable cause)
+    public AmqpLinkTransferLimitExceededException(Throwable cause)
     {
         super(cause);
         this.isRetryable = true;

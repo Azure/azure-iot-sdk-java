@@ -283,7 +283,7 @@ public class AmqpsSessionDeviceOperationTest
         };
     }
 
-    @Test (expected = IotHubServiceException.class)
+    @Test (expected = TransportException.class)
     public void authenticateLockThrows() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange

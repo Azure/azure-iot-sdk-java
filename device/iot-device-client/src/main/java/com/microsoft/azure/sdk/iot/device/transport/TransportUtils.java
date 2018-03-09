@@ -3,31 +3,24 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+
 public class TransportUtils
 {
     public static final String JAVA_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.iot-device-client/";
     public static final String CLIENT_VERSION = "1.9.0";
 
-    private static final byte[] SLEEP_INTERVALS = {1, 2, 4, 8, 16, 32, 60};
-    /** Generates a reconnection time with an exponential backoff
-     * and a maximum value of 60 seconds.
-     *
-     * @param currentAttempt the number of attempts
-     * @return the sleep interval in milliseconds until the next attempt.
-     */
-    public static int generateSleepInterval(int currentAttempt)
+    public static void throwTransportExceptionWithIotHubServiceType(String message, TransportException.IotHubService service) throws TransportException
     {
-        if (currentAttempt > 7)
-        {
-            return SLEEP_INTERVALS[6] * 1000;
-        }
-        else if (currentAttempt > 0)
-        {
-            return SLEEP_INTERVALS[currentAttempt - 1] * 1000;
-        }
-        else
-        {
-            return 0;
-        }
+        TransportException transportException = new TransportException(message);
+        transportException.setIotHubService(service);
+        throw transportException;
+    }
+
+    public static void throwTransportExceptionWithIotHubServiceType(Exception e, TransportException.IotHubService service) throws TransportException
+    {
+        TransportException transportException = new TransportException(e);
+        transportException.setIotHubService(service);
+        throw transportException;
     }
 }

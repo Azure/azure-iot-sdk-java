@@ -15,18 +15,18 @@ class AmqpsSessionManager
     AmqpsSessionManager(DeviceClientConfig deviceClientConfig);
     void addDeviceOperationSession(DeviceClientConfig deviceClientConfig);
     void closeNow();
-    public void authenticate() throws IOException;
-    public void openDeviceOperationLinks() throws IOException;
-    void onConnectionInit(Connection connection) throws IOException;
-    void onConnectionBound(Transport transport, SSLContext iotHubSSlContext);
-    void onLinkInit(Link link) throws IOException, IllegalArgumentException;
+    public void authenticate() throws TransportException;
+    public void openDeviceOperationLinks() throws TransportException;
+    void onConnectionInit(Connection connection) throws TransportException;
+    void onConnectionBound(Transport transport, SSLContext iotHubSSlContext)throws TransportException;
+    void onLinkInit(Link link) throws TransportException, IllegalArgumentException;
     Boolean onLinkRemoteOpen(Event event);
-    Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws IOException;
-    AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, IOException;
+    Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws TransportException;
+    AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, TransportException;
     Boolean isLinkFound(String linkName);
     Boolean isAuthenticationOpened();
-    AmqpsConvertToProtonReturnValue convertToProton(com.microsoft.azure.sdk.iot.device.Message message) throws IOException;
-    AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws IOException;
+    AmqpsConvertToProtonReturnValue convertToProton(com.microsoft.azure.sdk.iot.device.Message message) throws TransportException;
+    AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws TransportException;
 ```
 
 

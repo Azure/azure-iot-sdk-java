@@ -13,7 +13,6 @@ import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,13 +29,16 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
 
     /**
      * This constructor creates an instance of AmqpsDeviceTelemetry class and initializes member variables
+     *
+     * @param deviceClientConfig The configuration settings for an IoT Hub client
+     * @throws IllegalArgumentException if the deviceClientConfig argument is null
      */
-    AmqpsDeviceTelemetry(DeviceClientConfig deviceClientConfig) throws TransportException
+    AmqpsDeviceTelemetry(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
     {
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig argument is null.]
         if (deviceClientConfig == null)
         {
-            throwTelemetryTransportException(new IllegalArgumentException("The deviceId cannot be null or empty."));
+            new IllegalArgumentException("The deviceId cannot be null or empty.");
         }
 
         this.deviceClientConfig = deviceClientConfig;
@@ -89,24 +91,16 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
      * @param length The number of bytes to be send related to the offset
      * @param deliveryTag The unique identfier of the delivery
      * @return delivery tag
-     * @throws TransportException if sender link has not been initialized
-     * @throws TransportException if deliveryTag's length is 0
+     * @throws IllegalStateException if sender link has not been initialized
+     * @throws IllegalArgumentException if deliveryTag's length is 0
      */
     @Override
-    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws TransportException
+    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
     {
         if (messageType == MessageType.DEVICE_TELEMETRY)
         {
-            try
-            {
-                // Codes_SRS_AMQPSDEVICETELEMETRY_12_007: [The function shall call the super function with the arguments and return with it's return value.]
-                return super.sendMessageAndGetDeliveryHash(messageType, msgData, offset, length, deliveryTag);
-            }
-            catch (TransportException e)
-            {
-                e.setIotHubService(TransportException.IotHubService.TELEMETRY);
-                throw e;
-            }
+            // Codes_SRS_AMQPSDEVICETELEMETRY_12_007: [The function shall call the super function with the arguments and return with it's return value.]
+            return super.sendMessageAndGetDeliveryHash(messageType, msgData, offset, length, deliveryTag);
         }
         else
         {
@@ -122,7 +116,7 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
      * @param linkName The receiver link's name to read from
      * @return the received message
      * @throws IllegalArgumentException if linkName argument is empty
-     * @throws IOException if Proton throws
+     * @throws TransportException if Proton throws
      */
     @Override
     protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws TransportException
@@ -320,19 +314,5 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
         Section section = new Data(binary);
         outgoingMessage.setBody(section);
         return outgoingMessage;
-    }
-
-    private void throwTelemetryTransportException(String message) throws TransportException
-    {
-        TransportException transportException = new TransportException(message);
-        transportException.setIotHubService(TransportException.IotHubService.TELEMETRY);
-        throw transportException;
-    }
-
-    private void throwTelemetryTransportException(Exception e) throws TransportException
-    {
-        TransportException transportException = new TransportException(e);
-        transportException.setIotHubService(TransportException.IotHubService.TELEMETRY);
-        throw transportException;
     }
 }

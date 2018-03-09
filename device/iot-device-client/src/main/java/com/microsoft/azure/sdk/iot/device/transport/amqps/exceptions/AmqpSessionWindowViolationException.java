@@ -12,29 +12,29 @@ import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
  *
  * See {@linktourl http://docs.oasis-open.org/amqp/core/v1.0/os/amqp-core-complete-v1.0-os.pdf}
  */
-public class AmqpWindowViolationException extends ProtocolException
+public class AmqpSessionWindowViolationException extends ProtocolException
 {
     public static final String errorCode = "amqp:session:window-violation";
 
-    public AmqpWindowViolationException()
+    public AmqpSessionWindowViolationException()
     {
         super();
         this.isRetryable = true;
     }
 
-    public AmqpWindowViolationException(String message)
+    public AmqpSessionWindowViolationException(String message)
     {
         super(message);
         this.isRetryable = true;
     }
 
-    public AmqpWindowViolationException(String message, Throwable cause)
+    public AmqpSessionWindowViolationException(String message, Throwable cause)
     {
         super(message, cause);
         this.isRetryable = true;
     }
 
-    public AmqpWindowViolationException(Throwable cause)
+    public AmqpSessionWindowViolationException(Throwable cause)
     {
         super(cause);
         this.isRetryable = true;

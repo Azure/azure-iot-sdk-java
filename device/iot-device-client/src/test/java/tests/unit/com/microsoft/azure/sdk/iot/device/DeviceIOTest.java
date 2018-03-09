@@ -7,9 +7,7 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportNew;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTransport;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransport;
 import mockit.*;
 import org.junit.Test;
@@ -42,9 +40,6 @@ public class DeviceIOTest
     IotHubReceiveTask mockIotHubReceiveTask;
 
     @Mocked
-    AmqpsTransport mockAmqpsTransport;
-
-    @Mocked
     HttpsTransport mockHttpsTransport;
 
     @Mocked
@@ -67,13 +62,13 @@ public class DeviceIOTest
     private final static long RECEIVE_PERIOD_MILLIS_MQTT = 10L;
     private final static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
-    private Object newDeviceIOAmqp()
+    private Object newDeviceIO()
     {
         new NonStrictExpectations()
         {
             {
-                new AmqpsTransport(mockConfig);
-                result = mockAmqpsTransport;
+                new IotHubTransportNew(mockConfig);
+                result = mockedTransport;
             }
         };
 
@@ -140,16 +135,16 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsTransport(mockConfig);
-                result = mockAmqpsTransport;
+                new IotHubTransportNew(mockConfig);
+                result = mockedTransport;
                 times = 1;
             }
         };
 
         // act
         Object deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                mockConfig, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                new Class[] {DeviceClientConfig.class, long.class, long.class},
+                mockConfig, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
 
         // assert
         assertEquals(mockConfig, Deencapsulation.getField(deviceIO, "config"));
@@ -255,8 +250,8 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                new AmqpsTransport(mockConfig);
-                result = mockAmqpsTransport;
+                new IotHubTransportNew(mockConfig);
+                result = mockedTransport;
                 times = 1;
             }
         };
@@ -337,7 +332,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
@@ -352,13 +347,13 @@ public class DeviceIOTest
     public void openAmqpCreateSSLContextSuccess() throws URISyntaxException, IOException, TransportException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // assert
         new NonStrictExpectations()
         {
             {
-                mockAmqpsTransport.open(mockedCollection);
+                //mockedTransport.open(mockedCollection);
                 times = 1;
             }
         };
@@ -375,13 +370,13 @@ public class DeviceIOTest
     public void openSuccess() throws URISyntaxException, IOException, TransportException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // assert
         new NonStrictExpectations()
         {
             {
-                mockAmqpsTransport.open(mockedCollection);
+                //mockAmqpsTransport.open(mockedCollection);
                 times = 1;
                 new IotHubSendTask(mockedTransport);
                 result = mockIotHubSendTask;
@@ -415,13 +410,13 @@ public class DeviceIOTest
     public void openThrowsIOExceptionIfTransportOpenThrows() throws URISyntaxException, IOException, TransportException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // assert
         new NonStrictExpectations()
         {
             {
-                mockAmqpsTransport.open(mockedCollection);
+                //mockAmqpsTransport.open(mockedCollection);
                 result = new IOException();
                 times = 1;
             }
@@ -447,7 +442,7 @@ public class DeviceIOTest
     public void multiplexOpenDoesNothingIfStateOpened() throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         ArrayList<DeviceClient> deviceClientList = new ArrayList<>();
 
@@ -469,7 +464,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         final ArrayList<DeviceClient> deviceClientList = new ArrayList<>();
 
         // assert
@@ -512,7 +507,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
@@ -534,7 +529,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
@@ -544,7 +539,7 @@ public class DeviceIOTest
         new Verifications()
         {
             {
-                mockAmqpsTransport.close();
+                //mockAmqpsTransport.close();
                 times = 1;
             }
         };
@@ -556,7 +551,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // act
         Deencapsulation.invoke(deviceIO, "close");
@@ -571,7 +566,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
@@ -589,7 +584,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
@@ -604,7 +599,7 @@ public class DeviceIOTest
     public void multiplexCloseCallClose() throws IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         new StrictExpectations()
         {
@@ -631,7 +626,7 @@ public class DeviceIOTest
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
@@ -643,7 +638,7 @@ public class DeviceIOTest
             {
                 mockMsg.setIotHubConnectionString(mockConfig.getIotHubConnectionString());
                 times = 1;
-                mockAmqpsTransport.addMessage(mockMsg, mockCallback, context);
+                //mockAmqpsTransport.addMessage(mockMsg, mockCallback, context);
                 times = 1;
             }
         };
@@ -657,7 +652,7 @@ public class DeviceIOTest
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
@@ -675,7 +670,7 @@ public class DeviceIOTest
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
@@ -690,7 +685,7 @@ public class DeviceIOTest
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
@@ -708,7 +703,7 @@ public class DeviceIOTest
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
@@ -720,7 +715,7 @@ public class DeviceIOTest
             {
                 mockMsg.setIotHubConnectionString(mockConfig.getIotHubConnectionString());
                 times = 1;
-                mockAmqpsTransport.addMessage(mockMsg, mockCallback, context);
+                mockedTransport.addMessage(mockMsg, mockCallback, context);
                 times = 1;
             }
         };
@@ -734,7 +729,7 @@ public class DeviceIOTest
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
@@ -752,7 +747,7 @@ public class DeviceIOTest
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
@@ -767,7 +762,7 @@ public class DeviceIOTest
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
@@ -782,7 +777,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
@@ -798,7 +793,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // act
         long receivePeriodInMilliseconds = Deencapsulation.invoke(deviceIO, "getReceivePeriodInMilliseconds") ;
@@ -814,7 +809,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
 
         // act
@@ -832,7 +827,7 @@ public class DeviceIOTest
         // arrange
         final long interval = 1234L;
         final long lastInterval = 4321L;
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         Deencapsulation.invoke(deviceIO, "setReceivePeriodInMilliseconds",  lastInterval);
         new NonStrictExpectations()
         {
@@ -875,7 +870,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException, InterruptedException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.setField(deviceIO, "receiveTask", null);
 
@@ -889,7 +884,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException, InterruptedException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // act
         Deencapsulation.invoke(deviceIO, "setReceivePeriodInMilliseconds",  0L);
@@ -898,12 +893,12 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_030: [If the the provided interval is zero or negative, the setReceivePeriodInMilliseconds shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void setReceivePeriodInMillisecondsNegativeIntervalThrows(
-            @Mocked final AmqpsTransport mockAmqpsTransport,
+            @Mocked final IotHubTransportNew mockedTransport,
             @Mocked final DeviceClientConfig mockConfig)
             throws URISyntaxException, IOException, InterruptedException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // act
         Deencapsulation.invoke(deviceIO, "setReceivePeriodInMilliseconds",  -10L);
@@ -915,7 +910,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // act
         long sendPeriodInMilliseconds = Deencapsulation.invoke(deviceIO, "getSendPeriodInMilliseconds" );
@@ -931,7 +926,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
 
         // act
@@ -949,7 +944,7 @@ public class DeviceIOTest
         // arrange
         final long interval = 1234L;
         final long lastInterval = 4321L;
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         Deencapsulation.invoke(deviceIO, "setSendPeriodInMilliseconds",  lastInterval);
         new NonStrictExpectations()
         {
@@ -992,7 +987,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException, InterruptedException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.setField(deviceIO, "sendTask", null);
 
@@ -1006,7 +1001,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException, InterruptedException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // act
         Deencapsulation.invoke(deviceIO, "setSendPeriodInMilliseconds",  0L);
@@ -1018,7 +1013,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException, InterruptedException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // act
         Deencapsulation.invoke(deviceIO, "setSendPeriodInMilliseconds",  -10L);
@@ -1030,7 +1025,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
@@ -1046,7 +1041,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // act
         boolean isOpen = Deencapsulation.invoke(deviceIO, "isOpen" );
@@ -1061,13 +1056,13 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // assert
         new NonStrictExpectations()
         {
             {
-                mockAmqpsTransport.isEmpty();
+                mockedTransport.isEmpty();
                 result = true;
                 times = 1;
             }
@@ -1086,13 +1081,13 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
 
         // assert
         new NonStrictExpectations()
         {
             {
-                mockAmqpsTransport.isEmpty();
+                mockedTransport.isEmpty();
                 result = false;
                 times = 1;
             }
@@ -1110,7 +1105,7 @@ public class DeviceIOTest
     public void registerConnectionStateCallbackSuccess(@Mocked final IotHubConnectionStateCallback mockedStateCB)
     {
         //arrange
-        final Object deviceIO = newDeviceIOAmqp();
+        final Object deviceIO = newDeviceIO();
         
         //act
         Deencapsulation.invoke(deviceIO, "registerConnectionStateCallback", mockedStateCB, Object.class);
@@ -1119,7 +1114,7 @@ public class DeviceIOTest
         new Verifications()
         {
             {
-                mockAmqpsTransport.registerConnectionStateCallback(mockedStateCB, null);
+                mockedTransport.registerConnectionStateCallback(mockedStateCB, null);
                 times = 1;
             }
         };

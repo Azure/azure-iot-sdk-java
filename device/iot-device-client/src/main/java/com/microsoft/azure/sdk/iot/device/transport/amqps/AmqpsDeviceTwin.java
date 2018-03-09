@@ -5,16 +5,16 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
-import org.apache.qpid.proton.engine.Session;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -125,7 +125,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
      * @throws IllegalArgumentException if deliveryTag's length is 0
      */
     @Override
-    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException, TransportException
+    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
     {
         if (messageType == MessageType.DEVICE_TWIN)
         {
@@ -146,7 +146,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
      * @param linkName The receiver link's name to read from
      * @return the received message
      * @throws IllegalArgumentException if linkName argument is empty
-     * @throws IOException if Proton throws
+     * @throws TransportException if Proton throws
      */
     @Override
     protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, TransportException
@@ -172,7 +172,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
      * @return the converted message
      */
     @Override
-    protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws IOException
+    protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws TransportException
     {
         if ((amqpsMessage.getAmqpsMessageType() == MessageType.DEVICE_TWIN) &&
             (this.deviceClientConfig.getDeviceId() == deviceClientConfig.getDeviceId()))
@@ -203,7 +203,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
      * @return the converted message
      */
     @Override
-    protected AmqpsConvertToProtonReturnValue convertToProton(Message message) throws IOException
+    protected AmqpsConvertToProtonReturnValue convertToProton(Message message) throws TransportException
     {
         if (message.getMessageType() == MessageType.DEVICE_TWIN)
         {
@@ -229,7 +229,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
      * @return the corresponding IoT Hub message.
      */
     @Override
-    protected Message protonMessageToIoTHubMessage(MessageImpl protonMsg) throws IOException
+    protected Message protonMessageToIoTHubMessage(MessageImpl protonMsg) throws TransportException
     {
         byte[] msgBody;
 
@@ -305,7 +305,9 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
                             iotHubTransportMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
                             break;
                         default:
-                            throw new IOException("Invalid device operation type in protonMessageToIoTHubMessage!");
+                            TransportUtils.throwTransportExceptionWithIotHubServiceType(
+                                    "Invalid device operation type in protonMessageToIoTHubMessage!",
+                                    TransportException.IotHubService.TWIN);
                     }
                     // Codes_SRS_AMQPSDEVICETWIN_12_043: [The function shall remove the correlation from the correlationId list.]
                     this.correlationIdList.remove(properties.getCorrelationId().toString());
@@ -360,7 +362,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
      * @return the proton message.
      */
     @Override
-    protected MessageImpl iotHubMessageToProtonMessage(com.microsoft.azure.sdk.iot.device.Message message) throws IOException
+    protected MessageImpl iotHubMessageToProtonMessage(com.microsoft.azure.sdk.iot.device.Message message) throws TransportException
     {
         IotHubTransportMessage deviceTwinMessage = (IotHubTransportMessage)message;
 
@@ -419,7 +421,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
                     catch (NumberFormatException e)
                     {
                         // Codes_SRS_AMQPSDEVICETWIN_21_050: [If the provided version is not `Long`, the function shall throw IOException.]
-                        throw new IOException("Reported version is not a Long", e);
+                        TransportUtils.throwTransportExceptionWithIotHubServiceType(e, TransportException.IotHubService.TWIN);
                     }
                 }
                 break;
@@ -436,7 +438,9 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
                 messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE), MESSAGE_ANNOTATION_FIELD_VALUE_NOTIFICATIONS_TWIN_PROPERTIES_DESIRED);
                 break;
             default:
-                throw new IOException("Invalid device operation type in iotHubMessageToProtonMessage!");
+                TransportUtils.throwTransportExceptionWithIotHubServiceType(
+                        "Invalid device operation type in iotHubMessageToProtonMessage!",
+                        TransportException.IotHubService.TWIN);
         }
         MessageAnnotations messageAnnotations = new MessageAnnotations(messageAnnotationsMap);
         outgoingMessage.setMessageAnnotations(messageAnnotations);

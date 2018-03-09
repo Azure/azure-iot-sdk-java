@@ -88,9 +88,9 @@ public interface IotHubTransport extends Closeable
      * </p>
      * If no message callback is set, the function will do nothing.
      *
-     * @throws IOException if the server could not be reached.
+     * @throws TransportException if the server could not be reached.
      */
-    void handleMessage() throws IOException;
+    void handleMessage() throws IOException, TransportException;
 
     /**
      * Returns {@code true} if the transport has no more messages to handle,

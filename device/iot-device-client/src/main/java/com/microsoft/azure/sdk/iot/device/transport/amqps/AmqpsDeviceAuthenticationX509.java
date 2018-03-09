@@ -2,6 +2,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import org.apache.qpid.proton.engine.SslDomain;
 import org.apache.qpid.proton.engine.Transport;
@@ -41,7 +42,7 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
      * Do nothing in SAS case.
      */
     @Override
-    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
+    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag)
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_004: [The function shall override the default behaviour and return null.]
         return null;
@@ -51,7 +52,7 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
      * Do nothing in SAS case.
      */
     @Override
-    protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException
+    protected AmqpsMessage getMessageFromReceiverLink(String linkName)
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_005: [The function shall override the default behaviour and return null.]
         return null;
@@ -61,9 +62,10 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
      * Set authentication mode to PLAIN for SAS.
      *
      * @param transport The transport to set the SSL context to
+     * @throws TransportException if setSslDomain throws IOException
      */
     @Override
-    protected void setSslDomain(Transport transport)
+    protected void setSslDomain(Transport transport) throws TransportException
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_006: [The function shall throw IllegalArgumentException if any of the input parameter is null.]
         if (transport == null)
@@ -80,6 +82,7 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
         catch (IOException e)
         {
             logger.LogDebug("setSslDomain has thrown exception: %s", e.getMessage());
+            throw new TransportException(e);
         }
 
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_011: [The function shall set the domain on the transport.]

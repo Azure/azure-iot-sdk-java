@@ -129,7 +129,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
      * @param linkName The receiver link's name to read from
      * @return the Proton message
      * @throws IllegalArgumentException if link name argument is empty
-     * @throws IOException if Proton throws
+     * @throws TransportException if Proton throws
      */
     @Override
     protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, TransportException
@@ -190,9 +190,10 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
      * ANONYMUS and set domain on the transport 
      * 
      * @param transport Proton-J Transport object
+     * @throws TransportException if Proton throws IOException
      */
     @Override
-    protected void setSslDomain(Transport transport)
+    protected void setSslDomain(Transport transport) throws TransportException
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_011: [The function shall set get the sasl layer from the transport.]
         Sasl sasl = transport.sasl();
@@ -208,6 +209,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         catch (IOException e)
         {
             logger.LogDebug("setSslDomain has thrown exception: %s", e.getMessage());
+            throw new TransportException(e);
         }
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_014: [The function shall set the domain on the transport.]
         transport.ssl(domain);
@@ -219,9 +221,10 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
      * 
      * @param deviceClientConfig device configuration to use for 
      *                           authentication
+     * @throws TransportException when CBS Authentication Message failed to be created
      */
     @Override
-    protected void authenticate(DeviceClientConfig deviceClientConfig, UUID correlationId)
+    protected void authenticate(DeviceClientConfig deviceClientConfig, UUID correlationId) throws TransportException
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_030: [The function shall create a CBS authentication message using the device configuration and the correlationID.]
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_031: [The function shall set the CBS related properties on the message.]
@@ -264,10 +267,10 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
      * client 
      * 
      * @param deviceClientConfig device client configuration
-     * 
+     * @throws TransportException when failed to get renewed SAS token
      * @return MessageImpl the Proton-j message to send
      */
-    private MessageImpl createCBSAuthenticationMessage(DeviceClientConfig deviceClientConfig, UUID messageId)
+    private MessageImpl createCBSAuthenticationMessage(DeviceClientConfig deviceClientConfig, UUID messageId) throws TransportException
     {
         MessageImpl outgoingMessage = (MessageImpl) Proton.message();
 
@@ -299,6 +302,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         {
             logger.LogDebug("getRenewedSasToken has thrown exception: %s", e.getMessage());
             outgoingMessage = null;
+            throw new TransportException(e);
         }
 
         return outgoingMessage;

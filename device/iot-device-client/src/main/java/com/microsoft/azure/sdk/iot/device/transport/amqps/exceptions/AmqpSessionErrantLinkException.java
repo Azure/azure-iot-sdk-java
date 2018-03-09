@@ -8,30 +8,30 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 
 /**
- * This exception is thrown when a amqp:connection:framing-error error is encountered over an AMQP connection
+ * This exception is thrown when a amqp:session:errant-link error is encountered over an AMQP connection
  *
  * See {@linktourl http://docs.oasis-open.org/amqp/core/v1.0/os/amqp-core-complete-v1.0-os.pdf}
  */
-public class AmqpFramingErrorException extends ProtocolException
+public class AmqpSessionErrantLinkException extends ProtocolException
 {
-    public static final String errorCode = "amqp:connection:framing-error";
+    public static final String errorCode = "amqp:session:errant-link";
 
-    public AmqpFramingErrorException()
+    public AmqpSessionErrantLinkException()
     {
         super();
     }
 
-    public AmqpFramingErrorException(String message)
+    public AmqpSessionErrantLinkException(String message)
     {
         super(message);
     }
 
-    public AmqpFramingErrorException(String message, Throwable cause)
+    public AmqpSessionErrantLinkException(String message, Throwable cause)
     {
         super(message, cause);
     }
 
-    public AmqpFramingErrorException(Throwable cause)
+    public AmqpSessionErrantLinkException(Throwable cause)
     {
         super(cause);
     }

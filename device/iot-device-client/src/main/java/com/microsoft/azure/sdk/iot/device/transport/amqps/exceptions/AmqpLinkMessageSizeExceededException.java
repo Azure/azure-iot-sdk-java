@@ -8,33 +8,33 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 
 /**
- * This exception is thrown when a amqp:session:unattached-handle error is encountered over an AMQP connection
+ * This exception is thrown when a amqp:link:message-size-exceeded error is encountered over an AMQP connection
  *
  * See {@linktourl http://docs.oasis-open.org/amqp/core/v1.0/os/amqp-core-complete-v1.0-os.pdf}
  */
-public class AmqpUnattachedHandleException extends ProtocolException
+public class AmqpLinkMessageSizeExceededException extends ProtocolException
 {
-    public static final String errorCode = "amqp:session:unattached-handle";
+    public static final String errorCode = "amqp:link:message-size-exceeded";
 
-    public AmqpUnattachedHandleException()
+    public AmqpLinkMessageSizeExceededException()
     {
         super();
         this.isRetryable = true;
     }
 
-    public AmqpUnattachedHandleException(String message)
+    public AmqpLinkMessageSizeExceededException(String message)
     {
         super(message);
         this.isRetryable = true;
     }
 
-    public AmqpUnattachedHandleException(String message, Throwable cause)
+    public AmqpLinkMessageSizeExceededException(String message, Throwable cause)
     {
         super(message, cause);
         this.isRetryable = true;
     }
 
-    public AmqpUnattachedHandleException(Throwable cause)
+    public AmqpLinkMessageSizeExceededException(Throwable cause)
     {
         super(cause);
         this.isRetryable = true;

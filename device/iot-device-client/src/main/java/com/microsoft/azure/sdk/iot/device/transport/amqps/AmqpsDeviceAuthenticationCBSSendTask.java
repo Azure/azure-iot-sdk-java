@@ -13,8 +13,9 @@ public final class AmqpsDeviceAuthenticationCBSSendTask implements Runnable
      * Task runner for CBS authentication.
      *
      * @param amqpsDeviceAuthenticationCBS the class contining the function to run.
+     * @throws IllegalArgumentException if amqpsDeviceAuthenticationCBS is null
      */
-    public AmqpsDeviceAuthenticationCBSSendTask(AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS)
+    public AmqpsDeviceAuthenticationCBSSendTask(AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS) throws IllegalArgumentException
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBSSENDTASK_12_001: [The constructor shall throw IllegalArgumentException if the amqpsDeviceAuthenticationCBS parameter is null.]
         if (amqpsDeviceAuthenticationCBS == null)
