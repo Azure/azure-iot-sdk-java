@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
+import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
@@ -22,6 +23,7 @@ abstract public class Mqtt implements MqttCallback
 {
     private MqttConnection mqttConnection;
     private DeviceClientConfig deviceClientConfig = null;
+    private CustomLogger logger = null;
     ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
     Object mqttLock = null;
 
@@ -65,6 +67,7 @@ abstract public class Mqtt implements MqttCallback
         this.mqttLock = mqttConnection.getMqttLock();
         this.userSpecifiedSASTokenExpiredOnRetry = false;
         this.listener = listener;
+        this.logger = new CustomLogger(Mqtt.class);
     }
 
     /**
@@ -366,7 +369,7 @@ abstract public class Mqtt implements MqttCallback
                 int currentReconnectionAttempt = 0;
                 while (!this.mqttConnection.getMqttAsyncClient().isConnected())
                 {
-                    System.out.println("Lost connection to the server. Reconnecting " + currentReconnectionAttempt + " time.");
+                    logger.LogInfo("Lost connection to the server. Reconnecting " + currentReconnectionAttempt + " time.");
                     try
                     {
                         currentReconnectionAttempt++;
@@ -430,7 +433,7 @@ abstract public class Mqtt implements MqttCallback
             }
             else
             {
-                System.out.println("Initialise before using this..");
+                logger.LogWarn("Initialise before using this..");
             }
         }
     }
