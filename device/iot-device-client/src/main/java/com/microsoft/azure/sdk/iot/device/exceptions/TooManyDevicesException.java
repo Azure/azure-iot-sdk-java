@@ -5,7 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.device.exceptions;
 
-public class TooManyDevicesException extends ProtocolException
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+
+public class TooManyDevicesException extends IotHubServiceException
 {
     public TooManyDevicesException()
     {
@@ -25,5 +27,11 @@ public class TooManyDevicesException extends ProtocolException
     public TooManyDevicesException(Throwable cause)
     {
         super(cause);
+    }
+
+    @Override
+    public IotHubStatusCode getStatusCode()
+    {
+        return IotHubStatusCode.TOO_MANY_DEVICES;
     }
 }

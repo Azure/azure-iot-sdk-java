@@ -5,7 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.device.exceptions;
 
-public class PreconditionFailedException extends ProtocolException
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+
+public class PreconditionFailedException extends IotHubServiceException
 {
     public PreconditionFailedException()
     {
@@ -25,5 +27,11 @@ public class PreconditionFailedException extends ProtocolException
     public PreconditionFailedException(Throwable cause)
     {
         super(cause);
+    }
+
+    @Override
+    public IotHubStatusCode getStatusCode()
+    {
+        return IotHubStatusCode.PRECONDITION_FAILED;
     }
 }

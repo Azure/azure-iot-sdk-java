@@ -5,7 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.device.exceptions;
 
-public class RequestEntityTooLargeException extends ProtocolException
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+
+public class RequestEntityTooLargeException extends IotHubServiceException
 {
     public RequestEntityTooLargeException()
     {
@@ -25,5 +27,11 @@ public class RequestEntityTooLargeException extends ProtocolException
     public RequestEntityTooLargeException(Throwable cause)
     {
         super(cause);
+    }
+
+    @Override
+    public IotHubStatusCode getStatusCode()
+    {
+        return IotHubStatusCode.REQUEST_ENTITY_TOO_LARGE;
     }
 }

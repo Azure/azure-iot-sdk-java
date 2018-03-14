@@ -5,6 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.transport.https;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
@@ -21,7 +22,7 @@ import static org.junit.Assert.assertThat;
 public class HttpsRequestIT
 {
     @Test
-    public void sendHttpsRequestGetsCorrectResponse() throws IOException
+    public void sendHttpsRequestGetsCorrectResponse() throws IOException, TransportException
     {
         URL url = new URL("https://fonts.googleapis.com/css?family=Inconsolata");
         HttpsMethod method = HttpsMethod.GET;

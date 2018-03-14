@@ -6,7 +6,6 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportNew;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransport;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;

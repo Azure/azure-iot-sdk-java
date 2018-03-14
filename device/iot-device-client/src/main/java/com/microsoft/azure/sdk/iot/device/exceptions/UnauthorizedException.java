@@ -5,7 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.device.exceptions;
 
-public class UnauthorizedException extends ProtocolException
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+
+public class UnauthorizedException extends IotHubServiceException
 {
     public UnauthorizedException()
     {
@@ -25,5 +27,11 @@ public class UnauthorizedException extends ProtocolException
     public UnauthorizedException(Throwable cause)
     {
         super(cause);
+    }
+
+    @Override
+    public IotHubStatusCode getStatusCode()
+    {
+        return IotHubStatusCode.UNAUTHORIZED;
     }
 }

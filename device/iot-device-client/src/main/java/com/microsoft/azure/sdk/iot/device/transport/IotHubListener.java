@@ -17,11 +17,11 @@ public interface IotHubListener
     void onMessageSent(Message message, Throwable e);
 
     //message received
-    void onMessageReceived(Message message, Throwable e);
+    void onMessageReceived(IotHubTransportMessage transportMessage);
 
     //connection drop
     void onConnectionLost(Throwable e);
 
     //connection established
-    void onConnectionEstablished(Throwable e);
+    void onConnectionEstablished();
 }

@@ -3,12 +3,15 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ProtocolException;
+import java.net.NoRouteToHostException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,9 +49,9 @@ public class HttpsConnection
      * @param url the URL for the HTTPS connection.
      * @param method the HTTPS method (i.e. GET).
      *
-     * @throws IOException if the connection could not be opened.
+     * @throws TransportException if the connection could not be opened.
      */
-    public HttpsConnection(URL url, HttpsMethod method) throws IOException
+    public HttpsConnection(URL url, HttpsMethod method) throws TransportException
     {
         // Codes_SRS_HTTPSCONNECTION_11_022: [If the URI given does not use the HTTPS protocol, the constructor shall throw an IllegalArgumentException.]
         String protocol = url.getProtocol();
@@ -61,31 +64,46 @@ public class HttpsConnection
             throw new IllegalArgumentException(errMsg);
         }
 
-        // Codes_SRS_HTTPSCONNECTION_11_001: [The constructor shall open a connection to the given URL.]
-        // Codes_SRS_HTTPSCONNECTION_11_002: [The constructor shall throw an IOException if the connection was unable to be opened.]
-        this.connection = (HttpsURLConnection) url.openConnection();
-        // Codes_SRS_HTTPSCONNECTION_11_021: [The constructor shall set the HTTPS method to the given method.]
-        this.connection.setRequestMethod(method.name());
         this.body = new byte[0];
+
+        try
+        {
+            // Codes_SRS_HTTPSCONNECTION_11_001: [The constructor shall open a connection to the given URL.]
+            this.connection = (HttpsURLConnection) url.openConnection();
+            // Codes_SRS_HTTPSCONNECTION_11_021: [The constructor shall set the HTTPS method to the given method.]
+            this.connection.setRequestMethod(method.name());
+        }
+        catch (IOException e)
+        {
+            // Codes_SRS_HTTPSCONNECTION_11_002: [The constructor shall throw a TransportException if the connection was unable to be opened.]
+            throw HttpsConnection.buildTransportException(e);
+        }
     }
 
     /**
      * Sends the request to the URL given in the constructor.
      *
-     * @throws IOException if the connection could not be established, or the
+     * @throws TransportException if the connection could not be established, or the
      * server responded with a bad status code.
      */
-    public void connect() throws IOException
+    public void connect() throws TransportException
     {
-        // Codes_SRS_HTTPSCONNECTION_11_004: [The function shall stream the request body, if present, through the connection.]
-        if (this.body.length > 0)
+        try
         {
-            this.connection.setDoOutput(true);
-            this.connection.getOutputStream().write(this.body);
+            // Codes_SRS_HTTPSCONNECTION_11_004: [The function shall stream the request body, if present, through the connection.]
+            if (this.body.length > 0)
+            {
+                this.connection.setDoOutput(true);
+                this.connection.getOutputStream().write(this.body);
+            }
+            // Codes_SRS_HTTPSCONNECTION_11_003: [The function shall send a request to the URL given in the constructor.]
+            this.connection.connect();
         }
-        // Codes_SRS_HTTPSCONNECTION_11_003: [The function shall send a request to the URL given in the constructor.]
-        // Codes_SRS_HTTPSCONNECTION_11_005: [The function shall throw an IOException if the connection could not be established, or the server responded with a bad status code.]
-        this.connection.connect();
+        catch (IOException e)
+        {
+            // Codes_SRS_HTTPSCONNECTION_11_005: [The function shall throw a TransportException if the connection could not be established, or the server responded with a bad status code.]
+            throw HttpsConnection.buildTransportException(e);
+        }
     }
 
     /**
@@ -93,12 +111,12 @@ public class HttpsConnection
      *
      * @param method the request method.
      *
-     * @throws IllegalArgumentException if the request currently has a non-empty
+     * @throws TransportException if the request currently has a non-empty
      * body and the new method is not a POST or a PUT. This is because Java's
      * {@link HttpsURLConnection} silently converts the HTTPS method to POST or PUT if a
      * body is written to the request.
      */
-    public void setRequestMethod(HttpsMethod method)
+    public void setRequestMethod(HttpsMethod method) throws TransportException
     {
         // Codes_SRS_HTTPSCONNECTION_11_007: [The function shall throw an IllegalArgumentException if the request currently has a non-empty body and the new method is not a POST or a PUT.]
         if (method != HttpsMethod.POST && method != HttpsMethod.PUT)
@@ -116,9 +134,14 @@ public class HttpsConnection
         {
             this.connection.setRequestMethod(method.name());
         }
-        catch (ProtocolException e)
+        catch (java.net.ProtocolException e)
         {
             // should never happen, since the method names are hard-coded.
+            throw new TransportException(e);
+        }
+        catch (SecurityException e)
+        {
+            throw new TransportException(e);
         }
     }
 
@@ -152,12 +175,12 @@ public class HttpsConnection
      *
      * @param body the request body.
      *
-     * @throws IllegalArgumentException if the request does not currently use
+     * @throws TransportException if the request does not currently use
      * method POST or PUT and the body is non-empty. This is because Java's
      * {@link HttpsURLConnection} silently converts the HTTPS method to POST or PUT if a
      * body is written to the request.
      */
-    public void writeOutput(byte[] body)
+    public void writeOutput(byte[] body) throws TransportException
     {
         // Codes_SRS_HTTPSCONNECTION_11_010: [The function shall throw an IllegalArgumentException if the request does not currently use method POST or PUT and the body is non-empty.]
         HttpsMethod method = HttpsMethod.valueOf(
@@ -183,19 +206,27 @@ public class HttpsConnection
      *
      * @return the response body.
      *
-     * @throws IOException if the input stream could not be accessed, for
+     * @throws TransportException if the input stream could not be accessed, for
      * example if the server could not be reached.
      */
-    public byte[] readInput() throws IOException
+    public byte[] readInput() throws TransportException
     {
-        // Codes_SRS_HTTPSCONNECTION_11_011: [The function shall read from the input stream (response stream) and return the response.]
-        // Codes_SRS_HTTPSCONNECTION_11_012: [The function shall throw an IOException if the input stream could not be accessed.]
-        InputStream inputStream = this.connection.getInputStream();
-        byte[] input = readInputStream(inputStream);
-        // Codes_SRS_HTTPSCONNECTION_11_019: [The function shall close the input stream after it has been completely read.]
-        inputStream.close();
+        try
+        {
+            // Codes_SRS_HTTPSCONNECTION_11_011: [The function shall read from the input stream (response stream) and return the response.]
+            InputStream inputStream = this.connection.getInputStream();
+            byte[] input = readInputStream(inputStream);
+            // Codes_SRS_HTTPSCONNECTION_11_019: [The function shall close the input stream after it has been completely read.]
+            inputStream.close();
 
-        return input;
+            return input;
+        }
+        catch (IOException e)
+        {
+            // Codes_SRS_HTTPSCONNECTION_11_012: [The function shall throw a TransportException if the input stream could not be accessed.]
+            // Codes_SRS_HTTPSCONNECTION_34_027: [If an UnknownHostException or a NoRouteToHostException is encountered, the thrown TransportException shall be retryable.]
+            throw HttpsConnection.buildTransportException(e);
+        }
     }
 
     /**
@@ -203,25 +234,32 @@ public class HttpsConnection
      *
      * @return the error reason.
      *
-     * @throws IOException if the input stream could not be accessed, for
+     * @throws TransportException if the input stream could not be accessed, for
      * example if the server could not be reached.
      */
-    public byte[] readError() throws IOException
+    public byte[] readError() throws TransportException
     {
-        // Codes_SRS_HTTPSCONNECTION_11_013: [The function shall read from the error stream and return the response.]
-        // Codes_SRS_HTTPSCONNECTION_11_014: [The function shall throw an IOException if the error stream could not be accessed.]
-        InputStream errorStream = this.connection.getErrorStream();
-
-        byte[] error = new byte[0];
-        // if there is no error reason, getErrorStream() returns null.
-        if (errorStream != null)
+        try
         {
-            error = readInputStream(errorStream);
-            // Codes_SRS_HTTPSCONNECTION_11_020: [The function shall close the error stream after it has been completely read.]
-            errorStream.close();
-        }
+            // Codes_SRS_HTTPSCONNECTION_11_013: [The function shall read from the error stream and return the response.]
+            InputStream errorStream = this.connection.getErrorStream();
 
-        return error;
+            byte[] error = new byte[0];
+            // if there is no error reason, getErrorStream() returns null.
+            if (errorStream != null)
+            {
+                error = readInputStream(errorStream);
+                // Codes_SRS_HTTPSCONNECTION_11_020: [The function shall close the error stream after it has been completely read.]
+                errorStream.close();
+            }
+
+            return error;
+        }
+        catch (IOException e)
+        {
+            // Codes_SRS_HTTPSCONNECTION_11_014: [The function shall throw a TransportException if the error stream could not be accessed.]
+            throw HttpsConnection.buildTransportException(e);
+        }
     }
 
     /**
@@ -229,13 +267,20 @@ public class HttpsConnection
      *
      * @return the response status code.
      *
-     * @throws IOException if no response was received.
+     * @throws TransportException if no response was received.
      */
-    public int getResponseStatus() throws IOException
+    public int getResponseStatus() throws TransportException
     {
-        // Codes_SRS_HTTPSCONNECTION_11_015: [The function shall return the response status code.]
-        // Codes_SRS_HTTPSCONNECTION_11_016: [The function shall throw an IOException if no response was received.]
-        return this.connection.getResponseCode();
+        try
+        {
+            // Codes_SRS_HTTPSCONNECTION_11_015: [The function shall return the response status code.]
+            return this.connection.getResponseCode();
+        }
+        catch (IOException e)
+        {
+            // Codes_SRS_HTTPSCONNECTION_11_016: [The function shall throw a TransportException if no response was received.]
+            throw HttpsConnection.buildTransportException(e);
+        }
     }
 
     /**
@@ -249,7 +294,6 @@ public class HttpsConnection
     public Map<String, List<String>> getResponseHeaders()
     {
         // Codes_SRS_HTTPSCONNECTION_11_017: [The function shall return a mapping of header field names to the values associated with the header field name.]
-        // Codes_SRS_HTTPSCONNECTION_11_018: [The function shall throw an IOException if no response was received.]
         return this.connection.getHeaderFields();
     }
 
@@ -260,38 +304,44 @@ public class HttpsConnection
      *
      * @return the content of the input stream.
      *
-     * @throws IOException if the input stream could not be read from.
+     * @throws TransportException if the input stream could not be read from.
      */
-    private static byte[] readInputStream(InputStream stream)
-            throws IOException
+    private static byte[] readInputStream(InputStream stream) throws TransportException
     {
-        ArrayList<Byte> byteBuffer = new ArrayList<>();
-        int nextByte = -1;
-        // read(byte[]) reads the byte into the buffer and returns the number
-        // of bytes read, or -1 if the end of the stream has been reached.
-        while ((nextByte = stream.read()) > -1)
+        try
         {
-            byteBuffer.add((byte) nextByte);
-        }
+            ArrayList<Byte> byteBuffer = new ArrayList<>();
+            int nextByte = -1;
+            // read(byte[]) reads the byte into the buffer and returns the number
+            // of bytes read, or -1 if the end of the stream has been reached.
+            while ((nextByte = stream.read()) > -1)
+            {
+                byteBuffer.add((byte) nextByte);
+            }
 
-        int bufferSize = byteBuffer.size();
-        byte[] byteArray = new byte[bufferSize];
-        for (int i = 0; i < bufferSize; ++i)
+            int bufferSize = byteBuffer.size();
+            byte[] byteArray = new byte[bufferSize];
+            for (int i = 0; i < bufferSize; ++i)
+            {
+                byteArray[i] = byteBuffer.get(i);
+            }
+
+            return byteArray;
+        }
+        catch (IOException e)
         {
-            byteArray[i] = byteBuffer.get(i);
+            throw HttpsConnection.buildTransportException(e);
         }
-
-        return byteArray;
     }
 
     void setSSLContext(SSLContext sslContext) throws IllegalArgumentException
     {
         if (sslContext == null)
         {
-            //Codes_SRS_HTTPSCONNECTION_25_025: [The function shall throw IllegalArgumentException if the context is null value.**]**
+            //Codes_SRS_HTTPSCONNECTION_25_025: [The function shall throw IllegalArgumentException if the context is null value.]
             throw new IllegalArgumentException("SSL context cannot be null");
         }
-        //Codes_SRS_HTTPSCONNECTION_25_024: [**The function shall set the the SSL context with the given value.**]**
+        //Codes_SRS_HTTPSCONNECTION_25_024: [The function shall set the the SSL context with the given value.]
         this.connection.setSSLSocketFactory(sslContext.getSocketFactory());
     }
 
@@ -299,5 +349,17 @@ public class HttpsConnection
     protected HttpsConnection()
     {
         this.connection = null;
+    }
+
+    private static TransportException buildTransportException(IOException e)
+    {
+        TransportException transportException = new TransportException(e);
+
+        if (e instanceof NoRouteToHostException || e instanceof UnknownHostException)
+        {
+            transportException.setRetryable(true);
+        }
+
+        return transportException;
     }
 }

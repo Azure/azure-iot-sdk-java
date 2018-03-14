@@ -12,7 +12,7 @@ The underlying HttpsURLConnection is transparently managed by Java. To reuse con
 ```java
 public class HttpsConnection
 {
-    public HttpsConnection(URL url, HttpsMethod method) throws IOException;
+    public HttpsConnection(URL url, HttpsMethod method) throws TransportException;
 
     public void connect() throws IOException;
 
@@ -26,7 +26,7 @@ public class HttpsConnection
 
     public int getResponseStatus() throws IOException;
     public Map<String, List<String>> getResponseHeaders() throws IOException;
-    protected void setSSLContext(SSLContext sslContext) throws IllegalArgumentException;
+    void setSSLContext(SSLContext sslContext) throws TransportException;
 }
 ```
 
@@ -34,12 +34,12 @@ public class HttpsConnection
 ### HttpsConnection
 
 ```java
-public HttpsConnection(URL url, HttpsMethod method) throws IOException;
+public HttpsConnection(URL url, HttpsMethod method) throws TransportException;
 ```
 
 **SRS_HTTPSCONNECTION_11_001: [**The constructor shall open a connection to the given URL.**]**
 
-**SRS_HTTPSCONNECTION_11_002: [**The constructor shall throw an IOException if the connection was unable to be opened.**]**
+**SRS_HTTPSCONNECTION_11_002: [**The constructor shall throw a TranpsortException if the connection was unable to be opened.**]**
 
 **SRS_HTTPSCONNECTION_11_021: [**The constructor shall set the HTTPS method to the given method.**]**
 
@@ -91,7 +91,7 @@ public void setReadTimeoutMillis(int timeout);
 ### setSSLContext
 
 ```java
-protected void setSSLContext(SSLContext sslContext) throws IllegalArgumentException;
+protected void setSSLContext(SSLContext sslContext) throws TransportException;
 ```
 
 **SRS_HTTPSCONNECTION_25_024: [**The function shall set the the SSL context with the given value.**]**

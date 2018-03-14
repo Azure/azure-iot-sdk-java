@@ -84,17 +84,17 @@ public class HttpsResponse
      * @throws IllegalArgumentException if no value exists for the given field
      * name.
      */
-    public String getHeaderField(String field)
+    public String getHeaderField(String field) throws IllegalArgumentException
     {
         // Codes_SRS_HTTPSRESPONSE_11_008: [The function shall match the header field name in a case-insensitive manner.]
         String canonicalizedField = canonicalizeFieldName(field);
         String values = this.headerFields.get(canonicalizedField);
-        // Codes_SRS_HTTPSRESPONSE_11_006: [If a value could not be found for the given header field name, the function shall throw an IllegalArgumentException.]
         if (values == null)
         {
             String errMsg = String.format("Could not find a value "
                     + "associated with the header field name '%s'.%n", field);
 
+            // Codes_SRS_HTTPSRESPONSE_11_006: [If a value could not be found for the given header field name, the function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException(errMsg);
         }
 

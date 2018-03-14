@@ -5,12 +5,17 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.IotHubMethod;
+import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.junit.Test;
 
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test for IotHubTransportMessage
@@ -319,5 +324,29 @@ public class IotHubTransportMessageTest
 
         // assert
         assertEquals(uriPath, iotHubTransportMessage.getUriPath());
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORTMESSAGE_34_017: [This constructor shall return an instance of IotHubTransportMessage with provided bytes, messagetype, correlationid, messageid, and application properties.]
+    @Test
+    public void constructorWithPropertiesSavesProperties()
+    {
+        //arrange
+        byte[] expectedData = new byte[] {12,34,56};
+        MessageType expectedMessageType = MessageType.DEVICE_TELEMETRY;
+        String expectedCorrelationId = "1234";
+        String expectedMessageId = "5678";
+        MessageProperty[] expectedProperties = new MessageProperty[2];
+        expectedProperties[0] = new MessageProperty("bob", "job");
+        expectedProperties[1] = new MessageProperty("john", "bill");
+
+        //act
+        IotHubTransportMessage transportMessage = new IotHubTransportMessage(expectedData, expectedMessageType, expectedMessageId, expectedCorrelationId, expectedProperties);
+
+        //assert
+        assertArrayEquals(expectedData, transportMessage.getBytes());
+        assertEquals(expectedMessageType, transportMessage.getMessageType());
+        assertEquals(expectedMessageId, transportMessage.getMessageId());
+        assertEquals(expectedCorrelationId, transportMessage.getCorrelationId());
+        assertEquals(expectedProperties.length, transportMessage.getProperties().length);
     }
 }

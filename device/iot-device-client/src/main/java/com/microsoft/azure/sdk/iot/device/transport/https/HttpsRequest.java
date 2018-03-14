@@ -3,10 +3,10 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -28,15 +28,14 @@ public class HttpsRequest
      * @param body the request body. Must be an array of size 0 if the request
      * method is GET or DELETE.
      *
-     * @throws IOException if an IOException occurs in setting up the HTTPS
+     * @throws TransportException if an Exception occurs in setting up the HTTPS
      * connection.
-     * @throws IllegalArgumentException if the endpoint given does not use the
+     * @throws TransportException if the endpoint given does not use the
      * HTTPS protocol.
      */
-    public HttpsRequest(URL url, HttpsMethod method, byte[] body)
-            throws IOException
+    public HttpsRequest(URL url, HttpsMethod method, byte[] body) throws TransportException
     {
-        // Codes_SRS_HTTPSREQUEST_11_005: [If an IOException occurs in setting up the HTTPS connection, the function shall throw an IOException.]
+        // Codes_SRS_HTTPSREQUEST_11_005: [If an IOException occurs in setting up the HTTPS connection, the function shall throw a TransportException.]
         // Codes_SRS_HTTPSREQUEST_11_001: [The function shall open a connection with the given URL as the endpoint.]
         // Codes_SRS_HTTPSREQUEST_11_004: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
         this.connection = new HttpsConnection(url, method);
@@ -50,41 +49,22 @@ public class HttpsRequest
      *
      * @return an HTTPS response.
      *
-     * @throws IOException if the connection could not be established, or the
+     * @throws TransportException if the connection could not be established, or the
      * input/output streams could not be accessed.
      */
-    public HttpsResponse send() throws IOException
+    public HttpsResponse send() throws TransportException
     {
         int responseStatus = -1;
         byte[] responseBody = new byte[0];
         byte[] errorReason = new byte[0];
         Map<String, List<String>> headerFields;
-        try
-        {
-            // Codes_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
-            this.connection.connect();
 
-            responseStatus = this.connection.getResponseStatus();
-            headerFields = this.connection.getResponseHeaders();
-            responseBody = this.connection.readInput();
-        }
-        // Can be caused either by an unsuccessful
-        // connection or by a bad status code.
-        catch (IOException e)
-        {
-            // If the IOException was caused by a bad status code in the
-            // response, then getResponseStatus() returns a valid status code.
-            // Otherwise, a connection could not be established and
-            // getResponseStatus() throws an IOException.
-            // Codes_SRS_HTTPSREQUEST_11_011: [If the client cannot connect to the server, the function shall throw an IOException.]
-            responseStatus = this.connection.getResponseStatus();
-            headerFields = this.connection.getResponseHeaders();
-            // Codes_SRS_HTTPSREQUEST_11_012: [If an I/O exception occurs because of a bad response status code, the function shall attempt to flush or read the error stream so that the underlying HTTPS connection can be reused.]
-            // Connections are transparently managed by Java.
-            // The error stream must be cleared so that the connection
-            // can be reused later.
-            errorReason = this.connection.readError();
-        }
+        // Codes_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
+        this.connection.connect();
+
+        responseStatus = this.connection.getResponseStatus();
+        headerFields = this.connection.getResponseHeaders();
+        responseBody = this.connection.readInput();
 
         // Codes_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
         return new HttpsResponse(responseStatus, responseBody, headerFields,
@@ -122,11 +102,17 @@ public class HttpsRequest
         return this;
     }
 
-    public HttpsRequest setSSLContext(SSLContext sslContext)
+    /**
+     * Sets this object's SSL context
+     * @param sslContext the value to set this object's SSL context too
+     * @return itself, for fluent setting.
+     * @throws IllegalArgumentException if sslContext is null
+     */
+    public HttpsRequest setSSLContext(SSLContext sslContext) throws IllegalArgumentException
     {
         if (sslContext == null)
         {
-            //Codes_SRS_HTTPSREQUEST_25_015: [The function shall throw IllegalArgumentException if parameter is null .]
+            //Codes_SRS_HTTPSREQUEST_25_015: [The function shall throw IllegalArgumentException if argument is null .]
             throw new IllegalArgumentException("Context cannot be null");
         }
         //Codes_SRS_HTTPSREQUEST_25_016: [The function shall set the SSL context for the IotHub.]

@@ -5,29 +5,37 @@
 
 package com.microsoft.azure.sdk.iot.device.exceptions;
 
-public class ServiceThrottledException extends IotHubServiceException
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+
+public class ServerBusyException extends IotHubServiceException
 {
-    public ServiceThrottledException()
+    public ServerBusyException()
     {
         super();
         this.isRetryable = true;
     }
 
-    public ServiceThrottledException(String message)
+    public ServerBusyException(String message)
     {
         super(message);
         this.isRetryable = true;
     }
 
-    public ServiceThrottledException(String message, Throwable cause)
+    public ServerBusyException(String message, Throwable cause)
     {
         super(message, cause);
         this.isRetryable = true;
     }
 
-    public ServiceThrottledException(Throwable cause)
+    public ServerBusyException(Throwable cause)
     {
         super(cause);
         this.isRetryable = true;
+    }
+
+    @Override
+    public IotHubStatusCode getStatusCode()
+    {
+        return IotHubStatusCode.SERVER_BUSY;
     }
 }

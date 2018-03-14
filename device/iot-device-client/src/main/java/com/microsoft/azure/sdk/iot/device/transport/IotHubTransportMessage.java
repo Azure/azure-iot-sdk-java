@@ -3,10 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
-
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
+import com.microsoft.azure.sdk.iot.device.*;
 
 /**
  * Extends Message, adding transport artifacts.
@@ -51,7 +49,7 @@ public class IotHubTransportMessage extends Message
         this.version = null;
         this.requestId = null;
         this.status = null;
-        this.operationType = DEVICE_OPERATION_UNKNOWN;
+        this.operationType = DeviceOperations.DEVICE_OPERATION_UNKNOWN;
     }
 
     /**
@@ -67,7 +65,21 @@ public class IotHubTransportMessage extends Message
         this.version = null;
         this.requestId = null;
         this.status = null;
-        this.operationType = DEVICE_OPERATION_UNKNOWN;
+        this.operationType = DeviceOperations.DEVICE_OPERATION_UNKNOWN;
+    }
+
+    public IotHubTransportMessage(byte[] data, MessageType messageType, String messageId, String correlationId, MessageProperty[] messageProperties)
+    {
+        //Codes_SRS_IOTHUBTRANSPORTMESSAGE_34_017: [This constructor shall return an instance of IotHubTransportMessage with provided bytes, messagetype, correlationid, messageid, and application properties.]
+        super(data);
+        super.setMessageType(messageType);
+        this.setMessageId(messageId);
+        this.setCorrelationId(correlationId);
+
+        for (MessageProperty messageProperty : messageProperties)
+        {
+            this.setProperty(messageProperty.getName(), messageProperty.getValue());
+        }
     }
 
     public MessageCallback getMessageCallback()

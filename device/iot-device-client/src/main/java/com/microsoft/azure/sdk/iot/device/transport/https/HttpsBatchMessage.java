@@ -3,14 +3,14 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubSizeExceededException;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubSizeExceededException;
 
 
 /**
@@ -57,8 +57,7 @@ public final class HttpsBatchMessage implements HttpsMessage
      * batched message to exceed 256 kb in size. The batched message will remain
      * as if the message was never added.
      */
-    public void addMessage(HttpsSingleMessage msg)
-            throws IotHubSizeExceededException
+    public void addMessage(HttpsSingleMessage msg) throws IotHubSizeExceededException
     {
         String jsonMsg = msgToJson(msg);
         // Codes_SRS_HTTPSBATCHMESSAGE_11_002: [The function shall add the message as a JSON object appended to the current JSON array.]

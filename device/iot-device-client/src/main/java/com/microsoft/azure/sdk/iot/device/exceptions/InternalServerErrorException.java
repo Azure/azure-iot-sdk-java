@@ -5,7 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.device.exceptions;
 
-public class InternalServerErrorException extends ProtocolException
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+
+public class InternalServerErrorException extends IotHubServiceException
 {
     public InternalServerErrorException()
     {
@@ -25,5 +27,11 @@ public class InternalServerErrorException extends ProtocolException
     public InternalServerErrorException(Throwable cause)
     {
         super(cause);
+    }
+
+    @Override
+    public IotHubStatusCode getStatusCode()
+    {
+        return IotHubStatusCode.INTERNAL_SERVER_ERROR;
     }
 }

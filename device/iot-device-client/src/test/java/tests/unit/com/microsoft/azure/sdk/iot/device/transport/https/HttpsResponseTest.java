@@ -3,6 +3,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import org.junit.Test;
 
@@ -109,8 +110,7 @@ public class HttpsResponseTest
 
     // Tests_SRS_HTTPSRESPONSE_11_006: [If a value could not be found for the given header field name, the function shall throw an IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
-    public void getHeaderFieldRejectsInvalidFieldName()
-            throws IllegalArgumentException
+    public void getHeaderFieldRejectsInvalidFieldName() throws IllegalArgumentException
     {
         final int status = 200;
         final byte[] body = { 1 };

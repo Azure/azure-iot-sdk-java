@@ -3,6 +3,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import mockit.Deencapsulation;
@@ -15,6 +17,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.NoRouteToHostException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /** Unit tests for HttpsConnection. */
 public class HttpsConnectionTest
@@ -34,7 +37,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_001: [The constructor shall open a connection to the given URL.]
     @Test
-    public void constructorOpensConnection() throws IOException
+    public void constructorOpensConnection() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.PUT;
         new NonStrictExpectations()
@@ -57,10 +60,9 @@ public class HttpsConnectionTest
         };
     }
 
-    // Tests_SRS_HTTPSCONNECTION_11_002: [The constructor shall throw an IOException if the connection was unable to be opened.]
-    @Test(expected = IOException.class)
-    public void constructorThrowsIoExceptionIfCannotOpenConnection()
-            throws IOException
+    // Tests_SRS_HTTPSCONNECTION_11_002: [The constructor shall throw a TransportException if the connection was unable to be opened.]
+    @Test(expected = TransportException.class)
+    public void constructorThrowsIoExceptionIfCannotOpenConnection() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.PUT;
         new NonStrictExpectations()
@@ -78,7 +80,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_021: [The constructor shall set the HTTPS method to the given method.]
     @Test
-    public void constructorSetsRequestMethod() throws IOException
+    public void constructorSetsRequestMethod() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.PUT;
         new NonStrictExpectations()
@@ -105,7 +107,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_022: [If the URI given does not use the HTTPS protocol, the constructor shall throw an IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
-    public void constructorRejectsNonHttpsUrl() throws IOException
+    public void constructorRejectsNonHttpsUrl() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.PUT;
         new NonStrictExpectations()
@@ -125,7 +127,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_003: [The function shall send a request to the URL given in the constructor.]
     @Test
-    public void connectUsesCorrectUrl() throws IOException
+    public void connectUsesCorrectUrl() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.PUT;
         new NonStrictExpectations()
@@ -154,7 +156,7 @@ public class HttpsConnectionTest
     // Tests_SRS_HTTPSCONNECTION_11_004: [The function shall stream the request body, if present, through the connection.]
     // Tests_SRS_HTTPSCONNECTION_11_009: [The function shall save the body to be sent with the request.]
     @Test
-    public void connectStreamsRequestBody() throws IOException
+    public void connectStreamsRequestBody() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.PUT;
         byte[] body = { 1, 2, 3 };
@@ -184,9 +186,9 @@ public class HttpsConnectionTest
         };
     }
 
-    // Tests_SRS_HTTPSCONNECTION_11_005: [The function shall throw an IOException if the connection could not be established, or the server responded with a bad status code.]
-    @Test(expected = IOException.class)
-    public void connectThrowsIoExceptionIfCannotConnect() throws IOException
+    // Tests_SRS_HTTPSCONNECTION_11_005: [The function shall throw a TransportException if the connection could not be established, or the server responded with a bad status code.]
+    @Test(expected = TransportException.class)
+    public void connectThrowsIoExceptionIfCannotConnect() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.PUT;
         new NonStrictExpectations()
@@ -209,7 +211,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_006: [The function shall set the request method.]
     @Test
-    public void setRequestMethodSetsRequestMethod() throws IOException
+    public void setRequestMethodSetsRequestMethod() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.PUT;
         new NonStrictExpectations()
@@ -238,8 +240,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_007: [The function shall throw an IllegalArgumentException if the request currently has a non-empty body and the new method is not a POST or a PUT.]
     @Test(expected = IllegalArgumentException.class)
-    public void setRequestMethodRejectsNonPostOrPutIfHasBody()
-            throws IOException
+    public void setRequestMethodRejectsNonPostOrPutIfHasBody() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final HttpsMethod illegalHttpsMethod = HttpsMethod.DELETE;
@@ -263,7 +264,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_008: [The function shall set the given request header field.]
     @Test
-    public void setRequestHeaderSetsRequestHeader() throws IOException
+    public void setRequestHeaderSetsRequestHeader() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final String field = "test-field";
@@ -293,7 +294,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_023: [The function shall set the read timeout to the given value.]
     @Test
-    public void setReadTimeoutSetsRequestTimeout() throws IOException
+    public void setReadTimeoutSetsRequestTimeout() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final String field = "test-field";
@@ -325,7 +326,7 @@ public class HttpsConnectionTest
 
     //Tests_SRS_HTTPSCONNECTION_25_024: [**The function shall set the the SSL context with the given value.**]**
     @Test
-    public void setSSLContextSetsContext(@Mocked final SSLContext mockedContext) throws IOException
+    public void setSSLContextSetsContext(@Mocked final SSLContext mockedContext) throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final String field = "test-field";
@@ -357,7 +358,7 @@ public class HttpsConnectionTest
 
     //Tests_SRS_HTTPSCONNECTION_25_025: [The function shall throw IllegalArgumentException if the context is null value.**]**
     @Test (expected = IllegalArgumentException.class)
-    public void setSSLContextThrowsOnNullContext(@Mocked final SSLContext mockedContext) throws IOException
+    public void setSSLContextThrowsOnNullContext(@Mocked final SSLContext mockedContext) throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final String field = "test-field";
@@ -381,7 +382,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_010: [The function shall throw an IllegalArgumentException if the request does not currently use method POST or PUT and the body is non-empty.]
     @Test(expected = IllegalArgumentException.class)
-    public void writeOutputFailsWhenMethodIsNotPostOrPut() throws IOException
+    public void writeOutputFailsWhenMethodIsNotPostOrPut() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] body = { 1, 2 };
@@ -403,7 +404,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_010: [The function shall throw an IllegalArgumentException if the request does not currently use method POST or PUT and the body is non-empty.]
     @Test
-    public void writeOutputDoesNotFailWhenBodyIsEmpty() throws IOException
+    public void writeOutputDoesNotFailWhenBodyIsEmpty() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -426,8 +427,7 @@ public class HttpsConnectionTest
     // Tests_SRS_HTTPSCONNECTION_11_011: [The function shall read from the input stream (response stream) and return the response.]
     @Test
     public void readInputCompletelyReadsInputStream(
-            @Mocked final InputStream mockIs)
-            throws IOException
+            @Mocked final InputStream mockIs) throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         new NonStrictExpectations()
@@ -454,10 +454,9 @@ public class HttpsConnectionTest
         assertThat(testResponse, is(expectedResponse));
     }
 
-    // Tests_SRS_HTTPSCONNECTION_11_012: [The function shall throw an IOException if the input stream could not be accessed.]
-    @Test(expected = IOException.class)
-    public void readInputFailsIfCannotAccessInputStream()
-            throws IOException
+    // Tests_SRS_HTTPSCONNECTION_11_012: [The function shall throw a TransportException if the input stream could not be accessed.]
+    @Test(expected = TransportException.class)
+    public void readInputFailsIfCannotAccessInputStream() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         new NonStrictExpectations()
@@ -479,10 +478,47 @@ public class HttpsConnectionTest
         conn.readInput();
     }
 
+    // Tests_SRS_HTTPSCONNECTION_34_027: [If an UnknownHostException or a NoRouteToHostException is encountered, the thrown TransportException shall be retryable.]
+    @Test
+    public void readInputFailsIfCannotAccessInputStreamAndIsNoRouteToHost() throws IOException, TransportException
+    {
+        boolean exceptionCaught = false;
+        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+                mockUrlConn.getInputStream();
+                result = new NoRouteToHostException();
+            }
+        };
+        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        conn.connect();
+
+        try
+        {
+            conn.readInput();
+        }
+        catch (TransportException e)
+        {
+            exceptionCaught = true;
+            if (!e.isRetryable())
+            {
+                fail("NoRouteToHostException should yield retriable TransportException");
+            }
+        }
+
+        assertTrue(exceptionCaught);
+    }
+
     // Tests_SRS_HTTPSCONNECTION_11_019: [The function shall close the input stream after it has been completely read.]
     @Test
-    public void readInputClosesInputStream(@Mocked final InputStream mockIs)
-            throws IOException
+    public void readInputClosesInputStream(@Mocked final InputStream mockIs) throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         new NonStrictExpectations()
@@ -516,8 +552,7 @@ public class HttpsConnectionTest
     // Tests_SRS_HTTPSCONNECTION_11_013: [The function shall read from the error stream and return the response.]
     @Test
     public void readErrorCompletelyReadsErrorStream(
-            @Mocked final InputStream mockIs)
-            throws IOException
+            @Mocked final InputStream mockIs) throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         new NonStrictExpectations()
@@ -546,8 +581,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_013: [The function shall read from the error stream and return the response.]
     @Test
-    public void readErrorReturnsEmptyErrorReasonIfNoErrorReason()
-            throws IOException
+    public void readErrorReturnsEmptyErrorReasonIfNoErrorReason() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         new NonStrictExpectations()
@@ -572,10 +606,9 @@ public class HttpsConnectionTest
         assertThat(testError, is(expectedError));
     }
 
-    // Tests_SRS_HTTPSCONNECTION_11_014: [The function shall throw an IOException if the error stream could not be accessed.]
-    @Test(expected = IOException.class)
-    public void readErrorFailsIfCannotAccessErrorStream()
-            throws IOException
+    // Tests_SRS_HTTPSCONNECTION_11_014: [The function shall throw a TransportException if the error stream could not be accessed.]
+    @Test(expected = TransportException.class)
+    public void readErrorFailsIfCannotAccessErrorStream() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         new NonStrictExpectations()
@@ -599,8 +632,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_020: [The function shall close the error stream after it has been completely read.]
     @Test
-    public void readErrorClosesErrorStream(@Mocked final InputStream mockIs)
-            throws IOException
+    public void readErrorClosesErrorStream(@Mocked final InputStream mockIs) throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         new NonStrictExpectations()
@@ -634,8 +666,7 @@ public class HttpsConnectionTest
     // Tests_SRS_HTTPSCONNECTION_11_015: [The function shall return the response status code.]
     @Test
     public void getResponseStatusReturnsResponseStatus(
-            @Mocked final InputStream mockIs)
-            throws IOException
+            @Mocked final InputStream mockIs) throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final int status = 204;
@@ -661,10 +692,10 @@ public class HttpsConnectionTest
         assertThat(testStatus, is(expectedStatus));
     }
 
-    // Tests_SRS_HTTPSCONNECTION_11_016: [The function shall throw an IOException if no response was received.]
-    @Test(expected = IOException.class)
+    // Tests_SRS_HTTPSCONNECTION_11_016: [The function shall throw a TransportException if no response was received.]
+    @Test(expected = TransportException.class)
     public void getResponseStatusFailsIfDidNotReceiveResponse(
-            @Mocked final InputStream mockIs) throws IOException
+            @Mocked final InputStream mockIs) throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         new NonStrictExpectations()
@@ -688,8 +719,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_017: [The function shall return a mapping of header field names to the values associated with the header field name.]
     @Test
-    public void getResponseHeadersReturnsResponseHeaders()
-            throws IOException
+    public void getResponseHeadersReturnsResponseHeaders() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final String field0 = "test-field0";
@@ -736,8 +766,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_018: [The function shall throw an IOException if no response was received.]
     @Test(expected = IOException.class)
-    public void getResponseHeadersFailsIfDidNotReceiveResponse()
-            throws IOException
+    public void getResponseHeadersFailsIfDidNotReceiveResponse() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         new NonStrictExpectations()

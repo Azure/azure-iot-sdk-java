@@ -4,8 +4,6 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 
 /**
  * An IoT Hub status code. Included in a message from an IoT Hub to a device.
@@ -27,9 +25,9 @@ public enum IotHubStatusCode
     MESSAGE_EXPIRED,
     MESSAGE_CANCELLED_ONCLOSE;
 
-    public static TransportException getConnectionStatusException(IotHubStatusCode statusCode, String statusDescription)
+    public static IotHubServiceException getConnectionStatusException(IotHubStatusCode statusCode, String statusDescription)
     {
-        TransportException transportException;
+        IotHubServiceException transportException;
         switch (statusCode)
         {
             case OK:
@@ -57,13 +55,13 @@ public enum IotHubStatusCode
                 transportException = new RequestEntityTooLargeException(statusDescription);
                 break;
             case THROTTLED:
-                transportException = new ServiceThrottledException(statusDescription);
+                transportException = new ThrottledException(statusDescription);
                 break;
             case INTERNAL_SERVER_ERROR:
                 transportException = new InternalServerErrorException(statusDescription);
                 break;
             case SERVER_BUSY:
-                transportException = new ServiceServerBusyException(statusDescription);
+                transportException = new ServerBusyException(statusDescription);
                 break;
             case ERROR:
                 transportException = new ServiceUnknownException("Service gave unknown status code: " + statusCode);

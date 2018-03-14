@@ -12,6 +12,7 @@ Extends Message, adding transport artifacts.
 public class IotHubTransportMessage extends Message
 {
     public IotHubTransportMessage(String body);
+    public IotHubTransportMessage(Message message);
 
     public void setIotHubMethod(IotHubMethod iotHubMethod);
     public void setUriPath(String uriPath);
@@ -45,6 +46,15 @@ public IotHubTransportMessage(String body);
 ```
 
 **SRS_IOTHUBTRANSPORTMESSAGE_21_002: [**This method shall throw IllegalArgumentException if the body argument is null.**]**
+
+
+### IotHubTransportMessage
+
+```java
+public IotHubTransportMessage(Message message);
+```
+
+**SRS_IOTHUBTRANSPORTMESSAGE_34_017: [**This constructor shall return an instance of IotHubTransportMessage with provided bytes, messagetype, correlationid, messageid, and application properties.**]**
 
 
 ### setVersion

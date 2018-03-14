@@ -3,6 +3,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
@@ -13,7 +14,9 @@ import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.net.NoRouteToHostException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +24,7 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /** Unit tests for HttpsRequest. */
 public class HttpsRequestTest
@@ -29,7 +33,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_001: [The function shall open a connection with the given URL as the endpoint.]
     @Test
-    public void constructorOpensConnection(@Mocked final HttpsConnection mockConn) throws IOException
+    public void constructorOpensConnection(@Mocked final HttpsConnection mockConn) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -53,7 +57,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_002: [The function shall write the body to the connection.]
     @Test
-    public void constructorWritesBodyToConnection(@Mocked final HttpsConnection mockConn) throws IOException
+    public void constructorWritesBodyToConnection(@Mocked final HttpsConnection mockConn) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] body = { 1, 2, 3 };
@@ -79,7 +83,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_004: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
     @Test
-    public void constructorSetsHttpsMethodCorrectly(@Mocked final HttpsConnection mockConn) throws IOException
+    public void constructorSetsHttpsMethodCorrectly(@Mocked final HttpsConnection mockConn) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -101,9 +105,9 @@ public class HttpsRequestTest
         };
     }
 
-    // Tests_SRS_HTTPSREQUEST_11_005: [If an IOException occurs in setting up the HTTPS connection, the function shall throw an IOException.]
-    @Test(expected = IOException.class)
-    public void constructorThrowsIoExceptionIfCannotSetupConnection(@Mocked final HttpsConnection mockConn) throws IOException
+    // Tests_SRS_HTTPSREQUEST_11_005: [If an IOException occurs in setting up the HTTPS connection, the function shall throw a TransportException.]
+    @Test(expected = TransportException.class)
+    public void constructorThrowsIoExceptionIfCannotSetupConnection(@Mocked final HttpsConnection mockConn) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -113,7 +117,7 @@ public class HttpsRequestTest
                 mockUrl.getProtocol();
                 result = "https";
                 new HttpsConnection(mockUrl, httpsMethod);
-                result = new IOException();
+                result = new TransportException();
             }
         };
 
@@ -122,7 +126,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
     @Test
-    public void sendHasCorrectHttpsMethod() throws IOException
+    public void sendHasCorrectHttpsMethod() throws TransportException
     {
         final HttpsMethod expectedMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -137,7 +141,7 @@ public class HttpsRequestTest
             }
 
             @Mock
-            public void connect() throws IOException
+            public void connect()
             {
                 assertThat(testMethod, is(expectedMethod));
             }
@@ -162,26 +166,25 @@ public class HttpsRequestTest
             }
 
             @Mock
-            public byte[] readInput() throws IOException
+            public byte[] readInput()
             {
                 return new byte[0];
             }
 
             @Mock
-            public byte[] readError() throws IOException
+            public byte[] readError()
             {
                 return new byte[0];
             }
 
             @Mock
-            public int getResponseStatus() throws IOException
+            public int getResponseStatus()
             {
                 return 0;
             }
 
             @Mock
             public Map<String, List<String>> getResponseHeaders()
-                    throws IOException
             {
                 return new HashMap<>();
             }
@@ -201,7 +204,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
     @Test
-    public void sendSetsHeaderFieldsCorrectly() throws IOException
+    public void sendSetsHeaderFieldsCorrectly() throws TransportException
     {
         final HttpsMethod expectedMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -221,7 +224,7 @@ public class HttpsRequestTest
             }
 
             @Mock
-            public void connect() throws IOException
+            public void connect()
             {
                 assertThat(testHeaderFields.size(), is(3));
                 assertThat(testHeaderFields.get(field0), is(value0));
@@ -249,19 +252,19 @@ public class HttpsRequestTest
             }
 
             @Mock
-            public byte[] readInput() throws IOException
+            public byte[] readInput()
             {
                 return new byte[0];
             }
 
             @Mock
-            public byte[] readError() throws IOException
+            public byte[] readError()
             {
                 return new byte[0];
             }
 
             @Mock
-            public int getResponseStatus() throws IOException
+            public int getResponseStatus()
             {
                 return 0;
             }
@@ -289,7 +292,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
     @Test
-    public void sendWritesBodyToOutputStream() throws IOException
+    public void sendWritesBodyToOutputStream() throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final byte[] expectedBody = { 1, 2, 3 };
@@ -303,7 +306,7 @@ public class HttpsRequestTest
             }
 
             @Mock
-            public void connect() throws IOException
+            public void connect()
             {
                 assertThat(testBody, is(expectedBody));
             }
@@ -328,26 +331,25 @@ public class HttpsRequestTest
             }
 
             @Mock
-            public byte[] readInput() throws IOException
+            public byte[] readInput()
             {
                 return new byte[0];
             }
 
             @Mock
-            public byte[] readError() throws IOException
+            public byte[] readError()
             {
                 return new byte[0];
             }
 
             @Mock
-            public int getResponseStatus() throws IOException
+            public int getResponseStatus()
             {
                 return 0;
             }
 
             @Mock
             public Map<String, List<String>> getResponseHeaders()
-                    throws IOException
             {
                 return new HashMap<>();
             }
@@ -367,7 +369,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
     @Test
-    public void sendReadsStatusCode(@Mocked final HttpsConnection mockConn) throws IOException
+    public void sendReadsStatusCode(@Mocked final HttpsConnection mockConn) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -393,7 +395,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
     @Test
-    public void sendReturnsBody(@Mocked final HttpsConnection mockConn) throws IOException
+    public void sendReturnsBody(@Mocked final HttpsConnection mockConn) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] requestBody = new byte[0];
@@ -418,37 +420,8 @@ public class HttpsRequestTest
     }
 
     // Tests_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
-    // Tests_SRS_HTTPSREQUEST_11_012: [If an I/O exception occurs because of a bad response status code, the function shall attempt to flush or read the error stream so that the underlying HTTPS connection can be reused.]
     @Test
-    public void sendReturnsError(@Mocked final HttpsConnection mockConn) throws IOException
-    {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
-        final byte[] body = new byte[0];
-        final byte[] error = { 5, 6, 7, 0, 1 };
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "https";
-                mockConn.connect();
-                result = new IOException();
-                mockConn.readError();
-                result = error;
-            }
-        };
-
-        HttpsRequest request =
-                new HttpsRequest(mockUrl, httpsMethod, body);
-        HttpsResponse response = request.send();
-        byte[] testError = response.getErrorReason();
-
-        final byte[] expectedError = error;
-        assertThat(testError, is(expectedError));
-    }
-
-    // Tests_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
-    @Test
-    public void sendReturnsHeaderFields(@Mocked final HttpsConnection mockConn) throws IOException
+    public void sendReturnsHeaderFields(@Mocked final HttpsConnection mockConn) throws TransportException
     {
         final Map<String, List<String>> headerFields = new HashMap<>();
         final String field = "test-field";
@@ -479,99 +452,9 @@ public class HttpsRequestTest
         assertThat(testValues, is(expectedValues));
     }
 
-    // Tests_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
-    @Test
-    public void sendReturnsStatusCodeOnBadStatusException(@Mocked final HttpsConnection mockConn) throws IOException
-    {
-        final HttpsMethod httpsMethod = HttpsMethod.POST;
-        final byte[] body = new byte[0];
-        final int badStatus = 404;
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "https";
-                mockConn.connect();
-                result = new IOException();
-                mockConn.getResponseStatus();
-                result = badStatus;
-            }
-        };
-
-        HttpsRequest request =
-                new HttpsRequest(mockUrl, httpsMethod, body);
-        HttpsResponse response = request.send();
-        int testStatus = response.getStatus();
-
-        final int expectedStatus = badStatus;
-        assertThat(testStatus, is(expectedStatus));
-    }
-
-    // Tests_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
-    @Test
-    public void sendReturnsHeaderFieldsOnBadStatusException(@Mocked final HttpsConnection mockConn) throws IOException
-    {
-        final Map<String, List<String>> headerFields = new HashMap<>();
-        final String field = "test-field";
-        final List<String> values = new LinkedList<>();
-        final String value = "test-value0";
-        values.add(value);
-        headerFields.put(field, values);
-        final HttpsMethod httpsMethod = HttpsMethod.POST;
-        final byte[] body = new byte[0];
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "https";
-                mockConn.connect();
-                result = new IOException();
-                mockConn.getResponseHeaders();
-                result = headerFields;
-            }
-        };
-
-        HttpsRequest request =
-                new HttpsRequest(mockUrl, httpsMethod, body);
-        HttpsResponse response = request.send();
-        String testValues = response.getHeaderField(field);
-
-        final String expectedValues = value;
-        assertThat(testValues, is(expectedValues));
-    }
-
-    // Tests_SRS_HTTPSREQUEST_11_011: [If the client cannot connect to the server, the function shall throw an IOException.]
-    @Test(expected = IOException.class)
-    public void sendThrowsIoExceptionIfCannotConnect(@Mocked final HttpsConnection mockConn) throws IOException
-    {
-        final HttpsMethod httpsMethod = HttpsMethod.POST;
-        final byte[] body = new byte[0];
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "https";
-                mockConn.connect();
-                result = new IOException();
-                mockConn.getResponseHeaders();
-                result = new IOException();
-                mockConn.getResponseStatus();
-                result = new IOException();
-                mockConn.readInput();
-                result = new IOException();
-                mockConn.readError();
-                result = new IOException();
-            }
-        };
-
-        HttpsRequest request =
-                new HttpsRequest(mockUrl, httpsMethod, body);
-        request.send();
-    }
-
     // Tests_SRS_HTTPSREQUEST_11_013: [The function shall set the header field with the given name to the given value.]
     @Test
-    public void setHeaderFieldSetsHeaderField(@Mocked final HttpsConnection mockConn) throws IOException
+    public void setHeaderFieldSetsHeaderField(@Mocked final HttpsConnection mockConn) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final byte[] body = new byte[0];
@@ -599,7 +482,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_014: [The function shall set the read timeout for the request to the given value.]
     @Test
-    public void setReadTimeoutSetsReadTimeout(@Mocked final HttpsConnection mockConn) throws IOException
+    public void setReadTimeoutSetsReadTimeout(@Mocked final HttpsConnection mockConn) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final byte[] body = new byte[0];
@@ -628,7 +511,7 @@ public class HttpsRequestTest
     //Tests_SRS_HTTPSREQUEST_25_016: [The function shall set the SSL context for the IotHub.]
     @Test
     public void setSSLContextSetsSSLContext(@Mocked final HttpsConnection mockConn,
-                                            @Mocked final SSLContext mockedContext) throws IOException
+                                            @Mocked final SSLContext mockedContext) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final byte[] body = new byte[0];
@@ -652,9 +535,9 @@ public class HttpsRequestTest
         };
     }
 
-    //Tests_SRS_HTTPSREQUEST_25_015: [**The function shall throw IllegalArgumentException if parameter is null .**]**
+    //Tests_SRS_HTTPSREQUEST_25_015: [The function shall throw IllegalArgumentException if argument is null.]
     @Test (expected = IllegalArgumentException.class)
-    public void setSSLContextThrowsOnNull(@Mocked final HttpsConnection mockConn) throws IOException
+    public void setSSLContextThrowsOnNull(@Mocked final HttpsConnection mockConn) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final byte[] body = new byte[0];

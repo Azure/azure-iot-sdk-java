@@ -840,7 +840,7 @@ public final class DeviceClient implements Closeable
      * @throws UnsupportedOperationException if this method is called when using x509 authentication
      */
     public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
-                                  IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException, IOException, TransportException
+                                  IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException, IOException
     {
         /* Codes_SRS_DEVICECLIENT_21_044: [The uploadToBlobAsync shall asynchronously upload the stream in `inputStream` to the blob in `destinationBlobName`.] */
 

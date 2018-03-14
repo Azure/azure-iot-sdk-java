@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.device.exceptions;
 
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+
 /**
  * Exception class that covers all exceptions communicated from the IoT Hub that are not due to connection issues in
  * the transport protocols. These exceptions map to standard status codes from the service (401 -> unauthorized,
@@ -30,5 +32,10 @@ public class IotHubServiceException extends TransportException
     public IotHubServiceException(Throwable cause)
     {
         super(cause);
+    }
+
+    public IotHubStatusCode getStatusCode()
+    {
+        return IotHubStatusCode.ERROR;
     }
 }

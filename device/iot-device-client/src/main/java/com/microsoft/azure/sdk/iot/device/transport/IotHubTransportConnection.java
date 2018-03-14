@@ -19,7 +19,7 @@ public interface IotHubTransportConnection
 {
     //TODO (Tim) change this back to TransportException once HTTP and AMQP are done
     void open(Queue<DeviceClientConfig> deviceClientConfigs) throws Exception;
-    void addListener(IotHubListener listener) throws Exception;
+    void setListener(IotHubListener listener) throws Exception;
     void close() throws Exception;
     IotHubStatusCode sendMessage(Message message) throws Exception;
     boolean sendMessageResult(Message message, IotHubMessageResult result) throws Exception;

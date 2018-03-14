@@ -5,7 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.device.exceptions;
 
-public class BadFormatException extends ProtocolException
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+
+public class BadFormatException extends IotHubServiceException
 {
     public BadFormatException()
     {
@@ -25,5 +27,11 @@ public class BadFormatException extends ProtocolException
     public BadFormatException(Throwable cause)
     {
         super(cause);
+    }
+
+    @Override
+    public IotHubStatusCode getStatusCode()
+    {
+        return IotHubStatusCode.BAD_FORMAT;
     }
 }

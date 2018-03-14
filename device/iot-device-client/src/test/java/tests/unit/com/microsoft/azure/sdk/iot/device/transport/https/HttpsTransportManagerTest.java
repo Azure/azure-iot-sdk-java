@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubMethod;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.ResponseMessage;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
@@ -40,6 +41,8 @@ public class HttpsTransportManagerTest
     private HttpsSingleMessage mockHttpsMessage;
     @Mocked
     private ResponseMessage mockResponseMessage;
+    @Mocked
+    private IotHubTransportMessage mockedTransportMessage;
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_001: [The constructor shall store the device client configuration `config`.] */
     @Test
@@ -132,7 +135,7 @@ public class HttpsTransportManagerTest
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_007: [The send shall create a new instance of the `HttpMessage`, by parsing the Message with `parseHttpsJsonMessage` from `HttpsSingleMessage`.] */
     @Test
-    public void sendCreateHttpMessageSucceed() throws IOException
+    public void sendCreateHttpMessageSucceed() throws IOException, TransportException
     {
         // arrange
         final HttpsIotHubConnection httpsIotHubConnection = mockConn;
@@ -170,7 +173,7 @@ public class HttpsTransportManagerTest
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_008: [If send failed to parse the message, it shall bypass the exception.] */
     @Test (expected = IllegalArgumentException.class)
-    public void sendParseHttpsJsonMessageThrows() throws IOException
+    public void sendParseHttpsJsonMessageThrows()
     {
         // arrange
         final HttpsIotHubConnection httpsIotHubConnection = mockConn;
@@ -193,7 +196,7 @@ public class HttpsTransportManagerTest
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_009: [If the IotHubMethod is `GET`, the send shall set the httpsMethod as `GET`.] */
     @Test
-    public void sendMethodGETSucceed() throws IOException
+    public void sendMethodGETSucceed() throws IOException, TransportException
     {
         // arrange
         final HttpsIotHubConnection httpsIotHubConnection = mockConn;
@@ -231,7 +234,7 @@ public class HttpsTransportManagerTest
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_010: [If the IotHubMethod is `POST`, the send shall set the httpsMethod as `POST`.] */
     @Test
-    public void sendMethodPOSTSucceed() throws IOException
+    public void sendMethodPOSTSucceed() throws IOException, TransportException
     {
         // arrange
         final HttpsIotHubConnection httpsIotHubConnection = mockConn;
@@ -269,7 +272,7 @@ public class HttpsTransportManagerTest
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_011: [If the IotHubMethod is not `GET` or `POST`, the send shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
-    public void sendInvalidMethodThrows() throws IOException
+    public void sendInvalidMethodThrows()
     {
         // arrange
         final HttpsIotHubConnection httpsIotHubConnection = mockConn;
@@ -295,7 +298,7 @@ public class HttpsTransportManagerTest
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_012: [The send shall set the httpsPath with the uriPath in the message.] */
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_013: [The send shall call `sendHttpsMessage` from `HttpsIotHubConnection` to send the message.] */
     @Test
-    public void sendSucceed() throws IOException
+    public void sendSucceed() throws IOException, TransportException
     {
         // arrange
         final HttpsIotHubConnection httpsIotHubConnection = mockConn;
@@ -333,7 +336,7 @@ public class HttpsTransportManagerTest
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_014: [If `sendHttpsMessage` failed, the send shall bypass the exception.] */
     @Test (expected = IOException.class)
-    public void sendSendHttpsMessageThrows() throws IOException
+    public void sendSendHttpsMessageThrows() throws IOException, TransportException
     {
         // arrange
         final HttpsIotHubConnection httpsIotHubConnection = mockConn;
@@ -362,7 +365,7 @@ public class HttpsTransportManagerTest
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_015: [The receive shall receive and bypass message from `HttpsIotHubConnection`, by calling `receiveMessage`.] */
     @Test
-    public void receiveSucceed() throws IOException
+    public void receiveSucceed() throws TransportException
     {
         // arrange
         final HttpsIotHubConnection httpsIotHubConnection = mockConn;
@@ -373,7 +376,7 @@ public class HttpsTransportManagerTest
                 Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
                 result = httpsIotHubConnection;
                 httpsIotHubConnection.receiveMessage();
-                result = mockMsg;
+                result = mockedTransportMessage;
             }
         };
         HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, mockConfig);
@@ -394,7 +397,7 @@ public class HttpsTransportManagerTest
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_016: [If `receiveMessage` failed, the receive shall bypass the exception.] */
     @Test (expected = IOException.class)
-    public void receiveReceiveMessageThrows() throws IOException
+    public void receiveReceiveMessageThrows() throws TransportException
     {
         // arrange
         final HttpsIotHubConnection httpsIotHubConnection = mockConn;

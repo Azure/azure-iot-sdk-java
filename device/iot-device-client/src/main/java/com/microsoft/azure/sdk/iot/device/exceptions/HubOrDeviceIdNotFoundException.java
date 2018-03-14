@@ -5,7 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.device.exceptions;
 
-public class HubOrDeviceIdNotFoundException extends ProtocolException
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+
+public class HubOrDeviceIdNotFoundException extends IotHubServiceException
 {
     public HubOrDeviceIdNotFoundException()
     {
@@ -25,5 +27,11 @@ public class HubOrDeviceIdNotFoundException extends ProtocolException
     public HubOrDeviceIdNotFoundException(Throwable cause)
     {
         super(cause);
+    }
+
+    @Override
+    public IotHubStatusCode getStatusCode()
+    {
+        return IotHubStatusCode.HUB_OR_DEVICE_ID_NOT_FOUND;
     }
 }
