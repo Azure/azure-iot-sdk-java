@@ -3,7 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-public enum State
+public enum IotHubConnectionStatus
 {
-    OPEN, CLOSED
+    CONNECTED,
+    DISCONNECTED,
+    DISCONNECTED_RETRYING
 }

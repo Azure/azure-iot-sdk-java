@@ -54,7 +54,7 @@ public void stop() throws TransportException;
  public void send(final DeviceTwinMessage message) throws TransportException;
 ```
 
-**SRS_MQTTDEVICETWIN_25_021: [**send method shall throw an exception if the message is null.**]**
+**SRS_MQTTDEVICETWIN_25_021: [**send method shall throw an IllegalArgumentException if the message is null.**]**
 
 **SRS_MQTTDEVICETWIN_25_022: [**send method shall return if the message is not of Type DeviceTwin.**]**
 
@@ -62,11 +62,11 @@ public void stop() throws TransportException;
 
 **SRS_MQTTDEVICETWIN_25_024: [**send method shall build the get request topic of the format mentioned in spec ($iothub/twin/GET/?$rid={request id}) if the operation is of type DEVICE_TWIN_OPERATION_GET_REQUEST.**]**
 
-**SRS_MQTTDEVICETWIN_25_025: [**send method shall throw an exception if message contains a null or empty request id if the operation is of type DEVICE_TWIN_OPERATION_GET_REQUEST.**]**
+**SRS_MQTTDEVICETWIN_25_025: [**send method shall throw an IllegalArgumentException if message contains a null or empty request id if the operation is of type DEVICE_TWIN_OPERATION_GET_REQUEST.**]**
 
 **SRS_MQTTDEVICETWIN_25_026: [**send method shall build the update reported properties request topic of the format mentioned in spec ($iothub/twin/PATCH/properties/reported/?$rid={request id}&$version={base version}) if the operation is of type DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_REQUEST.**]**
 
-**SRS_MQTTDEVICETWIN_25_027: [**send method shall throw an exception if message contains a null or empty request id if the operation is of type DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_REQUEST.**]**
+**SRS_MQTTDEVICETWIN_25_027: [**send method shall throw an IllegalArgumentException if message contains a null or empty request id if the operation is of type DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_REQUEST.**]**
 
 **SRS_MQTTDEVICETWIN_25_028: [**send method shall not throw an exception if message contains a null or empty version if the operation is of type DEVICE_TWIN_OPERATION_UPDATE_REPORTED_PROPERTIES_REQUEST as version is optional**]**
 

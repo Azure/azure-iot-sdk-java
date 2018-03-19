@@ -170,7 +170,7 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(testMethod, "publish", anyString, actualPayload);
+                Deencapsulation.invoke(testMethod, "publish", new Class[] {String.class, byte[].class, Message.class}, anyString, actualPayload, any);
                 maxTimes = 1;
             }
         };
@@ -202,10 +202,8 @@ public class MqttDeviceMethodTest
         testMethod.send(testMessage);
     }
 
-    /*
-    Tests_SRS_MqttDeviceMethod_25_016: [**send method shall throw an exception if the message is null.**]**
-     */
-    @Test (expected = TransportException.class)
+    //Tests_SRS_MqttDeviceMethod_25_016: [send method shall throw an exception if the message is null.]
+    @Test (expected = IllegalArgumentException.class)
     public void sendThrowsOnMessageNull() throws TransportException
     {
         MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection);
@@ -218,7 +216,7 @@ public class MqttDeviceMethodTest
     Tests_SRS_MqttDeviceMethod_25_017: [**send method shall return if the message is not of Type DeviceMethod.**]**
      */
     @Test
-    public void sendDoesNotSendOnDifferentMessageType(@Mocked final Mqtt mockMqtt) throws TransportException
+    public void sendDoesNotSendOnDifferentMessageType(@Mocked final Mqtt mockMqtt, final @Mocked IotHubTransportMessage mockedMessage) throws TransportException
     {
         final byte[] actualPayload = "TestMessage".getBytes();
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
@@ -234,17 +232,16 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(testMethod, "publish", anyString, actualPayload);
+                Deencapsulation.invoke(testMethod, "publish", anyString, actualPayload, mockedMessage);
                 maxTimes = 0;
                 Deencapsulation.invoke(testMethod, "subscribe", anyString);
                 maxTimes = 0;
             }
         };
-
     }
 
-    //Tests_SRS_MqttDeviceMethod_25_021: [send method shall throw a TransportException if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.]
-    @Test (expected = TransportException.class)
+    //Tests_SRS_MqttDeviceMethod_25_021: [send method shall throw an IllegalArgumentException if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.]
+    @Test (expected = IllegalArgumentException.class)
     public void sendThrowsOnNullRequestID() throws TransportException
     {
         final byte[] actualPayload = "TestMessage".getBytes();

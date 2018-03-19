@@ -53,7 +53,7 @@ public class MqttDeviceTwin extends Mqtt
     public MqttDeviceTwin(MqttConnection mqttConnection) throws TransportException
     {
         //Codes_SRS_MQTTDEVICETWIN_25_001: [The constructor shall instantiate super class without any parameters.]
-        super(mqttConnection, null);
+        super(mqttConnection, null, null);
 
         //Codes_SRS_MQTTDEVICETWIN_25_002: [The constructor shall construct device twin response subscribeTopic.]
         this.subscribeTopic = RES + BACKSLASH + POUND;
@@ -99,8 +99,8 @@ public class MqttDeviceTwin extends Mqtt
                 }
                 else
                 {
-                    //Codes_SRS_MQTTDEVICETWIN_25_025: [send method shall throw an exception if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_TWIN_GET_REQUEST.]
-                    throwDeviceTwinTransportException(new IllegalArgumentException("Request Id is Mandatory"));
+                    //Codes_SRS_MQTTDEVICETWIN_25_025: [send method shall throw an IllegalArgumentException if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_TWIN_GET_REQUEST.]
+                    throw new IllegalArgumentException("Request Id is Mandatory");
                 }
                 break;
             }
@@ -123,8 +123,8 @@ public class MqttDeviceTwin extends Mqtt
                 }
                 else
                 {
-                    //Codes_SRS_MQTTDEVICETWIN_25_027: [send method shall throw an exception if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST.]
-                    throwDeviceTwinTransportException(new IllegalArgumentException("Request Id is Mandatory"));
+                    //Codes_SRS_MQTTDEVICETWIN_25_027: [send method shall throw an IllegalArgumentException if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST.]
+                    throw new IllegalArgumentException("Request Id is Mandatory");
                 }
                 
                 String version = message.getVersion();
@@ -162,23 +162,30 @@ public class MqttDeviceTwin extends Mqtt
             default:
             {
                 //Codes_SRS_MQTTDEVICETWIN_25_023: [send method shall throw an exception if the getDeviceOperationType() returns DEVICE_OPERATION_UNKNOWN.]
-                throwDeviceTwinTransportException(new UnsupportedOperationException("Device Twin Operation is not supported - " + message.getDeviceOperationType()));
+                throw new UnsupportedOperationException("Device Twin Operation is not supported - " + message.getDeviceOperationType());
             }
         }
+
         return topic.toString();
     }
 
+    /**
+     * Sends the provided device twin message over the mqtt connection
+     *
+     * @param message the message to send
+     * @throws TransportException if any exception is encountered while sending the message
+     */
     public void send(final IotHubTransportMessage message) throws TransportException
     {
         if (message == null || message.getBytes() == null)
         {
-            //Codes_SRS_MQTTDEVICETWIN_25_021: [send method shall throw an exception if the message is null.]
-            throwDeviceTwinTransportException(new IllegalArgumentException("Message cannot be null"));
+            //Codes_SRS_MQTTDEVICETWIN_25_021: [send method shall throw an IllegalArgumentException if the message is null.]
+            throw new IllegalArgumentException("Message cannot be null");
         }
 
         if(!this.isStarted)
         {
-            throwDeviceTwinTransportException(new IllegalStateException("Start device twin before using it"));
+            throw new IllegalStateException("Start device twin before using it");
         }
 
         if (message.getMessageType() != MessageType.DEVICE_TWIN)
@@ -209,7 +216,7 @@ public class MqttDeviceTwin extends Mqtt
         else
         {
             //Codes_SRS_MQTTDEVICETWIN_25_031: [send method shall publish a message to the IOT Hub on the respective publish topic by calling method publish().]
-            this.publish(publishTopic, message.getBytes());
+            this.publish(publishTopic, message);
         }
     }
 
@@ -266,7 +273,7 @@ public class MqttDeviceTwin extends Mqtt
     }
 
     @Override
-    public Message receive() throws TransportException
+    public IotHubTransportMessage receive() throws TransportException
     {
         synchronized (this.mqttLock)
         {
@@ -339,7 +346,7 @@ public class MqttDeviceTwin extends Mqtt
                                 }
                                 else
                                 {
-                                    this.throwDeviceTwinTransportException(new UnsupportedOperationException());
+                                    this.throwDeviceTwinTransportException(new UnsupportedOperationException("Request Id is mandatory"));
                                 }
                             }
 

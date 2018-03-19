@@ -17,13 +17,16 @@ public final class Mqtt implements MqttCallback
 
     protected void connect() throws TransportException;
     protected void disconnect() throws TransportException;
-    protected void publish(String publishTopic, byte[] payload) throws TransportException;
+    protected int publish(String publishTopic, byte[] payload) throws TransportException;
     protected void subscribe(String topic) throws TransportException;
     public Message receive() throws TransportException;
     public void restartBaseMqtt();
 
     public void connectionLost(Throwable throwable);
     public void messageArrived(String topic, MqttMessage mqttMessage);
+
+    public void deliveryComplete(IMqttDeliveryToken imqttDeliveryToken);
+    protected boolean sendMessageAcknowledgement(int messageId) throws TransportException
 }
 ```
 
@@ -34,7 +37,7 @@ public final class Mqtt implements MqttCallback
 public Mqtt(MqttConnection mqttConnection) throws TransportException
 ```
 
-**SRS_Mqtt_25_002: [**The constructor shall throw a TransportException if mqttConnection is null .**]**
+**SRS_Mqtt_25_002: [**The constructor shall throw an IllegalArgumentException if mqttConnection is null.**]**
 
 **SRS_Mqtt_25_003: [**The constructor shall retrieve lock, queue from the provided connection information and save the connection.**]**
 
@@ -49,6 +52,8 @@ protected void connect() throws TransportException;
 **SRS_Mqtt_25_008: [**If the MQTT connection is already open, the function shall do nothing.**]**
 
 **SRS_Mqtt_34_020: [**If the MQTT connection is established successfully, this function shall notify its listener that connection was established.**]**
+
+**SRS_Mqtt_34_044: [**If an MqttException is encountered while connecting, this function shall throw the associated ProtocolException.**]**
 
 
 ### disconnect
@@ -70,15 +75,17 @@ protected void publish(String publishTopic, byte[] payload) throws TransportExce
 ```
 **SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw a TransportException.**]**
 
-**SRS_Mqtt_25_012: [**If the MQTT connection is closed, the function shall throw a ProtocolConnectionException.**]**
+**SRS_Mqtt_25_012: [**If the MQTT connection is closed, the function shall throw a TransportException.**]**
 
-**SRS_Mqtt_25_013: [**If the either publishTopic or payload is null or empty, the function shall throw a TransportException.**]**
+**SRS_Mqtt_25_013: [**If the either publishTopic or payload is null or empty, the function shall throw an IllegalArgumentException.**]**
 
 **SRS_Mqtt_25_047: [**If the MqttClientAsync client throws MqttException on call to publish or getPendingDeliveryTokens, the function shall throw a ProtocolConnectionException with the message.**]**
 
 **SRS_Mqtt_25_048: [**publish shall check for pending publish tokens by calling getPendingDeliveryTokens. And if there are pending tokens publish shall sleep until the number of pending tokens are less than 10 as per paho limitations**]**
 
 **SRS_Mqtt_25_014: [**The function shall publish message payload on the publishTopic specified to the IoT Hub given in the configuration.**]**
+
+**SRS_Mqtt_34_026: [**If this function publishes the message on the mqtt async client, this function shall return the message id of the returned mqtt delivery token.**]**
 
 
 ### subscribe
@@ -87,13 +94,13 @@ protected void publish(String publishTopic, byte[] payload) throws TransportExce
 protected void subscribe(String topic) throws TransportException;
 ```
 
-**SRS_Mqtt_25_015: [**If the MQTT connection is closed, the function shall throw a ProtocolConnectionException with message.**]**
+**SRS_Mqtt_25_015: [**If the MQTT connection is closed, the function shall throw a TranpsortException with message.**]**
 
-**SRS_Mqtt_25_016: [**If the subscribeTopic is null or empty, the function shall throw a TransportException.**]**
+**SRS_Mqtt_25_016: [**If the subscribeTopic is null or empty, the function shall throw an IllegalArgumentException.**]**
 
 **SRS_Mqtt_99_049: [**If the user supplied SAS token has expired, the function shall throw a TransportException.**]**
 
-**SRS_Mqtt_25_048: [**If the Mqtt Client Async throws MqttException for any reason, the function shall throw a ProtocolConnectionException with the message.**]**
+**SRS_Mqtt_25_048: [**If the Mqtt Client Async throws MqttException for any reason, the function shall throw a ProtocolException with the message.**]**
 
 **SRS_Mqtt_25_017: [**The function shall subscribe to subscribeTopic specified to the IoT Hub given in the configuration.**]**
 
@@ -134,6 +141,8 @@ public void messageArrived(String topic, MqttMessage mqttMessage);
 
 **SRS_Mqtt_25_030: [**The payload of the message and the topic is added to the received messages queue .**]**
 
+**SRS_Mqtt_34_045: [**If there is a saved listener, this function shall notify that listener that a message arrived.**]**
+
 
 ### constructMessage
 
@@ -159,10 +168,17 @@ private void assignPropertiesToMessage(Message message, String propertiesString)
 **SRS_Mqtt_34_054: [**A message may have 0 to many custom properties**]**
 
 
-### peekMessage
-
+### deliveryComplete
 ```java
-Pair<String, byte[]> peekMessage() throws TransportException;
+public void deliveryComplete(IMqttDeliveryToken imqttDeliveryToken);
 ```
 
-**SRS_Mqtt_34_040: [**If allReceivedMessages queue is null then this method shall throw a TransportException.**]**
+**SRS_Mqtt_34_042: [**If this object has a saved listener, that listener shall be notified of the successfully delivered message.**]**
+
+
+### sendMessageAcknowledgement
+```java
+protected boolean sendMessageAcknowledgement(int messageId) throws TransportException
+```
+
+**SRS_Mqtt_34_043: [**This function shall invoke the saved mqttConnection object to send the message acknowledgement for the provided messageId and return that result.**]**

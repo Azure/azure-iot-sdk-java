@@ -32,7 +32,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 {
     private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 1*60*1000; // 1 minute timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
-    private State state;
+    private IotHubConnectionStatus state;
 
     private int linkCredit = -1;
     /** The {@link Delivery} tag. */
@@ -131,8 +131,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         add(new Handshaker());
         add(new FlowController());
 
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_006: [The constructor shall set its state to CLOSED.]
-        this.state = State.CLOSED;
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_006: [The constructor shall set its state to DISCONNECTED.]
+        this.state = IotHubConnectionStatus.DISCONNECTED;
 
         logger.LogInfo("AmqpsIotHubConnection object is created successfully using port %s in %s method ", useWebSockets ? AMQP_WEB_SOCKET_PORT : AMQP_PORT, logger.getMethodName());
 
@@ -170,7 +170,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_007: [If the AMQPS connection is already open, the function shall do nothing.]
-        if(this.state == State.CLOSED)
+        if(this.state == IotHubConnectionStatus.DISCONNECTED)
         {
             if(deviceClientConfigs.size() > 1)
             {
@@ -338,8 +338,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048 [If the AMQPS connection is already closed, the function shall do nothing.]
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to CLOSED.]
-        this.state = State.CLOSED;
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to DISCONNECTED.]
+        this.state = IotHubConnectionStatus.DISCONNECTED;
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall closeNow the AmqpsSessionManager and the AMQP connection.]
         this.amqpsSessionManager.closeNow();
@@ -372,9 +372,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         Integer deliveryHash = -1;
 
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_015: [If the state of the connection is CLOSED or there is not enough
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_015: [If the state of the connection is DISCONNECTED or there is not enough
         // credit, the function shall return -1.]
-        if (this.state == State.CLOSED || this.linkCredit <= 0)
+        if (this.state == IotHubConnectionStatus.DISCONNECTED || this.linkCredit <= 0)
         {
             deliveryHash = -1;
         }
@@ -402,7 +402,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         Boolean ackResult = false;
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_022: [If the AMQPS Connection is closed, the function shall return false.]
-        if(this.state != State.CLOSED)
+        if(this.state != IotHubConnectionStatus.DISCONNECTED)
         {
             try
             {
@@ -560,7 +560,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     }
 
     /**
-     * Event handler for the connection unbound event. Sets the connection state to CLOSED.
+     * Event handler for the connection unbound event. Sets the connection state to DISCONNECTED.
      * @param event The Proton Event object.
      */
     @Override
@@ -569,7 +569,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_12_010: [The function sets the state to closed.]
-        this.state = State.CLOSED;
+        this.state = IotHubConnectionStatus.DISCONNECTED;
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
@@ -694,7 +694,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     /**
      * Event handler for the link remote open event. This signifies that the
-     * {@link org.apache.qpid.proton.reactor.Reactor} is ready, so we set the connection to OPEN.
+     * {@link org.apache.qpid.proton.reactor.Reactor} is ready, so we set the connection to CONNECTED.
      * @param event The Proton Event object.
      */
     @Override
@@ -705,10 +705,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         // Codes_SRS_AMQPSIOTHUBCONNECTION_12_052: [The function shall call AmqpsSessionManager.onLinkRemoteOpen with the given link.]
         if (this.amqpsSessionManager.onLinkRemoteOpen(event))
         {
-            this.state = State.OPEN;
+            this.state = IotHubConnectionStatus.CONNECTED;
 
             // Codes_SRS_AMQPSIOTHUBCONNECTION_99_001: [All server listeners shall be notified when that the connection has been established.]
-            listener.onConnectionEstablished(null);
+            listener.onConnectionEstablished();
 
             // Codes_SRS_AMQPSIOTHUBCONNECTION_21_051 [The open lock shall be notified when that the connection has been established.]
             synchronized (openLock)
@@ -731,7 +731,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
-        this.state = State.CLOSED;
+        this.state = IotHubConnectionStatus.DISCONNECTED;
 
         if (event.getSender() != null && event.getSender().getRemoteCondition() != null && event.getSender().getRemoteCondition().getCondition() != null)
         {
@@ -753,7 +753,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
-        this.state = State.CLOSED;
+        this.state = IotHubConnectionStatus.DISCONNECTED;
 
         if (event.getTransport() != null && event.getTransport().getCondition() != null && event.getTransport().getCondition().getCondition() != null)
         {
@@ -870,7 +870,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         logger.LogInfo("All the listeners are informed that a message has been received, method name is %s ", logger.getMethodName());
 
         Exception e = null;
-        IotHubTransportMessage message = null;
+        IotHubTransportMessage transportMessage = null;
 
         AmqpsConvertFromProtonReturnValue amqpsHandleMessageReturnValue = this.convertFromProton(amqpsMessage, amqpsMessage.getDeviceClientConfig());
 
@@ -894,8 +894,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             throw new TransportException("callback is not defined");
         }
 
-        message = new IotHubTransportMessage(amqpsHandleMessageReturnValue.getMessage().getBytes(), amqpsHandleMessageReturnValue.getMessage().getMessageType());
-        message.setMessageCallback(amqpsHandleMessageReturnValue.getMessageCallback());
+        transportMessage = new IotHubTransportMessage(amqpsHandleMessageReturnValue.getMessage().getBytes(), amqpsHandleMessageReturnValue.getMessage().getMessageType());
+        transportMessage.setMessageCallback(amqpsHandleMessageReturnValue.getMessageCallback());
 
         if (amqpsMessage.getApplicationProperties() != null && amqpsMessage.getApplicationProperties().getValue() != null)
         {
@@ -928,17 +928,17 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         }
 
-        this.sendAckMessages.put(amqpsMessage, message);
+        this.sendAckMessages.put(amqpsMessage, transportMessage);
 
         //Codes_SRS_AMQPSIOTHUBCONNECTION_34_090: [If an amqp message can be received from the receiver link, and that amqp message contains a status code that is 200 or 204, this function shall notify this object's listeners that that message was received with a null exception.]
         //Codes_SRS_AMQPSIOTHUBCONNECTION_34_091: [If an amqp message can be received from the receiver link, and that amqp message contains no status code, this function shall notify this object's listeners that that message was received with a null exception.]
         //Codes_SRS_AMQPSIOTHUBCONNECTION_34_092: [If an amqp message can be received from the receiver link, and that amqp message contains no application properties, this function shall notify this object's listeners that that message was received with a null exception.]
         //Codes_SRS_AMQPSIOTHUBCONNECTION_34_093: [If an amqp message can be received from the receiver link, and that amqp message contains a status code, but that status code cannot be parsed to an integer, this function shall notify this object's listeners that that message was received with a null exception.]
-        this.listener.onMessageReceived(message, e);
+        this.listener.onMessageReceived(transportMessage, e);
     }
 
     @Override
-    public void addListener(IotHubListener listener) throws IllegalArgumentException
+    public void setListener(IotHubListener listener) throws IllegalArgumentException
     {
         if (listener == null)
         {
@@ -992,11 +992,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                     {
                         return false;
                     }
-                    else
-                    {
-                        sendAckMessages.remove(amqpsMessage);
-                        return true;
-                    }
+
+                    sendAckMessages.remove(amqpsMessage);
+                    return true;
                 }
             }
             return false;

@@ -43,34 +43,36 @@ public class MqttConnection
      * @param userName Username
      * @param password password
      * @param iotHubSSLContext SSLContext for the connection
-     * @throws IOException is thrown if any of the parameters are null or empty or client cannot be instantiated
+     * @throws IllegalArgumentException is thrown if any of the parameters are null or empty
+     * @throws TransportException when Mqtt async client cannot be instantiated
      */
-    MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext iotHubSSLContext) throws TransportException
+    MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext iotHubSSLContext) throws TransportException, IllegalArgumentException
     {
         if (serverURI == null || clientId == null || userName == null || iotHubSSLContext == null)
         {
-            //Codes_SRS_MQTTCONNECTION_25_001: [The constructor shall throw InvalidParameter Exception if any of the input parameters are null other than password.]
-            throw new TransportException(new IllegalArgumentException("ServerURI, clientId, and userName may not be null or empty"));
+            //Codes_SRS_MQTTCONNECTION_25_001: [The constructor shall throw IllegalArgumentException if any of the input parameters are null other than password.]
+            throw new IllegalArgumentException("ServerURI, clientId, and userName may not be null or empty");
         }
 
         else if (serverURI.isEmpty() || clientId.isEmpty() || userName.isEmpty())
         {
-            //Codes_SRS_MQTTCONNECTION_25_002: [The constructor shall throw InvalidParameter Exception if serverUri, clientId, userName, password are empty.]
-            throw new TransportException(new IllegalArgumentException("ServerURI, clientId, and userName may not be null or empty"));
+            //Codes_SRS_MQTTCONNECTION_25_002: [The constructor shall throw IllegalArgumentException if serverUri, clientId, userName, password are empty.]
+            throw new IllegalArgumentException("ServerURI, clientId, and userName may not be null or empty");
         }
 
         try
         {
             //Codes_SRS_MQTTCONNECTION_25_004: [The constructor shall create an MqttAsync client and update the connection options using the provided serverUri, clientId, userName, password and sslContext.]
-            mqttAsyncClient = new MqttAsyncClient(serverURI, clientId, new MemoryPersistence());
-            connectionOptions = new MqttConnectOptions();
+            this.mqttAsyncClient = new MqttAsyncClient(serverURI, clientId, new MemoryPersistence());
+            this.mqttAsyncClient.setManualAcks(true);
+            this.connectionOptions = new MqttConnectOptions();
             this.updateConnectionOptions(userName, password, iotHubSSLContext);
         }
         catch (MqttException e)
         {
-            mqttAsyncClient = null;
-            connectionOptions = null;
-            TransportException transportException = PahoExceptionTranslator.translatePahoException(e, "Unable to create mqttAsyncClient");
+            this.mqttAsyncClient = null;
+            this.connectionOptions = null;
+            TransportException transportException = PahoExceptionTranslator.convertToMqttException(e, "Unable to create mqttAsyncClient");
             throw transportException;
         }
 
@@ -102,14 +104,14 @@ public class MqttConnection
     /**
      * Callback to trigger onto if any of the Paho API's triggers callback
      * @param mqttCallback callback to be set
-     * @throws TransportException is thrown if callback is null
+     * @throws IllegalArgumentException is thrown if callback is null
      */
-    void setMqttCallback(MqttCallback mqttCallback) throws TransportException
+    void setMqttCallback(MqttCallback mqttCallback) throws IllegalArgumentException
     {
         if (mqttCallback == null)
         {
             //Codes_SRS_MQTTCONNECTION_25_006: [This method shall throw IllegalArgumentException if callback is null.]
-            throw new TransportException(new IllegalArgumentException("callback cannot be null"));
+            throw new IllegalArgumentException("callback cannot be null");
         }
 
         //Codes_SRS_MQTTCONNECTION_25_005: [This method shall set the callback for Mqtt.]
@@ -165,5 +167,27 @@ public class MqttConnection
     {
         //Codes_SRS_MQTTCONNECTION_25_011: [Setter for the MqttAsyncClient which can be null.]
         this.mqttAsyncClient = mqttAsyncClient;
+    }
+
+    /**
+     * Sends the message ack for the given messageId
+     *
+     * @param messageId the id of the message to acknowledge
+     * @return true if the message was successfully acknowledged
+     * @throws TransportException if the message could not be acknowledged
+     */
+    boolean sendMessageAcknowledgement(int messageId) throws TransportException
+    {
+        try
+        {
+            //Codes_SRS_MQTTCONNECTION_25_012: [This function shall invoke the saved mqttAsyncClient to send the message ack for the provided messageId and then return true.]
+            this.mqttAsyncClient.messageArrivedComplete(messageId, QOS);
+            return true;
+        }
+        catch (MqttException e)
+        {
+            //Codes_SRS_MQTTCONNECTION_25_013: [If this function encounters an MqttException when sending the message ack over the mqtt async client, this function shall translate that exception and throw it.]
+            throw PahoExceptionTranslator.convertToMqttException(e, "Error sending message ack");
+        }
     }
 }

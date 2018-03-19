@@ -19,6 +19,7 @@ public class MqttConnection
     Object getMqttLock();
     MqttConnectOptions getConnectionOptions();
     void setMqttAsyncClient(MqttAsyncClient mqttAsyncClient);
+    boolean sendMessageAcknowledgement(int messageId) throws TransportException;
 }
 ```
 
@@ -28,9 +29,9 @@ public class MqttConnection
 MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext iotHubSSLContext) throws IOException
 ```
 
-**SRS_MQTTCONNECTION_25_001: [**The constructor shall throw TransportException if any of the input parameters are null other than password.**]**
+**SRS_MQTTCONNECTION_25_001: [**The constructor shall throw IllegalArgumentException if any of the input parameters are null other than password.**]**
 
-**SRS_MQTTCONNECTION_25_002: [**The constructor shall throw TransportException if serverUri, clientId, userName, password are empty.**]**
+**SRS_MQTTCONNECTION_25_002: [**The constructor shall throw IllegalArgumentException if serverUri, clientId, userName, password are empty.**]**
 
 **SRS_MQTTCONNECTION_25_003: [**The constructor shall create lock, queue for this MqttConnection.**]**
 
@@ -44,7 +45,7 @@ void setMqttCallback(MqttCallback mqttCallback) throws TransportException;
 
 **SRS_MQTTCONNECTION_25_005: [**This method shall set the callback for Mqtt.**]**
 
-**SRS_MQTTCONNECTION_25_006: [**This method shall throw TransportException if callback is null.**]**
+**SRS_MQTTCONNECTION_25_006: [**This method shall throw IllegalArgumentException if callback is null.**]**
 
 ### getMqttAsyncClient
 
@@ -86,3 +87,12 @@ void setMqttCallback(MqttCallback mqttCallback) throws TransportException;
 
 **SRS_MQTTCONNECTION_25_011: [**Setter for the MqttAsyncClient which can be null.**]**
 
+
+### sendMessageAcknowledgement
+```java
+boolean sendMessageAcknowledgement(int messageId) throws TransportException
+```
+
+**SRS_MQTTCONNECTION_25_012: [**This function shall invoke the saved mqttAsyncClient to send the message ack for the provided messageId and then return true.**]**
+
+**SRS_MQTTCONNECTION_25_013: [**If this function encounters an MqttException when sending the message ack over the mqtt async client, this function shall translate that exception and throw it.**]**

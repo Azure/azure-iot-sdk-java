@@ -16,8 +16,8 @@ public interface IotHubListener
      */
     void onMessageSent(Message message, Throwable e);
 
-    //message received
-    void onMessageReceived(IotHubTransportMessage transportMessage);
+    //message received or exception encountered while receiving message
+    void onMessageReceived(IotHubTransportMessage transportMessage, Throwable e);
 
     //connection drop
     void onConnectionLost(Throwable e);

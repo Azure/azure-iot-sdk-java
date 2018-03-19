@@ -67,7 +67,7 @@ public void stop() throws IOException;
 
 **SRS_MQTTDEVICEMETHOD_25_020: [**send method shall subscribe to topic from spec ($iothub/methods/POST/#) if the operation is of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST.**]**
 
-**SRS_MQTTDEVICEMETHOD_25_021: [**send method shall throw a TransportException if message contains a null or empty request id and if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
+**SRS_MQTTDEVICEMETHOD_25_021: [**send method shall throw an IllegalArgumentException if message contains a null or empty request id and if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
 
 **SRS_MQTTDEVICEMETHOD_25_022: [**send method shall build the publish topic of the format mentioned in spec ($iothub/methods/res/{status}/?$rid={request id}) and publish if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
 

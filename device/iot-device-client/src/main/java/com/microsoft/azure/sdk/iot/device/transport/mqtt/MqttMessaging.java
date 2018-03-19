@@ -5,7 +5,9 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
+import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 
 public class MqttMessaging extends Mqtt
 {
@@ -13,14 +15,15 @@ public class MqttMessaging extends Mqtt
     private String publishTopic;
     private String parseTopic;
 
-    public MqttMessaging(MqttConnection mqttConnection, String deviceId, MqttConnectionStateListener listener) throws TransportException
+    public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener) throws TransportException
     {
         //Codes_SRS_MqttMessaging_25_002: [The constructor shall use the configuration to instantiate super class and passing the parameters.]
-        super(mqttConnection, listener);
+        super(mqttConnection, listener, messageListener);
 
         if (deviceId == null || deviceId.isEmpty())
         {
-            throwTelemtryTransportException(new IllegalArgumentException("Device id cannot be null or empty"));
+            //Codes_SRS_MqttMessaging_25_001: [The constructor shall throw IllegalArgumentException if any of the parameters are null or empty .]
+            throw new IllegalArgumentException("Device id cannot be null or empty");
         }
 
         //Codes_SRS_MqttMessaging_25_003: [The constructor construct publishTopic and subscribeTopic from deviceId.]
@@ -44,12 +47,18 @@ public class MqttMessaging extends Mqtt
        this.disconnect();
     }
 
+    /**
+     * Sends the provided telemetry message over the mqtt connection
+     *
+     * @param message the message to send
+     * @throws TransportException if any exception is encountered while sending the message
+     */
     public void send(Message message) throws TransportException
     {
         if (message == null || message.getBytes() == null)
         {
-            //Codes_SRS_MqttMessaging_25_025: [send method shall throw a TransportException if the message is null.]
-            throwTelemtryTransportException(new IllegalArgumentException("Message cannot be null"));
+            //Codes_SRS_MqttMessaging_25_025: [send method shall throw an IllegalArgumentException if the message is null.]
+            throw new IllegalArgumentException("Message cannot be null");
         }
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -112,7 +121,7 @@ public class MqttMessaging extends Mqtt
             separatorNeeded = true;
         }
 
-        for(MessageProperty property : message.getProperties())
+        for (MessageProperty property : message.getProperties())
         {
             if (separatorNeeded)
             {
@@ -130,10 +139,10 @@ public class MqttMessaging extends Mqtt
         String messagePublishTopic = stringBuilder.toString();
 
         //Codes_SRS_MqttMessaging_25_024: [send method shall publish a message to the IOT Hub on the publish topic by calling method publish().]
-        this.publish(messagePublishTopic, message.getBytes());
+        this.publish(messagePublishTopic, message);
     }
 
-    private void throwTelemtryTransportException(Exception e) throws TransportException
+    private void throwTelemetryTransportException(Exception e) throws TransportException
     {
         TransportException transportException = new TransportException(e);
         transportException.setIotHubService(TransportException.IotHubService.TELEMETRY);

@@ -17,10 +17,9 @@ import java.util.Queue;
 
 public interface IotHubTransportConnection
 {
-    //TODO (Tim) change this back to TransportException once HTTP and AMQP are done
-    void open(Queue<DeviceClientConfig> deviceClientConfigs) throws Exception;
-    void setListener(IotHubListener listener) throws Exception;
-    void close() throws Exception;
-    IotHubStatusCode sendMessage(Message message) throws Exception;
-    boolean sendMessageResult(Message message, IotHubMessageResult result) throws Exception;
+    void open(Queue<DeviceClientConfig> deviceClientConfigs) throws TransportException;
+    void setListener(IotHubListener listener) throws TransportException;
+    void close() throws TransportException;
+    IotHubStatusCode sendMessage(Message message) throws TransportException;
+    boolean sendMessageResult(Message message, IotHubMessageResult result) throws TransportException;
 }

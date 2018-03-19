@@ -8,7 +8,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportNew;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransport;
 import mockit.*;
 import org.junit.Test;
 
@@ -40,9 +39,6 @@ public class DeviceIOTest
     IotHubReceiveTask mockIotHubReceiveTask;
 
     @Mocked
-    HttpsTransport mockHttpsTransport;
-
-    @Mocked
     IotHubTransportNew mockedTransport;
 
     @Mocked 
@@ -56,6 +52,9 @@ public class DeviceIOTest
 
     @Mocked
     Collection<DeviceClientConfig> mockedCollection;
+
+    @Mocked
+    IotHubEventCallback mockedIotHubEventCallback;
 
     private final static long SEND_PERIOD_MILLIS = 10L;
     private final static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
@@ -75,25 +74,7 @@ public class DeviceIOTest
         final Object deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
                 new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
                 mockConfig, IotHubClientProtocol.AMQPS, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
-
-        return deviceIO;
-    }
-
-    private Object newDeviceIOHttps()
-    {
-        new NonStrictExpectations()
-        {
-            {
-                new HttpsTransport(mockConfig);
-                result = mockHttpsTransport;
-            }
-        };
-
-        final Object deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                mockConfig, IotHubClientProtocol.HTTPS, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_HTTPS);
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
 
         return deviceIO;
     }
@@ -117,12 +98,12 @@ public class DeviceIOTest
         };
 
         Deencapsulation.invoke(deviceIO, "open");
-        assertEquals("OPEN", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("CONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     /* Tests_SRS_DEVICE_IO_21_001: [The constructor shall store the provided protocol and config information.] */
     /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
-    /* Tests_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `CLOSED`.] */
+    /* Tests_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `DISCONNECTED`.] */
     /* Tests_SRS_DEVICE_IO_21_037: [The constructor shall initialize the `sendPeriodInMilliseconds` with default value of 10 milliseconds.] */
     /* Tests_SRS_DEVICE_IO_21_038: [The constructor shall initialize the `receivePeriodInMilliseconds` with default value of each protocol.] */
     @Test
@@ -149,7 +130,7 @@ public class DeviceIOTest
         // assert
         assertEquals(mockConfig, Deencapsulation.getField(deviceIO, "config"));
         assertEquals(protocol, Deencapsulation.getField(deviceIO, "protocol"));
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
         assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
         assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
 
@@ -198,37 +179,6 @@ public class DeviceIOTest
         Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
                 new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
                 mockConfig, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_MQTT);
-
-        new Verifications()
-        {
-            {
-                mockConfig.setUseWebsocket(false);
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
-    @Test
-    public void constructorHttpSuccess() throws URISyntaxException
-    {
-        // arrange
-        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
-
-        // assert
-        new NonStrictExpectations()
-        {
-            {
-                new HttpsTransport(mockConfig);
-                result = mockHttpsTransport;
-                times = 1;
-            }
-        };
-
-        // act
-        Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                mockConfig, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_HTTPS);
 
         new Verifications()
         {
@@ -339,7 +289,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "open");
 
         // assert
-        assertEquals("OPEN", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("CONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     /* Tests_SRS_DEVICE_IO_21_008: [The open shall create default IotHubSSL context if no certificate input was provided by user and save it by calling setIotHubSSLContext.] */
@@ -365,7 +315,7 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_012: [The open shall open the transport to communicate with an IoT Hub.] */
     /* Tests_SRS_DEVICE_IO_21_013: [The open shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.] */
     /* Tests_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.] */
-    /* Tests_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `OPEN`.] */
+    /* Tests_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `CONNECTED`.] */
     @Test
     public void openSuccess() throws URISyntaxException, IOException, TransportException
     {
@@ -402,7 +352,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "open");
 
         // assert
-        assertEquals("OPEN", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("CONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     /* Tests_SRS_DEVICE_IO_21_015: [If an error occurs in opening the transport, the open shall throw an IOException.] */
@@ -434,7 +384,7 @@ public class DeviceIOTest
         }
 
         // assert
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     // Tests_SRS_DEVICE_IO_12_002: [If the client is already open, the open shall do nothing.]
@@ -450,7 +400,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "multiplexOpen", deviceClientList);
 
         // assert
-        assertEquals("OPEN", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("CONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     // Tests_SRS_DEVICE_IO_12_002: [If the client is already open, the open shall do nothing.]
@@ -458,7 +408,7 @@ public class DeviceIOTest
     // Tests_SRS_DEVICE_IO_12_004: [The open shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.]
     // Tests_SRS_DEVICE_IO_12_005: [The open shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.]
     // Tests_SRS_DEVICE_IO_12_006: [If an error occurs in opening the transport, the open shall throw an IOException.]
-    // Tests_SRS_DEVICE_IO_12_007: [The open shall set the `state` as `OPEN`.]
+    // Tests_SRS_DEVICE_IO_12_007: [The open shall set the `state` as `CONNECTED`.]
     @Test
     public void multiplexOpenSuccess()
             throws URISyntaxException, IOException
@@ -497,7 +447,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "multiplexOpen", deviceClientList);
 
         // assert
-        assertEquals("OPEN", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("CONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     /* Tests_SRS_DEVICE_IO_21_017: [The closeNow shall finish all ongoing tasks.] */
@@ -557,7 +507,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "close");
 
         // assert
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     /* Tests_SRS_DEVICE_IO_21_020: [If the client is already closed, the closeNow shall do nothing.] */
@@ -569,13 +519,13 @@ public class DeviceIOTest
         final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
 
         // act
         Deencapsulation.invoke(deviceIO, "close");
 
         // assert
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     /* Tests_SRS_DEVICE_IO_21_021: [The closeNow shall set the `state` as `CLOSE`.] */
@@ -591,7 +541,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "close");
 
         // assert
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     // Tests_SRS_DEVICE_IO_12_009: [THe function shall call close().]
@@ -612,7 +562,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "multiplexClose");
 
         // assert
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
 
@@ -688,7 +638,7 @@ public class DeviceIOTest
         final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
@@ -715,7 +665,7 @@ public class DeviceIOTest
             {
                 mockMsg.setIotHubConnectionString(mockConfig.getIotHubConnectionString());
                 times = 1;
-                mockedTransport.addMessage(mockMsg, mockCallback, context);
+                mockedTransport.addMessage(mockMsg, mockedIotHubEventCallback, context);
                 times = 1;
             }
         };
@@ -765,7 +715,7 @@ public class DeviceIOTest
         final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
-        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());

@@ -15,9 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Implement the standard I/O interface with the IoTHub.
- *
+/*
  *     +-------------------------------------+                  +-----------------------------------+
  *     |                                     |                  |                                   |
  *     |             DeviceClient            |------------------+        DeviceClientConfig         |
@@ -63,6 +61,10 @@ import java.util.concurrent.TimeUnit;
  *      |  AmqpsIotHubConnection  |    |  MqttIotHubConnection   |    |             HttpsIotHubConnection           |
  *      +-------------------------+    +-------------------------+    +---------------------------------------------+
  *
+ */
+
+/**
+ * The task scheduler for sending and receiving messages for the Device Client
  */
 public final class DeviceIO
 {
@@ -115,7 +117,7 @@ public final class DeviceIO
         /* Codes_SRS_DEVICE_IO_21_038: [The constructor shall initialize the `receivePeriodInMilliseconds` with default value of each protocol.] */
         this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
 
-        /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `CLOSED`.] */
+        /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `DISCONNECTED`.] */
         this.state = IotHubClientState.CLOSED;
 
         if (protocol == IotHubClientProtocol.AMQPS_WS || protocol == IotHubClientProtocol.MQTT_WS)
@@ -130,7 +132,7 @@ public final class DeviceIO
         /* Codes_SRS_DEVICE_IO_21_038: [The constructor shall initialize the `receivePeriodInMilliseconds` with default value of each protocol.] */
         this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
 
-        /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `CLOSED`.] */
+        /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `DISCONNECTED`.] */
         this.state = IotHubClientState.CLOSED;
 
         this.logger = new CustomLogger(this.getClass());
@@ -163,7 +165,7 @@ public final class DeviceIO
         }
 
         /* Codes_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every receivePeriodInMilliseconds milliseconds.] */
-        /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `OPEN`.] */
+        /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `CONNECTED`.] */
         commonOpenSetup();
     }
 
@@ -185,7 +187,7 @@ public final class DeviceIO
 /*    public void multiplexOpen(List<DeviceClient> deviceClientList) throws IOException
     {
         // Codes_SRS_DEVICE_IO_12_002: [If the client is already open, the open shall do nothing.]
-        if (this.state == IotHubClientState.OPEN)
+        if (this.state == IotHubClientState.CONNECTED)
         {
             return;
         }
@@ -197,7 +199,7 @@ public final class DeviceIO
         // Codes_SRS_DEVICE_IO_12_004: [The open shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.]
         // Codes_SRS_DEVICE_IO_12_005: [The open shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.]
         // Codes_SRS_DEVICE_IO_12_006: [If an error occurs in opening the transport, the open shall throw an IOException.]
-        // Codes_SRS_DEVICE_IO_12_007: [The open shall set the `state` as `OPEN`.]
+        // Codes_SRS_DEVICE_IO_12_007: [The open shall set the `state` as `CONNECTED`.]
         commonOpenSetup();
     }*/
 
@@ -220,7 +222,7 @@ public final class DeviceIO
         this.taskScheduler.scheduleAtFixedRate(this.receiveTask, 0,
                 receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
 
-        /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `OPEN`.] */
+        /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `CONNECTED`.] */
         this.state = IotHubClientState.OPEN;
     }
 
@@ -251,6 +253,7 @@ public final class DeviceIO
         }
         catch (DeviceClientException e)
         {
+            this.state = IotHubClientState.CLOSED;
             throw new IOException(e);
         }
 
@@ -312,50 +315,6 @@ public final class DeviceIO
 
         logger.LogInfo("Message with messageid %s along with callback and callbackcontext is added to the queue, method name is %s ", message.getMessageId(), logger.getMethodName());
         /* Codes_SRS_DEVICE_IO_21_022: [The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.] */
-        transport.addMessage(message, callback, callbackContext);
-    }
-
-    /**
-     * Asynchronously sends an event message to the IoT Hub. Use IotHubResponseCallback if you
-     * need the message payload received as a response for a sent message, together with the
-     * status.
-     *
-     * @param message the message to be sent.
-     * @param callback the callback to be invoked when a response is received.
-     * Can be {@code null}.
-     * @param callbackContext a context to be passed to the callback. Can be
-     * {@code null} if no callback is provided.
-     * @param iotHubConnectionString the sender's connection string.
-     *
-     * @throws IllegalArgumentException if the message provided is {@code null}.
-     * @throws IllegalStateException if the client has not been opened yet or is already closed.
-     */
-    public synchronized void sendEventAsync(Message message,
-                               IotHubResponseCallback callback,
-                               Object callbackContext,
-                               IotHubConnectionString iotHubConnectionString)
-    {
-        /* Codes_SRS_DEVICE_IO_21_042: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
-        if (this.state == IotHubClientState.CLOSED)
-        {
-            throw new IllegalStateException(
-                    "Cannot send event from "
-                            + "an IoT Hub client that is closed.");
-        }
-
-        /* Codes_SRS_DEVICE_IO_21_041: [If the message given is null, the sendEventAsync shall throw an IllegalArgumentException.] */
-        if (message == null)
-        {
-            throw new IllegalArgumentException("Cannot send message 'null'.");
-        }
-
-        if (iotHubConnectionString != null)
-        {
-            message.setIotHubConnectionString(iotHubConnectionString);
-        }
-
-        logger.LogInfo("Message with messageid %s along with callback and callbackContext is added to the queue, method name is %s ", message.getMessageId(), logger.getMethodName());
-        /* Codes_SRS_DEVICE_IO_21_040: [The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.] */
         transport.addMessage(message, callback, callbackContext);
     }
 
@@ -492,6 +451,6 @@ public final class DeviceIO
 
     public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback statusChangeCallback, Object callbackContext)
     {
-        //TODO
+        this.transport.registerConnectionStatusChangeCallback(statusChangeCallback, callbackContext);
     }
 }

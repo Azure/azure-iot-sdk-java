@@ -25,7 +25,7 @@ public final class MqttMessaging extends Mqtt
 public MqttMessaging(MqttConnection mqttConnection, String deviceId, MqttConnectionStateListener listener) throws TransportException
 ```
 
-**SRS_MqttMessaging_25_001: [**The constructor shall throw TransportException if any of the parameters are null or empty .**]**
+**SRS_MqttMessaging_25_001: [**The constructor shall throw IllegalArgumentException if any of the parameters are null or empty .**]**
 
 **SRS_MqttMessaging_25_002: [**The constructor shall use the configuration to instantiate super class and passing the parameters.**]**
 
@@ -63,7 +63,7 @@ public void stop() throws TransportException;
 
 **SRS_MqttMessaging_25_024: [**send method shall publish a message to the IOT Hub on the publish topic by calling method publish().**]**
 
-**SRS_MqttMessaging_25_025: [**send method shall throw a TransportException if the message is null.**]**
+**SRS_MqttMessaging_25_025: [**send method shall throw an IllegalArgumentException if the message is null.**]**
 
 **SRS_MqttMessaging_34_026: [**This method shall append each custom property's name and value to the publishTopic before publishing.**]**
 

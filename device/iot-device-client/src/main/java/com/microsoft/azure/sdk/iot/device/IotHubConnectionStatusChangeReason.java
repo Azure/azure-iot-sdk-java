@@ -12,5 +12,6 @@ public enum IotHubConnectionStatusChangeReason
     RETRY_EXPIRED,
     NO_NETWORK,
     COMMUNICATION_ERROR,
-    CONNECTION_OK
+    CONNECTION_OK,
+    CLIENT_CLOSE
 }

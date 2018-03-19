@@ -7,7 +7,6 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.*;
 import mockit.*;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -36,7 +35,7 @@ public class PahoExceptionTranslatorTest
         };
 
         //act
-        Exception e = PahoExceptionTranslator.translatePahoException(new MqttException(MqttException.REASON_CODE_INVALID_PROTOCOL_VERSION), "");
+        Exception e = PahoExceptionTranslator.convertToMqttException(new MqttException(MqttException.REASON_CODE_INVALID_PROTOCOL_VERSION), "");
 
         //assert
         assertTrue(e instanceof MqttRejectedProtocolVersionException);
@@ -56,7 +55,7 @@ public class PahoExceptionTranslatorTest
         };
 
         //act
-        Exception e = PahoExceptionTranslator.translatePahoException(new MqttException(MqttException.REASON_CODE_INVALID_CLIENT_ID), "");
+        Exception e = PahoExceptionTranslator.convertToMqttException(new MqttException(MqttException.REASON_CODE_INVALID_CLIENT_ID), "");
 
         //assert
         assertTrue(e instanceof MqttIdentifierRejectedException);
@@ -76,7 +75,7 @@ public class PahoExceptionTranslatorTest
         };
 
         //act
-        Exception e = PahoExceptionTranslator.translatePahoException(new MqttException(MqttException.REASON_CODE_BROKER_UNAVAILABLE), "");
+        Exception e = PahoExceptionTranslator.convertToMqttException(new MqttException(MqttException.REASON_CODE_BROKER_UNAVAILABLE), "");
 
         //assert
         assertTrue(e instanceof MqttServerUnavailableException);
@@ -96,7 +95,7 @@ public class PahoExceptionTranslatorTest
         };
 
         //act
-        Exception e = PahoExceptionTranslator.translatePahoException(new MqttException(MqttException.REASON_CODE_FAILED_AUTHENTICATION), "");
+        Exception e = PahoExceptionTranslator.convertToMqttException(new MqttException(MqttException.REASON_CODE_FAILED_AUTHENTICATION), "");
 
         //assert
         assertTrue(e instanceof MqttBadUsernameOrPasswordException);
@@ -116,7 +115,7 @@ public class PahoExceptionTranslatorTest
         };
 
         //act
-        Exception e = PahoExceptionTranslator.translatePahoException(new MqttException(MqttException.REASON_CODE_NOT_AUTHORIZED), "");
+        Exception e = PahoExceptionTranslator.convertToMqttException(new MqttException(MqttException.REASON_CODE_NOT_AUTHORIZED), "");
 
         //assert
         assertTrue(e instanceof MqttUnauthorizedException);
@@ -136,7 +135,7 @@ public class PahoExceptionTranslatorTest
         };
 
         //act
-        Exception e = PahoExceptionTranslator.translatePahoException(new MqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR), "");
+        Exception e = PahoExceptionTranslator.convertToMqttException(new MqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR), "");
 
         //assert
         assertTrue(e instanceof MqttUnexpectedErrorException);
@@ -156,7 +155,7 @@ public class PahoExceptionTranslatorTest
         };
 
         //act
-        Exception e = PahoExceptionTranslator.translatePahoException(new MqttException(MqttException.REASON_CODE_SSL_CONFIG_ERROR), "");
+        Exception e = PahoExceptionTranslator.convertToMqttException(new MqttException(MqttException.REASON_CODE_SSL_CONFIG_ERROR), "");
 
         //assert
         assertTrue(e instanceof ProtocolException);
@@ -197,13 +196,13 @@ public class PahoExceptionTranslatorTest
         };
 
         //assert
-        assertTrue(PahoExceptionTranslator.translatePahoException(mockedMqttException, "").isRetryable());
-        assertTrue(PahoExceptionTranslator.translatePahoException(mockedMqttException, "").isRetryable());
-        assertTrue(PahoExceptionTranslator.translatePahoException(mockedMqttException, "").isRetryable());
-        assertTrue(PahoExceptionTranslator.translatePahoException(mockedMqttException, "").isRetryable());
-        assertTrue(PahoExceptionTranslator.translatePahoException(mockedMqttException, "").isRetryable());
-        assertTrue(PahoExceptionTranslator.translatePahoException(mockedMqttException, "").isRetryable());
-        assertTrue(PahoExceptionTranslator.translatePahoException(mockedMqttException, "").isRetryable());
-        assertTrue(PahoExceptionTranslator.translatePahoException(mockedMqttException, "").isRetryable());
+        assertTrue(PahoExceptionTranslator.convertToMqttException(mockedMqttException, "").isRetryable());
+        assertTrue(PahoExceptionTranslator.convertToMqttException(mockedMqttException, "").isRetryable());
+        assertTrue(PahoExceptionTranslator.convertToMqttException(mockedMqttException, "").isRetryable());
+        assertTrue(PahoExceptionTranslator.convertToMqttException(mockedMqttException, "").isRetryable());
+        assertTrue(PahoExceptionTranslator.convertToMqttException(mockedMqttException, "").isRetryable());
+        assertTrue(PahoExceptionTranslator.convertToMqttException(mockedMqttException, "").isRetryable());
+        assertTrue(PahoExceptionTranslator.convertToMqttException(mockedMqttException, "").isRetryable());
+        assertTrue(PahoExceptionTranslator.convertToMqttException(mockedMqttException, "").isRetryable());
     }
 }

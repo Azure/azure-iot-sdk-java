@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+
 public interface IotHubConnectionStatusChangeCallback
 {
     void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext);

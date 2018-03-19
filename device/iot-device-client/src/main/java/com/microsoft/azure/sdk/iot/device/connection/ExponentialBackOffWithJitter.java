@@ -9,4 +9,8 @@ package com.microsoft.azure.sdk.iot.device.connection;
 
 public class ExponentialBackOffWithJitter implements ReconnectionPolicy
 {
+    @Override
+    public boolean waitAndRetry() {
+        return false;
+    }
 }

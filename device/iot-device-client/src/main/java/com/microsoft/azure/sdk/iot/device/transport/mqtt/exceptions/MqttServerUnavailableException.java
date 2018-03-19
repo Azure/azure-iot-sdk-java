@@ -10,6 +10,8 @@ import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 /**
  *  This exception is thrown when an MQTT Connection Return code of 0x03 is encountered when opening an MQTT connection
  *
+ *  In the context of IoT, this exception may be encountered when trying to connect to a disabled device
+ *
  * <a href="http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/csprd02/mqtt-v3.1.1-csprd02.html#_Toc385349771">
  *     MQTT Connect Return Code Documentation</a>
  */

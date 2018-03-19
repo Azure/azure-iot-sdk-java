@@ -9,24 +9,26 @@ import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
+import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
 
 import static org.eclipse.paho.client.mqttv3.MqttException.*;
-import static org.eclipse.paho.client.mqttv3.MqttException.REASON_CODE_MAX_INFLIGHT;
 
 public class PahoExceptionTranslator
 {
     private static final int UNDEFINED_MQTT_CONNECT_CODE_LOWER_BOUND = 6;
     private static final int UNDEFINED_MQTT_CONNECT_CODE_UPPER_BOUND = 255;
 
-    public static TransportException translatePahoException(MqttException pahoException, String errorMessage)
+    public static ProtocolException convertToMqttException(MqttException pahoException, String errorMessage)
     {
         switch (pahoException.getReasonCode())
         {
             case REASON_CODE_CLIENT_EXCEPTION:
                 // MQTT Client encountered an exception, no connect code retrieved from service, so the reason
                 // for this connection loss is in the mqttException cause
-                if (pahoException.getCause() instanceof UnknownHostException || pahoException.getCause() instanceof InterruptedException)
+                if (pahoException.getCause() instanceof UnknownHostException
+                        || pahoException.getCause() instanceof NoRouteToHostException
+                        || pahoException.getCause() instanceof InterruptedException)
                 {
                     //Codes_SRS_PahoExceptionTranslator_34_139: [When deriving the TransportException from the provided MqttException, this function shall map all client exceptions with underlying UnknownHostException or InterruptedException to a retryable ProtocolException.]
                     ProtocolException connectionException = new ProtocolException(errorMessage, pahoException);
@@ -61,6 +63,7 @@ public class PahoExceptionTranslator
             case REASON_CODE_CLIENT_TIMEOUT:
             case REASON_CODE_WRITE_TIMEOUT:
             case REASON_CODE_MAX_INFLIGHT:
+            case REASON_CODE_CONNECT_IN_PROGRESS:
                 // Codes_SRS_PahoExceptionTranslator_34_146: [When deriving the TransportException from the provided MqttException, this function shall map REASON_CODE_SUBSCRIBE_FAILED, REASON_CODE_CLIENT_NOT_CONNECTED, REASON_CODE_TOKEN_INUSE, REASON_CODE_CONNECTION_LOST, REASON_CODE_SERVER_CONNECT_ERROR, REASON_CODE_CLIENT_TIMEOUT, REASON_CODE_WRITE_TIMEOUT, and REASON_CODE_MAX_INFLIGHT to a retryable ProtocolException.]
                 //Client lost internet connection, or server could not be reached, or other retryable connection exceptions
                 ProtocolException connectionException = new ProtocolException(errorMessage, pahoException);

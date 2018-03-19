@@ -39,7 +39,7 @@ public class MqttDeviceMethod extends Mqtt
     public MqttDeviceMethod(MqttConnection mqttConnection) throws TransportException
     {
         //Codes_SRS_MqttDeviceMethod_25_001: [The constructor shall instantiate super class without any parameters.]
-        super(mqttConnection, null);
+        super(mqttConnection, null, null);
 
         //Codes_SRS_MqttDeviceMethod_25_002: [The constructor shall create subscribe and response topics strings for device methods as per the spec.]
         this.subscribeTopic = POST + BACKSLASH + POUND;
@@ -65,12 +65,19 @@ public class MqttDeviceMethod extends Mqtt
         }
     }
 
-    public void send(final IotHubTransportMessage message) throws TransportException
+    /**
+     * Sends the provided device method message over the mqtt connection
+     *
+     * @param message the message to send
+     * @throws TransportException if any exception is encountered while sending the message
+     * @throws IllegalArgumentException if the provided message is null or has a null body
+     */
+    public void send(final IotHubTransportMessage message) throws TransportException, IllegalArgumentException
     {
         if (message == null || message.getBytes() == null)
         {
             //Codes_SRS_MqttDeviceMethod_25_016: [send method shall throw an exception if the message is null.]
-            throwMethodsTransportException(new IllegalArgumentException("Message cannot be null"));
+            throw new IllegalArgumentException("Message cannot be null");
         }
 
         if(!isStarted)
@@ -96,8 +103,8 @@ public class MqttDeviceMethod extends Mqtt
             {
                 if (message.getRequestId() == null || message.getRequestId().isEmpty())
                 {
-                    //Codes_SRS_MqttDeviceMethod_25_021: [send method shall throw a TransportException if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.]
-                    throwMethodsTransportException(new IllegalArgumentException("Request id cannot be null or empty"));
+                    //Codes_SRS_MqttDeviceMethod_25_021: [send method shall throw an IllegalArgumentException if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.]
+                    throw new IllegalArgumentException("Request id cannot be null or empty");
                 }
 
                 if (requestMap.containsKey(message.getRequestId()))
@@ -121,8 +128,9 @@ public class MqttDeviceMethod extends Mqtt
                         BACKSLASH +
                         REQ_ID +
                         message.getRequestId();
+
                 //Codes_SRS_MqttDeviceMethod_25_022: [send method shall build the publish topic of the format mentioned in spec ($iothub/methods/res/{status}/?$rid={request id}) and publish if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.]
-                this.publish(topic, message.getBytes());
+                this.publish(topic, message);
                 break;
             }
             default:
@@ -134,7 +142,7 @@ public class MqttDeviceMethod extends Mqtt
     }
 
     @Override
-    public Message receive() throws TransportException
+    public IotHubTransportMessage receive() throws TransportException
     {
         synchronized (this.mqttLock)
         {
@@ -165,13 +173,13 @@ public class MqttDeviceMethod extends Mqtt
                             if (data != null && data.length > 0)
                             {
                                 message = new IotHubTransportMessage(data, MessageType.DEVICE_METHODS);
-                                message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                             }
                             else
                             {
                                 message = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
-                                message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                             }
+
+                            message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
 
                             //Codes_SRS_MqttDeviceMethod_25_028: [If the topic is of type post topic then this method shall parse further for method name and set it for the message by calling setMethodName for the message]
                             String methodName = topicParser.getMethodName(METHOD_TOKEN);
