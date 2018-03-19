@@ -72,7 +72,7 @@ This repository contains [provisioning device client SDK](./provisioning-device-
 
 
 
-### Provisioniong service client SDK
+### Provisioning service client SDK
 This repository contains [provisioning service client SDK](./provisioning/provisioning-service-client) for the Device Provisioning Service to [programmatically enroll devices](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-manage-enrollments-sdks).
 
 | Feature                                            | Support            | Description                                                                                                                                                                                                                                            |
