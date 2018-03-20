@@ -4,6 +4,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
@@ -16,6 +17,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,6 +31,7 @@ import static org.junit.Assert.*;
  * 100% method,
  * 97% line
  */
+
 public class DeviceIOTest
 {
 
@@ -50,8 +53,7 @@ public class DeviceIOTest
     @Mocked
     ScheduledExecutorService mockScheduler;
 
-    @Mocked
-    Collection<DeviceClientConfig> mockedCollection;
+    private final static Collection<DeviceClientConfig> configs = new ArrayList<>();
 
     @Mocked
     IotHubEventCallback mockedIotHubEventCallback;
@@ -61,7 +63,7 @@ public class DeviceIOTest
     private final static long RECEIVE_PERIOD_MILLIS_MQTT = 10L;
     private final static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
-    private Object newDeviceIO()
+    private DeviceIO newDeviceIO()
     {
         new NonStrictExpectations()
         {
@@ -71,10 +73,11 @@ public class DeviceIOTest
             }
         };
 
-        final Object deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                mockConfig, IotHubClientProtocol.AMQPS, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
-        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
+        final DeviceIO deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
+                new Class[] {DeviceClientConfig.class, long.class, long.class},
+                mockConfig, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+
+        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
 
         return deviceIO;
     }
@@ -98,27 +101,24 @@ public class DeviceIOTest
         };
 
         Deencapsulation.invoke(deviceIO, "open");
-        assertEquals("CONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("OPEN", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     /* Tests_SRS_DEVICE_IO_21_001: [The constructor shall store the provided protocol and config information.] */
     /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
-    /* Tests_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `DISCONNECTED`.] */
+    /* Tests_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `CLOSED`.] */
     /* Tests_SRS_DEVICE_IO_21_037: [The constructor shall initialize the `sendPeriodInMilliseconds` with default value of 10 milliseconds.] */
     /* Tests_SRS_DEVICE_IO_21_038: [The constructor shall initialize the `receivePeriodInMilliseconds` with default value of each protocol.] */
     @Test
-    public void constructorAmqpSuccess() throws URISyntaxException
+    public void constructorAmqpSuccess()
     {
         // arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-
-        // assert
         new NonStrictExpectations()
         {
             {
-                new IotHubTransportNew(mockConfig);
-                result = mockedTransport;
-                times = 1;
+                mockConfig.getProtocol();
+                result = protocol;
             }
         };
 
@@ -130,15 +130,15 @@ public class DeviceIOTest
         // assert
         assertEquals(mockConfig, Deencapsulation.getField(deviceIO, "config"));
         assertEquals(protocol, Deencapsulation.getField(deviceIO, "protocol"));
-        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
         assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
         assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
 
         new Verifications()
         {
             {
-                mockConfig.setUseWebsocket(false);
-                times = 1;
+                mockConfig.setUseWebsocket(true);
+                times = 0;
             }
         };
     }
@@ -148,19 +148,16 @@ public class DeviceIOTest
     public void constructorConnectionStringThrows()
             throws URISyntaxException
     {
-        // arrange
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-
         // act
         Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                null, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                new Class[] {DeviceClientConfig.class, long.class, long.class},
+                null, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
     }
 
     /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
     @Test
     public void constructorMqttSuccess(
-            @Mocked final DeviceClientConfig mockConfig) throws URISyntaxException
+            @Mocked final DeviceClientConfig mockConfig)
     {
         // arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
@@ -169,48 +166,90 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                new IotHubTransportNew(mockConfig);
-                result = mockedTransport;
-                times = 1;
+                mockConfig.getProtocol();
+                result = protocol;
             }
         };
 
         // act
-        Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                mockConfig, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_MQTT);
+        Object deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
+                new Class[] {DeviceClientConfig.class, long.class, long.class},
+                mockConfig, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_MQTT);
+
+
+        // assert
+        assertEquals(mockConfig, Deencapsulation.getField(deviceIO, "config"));
+        assertEquals(protocol, Deencapsulation.getField(deviceIO, "protocol"));
+        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
+        assertEquals(RECEIVE_PERIOD_MILLIS_MQTT, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
 
         new Verifications()
         {
             {
-                mockConfig.setUseWebsocket(false);
-                times = 1;
+                mockConfig.setUseWebsocket(true);
+                times = 0;
             }
         };
     }
 
     /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
     @Test
-    public void constructorAmqpWSSuccess() throws URISyntaxException
+    public void constructorHttpSuccess()
+    {
+        // arrange
+        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = protocol;
+            }
+        };
+
+        // act
+        Object deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
+                new Class[] {DeviceClientConfig.class, long.class, long.class},
+                mockConfig, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_HTTPS);
+
+        // assert
+        assertEquals(mockConfig, Deencapsulation.getField(deviceIO, "config"));
+        assertEquals(protocol, Deencapsulation.getField(deviceIO, "protocol"));
+        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
+        assertEquals(RECEIVE_PERIOD_MILLIS_HTTPS, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
+
+        new Verifications()
+        {
+            {
+                mockConfig.setUseWebsocket(true);
+                times = 0;
+            }
+        };
+    }
+
+    /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
+    @Test
+    public void constructorAmqpWSSuccess()
     {
         // arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
 
-        // assert
         new NonStrictExpectations()
         {
             {
-                new IotHubTransportNew(mockConfig);
-                result = mockedTransport;
-                times = 1;
+                mockConfig.getProtocol();
+                result = protocol;
             }
         };
 
         // act
         Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                mockConfig, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                new Class[] {DeviceClientConfig.class, long.class, long.class},
+                mockConfig, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
 
+        // assert
         new Verifications()
         {
             {
@@ -226,21 +265,20 @@ public class DeviceIOTest
         // arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT_WS;
 
-        // assert
         new NonStrictExpectations()
         {
             {
-                new IotHubTransportNew(mockConfig);
-                result = mockedTransport;
-                times = 1;
+                mockConfig.getProtocol();
+                result = protocol;
             }
         };
 
         // act
         Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                                    new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                                    mockConfig, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                                    new Class[] {DeviceClientConfig.class, long.class, long.class},
+                                    mockConfig, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_MQTT);
 
+        // assert
         new Verifications()
         {
             {
@@ -248,32 +286,6 @@ public class DeviceIOTest
                 times = 1;
             }
         };
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_004: [If the `protocol` is null, the constructor shall throw an IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorNullProtocolThrows()
-            throws URISyntaxException
-    {
-        // arrange
-        final IotHubClientProtocol protocol = null;
-
-        // act
-        Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                mockConfig, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_005: [If the `protocol` is not valid, the constructor shall throw an IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorInvalidProtocolThrows(
-            @Mocked final DeviceClientConfig mockConfig)
-            throws URISyntaxException
-    {
-        // act
-        Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                mockConfig, null, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
     }
 
     /* Tests_SRS_DEVICE_IO_21_007: [If the client is already open, the open shall do nothing.] */
@@ -289,27 +301,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "open");
 
         // assert
-        assertEquals("CONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_008: [The open shall create default IotHubSSL context if no certificate input was provided by user and save it by calling setIotHubSSLContext.] */
-    @Test
-    public void openAmqpCreateSSLContextSuccess() throws URISyntaxException, IOException, TransportException
-    {
-        // arrange
-        final Object deviceIO = newDeviceIO();
-
-        // assert
-        new NonStrictExpectations()
-        {
-            {
-                //mockedTransport.open(mockedCollection);
-                times = 1;
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(deviceIO, "open");
+        assertEquals("OPEN", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     /* Tests_SRS_DEVICE_IO_21_012: [The open shall open the transport to communicate with an IoT Hub.] */
@@ -317,33 +309,58 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.] */
     /* Tests_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `CONNECTED`.] */
     @Test
-    public void openSuccess() throws URISyntaxException, IOException, TransportException
+    public void openSuccess() throws DeviceClientException, IOException
     {
         // arrange
         final Object deviceIO = newDeviceIO();
+        configs.add(mockConfig);
+        Deencapsulation.setField(deviceIO, "deviceClientConfigs", configs);
 
-        // assert
         new NonStrictExpectations()
         {
             {
-                //mockAmqpsTransport.open(mockedCollection);
-                times = 1;
                 new IotHubSendTask(mockedTransport);
                 result = mockIotHubSendTask;
-                times = 1;
                 new IotHubReceiveTask(mockedTransport);
                 result = mockIotHubReceiveTask;
-                times = 1;
                 mockExecutors.newScheduledThreadPool(2);
                 result = mockScheduler;
-                times = 1;
+            }
+        };
+
+        // act
+        Deencapsulation.invoke(deviceIO, "open");
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockedTransport.open(configs);
                 mockScheduler.scheduleAtFixedRate(mockIotHubSendTask,
                         0, SEND_PERIOD_MILLIS,
                         TimeUnit.MILLISECONDS);
-                times = 1;
                 mockScheduler.scheduleAtFixedRate(mockIotHubReceiveTask,
                         0, RECEIVE_PERIOD_MILLIS_AMQPS,
                         TimeUnit.MILLISECONDS);
+                assertEquals("OPEN", Deencapsulation.getField(deviceIO, "state").toString());
+            }
+        };
+    }
+
+    /* Tests_SRS_DEVICE_IO_21_015: [If an error occurs in opening the transport, the open shall throw an IOException.] */
+    @Test (expected = IOException.class)
+    public void openThrowsIOExceptionIfTransportOpenThrows() throws DeviceClientException
+    {
+        // arrange
+        final Object deviceIO = newDeviceIO();
+        configs.add(mockConfig);
+        Deencapsulation.setField(deviceIO, "deviceClientConfigs", configs);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedTransport.open(configs);
+                result = new DeviceClientException();
                 times = 1;
             }
         };
@@ -352,102 +369,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "open");
 
         // assert
-        assertEquals("CONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_015: [If an error occurs in opening the transport, the open shall throw an IOException.] */
-    @Test
-    public void openThrowsIOExceptionIfTransportOpenThrows() throws URISyntaxException, IOException, TransportException
-    {
-        // arrange
-        final Object deviceIO = newDeviceIO();
-
-        // assert
-        new NonStrictExpectations()
-        {
-            {
-                //mockAmqpsTransport.open(mockedCollection);
-                result = new IOException();
-                times = 1;
-            }
-        };
-
-        // act
-        try
-        {
-            Deencapsulation.invoke(deviceIO, "open");
-            assert true;
-        }
-        catch (Exception expected)
-        {
-            // Don't do anything. Expected exception.
-        }
-
-        // assert
-        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
-    }
-
-    // Tests_SRS_DEVICE_IO_12_002: [If the client is already open, the open shall do nothing.]
-    @Test
-    public void multiplexOpenDoesNothingIfStateOpened() throws URISyntaxException, IOException
-    {
-        // arrange
-        final Object deviceIO = newDeviceIO();
-        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
-        ArrayList<DeviceClient> deviceClientList = new ArrayList<>();
-
-        // act
-        Deencapsulation.invoke(deviceIO, "multiplexOpen", deviceClientList);
-
-        // assert
-        assertEquals("CONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
-    }
-
-    // Tests_SRS_DEVICE_IO_12_002: [If the client is already open, the open shall do nothing.]
-    // Tests_SRS_DEVICE_IO_12_003: [The open shall open the transport in multiplex mode to communicate with an IoT Hub.]
-    // Tests_SRS_DEVICE_IO_12_004: [The open shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.]
-    // Tests_SRS_DEVICE_IO_12_005: [The open shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.]
-    // Tests_SRS_DEVICE_IO_12_006: [If an error occurs in opening the transport, the open shall throw an IOException.]
-    // Tests_SRS_DEVICE_IO_12_007: [The open shall set the `state` as `CONNECTED`.]
-    @Test
-    public void multiplexOpenSuccess()
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final Object deviceIO = newDeviceIO();
-        final ArrayList<DeviceClient> deviceClientList = new ArrayList<>();
-
-        // assert
-        new NonStrictExpectations()
-        {
-            {
-                //mockAmqpsTransport.multiplexOpen(deviceClientList);
-                //times = 1;
-                new IotHubSendTask(mockedTransport);
-                result = mockIotHubSendTask;
-                times = 1;
-                new IotHubReceiveTask(mockedTransport);
-                result = mockIotHubReceiveTask;
-                times = 1;
-                mockExecutors.newScheduledThreadPool(2);
-                result = mockScheduler;
-                times = 1;
-                mockScheduler.scheduleAtFixedRate(mockIotHubSendTask,
-                        0, SEND_PERIOD_MILLIS,
-                        TimeUnit.MILLISECONDS);
-                times = 1;
-                mockScheduler.scheduleAtFixedRate(mockIotHubReceiveTask,
-                        0, RECEIVE_PERIOD_MILLIS_AMQPS,
-                        TimeUnit.MILLISECONDS);
-                times = 1;
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(deviceIO, "multiplexOpen", deviceClientList);
-
-        // assert
-        assertEquals("CONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     /* Tests_SRS_DEVICE_IO_21_017: [The closeNow shall finish all ongoing tasks.] */
@@ -473,10 +395,9 @@ public class DeviceIOTest
         };
     }
 
-    /* Tests_SRS_DEVICE_IO_21_019: [The closeNow shall closeNow the transport.] */
+    /* Tests_SRS_DEVICE_IO_21_019: [The close shall close the transport.] */
     @Test
-    public void closeClosesTransportSuccess()
-            throws URISyntaxException, IOException
+    public void closeClosesTransportSuccess() throws IOException, DeviceClientException
     {
         // arrange
         final Object deviceIO = newDeviceIO();
@@ -489,10 +410,36 @@ public class DeviceIOTest
         new Verifications()
         {
             {
-                //mockAmqpsTransport.close();
+                mockedTransport.close();
                 times = 1;
             }
         };
+    }
+
+    @Test (expected = IOException.class)
+    public void closeCloseTransportThrows() throws DeviceClientException, IOException
+    {
+        // arrange
+        final Object deviceIO = newDeviceIO();
+        try
+        {
+            openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
+        }
+        catch (IOException e)
+        {
+            // catch and ignore IOException from open
+        }
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedTransport.close();
+                result = new DeviceClientException();
+            }
+        };
+
+        // act
+        Deencapsulation.invoke(deviceIO, "close");
     }
 
     /* Tests_SRS_DEVICE_IO_21_020: [If the client is already closed, the closeNow shall do nothing.] */
@@ -507,7 +454,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "close");
 
         // assert
-        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     /* Tests_SRS_DEVICE_IO_21_020: [If the client is already closed, the closeNow shall do nothing.] */
@@ -519,13 +466,13 @@ public class DeviceIOTest
         final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
-        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
 
         // act
         Deencapsulation.invoke(deviceIO, "close");
 
         // assert
-        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     /* Tests_SRS_DEVICE_IO_21_021: [The closeNow shall set the `state` as `CLOSE`.] */
@@ -541,7 +488,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "close");
 
         // assert
-        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
     // Tests_SRS_DEVICE_IO_12_009: [THe function shall call close().]
@@ -562,7 +509,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "multiplexClose");
 
         // assert
-        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
 
@@ -572,7 +519,7 @@ public class DeviceIOTest
     public void sendEventAsyncAddsMessageToTransportSuccess(
             @Mocked final Message mockMsg,
             @Mocked final IotHubEventCallback mockCallback)
-            throws URISyntaxException, IOException
+            throws IOException
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
@@ -580,7 +527,9 @@ public class DeviceIOTest
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
-        Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
+        Deencapsulation.invoke(deviceIO, "sendEventAsync",
+                new Class[] {Message.class, IotHubEventCallback.class, Object.class, IotHubConnectionString.class},
+                mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
 
         // assert
         new Verifications()
@@ -588,7 +537,7 @@ public class DeviceIOTest
             {
                 mockMsg.setIotHubConnectionString(mockConfig.getIotHubConnectionString());
                 times = 1;
-                //mockAmqpsTransport.addMessage(mockMsg, mockCallback, context);
+                mockedTransport.addMessage(mockMsg, mockCallback, context);
                 times = 1;
             }
         };
@@ -598,84 +547,7 @@ public class DeviceIOTest
     @Test (expected = IllegalArgumentException.class)
     public void sendEventAsyncRejectsNullMessageThrows(
             @Mocked final IotHubEventCallback mockCallback)
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final Map<String, Object> context = new HashMap<>();
-        final Object deviceIO = newDeviceIO();
-        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
-
-        // act
-        Deencapsulation.invoke(deviceIO, "sendEventAsync", 
-                new Class[] {Message.class, IotHubEventCallback.class, Object.class}, 
-                null, mockCallback, context);
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
-    @Test (expected = IllegalStateException.class)
-    public void sendEventAsyncClientNotOpenedThrows(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback)
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final Map<String, Object> context = new HashMap<>();
-        final Object deviceIO = newDeviceIO();
-
-        // act
-        Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
-    @Test (expected = IllegalStateException.class)
-    public void sendEventAsyncClientAlreadyClosedThrows(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback)
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final Map<String, Object> context = new HashMap<>();
-        final Object deviceIO = newDeviceIO();
-        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
-        Deencapsulation.invoke(deviceIO, "close");
-        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
-
-        // act
-        Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_040: [The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.] */
-    @Test
-    public void sendEventAsyncAddsMessageWithResponseToTransportSuccess(
-            @Mocked final Message mockMsg,
-            @Mocked final IotHubResponseCallback mockCallback)
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final Map<String, Object> context = new HashMap<>();
-        final Object deviceIO = newDeviceIO();
-        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
-
-        // act
-        Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockMsg.setIotHubConnectionString(mockConfig.getIotHubConnectionString());
-                times = 1;
-                mockedTransport.addMessage(mockMsg, mockedIotHubEventCallback, context);
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_041: [If the message given is null, the sendEventAsync shall throw an IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void sendEventAsyncRejectsNullMessageWithResponseThrows(
-            @Mocked final IotHubResponseCallback mockCallback)
-            throws URISyntaxException, IOException
+            throws IOException
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
@@ -684,38 +556,39 @@ public class DeviceIOTest
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync",
-                new Class[] {Message.class, IotHubResponseCallback.class, Object.class},
-                null, mockCallback, context);
+                new Class[] {Message.class, IotHubEventCallback.class, Object.class, IotHubConnectionString.class},
+                null, mockCallback, context, mockConfig.getIotHubConnectionString());
     }
 
-    /* Tests_SRS_DEVICE_IO_21_042: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
+    /* Tests_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
     @Test (expected = IllegalStateException.class)
-    public void sendEventAsyncWithResponseClientNotOpenedThrows(
+    public void sendEventAsyncClientNotOpenedThrows(
             @Mocked final Message mockMsg,
-            @Mocked final IotHubResponseCallback mockCallback)
-            throws URISyntaxException, IOException
+            @Mocked final IotHubEventCallback mockCallback)
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIO();
 
         // act
-        Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
+        Deencapsulation.invoke(deviceIO, "sendEventAsync",
+                new Class[] {Message.class, IotHubEventCallback.class, Object.class, IotHubConnectionString.class},
+                mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
     }
 
-    /* Tests_SRS_DEVICE_IO_21_042: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
+    /* Tests_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
     @Test (expected = IllegalStateException.class)
-    public void sendEventAsyncWithResponseClientAlreadyClosedThrows(
+    public void sendEventAsyncClientAlreadyClosedThrows(
             @Mocked final Message mockMsg,
-            @Mocked final IotHubResponseCallback mockCallback)
-            throws URISyntaxException, IOException
+            @Mocked final IotHubEventCallback mockCallback)
+            throws IOException
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
         final Object deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
         Deencapsulation.invoke(deviceIO, "close");
-        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
+        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
@@ -726,15 +599,25 @@ public class DeviceIOTest
     public void getTransportProtocolSuccess()
             throws URISyntaxException, IOException
     {
-        // arrange
-        final Object deviceIO = newDeviceIO();
-        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
+        //arrange
+        final IotHubClientProtocol expected = IotHubClientProtocol.AMQPS;
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = expected;
+            }
+        };
+
+        final DeviceIO deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
+                new Class[] {DeviceClientConfig.class, long.class, long.class},
+                mockConfig, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
 
         // act
         IotHubClientProtocol actualProtocol = Deencapsulation.invoke(deviceIO, "getProtocol") ;
 
         // assert
-        assertEquals(IotHubClientProtocol.AMQPS, actualProtocol);
+        assertEquals(expected, actualProtocol);
     }
 
     /* Tests_SRS_DEVICE_IO_21_026: [The getReceivePeriodInMilliseconds shall return the programed receive period in milliseconds.] */
@@ -743,6 +626,7 @@ public class DeviceIOTest
             throws URISyntaxException, IOException
     {
         // arrange
+        Deencapsulation.setField(mockConfig, "protocol", IotHubClientProtocol.AMQPS );
         final Object deviceIO = newDeviceIO();
 
         // act
@@ -1056,7 +940,7 @@ public class DeviceIOTest
     {
         //arrange
         final Object deviceIO = newDeviceIO();
-        
+
         //act
         Deencapsulation.invoke(deviceIO, "registerConnectionStateCallback", mockedStateCB, Object.class);
 
