@@ -2,6 +2,8 @@ package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.transport.NoRetry;
+import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -31,6 +33,9 @@ public class TransportClientTest
 
     @Mocked
     IotHubSasTokenAuthenticationProvider mockIotHubSasTokenAuthenticationProvider;
+
+    @Mocked
+    RetryPolicy mockRetryPolicy;
 
     // Tests_SRS_TRANSPORTCLIENT_12_001: [If the `protocol` is not valid, the constructor shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
@@ -359,8 +364,6 @@ public class TransportClientTest
 
 
     // Tests_SRS_TRANSPORTCLIENT_12_020: [The function shall call the underlying deviceIO updateDeviceConfig with the given config.]
-
-
     // Tests_SRS_TRANSPORTCLIENT_12_019: [The getter shall return with the value of the transportClientState.]
     @Test
     public void getSenderLinkAddressReturnsSenderLinkAddress()
@@ -377,4 +380,48 @@ public class TransportClientTest
         assertEquals(TransportClient.TransportClientState.OPENED, actualState);
     }
 
+    // Tests_SRS_TRANSPORTCLIENT_28_001: [The function shall throw UnsupportedOperationException if there is no registered device client]
+    @Test (expected = UnsupportedOperationException.class)
+    public void setRetryPolicyDoNothingIfNoRegisteredDeviceClient()
+    {
+        // arrange
+        IotHubClientProtocol iotHubClientProtocol = IotHubClientProtocol.AMQPS;
+        TransportClient transportClient = new TransportClient(iotHubClientProtocol);
+        ArrayList<DeviceClient> deviceClientList = new ArrayList<>();
+        Deencapsulation.setField(transportClient, "deviceClientList", deviceClientList);
+
+        // act
+        transportClient.setRetryPolicy(new NoRetry());
+    }
+
+    // Tests_SRS_TRANSPORTCLIENT_28_002: [The function shall set the retry policies to all registered device clients.]
+    @Test
+    public void setRetryPolicySetIfOneRegisteredDeviceClient()
+    {
+        // arrange
+        IotHubClientProtocol iotHubClientProtocol = IotHubClientProtocol.AMQPS;
+        TransportClient transportClient = new TransportClient(iotHubClientProtocol);
+        ArrayList<DeviceClient> deviceClientList = new ArrayList<>();
+        deviceClientList.add(mockDeviceClient);
+        Deencapsulation.setField(transportClient, "deviceClientList", deviceClientList);
+        new NonStrictExpectations()
+        {
+            {
+                mockDeviceClient.getConfig();
+                result = mockDeviceClientConfig;
+            }
+        };
+
+        // act
+        transportClient.setRetryPolicy(new NoRetry());
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockDeviceClientConfig.setRetryPolicy((RetryPolicy) any);
+                times = 1;
+            }
+        };
+    }
 }

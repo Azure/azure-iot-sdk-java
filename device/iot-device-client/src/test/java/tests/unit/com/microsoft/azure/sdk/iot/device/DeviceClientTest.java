@@ -9,6 +9,8 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvi
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509AuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
+import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoff;
+import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
@@ -82,7 +84,7 @@ public class DeviceClientTest
                 Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
                 result = mockConfig;
                 Deencapsulation.newInstance(DeviceIO.class,
-                        mockConfig, protocol, SEND_PERIOD_MILLIS, receivePeriod);
+                        mockConfig, SEND_PERIOD_MILLIS, receivePeriod);
                 result = mockDeviceIO;
             }
         };
@@ -299,8 +301,8 @@ public class DeviceClientTest
                 times = 1;
 
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                        (DeviceClientConfig)any, expectedProtocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_HTTPS);
+                        new Class[] {DeviceClientConfig.class, long.class, long.class},
+                        any, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_HTTPS);
                 times = 1;
             }
         };
@@ -379,8 +381,8 @@ public class DeviceClientTest
                 Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
                 times = 0;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                        (DeviceClientConfig)any, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                        new Class[] {DeviceClientConfig.class, long.class, long.class},
+                        any, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
                 times = 0;
             }
         };
@@ -458,8 +460,8 @@ public class DeviceClientTest
         {
             {
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                        (DeviceClientConfig)any, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                        new Class[] {DeviceClientConfig.class, long.class, long.class},
+                        any, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
                 times = 1;
 
                 Deencapsulation.invoke(mockDeviceIO, "open");
@@ -3333,6 +3335,30 @@ public class DeviceClientTest
         {
             {
                 mockDeviceIO.registerConnectionStatusChangeCallback(mockedIotHubConnectionStatusChangeCallback, context);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENT_28_001: [The function shall set the device config's RetryPolicy .]
+    @Test
+    public void setRetryPolicySetPolicy() throws URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        DeviceClient client = new DeviceClient(connString, protocol);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        //act
+        client.setRetryPolicy(new ExponentialBackoff());
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockConfig.setRetryPolicy((RetryPolicy) any);
                 times = 1;
             }
         };

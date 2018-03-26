@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
+import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 
@@ -1245,6 +1246,19 @@ public final class DeviceClient implements Closeable
 
         //Codes_SRS_DEVICECLIENT_34_069: [This function shall register the provided callback and context with its device IO instance.]
         this.deviceIO.registerConnectionStatusChangeCallback(callback, callbackContext);
+    }
+
+    /***
+     * Sets the given retry policy on the underlying transport
+     *
+     * @param retryPolicy the new interval in milliseconds
+     */
+    public void setRetryPolicy(RetryPolicy retryPolicy)
+    {
+        // Codes_SRS_DEVICECLIENT_28_001: [The function shall set the device config's RetryPolicy .]
+        this.config.setRetryPolicy(retryPolicy);
+
+        logger.LogInfo("Retry policy updated successfully in the device client config, method name is %s ", logger.getMethodName());
     }
 
     /**

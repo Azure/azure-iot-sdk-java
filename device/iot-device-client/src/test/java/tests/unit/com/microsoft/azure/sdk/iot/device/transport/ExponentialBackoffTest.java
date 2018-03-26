@@ -34,10 +34,25 @@ public class ExponentialBackoffTest
     {
         //act
         final RetryPolicy exp = new ExponentialBackoff(
-                10, Duration.millis(100), Duration.seconds(10), Duration.millis(100), true);
+                10, Duration.seconds(2), Duration.seconds(2), Duration.seconds(2), false);
 
         // assert
         assertEquals(10, Deencapsulation.getField(exp, "retryCount"));
+        assertEquals(Duration.seconds(2), Deencapsulation.getField(exp, "minBackoff"));
+        assertEquals(Duration.seconds(2), Deencapsulation.getField(exp, "maxBackoff"));
+        assertEquals(Duration.seconds(2), Deencapsulation.getField(exp, "deltaBackoff"));
+        assertFalse((boolean)Deencapsulation.getField(exp, "firstFastRetry"));
+    }
+
+    // Tests_SRS_EXPONENTIALBACKOFF_28_006: [Constructor should have default values retryCount, minBackoff, maxBackoff, deltaBackoff and firstFastRetry]
+    @Test
+    public void constructorHaveDefaultValues()
+    {
+        //act
+        final RetryPolicy exp = new ExponentialBackoff();
+
+        // assert
+        assertEquals(Integer.MAX_VALUE, Deencapsulation.getField(exp, "retryCount"));
         assertEquals(Duration.millis(100), Deencapsulation.getField(exp, "minBackoff"));
         assertEquals(Duration.seconds(10), Deencapsulation.getField(exp, "maxBackoff"));
         assertEquals(Duration.millis(100), Deencapsulation.getField(exp, "deltaBackoff"));

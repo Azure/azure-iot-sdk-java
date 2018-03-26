@@ -4,6 +4,8 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.auth.*;
+import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoff;
+import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
@@ -61,6 +63,9 @@ public final class DeviceClientConfig
     private AuthType authenticationType;
 
     private IotHubClientProtocol protocol;
+
+    // Codes_SRS_DEVICECLIENTCONFIG_28_001: [The class shall have ExponentialBackOff as the default retryPolicy.]
+    private RetryPolicy retryPolicy = new ExponentialBackoff();
 
     /**
      * Constructor
@@ -202,6 +207,33 @@ public final class DeviceClientConfig
     void setProtocol(IotHubClientProtocol protocol)
     {
         this.protocol = protocol;
+    }
+
+    /**
+     * Setter for RetryPolicy
+     *
+     * @param retryPolicy The types of retry policy to be used
+     */
+    public void setRetryPolicy(RetryPolicy retryPolicy)
+    {
+        // Codes_SRS_DEVICECLIENTCONFIG_28_002: [This function shall throw IllegalArgumentException retryPolicy is null.]
+        if (retryPolicy == null)
+        {
+            throw new IllegalArgumentException("Retry Policy cannot be null.");
+        }
+        // Codes_SRS_DEVICECLIENTCONFIG_28_003: [This function shall set retryPolicy.]
+        this.retryPolicy = retryPolicy;
+    }
+
+    /**
+     * Getter for RetryPolicy
+     *
+     * @return The value of RetryPolicy
+     */
+    public RetryPolicy getRetryPolicy()
+    {
+        // Codes_SRS_DEVICECLIENTCONFIG_28_004: [This function shall return the saved RetryPolicy object.]
+        return this.retryPolicy;
     }
 
     /**

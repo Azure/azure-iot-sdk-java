@@ -17,13 +17,22 @@ import java.util.Random;
  */
 public class ExponentialBackoff implements RetryPolicy
 {
-    private int retryCount;
-    private Duration minBackoff;
-    private Duration maxBackoff;
-    private Duration deltaBackoff;
-    private boolean firstFastRetry;
+    // Codes_SRS_EXPONENTIALBACKOFF_28_006: [Constructor should have default values retryCount, minBackoff, maxBackoff, deltaBackoff and firstFastRetry]
+    private int retryCount = Integer.MAX_VALUE;
+    private Duration minBackoff = Duration.millis(100);
+    private Duration maxBackoff = Duration.seconds(10);
+    private Duration deltaBackoff = Duration.millis(100);
+    private boolean firstFastRetry = true;
 
     private Random random = new Random();
+
+    /**
+     * Constructor with default backoff values and firstFastRetry
+     */
+    public ExponentialBackoff()
+    {
+
+    }
 
     /**
      * Constructor.

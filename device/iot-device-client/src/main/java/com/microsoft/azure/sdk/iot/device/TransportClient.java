@@ -1,5 +1,7 @@
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -177,6 +179,30 @@ public class TransportClient
     }
 
     /**
+     * Sets the given retry policy on the underlying transport
+     *
+     * @param retryPolicy the new interval in milliseconds
+     * @throws IOException if the given number is less or equal to zero.
+     * @throws IOException if the given number is less or equal to zero.
+     */
+    public void setRetryPolicy(RetryPolicy retryPolicy)
+    {
+        if (deviceClientList.size() == 0)
+        {
+            // Codes_SRS_TRANSPORTCLIENT_28_001: [The function shall throw UnsupportedOperationException if there is no registered device client]
+            throw new UnsupportedOperationException("TransportClient.setRetryPolicy only works when there is at least one registered device client.");
+        }
+
+        for (int i = 0; i < this.deviceClientList.size(); i++)
+        {
+            // Codes_SRS_TRANSPORTCLIENT_28_002: [The function shall set the retry policies to all registered device clients.]
+            deviceClientList.get(i).getConfig().setRetryPolicy(retryPolicy);
+        }
+
+        logger.LogInfo("Retry policy updated successfully in the transport client, method name is %s ", logger.getMethodName());
+    }
+
+    /**
      * Registers the given device into the transport client.
      *
      * @throws IllegalArgumentException if the deviceClient parameter is null.
@@ -202,6 +228,10 @@ public class TransportClient
         logger.LogInfo("DeviceClient is added successfully to the transport client, method name is %s ", logger.getMethodName());
     }
 
+    /**
+     * Getter for the iotHubClientProtocol
+     * @return the current protocol for the iotHubClient
+     */
     IotHubClientProtocol getIotHubClientProtocol()
     {
         return iotHubClientProtocol;
