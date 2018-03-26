@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.sun.deploy.resources.Deployment_it;
 
 /**
  * Extends Message, adding transport artifacts.
@@ -196,6 +197,23 @@ public class IotHubTransportMessage extends Message
         **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_011: [**The function shall return the operation type either set by the setter or the default if unset so far.**]**
          */
         return this.operationType;
+    }
+
+    public boolean isMessageAckNeeded(IotHubClientProtocol protocol)
+    {
+        if (protocol == IotHubClientProtocol.MQTT || protocol == IotHubClientProtocol.MQTT_WS)
+        {
+            if (this.operationType == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
+                    || this.operationType == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
+                    || this.operationType == DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
+            {
+                //This is a SUBSCRIBE action in MQTT which we currently treat synchronously, so there is no message ack
+                // unlike other send operations
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

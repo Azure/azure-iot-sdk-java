@@ -8,7 +8,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportNew;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import mockit.*;
 import org.junit.Test;
 
@@ -42,7 +42,7 @@ public class DeviceIOTest
     IotHubReceiveTask mockIotHubReceiveTask;
 
     @Mocked
-    IotHubTransportNew mockedTransport;
+    IotHubTransport mockedTransport;
 
     @Mocked 
     DeviceClientConfig mockConfig;
@@ -68,7 +68,7 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                new IotHubTransportNew(mockConfig);
+                new IotHubTransport(mockConfig);
                 result = mockedTransport;
             }
         };
@@ -84,7 +84,7 @@ public class DeviceIOTest
 
     private void openDeviceIO(
             final Object deviceIO,
-            final IotHubTransportNew transport,
+            final IotHubTransport transport,
             final Executors executors,
             final ScheduledExecutorService scheduledExecutorService) throws IOException
     {
@@ -410,7 +410,7 @@ public class DeviceIOTest
         new Verifications()
         {
             {
-                mockedTransport.close();
+                mockedTransport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE);
                 times = 1;
             }
         };
@@ -433,7 +433,7 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                mockedTransport.close();
+                mockedTransport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE);
                 result = new DeviceClientException();
             }
         };
@@ -727,7 +727,7 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_030: [If the the provided interval is zero or negative, the setReceivePeriodInMilliseconds shall throw IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void setReceivePeriodInMillisecondsNegativeIntervalThrows(
-            @Mocked final IotHubTransportNew mockedTransport,
+            @Mocked final IotHubTransport mockedTransport,
             @Mocked final DeviceClientConfig mockConfig)
             throws URISyntaxException, IOException, InterruptedException
     {

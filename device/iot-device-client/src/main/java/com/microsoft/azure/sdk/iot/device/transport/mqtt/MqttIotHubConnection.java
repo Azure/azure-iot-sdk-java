@@ -170,9 +170,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 this.deviceMethod = new MqttDeviceMethod(mqttConnection);
                 this.deviceTwin = new MqttDeviceTwin(mqttConnection);
 
-                // Codes_SRS_MQTTIOTHUBCONNECTION_99_017 : [The function shall set DeviceClientConfig object needed for SAS token renewal.]
-                this.deviceMessaging.setDeviceClientConfig(this.config);
-
                 this.deviceMessaging.start();
                 this.state = IotHubConnectionStatus.CONNECTED;
             }

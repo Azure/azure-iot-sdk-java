@@ -5,7 +5,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportNew;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -18,7 +18,7 @@ import java.net.URISyntaxException;
 public class IotHubReceiveTaskTest
 {
     @Mocked
-    IotHubTransportNew mockTransport;
+    IotHubTransport mockTransport;
 
     // Tests_SRS_IOTHUBRECEIVETASK_11_001: [The constructor shall save the transport.]
     // Tests_SRS_IOTHUBRECEIVETASK_11_002: [The function shall poll an IoT Hub for messages, invoke the message callback if one exists, and return one of COMPLETE, ABANDON, or REJECT to the IoT Hub.]

@@ -5,20 +5,19 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportNew;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 /** Unit tests for IotHubSendTask. */
 public class IotHubSendTaskTest
 {
     @Mocked
-    IotHubTransportNew mockTransport;
+    IotHubTransport mockTransport;
 
     // Tests_SRS_IOTHUBSENDTASK_11_001: [The constructor shall save the transport.]
     // Tests_SRS_IOTHUBSENDTASK_11_002: [The function shall send all messages on the transport queue.]

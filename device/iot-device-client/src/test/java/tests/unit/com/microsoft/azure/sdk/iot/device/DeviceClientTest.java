@@ -462,7 +462,7 @@ public class DeviceClientTest
                         (DeviceClientConfig)any, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
                 times = 1;
 
-                mockDeviceIO.open();
+                Deencapsulation.invoke(mockDeviceIO, "open");
                 times = 1;
             }
         };
@@ -515,7 +515,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                mockDeviceIO.open();
+                Deencapsulation.invoke(mockDeviceIO, "open");
                 times = 0;
             }
         };
@@ -2097,9 +2097,8 @@ public class DeviceClientTest
                 times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                mockDeviceIO.open();
+                Deencapsulation.invoke(mockDeviceIO, "open");
                 times = 2;
-
             }
         };
     }
@@ -2144,9 +2143,8 @@ public class DeviceClientTest
                 times = 0;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                mockDeviceIO.open();
+                Deencapsulation.invoke(mockDeviceIO, "open");
                 times = 1;
-
             }
         };
     }
@@ -2227,9 +2225,8 @@ public class DeviceClientTest
                 times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                mockDeviceIO.open();
+                Deencapsulation.invoke(mockDeviceIO, "open");
                 times = 2;
-
             }
         };
     }
@@ -2310,9 +2307,8 @@ public class DeviceClientTest
                 times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                mockDeviceIO.open();
+                Deencapsulation.invoke(mockDeviceIO, "open");
                 times = 2;
-
             }
         };
     }
@@ -2689,7 +2685,7 @@ public class DeviceClientTest
                 result = anyString;
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockDeviceIO.open();
+                Deencapsulation.invoke(mockDeviceIO, "open");
                 result =  new IOException();
             }
         };
@@ -2709,7 +2705,7 @@ public class DeviceClientTest
     // Tests_SRS_DEVICECLIENT_12_022: [If the client configured to use TransportClient the SetSendInterval shall throw IOException.]
     @Test (expected = IllegalStateException.class)
     public void setOptionWithTransportClientThrowsSetSendInterval()
-            throws IOException, URISyntaxException
+            throws URISyntaxException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2723,7 +2719,7 @@ public class DeviceClientTest
     // Tests_SRS_DEVICECLIENT_12_023: [If the client configured to use TransportClient the SetMinimumPollingInterval shall throw IOException.]
     @Test (expected = IllegalStateException.class)
     public void setOptionWithTransportClientThrowsSetMinimumPollingInterval()
-            throws IOException, URISyntaxException
+            throws URISyntaxException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2737,7 +2733,7 @@ public class DeviceClientTest
 
     //Tests_SRS_DEVICECLIENT_34_055: [If the provided connection string contains an expired SAS token, a SecurityException shall be thrown.]
     @Test (expected = SecurityException.class)
-    public void deviceClientInitializedWithExpiredTokenThrowsSecurityException() throws SecurityException, URISyntaxException, IOException
+    public void deviceClientInitializedWithExpiredTokenThrowsSecurityException() throws SecurityException, URISyntaxException
     {
         //This token will always be expired
         final Long expiryTime = 0L;

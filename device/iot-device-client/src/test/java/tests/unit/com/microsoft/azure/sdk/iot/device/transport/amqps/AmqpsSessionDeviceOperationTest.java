@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -97,7 +98,7 @@ public class AmqpsSessionDeviceOperationTest
     UUID mockUUID;
 
     @Mocked
-    ObjectLock mockLock;
+    CountDownLatch mockCountDownLatch;
 
     @Mocked
     List<UUID> mockListUUID;
@@ -251,7 +252,7 @@ public class AmqpsSessionDeviceOperationTest
         final int MAX_WAIT_TO_AUTHENTICATE = 10*1000;
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "deviceClientConfig", mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLock", mockLock);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLatch", mockCountDownLatch);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "cbsCorrelationIdList", mockListUUID);
 
         new NonStrictExpectations()
@@ -278,25 +279,26 @@ public class AmqpsSessionDeviceOperationTest
                 times = 1;
                 Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "authenticate", mockDeviceClientConfig, mockUUID);
                 times = 1;
-                mockLock.waitLock(MAX_WAIT_TO_AUTHENTICATE);
+                mockCountDownLatch.await(MAX_WAIT_TO_AUTHENTICATE, TimeUnit.MILLISECONDS);
             }
         };
     }
 
+    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_34_063: [If an InterruptedException is encountered while waiting for authentication to finish, this function shall throw a TransportException.]
     @Test (expected = TransportException.class)
     public void authenticateLockThrows() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
         final int MAX_WAIT_TO_AUTHENTICATE = 10*1000;
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLock", mockLock);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLatch", mockCountDownLatch);
 
         new NonStrictExpectations()
         {
             {
                 mockDeviceClientConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockLock.waitLock(MAX_WAIT_TO_AUTHENTICATE);
+                mockCountDownLatch.await(MAX_WAIT_TO_AUTHENTICATE, TimeUnit.MILLISECONDS);
                 result = new InterruptedException();
             }
         };
@@ -791,7 +793,7 @@ public class AmqpsSessionDeviceOperationTest
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATING);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthentication);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "cbsCorrelationIdList", cbsCorrelationIdList);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLock", mockLock);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLatch", mockCountDownLatch);
 
         new NonStrictExpectations()
         {
@@ -814,7 +816,7 @@ public class AmqpsSessionDeviceOperationTest
         new Verifications()
         {
             {
-                mockLock.notifyLock();
+                mockCountDownLatch.countDown();
                 times = 1;
                 cbsCorrelationIdList.remove(mockUUID);
                 times = 1;
@@ -839,7 +841,7 @@ public class AmqpsSessionDeviceOperationTest
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATING);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthentication);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "cbsCorrelationIdList", cbsCorrelationIdList);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLock", mockLock);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLatch", mockCountDownLatch);
 
         new NonStrictExpectations()
         {
@@ -862,7 +864,7 @@ public class AmqpsSessionDeviceOperationTest
         new Verifications()
         {
             {
-                mockLock.notifyLock();
+                mockCountDownLatch.countDown();
                 times = 0;
                 cbsCorrelationIdList.remove(mockUUID);
                 times = 0;
@@ -888,7 +890,7 @@ public class AmqpsSessionDeviceOperationTest
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATING);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthentication);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "cbsCorrelationIdList", cbsCorrelationIdList);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLock", mockLock);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLatch", mockCountDownLatch);
 
         new NonStrictExpectations()
         {
@@ -911,7 +913,7 @@ public class AmqpsSessionDeviceOperationTest
         new Verifications()
         {
             {
-                mockLock.notifyLock();
+                mockCountDownLatch.countDown();
                 times = 0;
                 cbsCorrelationIdList.remove(mockUUID);
                 times = 0;

@@ -64,11 +64,14 @@ public class HttpsRequest
 
         responseStatus = this.connection.getResponseStatus();
         headerFields = this.connection.getResponseHeaders();
-        responseBody = this.connection.readInput();
 
-        // Codes_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
-        return new HttpsResponse(responseStatus, responseBody, headerFields,
-                errorReason);
+        if (responseStatus == 200)
+        {
+            responseBody = this.connection.readInput();
+        }
+
+        // Codes_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body (if 200 status code), header fields, and error reason (if any).]
+        return new HttpsResponse(responseStatus, responseBody, headerFields, errorReason);
     }
 
     /**

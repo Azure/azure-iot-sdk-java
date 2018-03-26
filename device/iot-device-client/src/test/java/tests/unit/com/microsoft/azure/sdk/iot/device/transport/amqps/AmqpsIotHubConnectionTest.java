@@ -5,32 +5,29 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.device.MessageType;
-import com.microsoft.azure.sdk.iot.device.ObjectLock;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
+import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpLinkRedirectException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpSessionWindowViolationException;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
-import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
-import org.apache.qpid.proton.amqp.messaging.Source;
-import org.apache.qpid.proton.amqp.messaging.Target;
+import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
+import org.apache.qpid.proton.message.impl.MessageImpl;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
@@ -40,14 +37,19 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.Queue;
+import java.util.concurrent.*;
+
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for AmqpsIotHubConnection.
  * Coverage :
- * 100% method,
- * 93% line
+ * 94% method,
+ * 88% line
  */
 public class AmqpsIotHubConnectionTest {
 
@@ -57,6 +59,12 @@ public class AmqpsIotHubConnectionTest {
     final String deviceKey = "test-devicekey?&test";
     final String amqpPort = "5671";
     final String amqpWebSocketPort = "443";
+
+    @Mocked
+    ProtocolException mockedProtocolException;
+
+    @Mocked
+    TransportException mockedTransportException;
 
     @Mocked
     protected Handshaker mockHandshaker;
@@ -137,10 +145,10 @@ public class AmqpsIotHubConnectionTest {
     Source mockSource;
 
     @Mocked
-    ObjectLock mockOpenLock;
+    CountDownLatch mockOpenLatch;
 
     @Mocked
-    ObjectLock mockCloseLock;
+    CountDownLatch mockCloseLatch;
 
     @Mocked
     Link mockLink;
@@ -169,6 +177,11 @@ public class AmqpsIotHubConnectionTest {
     @Mocked
     IotHubTransportMessage mockedTransportMessage;
 
+    @Mocked
+    AmqpsConvertFromProtonReturnValue mockedAmqpsConvertFromProtonReturnValue;
+
+    @Mocked
+    AmqpsConvertToProtonReturnValue mockedAmqpsConvertToProtonReturnValue;
 
     @Mocked
     ErrorCondition mockedErrorCondition;
@@ -179,23 +192,39 @@ public class AmqpsIotHubConnectionTest {
     @Mocked
     ApplicationProperties mockedApplicationProperties;
 
-    /*
-
     @Mocked
     Queue<DeviceClientConfig> mockedQueue;
 
+    @Mocked
+    Rejected mockedRejected;
+
+    @Mocked
+    Received mockedReceived;
+
+    @Mocked
+    Modified mockedModified;
+
+    @Mocked
+    Released mockedReleased;
+
+    @Mocked
+    MessageImpl mockedMessageImpl;
+
+    @Mocked
+    AmqpsIotHubConnection.ReconnectionTask mockedReconnectionTask;
+
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
     // any of the parameters of the configuration is null or empty.]
     @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfConfigIsNull() throws IOException
+    public void constructorThrowsIllegalArgumentExceptionIfConfigIsNull() throws TransportException
     {
-        new AmqpsIotHubConnection(null, 1);
+        new AmqpsIotHubConnection(null);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
     // any of the parameters of the configuration is null or empty.]
     @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfIoTHubHostNameNull() throws IOException
+    public void constructorThrowsIllegalArgumentExceptionIfIoTHubHostNameNull() throws TransportException
     {
         new NonStrictExpectations()
         {
@@ -204,13 +233,13 @@ public class AmqpsIotHubConnectionTest {
                 result = null;
             }
         };
-        new AmqpsIotHubConnection(mockConfig, 1);
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
     // any of the parameters of the configuration is null or empty.]
     @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfIoTHubHostNameEmpty() throws IOException
+    public void constructorThrowsIllegalArgumentExceptionIfIoTHubHostNameEmpty() throws TransportException
     {
         new NonStrictExpectations()
         {
@@ -219,13 +248,15 @@ public class AmqpsIotHubConnectionTest {
                 result = "";
             }
         };
-        new AmqpsIotHubConnection(mockConfig, 1);
+
+        //act
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
     // any of the parameters of the configuration is null or empty.]
     @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfDeviceIdNull() throws IOException
+    public void constructorThrowsIllegalArgumentExceptionIfDeviceIdNull() throws TransportException
     {
         new NonStrictExpectations()
         {
@@ -236,13 +267,13 @@ public class AmqpsIotHubConnectionTest {
                 result = null;
             }
         };
-        new AmqpsIotHubConnection(mockConfig, 1);
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
     // any of the parameters of the configuration is null or empty.]
     @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfDeviceIdIsEmpty() throws IOException
+    public void constructorThrowsIllegalArgumentExceptionIfDeviceIdIsEmpty() throws TransportException
     {
         new NonStrictExpectations()
         {
@@ -253,13 +284,13 @@ public class AmqpsIotHubConnectionTest {
                 result = "";
             }
         };
-        new AmqpsIotHubConnection(mockConfig, 1);
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
     // any of the parameters of the configuration is null or empty.]
     @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfIoTHubNameNull() throws IOException
+    public void constructorThrowsIllegalArgumentExceptionIfIoTHubNameNull() throws TransportException
     {
         new NonStrictExpectations()
         {
@@ -272,13 +303,13 @@ public class AmqpsIotHubConnectionTest {
                 result = null;
             }
         };
-        new AmqpsIotHubConnection(mockConfig, 1);
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
     // any of the parameters of the configuration is null or empty.]
     @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfHubNameIsEmpty() throws IOException
+    public void constructorThrowsIllegalArgumentExceptionIfHubNameIsEmpty() throws TransportException
     {
         new NonStrictExpectations() {
             {
@@ -290,13 +321,13 @@ public class AmqpsIotHubConnectionTest {
                 result = "";
             }
         };
-        new AmqpsIotHubConnection(mockConfig, 1);
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
     // any of the parameters of the configuration is null or empty.]
     @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfDeviceKeyIsNull() throws IOException
+    public void constructorThrowsIllegalArgumentExceptionIfDeviceKeyIsNull() throws TransportException
     {
         new NonStrictExpectations() {
             {
@@ -315,13 +346,13 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        new AmqpsIotHubConnection(mockConfig, 1);
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
     // any of the parameters of the configuration is null or empty.]
     @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfDeviceKeyIsEmpty() throws IOException
+    public void constructorThrowsIllegalArgumentExceptionIfDeviceKeyIsEmpty() throws TransportException
     {
         new NonStrictExpectations()
         {
@@ -341,7 +372,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        new AmqpsIotHubConnection(mockConfig, 1);
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_002: [The constructor shall save the configuration into private member variables.]
@@ -353,7 +384,7 @@ public class AmqpsIotHubConnectionTest {
     // (Proton) object to handle communication flow.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_006: [The constructor shall set its state to DISCONNECTED.]
     @Test
-    public void constructorCopiesAllData() throws IOException
+    public void constructorCopiesAllData() throws TransportException
     {
         baseExpectations();
         new NonStrictExpectations()
@@ -364,7 +395,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         DeviceClientConfig actualConfig = Deencapsulation.getField(connection, "deviceClientConfig");
         String actualHostName = Deencapsulation.getField(connection, "hostName");
@@ -386,26 +417,9 @@ public class AmqpsIotHubConnectionTest {
         assertEquals(IotHubConnectionStatus.DISCONNECTED, actualState);
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_12_002: [The constructor shall create a Proton reactor.]
-    @Test
-    public void constructorCreatesProtonReactor() throws IOException
-    {
-        baseExpectations();
-
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-
-        new Verifications()
-        {
-            {
-                Proton.reactor(connection);
-                times = 1;
-            }
-        };
-    }
-
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_12_003: [The constructor shall throw IOException if the Proton reactor creation failed.]
-    @Test (expected = IOException.class)
-    public void constructorCreatesProtonReactorThrows() throws IOException
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_12_003: [The constructor shall throw TransportException if the Proton reactor creation failed.]
+    @Test (expected = TransportException.class)
+    public void constructorCreatesProtonReactorThrows() throws TransportException, IOException
     {
         baseExpectations();
 
@@ -417,13 +431,16 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        new AmqpsIotHubConnection(mockConfig, 1);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+
+        //act
+        connection.open(mockedQueue);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_001: [The constructor shall initialize the AmqpsSessionManager member variable with the given config.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_017: [The constructor shall set the AMQP socket port using the configuration.]
     @Test
-    public void constructorSetsHostNameCorrectlyWhenWebSocketsAreEnabled() throws IOException
+    public void constructorSetsHostNameCorrectlyWhenWebSocketsAreEnabled() throws TransportException
     {
         // arrange
         baseExpectations();
@@ -438,7 +455,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         // act
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
 
         // assert
@@ -457,7 +474,7 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_001: [The constructor shall initialize the AmqpsSessionManager member variable with the given config.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_017: [The constructor shall set the AMQP socket port using the configuration.]
     @Test
-    public void constructorSetsHostNameCorrectlyWhenWebSocketsAreDisabled() throws IOException
+    public void constructorSetsHostNameCorrectlyWhenWebSocketsAreDisabled() throws TransportException
     {
         // arrange
         baseExpectations();
@@ -470,7 +487,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         // act
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         // assert
         String actualHostName = Deencapsulation.getField(connection, "hostName");
@@ -487,11 +504,12 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_007: [If the AMQPS connection is already open, the function shall do nothing.]
     @Test
-    public void openDoesNothingIfTheConnectionIsAlreadyOpen() throws IOException, InterruptedException
+    public void openDoesNothingIfTheConnectionIsAlreadyOpen() throws TransportException
     {
         baseExpectations();
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        connection.setListener(mockedIotHubListener);
 
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
 
@@ -506,33 +524,13 @@ public class AmqpsIotHubConnectionTest {
         };
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_008: [The function shall create a new sasToken valid for the duration
-    // specified in config to be used for the communication with IoTHub.]
-    @Test
-    public void openCreatesSasToken() throws IOException, InterruptedException
-    {
-        baseExpectations();
-
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-
-        connection.open(mockedQueue);
-
-        new Verifications()
-        {
-            {
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken();
-                times = 1;
-            }
-        };
-    }
-
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_018: [The function shall do nothing if the deviceClientConfig parameter is null.]
     @Test
-    public void addDeviceOperationSessionDoesNothing() throws IOException, InterruptedException
+    public void addDeviceOperationSessionDoesNothing() throws TransportException
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         // act
         connection.addDeviceOperationSession(null);
@@ -551,11 +549,11 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_019: [The function shall call AmqpsSessionManager.addDeviceOperationSession with the given deviceClientConfig.]
     @Test
-    public void addDeviceOperationSessionSuccess() throws IOException, InterruptedException
+    public void addDeviceOperationSessionSuccess() throws TransportException
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         // act
         connection.addDeviceOperationSession(mockConfig);
@@ -575,43 +573,48 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_057: [The function shall call the connection to authenticate.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_058: [The function shall call the connection to open device client links.]
     @Test
-    public void openCallsAuthenticateAndOpenLinks() throws IOException, InterruptedException
+    public void openCallsAuthenticateAndOpenLinks() throws TransportException, IOException, InterruptedException
     {
         // arrange
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-        Deencapsulation.setField(connection, "openLock", mockOpenLock);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        connection.setListener(mockedIotHubListener);
+        Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
         Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
+
+        new StrictExpectations()
+        {
+            {
+                mockOpenLatch.await(anyLong, TimeUnit.MILLISECONDS);
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
+                result = true;
+
+                mockAmqpsSessionManager.authenticate();
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
+                result = true;
+
+                mockAmqpsSessionManager.openDeviceOperationLinks();
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
+                result = true;
+            }
+        };
 
         // act
         connection.open(mockedQueue);
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken();
-                times = 1;
-                mockOpenLock.waitLock(anyLong);
-                times = 1;
-
-                connection.authenticate();
-                times = 2;
-                connection.openLinks();
-                times = 2;
-            }
-        };
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger the reactor, the function shall closeNow the connection and throw an IOException.]
     @Test (expected = IOException.class)
-    public void openThrowsIfProtonReactorThrows() throws IOException, InterruptedException
+    public void openThrowsIfProtonReactorThrows() throws TransportException
     {
         // arrange
         baseExpectations();
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "reactor", null);
 
         new NonStrictExpectations()
@@ -628,13 +631,22 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
     @Test
-    public void openTriggersProtonReactor(@Mocked final Reactor mockedReactor) throws IOException, InterruptedException
+    public void openTriggersProtonReactor(@Mocked final Reactor mockedReactor) throws TransportException, InterruptedException
     {
         baseExpectations();
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
+                result = true;
+            }
+        };
 
-        Deencapsulation.setField(connection, "openLock", mockOpenLock);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        connection.setListener(mockedIotHubListener);
+
+        Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
 
         connection.open(mockedQueue);
 
@@ -643,7 +655,7 @@ public class AmqpsIotHubConnectionTest {
             {
                 new IotHubReactor((Reactor)any);
                 times = 1;
-                mockOpenLock.waitLock(anyLong);
+                mockOpenLatch.await(anyLong, TimeUnit.MILLISECONDS);
                 times = 1;
             }
         };
@@ -652,61 +664,42 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_010: [The function shall wait for the reactor to be ready and for
     // enough link credit to become available.]
     @Test
-    public void openWaitsForReactorToBeReadyAndForEnoughLinkCreditToBeAvailable() throws IOException, InterruptedException
+    public void openWaitsForReactorToBeReadyAndForEnoughLinkCreditToBeAvailable() throws TransportException, InterruptedException
     {
         baseExpectations();
 
         new NonStrictExpectations()
         {
             {
-                mockOpenLock.waitLock(anyLong);
+                mockOpenLatch.await(anyLong, TimeUnit.MILLISECONDS);
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
+                result = true;
             }
         };
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        connection.setListener(mockedIotHubListener);
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-
-        Deencapsulation.setField(connection, "openLock", mockOpenLock);
+        Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
 
         connection.open(mockedQueue);
 
         new Verifications()
         {
             {
-                mockOpenLock.waitLock(anyLong);
+                mockOpenLatch.await(anyLong, TimeUnit.MILLISECONDS);
                 times = 1;
             }
         };
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger
-    // the reactor, the function shall closeNow the connection and throw an IOException.]
-    @Test(expected = IOException.class)
-    public void openFailsIfConnectionIsNotOpenedInTime() throws Exception
-    {
-        baseExpectations();
-
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-
-        Deencapsulation.setField(connection, "openLock", mockOpenLock);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockOpenLock.waitLock(anyLong);
-                result = new InterruptedException();
-            }
-        };
-
-        connection.open(mockedQueue);
-    }
-
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_020: [The function shall do nothing if the authentication is already open.]
     @Test
-    public void authenticateDoesNothing() throws IOException, InterruptedException
+    public void authenticateDoesNothing() throws TransportException
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         new NonStrictExpectations()
         {
@@ -735,11 +728,11 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_021: [The function shall call AmqpsSessionManager.authenticate.]
     @Test
-    public void authenticateSuccess() throws IOException, InterruptedException
+    public void authenticateSuccess() throws TransportException
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         new NonStrictExpectations()
         {
@@ -768,11 +761,11 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_022: [The function shall do nothing if the authentication is already open.]
     @Test
-    public void openLinksDoesNothing() throws IOException, InterruptedException
+    public void openLinksDoesNothing() throws TransportException
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         new NonStrictExpectations()
         {
@@ -801,11 +794,11 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_023: [The function shall call AmqpsSessionManager.openDeviceOperationLinks.]
     @Test
-    public void openLinksSuccess() throws IOException, InterruptedException
+    public void openLinksSuccess() throws TransportException
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         new NonStrictExpectations()
         {
@@ -832,19 +825,19 @@ public class AmqpsIotHubConnectionTest {
         };
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_12_004: [The function shall IOException throws if the waitLock throws.]
-    @Test(expected = IOException.class)
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_12_004: [The function shall TransportException throws if the waitLock throws.]
+    @Test(expected = TransportException.class)
     public void closeThrowsIfWaitLockThrows() throws Exception
     {
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-        Deencapsulation.setField(connection, "closeLock", mockCloseLock);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        this.setLatches(connection);
 
         new NonStrictExpectations()
         {
             {
-                mockCloseLock.waitLock(anyLong);
+                mockCloseLatch.await(anyLong, TimeUnit.MILLISECONDS);
                 result = new InterruptedException();
             }
         };
@@ -852,49 +845,11 @@ public class AmqpsIotHubConnectionTest {
         connection.close();
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_048 [If the AMQPS connection is already closed, the function shall do nothing.]
-    @Test
-    public void closeDoesNothingIfTheConnectionWasNeverOpened() throws InterruptedException, IOException
-    {
-        baseExpectations();
-
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-
-        Deencapsulation.setField(connection, "closeLock", mockCloseLock);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockCloseLock.waitLock(anyLong);
-            }
-        };
-
-        connection.close();
-
-        new Verifications()
-        {
-            {
-                mockSender.close();
-                times = 0;
-                mockReceiver.close();
-                times = 0;
-                mockSession.close();
-                times = 0;
-                mockConnection.close();
-                times = 0;
-                mockReactorFuture.cancel(true);
-                times = 0;
-                mockExecutorService.shutdown();
-                times = 0;
-            }
-        };
-    }
-
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to DISCONNECTED.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall closeNow the AmqpsSessionManager and the AMQP connection.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_014: [The function shall stop the Proton reactor.]
+    // Codes_SRS_AMQPSIOTHUBCONNECTION_34_014: [If this object's proton reactor is not null, this function shall stop the Proton reactor.]
     @Test
-    public void closeClosesAllProtonVariablesAndStopsProtonReactor() throws IOException, InterruptedException
+    public void closeClosesAllProtonVariablesAndStopsProtonReactor() throws TransportException
     {
         baseExpectations();
 
@@ -908,12 +863,12 @@ public class AmqpsIotHubConnectionTest {
 
         new MockUp<AmqpsIotHubConnection>() {
             @Mock
-            void open()
+            void open(Queue<DeviceClientConfig> deviceClientConfigs)
             {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Deencapsulation.setField(connection, "connection", mockConnection);
@@ -937,7 +892,7 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_005: [The function shall throw IOException if the executor shutdown is interrupted.]
     @Test (expected = InterruptedException.class)
-    public void closeThrowsIfShutdownThrows() throws IOException, InterruptedException
+    public void closeThrowsIfShutdownThrows() throws TransportException
     {
         baseExpectations();
 
@@ -951,7 +906,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Deencapsulation.setField(connection, "connection", mockConnection);
@@ -980,17 +935,17 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_015: [If the state of the connection is DISCONNECTED or there is not enough
     // credit, the function shall return -1.]
     @Test
-    public void sendMessageDoesNothingIfConnectionIsClosed() throws IOException
+    public void sendMessageDoesNothingIfConnectionIsClosed() throws TransportException
     {
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.DISCONNECTED);
         Deencapsulation.setField(connection, "linkCredit", 100);
 
         Integer expectedDeliveryHash = -1;
-        Integer actualDeliveryHash = connection.sendMessage(Message.Factory.create(), MessageType.DEVICE_TELEMETRY, mockConnectionString);
+        Integer actualDeliveryHash = Deencapsulation.invoke(connection, "sendMessage", Message.Factory.create(), MessageType.DEVICE_TELEMETRY, mockConnectionString);
 
         assertEquals(expectedDeliveryHash, actualDeliveryHash);
     }
@@ -998,17 +953,17 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_015: [If the state of the connection is DISCONNECTED or there is not enough
     // credit, the function shall return -1.]
     @Test
-    public void sendMessageDoesNothingIfNotEnoughLinkCredit() throws IOException
+    public void sendMessageDoesNothingIfNotEnoughLinkCredit() throws TransportException
     {
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Deencapsulation.setField(connection, "linkCredit", -1);
 
         Integer expectedDeliveryHash = -1;
-        Integer actualDeliveryHash = connection.sendMessage(Message.Factory.create(), MessageType.DEVICE_TELEMETRY, mockConnectionString);
+        Integer actualDeliveryHash = Deencapsulation.invoke(connection, "sendMessage", Message.Factory.create(), MessageType.DEVICE_TELEMETRY, mockConnectionString);
 
         assertEquals(expectedDeliveryHash, actualDeliveryHash);
     }
@@ -1016,7 +971,7 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_024: [The function shall call AmqpsSessionManager.sendMessage with the given parameters.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_021: [The function shall return the delivery hash.]
     @Test
-    public void sendMessage() throws IOException
+    public void sendMessage() throws TransportException
     {
         // arrange
         baseExpectations();
@@ -1032,13 +987,13 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Deencapsulation.setField(connection, "linkCredit", 100);
 
         // act
-        Integer actualDeliveryHash = connection.sendMessage(mockProtonMessage, MessageType.DEVICE_TELEMETRY, mockConnectionString);
+        Integer actualDeliveryHash = Deencapsulation.invoke(connection, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, mockConnectionString);
 
         // assert
         assertEquals(expectedDeliveryHash, actualDeliveryHash);
@@ -1053,85 +1008,9 @@ public class AmqpsIotHubConnectionTest {
 
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_022: [If the AMQPS Connection is closed, the function shall return false.]
-    @Test
-    public void sendMessageReturnsFalseIfConnectionIsClosed() throws IOException
-    {
-        baseExpectations();
-
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-
-        Deencapsulation.setField(connection, "state", IotHubConnectionStatus.DISCONNECTED);
-
-        Boolean expectedResult = false;
-        Boolean actualResult = connection.sendMessageResult(mockAmqpsMessage, IotHubMessageResult.COMPLETE);
-
-        assertEquals(expectedResult, actualResult);
-    }
-
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_12_008: [The function shall return false if message acknowledge throws exception.]
-    @Test
-    public void sendMessageReturnsFalseIfAcknowledgeThrows() throws IOException
-    {
-        baseExpectations();
-
-        new NonStrictExpectations()
-        {
-            {
-                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
-                result = new IllegalStateException();
-            }
-        };
-
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-
-        Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
-
-        Boolean expectedResult = false;
-        Boolean actualResult = connection.sendMessageResult(mockAmqpsMessage, IotHubMessageResult.COMPLETE);
-
-        assertEquals(expectedResult, actualResult);
-    }
-
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_023: [If the message result is COMPLETE, ABANDON, or REJECT,
-    // the function shall acknowledge the last message with acknowledgement type COMPLETE, ABANDON, or REJECT respectively.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_024: [The function shall return true after the message was acknowledged.]
-    @Test
-    public void sendMessageAcknowledgesProperlyBasedOnMessageResult() throws IOException
-    {
-        baseExpectations();
-
-        new NonStrictExpectations()
-        {
-            {
-                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
-            }
-        };
-
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-
-        Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
-
-        for(final AmqpsMessage.ACK_TYPE ackType : AmqpsMessage.ACK_TYPE.values())
-        {
-            Boolean expectedResult = true;
-            Boolean actualResult = connection.sendMessageResult(mockAmqpsMessage, IotHubMessageResult.valueOf(ackType.toString()));
-
-            assertEquals(expectedResult, actualResult);
-
-            new Verifications()
-            {
-                {
-                    mockAmqpsMessage.acknowledge(ackType);
-                    times = 1;
-                }
-            };
-        }
-    }
-
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_033: [The event handler shall set the current handler to handle the connection events.]
     @Test
-    public void onReactorInit() throws IOException
+    public void onReactorInit() throws TransportException
     {
         baseExpectations();
 
@@ -1144,7 +1023,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         connection.onReactorInit(mockEvent);
 
@@ -1161,7 +1040,7 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_033: [The event handler shall set the current handler to handle the connection events.]
     @Test
-    public void onReactorInitWithWebSockets() throws IOException
+    public void onReactorInitWithWebSockets() throws TransportException
     {
         baseExpectations();
 
@@ -1176,7 +1055,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         connection.onReactorInit(mockEvent);
 
@@ -1194,7 +1073,7 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_011: [The function shall call notify lock on close lock.]
     // Test_SRS_AMQPSIOTHUBCONNECTION_12_008: [The function shall set the reactor member variable to null.]
     @Test
-    public void onReactorFinalNoReconnect() throws IOException
+    public void onReactorFinalNoReconnect() throws TransportException
     {
         baseExpectations();
 
@@ -1203,14 +1082,13 @@ public class AmqpsIotHubConnectionTest {
             {
                 mockConfig.isUseWebsocket();
                 result = true;
-                mockCloseLock.notifyLock();
+                mockCloseLatch.countDown();
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-        Deencapsulation.setField(connection, "closeLock", mockCloseLock);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        this.setLatches(connection);
         Deencapsulation.setField(connection, "reactor", mockReactor);
-        Deencapsulation.setField(connection, "reconnectCall", false);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.DISCONNECTED);
 
         new MockUp<AmqpsIotHubConnection>()
@@ -1232,54 +1110,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockCloseLock.notifyLock();
-                times = 1;
-
-            }
-        };
-    }
-
-    // Test_SRS_AMQPSIOTHUBCONNECTION_12_009: [The function shall call openAsync and disable reconnection if it is a reconnection attempt.]
-    @Test
-    public void onReactorFinalReconnect() throws IOException
-    {
-        baseExpectations();
-
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.isUseWebsocket();
-                result = true;
-                mockCloseLock.notifyLock();
-            }
-        };
-
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-        Deencapsulation.setField(connection, "closeLock", mockCloseLock);
-        Deencapsulation.setField(connection, "reactor", mockReactor);
-        Deencapsulation.setField(connection, "reconnectCall", true);
-        Deencapsulation.setField(connection, "state", IotHubConnectionStatus.DISCONNECTED);
-
-        new MockUp<AmqpsIotHubConnection>()
-        {
-            @Mock
-            void openAsync()
-            {
-                Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
-            }
-        };
-
-        connection.onReactorFinal(mockEvent);
-
-        Reactor reactor = Deencapsulation.getField(connection, "reactor");
-        assertEquals(null, reactor);
-        IotHubConnectionStatus state = Deencapsulation.getField(connection, "state");
-        assertEquals(IotHubConnectionStatus.DISCONNECTED, state);
-
-        new Verifications()
-        {
-            {
-                mockCloseLock.notifyLock();
+                mockCloseLatch.countDown();
                 times = 1;
 
             }
@@ -1288,7 +1119,7 @@ public class AmqpsIotHubConnectionTest {
 
     // Test_SRS_AMQPSIOTHUBCONNECTION_12_010: [The function shall log the error if openAsync failed.]
     @Test
-    public void onReactorFinalReconnectFailed() throws IOException
+    public void onReactorFinalReconnectFailed() throws TransportException
     {
         baseExpectations();
 
@@ -1297,14 +1128,13 @@ public class AmqpsIotHubConnectionTest {
             {
                 mockConfig.isUseWebsocket();
                 result = true;
-                mockCloseLock.notifyLock();
+                mockCloseLatch.countDown();
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-        Deencapsulation.setField(connection, "closeLock", mockCloseLock);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        this.setLatches(connection);
         Deencapsulation.setField(connection, "reactor", mockReactor);
-        Deencapsulation.setField(connection, "reconnectCall", true);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.DISCONNECTED);
 
         new MockUp<AmqpsIotHubConnection>()
@@ -1326,9 +1156,8 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockCloseLock.notifyLock();
+                mockCloseLatch.countDown();
                 times = 1;
-
             }
         };
     }
@@ -1337,7 +1166,7 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_029: [The event handler shall open the connection.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_009: [The event handler shall call the amqpsSessionManager.onConnectionInit function with the connection.]
     @Test
-    public void onConnectionInit() throws IOException
+    public void onConnectionInit() throws TransportException
     {
         baseExpectations();
 
@@ -1351,7 +1180,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.onConnectionInit(mockEvent);
 
         new Verifications()
@@ -1374,7 +1203,7 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_032: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_25_049: [The event handler shall set the SSL Context to IOTHub SSL context containing valid certificates.]
     @Test
-    public void onConnectionBoundNoWebSockets() throws IOException
+    public void onConnectionBoundNoWebSockets() throws TransportException, IOException
     {
         baseExpectations();
 
@@ -1394,7 +1223,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "useWebSockets", false);
 
         connection.onConnectionBound(mockEvent);
@@ -1411,7 +1240,7 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_030: [The event handler shall get the Transport (Proton) object from the event.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_25_049: [If websocket enabled the event handler shall configure the transport layer for websocket.]
     @Test
-    public void onConnectionBoundWebSockets() throws IOException
+    public void onConnectionBoundWebSockets() throws TransportException, IOException
     {
         baseExpectations();
 
@@ -1435,7 +1264,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         Deencapsulation.setField(connection, "useWebSockets", true);
 
@@ -1452,11 +1281,11 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_005: [THe function sets the state to disconnected.]
     @Test
-    public void onConnectionUnbound() throws IOException
+    public void onConnectionUnbound() throws TransportException
     {
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
 
         connection.onConnectionUnbound(mockEvent);
@@ -1468,7 +1297,7 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_015: [The function shall call AmqpsSessionManager.getMessageFromReceiverLink.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_050: [All the listeners shall be notified that a message was received from the server.]
     @Test
-    public void onDeliveryReceive() throws IOException
+    public void onDeliveryReceive() throws TransportException
     {
         baseExpectations();
 
@@ -1487,8 +1316,8 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-        connection.setListener(mockServerListener);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        connection.setListener(mockedIotHubListener);
         connection.onDelivery(mockEvent);
 
         new Verifications()
@@ -1503,38 +1332,51 @@ public class AmqpsIotHubConnectionTest {
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_038: [If this link is the Sender link and the event type is DELIVERY, the event handler shall get the Delivery (Proton) object from the event.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_039: [The event handler shall note the remote delivery state and use it and the Delivery (Proton) hash code to inform the AmqpsIotHubConnection of the message receipt.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_064: [If the acknowledgement sent from the service is "Accepted", this function shall notify its listener that the message was successfully sent.]
     @Test
-    public void onDeliverySend(
-    ) throws IOException
+    public void onDeliverySend(@Mocked final Map<Integer, com.microsoft.azure.sdk.iot.device.Message> mockInProgressMessages) throws TransportException
     {
         baseExpectations();
         final String receiverLinkName = "receiver";
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "inProgressMessages", mockInProgressMessages);
 
         new NonStrictExpectations()
         {
             {
+                Deencapsulation.invoke(mockAmqpsSessionManager, "getMessageFromReceiverLink", anyString);
+                result = null;
+
                 mockEvent.getLink();
                 result = mockLink;
+
                 mockLink.getName();
                 result = receiverLinkName;
+
                 mockEvent.getType();
                 result = Event.Type.DELIVERY;
+
                 mockEvent.getDelivery();
                 result = mockDelivery;
+
                 mockDelivery.getRemoteState();
                 result = Accepted.getInstance();
-                mockedIotHubListener.messageSent(anyInt, true);
-                Deencapsulation.invoke(mockAmqpsSessionManager, "getMessageFromReceiverLink", receiverLinkName);
-                result = null;
+
+                mockInProgressMessages.containsKey(anyInt);
+                result = true;
+
+                mockInProgressMessages.remove(anyInt);
+                result = mockedTransportMessage;
             }
         };
 
         connection.setListener(mockedIotHubListener);
+
+        //act
         connection.onDelivery(mockEvent);
 
+        //assert
         new Verifications()
         {
             {
@@ -1544,7 +1386,279 @@ public class AmqpsIotHubConnectionTest {
                 times = 1;
                 mockDelivery.getRemoteState();
                 times = 1;
-                mockedIotHubListener.messageSent(mockDelivery.hashCode(), true);
+                mockedIotHubListener.onMessageSent(mockedTransportMessage, null);
+                times = 1;
+                mockDelivery.free();
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_065: [If the acknowledgement sent from the service is "Rejected", this function shall notify its listener that the sent message was rejected and that it should not be retried.]
+    @Test
+    public void onDeliverySendRejectedMessage(@Mocked final Map<Integer, com.microsoft.azure.sdk.iot.device.Message> mockInProgressMessages) throws TransportException
+    {
+        baseExpectations();
+        final String receiverLinkName = "receiver";
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "inProgressMessages", mockInProgressMessages);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsSessionManager, "getMessageFromReceiverLink", anyString);
+                result = null;
+
+                mockEvent.getLink();
+                result = mockLink;
+
+                mockLink.getName();
+                result = receiverLinkName;
+
+                mockEvent.getType();
+                result = Event.Type.DELIVERY;
+
+                mockEvent.getDelivery();
+                result = mockDelivery;
+
+                mockDelivery.getRemoteState();
+                result = mockedRejected;
+
+                mockInProgressMessages.containsKey(anyInt);
+                result = true;
+
+                mockInProgressMessages.remove(anyInt);
+                result = mockedTransportMessage;
+
+                new TransportException(anyString);
+                result = mockedTransportException;
+
+                mockedTransportException.setRetryable(true);
+                times = 0;
+            }
+        };
+
+        connection.setListener(mockedIotHubListener);
+
+        //act
+        connection.onDelivery(mockEvent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockEvent.getType();
+                times = 1;
+                mockEvent.getDelivery();
+                times = 1;
+                mockDelivery.getRemoteState();
+                times = 1;
+                mockedIotHubListener.onMessageSent(mockedTransportMessage, mockedTransportException);
+                times = 1;
+                mockDelivery.free();
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_066: [If the acknowledgement sent from the service is "Modified", "Released", or "Received", this function shall notify its listener that the sent message needs to be retried.]
+    @Test
+    public void onDeliverySendModifiedMessage(@Mocked final Map<Integer, com.microsoft.azure.sdk.iot.device.Message> mockInProgressMessages) throws TransportException
+    {
+        baseExpectations();
+        final String receiverLinkName = "receiver";
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "inProgressMessages", mockInProgressMessages);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsSessionManager, "getMessageFromReceiverLink", anyString);
+                result = null;
+
+                mockEvent.getLink();
+                result = mockLink;
+
+                mockLink.getName();
+                result = receiverLinkName;
+
+                mockEvent.getType();
+                result = Event.Type.DELIVERY;
+
+                mockEvent.getDelivery();
+                result = mockDelivery;
+
+                mockDelivery.getRemoteState();
+                result = mockedModified;
+
+                mockInProgressMessages.containsKey(anyInt);
+                result = true;
+
+                mockInProgressMessages.remove(anyInt);
+                result = mockedTransportMessage;
+
+                new TransportException(anyString);
+                result = mockedTransportException;
+
+                mockedTransportException.setRetryable(true);
+                times = 1;
+            }
+        };
+
+        connection.setListener(mockedIotHubListener);
+
+        //act
+        connection.onDelivery(mockEvent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockEvent.getType();
+                times = 1;
+                mockEvent.getDelivery();
+                times = 1;
+                mockDelivery.getRemoteState();
+                times = 1;
+                mockedIotHubListener.onMessageSent(mockedTransportMessage, mockedTransportException);
+                times = 1;
+                mockDelivery.free();
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_066: [If the acknowledgement sent from the service is "Modified", "Released", or "Received", this function shall notify its listener that the sent message needs to be retried.]
+    @Test
+    public void onDeliverySendReceivedMessage(@Mocked final Map<Integer, com.microsoft.azure.sdk.iot.device.Message> mockInProgressMessages) throws TransportException
+    {
+        baseExpectations();
+        final String receiverLinkName = "receiver";
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "inProgressMessages", mockInProgressMessages);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsSessionManager, "getMessageFromReceiverLink", anyString);
+                result = null;
+
+                mockEvent.getLink();
+                result = mockLink;
+
+                mockLink.getName();
+                result = receiverLinkName;
+
+                mockEvent.getType();
+                result = Event.Type.DELIVERY;
+
+                mockEvent.getDelivery();
+                result = mockDelivery;
+
+                mockDelivery.getRemoteState();
+                result = mockedReceived;
+
+                mockInProgressMessages.containsKey(anyInt);
+                result = true;
+
+                mockInProgressMessages.remove(anyInt);
+                result = mockedTransportMessage;
+
+                new TransportException(anyString);
+                result = mockedTransportException;
+
+                mockedTransportException.setRetryable(true);
+                times = 1;
+            }
+        };
+
+        connection.setListener(mockedIotHubListener);
+
+        //act
+        connection.onDelivery(mockEvent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockEvent.getType();
+                times = 1;
+                mockEvent.getDelivery();
+                times = 1;
+                mockDelivery.getRemoteState();
+                times = 1;
+                mockedIotHubListener.onMessageSent(mockedTransportMessage, mockedTransportException);
+                times = 1;
+                mockDelivery.free();
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_066: [If the acknowledgement sent from the service is "Modified", "Released", or "Received", this function shall notify its listener that the sent message needs to be retried.]
+    @Test
+    public void onDeliverySendReleasedMessage(@Mocked final Map<Integer, com.microsoft.azure.sdk.iot.device.Message> mockInProgressMessages) throws TransportException
+    {
+        baseExpectations();
+        final String receiverLinkName = "receiver";
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "inProgressMessages", mockInProgressMessages);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsSessionManager, "getMessageFromReceiverLink", anyString);
+                result = null;
+
+                mockEvent.getLink();
+                result = mockLink;
+
+                mockLink.getName();
+                result = receiverLinkName;
+
+                mockEvent.getType();
+                result = Event.Type.DELIVERY;
+
+                mockEvent.getDelivery();
+                result = mockDelivery;
+
+                mockDelivery.getRemoteState();
+                result = mockedReleased;
+
+                mockInProgressMessages.containsKey(anyInt);
+                result = true;
+
+                mockInProgressMessages.remove(anyInt);
+                result = mockedTransportMessage;
+
+                new TransportException(anyString);
+                result = mockedTransportException;
+
+                mockedTransportException.setRetryable(true);
+                times = 1;
+            }
+        };
+
+        connection.setListener(mockedIotHubListener);
+
+        //act
+        connection.onDelivery(mockEvent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockEvent.getType();
+                times = 1;
+                mockEvent.getDelivery();
+                times = 1;
+                mockDelivery.getRemoteState();
+                times = 1;
+                mockedIotHubListener.onMessageSent(mockedTransportMessage, mockedTransportException);
                 times = 1;
                 mockDelivery.free();
                 times = 1;
@@ -1554,11 +1668,11 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_016: [The function shall get the link from the event and call device operation objects with it.]
     @Test
-    public void onLinkInit() throws IOException
+    public void onLinkInit() throws TransportException
     {
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         connection.onLinkInit(mockEvent);
 
@@ -1573,9 +1687,34 @@ public class AmqpsIotHubConnectionTest {
         };
     }
 
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_067: [If an exception is thrown while executing the callback onLinkInit on the saved amqpsSessionManager, that exception shall be saved.]
+    @Test
+    public void onLinkInitSavesExceptions() throws TransportException
+    {
+        baseExpectations();
+
+        new NonStrictExpectations()
+        {
+            {
+                mockEvent.getLink();
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "onLinkInit", mockLink);
+                result = mockedTransportException;
+            }
+        };
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+
+        connection.onLinkInit(mockEvent);
+
+        //assert
+        TransportException savedException = Deencapsulation.getField(connection, "savedException");
+        assertNotNull(savedException);
+    }
+
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_040: [The event handler shall save the remaining link credit.]
     @Test
-    public void onLinkFlow() throws IOException
+    public void onLinkFlow() throws TransportException
     {
         baseExpectations();
 
@@ -1589,7 +1728,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.onLinkFlow(mockEvent);
 
         Integer expectedLinkCredit = 100;
@@ -1609,240 +1748,77 @@ public class AmqpsIotHubConnectionTest {
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_041: [The connection state shall be considered CONNECTED when the sender link is open remotely.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_99_001: [All server listeners shall be notified when that the connection has been established.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_21_051: [The open lock shall be notified when that the connection has been established.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_052: [The function shall call AmqpsSessionManager.onLinkRemoteOpen with the given link.]
     @Test
-    public void onLinkRemoteOpen() throws IOException
+    public void onLinkRemoteOpen() throws TransportException
     {
         baseExpectations();
 
         new NonStrictExpectations()
         {
             {
-                new ObjectLock();
-                result = mockOpenLock;
                 Deencapsulation.invoke(mockAmqpsSessionManager, "onLinkRemoteOpen", mockEvent);
                 result = true;
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        this.setLatches(connection);
 
-        connection.setListener(mockedIotHubListener);
+        //act
         connection.onLinkRemoteOpen(mockEvent);
 
+        //assert
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
         IotHubConnectionStatus actualState = Deencapsulation.getField(connection, "state");
-
         assertEquals(expectedState, actualState);
-
         new Verifications()
         {
             {
                 Deencapsulation.invoke(mockAmqpsSessionManager, "onLinkRemoteOpen", mockEvent);
                 times = 1;
-                mockedIotHubListener.connectionEstablished();
-                times = 1;
-                mockOpenLock.notifyLock();
+                mockOpenLatch.countDown();
                 times = 1;
             }
         };
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_042 [The event handler shall attempt to reconnect to the IoTHub.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_054: [The function shall save the given listener.]
     @Test
-    public void onLinkRemoteClose() throws IOException
-    {
-        baseExpectations();
-
-        new NonStrictExpectations()
-        {
-            {
-                mockEvent.getLink();
-                result = mockSender;
-                mockSender.getName();
-                result = "sender";
-                mockedIotHubListener.connectionLost();
-                Deencapsulation.invoke(mockAmqpsSessionManager, "isLinkFound", "sender");
-                result = true;
-            }
-        };
-
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-
-        final Boolean[] openAsyncCalled = { false };
-        final Boolean[] closeAsyncCalled = { false };
-
-        new MockUp<AmqpsIotHubConnection>()
-        {
-            @Mock
-            void openAsync()
-            {
-                openAsyncCalled[0] = true;
-                Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
-            }
-
-            @Mock
-            void closeAsync()
-            {
-                closeAsyncCalled[0] = true;
-                Deencapsulation.setField(connection, "state", IotHubConnectionStatus.DISCONNECTED);
-            }
-        };
-
-        connection.setListener(mockedIotHubListener);
-        connection.onLinkRemoteClose(mockEvent);
-
-        assertEquals(true, closeAsyncCalled[0]);
-        assertEquals(false, openAsyncCalled[0]);
-
-        new Verifications()
-        {
-            {
-                mockEvent.getLink();
-                times = 1;
-                mockSender.getName();
-                times = 1;
-                mockedIotHubListener.connectionLost();
-                times = 1;
-            }
-        };
-    }
-
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to reconnect to IoTHub.]
-    @Test
-    public void onTransportError() throws IOException
-    {
-        baseExpectations();
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedIotHubListener.connectionLost();
-            }
-        };
-
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-
-        final Boolean[] openAsyncCalled = { false };
-        final Boolean[] closeAsyncCalled = { false };
-
-        new MockUp<AmqpsIotHubConnection>()
-        {
-            @Mock
-            void openAsync()
-            {
-                openAsyncCalled[0] = true;
-                Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
-            }
-
-            @Mock
-            void closeAsync()
-            {
-                closeAsyncCalled[0] = true;
-                Deencapsulation.setField(connection, "state", IotHubConnectionStatus.DISCONNECTED);
-            }
-        };
-
-        connection.setListener(mockedIotHubListener);
-        connection.onTransportError(mockEvent);
-
-        assertEquals(true, closeAsyncCalled[0]);
-        assertEquals(false, openAsyncCalled[0]);
-
-        new Verifications()
-        {
-            {
-                mockedIotHubListener.connectionLost();
-                times = 1;
-            }
-        };
-    }
-
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_048: [The event handler shall attempt to reconnect to IoTHub.]
-    @Test
-    public void onTransportErrorReconnectionCounterRotate() throws IOException, InterruptedException
-    {
-        baseExpectations();
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedIotHubListener.connectionLost();
-            }
-        };
-
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-        Deencapsulation.setField(connection, "currentReconnectionAttempt", Integer.MAX_VALUE);
-
-        final Boolean[] openAsyncCalled = { false };
-        final Boolean[] closeAsyncCalled = { false };
-
-        new MockUp<AmqpsIotHubConnection>()
-        {
-            @Mock
-            void openAsync()
-            {
-                openAsyncCalled[0] = true;
-                Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
-            }
-
-            @Mock
-            void closeAsync()
-            {
-                closeAsyncCalled[0] = true;
-                Deencapsulation.setField(connection, "state", IotHubConnectionStatus.DISCONNECTED);
-            }
-        };
-
-        connection.setListener(mockedIotHubListener);
-        connection.onTransportError(mockEvent);
-
-        int currentReconnectionAttempt = Deencapsulation.getField(connection, "currentReconnectionAttempt");
-        assertEquals(currentReconnectionAttempt, 0);
-        assertEquals(true, closeAsyncCalled[0]);
-        assertEquals(false, openAsyncCalled[0]);
-
-        new Verifications()
-        {
-            {
-                mockedIotHubListener.connectionLost();
-                times = 1;
-            }
-        };
-    }
-
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_12_054: [The function shall add the given listener to the listener list.]
-    @Test
-    public void addListenerSuccess() throws IOException, InterruptedException
+    public void setListenerSuccess() throws TransportException
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-        Deencapsulation.setField(connection, "listeners", mockServerListenerList);
-
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        
         // act
         connection.setListener(mockedIotHubListener);
 
         // assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockServerListenerList, "add", mockedIotHubListener);
-                times = 1;
-            }
-        };
+        IotHubListener listener = Deencapsulation.getField(connection, "listener");
+        assertEquals(mockedIotHubListener, listener);
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_063: [If the provided listener is null, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void setListenerThrowsForNullListener() throws TransportException
+    {
+        // arrange
+        baseExpectations();
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+
+        // act
+        connection.setListener(null);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_055: [The function shall call AmqpsSessionManager.convertToProton with the given message.]
     @Test
-    public void convertToProton() throws IOException, InterruptedException
+    public void convertToProton() throws TransportException
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-        Deencapsulation.setField(connection, "listeners", mockServerListenerList);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         // act
         Deencapsulation.invoke(connection, "convertToProton", mockIoTMessage);
@@ -1859,11 +1835,11 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_056: [*The function shall call AmqpsSessionManager.convertFromProton with the given message. ]
     @Test
-    public void convertFromProton() throws IOException, InterruptedException
+    public void convertFromProton() throws TransportException
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         // act
@@ -1878,15 +1854,14 @@ public class AmqpsIotHubConnectionTest {
             }
         };
     }
-    */
 
     //Tests_SRS_AMQPSIOTHUBCONNECTION_34_060 [If the provided event object's transport holds an error condition object, this function shall report the associated TransportException to this object's listeners.]
     @Test
-    public void OnTransportErrorReportsErrorCodeIfPresent() throws IOException, TransportException
+    public void OnTransportErrorReportsErrorCodeIfPresent() throws TransportException
     {
         //arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         Deencapsulation.setField(connection, "reactor", mockReactor);
         new NonStrictExpectations()
@@ -1910,18 +1885,18 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockedIotHubListener.onConnectionLost((AmqpSessionWindowViolationException) any);
+                Deencapsulation.newInstance(AmqpsIotHubConnection.ReconnectionTask.class, new Class[] {Throwable.class, IotHubListener.class}, any, mockedIotHubListener);
                 times = 1;
             }
         };
     }
 
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_061 [If the provided event object's transport holds a remote error condition object, this function shall report the associated TransportException to this object's listeners.]
+    //Tests_SRS_n [If the provided event object's transport holds a remote error condition object, this function shall report the associated TransportException to this object's listeners.]
     @Test
-    public void OnLinkRemoteCloseReportsErrorCodeIfPresent() throws IOException, TransportException
+    public void OnLinkRemoteCloseReportsErrorCodeIfPresent() throws TransportException
     {
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         new NonStrictExpectations()
         {
@@ -1944,7 +1919,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockedIotHubListener.onConnectionLost((AmqpLinkRedirectException) any);
+                Deencapsulation.newInstance(AmqpsIotHubConnection.ReconnectionTask.class, new Class[] {Throwable.class, IotHubListener.class}, any, mockedIotHubListener);
                 times = 1;
             }
         };
@@ -1952,15 +1927,16 @@ public class AmqpsIotHubConnectionTest {
 
     //Tests_SRS_AMQPSIOTHUBCONNECTION_34_089: [If an amqp message can be received from the receiver link, and that amqp message contains a status code that is not 200 or 204, this function shall notify this object's listeners that that message was received and provide the status code's mapped exception.]
     @Test
-    public void onDeliveryNotifiesListenerOfErrorCodes() throws IOException, TransportException
+    public void onDeliveryNotifiesListenerOfErrorCodes() throws TransportException
     {
         //arrange
+        final int expectedErrorCode = 401;
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
         final Map<String, Object> applicationPropertiesMap = new HashMap<>();
-        applicationPropertiesMap.put("status-code", 401);
+        applicationPropertiesMap.put("status-code", expectedErrorCode);
         applicationPropertiesMap.put("status-description", "You can't do that");
         new NonStrictExpectations()
         {
@@ -1973,125 +1949,10 @@ public class AmqpsIotHubConnectionTest {
                 result = mockedApplicationProperties;
                 mockedApplicationProperties.getValue();
                 result = applicationPropertiesMap;
-                new IotHubTransportMessage((byte[]) any, (MessageType) any);
-                result = mockIoTMessage;
-            }
-        };
-
-        //act
-        connection.onDelivery(mockEvent);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedIotHubListener.onMessageReceived(mockedTransportMessage, null);
-                times = 1;
-            }
-        };
-    }
-
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_090: [If an amqp message can be received from the receiver link, and that amqp message contains a status code that is 200 or 204, this function shall notify this object's listeners that that that message was received with a null exception.]
-    @Test
-    public void onDeliveryNotifiesListenerOf200Code() throws IOException, TransportException
-    {
-        //arrange
-        baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-        connection.setListener(mockedIotHubListener);
-        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
-        final Map<String, Object> applicationPropertiesMap = new HashMap<>();
-        applicationPropertiesMap.put("status-code", 200);
-        new NonStrictExpectations()
-        {
-            {
-                mockEvent.getLink().getName();
-                result = "";
-                Deencapsulation.invoke(mockAmqpsSessionManager, "getMessageFromReceiverLink", "");
-                result = mockAmqpsMessage;
-                mockAmqpsMessage.getApplicationProperties();
-                result = mockedApplicationProperties;
-                mockedApplicationProperties.getValue();
-                result = applicationPropertiesMap;
-                new IotHubTransportMessage((byte[]) any, (MessageType) any);
-                result = mockIoTMessage;
-            }
-        };
-
-        //act
-        connection.onDelivery(mockEvent);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedIotHubListener.onMessageReceived(mockedTransportMessage, null);
-                times = 1;
-            }
-        };
-    }
-
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_091: [If an amqp message can be received from the receiver link, and that amqp message contains no status code, this function shall notify this object's listeners that that message was received with a null exception.]
-    @Test
-    public void onDeliveryNotifiesListenerOfMessageReceivedWithNoStatusCode() throws IOException, TransportException
-    {
-        //arrange
-        baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-        connection.setListener(mockedIotHubListener);
-        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
-        final Map<String, Object> applicationPropertiesMap = new HashMap<>();
-        new NonStrictExpectations()
-        {
-            {
-                mockEvent.getLink().getName();
-                result = "";
-                Deencapsulation.invoke(mockAmqpsSessionManager, "getMessageFromReceiverLink", "");
-                result = mockAmqpsMessage;
-                mockAmqpsMessage.getApplicationProperties();
-                result = mockedApplicationProperties;
-                mockedApplicationProperties.getValue();
-                result = applicationPropertiesMap;
-                new IotHubTransportMessage((byte[]) any, (MessageType) any);
-                result = mockIoTMessage;
-            }
-        };
-
-        //act
-        connection.onDelivery(mockEvent);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedIotHubListener.onMessageReceived(mockedTransportMessage, null);
-                times = 1;
-            }
-        };
-    }
-
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_092: [If an amqp message can be received from the receiver link, and that amqp message contains no application properties, this function shall notify this object's listeners that that message was received with a null exception.]
-    @Test
-    public void onDeliveryNotifiesListenerOfMessageReceivedWithNoApplicationProperties() throws IOException, TransportException
-    {
-        //arrange
-        baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-        connection.setListener(mockedIotHubListener);
-        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
-        new NonStrictExpectations()
-        {
-            {
-                mockEvent.getLink().getName();
-                result = "";
-                Deencapsulation.invoke(mockAmqpsSessionManager, "getMessageFromReceiverLink", "");
-                result = mockAmqpsMessage;
-                mockAmqpsMessage.getApplicationProperties();
-                result = mockedApplicationProperties;
-                mockedApplicationProperties.getValue();
+                Deencapsulation.invoke(mockAmqpsSessionManager, "convertFromProton", new Class[] {AmqpsMessage.class, DeviceClientConfig.class}, any, any);
                 result = null;
-                new IotHubTransportMessage((byte[]) any, (MessageType) any);
-                result = mockedTransportMessage;
+                mockAmqpsMessage.getAmqpsMessageType();
+                result = MessageType.CBS_AUTHENTICATION;
             }
         };
 
@@ -2099,55 +1960,304 @@ public class AmqpsIotHubConnectionTest {
         connection.onDelivery(mockEvent);
 
         //assert
-        new Verifications()
-        {
-            {
-                mockedIotHubListener.onMessageReceived(mockedTransportMessage, null);
-                times = 1;
-            }
-        };
+        IotHubServiceException savedException = Deencapsulation.getField(connection, "savedException");
+        assertEquals(IotHubStatusCode.getIotHubStatusCode(expectedErrorCode), savedException.getStatusCode());
     }
 
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_093: [If an amqp message can be received from the receiver link, and that amqp message contains a status code, but that status code cannot be parsed to an integer, this function shall notify this object's listeners that that message was received with a null exception.]
+    // Tests_SRS_AMQPSTRANSPORT_34_068: [If the provided message is saved in the saved map of messages to acknowledge, and if the provided result is ABANDON, this function shall send the amqp ack with ABANDON.]
+    // Tests_SRS_AMQPSTRANSPORT_34_071: [If the amqp message is acknowledged, this function shall remove it from the saved map of messages to acknowledge and return true.]
     @Test
-    public void onDeliveryNotifiesListenerEvenIfStatusCodeCannotBeParsedToInteger() throws IOException, TransportException
+    public void sendMessageResultCOMPLETE() throws TransportException
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, 1);
-        connection.setListener(mockedIotHubListener);
-        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
-        final Map<String, Object> applicationPropertiesMap = new HashMap<>();
-        applicationPropertiesMap.put("status-code", "This is not a valid status code");
-        new NonStrictExpectations()
-        {
-            {
-                mockEvent.getLink().getName();
-                result = "";
-                Deencapsulation.invoke(mockAmqpsSessionManager, "getMessageFromReceiverLink", "");
-                result = mockAmqpsMessage;
-                mockAmqpsMessage.getApplicationProperties();
-                result = mockedApplicationProperties;
-                mockedApplicationProperties.getValue();
-                result = applicationPropertiesMap;
-                new IotHubTransportMessage((byte[]) any, (MessageType) any);
-                result = mockIoTMessage;
-            }
-        };
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
+        Map<com.microsoft.azure.sdk.iot.device.Message, AmqpsMessage> sendAckMessages = new ConcurrentHashMap<>();
+        sendAckMessages.put(mockedTransportMessage, mockAmqpsMessage);
+        Deencapsulation.setField(connection, "sendAckMessages", sendAckMessages);
 
         //act
-        connection.onDelivery(mockEvent);
+        boolean result = connection.sendMessageResult(mockedTransportMessage, IotHubMessageResult.COMPLETE);
+
+        //assert
+        assertTrue(result);
+        assertTrue(sendAckMessages.isEmpty());
+        new Verifications()
+        {
+            {
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
+                times = 1;
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.REJECT);
+                times = 0;
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.ABANDON);
+                times = 0;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_34_069: [If the provided message is saved in the saved map of messages to acknowledge, and if the provided result is REJECT, this function shall send the amqp ack with REJECT.]
+    @Test
+    public void sendMessageResultREJECT() throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
+        Map<com.microsoft.azure.sdk.iot.device.Message, AmqpsMessage> sendAckMessages = new ConcurrentHashMap<>();
+        sendAckMessages.put(mockedTransportMessage, mockAmqpsMessage);
+        Deencapsulation.setField(connection, "sendAckMessages", sendAckMessages);
+
+        //act
+        boolean result = connection.sendMessageResult(mockedTransportMessage, IotHubMessageResult.REJECT);
 
         //assert
         new Verifications()
         {
             {
-                mockedIotHubListener.onMessageReceived(mockedTransportMessage, null);
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
+                times = 0;
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.REJECT);
+                times = 1;
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.ABANDON);
+                times = 0;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_34_070: [If the provided message is saved in the saved map of messages to acknowledge, and if the provided result is COMPLETE, this function shall send the amqp ack with COMPLETE.]
+    @Test
+    public void sendMessageResultABANDON() throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
+        Map<com.microsoft.azure.sdk.iot.device.Message, AmqpsMessage> sendAckMessages = new ConcurrentHashMap<>();
+        sendAckMessages.put(mockedTransportMessage, mockAmqpsMessage);
+        Deencapsulation.setField(connection, "sendAckMessages", sendAckMessages);
+
+        //act
+        boolean result = connection.sendMessageResult(mockedTransportMessage, IotHubMessageResult.ABANDON);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
+                times = 0;
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.REJECT);
+                times = 0;
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.ABANDON);
                 times = 1;
             }
         };
     }
 
+    // Tests_SRS_AMQPSTRANSPORT_34_072: [If the provided message is not saved in the saved map of messages to acknowledge, this function shall return false.]
+    @Test
+    public void sendMessageResultReturnsFalseIfNoAssociatedAmqpsMessage() throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
+
+        //act
+        boolean result = connection.sendMessageResult(mockedTransportMessage, IotHubMessageResult.ABANDON);
+
+        //assert
+        assertFalse(result);
+        new Verifications()
+        {
+            {
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
+                times = 0;
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.REJECT);
+                times = 0;
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.ABANDON);
+                times = 0;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_34_073: [If this object is not CONNECTED, this function shall return false.]
+    @Test
+    public void sendMessageResultReturnsFalseIfNotConnected() throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "state", IotHubConnectionStatus.DISCONNECTED);
+
+        //act
+        boolean result = connection.sendMessageResult(mockedTransportMessage, IotHubMessageResult.ABANDON);
+
+        //assert
+        assertFalse(result);
+        new Verifications()
+        {
+            {
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
+                times = 0;
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.REJECT);
+                times = 0;
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.ABANDON);
+                times = 0;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_12_074: [If authentication has not succeeded after calling authenticate() and openLinks(), this function shall throw a retriable transport exception.]
+    @Test (expected = TransportException.class)
+    public void openChecksIfActuallyOpen() throws TransportException, InterruptedException
+    {
+        // arrange
+        baseExpectations();
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        connection.setListener(mockedIotHubListener);
+        Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
+
+        new StrictExpectations()
+        {
+            {
+                mockOpenLatch.await(anyLong, TimeUnit.MILLISECONDS);
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
+                result = true;
+
+                mockAmqpsSessionManager.authenticate();
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
+                result = true;
+
+                mockAmqpsSessionManager.openDeviceOperationLinks();
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
+                result = false;
+            }
+        };
+
+        // act
+        connection.open(mockedQueue);
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_34_076: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
+    @Test (expected = IllegalStateException.class)
+    public void sendMessageThrowsIfNoHandler() throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsSessionManager, "convertToProton", mockedTransportMessage);
+                result = null;
+            }
+        };
+
+        //act
+        connection.sendMessage(mockedTransportMessage);
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_34_077: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
+    // Tests_SRS_AMQPSTRANSPORT_34_078: [If the sent message hash is valid, it shall be added to the in progress map and this function shall return OK.]
+    @Test
+    public void sendMessageGetsHash() throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        final int expectedHash = 40;
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
+        Deencapsulation.setField(connection, "linkCredit", 20);
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsSessionManager, "convertToProton", mockIoTMessage);
+                result = mockedAmqpsConvertToProtonReturnValue;
+
+                Deencapsulation.invoke(mockedAmqpsConvertToProtonReturnValue, "getMessageImpl");
+                result = mockedMessageImpl;
+
+                Deencapsulation.invoke(mockedAmqpsConvertToProtonReturnValue, "getMessageType");
+                result = MessageType.DEVICE_TWIN;
+
+                mockIoTMessage.getIotHubConnectionString();
+                result = mockConnectionString;
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "sendMessage", new Class[] {Message.class, MessageType.class, IotHubConnectionString.class}, mockedMessageImpl, MessageType.DEVICE_TWIN, mockConnectionString);
+                result = expectedHash;
+            }
+        };
+
+        //act
+        IotHubStatusCode actualStatusCode = connection.sendMessage(mockIoTMessage);
+
+        //assert
+        Map<Integer, com.microsoft.azure.sdk.iot.device.Message> inProgressMessages = Deencapsulation.getField(connection, "inProgressMessages");
+        assertTrue(inProgressMessages.containsKey(expectedHash));
+        assertEquals(IotHubStatusCode.OK, actualStatusCode);
+    }
+
+    // Tests_SRS_AMQPSTRANSPORT_34_079: [If the sent message hash is -1, this function shall throw a retriable ProtocolException.]
+    @Test
+    public void sendMessageThrowsForNegativeHash() throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        final int expectedHash = -1;
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
+        Deencapsulation.setField(connection, "linkCredit", 20);
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsSessionManager, "convertToProton", mockIoTMessage);
+                result = mockedAmqpsConvertToProtonReturnValue;
+
+                Deencapsulation.invoke(mockedAmqpsConvertToProtonReturnValue, "getMessageImpl");
+                result = mockedMessageImpl;
+
+                Deencapsulation.invoke(mockedAmqpsConvertToProtonReturnValue, "getMessageType");
+                result = MessageType.DEVICE_TWIN;
+
+                mockIoTMessage.getIotHubConnectionString();
+                result = mockConnectionString;
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "sendMessage", new Class[] {Message.class, MessageType.class, IotHubConnectionString.class}, mockedMessageImpl, MessageType.DEVICE_TWIN, mockConnectionString);
+                result = expectedHash;
+
+                new ProtocolException(anyString);
+                result = mockedProtocolException;
+            }
+        };
+
+        boolean exceptionThrown = false;
+
+        //act
+        try
+        {
+            connection.sendMessage(mockIoTMessage);
+        }
+        catch (ProtocolException e)
+        {
+            exceptionThrown = true;
+        }
+
+        //assert
+        assertTrue(exceptionThrown);
+        new Verifications()
+        {
+            {
+                mockedProtocolException.setRetryable(true);
+                times = 1;
+            }
+        };
+    }
 
     private void baseExpectations()
     {
@@ -2167,5 +2277,11 @@ public class AmqpsIotHubConnectionTest {
                 result = false;
             }
         };
+    }
+
+    private void setLatches(AmqpsIotHubConnection connection)
+    {
+        Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
+        Deencapsulation.setField(connection, "closeLatch", mockCloseLatch);
     }
 }

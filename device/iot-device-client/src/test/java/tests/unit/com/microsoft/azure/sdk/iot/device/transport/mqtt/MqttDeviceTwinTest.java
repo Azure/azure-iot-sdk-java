@@ -154,8 +154,8 @@ public class MqttDeviceTwinTest
         {
             {
                 mockMessage.getBytes();
-                times = 2;
-                Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, actualPayload, mockMessage);
+                times = 1;
+                Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, mockMessage);
                 times = 1;
             }
         };
@@ -240,8 +240,8 @@ public class MqttDeviceTwinTest
         {
             {
                 mockMessage.getBytes();
-                times = 2;
-                Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, actualPayload, mockMessage);
+                times = 1;
+                Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, mockMessage);
                 times = 1;
             }
         };
@@ -327,7 +327,7 @@ public class MqttDeviceTwinTest
                 times = 1;
                 Deencapsulation.invoke(mockMqtt, "subscribe", expectedTopic);
                 times = 1;
-                Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, actualPayload, mockMessage);
+                Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, mockMessage);
                 times = 0;
             }
         };
@@ -355,7 +355,7 @@ public class MqttDeviceTwinTest
                 result = mockVersion;
                 mockMessage.getRequestId();
                 result = "some request id";
-                Deencapsulation.invoke(mockMqtt, "publish", new Class[] {String.class, byte[].class, Message.class}, anyString, (byte[]) any, (Message) any);
+                Deencapsulation.invoke(mockMqtt, "publish", new Class[] {String.class, Message.class}, anyString, (Message) any);
             }
         };
 
@@ -367,10 +367,10 @@ public class MqttDeviceTwinTest
         {
             {
                 mockMessage.getBytes();
-                times = 2;
+                times = 1;
                 Deencapsulation.invoke(mockMqtt, "subscribe", anyString);
                 times = 0;
-                Deencapsulation.invoke(mockMqtt, "publish", anyString, actualPayload, mockMessage);
+                Deencapsulation.invoke(mockMqtt, "publish", anyString, mockMessage);
                 times = 1;
             }
         };
@@ -413,7 +413,7 @@ public class MqttDeviceTwinTest
                 times = 1;
                 Deencapsulation.invoke(mockMqtt, "subscribe", expectedSubscribeTopic);
                 times = 1;
-                Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, actualPayload, mockMessage);
+                Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, mockMessage);
                 times = 0;
             }
         };
@@ -480,8 +480,8 @@ public class MqttDeviceTwinTest
             {
                 {
                     mockMessage.getBytes();
-                    times = 2;
-                    Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, actualPayload, mockMessage);
+                    times = 1;
+                    Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, mockMessage);
                     times = 1;
                 }
             };

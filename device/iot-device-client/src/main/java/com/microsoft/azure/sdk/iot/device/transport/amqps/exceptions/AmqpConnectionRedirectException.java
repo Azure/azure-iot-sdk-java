@@ -31,10 +31,12 @@ public class AmqpConnectionRedirectException extends ProtocolException
     public AmqpConnectionRedirectException(String message, Throwable cause)
     {
         super(message, cause);
+        this.isRetryable = true;
     }
 
     public AmqpConnectionRedirectException(Throwable cause)
     {
         super(cause);
+        this.isRetryable = true;
     }
 }

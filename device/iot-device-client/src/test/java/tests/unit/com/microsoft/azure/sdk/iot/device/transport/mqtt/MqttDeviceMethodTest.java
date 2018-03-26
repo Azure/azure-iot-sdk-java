@@ -170,7 +170,7 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(testMethod, "publish", new Class[] {String.class, byte[].class, Message.class}, anyString, actualPayload, any);
+                Deencapsulation.invoke(testMethod, "publish", new Class[] {String.class, Message.class}, anyString, any);
                 maxTimes = 1;
             }
         };
@@ -232,7 +232,7 @@ public class MqttDeviceMethodTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(testMethod, "publish", anyString, actualPayload, mockedMessage);
+                Deencapsulation.invoke(testMethod, "publish", anyString, mockedMessage);
                 maxTimes = 0;
                 Deencapsulation.invoke(testMethod, "subscribe", anyString);
                 maxTimes = 0;

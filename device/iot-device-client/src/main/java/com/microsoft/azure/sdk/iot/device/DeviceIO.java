@@ -6,7 +6,7 @@ package com.microsoft.azure.sdk.iot.device;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportNew;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -78,7 +78,7 @@ public final class DeviceIO
     private long receivePeriodInMilliseconds;
 
     private CustomLogger logger;
-    private IotHubTransportNew transport;
+    private IotHubTransport transport;
     private DeviceClientConfig config;
     private IotHubSendTask sendTask = null;
     private IotHubReceiveTask receiveTask = null;
@@ -125,7 +125,7 @@ public final class DeviceIO
             this.config.setUseWebsocket(true);
         }
 
-        this.transport = new IotHubTransportNew(config);
+        this.transport = new IotHubTransport(config);
 
         /* Codes_SRS_DEVICE_IO_21_037: [The constructor shall initialize the `sendPeriodInMilliseconds` with default value of 10 milliseconds.] */
         this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
@@ -145,7 +145,7 @@ public final class DeviceIO
      *
      * @throws IOException if a connection to an IoT Hub cannot be established.
      */
-    public void open() throws IOException
+    void open() throws IOException
     {
         /* Codes_SRS_DEVICE_IO_21_007: [If the client is already open, the open shall do nothing.] */
         if (this.state == IotHubClientState.OPEN)
@@ -161,7 +161,7 @@ public final class DeviceIO
         }
         catch (DeviceClientException e)
         {
-            throw new IOException(e);
+            throw new IOException("Could not open the connection", e);
         }
 
         /* Codes_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every receivePeriodInMilliseconds milliseconds.] */
@@ -169,39 +169,20 @@ public final class DeviceIO
         commonOpenSetup();
     }
 
-    public void addClient(DeviceClientConfig config)
-    {
-        // add client to transport
-
-        deviceClientConfigs.add(config);
-    }
-
     /**
-     * Starts asynchronously sending and receiving messages from an IoT Hub
-     * using multiplexing.
-     * If the client is already open, the function shall do nothing.
-     *
-     * @param deviceClientList the list of device clients to initialize for the transport.
-     * @throws IOException if a connection to an IoT Hub cannot be established.
+     * Adds a device client config to the saved list. Each device client config will be used in multiplexing
+     * @param config the config tied to the device client to multiplex with
      */
-/*    public void multiplexOpen(List<DeviceClient> deviceClientList) throws IOException
+    void addClient(DeviceClientConfig config)
     {
-        // Codes_SRS_DEVICE_IO_12_002: [If the client is already open, the open shall do nothing.]
-        if (this.state == IotHubClientState.CONNECTED)
+        if (config == null)
         {
-            return;
+            throw new IllegalArgumentException("Config cannot be null");
         }
 
-        // Codes_SRS_DEVICE_IO_12_003: [The open shall open the transport in multiplex mode to communicate with an IoT Hub.]
-        //TODO
-        //this.transport.multiplexOpen(deviceClientList);
-
-        // Codes_SRS_DEVICE_IO_12_004: [The open shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.]
-        // Codes_SRS_DEVICE_IO_12_005: [The open shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.]
-        // Codes_SRS_DEVICE_IO_12_006: [If an error occurs in opening the transport, the open shall throw an IOException.]
-        // Codes_SRS_DEVICE_IO_12_007: [The open shall set the `state` as `CONNECTED`.]
-        commonOpenSetup();
-    }*/
+        // add client to transport
+        deviceClientConfigs.add(config);
+    }
 
     /**
      * Handles logic common to all open functions.
@@ -249,7 +230,7 @@ public final class DeviceIO
         /* Codes_SRS_DEVICE_IO_21_019: [The close shall close the transport.] */
         try
         {
-            this.transport.close();
+            this.transport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE);
         }
         catch (DeviceClientException e)
         {

@@ -19,20 +19,24 @@ public class AmqpConnectionFramingErrorException extends ProtocolException
     public AmqpConnectionFramingErrorException()
     {
         super();
+        this.isRetryable = true;
     }
 
     public AmqpConnectionFramingErrorException(String message)
     {
         super(message);
+        this.isRetryable = true;
     }
 
     public AmqpConnectionFramingErrorException(String message, Throwable cause)
     {
         super(message, cause);
+        this.isRetryable = true;
     }
 
     public AmqpConnectionFramingErrorException(Throwable cause)
     {
         super(cause);
+        this.isRetryable = true;
     }
 }

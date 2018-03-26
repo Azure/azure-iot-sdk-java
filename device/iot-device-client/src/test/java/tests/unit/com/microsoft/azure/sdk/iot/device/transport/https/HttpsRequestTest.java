@@ -393,7 +393,7 @@ public class HttpsRequestTest
         assertThat(testStatus, is(expectedStatus));
     }
 
-    // Tests_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
+    // Tests_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body (if 200 status code), header fields, and error reason (if any).]
     @Test
     public void sendReturnsBody(@Mocked final HttpsConnection mockConn) throws TransportException
     {
@@ -407,6 +407,8 @@ public class HttpsRequestTest
                 result = "https";
                 mockConn.readInput();
                 result = responseBody;
+                mockConn.getResponseStatus();
+                result = 200;
             }
         };
 

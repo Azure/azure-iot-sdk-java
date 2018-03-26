@@ -233,7 +233,7 @@ public class MqttMessagingTest
             {
                 mockedMessage.getBytes();
                 result = messageBody;
-                Deencapsulation.invoke(mockMqtt, "publish", new Class[] {String.class, byte[].class, Message.class}, anyString, (byte[]) any, (Message) any);
+                Deencapsulation.invoke(mockMqtt, "publish", new Class[] {String.class, Message.class}, anyString, (Message) any);
             }
         };
 
@@ -245,8 +245,8 @@ public class MqttMessagingTest
         {
             {
                 mockedMessage.getBytes();
-                times = 2;
-                Deencapsulation.invoke(mockMqtt, "publish", new Class[]{String.class, byte[].class, Message.class}, anyString, messageBody, mockedMessage);
+                times = 1;
+                Deencapsulation.invoke(mockMqtt, "publish", new Class[]{String.class, Message.class}, anyString, mockedMessage);
                 times = 1;
             }
         };
@@ -335,7 +335,7 @@ public class MqttMessagingTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithCustomProperties,  messageBody, mockedMessage);
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithCustomProperties, mockedMessage);
                 times = 1;
             }
         };
@@ -371,7 +371,7 @@ public class MqttMessagingTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithMessageId, messageBody, mockedMessage);
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithMessageId, mockedMessage);
                 times = 1;
             }
         };
@@ -407,7 +407,7 @@ public class MqttMessagingTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithCorrelationId, messageBody, mockedMessage);
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithCorrelationId, mockedMessage);
                 times = 1;
             }
         };
@@ -443,7 +443,7 @@ public class MqttMessagingTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithUserId, messageBody, mockedMessage);
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithUserId, mockedMessage);
                 times = 1;
             }
         };
@@ -479,7 +479,7 @@ public class MqttMessagingTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithTo, messageBody, mockedMessage);
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithTo, mockedMessage);
                 times = 1;
             }
         };
@@ -535,7 +535,7 @@ public class MqttMessagingTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithAllSystemAndCustomProperties,  messageBody, mockedMessage);
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithAllSystemAndCustomProperties,  mockedMessage);
                 times = 1;
             }
         };

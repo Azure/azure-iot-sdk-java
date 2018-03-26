@@ -2,11 +2,11 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import org.apache.qpid.proton.engine.*;
 
 import java.nio.BufferOverflowException;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +33,7 @@ public class AmqpsSessionDeviceOperation
     private static final double PERCENTAGE_FACTOR = 0.75;
     private static final int SEC_IN_MILLISEC = 1000;
 
-    private final ObjectLock authenticationLock = new ObjectLock();
+    private final CountDownLatch authenticationLatch = new CountDownLatch(1);
 
     private List<UUID> cbsCorrelationIdList = Collections.synchronizedList(new ArrayList<UUID>());
 
@@ -127,23 +127,21 @@ public class AmqpsSessionDeviceOperation
             }
 
             this.amqpsDeviceAuthentication.authenticate(this.deviceClientConfig, correlationId);
-            synchronized (this.authenticationLock)
-            {
-                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_005: [The function shall set the authentication state to not authenticated if the authentication type is CBS.]
-                this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.AUTHENTICATING;
-                try
-                {
-                    // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_062: [The function shall start the authentication process and start the lock wait if the authentication type is CBS.]
-                    this.authenticationLock.waitLock(MAX_WAIT_TO_AUTHENTICATE);
-                }
-                catch (InterruptedException e)
-                {
-                    cbsCorrelationIdList.remove(correlationId);
 
-                    // Codes_SRS_AMQPSESSIONMANAGER_12_017: [The function shall throw TransportException if the lock throws.]
-                    throw new TransportException("Waited too long for the authentication message reply.");
-                }
+            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_005: [The function shall set the authentication state to not authenticated if the authentication type is CBS.]
+            this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.AUTHENTICATING;
+            try
+            {
+                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_062: [The function shall start the authentication process and start the lock wait if the authentication type is CBS.]
+                this.authenticationLatch.await(MAX_WAIT_TO_AUTHENTICATE, TimeUnit.MILLISECONDS);
             }
+            catch (InterruptedException e)
+            {
+                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_34_063: [If an InterruptedException is encountered while waiting for authentication to finish, this function shall throw a TransportException.]
+                cbsCorrelationIdList.remove(correlationId);
+                throw new TransportException("Waited too long for the authentication message reply.");
+            }
+
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
@@ -393,16 +391,13 @@ public class AmqpsSessionDeviceOperation
                     {
                         if (this.amqpsDeviceAuthentication.authenticationMessageReceived(amqpsMessage, correlationId))
                         {
-                            synchronized (this.authenticationLock)
-                            {
-                                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_053: [The function shall call authenticationMessageReceived with the correlation ID on the authentication object and if it returns true set the authentication state to authenticated.]
-                                this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.AUTHENTICATED;
-                                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_054: [The function shall call notify the lock if after receiving the message and the authentication is in authenticating state.]
-                                this.authenticationLock.notifyLock();
+                            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_053: [The function shall call authenticationMessageReceived with the correlation ID on the authentication object and if it returns true set the authentication state to authenticated.]
+                            this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.AUTHENTICATED;
+                            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_054: [The function shall call notify the lock if after receiving the message and the authentication is in authenticating state.]
+                            this.authenticationLatch.countDown();
 
-                                uuidFound = correlationId;
-                                break;
-                            }
+                            uuidFound = correlationId;
+                            break;
                         }
                     }
                     // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_056: [The function shall remove the correlationId from the list if it is found.]
