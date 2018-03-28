@@ -1207,7 +1207,7 @@ public final class DeviceClient implements Closeable
 
     /**
      * Registers a callback to be executed whenever the connection to the device is lost or established.
-     * @deprecated as of release TODO by {@link #registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)}
+     * @deprecated as of release 1.10.0 by {@link #registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)}
      * @param callback the callback to be called.
      * @param callbackContext a context to be passed to the callback. Can be
      * {@code null} if no callback is provided.
@@ -1248,7 +1248,7 @@ public final class DeviceClient implements Closeable
         this.deviceIO.registerConnectionStatusChangeCallback(callback, callbackContext);
     }
 
-    /***
+    /**
      * Sets the given retry policy on the underlying transport
      *
      * @param retryPolicy the new interval in milliseconds
@@ -1259,6 +1259,19 @@ public final class DeviceClient implements Closeable
         this.config.setRetryPolicy(retryPolicy);
 
         logger.LogInfo("Retry policy updated successfully in the device client config, method name is %s ", logger.getMethodName());
+    }
+
+    /**
+     * Set the length of time, in milliseconds, that any given operation will expire in. These operations include
+     * reconnecting upon a connection drop and sending a message.
+     * @param timeout the length in time, in milliseconds, until a given operation shall expire
+     * @throws IllegalArgumentException if the provided timeout is 0 or negative
+     */
+    public void setOperationTimeout(long timeout) throws IllegalArgumentException
+    {
+        // Codes_SRS_DEVICECLIENT_34_070: [The function shall set the device config's operation timeout .]
+        this.config.setOperationTimeout(timeout);
+        logger.LogInfo("Device Operation Timeout updated successfully in the device client config, method name is %s ", logger.getMethodName());
     }
 
     /**

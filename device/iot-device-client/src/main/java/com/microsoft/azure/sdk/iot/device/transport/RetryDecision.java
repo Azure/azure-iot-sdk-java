@@ -25,18 +25,18 @@ public class RetryDecision
      */
     public RetryDecision(boolean shouldRetry, Duration duration)
     {
-        // Codes_SRS_RETRYDECISION_28_001: [The constructor shall save the duration and shouldRetry]
+        // Codes_SRS_RETRYDECISION_28_001: [The constructor shall save the duration and getRetryDecision]
         this.duration = duration;
         this.shouldRetry = shouldRetry;
     }
 
     /**
-     * Getter for the shouldRetry
+     * Getter for the getRetryDecision
      * @return true if the operation should be retried; otherwise false
      */
-    public boolean getShouldRetry()
+    public boolean shouldRetry()
     {
-        // Codes_SRS_RETRYDECISION_28_002: [The function shall return the value of shouldRetry]
+        // Codes_SRS_RETRYDECISION_28_002: [The function shall return the value of getRetryDecision]
         return this.shouldRetry;
     }
 
@@ -46,9 +46,7 @@ public class RetryDecision
      */
     public Duration getDuration()
     {
-
         // Codes_SRS_RETRYDECISION_28_003: [The function shall return the value of duration]
-
         return this.duration;
     }
 }

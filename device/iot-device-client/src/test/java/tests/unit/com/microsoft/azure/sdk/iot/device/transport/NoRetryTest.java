@@ -3,7 +3,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryDecision;
 import com.microsoft.azure.sdk.iot.device.transport.NoRetry;
 import java.util.Arrays;
@@ -20,10 +20,10 @@ import static org.junit.Assert.assertEquals;
 public class NoRetryTest
 {
     private int currentRetryCount;
-    private Exception lastException;
+    private TransportException lastException;
     private NoRetry retryNoRetry;
 
-    public NoRetryTest(int currentRetryCount, Exception lastException)
+    public NoRetryTest(int currentRetryCount, TransportException lastException)
     {
         super();
         this.currentRetryCount = currentRetryCount;
@@ -43,7 +43,7 @@ public class NoRetryTest
                 {0, null},
                 {1, null},
                 {-1, null},
-                {1, new IotHubException()},
+                {1, new TransportException()},
         });
     }
 
@@ -55,10 +55,10 @@ public class NoRetryTest
         RetryDecision expected = new RetryDecision(false, Duration.UNKNOWN);
 
         // act
-        RetryDecision actual = retryNoRetry.ShouldRetry(this.currentRetryCount, this.lastException);
+        RetryDecision actual = retryNoRetry.getRetryDecision(this.currentRetryCount, this.lastException);
 
         // assert
-        assertEquals(expected.getShouldRetry(), actual.getShouldRetry());
+        assertEquals(expected.shouldRetry(), actual.shouldRetry());
         assertEquals(expected.getDuration(), actual.getDuration());
     }
 }

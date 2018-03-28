@@ -31,7 +31,7 @@ import java.util.concurrent.*;
  */
 public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTransportConnection
 {
-    private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 1*60*1000; // 1 minute timeout
+    private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 30*1000; // 30 second timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
     private IotHubConnectionStatus state;
 

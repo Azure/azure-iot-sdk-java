@@ -7,15 +7,15 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import javafx.util.Duration;
 
 import java.util.Random;
 
 /**
  * Represents a retry policy that performs exponential backoff with jitter retries.
- * The function to calculate the next interval is the following
  */
-public class ExponentialBackoff implements RetryPolicy
+public class ExponentialBackoffWithJitter implements RetryPolicy
 {
     // Codes_SRS_EXPONENTIALBACKOFF_28_006: [Constructor should have default values retryCount, minBackoff, maxBackoff, deltaBackoff and firstFastRetry]
     private int retryCount = Integer.MAX_VALUE;
@@ -29,7 +29,7 @@ public class ExponentialBackoff implements RetryPolicy
     /**
      * Constructor with default backoff values and firstFastRetry
      */
-    public ExponentialBackoff()
+    public ExponentialBackoffWithJitter()
     {
 
     }
@@ -43,7 +43,7 @@ public class ExponentialBackoff implements RetryPolicy
      * @param deltaBackoff the max delta allowed between retries.
      * @param firstFastRetry indicates whether the first retry should be immediate.
      */
-    public ExponentialBackoff(int retryCount, Duration minBackoff, Duration maxBackoff, Duration deltaBackoff, boolean firstFastRetry)
+    public ExponentialBackoffWithJitter(int retryCount, Duration minBackoff, Duration maxBackoff, Duration deltaBackoff, boolean firstFastRetry)
     {
         // Codes_SRS_EXPONENTIALBACKOFF_28_001: [If the retryCount is less than or equal to 0, the function shall throw an IllegalArgumentException.]
         if (retryCount <= 0)
@@ -63,10 +63,9 @@ public class ExponentialBackoff implements RetryPolicy
      * Determines whether the operation should be retried and the interval until the next retry.
      *
      * @param currentRetryCount the number of retries for the given operation
-     * @param lastException the last exception encountered
      * @return the retry decision.
      */
-    public RetryDecision ShouldRetry(int currentRetryCount, Exception lastException)
+    public RetryDecision getRetryDecision(int currentRetryCount, TransportException lastException)
     {
         // Codes_SRS_EXPONENTIALBACKOFF_28_003: [The function shall indicate immediate retry on first retry if firstFastRetry is true]
         if (currentRetryCount == 0 && this.firstFastRetry) {

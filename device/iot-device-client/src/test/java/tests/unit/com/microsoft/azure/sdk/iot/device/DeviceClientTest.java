@@ -9,21 +9,24 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvi
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509AuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
-import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoff;
+import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.*;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Unit tests for DeviceClient.
@@ -3352,13 +3355,38 @@ public class DeviceClientTest
         Deencapsulation.setField(client, "config", mockConfig);
 
         //act
-        client.setRetryPolicy(new ExponentialBackoff());
+        client.setRetryPolicy(new ExponentialBackoffWithJitter());
 
         //assert
         new Verifications()
         {
             {
                 mockConfig.setRetryPolicy((RetryPolicy) any);
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_DEVICECLIENT_34_070: [The function shall set the device config's operation timeout .]
+    @Test
+    public void setDeviceOperationTimeoutSetsConfig() throws URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        DeviceClient client = new DeviceClient(connString, protocol);
+        final long expectedTimeout = 1034;
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        //act
+        client.setOperationTimeout(expectedTimeout);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockConfig, "setOperationTimeout", expectedTimeout);
                 times = 1;
             }
         };

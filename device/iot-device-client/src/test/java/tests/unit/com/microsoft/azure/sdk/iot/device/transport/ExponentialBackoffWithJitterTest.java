@@ -4,7 +4,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.transport.RetryDecision;
-import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoff;
+import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import javafx.util.Duration;
 import java.util.Random;
@@ -14,7 +14,7 @@ import mockit.NonStrictExpectations;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class ExponentialBackoffTest
+public class ExponentialBackoffWithJitterTest
 {
     @Mocked
     Random mockedRandom;
@@ -24,7 +24,7 @@ public class ExponentialBackoffTest
     public void constructorThrowsWithZeroRetryCount()
     {
         //act
-        final RetryPolicy exp = new ExponentialBackoff(
+        final RetryPolicy exp = new ExponentialBackoffWithJitter(
                 0, Duration.millis(100), Duration.seconds(10), Duration.millis(100), true);
     }
 
@@ -33,7 +33,7 @@ public class ExponentialBackoffTest
     public void constructorSavesParameterToLocal()
     {
         //act
-        final RetryPolicy exp = new ExponentialBackoff(
+        final RetryPolicy exp = new ExponentialBackoffWithJitter(
                 10, Duration.seconds(2), Duration.seconds(2), Duration.seconds(2), false);
 
         // assert
@@ -49,7 +49,7 @@ public class ExponentialBackoffTest
     public void constructorHaveDefaultValues()
     {
         //act
-        final RetryPolicy exp = new ExponentialBackoff();
+        final RetryPolicy exp = new ExponentialBackoffWithJitter();
 
         // assert
         assertEquals(Integer.MAX_VALUE, Deencapsulation.getField(exp, "retryCount"));
@@ -64,15 +64,15 @@ public class ExponentialBackoffTest
     public void shouldRetryResultWithFirstFastRetry()
     {
         // arrange
-        final RetryPolicy exp = new ExponentialBackoff(
+        final RetryPolicy exp = new ExponentialBackoffWithJitter(
             10, Duration.millis(100), Duration.seconds(10), Duration.millis(100), true);
         RetryDecision expected = new RetryDecision(true, Duration.ZERO);
 
         // act
-        RetryDecision actual = exp.ShouldRetry(0, null);
+        RetryDecision actual = exp.getRetryDecision(0, null);
 
         //assert
-        assertEquals(true, actual.getShouldRetry());
+        assertEquals(true, actual.shouldRetry());
         assertEquals(Duration.ZERO, actual.getDuration());
     }
 
@@ -81,14 +81,14 @@ public class ExponentialBackoffTest
     public void shouldRetryResultWithNoFirstFastRetry()
     {
         // arrange
-        final RetryPolicy exp = new ExponentialBackoff(
+        final RetryPolicy exp = new ExponentialBackoffWithJitter(
                 10, Duration.millis(100), Duration.seconds(10), Duration.millis(100), false);
 
         // act
-        RetryDecision actual = exp.ShouldRetry(0, null);
+        RetryDecision actual = exp.getRetryDecision(0, null);
 
         //assert
-        assertTrue(actual.getShouldRetry());
+        assertTrue(actual.shouldRetry());
         assertTrue(actual.getDuration().greaterThan(Duration.ZERO));
     }
 
@@ -98,7 +98,7 @@ public class ExponentialBackoffTest
     public void shouldRetryResultWithOnlyCurrentRetryCount()
     {
         // arrange
-        final RetryPolicy exp = new ExponentialBackoff(
+        final RetryPolicy exp = new ExponentialBackoffWithJitter(
                 10, Duration.ZERO, Duration.ZERO, Duration.ZERO, true);
         Deencapsulation.setField(exp, "random", mockedRandom);
 
@@ -111,10 +111,10 @@ public class ExponentialBackoffTest
         };
 
         // act
-        RetryDecision actual = exp.ShouldRetry(1, null);
+        RetryDecision actual = exp.getRetryDecision(1, null);
 
         //assert
-        assertTrue(actual.getShouldRetry());
+        assertTrue(actual.shouldRetry());
         assertEquals(Duration.ZERO, actual.getDuration());
     }
 
@@ -124,7 +124,7 @@ public class ExponentialBackoffTest
     public void shouldRetryResultWithMinMaxBackOffReturnsMinBackOff()
     {
         // arrange
-        final RetryPolicy exp = new ExponentialBackoff(
+        final RetryPolicy exp = new ExponentialBackoffWithJitter(
                 10, Duration.millis(10), Duration.millis(100), Duration.ZERO, true);
         Deencapsulation.setField(exp, "random", mockedRandom);
 
@@ -137,10 +137,10 @@ public class ExponentialBackoffTest
         };
 
         // act
-        RetryDecision actual = exp.ShouldRetry(1, null);
+        RetryDecision actual = exp.getRetryDecision(1, null);
 
         //assert
-        assertTrue(actual.getShouldRetry());
+        assertTrue(actual.shouldRetry());
         assertEquals(Duration.millis(10), actual.getDuration());
     }
 
@@ -150,7 +150,7 @@ public class ExponentialBackoffTest
     public void shouldRetryResultWithLargeCurrentRetryCountReturnsMaxBackOff()
     {
         // arrange
-        final RetryPolicy exp = new ExponentialBackoff(
+        final RetryPolicy exp = new ExponentialBackoffWithJitter(
                 10000, Duration.millis(10), Duration.millis(100), Duration.millis(10), true);
         Deencapsulation.setField(exp, "random", mockedRandom);
 
@@ -163,10 +163,10 @@ public class ExponentialBackoffTest
         };
 
         // act
-        RetryDecision actual = exp.ShouldRetry(999, null);
+        RetryDecision actual = exp.getRetryDecision(999, null);
 
         //assert
-        assertTrue(actual.getShouldRetry());
+        assertTrue(actual.shouldRetry());
         assertEquals(Duration.millis(100), actual.getDuration());
     }
 
@@ -176,7 +176,7 @@ public class ExponentialBackoffTest
     public void shouldRetryResultRetry1stTime()
     {
         // arrange
-        final RetryPolicy exp = new ExponentialBackoff(
+        final RetryPolicy exp = new ExponentialBackoffWithJitter(
                 10000, Duration.millis(10), Duration.millis(100), Duration.millis(10), true);
         final double deltaBackoffLowBound = 10 * 0.8;
         final int count = 2;
@@ -191,11 +191,11 @@ public class ExponentialBackoffTest
         };
 
         // act
-        RetryDecision actual = exp.ShouldRetry(count, null);
+        RetryDecision actual = exp.getRetryDecision(count, null);
 
         //assert
         int expected = (int)((Math.pow(2.0, (double)count) - 1.0) * deltaBackoffLowBound) + 10;
-        assertTrue(actual.getShouldRetry());
+        assertTrue(actual.shouldRetry());
         assertEquals(Duration.millis(expected), actual.getDuration());
     }
 }

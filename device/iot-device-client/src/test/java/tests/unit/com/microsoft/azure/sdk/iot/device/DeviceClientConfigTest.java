@@ -7,7 +7,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.MessageCallback;
 import com.microsoft.azure.sdk.iot.device.auth.*;
-import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoff;
+import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
@@ -673,7 +673,7 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
 
         //assert
-        assertEquals(Deencapsulation.getField(config, "retryPolicy").getClass(), new ExponentialBackoff().getClass());
+        assertEquals(Deencapsulation.getField(config, "retryPolicy").getClass(), new ExponentialBackoffWithJitter().getClass());
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_28_002: [This function shall throw IllegalArgumentException retryPolicy is null.]
@@ -714,5 +714,60 @@ public class DeviceClientConfigTest
 
         //assert
         assertEquals(mockRetryPolicy, actual);
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_34_030: [If the provided timeout is 0 or negative, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void setOperationTimeoutThrowsForNegativeTimeout()
+    {
+        //arrange
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
+
+        //act
+        Deencapsulation.invoke(config, "setOperationTimeout", new Class[] {long.class}, -1);
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_34_030: [If the provided timeout is 0 or negative, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void setOperationTimeoutThrowsForZeroTimeout()
+    {
+        //arrange
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
+
+        //act
+        Deencapsulation.invoke(config, "setOperationTimeout", new Class[] {long.class}, 0);
+    }
+
+
+    //Tests_SRS_DEVICECLIENTCONFIG_34_031: [This function shall save the provided operation timeout.]
+    @Test
+    public void setOperationTimeoutSavesTimeout()
+    {
+        //arrange
+        final long expectedOperationTimeout = 1234;
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
+
+        //act
+        Deencapsulation.invoke(config, "setOperationTimeout", new Class[] {long.class}, expectedOperationTimeout);
+
+        //assert
+        long actualTimeout = Deencapsulation.getField(config, "operationTimeout");
+        assertEquals(expectedOperationTimeout, actualTimeout);
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_34_032: [This function shall return the saved operation timeout.]
+    @Test
+    public void getDeviceOperationTimeoutReturnsTimeout()
+    {
+        //arrange
+        final long expectedOperationTimeout = 1234;
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
+        Deencapsulation.setField(config, "operationTimeout", expectedOperationTimeout);
+
+        //act
+        long actual = config.getOperationTimeout();
+
+        //assert
+        assertEquals(expectedOperationTimeout, actual);
     }
 }

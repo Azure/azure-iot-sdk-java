@@ -10,8 +10,8 @@ import static org.junit.Assert.*;
 
 public class RetryDecisionTest
 {
-    // Tests_SRS_RETRYDECISION_28_001: [The constructor shall save the duration and shouldRetry]
-    // Tests_SRS_RETRYDECISION_28_002: [The function shall return the value of shouldRetry]
+    // Tests_SRS_RETRYDECISION_28_001: [The constructor shall save the duration and getRetryDecision]
+    // Tests_SRS_RETRYDECISION_28_002: [The function shall return the value of getRetryDecision]
     // Tests_SRS_RETRYDECISION_28_003: [The function shall return the value of duration]
     @Test
     public void constructorSavesParameters()
@@ -20,7 +20,7 @@ public class RetryDecisionTest
         final RetryDecision retryDecisionTest = new RetryDecision(true, Duration.millis(10));
 
         // assert
-        assertTrue(retryDecisionTest.getShouldRetry());
+        assertTrue(retryDecisionTest.shouldRetry());
         assertEquals(Duration.millis(10), retryDecisionTest.getDuration());
     }
 }

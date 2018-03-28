@@ -410,7 +410,7 @@ public class DeviceIOTest
         new Verifications()
         {
             {
-                mockedTransport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE);
+                mockedTransport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null);
                 times = 1;
             }
         };
@@ -433,7 +433,7 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                mockedTransport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE);
+                mockedTransport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null);
                 result = new DeviceClientException();
             }
         };
@@ -445,7 +445,6 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_020: [If the client is already closed, the closeNow shall do nothing.] */
     @Test
     public void closeDoesNothingOnUnopenedClientSuccess()
-            throws URISyntaxException, IOException
     {
         // arrange
         final Object deviceIO = newDeviceIO();
@@ -460,7 +459,7 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_020: [If the client is already closed, the closeNow shall do nothing.] */
     @Test
     public void closeDoesNothingOnClosedClientSuccess()
-            throws URISyntaxException, IOException
+            throws IOException
     {
         // arrange
         final Object deviceIO = newDeviceIO();

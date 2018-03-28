@@ -4,7 +4,7 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.auth.*;
-import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoff;
+import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
@@ -22,6 +22,8 @@ public final class DeviceClientConfig
     private static final int DEFAULT_READ_TIMEOUT_MILLIS = 240000;
     /** The default value for messageLockTimeoutSecs. */
     private static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
+
+    private static final long DEFAULT_OPERATION_TIMEOUT = 4 * 60 * 1000; //4 minutes
 
     private boolean useWebsocket;
 
@@ -61,11 +63,11 @@ public final class DeviceClientConfig
     }
 
     private AuthType authenticationType;
-
+    private long operationTimeout = DEFAULT_OPERATION_TIMEOUT;
     private IotHubClientProtocol protocol;
 
     // Codes_SRS_DEVICECLIENTCONFIG_28_001: [The class shall have ExponentialBackOff as the default retryPolicy.]
-    private RetryPolicy retryPolicy = new ExponentialBackoff();
+    private RetryPolicy retryPolicy = new ExponentialBackoffWithJitter();
 
     /**
      * Constructor
@@ -478,6 +480,33 @@ public final class DeviceClientConfig
     {
         //Codes_SRS_DEVICECLIENTCONFIG_34_039: [This function shall return the type of authentication that the config is set up to use.]
         return authenticationType;
+    }
+
+    /**
+     * Sets the device operation timeout
+     * @param timeout the amount of time, in milliseconds, that a given device operation can last before expiring
+     * @throws IllegalArgumentException if timeout is 0 or negative
+     */
+    void setOperationTimeout(long timeout) throws IllegalArgumentException
+    {
+        if (timeout < 1)
+        {
+            //Codes_SRS_DEVICECLIENTCONFIG_34_030: [If the provided timeout is 0 or negative, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("Operation timeout cannot be 0 or negative");
+        }
+
+        //Codes_SRS_DEVICECLIENTCONFIG_34_031: [This function shall save the provided operation timeout.]
+        this.operationTimeout = timeout;
+    }
+
+    /**
+     * Getter for the device operation timeout
+     * @return the amount of time, in milliseconds, before any device operation expires
+     */
+    public long getOperationTimeout()
+    {
+        //Codes_SRS_DEVICECLIENTCONFIG_34_032: [This function shall return the saved operation timeout.]
+        return this.operationTimeout;
     }
 
     @SuppressWarnings("unused")

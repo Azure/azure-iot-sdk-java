@@ -230,7 +230,7 @@ public final class DeviceIO
         /* Codes_SRS_DEVICE_IO_21_019: [The close shall close the transport.] */
         try
         {
-            this.transport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE);
+            this.transport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null);
         }
         catch (DeviceClientException e)
         {
