@@ -178,6 +178,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             if(deviceClientConfigs.size() > 1)
             {
+                deviceClientConfigs.remove();
                 while (!deviceClientConfigs.isEmpty())
                 {
                     this.addDeviceOperationSession(deviceClientConfigs.remove());
@@ -884,11 +885,16 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         com.microsoft.azure.sdk.iot.device.Message message = amqpsHandleMessageReturnValue.getMessage();
-        IotHubTransportMessage transportMessage = new IotHubTransportMessage(message.getBytes(), message.getMessageType(), message.getMessageId(), message.getCorrelationId(), message.getProperties());
+        IotHubTransportMessage transportMessage;
         if (message instanceof IotHubTransportMessage)
         {
             //preserve the properties of the transport message
             transportMessage = (IotHubTransportMessage) message;
+        }
+        else
+        {
+            transportMessage = new IotHubTransportMessage(message.getBytes(), message.getMessageType(), message.getMessageId(), message.getCorrelationId(), message.getProperties());
+            transportMessage.setIotHubConnectionString(message.getIotHubConnectionString());
         }
 
         transportMessage.setMessageCallback(amqpsHandleMessageReturnValue.getMessageCallback());
