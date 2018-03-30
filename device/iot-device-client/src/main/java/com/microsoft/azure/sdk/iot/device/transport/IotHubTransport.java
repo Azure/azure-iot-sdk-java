@@ -860,6 +860,8 @@ public class IotHubTransport implements IotHubListener
 
         if (message.isExpired())
         {
+            //Codes_SRS_IOTHUBTRANSPORT_28_008:[This function shall set the packet status to MESSAGE_EXPIRED if packet has expired.]
+            //Codes_SRS_IOTHUBTRANSPORT_28_009:[This function shall add the expired packet to the Callback Queue.]
             logger.LogInfo("Creating a callback for the expired message with MESSAGE_EXPIRED status, method " +
                     "name is %s ", logger.getMethodName());
             packet.setStatus(IotHubStatusCode.MESSAGE_EXPIRED);
@@ -869,6 +871,8 @@ public class IotHubTransport implements IotHubListener
 
         if (isSasTokenExpired())
         {
+            //Codes_SRS_IOTHUBTRANSPORT_28_010:[This function shall set the packet status to UNAUTHORIZED if sas token has expired.]
+            //Codes_SRS_IOTHUBTRANSPORT_28_011:[This function shall add the packet which sas token has expired to the Callback Queue.]
             logger.LogInfo("Creating a callback for the message with expired sas token with UNAUTHORIZED status," +
                     " method name is %s ", logger.getMethodName());
             packet.setStatus(IotHubStatusCode.UNAUTHORIZED);
@@ -893,6 +897,8 @@ public class IotHubTransport implements IotHubListener
      */
     private void updateStatus(IotHubConnectionStatus newConnectionStatus, IotHubConnectionStatusChangeReason reason, Throwable throwable)
     {
+        //Codes_SRS_IOTHUBTRANSPORT_28_005:[This function shall updated the saved connection status if the connection status has changed.]
+        //Codes_SRS_IOTHUBTRANSPORT_28_006:[This function shall invoke all callbacks listening for the state change if the connection status has changed.]
         if (this.connectionStatus != newConnectionStatus)
         {
             this.connectionStatus = newConnectionStatus;
@@ -903,6 +909,7 @@ public class IotHubTransport implements IotHubListener
 
             if (newConnectionStatus == IotHubConnectionStatus.CONNECTED)
             {
+                //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt if connection status is changed to CONNECTED.]
                 this.currentReconnectionAttempt = 0;
             }
         }
@@ -940,6 +947,7 @@ public class IotHubTransport implements IotHubListener
      */
     private void invokeConnectionStatusChangeCallback(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason reason, Throwable e)
     {
+        //Codes_SRS_IOTHUBTRANSPORT_28_004:[This function shall notify the connection status change callback if the callback is not null]
         if (this.connectionStatusChangeCallback != null)
         {
             this.connectionStatusChangeCallback.execute(status, reason, e, this.connectionStatusChangeCallbackContext);
@@ -951,6 +959,7 @@ public class IotHubTransport implements IotHubListener
      */
     private boolean isSasTokenExpired()
     {
+        //Codes_SRS_IOTHUBTRANSPORT_28_003: [This function shall indicate if the device's sas token is expired.]
         return this.defaultConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN
                 && this.defaultConfig.getSasTokenAuthentication().isRenewalNecessary();
     }
@@ -972,6 +981,7 @@ public class IotHubTransport implements IotHubListener
      */
     private void addToCallbackQueue(IotHubTransportPacket packet)
     {
+        //Codes_SRS_IOTHUBTRANSPORT_28_002: [This function shall add the packet to the callback queue if it has a callback.]
         if (packet.getCallback() != null)
         {
             this.callbackPacketsQueue.add(packet);
@@ -1020,6 +1030,8 @@ public class IotHubTransport implements IotHubListener
      */
     private void checkForUnauthorizedException(TransportException transportException)
     {
+        //Codes_SRS_IOTHUBTRANSPORT_28_001: [This function shall set the MqttUnauthorizedException, UnauthorizedException or
+        //AmqpUnauthorizedAccessException as retryable if the sas token has not expired.]
         if (!this.isSasTokenExpired() && (transportException instanceof MqttUnauthorizedException
                 || transportException instanceof UnauthorizedException
                 || transportException instanceof AmqpUnauthorizedAccessException))

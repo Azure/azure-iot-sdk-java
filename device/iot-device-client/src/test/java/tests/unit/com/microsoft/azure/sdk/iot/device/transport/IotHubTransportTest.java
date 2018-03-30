@@ -7,10 +7,13 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpUnauthorizedAccessException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttUnauthorizedException;
 import javafx.util.Duration;
 import mockit.*;
 import org.junit.Test;
@@ -1947,6 +1950,550 @@ public class IotHubTransportTest
             {
                 Deencapsulation.invoke(transport, "updateStatus", IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.COMMUNICATION_ERROR, mockedTransportException);
                 times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_008:[This function shall set the packet status to MESSAGE_EXPIRED if packet has expired.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_009:[This function shall add the expired packet to the Callback Queue.]
+    @Test
+    public void isMessageValidWithMessageExpired()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                mockedPacket.getMessage();
+                result = mockedMessage;
+                mockedMessage.isExpired();
+                result = true;
+                Deencapsulation.invoke(transport, "addToCallbackQueue", new Class[] {IotHubTransportPacket.class}, mockedPacket);
+                Deencapsulation.invoke(transport, "isSasTokenExpired");
+                result = false;
+            }
+        };
+
+        //act
+        boolean ret = Deencapsulation.invoke(transport, "isMessageValid", new Class[] {IotHubTransportPacket.class}, mockedPacket);
+
+        //assert
+        assertFalse(ret);
+        new Verifications()
+        {
+            {
+                mockedPacket.setStatus(IotHubStatusCode.MESSAGE_EXPIRED);
+                times = 1;
+                Deencapsulation.invoke(transport, "addToCallbackQueue", new Class[] {IotHubTransportPacket.class}, mockedPacket);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_008:[This function shall set the packet status to MESSAGE_EXPIRED if packet has expired.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_009:[This function shall add the expired packet to the Callback Queue.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_010:[This function shall set the packet status to UNAUTHORIZED if sas token has expired.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_011:[This function shall add the packet which sas token has expired to the Callback Queue.]
+    @Test
+    public void isMessageValidWithMessageNotExpiredAndValidSasToken()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                mockedPacket.getMessage();
+                result = mockedMessage;
+                mockedMessage.isExpired();
+                result = false;
+                Deencapsulation.invoke(transport, "addToCallbackQueue", new Class[] {IotHubTransportPacket.class}, mockedPacket);
+                Deencapsulation.invoke(transport, "isSasTokenExpired");
+                result = false;
+            }
+        };
+
+        //act
+        boolean ret = Deencapsulation.invoke(transport, "isMessageValid", new Class[] {IotHubTransportPacket.class}, mockedPacket);
+
+        //assert
+        assertTrue(ret);
+        new Verifications()
+        {
+            {
+                mockedPacket.setStatus(IotHubStatusCode.MESSAGE_EXPIRED);
+                times = 0;
+                Deencapsulation.invoke(transport, "addToCallbackQueue", new Class[] {IotHubTransportPacket.class}, mockedPacket);
+                times = 0;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_010:[This function shall set the packet status to UNAUTHORIZED if sas token has expired.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_011:[This function shall add the packet which sas token has expired to the Callback Queue.]
+    @Test
+    public void isMessageValidWithMessageNotExpiredSasTokenExpired()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                mockedPacket.getMessage();
+                result = mockedMessage;
+                mockedMessage.isExpired();
+                result = false;
+                Deencapsulation.invoke(transport, "addToCallbackQueue", new Class[] {IotHubTransportPacket.class}, mockedPacket);
+                Deencapsulation.invoke(transport, "isSasTokenExpired");
+                result = true;
+                Deencapsulation.invoke(transport, "updateStatus",
+                        new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                        IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN, any);
+            }
+        };
+
+        //act
+        boolean ret = Deencapsulation.invoke(transport, "isMessageValid", new Class[] {IotHubTransportPacket.class}, mockedPacket);
+
+        //assert
+        assertFalse(ret);
+        new Verifications()
+        {
+            {
+                mockedPacket.setStatus(IotHubStatusCode.UNAUTHORIZED);
+                times = 1;
+                Deencapsulation.invoke(transport, "addToCallbackQueue", new Class[] {IotHubTransportPacket.class}, mockedPacket);
+                times = 1;
+                Deencapsulation.invoke(transport, "updateStatus",
+                        new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                        IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN, any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_005:[This function shall updated the saved connection status if the connection status has changed.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_006:[This function shall invoke all callbacks listening for the state change if the connection status has changed.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt if connection status is changed to CONNECTED.]
+    @Test
+    public void updateStatusConnectionStatusChangedToConnected()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatus", IotHubConnectionStatus.DISCONNECTED_RETRYING);
+        Deencapsulation.setField(transport, "currentReconnectionAttempt", 5);
+        new Expectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "invokeConnectionStatusChangeCallback",
+                        new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                        IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.NO_NETWORK, null);
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "updateStatus",
+                new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.NO_NETWORK, null);
+
+        //assert
+        assertEquals(IotHubConnectionStatus.CONNECTED, Deencapsulation.getField(transport, "connectionStatus"));
+        assertEquals(0, Deencapsulation.getField(transport, "currentReconnectionAttempt"));
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "invokeConnectionStatusChangeCallback",
+                        new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                        IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.NO_NETWORK, null);
+                times =1;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_005:[This function shall updated the saved connection status if the connection status has changed.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_006:[This function shall invoke all callbacks listening for the state change if the connection status has changed.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt if connection status is changed to CONNECTED.]
+    @Test
+    public void updateStatusConnectionStatusNotChanged()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatus", IotHubConnectionStatus.CONNECTED);
+        Deencapsulation.setField(transport, "currentReconnectionAttempt", 5);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "invokeConnectionStatusChangeCallback",
+                        new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                        IotHubConnectionStatus.CONNECTED, null, null);
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "updateStatus",
+                new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                IotHubConnectionStatus.CONNECTED, null, null);
+
+        //assert
+        assertEquals(IotHubConnectionStatus.CONNECTED, Deencapsulation.getField(transport, "connectionStatus"));
+        assertEquals(5, Deencapsulation.getField(transport, "currentReconnectionAttempt"));
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "invokeConnectionStatusChangeCallback",
+                        new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                        IotHubConnectionStatus.CONNECTED, null, null);
+                times = 0;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_005:[This function shall updated the saved connection status if the connection status has changed.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_006:[This function shall invoke all callbacks listening for the state change if the connection status has changed.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt if connection status is changed to CONNECTED.]
+    @Test
+    public void updateStatusConnectionStatusChangedToDisconnected()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatus", IotHubConnectionStatus.DISCONNECTED_RETRYING);
+        Deencapsulation.setField(transport, "currentReconnectionAttempt", 5);
+        new Expectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "invokeConnectionStatusChangeCallback",
+                        new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                        IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.NO_NETWORK, null);
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "updateStatus",
+                new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.NO_NETWORK, null);
+
+        //assert
+        assertEquals(IotHubConnectionStatus.DISCONNECTED, Deencapsulation.getField(transport, "connectionStatus"));
+        assertEquals(5, Deencapsulation.getField(transport, "currentReconnectionAttempt"));
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "invokeConnectionStatusChangeCallback",
+                        new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                        IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.NO_NETWORK, null);
+                times =1;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_004:[This function shall notify the connection status change callback if the callback is not null]
+    @Test
+    public void invokeConnectionStatusChangeCallbackWithCallback()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatusChangeCallback", mockedIotHubConnectionStatusChangeCallback);
+
+        //act
+        Deencapsulation.invoke(transport, "invokeConnectionStatusChangeCallback",
+                new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new IOException());
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedIotHubConnectionStatusChangeCallback.execute(
+                        (IotHubConnectionStatus)any,
+                        (IotHubConnectionStatusChangeReason)any,
+                        (Throwable)any,
+                        any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_004:[This function shall notify the connection status change callback if the callback is not null]
+    @Test
+    public void invokeConnectionStatusChangeCallbackWithNullCallback()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatusChangeCallback", null);
+
+        //act
+        Deencapsulation.invoke(transport, "invokeConnectionStatusChangeCallback",
+                new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new IOException());
+
+        //assert
+
+        new Verifications()
+        {
+            {
+                mockedIotHubConnectionStatusChangeCallback.execute(
+                        (IotHubConnectionStatus)any,
+                        (IotHubConnectionStatusChangeReason)any,
+                        (Throwable)any,
+                        any);
+                times = 0;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_003: [This function shall indicate if the device's sas token is expired.]
+    @Test
+    public void isSasTokenExpiredAuthenticationTypeIsSasTokenAndExpired()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations()
+        {
+            {
+                mockedConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockedConfig.getSasTokenAuthentication().isRenewalNecessary();
+                result = true;
+            }
+        };
+
+        //act
+        boolean ret = Deencapsulation.invoke(transport, "isSasTokenExpired");
+
+        //assert
+        assertTrue(ret);
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_003: [This function shall indicate if the device's sas token is expired.]
+    @Test
+    public void isSasTokenExpiredAuthenticationTypeIsSasTokenAndNotExpired()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations()
+        {
+            {
+                mockedConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockedConfig.getSasTokenAuthentication().isRenewalNecessary();
+                result = false;
+            }
+        };
+
+        //act
+        boolean ret = Deencapsulation.invoke(transport, "isSasTokenExpired");
+
+        //assert
+        assertFalse(ret);
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_003: [This function shall indicate if the device's sas token is expired.]
+    @Test
+    public void isSasTokenExpiredAuthenticationTypeNotSasToken()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations()
+        {
+            {
+                mockedConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                mockedConfig.getSasTokenAuthentication().isRenewalNecessary();
+                result = true;
+            }
+        };
+
+        //act
+        boolean ret = Deencapsulation.invoke(transport, "isSasTokenExpired");
+
+        //assert
+        assertFalse(ret);
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_002: [This function shall add the packet to the callback queue if it has a callback.]
+    @Test
+    public void addToCallbackQueuePacketHasCallback(@Mocked final IotHubEventCallback mockCallback)
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations()
+        {
+            {
+                mockedPacket.getCallback();
+                result = mockCallback;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "addToCallbackQueue", mockedPacket);
+
+        //assert
+        Queue<IotHubTransportPacket> callbackPacketsQueue = Deencapsulation.getField(transport, "callbackPacketsQueue");
+        assertEquals(1, callbackPacketsQueue.size());
+        assertTrue(callbackPacketsQueue.contains(mockedPacket));
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_002: [This function shall add the packet to the callback queue if it has a callback.]
+    @Test
+    public void addToCallbackQueuePacketNoCallback(@Mocked final IotHubEventCallback mockCallback)
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations()
+        {
+            {
+                mockedPacket.getCallback();
+                result = null;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "addToCallbackQueue", mockedPacket);
+
+        //assert
+        Queue<IotHubTransportPacket> callbackPacketsQueue = Deencapsulation.getField(transport, "callbackPacketsQueue");
+        assertEquals(0, callbackPacketsQueue.size());
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_001: [This function shall set the MqttUnauthorizedException as retryable if the sas token has not expired.]
+    @Test
+    public void checkForUnauthorizedExceptionInMqttUnauthroizedException()
+    {
+        //arrange
+        final MqttUnauthorizedException testException = new MqttUnauthorizedException();
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "isSasTokenExpired");
+                result = false;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "checkForUnauthorizedException", testException);
+
+        //assert
+        new Verifications()
+        {
+            {
+                testException.setRetryable(true);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_001: [This function shall set the MqttUnauthorizedException, UnauthorizedException or
+    //AmqpUnauthorizedAccessException as retryable if the sas token has not expired.]
+    @Test
+    public void checkForUnauthorizedExceptionInUnauthorizedException()
+    {
+        //arrange
+        final UnauthorizedException testException = new UnauthorizedException();
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "isSasTokenExpired");
+                result = false;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "checkForUnauthorizedException", testException);
+
+        //assert
+        new Verifications()
+        {
+            {
+                testException.setRetryable(true);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_001: [This function shall set the MqttUnauthorizedException, UnauthorizedException or
+    //AmqpUnauthorizedAccessException as retryable if the sas token has not expired.]
+    @Test
+    public void checkForUnauthorizedExceptionInAmqpUnauthorizedAccessException()
+    {
+        //arrange
+        final AmqpUnauthorizedAccessException testException = new AmqpUnauthorizedAccessException();
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "isSasTokenExpired");
+                result = false;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "checkForUnauthorizedException", testException);
+
+        //assert
+        new Verifications()
+        {
+            {
+                testException.setRetryable(true);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_001: [This function shall set the MqttUnauthorizedException, UnauthorizedException or
+    //AmqpUnauthorizedAccessException as retryable if the sas token has not expired.]
+    @Test
+    public void checkForUnauthorizedExceptionWithExpiredSASToken()
+    {
+        //arrange
+        final UnauthorizedException testException = new UnauthorizedException();
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "isSasTokenExpired");
+                result = true;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "checkForUnauthorizedException", testException);
+
+        //assert
+        new Verifications()
+        {
+            {
+                testException.setRetryable(true);
+                times = 0;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_28_001: [This function shall set the MqttUnauthorizedException, UnauthorizedException or
+    //AmqpUnauthorizedAccessException as retryable if the sas token has not expired.]
+    @Test
+    public void checkForUnauthorizedExceptionWithOtherTransportException()
+    {
+        //arrange
+        final TransportException testException = new TransportException();
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "isSasTokenExpired");
+                result = true;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "checkForUnauthorizedException", testException);
+
+        //assert
+        new Verifications()
+        {
+            {
+                testException.setRetryable(true);
+                times = 0;
             }
         };
     }
