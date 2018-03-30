@@ -264,7 +264,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_013: [If the MQTT connection is closed,
             // the function shall throw an IllegalStateException.]
-            if (this.state == State.CLOSED)
+            if (this.state == IotHubConnectionStatus.DISCONNECTED)
             {
                 throw new IllegalStateException("Cannot send event using a closed MQTT connection");
             }
@@ -274,18 +274,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_011: [If the message was successfully received by the service,
             // the function shall return status code OK_EMPTY.]
             IotHubStatusCode result = IotHubStatusCode.OK_EMPTY;
-
-            if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isRenewalNecessary())
-            {
-                if (this.stateCallback != null)
-                {
-                    //Codes_SRS_MQTTIOTHUBCONNECTION_34_036: [If the sas token saved in the config has expired and needs to be renewed and if there is a connection state callback saved, this function shall invoke that callback with Status SAS_TOKEN_EXPIRED.]
-                    this.stateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, this.stateCallbackContext);
-                }
-
-                //Codes_SRS_MQTTIOTHUBCONNECTION_34_035: [If the sas token saved in the config has expired and needs to be renewed, this function shall return UNAUTHORIZED.]
-                return IotHubStatusCode.UNAUTHORIZED;
-            }
 
             try
             {

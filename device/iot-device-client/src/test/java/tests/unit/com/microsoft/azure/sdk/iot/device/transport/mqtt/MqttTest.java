@@ -420,7 +420,7 @@ public class MqttTest
 
     //Tests_SRS_Mqtt_34_055: [If an MQTT connection is connected, the function shall disconnect that connection.]
     @Test
-    public void disconnectDisconnectsIfConnected() throws IOException, MqttException
+    public void disconnectDisconnectsIfConnected() throws IOException, MqttException, TransportException
     {
         baseConstructorExpectations();
         baseConnectExpectation();
@@ -450,7 +450,7 @@ public class MqttTest
 
     //Tests_SRS_Mqtt_34_055: [If an MQTT connection is connected, the function shall disconnect that connection.]
     @Test
-    public void disconnectDoesNotDisconnectIfNotConnected() throws IOException, MqttException
+    public void disconnectDoesNotDisconnectIfNotConnected() throws IOException, MqttException, TransportException
     {
         //arrange
         baseConstructorExpectations();
