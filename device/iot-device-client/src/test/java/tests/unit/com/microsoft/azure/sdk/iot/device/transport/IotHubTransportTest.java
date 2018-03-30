@@ -5,15 +5,16 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
+import javafx.util.Duration;
 import mockit.*;
 import org.junit.Test;
 
-import javax.xml.ws.http.HTTPBinding;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,14 +23,11 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason.*;
-import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.CONNECTED;
-import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.DISCONNECTED;
-import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.DISCONNECTED_RETRYING;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
+import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.*;
+import static junit.framework.TestCase.*;
 
 /**
  * Unit tests for IotHubTransportPacket.
@@ -38,6 +36,9 @@ public class IotHubTransportTest
 {
     @Mocked
     DeviceClientConfig mockedConfig;
+
+    @Mocked
+    IotHubStatusCode mockedStatus;
 
     @Mocked
     Message mockedMessage;
@@ -71,6 +72,33 @@ public class IotHubTransportTest
 
     @Mocked
     MqttIotHubConnection mockedMqttIotHubConnection;
+
+    @Mocked
+    IotHubConnectionStateCallback mockedIotHubConnectionStateCallback;
+
+    @Mocked
+    IotHubConnectionStatusChangeCallback mockedIotHubConnectionStatusChangeCallback;
+
+    @Mocked
+    IotHubConnectionStatusChangeReason mockedIotHubConnectionStatusChangeReason;
+
+    @Mocked
+    RetryPolicy mockedRetryPolicy;
+
+    @Mocked
+    RetryDecision mockedRetryDecision;
+
+    @Mocked
+    MessageCallback mockedMessageCallback;
+
+    @Mocked
+    ScheduledExecutorService mockedTaskScheduler;
+
+    @Mocked
+    IotHubTransport.MessageRetryRunnable mockedMessageRetryRunnable;
+
+    @Mocked
+    IotHubServiceException mockedIothubServiceException;
 
     //Tests_SRS_IOTHUBTRANSPORT_34_001: [The constructor shall save the default config.]
     //Tests_SRS_IOTHUBTRANSPORT_34_003: [The constructor shall set the connection status as DISCONNECTED and the current retry attempt to 0.]
@@ -1025,9 +1053,901 @@ public class IotHubTransportTest
         assertFalse(hasTimedOut);
     }
 
-    //TODO
     //Tests_SRS_IOTHUBTRANSPORT_34_041: [If this object's connection state is DISCONNECTED, this function shall throw an IllegalStateException.]
+    @Test (expected = IllegalStateException.class)
+    public void addMessageThrowsIfDisconnected()
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatus", DISCONNECTED);
+
+        //act
+        transport.addMessage(mockedMessage, mockedEventCallback, new Object());
+    }
+
     //Tests_SRS_IOTHUBTRANSPORT_34_042: [This function shall build a transport packet from the provided message, callback, and context and then add that packet to the waiting queue.]
+    @Test
+    public void addMessageAddsMessage()
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatus", CONNECTED);
+        Queue<IotHubTransportPacket> waitingPacketsQueue = new ConcurrentLinkedQueue<>();
+        Deencapsulation.setField(transport, "waitingPacketsQueue", waitingPacketsQueue);
+
+        new NonStrictExpectations()
+        {
+            {
+                new IotHubTransportPacket(mockedMessage, mockedEventCallback, any, null, anyLong);
+                result = mockedPacket;
+            }
+        };
+
+        //act
+        transport.addMessage(mockedMessage, mockedEventCallback, new Object());
+
+        //assert
+        assertEquals(1, waitingPacketsQueue.size());
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_043: [If the connection status of this object is not CONNECTED, this function shall do nothing]
+    @Test
+    public void sendMessagesDoesNothingIfNotConnected()
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatus", DISCONNECTED);
+        Queue<IotHubTransportPacket> waitingPacketsQueue = new ConcurrentLinkedQueue<>();
+        waitingPacketsQueue.add(mockedPacket);
+        Deencapsulation.setField(transport, "waitingPacketsQueue", waitingPacketsQueue);
+
+        //act
+        transport.sendMessages();
+
+        //assert
+        assertFalse(waitingPacketsQueue.isEmpty());
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_044: [This function continue to dequeue packets saved in the waiting
+    // queue and send them until connection status isn't CONNECTED or until 10 messages have been sent]
+    @Test
+    public void sendMessagesSendsMessages()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        final int MAX_MESSAGES_TO_SEND_PER_THREAD = Deencapsulation.getField(transport, "MAX_MESSAGES_TO_SEND_PER_THREAD");
+        Deencapsulation.setField(transport, "connectionStatus", CONNECTED);
+        Queue<IotHubTransportPacket> waitingPacketsQueue = new ConcurrentLinkedQueue<>();
+        for (int i = 0; i < MAX_MESSAGES_TO_SEND_PER_THREAD + 1; i++)
+        {
+            waitingPacketsQueue.add(mockedPacket);
+        }
+
+        Deencapsulation.setField(transport, "waitingPacketsQueue", waitingPacketsQueue);
+
+        new Expectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "sendPacket", new Class[] {IotHubTransportPacket.class}, mockedPacket);
+            }
+        };
+
+        //act
+        transport.sendMessages();
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "sendPacket", new Class[] {IotHubTransportPacket.class}, mockedPacket);
+                times = MAX_MESSAGES_TO_SEND_PER_THREAD;
+            }
+        };
+        assertEquals(1, waitingPacketsQueue.size());
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_045: [This function shall dequeue each packet in the callback queue and execute
+    // their saved callback with their saved status and context]
+    @Test
+    public void invokeCallbacksInvokesAllCallbacks()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Queue<IotHubTransportPacket> callbackPacketsQueue = new ConcurrentLinkedQueue<>();
+        callbackPacketsQueue.add(mockedPacket);
+        callbackPacketsQueue.add(mockedPacket);
+        callbackPacketsQueue.add(mockedPacket);
+        Deencapsulation.setField(transport, "callbackPacketsQueue", callbackPacketsQueue);
+        final Object context = new Object();
+        new NonStrictExpectations()
+        {
+            {
+                mockedPacket.getCallback();
+                result = mockedEventCallback;
+
+                mockedPacket.getContext();
+                result = context;
+
+                mockedPacket.getStatus();
+                result = mockedStatus;
+            }
+        };
+
+        //act
+        transport.invokeCallbacks();
+
+        //assert
+        assertTrue(callbackPacketsQueue.isEmpty());
+        new Verifications()
+        {
+            {
+                mockedEventCallback.execute(mockedStatus, context);
+                times = 3;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_046: [If this object's connection status is not CONNEECTED, this function shall do nothing.]
+    @Test
+    public void handleMessageDoesNothingIfNotConnected() throws DeviceClientException
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatus", DISCONNECTED);
+        Queue<IotHubTransportMessage> receivedMessagesQueue = new ConcurrentLinkedQueue<>();
+        receivedMessagesQueue.add(mockedTransportMessage);
+        receivedMessagesQueue.add(mockedTransportMessage);
+        Deencapsulation.setField(transport, "receivedMessagesQueue", receivedMessagesQueue);
+
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedHttpsIotHubConnection);
+
+        //act
+        transport.handleMessage();
+
+        //assert
+        assertEquals(2, receivedMessagesQueue.size());
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "addReceivedMessagesOverHttpToReceivedQueue");
+                times = 0;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_047: [If this object's connection status is CONNECTED and is using HTTPS,
+    // this function shall invoke addReceivedMessagesOverHttpToReceivedQueue.]
+    @Test
+    public void handleMessageChecksForHttpMessages() throws DeviceClientException
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatus", CONNECTED);
+        Queue<IotHubTransportMessage> receivedMessagesQueue = new ConcurrentLinkedQueue<>();
+        receivedMessagesQueue.add(mockedTransportMessage);
+        receivedMessagesQueue.add(mockedTransportMessage);
+        Deencapsulation.setField(transport, "receivedMessagesQueue", receivedMessagesQueue);
+
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedHttpsIotHubConnection);
+
+        new Expectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "acknowledgeReceivedMessage", mockedTransportMessage);
+
+                Deencapsulation.invoke(transport, "addReceivedMessagesOverHttpToReceivedQueue");
+            }
+        };
+
+        //act
+        transport.handleMessage();
+
+        //assert
+        assertEquals(1, receivedMessagesQueue.size());
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "addReceivedMessagesOverHttpToReceivedQueue");
+                times = 1;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_048: [If this object's connection status is CONNECTED and there is a
+    // received message in the queue, this function shall acknowledge the received message
+    @Test
+    public void handleMessageAcknowledgesAReceivedMessages() throws DeviceClientException
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatus", CONNECTED);
+        Queue<IotHubTransportMessage> receivedMessagesQueue = new ConcurrentLinkedQueue<>();
+        receivedMessagesQueue.add(mockedTransportMessage);
+        receivedMessagesQueue.add(mockedTransportMessage);
+        Deencapsulation.setField(transport, "receivedMessagesQueue", receivedMessagesQueue);
+
+        new Expectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "acknowledgeReceivedMessage", mockedTransportMessage);
+            }
+        };
+
+        //act
+        transport.handleMessage();
+
+        //assert
+        assertEquals(1, receivedMessagesQueue.size());
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "acknowledgeReceivedMessage", mockedTransportMessage);
+                times = 1;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_049: [If the provided callback is null, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void registerConnectionStateCallbackThrowsForNullCallback()
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+
+        //act
+        transport.registerConnectionStateCallback(null, new Object());
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_050: [This function shall save the provided callback and context.]
+    @Test
+    public void registerConnectionStateCallbackSavesProvidedCallbackAndContext()
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        final Object context = new Object();
+
+        //act
+        transport.registerConnectionStateCallback(mockedIotHubConnectionStateCallback, context);
+
+        //assert
+        assertEquals(mockedIotHubConnectionStateCallback, Deencapsulation.getField(transport, "stateCallback"));
+        assertEquals(context, Deencapsulation.getField(transport, "stateCallbackContext"));
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_051: [If the provided callback is null, this function shall throw an IllegalArgumentException.]
+    @Test(expected = IllegalArgumentException.class)
+    public void registerConnectionStatusChangeCallbackThrowsForNullCallback()
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+
+        //act
+        transport.registerConnectionStatusChangeCallback(null, new Object());
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_052: [This function shall save the provided callback and context.]
+    @Test
+    public void registerConnectionStatusChangeCallbackSavesProvidedCallbackAndContext()
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        final Object context = new Object();
+
+        //act
+        transport.registerConnectionStatusChangeCallback(mockedIotHubConnectionStatusChangeCallback, context);
+
+        //assert
+        assertEquals(mockedIotHubConnectionStatusChangeCallback, Deencapsulation.getField(transport, "connectionStatusChangeCallback"));
+        assertEquals(context, Deencapsulation.getField(transport, "connectionStatusChangeCallbackContext"));
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_053: [This function shall execute the callback associate with the provided
+    // transport message with the provided message and its saved callback context.]
+    //Codes_SRS_IOTHUBTRANSPORT_34_054: [This function shall send the message callback result along the
+    // connection as the ack to the service.]
+    @Test
+    public void acknowledgeReceivedMessageSendsAck() throws TransportException
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        final Object context = new Object();
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedIotHubTransportConnection);
+        new Expectations()
+        {
+            {
+                mockedTransportMessage.getMessageCallback();
+                result = mockedMessageCallback;
+
+                mockedTransportMessage.getMessageCallbackContext();
+                result = context;
+
+                mockedMessageCallback.execute(mockedTransportMessage, context);
+                result = IotHubMessageResult.COMPLETE;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "acknowledgeReceivedMessage", mockedTransportMessage);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedMessageCallback.execute(mockedTransportMessage, context);
+                times = 1;
+
+                mockedIotHubTransportConnection.sendMessageResult(mockedTransportMessage, IotHubMessageResult.COMPLETE);
+                times = 1;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_055: [If an exception is thrown while acknowledging the received message,
+    // this function shall add the received message back into the receivedMessagesQueue and then rethrow the exception.]
+    @Test
+    public void acknowledgeReceivedMessageReQueuesFailedMessages() throws TransportException
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        final Object context = new Object();
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedIotHubTransportConnection);
+        new Expectations()
+        {
+            {
+                mockedTransportMessage.getMessageCallback();
+                result = mockedMessageCallback;
+
+                mockedTransportMessage.getMessageCallbackContext();
+                result = context;
+
+                mockedMessageCallback.execute(mockedTransportMessage, context);
+                result = IotHubMessageResult.COMPLETE;
+
+                mockedIotHubTransportConnection.sendMessageResult(mockedTransportMessage, IotHubMessageResult.COMPLETE);
+                result = mockedTransportException;
+            }
+        };
+
+        boolean exceptionRethrown = false;
+
+        //act
+        try
+        {
+            Deencapsulation.invoke(transport, "acknowledgeReceivedMessage", mockedTransportMessage);
+        }
+        catch (Exception e)
+        {
+            exceptionRethrown = true;
+        }
+
+        //assert
+        assertTrue(exceptionRethrown);
+        Queue<IotHubTransportMessage> receivedMessagesQueue = Deencapsulation.getField(transport, "receivedMessagesQueue");
+        assertEquals(1, receivedMessagesQueue.size());
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_056: [If the saved http transport connection can receive a message, add it to receivedMessagesQueue.]
+    @Test
+    public void addReceivedMessagesOverHttpToReceivedQueueChecksForHttpMessages() throws TransportException
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedHttpsIotHubConnection);
+
+        //act
+        Deencapsulation.invoke(transport, "addReceivedMessagesOverHttpToReceivedQueue");
+
+        //assert
+        Queue<IotHubTransportMessage> receivedMessagesQueue = Deencapsulation.getField(transport, "receivedMessagesQueue");
+        assertEquals(1, receivedMessagesQueue.size());
+        new Verifications()
+        {
+            {
+                mockedHttpsIotHubConnection.receiveMessage();
+                times = 1;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_057: [This function shall move all packets from inProgressQueue to waiting queue.]
+    //Codes_SRS_IOTHUBTRANSPORT_34_058: [This function shall invoke updateStatus with DISCONNECTED_RETRYING, and the provided transportException.]
+    //Codes_SRS_IOTHUBTRANSPORT_34_059: [This function shall invoke checkForUnauthorizedException with the provided exception.]
+    //Codes_SRS_IOTHUBTRANSPORT_34_060: [This function shall invoke reconnect with the provided exception.]
+    @Test
+    public void handleDisconnectionClearsInProgressAndReconnects()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+
+        new Expectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", mockedTransportException);
+                result = mockedIotHubConnectionStatusChangeReason;
+
+                Deencapsulation.invoke(transport, "updateStatus",
+                        new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                        DISCONNECTED_RETRYING, mockedIotHubConnectionStatusChangeReason, mockedTransportException);
+
+                Deencapsulation.invoke(transport, "checkForUnauthorizedException", mockedTransportException);
+
+                Deencapsulation.invoke(transport, "reconnect", mockedTransportException);
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "handleDisconnection", mockedTransportException);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", mockedTransportException);
+                times = 1;
+
+                Deencapsulation.invoke(transport, "updateStatus",
+                        new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
+                        DISCONNECTED_RETRYING, mockedIotHubConnectionStatusChangeReason, mockedTransportException);
+                times = 1;
+
+                Deencapsulation.invoke(transport, "checkForUnauthorizedException", mockedTransportException);
+                times = 1;
+
+                Deencapsulation.invoke(transport, "reconnect", mockedTransportException);
+                times = 1;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_061: [This function shall close the saved connection, and then invoke openConnection and return null.]
+    @Test
+    public void singleReconnectAttemptSuccess() throws TransportException
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedIotHubTransportConnection);
+
+        new Expectations(IotHubTransport.class)
+        {
+            {
+                //open and close happen with no exception
+                mockedIotHubTransportConnection.close();
+                Deencapsulation.invoke(transport, "openConnection");
+            }
+        };
+
+        //act
+        Exception result = Deencapsulation.invoke(transport, "singleReconnectAttempt");
+
+        //assert
+        assertNull(result);
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_062: [If an exception is encountered while closing or opening the connection,
+    // this function shall invoke checkForUnauthorizedException on that exception and then return it.]
+    @Test
+    public void singleReconnectAttemptReturnsEncounteredException() throws TransportException
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedIotHubTransportConnection);
+
+        new Expectations(IotHubTransport.class)
+        {
+            {
+                //open and close happen with no exception
+                mockedIotHubTransportConnection.close();
+                result = mockedTransportException;
+
+                Deencapsulation.invoke(transport, "checkForUnauthorizedException", mockedTransportException);
+            }
+        };
+
+        //act
+        Exception result = Deencapsulation.invoke(transport, "singleReconnectAttempt");
+
+        //assert
+        assertEquals(mockedTransportException, result);
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "checkForUnauthorizedException", mockedTransportException);
+                times = 1;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_063: [If the provided transportException is retryable, the packet has not
+    // timed out, and the retry policy allows, this function shall schedule a task to add the provided
+    // packet to the waiting list after the amount of time determined by the retry policy.]
+    @Test
+    public void handleMessageExceptionSchedulesRetryIfRetryable()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        final long expectedDelay = 0;
+        final Duration duration = Duration.ZERO;
+        Deencapsulation.setField(transport, "taskScheduler", mockedTaskScheduler);
+        new Expectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "hasOperationTimedOut", anyLong);
+                result = false;
+
+                mockedTransportException.isRetryable();
+                result = true;
+
+                mockedConfig.getRetryPolicy();
+                result = mockedRetryPolicy;
+
+                mockedRetryPolicy.getRetryDecision(anyInt, mockedTransportException);
+                result = mockedRetryDecision;
+
+                mockedRetryDecision.shouldRetry();
+                result = true;
+
+                mockedRetryDecision.getDuration();
+                result = duration;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "handleMessageException", mockedPacket, mockedTransportException);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedPacket.incrementRetryAttempt();
+                times = 1;
+
+                mockedTaskScheduler.schedule((IotHubTransport.MessageRetryRunnable) any, expectedDelay, TimeUnit.MILLISECONDS);
+                times = 1;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_064: [If the provided transportException is not retryable, the packet has expired,
+    // or if the retry policy says to not retry, this function shall add the provided packet to the callback queue.]
+    @Test
+    public void handleMessageExceptionDoesNotRetryIfDeviceOperationTimedOut()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        final long expectedDelay = 0;
+        Deencapsulation.setField(transport, "taskScheduler", mockedTaskScheduler);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "hasOperationTimedOut", anyLong);
+                result = true;
+
+                mockedIothubServiceException.isRetryable();
+                result = true;
+
+                mockedConfig.getRetryPolicy();
+                result = mockedRetryPolicy;
+
+                mockedRetryPolicy.getRetryDecision(anyInt, mockedTransportException);
+                result = mockedRetryDecision;
+
+                mockedRetryDecision.shouldRetry();
+                result = true;
+
+                mockedIothubServiceException.getStatusCode();
+                result = mockedStatus;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "handleMessageException", mockedPacket, mockedIothubServiceException);
+
+        //assert
+        Queue<IotHubTransportPacket> callbackQueue = Deencapsulation.getField(transport, "callbackPacketsQueue");
+        assertEquals(1, callbackQueue.size());
+        assertEquals(mockedPacket, callbackQueue.poll());
+        new Verifications()
+        {
+            {
+                mockedPacket.setStatus(mockedStatus);
+                times = 1;
+
+                mockedTaskScheduler.schedule((IotHubTransport.MessageRetryRunnable) any, expectedDelay, TimeUnit.MILLISECONDS);
+                times = 0;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_064: [If the provided transportException is not retryable, the packet has expired,
+    // or if the retry policy says to not retry, this function shall add the provided packet to the callback queue.]
+    @Test
+    public void handleMessageExceptionDoesNotRetryIfExceptionIsNotRetryable()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        final long expectedDelay = 0;
+        Deencapsulation.setField(transport, "taskScheduler", mockedTaskScheduler);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "hasOperationTimedOut", anyLong);
+                result = false;
+
+                mockedTransportException.isRetryable();
+                result = false;
+
+                mockedConfig.getRetryPolicy();
+                result = mockedRetryPolicy;
+
+                mockedRetryPolicy.getRetryDecision(anyInt, mockedTransportException);
+                result = mockedRetryDecision;
+
+                mockedRetryDecision.shouldRetry();
+                result = true;
+
+                mockedIothubServiceException.getStatusCode();
+                result = mockedStatus;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "handleMessageException", mockedPacket, mockedIothubServiceException);
+
+        //assert
+        Queue<IotHubTransportPacket> callbackQueue = Deencapsulation.getField(transport, "callbackPacketsQueue");
+        assertEquals(1, callbackQueue.size());
+        assertEquals(mockedPacket, callbackQueue.poll());
+        new Verifications()
+        {
+            {
+                mockedPacket.setStatus(mockedStatus);
+                times = 1;
+
+                mockedTaskScheduler.schedule((IotHubTransport.MessageRetryRunnable) any, expectedDelay, TimeUnit.MILLISECONDS);
+                times = 0;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_064: [If the provided transportException is not retryable, the packet has expired,
+    // or if the retry policy says to not retry, this function shall add the provided packet to the callback queue.]
+    @Test
+    public void handleMessageExceptionDoesNotRetryIfRetryPolicySaysToNotRetry()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        final long expectedDelay = 0;
+        Deencapsulation.setField(transport, "taskScheduler", mockedTaskScheduler);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "hasOperationTimedOut", anyLong);
+                result = false;
+
+                mockedTransportException.isRetryable();
+                result = true;
+
+                mockedConfig.getRetryPolicy();
+                result = mockedRetryPolicy;
+
+                mockedRetryPolicy.getRetryDecision(anyInt, mockedTransportException);
+                result = mockedRetryDecision;
+
+                mockedRetryDecision.shouldRetry();
+                result = false;
+
+                mockedIothubServiceException.getStatusCode();
+                result = mockedStatus;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "handleMessageException", mockedPacket, mockedIothubServiceException);
+
+        //assert
+        Queue<IotHubTransportPacket> callbackQueue = Deencapsulation.getField(transport, "callbackPacketsQueue");
+        assertEquals(1, callbackQueue.size());
+        assertEquals(mockedPacket, callbackQueue.poll());
+        new Verifications()
+        {
+            {
+                mockedPacket.setStatus(mockedStatus);
+                times = 1;
+
+                mockedTaskScheduler.schedule((IotHubTransport.MessageRetryRunnable) any, expectedDelay, TimeUnit.MILLISECONDS);
+                times = 0;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_068: [If the reconnection effort ends because the retry policy said to
+    // stop, this function shall invoke close with RETRY_EXPIRED and the last transportException.]
+    //Codes_SRS_IOTHUBTRANSPORT_34_065: [this function shall save the current time that reconnection starts.]
+    //Codes_SRS_IOTHUBTRANSPORT_34_066: [This function shall attempt to reconnect while this object's state is
+    // DISCONNECTED_RETRYING, the operation hasn't timed out, and the last transport exception is retryable.]
+    @Test
+    public void reconnectAttemptsToReconnectUntilRetryPolicyEnds()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatus", DISCONNECTED_RETRYING);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "hasOperationTimedOut", anyLong);
+                result = false;
+
+                mockedTransportException.isRetryable();
+                result = true;
+
+                mockedConfig.getRetryPolicy();
+                result = mockedRetryPolicy;
+
+                mockedRetryPolicy.getRetryDecision(anyInt, (TransportException) any);
+                result = mockedRetryDecision;
+
+                mockedRetryDecision.shouldRetry();
+                result = false;
+
+                Deencapsulation.invoke(transport, "close", new Class[] {IotHubConnectionStatusChangeReason.class, Throwable.class}, RETRY_EXPIRED, any);
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "reconnect", mockedTransportException);
+
+        //assert
+        long reconnectionAttemptStartTimeMillis = Deencapsulation.getField(transport, "reconnectionAttemptStartTimeMillis");
+        assertTrue(reconnectionAttemptStartTimeMillis > 0);
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "close", new Class[] {IotHubConnectionStatusChangeReason.class, Throwable.class}, RETRY_EXPIRED, any);
+                times = 1;
+            }
+        };
+    }
 
 
+    //Codes_SRS_IOTHUBTRANSPORT_34_069: [If the reconnection effort ends because the reconnection timed out,
+    // this function shall invoke close with RETRY_EXPIRED and a DeviceOperationTimeoutException.]
+    @Test
+    public void reconnectAttemptsToReconnectUntilOperationTimesOut()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatus", DISCONNECTED_RETRYING);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "hasOperationTimedOut", anyLong);
+                result = true;
+
+                mockedTransportException.isRetryable();
+                result = true;
+
+                mockedConfig.getRetryPolicy();
+                result = mockedRetryPolicy;
+
+                mockedRetryPolicy.getRetryDecision(anyInt, (TransportException) any);
+                result = mockedRetryDecision;
+
+                mockedRetryDecision.shouldRetry();
+                result = false;
+
+                Deencapsulation.invoke(transport, "close", new Class[] {IotHubConnectionStatusChangeReason.class, Throwable.class}, RETRY_EXPIRED, any);
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "reconnect", mockedTransportException);
+
+        //assert
+        long reconnectionAttemptStartTimeMillis = Deencapsulation.getField(transport, "reconnectionAttemptStartTimeMillis");
+        assertTrue(reconnectionAttemptStartTimeMillis > 0);
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "close", new Class[] {IotHubConnectionStatusChangeReason.class, Throwable.class}, RETRY_EXPIRED, any);
+                times = 1;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_070: [If the reconnection effort ends because a terminal exception is
+    // encountered, this function shall invoke close with that terminal exception.]
+    @Test
+    public void reconnectAttemptsToReconnectUntilExceptionNotRetryable()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatus", DISCONNECTED_RETRYING);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "hasOperationTimedOut", anyLong);
+                result = false;
+
+                mockedTransportException.isRetryable();
+                result = false;
+
+                mockedConfig.getRetryPolicy();
+                result = mockedRetryPolicy;
+
+                mockedRetryPolicy.getRetryDecision(anyInt, (TransportException) any);
+                result = mockedRetryDecision;
+
+                mockedRetryDecision.shouldRetry();
+                result = false;
+
+                Deencapsulation.invoke(transport, "close", new Class[] {IotHubConnectionStatusChangeReason.class, Throwable.class}, any, any);
+
+                Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", mockedTransportException);
+
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "reconnect", mockedTransportException);
+
+        //assert
+        long reconnectionAttemptStartTimeMillis = Deencapsulation.getField(transport, "reconnectionAttemptStartTimeMillis");
+        assertTrue(reconnectionAttemptStartTimeMillis > 0);
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "close", new Class[] {IotHubConnectionStatusChangeReason.class, Throwable.class}, any, mockedTransportException);
+                times = 1;
+
+                Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", mockedTransportException);
+                times = 1;
+            }
+        };
+    }
+
+    //Codes_SRS_IOTHUBTRANSPORT_34_071: [If an exception is encountered while closing, this function shall invoke
+    // updateStatus with DISCONNECTED, COMMUNICATION_ERROR, and the last transport exception.]
+    @Test
+    public void reconnectUpdatesStatusIfClosingFailed()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Deencapsulation.setField(transport, "connectionStatus", DISCONNECTED_RETRYING);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "hasOperationTimedOut", anyLong);
+                result = true;
+
+                mockedTransportException.isRetryable();
+                result = true;
+
+                mockedConfig.getRetryPolicy();
+                result = mockedRetryPolicy;
+
+                mockedRetryPolicy.getRetryDecision(anyInt, (TransportException) any);
+                result = mockedRetryDecision;
+
+                mockedRetryDecision.shouldRetry();
+                result = true;
+
+                Deencapsulation.invoke(transport, "close", new Class[] {IotHubConnectionStatusChangeReason.class, Throwable.class}, RETRY_EXPIRED, any);
+                result = mockedTransportException;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "reconnect", mockedTransportException);
+
+        //assert
+        long reconnectionAttemptStartTimeMillis = Deencapsulation.getField(transport, "reconnectionAttemptStartTimeMillis");
+        assertTrue(reconnectionAttemptStartTimeMillis > 0);
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "updateStatus", IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.COMMUNICATION_ERROR, mockedTransportException);
+                times = 1;
+            }
+        };
+    }
 }

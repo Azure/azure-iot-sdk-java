@@ -9,6 +9,7 @@ import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -192,6 +193,7 @@ public class CustomLoggerTest
     }
 
     // Tests_SRS_CUSTOMERLOGGER_25_002: [The function shall print message for ERROR level.]
+    @Ignore
     @Test
     public void testLogError(@Mocked final Logger mockLogger)
     {
