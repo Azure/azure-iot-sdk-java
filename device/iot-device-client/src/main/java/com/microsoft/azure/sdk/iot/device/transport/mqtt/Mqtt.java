@@ -3,8 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.CustomLogger;
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
@@ -56,6 +54,8 @@ abstract public class Mqtt implements MqttCallback
     /**
      * Constructor to instantiate mqtt broker connection.
      * @param mqttConnection the connection to use
+     * @param listener the listener to be called back upon connection established/lost and upon a message being delivered
+     * @param messageListener the listener to be called back upon a message arriving
      * @throws IllegalArgumentException if the provided mqttConnection is null
      */
     public Mqtt(MqttConnection mqttConnection, IotHubListener listener, MqttMessageListener messageListener) throws IllegalArgumentException
@@ -145,6 +145,8 @@ abstract public class Mqtt implements MqttCallback
      *
      * @param publishTopic the topic to publish on mqtt broker connection.
      * @param message the message to publish.
+     * @throws TransportException if sas token has expired, if connection hasn't been established yet, or if Paho throws
+     * for any other reason
      */
     protected void publish(String publishTopic, Message message) throws TransportException
     {

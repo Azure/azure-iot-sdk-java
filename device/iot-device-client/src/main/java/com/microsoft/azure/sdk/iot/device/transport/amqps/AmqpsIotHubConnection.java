@@ -145,6 +145,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
      * Creates a new DeviceOperation using the given configuration..
      *
      * @param deviceClientConfig the device configuration to add.
+     * @throws TransportException if adding the device fails
      */
     public void addDeviceOperationSession(DeviceClientConfig deviceClientConfig) throws TransportException
     {

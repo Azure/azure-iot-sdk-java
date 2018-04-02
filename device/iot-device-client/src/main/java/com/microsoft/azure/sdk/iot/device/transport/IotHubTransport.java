@@ -216,6 +216,8 @@ public class IotHubTransport implements IotHubListener
      * If reconnection is occurring when this is called, this function shall block and wait for the reconnection
      * to finish before trying to open the connection
      *
+     * @param deviceClientConfigs the configs for the devices to open
+     *
      * @throws DeviceClientException if a communication channel cannot be
      * established.
      */
@@ -261,6 +263,9 @@ public class IotHubTransport implements IotHubListener
      * Closes all resources used to communicate with an IoT Hub. Once {@code close()} is
      * called, the transport is no longer usable. If the transport is already
      * closed, the function shall do nothing.
+     *
+     * @param cause the cause of why this connection is closing, to be reported over connection status change callback
+     * @param reason the reason to close this connection, to be reported over connection status change callback
      *
      * @throws DeviceClientException if an error occurs in closing the transport.
      */
@@ -323,8 +328,6 @@ public class IotHubTransport implements IotHubListener
      * Sends all messages on the transport queue. If a previous send attempt had
      * failed, the function will attempt to resend the messages in the previous
      * attempt.
-     *
-     * @throws DeviceClientException if the server could not be reached.
      */
     public void sendMessages()
     {
@@ -356,7 +359,9 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
-    /** Invokes the callbacks for all completed requests. */
+    /**
+     * Invokes the callbacks for all completed requests.
+     */
     public void invokeCallbacks()
     {
         IotHubTransportPacket packet = this.callbackPacketsQueue.poll();

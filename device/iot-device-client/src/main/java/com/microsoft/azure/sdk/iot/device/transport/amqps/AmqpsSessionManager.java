@@ -494,6 +494,7 @@ public class AmqpsSessionManager
      *
      * @return AmqpsConvertFromProtonReturnValue the result of the 
      *         conversion containing the IoTHub message.
+     * @throws TransportException if converting the message fails
      */
     AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws TransportException
     {

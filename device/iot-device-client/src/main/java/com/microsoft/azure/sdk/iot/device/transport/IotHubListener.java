@@ -25,8 +25,8 @@ public interface IotHubListener
 
     /**
      * Callback to be fired when a transport message has been received.
-     * @param transportMessage The message that was received. May be null if {@param e} is not null
-     * @param e the exception that was encountered while receiving messages. May be null if {@param transportMessage}
+     * @param transportMessage The message that was received. May be null if e is not null
+     * @param e the exception that was encountered while receiving messages. May be null if transportMessage
      *          is not null
      */
     void onMessageReceived(IotHubTransportMessage transportMessage, Throwable e);

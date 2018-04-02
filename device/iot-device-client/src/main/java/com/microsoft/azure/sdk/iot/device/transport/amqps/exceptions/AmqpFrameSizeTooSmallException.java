@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 /**
  * This exception is thrown when a amqp:frame-size-too-small error is encountered over an AMQP connection
  *
- * See {@linktourl http://docs.oasis-open.org/amqp/core/v1.0/os/amqp-core-complete-v1.0-os.pdf}
+ <a href="http://docs.oasis-open.org/amqp/core/v1.0/os/amqp-core-complete-v1.0-os.pdf">For additional details, see this link</a>
  */
 public class AmqpFrameSizeTooSmallException extends ProtocolException
 {
