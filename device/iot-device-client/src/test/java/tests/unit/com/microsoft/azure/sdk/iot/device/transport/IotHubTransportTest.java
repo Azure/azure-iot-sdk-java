@@ -14,7 +14,6 @@ import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpUnautho
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttUnauthorizedException;
-import javafx.util.Duration;
 import mockit.*;
 import org.junit.Test;
 
@@ -1566,7 +1565,7 @@ public class IotHubTransportTest
         //arrange
         final IotHubTransport transport = new IotHubTransport(mockedConfig);
         final long expectedDelay = 0;
-        final Duration duration = Duration.ZERO;
+        final long duration = 0;
         Deencapsulation.setField(transport, "taskScheduler", mockedTaskScheduler);
         new Expectations(IotHubTransport.class)
         {

@@ -7,23 +7,21 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import javafx.util.Duration;
-
 /**
  * Represents the retry details
  */
 public class RetryDecision
 {
     private final boolean shouldRetry;
-    private final Duration duration;
+    private final long duration;
 
     /**
      * Constructor.
      *
      * @param shouldRetry the max number of retries allowed in the policies.
-     * @param duration the min interval between each retry.
+     * @param duration the min interval between each retry in milliseconds.
      */
-    public RetryDecision(boolean shouldRetry, Duration duration)
+    public RetryDecision(boolean shouldRetry, long duration)
     {
         // Codes_SRS_RETRYDECISION_28_001: [The constructor shall save the duration and getRetryDecision]
         this.duration = duration;
@@ -44,7 +42,7 @@ public class RetryDecision
      * Getter for the duration
      * @return the Duration which represents the interval to wait until the next retry..
      */
-    public Duration getDuration()
+    public long getDuration()
     {
         // Codes_SRS_RETRYDECISION_28_003: [The function shall return the value of duration]
         return this.duration;

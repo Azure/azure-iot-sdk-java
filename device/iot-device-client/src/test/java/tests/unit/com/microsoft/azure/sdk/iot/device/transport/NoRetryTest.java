@@ -8,7 +8,6 @@ import com.microsoft.azure.sdk.iot.device.transport.RetryDecision;
 import com.microsoft.azure.sdk.iot.device.transport.NoRetry;
 import java.util.Arrays;
 import java.util.Collection;
-import javafx.util.Duration;
 import org.junit.Before;
 import org.junit.runners.Parameterized;
 import org.junit.runner.RunWith;
@@ -52,7 +51,7 @@ public class NoRetryTest
     public void VerifyShouldRetryResult()
     {
         // arrange
-        RetryDecision expected = new RetryDecision(false, Duration.UNKNOWN);
+        RetryDecision expected = new RetryDecision(false, 0);
 
         // act
         RetryDecision actual = retryNoRetry.getRetryDecision(this.currentRetryCount, this.lastException);

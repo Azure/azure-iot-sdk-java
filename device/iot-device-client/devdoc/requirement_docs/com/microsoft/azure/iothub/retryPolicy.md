@@ -1,7 +1,7 @@
 # Default RetryPolicy
 
 The default retry policy is defined by the following:
-`new ExponentialBackoffWithJitter(int.MaxValue, Duration.millis(100), Duration.seconds(10), Duration.millis(100));`
+`new ExponentialBackoffWithJitter(Integer.MAX_VALUE, 100, 10*1000, 100);`
 
 This retry policy will have a fast first retry by default as well.
 

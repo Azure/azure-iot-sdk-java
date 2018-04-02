@@ -8,7 +8,6 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import javafx.util.Duration;
 
 import java.util.Random;
 
@@ -19,9 +18,9 @@ public class ExponentialBackoffWithJitter implements RetryPolicy
 {
     // Codes_SRS_EXPONENTIALBACKOFF_28_006: [Constructor should have default values retryCount, minBackoff, maxBackoff, deltaBackoff and firstFastRetry]
     private int retryCount = Integer.MAX_VALUE;
-    private Duration minBackoff = Duration.millis(100);
-    private Duration maxBackoff = Duration.seconds(10);
-    private Duration deltaBackoff = Duration.millis(100);
+    private long minBackoff = 100;
+    private long maxBackoff = 10*1000; //10 seconds
+    private long deltaBackoff = 100;
     private boolean firstFastRetry = true;
 
     private Random random = new Random();
@@ -43,7 +42,7 @@ public class ExponentialBackoffWithJitter implements RetryPolicy
      * @param deltaBackoff the max delta allowed between retries.
      * @param firstFastRetry indicates whether the first retry should be immediate.
      */
-    public ExponentialBackoffWithJitter(int retryCount, Duration minBackoff, Duration maxBackoff, Duration deltaBackoff, boolean firstFastRetry)
+    public ExponentialBackoffWithJitter(int retryCount, long minBackoff, long maxBackoff, long deltaBackoff, boolean firstFastRetry)
     {
         // Codes_SRS_EXPONENTIALBACKOFF_28_001: [If the retryCount is less than or equal to 0, the function shall throw an IllegalArgumentException.]
         if (retryCount <= 0)
@@ -69,7 +68,7 @@ public class ExponentialBackoffWithJitter implements RetryPolicy
     {
         // Codes_SRS_EXPONENTIALBACKOFF_28_003: [The function shall indicate immediate retry on first retry if firstFastRetry is true]
         if (currentRetryCount == 0 && this.firstFastRetry) {
-            return new RetryDecision(true, Duration.ZERO);
+            return new RetryDecision(true, 0);
         }
 
         // Codes_SRS_EXPONENTIALBACKOFF_28_004: [The function shall return non-zero wait time on first retry if firstFastRetry is false]
@@ -77,14 +76,14 @@ public class ExponentialBackoffWithJitter implements RetryPolicy
         // F(x) = min(Cmin+ (2^(x-1)-1) * rand(C * (1 – Jd), C*(1-Ju)), Cmax) where  x is the xth retry.]
         if (currentRetryCount < this.retryCount)
         {
-            int deltaBackoffLowbound = (int)(this.deltaBackoff.toMillis() * 0.8);
-            int deltaBackoffUpperbound = (int)(this.deltaBackoff.toMillis() * 1.2);
-            int randomDeltaBackOff = random.nextInt(deltaBackoffUpperbound - deltaBackoffLowbound);
-            int exponentialBackOffWithJitter = (int)((Math.pow(2.0, (double)currentRetryCount) - 1.0) * (randomDeltaBackOff + deltaBackoffLowbound));
-            int finalWaitTimeUntilNextRetry = (int)Math.min(this.minBackoff.toMillis()+ (double)exponentialBackOffWithJitter, this.maxBackoff.toMillis());
-            return new RetryDecision(true, new Duration((double)finalWaitTimeUntilNextRetry));
+            int deltaBackoffLowbound = (int)(this.deltaBackoff * 0.8);
+            int deltaBackoffUpperbound = (int)(this.deltaBackoff * 1.2);
+            long randomDeltaBackOff = random.nextInt(deltaBackoffUpperbound - deltaBackoffLowbound);
+            long exponentialBackOffWithJitter = (int)((Math.pow(2.0, (double)currentRetryCount) - 1.0) * (randomDeltaBackOff + deltaBackoffLowbound));
+            long finalWaitTimeUntilNextRetry = (int)Math.min(this.minBackoff + (double)exponentialBackOffWithJitter, this.maxBackoff);
+            return new RetryDecision(true, finalWaitTimeUntilNextRetry);
         }
 
-        return new RetryDecision(false, Duration.UNKNOWN);
+        return new RetryDecision(false, 0);
     }
 }

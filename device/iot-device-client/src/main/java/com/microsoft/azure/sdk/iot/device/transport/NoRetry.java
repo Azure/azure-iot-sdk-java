@@ -8,7 +8,6 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import javafx.util.Duration;
 
 /**
   * Represents a retry policy that performs no retries.
@@ -25,6 +24,6 @@ public class NoRetry implements RetryPolicy
     public RetryDecision getRetryDecision(int currentRetryCount, TransportException lastException)
     {
         // Codes_SRS_NORETRY_28_001: [The function shall return the false and 0 as the RetryDecision despite on inputs.]
-        return new RetryDecision(false, Duration.UNKNOWN);
+        return new RetryDecision(false, 0);
     }
 }

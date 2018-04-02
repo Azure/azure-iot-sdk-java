@@ -4,7 +4,6 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.transport.RetryDecision;
-import javafx.util.Duration;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -17,10 +16,10 @@ public class RetryDecisionTest
     public void constructorSavesParameters()
     {
         //act
-        final RetryDecision retryDecisionTest = new RetryDecision(true, Duration.millis(10));
+        final RetryDecision retryDecisionTest = new RetryDecision(true, 10);
 
         // assert
         assertTrue(retryDecisionTest.shouldRetry());
-        assertEquals(Duration.millis(10), retryDecisionTest.getDuration());
+        assertEquals(10, retryDecisionTest.getDuration());
     }
 }

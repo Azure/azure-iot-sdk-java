@@ -681,7 +681,7 @@ public class IotHubTransport implements IotHubListener
             //Want to sleep without interruption because the only interruptions expected are threads that add a message
             // to the waiting list again. Those threads should wait until after reconnection finishes first because
             // they will constantly fail until connection is re-established
-            IotHubTransport.sleepUninterruptibly((long) retryDecision.getDuration().toMillis(), MILLISECONDS);
+            IotHubTransport.sleepUninterruptibly((long) retryDecision.getDuration(), MILLISECONDS);
 
             hasReconnectOperationTimedOut = this.hasOperationTimedOut(this.reconnectionAttemptStartTimeMillis);
 
@@ -782,7 +782,7 @@ public class IotHubTransport implements IotHubListener
                 //Codes_SRS_IOTHUBTRANSPORT_34_063: [If the provided transportException is retryable, the packet has not
                 // timed out, and the retry policy allows, this function shall schedule a task to add the provided
                 // packet to the waiting list after the amount of time determined by the retry policy.]
-                this.taskScheduler.schedule(new MessageRetryRunnable(this.waitingPacketsQueue, packet), (long) retryDecision.getDuration().toMillis(), MILLISECONDS);
+                this.taskScheduler.schedule(new MessageRetryRunnable(this.waitingPacketsQueue, packet), (long) retryDecision.getDuration(), MILLISECONDS);
                 return;
             }
         }
