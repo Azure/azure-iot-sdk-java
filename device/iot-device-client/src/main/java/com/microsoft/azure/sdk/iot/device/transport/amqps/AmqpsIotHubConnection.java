@@ -204,7 +204,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_12_058: [The function shall call the connection to open device client links.]
                 this.openLinks();
 
-                if (!this.amqpsSessionManager.isAuthenticationOpened())
+                if (!this.amqpsSessionManager.isAuthenticationOpened() || this.state != IotHubConnectionStatus.CONNECTED)
                 {
                     // Codes_SRS_AMQPSIOTHUBCONNECTION_12_074: [If authentication has not succeeded after calling authenticate() and openLinks(), this function shall throw a retriable transport exception.]
                     TransportException transportException = new TransportException("Timed out waiting to connect to service");

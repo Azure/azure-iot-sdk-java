@@ -409,7 +409,7 @@ public class SendMessagesIT
 
         //Force the SAS token to expire before sending messages
         Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
-        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.HTTPS.toString(), NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.HTTPS.toString(), 1, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
         client.closeNow();
     }
 
@@ -422,7 +422,7 @@ public class SendMessagesIT
 
         //Force the SAS token to expire before sending messages
         Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
-        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.MQTT.toString(), NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.MQTT.toString(), 1, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
         client.closeNow();
     }
 
@@ -435,7 +435,7 @@ public class SendMessagesIT
 
         //Force the SAS token to expire before sending messages
         Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
-        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.MQTT_WS.toString(), NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.MQTT_WS.toString(), 1, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
         client.closeNow();
     }
 
@@ -448,7 +448,7 @@ public class SendMessagesIT
 
         //Force the SAS token to expire before sending messages
         Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
-        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.AMQPS.toString(), NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.AMQPS.toString(), 1, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
         client.closeNow();
     }
 
@@ -461,7 +461,7 @@ public class SendMessagesIT
 
         //Force the SAS token to expire before sending messages
         Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
-        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.AMQPS_WS.toString(), NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.AMQPS_WS.toString(), 1, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
         client.closeNow();
     }
 

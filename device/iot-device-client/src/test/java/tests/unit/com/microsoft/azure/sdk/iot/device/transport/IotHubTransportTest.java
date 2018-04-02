@@ -19,10 +19,7 @@ import mockit.*;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -160,7 +157,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_005: [If there was a packet in the inProgressPackets queue tied to the provided message, and the provided throwable is null, this function shall set the status of that packet to OK and add it to the callbacks queue.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_005: [If there was a packet in the inProgressPackets queue tied to the provided message, and the provided throwable is null, this function shall set the status of that packet to OK_EMPTY and add it to the callbacks queue.]
     @Test
     public void onMessageSentRetrievesFromInProgressAndAddsToCallbackForNoException()
     {
@@ -189,7 +186,7 @@ public class IotHubTransportTest
         new Verifications()
         {
             {
-                mockedPacket.setStatus(IotHubStatusCode.OK);
+                mockedPacket.setStatus(IotHubStatusCode.OK_EMPTY);
                 times = 1;
             }
         };
@@ -2494,6 +2491,207 @@ public class IotHubTransportTest
             {
                 testException.setRetryable(true);
                 times = 0;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_34_072: [This function shall check if the provided message should expect an ACK or not.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_073: [This function shall send the provided message over the saved connection
+    // and save the response code.]
+    @Test
+    public void sendPacketHappyPathWithAck() throws TransportException
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Map<String, IotHubTransportPacket> inProgressMessages = new HashMap<>();
+        Deencapsulation.setField(transport, "inProgressPackets", inProgressMessages);
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedHttpsIotHubConnection);
+        new NonStrictExpectations()
+        {
+            {
+                mockedPacket.getMessage();
+                result = mockedTransportMessage;
+
+                mockedTransportMessage.isMessageAckNeeded((IotHubClientProtocol) any);
+                result = true;
+
+                mockedHttpsIotHubConnection.sendMessage((Message) any);
+                result = IotHubStatusCode.OK_EMPTY;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "sendPacket", mockedPacket);
+
+        //assert
+        assertEquals(1, inProgressMessages.size());
+    }
+
+
+    //Tests_SRS_IOTHUBTRANSPORT_34_074: [If the response from sending is not OK or OK_EMPTY, this function
+    // shall invoke handleMessageException with that message.]
+    @Test
+    public void sendPacketReceivesStatusThatIsNotOkOrOkEmpty() throws TransportException
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Map<String, IotHubTransportPacket> inProgressMessages = new HashMap<>();
+        Deencapsulation.setField(transport, "inProgressPackets", inProgressMessages);
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedHttpsIotHubConnection);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                mockedPacket.getMessage();
+                result = mockedTransportMessage;
+
+                mockedTransportMessage.isMessageAckNeeded((IotHubClientProtocol) any);
+                result = true;
+
+                mockedHttpsIotHubConnection.sendMessage((Message) any);
+                result = IotHubStatusCode.HUB_OR_DEVICE_ID_NOT_FOUND;
+
+                Deencapsulation.invoke(transport, "handleMessageException", new Class[] {IotHubTransportPacket.class, TransportException.class}, mockedPacket, any);
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "sendPacket", mockedPacket);
+
+        //assert
+        assertEquals(0, inProgressMessages.size());
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "handleMessageException", new Class[] {IotHubTransportPacket.class, TransportException.class}, mockedPacket, any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_34_075: [If the response from sending is OK or OK_EMPTY and no ack is expected,
+    // this function shall put that set that status in the sent packet and add that packet to the callbacks queue.]
+    @Test
+    public void sendPacketHappyPathWithoutAck() throws TransportException
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Map<String, IotHubTransportPacket> inProgressMessages = new HashMap<>();
+        Queue<IotHubTransportPacket> callbackPacketsQueue = new ConcurrentLinkedQueue<>();
+        Deencapsulation.setField(transport, "callbackPacketsQueue", callbackPacketsQueue);
+        Deencapsulation.setField(transport, "inProgressPackets", inProgressMessages);
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedHttpsIotHubConnection);
+        new NonStrictExpectations()
+        {
+            {
+                mockedPacket.getMessage();
+                result = mockedTransportMessage;
+
+                mockedTransportMessage.isMessageAckNeeded((IotHubClientProtocol) any);
+                result = false;
+
+                mockedHttpsIotHubConnection.sendMessage((Message) any);
+                result = IotHubStatusCode.OK_EMPTY;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "sendPacket", mockedPacket);
+
+        //assert
+        assertEquals(0, inProgressMessages.size());
+        assertEquals(1, callbackPacketsQueue.size());
+        new Verifications()
+        {
+            {
+                mockedPacket.setStatus(IotHubStatusCode.OK_EMPTY);
+                times = 1;
+            }
+        };
+    }
+
+
+    //Tests_SRS_IOTHUBTRANSPORT_34_076: [If an exception is encountered while sending the message, this function
+    // shall invoke handleMessageException with that packet.]
+    @Test
+    public void sendPacketFailsToSend() throws TransportException
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Map<String, IotHubTransportPacket> inProgressMessages = new HashMap<>();
+        Queue<IotHubTransportPacket> callbackPacketsQueue = new ConcurrentLinkedQueue<>();
+        Deencapsulation.setField(transport, "callbackPacketsQueue", callbackPacketsQueue);
+        Deencapsulation.setField(transport, "inProgressPackets", inProgressMessages);
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedHttpsIotHubConnection);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                mockedPacket.getMessage();
+                result = mockedTransportMessage;
+
+                mockedTransportMessage.isMessageAckNeeded((IotHubClientProtocol) any);
+                result = false;
+
+                mockedHttpsIotHubConnection.sendMessage((Message) any);
+                result = mockedTransportException;
+
+                Deencapsulation.invoke(transport, "handleMessageException", new Class[] {IotHubTransportPacket.class, TransportException.class}, mockedPacket, mockedTransportException);
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "sendPacket", mockedPacket);
+
+        //assert
+        assertEquals(0, inProgressMessages.size());
+        assertEquals(0, callbackPacketsQueue.size());
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "handleMessageException", new Class[] {IotHubTransportPacket.class, TransportException.class}, mockedPacket, mockedTransportException);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_34_076: [If an exception is encountered while sending the message, this function
+    // shall invoke handleMessageException with that packet.]
+    @Test
+    public void sendPacketFailsToSendAndExpectsAck() throws TransportException
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Map<String, IotHubTransportPacket> inProgressMessages = new HashMap<>();
+        Queue<IotHubTransportPacket> callbackPacketsQueue = new ConcurrentLinkedQueue<>();
+        Deencapsulation.setField(transport, "callbackPacketsQueue", callbackPacketsQueue);
+        Deencapsulation.setField(transport, "inProgressPackets", inProgressMessages);
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedHttpsIotHubConnection);
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                mockedPacket.getMessage();
+                result = mockedTransportMessage;
+
+                mockedTransportMessage.isMessageAckNeeded((IotHubClientProtocol) any);
+                result = true;
+
+                mockedHttpsIotHubConnection.sendMessage((Message) any);
+                result = mockedTransportException;
+
+                Deencapsulation.invoke(transport, "handleMessageException", new Class[] {IotHubTransportPacket.class, TransportException.class}, mockedPacket, mockedTransportException);
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(transport, "sendPacket", mockedPacket);
+
+        //assert
+        assertEquals(0, inProgressMessages.size());
+        assertEquals(0, callbackPacketsQueue.size());
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "handleMessageException", new Class[] {IotHubTransportPacket.class, TransportException.class}, mockedPacket, mockedTransportException);
+                times = 1;
             }
         };
     }

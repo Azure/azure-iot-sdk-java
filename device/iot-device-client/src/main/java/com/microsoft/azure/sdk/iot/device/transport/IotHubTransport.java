@@ -114,8 +114,8 @@ public class IotHubTransport implements IotHubListener
             {
                 //Codes_SRS_IOTHUBTRANSPORT_34_005: [If there was a packet in the inProgressPackets queue tied to the
                 // provided message, and the provided throwable is null, this function shall set the status of that
-                // packet to OK and add it to the callbacks queue.]
-                packet.setStatus(IotHubStatusCode.OK);
+                // packet to OK_EMPTY and add it to the callbacks queue.]
+                packet.setStatus(IotHubStatusCode.OK_EMPTY);
                 this.addToCallbackQueue(packet);
             }
             else
@@ -177,7 +177,7 @@ public class IotHubTransport implements IotHubListener
     @Override
     public void onConnectionLost(Throwable e)
     {
-        if (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED)
+        if (this.connectionStatus != IotHubConnectionStatus.CONNECTED)
         {
             //Codes_SRS_IOTHUBTRANSPORT_34_011: [If this function is called while the connection status is DISCONNECTED,
             // this function shall do nothing.]
@@ -802,6 +802,8 @@ public class IotHubTransport implements IotHubListener
     private void sendPacket(IotHubTransportPacket packet)
     {
         Message message = packet.getMessage();
+
+        //Codes_SRS_IOTHUBTRANSPORT_34_072: [This function shall check if the provided message should expect an ACK or not.]
         boolean messageAckExpected = !(message instanceof IotHubTransportMessage
                 && !((IotHubTransportMessage) message).isMessageAckNeeded(this.defaultConfig.getProtocol()));
 
@@ -815,15 +817,20 @@ public class IotHubTransport implements IotHubListener
                 }
             }
 
+            //Codes_SRS_IOTHUBTRANSPORT_34_073: [This function shall send the provided message over the saved connection
+            // and save the response code.]
             IotHubStatusCode statusCode = this.iotHubTransportConnection.sendMessage(message);
 
             if (statusCode != IotHubStatusCode.OK_EMPTY && statusCode != IotHubStatusCode.OK)
             {
-                this.handleMessageException(packet, IotHubStatusCode.getConnectionStatusException(statusCode, ""));
+                //Codes_SRS_IOTHUBTRANSPORT_34_074: [If the response from sending is not OK or OK_EMPTY, this function
+                // shall invoke handleMessageException with that message.]
+                this.handleMessageException(this.inProgressPackets.remove(message.getMessageId()), IotHubStatusCode.getConnectionStatusException(statusCode, ""));
             }
             else if (!messageAckExpected)
             {
-                //when no ack is expected for the sent message, all we can do is add callback
+                //Codes_SRS_IOTHUBTRANSPORT_34_075: [If the response from sending is OK or OK_EMPTY and no ack is expected,
+                // this function shall put that set that status in the sent packet and add that packet to the callbacks queue.]
                 packet.setStatus(statusCode);
                 this.addToCallbackQueue(packet);
             }
@@ -844,9 +851,10 @@ public class IotHubTransport implements IotHubListener
                 outboundPacket = packet;
             }
 
+            //Codes_SRS_IOTHUBTRANSPORT_34_076: [If an exception is encountered while sending the message, this function
+            // shall invoke handleMessageException with that packet.]
             this.handleMessageException(outboundPacket, transportException);
         }
-
     }
 
     /**

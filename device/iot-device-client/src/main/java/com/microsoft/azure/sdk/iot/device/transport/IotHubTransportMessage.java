@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.sun.deploy.resources.Deployment_it;
 
 /**
  * Extends Message, adding transport artifacts.

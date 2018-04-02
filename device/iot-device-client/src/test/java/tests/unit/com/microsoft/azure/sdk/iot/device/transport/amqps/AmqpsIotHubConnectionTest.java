@@ -573,7 +573,7 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_057: [The function shall call the connection to authenticate.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_058: [The function shall call the connection to open device client links.]
     @Test
-    public void openCallsAuthenticateAndOpenLinks() throws TransportException, IOException, InterruptedException
+    public void openCallsAuthenticateAndOpenLinks() throws TransportException, InterruptedException
     {
         // arrange
         baseExpectations();
@@ -604,7 +604,14 @@ public class AmqpsIotHubConnectionTest {
         };
 
         // act
-        connection.open(mockedQueue);
+        try
+        {
+            connection.open(mockedQueue);
+        }
+        catch (TransportException e)
+        {
+            //exception will be thrown, but we aren't testing for what it is nor do we care that it threw
+        }
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger the reactor, the function shall closeNow the connection and throw an IOException.]
@@ -633,6 +640,7 @@ public class AmqpsIotHubConnectionTest {
     @Test
     public void openTriggersProtonReactor(@Mocked final Reactor mockedReactor) throws TransportException, InterruptedException
     {
+        //arrange
         baseExpectations();
 
         new NonStrictExpectations()
@@ -645,11 +653,19 @@ public class AmqpsIotHubConnectionTest {
 
         AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
-
         Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
 
-        connection.open(mockedQueue);
+        //act
+        try
+        {
+            connection.open(mockedQueue);
+        }
+        catch (TransportException e)
+        {
+            //exception will be thrown, but this unit test does not care
+        }
 
+        //assert
         new Verifications()
         {
             {
@@ -666,6 +682,7 @@ public class AmqpsIotHubConnectionTest {
     @Test
     public void openWaitsForReactorToBeReadyAndForEnoughLinkCreditToBeAvailable() throws TransportException, InterruptedException
     {
+        //arrange
         baseExpectations();
 
         new NonStrictExpectations()
@@ -679,11 +696,19 @@ public class AmqpsIotHubConnectionTest {
         };
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
-
         Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
 
-        connection.open(mockedQueue);
+        //act
+        try
+        {
+            connection.open(mockedQueue);
+        }
+        catch (TransportException e)
+        {
+            //exception will be thrown, but we aren't testing for what it is nor do we care that it threw
+        }
 
+        //assert
         new Verifications()
         {
             {

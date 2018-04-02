@@ -215,14 +215,16 @@ public final class DeviceClientConfig
      * Setter for RetryPolicy
      *
      * @param retryPolicy The types of retry policy to be used
+     * @throws IllegalArgumentException if retry policy is null
      */
-    public void setRetryPolicy(RetryPolicy retryPolicy)
+    public void setRetryPolicy(RetryPolicy retryPolicy) throws IllegalArgumentException
     {
         // Codes_SRS_DEVICECLIENTCONFIG_28_002: [This function shall throw IllegalArgumentException retryPolicy is null.]
         if (retryPolicy == null)
         {
             throw new IllegalArgumentException("Retry Policy cannot be null.");
         }
+
         // Codes_SRS_DEVICECLIENTCONFIG_28_003: [This function shall set retryPolicy.]
         this.retryPolicy = retryPolicy;
     }
