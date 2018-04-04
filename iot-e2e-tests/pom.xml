@@ -19,6 +19,7 @@
     <modules>
         <module>common</module>
         <module>jvm</module>
+        <module>android</module>
     </modules>
     <build>
         <plugins>

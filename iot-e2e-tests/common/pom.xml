@@ -23,6 +23,11 @@
             <artifactId>iot-device-client</artifactId>
             <version>1.9.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-service-client</artifactId>
+            <version>1.9.26</version>
+        </dependency>
         <!-- test dependencies -->
         <dependency>
             <groupId>org.jmockit</groupId>
