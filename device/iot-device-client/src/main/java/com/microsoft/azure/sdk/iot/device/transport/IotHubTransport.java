@@ -662,8 +662,12 @@ public class IotHubTransport implements IotHubListener
      */
     private void reconnect(TransportException transportException)
     {
-        //Codes_SRS_IOTHUBTRANSPORT_34_065: [this function shall save the current time that reconnection starts.]
-        this.reconnectionAttemptStartTimeMillis = System.currentTimeMillis();
+        if (this.reconnectionAttemptStartTimeMillis == 0)
+        {
+            //Codes_SRS_IOTHUBTRANSPORT_34_065: [If the saved reconnection attempt start time is 0, this function shall
+            // save the current time as the time that reconnection started.]
+            this.reconnectionAttemptStartTimeMillis = System.currentTimeMillis();
+        }
 
         boolean hasReconnectOperationTimedOut = this.hasOperationTimedOut(this.reconnectionAttemptStartTimeMillis);
         RetryDecision retryDecision = null;
@@ -686,7 +690,7 @@ public class IotHubTransport implements IotHubListener
             //Want to sleep without interruption because the only interruptions expected are threads that add a message
             // to the waiting list again. Those threads should wait until after reconnection finishes first because
             // they will constantly fail until connection is re-established
-            IotHubTransport.sleepUninterruptibly((long) retryDecision.getDuration(), MILLISECONDS);
+            IotHubTransport.sleepUninterruptibly(retryDecision.getDuration(), MILLISECONDS);
 
             hasReconnectOperationTimedOut = this.hasOperationTimedOut(this.reconnectionAttemptStartTimeMillis);
 
@@ -922,8 +926,9 @@ public class IotHubTransport implements IotHubListener
 
             if (newConnectionStatus == IotHubConnectionStatus.CONNECTED)
             {
-                //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt if connection status is changed to CONNECTED.]
+                //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt and reconnectionAttemptStartTimeMillis if connection status is changed to CONNECTED.]
                 this.currentReconnectionAttempt = 0;
+                this.reconnectionAttemptStartTimeMillis = 0;
             }
         }
     }
@@ -983,6 +988,12 @@ public class IotHubTransport implements IotHubListener
      */
     private boolean hasOperationTimedOut(long startTime)
     {
+        if (startTime == 0)
+        {
+            //Codes_SRS_IOTHUBTRANSPORT_34_077: [If the provided start time is 0, this function shall return false.]
+            return false;
+        }
+
         //Codes_SRS_IOTHUBTRANSPORT_34_044: [This function shall return if the provided start time was long enough ago
         // that it has passed the device operation timeout threshold.]
         return (System.currentTimeMillis() - startTime) > this.defaultConfig.getOperationTimeout();

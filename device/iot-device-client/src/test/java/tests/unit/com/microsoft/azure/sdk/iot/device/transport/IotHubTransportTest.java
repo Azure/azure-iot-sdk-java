@@ -1025,10 +1025,31 @@ public class IotHubTransportTest
         };
 
         //act
-        boolean hasTimedOut = Deencapsulation.invoke(transport, "hasOperationTimedOut", 0L);
+        boolean hasTimedOut = Deencapsulation.invoke(transport, "hasOperationTimedOut", 1L);
 
         //assert
         assertTrue(hasTimedOut);
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_34_077: [If the provided start time is 0, this function shall return false.]
+    @Test
+    public void hasOperationTimedOutReturnsFalseIfProvidedTimeIsZero()
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        new NonStrictExpectations()
+        {
+            {
+                mockedConfig.getOperationTimeout();
+                result = 0;
+            }
+        };
+
+        //act
+        boolean hasTimedOut = Deencapsulation.invoke(transport, "hasOperationTimedOut", 0L);
+
+        //assert
+        assertFalse(hasTimedOut);
     }
 
     //Tests_SRS_IOTHUBTRANSPORT_34_044: [This function shall return if the provided start time was long enough ago that it has passed the device operation timeout threshold.]
@@ -1089,7 +1110,7 @@ public class IotHubTransportTest
         assertEquals(1, waitingPacketsQueue.size());
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_043: [If the connection status of this object is not CONNECTED, this function shall do nothing]
+    //Tests_SRS_IOTHUBTRANSPORT_34_043: [If the connection status of this object is not CONNECTED, this function shall do nothing]
     @Test
     public void sendMessagesDoesNothingIfNotConnected()
     {
@@ -1107,7 +1128,7 @@ public class IotHubTransportTest
         assertFalse(waitingPacketsQueue.isEmpty());
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_044: [This function continue to dequeue packets saved in the waiting
+    //Tests_SRS_IOTHUBTRANSPORT_34_044: [This function continue to dequeue packets saved in the waiting
     // queue and send them until connection status isn't CONNECTED or until 10 messages have been sent]
     @Test
     public void sendMessagesSendsMessages()
@@ -1145,7 +1166,7 @@ public class IotHubTransportTest
         assertEquals(1, waitingPacketsQueue.size());
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_045: [This function shall dequeue each packet in the callback queue and execute
+    //Tests_SRS_IOTHUBTRANSPORT_34_045: [This function shall dequeue each packet in the callback queue and execute
     // their saved callback with their saved status and context]
     @Test
     public void invokeCallbacksInvokesAllCallbacks()
@@ -1186,7 +1207,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_046: [If this object's connection status is not CONNEECTED, this function shall do nothing.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_046: [If this object's connection status is not CONNEECTED, this function shall do nothing.]
     @Test
     public void handleMessageDoesNothingIfNotConnected() throws DeviceClientException
     {
@@ -1214,7 +1235,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_047: [If this object's connection status is CONNECTED and is using HTTPS,
+    //Tests_SRS_IOTHUBTRANSPORT_34_047: [If this object's connection status is CONNECTED and is using HTTPS,
     // this function shall invoke addReceivedMessagesOverHttpToReceivedQueue.]
     @Test
     public void handleMessageChecksForHttpMessages() throws DeviceClientException
@@ -1252,7 +1273,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_048: [If this object's connection status is CONNECTED and there is a
+    //Tests_SRS_IOTHUBTRANSPORT_34_048: [If this object's connection status is CONNECTED and there is a
     // received message in the queue, this function shall acknowledge the received message
     @Test
     public void handleMessageAcknowledgesAReceivedMessages() throws DeviceClientException
@@ -1286,7 +1307,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_049: [If the provided callback is null, this function shall throw an IllegalArgumentException.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_049: [If the provided callback is null, this function shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
     public void registerConnectionStateCallbackThrowsForNullCallback()
     {
@@ -1297,7 +1318,7 @@ public class IotHubTransportTest
         transport.registerConnectionStateCallback(null, new Object());
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_050: [This function shall save the provided callback and context.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_050: [This function shall save the provided callback and context.]
     @Test
     public void registerConnectionStateCallbackSavesProvidedCallbackAndContext()
     {
@@ -1313,7 +1334,7 @@ public class IotHubTransportTest
         assertEquals(context, Deencapsulation.getField(transport, "stateCallbackContext"));
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_051: [If the provided callback is null, this function shall throw an IllegalArgumentException.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_051: [If the provided callback is null, this function shall throw an IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
     public void registerConnectionStatusChangeCallbackThrowsForNullCallback()
     {
@@ -1324,7 +1345,7 @@ public class IotHubTransportTest
         transport.registerConnectionStatusChangeCallback(null, new Object());
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_052: [This function shall save the provided callback and context.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_052: [This function shall save the provided callback and context.]
     @Test
     public void registerConnectionStatusChangeCallbackSavesProvidedCallbackAndContext()
     {
@@ -1340,9 +1361,9 @@ public class IotHubTransportTest
         assertEquals(context, Deencapsulation.getField(transport, "connectionStatusChangeCallbackContext"));
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_053: [This function shall execute the callback associate with the provided
+    //Tests_SRS_IOTHUBTRANSPORT_34_053: [This function shall execute the callback associate with the provided
     // transport message with the provided message and its saved callback context.]
-    //Codes_SRS_IOTHUBTRANSPORT_34_054: [This function shall send the message callback result along the
+    //Tests_SRS_IOTHUBTRANSPORT_34_054: [This function shall send the message callback result along the
     // connection as the ack to the service.]
     @Test
     public void acknowledgeReceivedMessageSendsAck() throws TransportException
@@ -1381,7 +1402,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_055: [If an exception is thrown while acknowledging the received message,
+    //Tests_SRS_IOTHUBTRANSPORT_34_055: [If an exception is thrown while acknowledging the received message,
     // this function shall add the received message back into the receivedMessagesQueue and then rethrow the exception.]
     @Test
     public void acknowledgeReceivedMessageReQueuesFailedMessages() throws TransportException
@@ -1425,7 +1446,7 @@ public class IotHubTransportTest
         assertEquals(1, receivedMessagesQueue.size());
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_056: [If the saved http transport connection can receive a message, add it to receivedMessagesQueue.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_056: [If the saved http transport connection can receive a message, add it to receivedMessagesQueue.]
     @Test
     public void addReceivedMessagesOverHttpToReceivedQueueChecksForHttpMessages() throws TransportException
     {
@@ -1448,10 +1469,10 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_057: [This function shall move all packets from inProgressQueue to waiting queue.]
-    //Codes_SRS_IOTHUBTRANSPORT_34_058: [This function shall invoke updateStatus with DISCONNECTED_RETRYING, and the provided transportException.]
-    //Codes_SRS_IOTHUBTRANSPORT_34_059: [This function shall invoke checkForUnauthorizedException with the provided exception.]
-    //Codes_SRS_IOTHUBTRANSPORT_34_060: [This function shall invoke reconnect with the provided exception.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_057: [This function shall move all packets from inProgressQueue to waiting queue.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_058: [This function shall invoke updateStatus with DISCONNECTED_RETRYING, and the provided transportException.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_059: [This function shall invoke checkForUnauthorizedException with the provided exception.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_060: [This function shall invoke reconnect with the provided exception.]
     @Test
     public void handleDisconnectionClearsInProgressAndReconnects()
     {
@@ -1498,7 +1519,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_061: [This function shall close the saved connection, and then invoke openConnection and return null.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_061: [This function shall close the saved connection, and then invoke openConnection and return null.]
     @Test
     public void singleReconnectAttemptSuccess() throws TransportException
     {
@@ -1522,7 +1543,7 @@ public class IotHubTransportTest
         assertNull(result);
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_062: [If an exception is encountered while closing or opening the connection,
+    //Tests_SRS_IOTHUBTRANSPORT_34_062: [If an exception is encountered while closing or opening the connection,
     // this function shall invoke checkForUnauthorizedException on that exception and then return it.]
     @Test
     public void singleReconnectAttemptReturnsEncounteredException() throws TransportException
@@ -1556,7 +1577,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_063: [If the provided transportException is retryable, the packet has not
+    //Tests_SRS_IOTHUBTRANSPORT_34_063: [If the provided transportException is retryable, the packet has not
     // timed out, and the retry policy allows, this function shall schedule a task to add the provided
     // packet to the waiting list after the amount of time determined by the retry policy.]
     @Test
@@ -1606,7 +1627,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_064: [If the provided transportException is not retryable, the packet has expired,
+    //Tests_SRS_IOTHUBTRANSPORT_34_064: [If the provided transportException is not retryable, the packet has expired,
     // or if the retry policy says to not retry, this function shall add the provided packet to the callback queue.]
     @Test
     public void handleMessageExceptionDoesNotRetryIfDeviceOperationTimedOut()
@@ -1657,7 +1678,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_064: [If the provided transportException is not retryable, the packet has expired,
+    //Tests_SRS_IOTHUBTRANSPORT_34_064: [If the provided transportException is not retryable, the packet has expired,
     // or if the retry policy says to not retry, this function shall add the provided packet to the callback queue.]
     @Test
     public void handleMessageExceptionDoesNotRetryIfExceptionIsNotRetryable()
@@ -1708,7 +1729,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_064: [If the provided transportException is not retryable, the packet has expired,
+    //Tests_SRS_IOTHUBTRANSPORT_34_064: [If the provided transportException is not retryable, the packet has expired,
     // or if the retry policy says to not retry, this function shall add the provided packet to the callback queue.]
     @Test
     public void handleMessageExceptionDoesNotRetryIfRetryPolicySaysToNotRetry()
@@ -1759,10 +1780,11 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_068: [If the reconnection effort ends because the retry policy said to
+    //Tests_SRS_IOTHUBTRANSPORT_34_068: [If the reconnection effort ends because the retry policy said to
     // stop, this function shall invoke close with RETRY_EXPIRED and the last transportException.]
-    //Codes_SRS_IOTHUBTRANSPORT_34_065: [this function shall save the current time that reconnection starts.]
-    //Codes_SRS_IOTHUBTRANSPORT_34_066: [This function shall attempt to reconnect while this object's state is
+    //Tests_SRS_IOTHUBTRANSPORT_34_065: [If the saved reconnection attempt start time is 0, this function shall 
+    // save the current time as the time that reconnection started.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_066: [This function shall attempt to reconnect while this object's state is
     // DISCONNECTED_RETRYING, the operation hasn't timed out, and the last transport exception is retryable.]
     @Test
     public void reconnectAttemptsToReconnectUntilRetryPolicyEnds()
@@ -1808,7 +1830,7 @@ public class IotHubTransportTest
     }
 
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_069: [If the reconnection effort ends because the reconnection timed out,
+    //Tests_SRS_IOTHUBTRANSPORT_34_069: [If the reconnection effort ends because the reconnection timed out,
     // this function shall invoke close with RETRY_EXPIRED and a DeviceOperationTimeoutException.]
     @Test
     public void reconnectAttemptsToReconnectUntilOperationTimesOut()
@@ -1853,7 +1875,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_070: [If the reconnection effort ends because a terminal exception is
+    //Tests_SRS_IOTHUBTRANSPORT_34_070: [If the reconnection effort ends because a terminal exception is
     // encountered, this function shall invoke close with that terminal exception.]
     @Test
     public void reconnectAttemptsToReconnectUntilExceptionNotRetryable()
@@ -1904,7 +1926,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Codes_SRS_IOTHUBTRANSPORT_34_071: [If an exception is encountered while closing, this function shall invoke
+    //Tests_SRS_IOTHUBTRANSPORT_34_071: [If an exception is encountered while closing, this function shall invoke
     // updateStatus with DISCONNECTED, COMMUNICATION_ERROR, and the last transport exception.]
     @Test
     public void reconnectUpdatesStatusIfClosingFailed()
@@ -2069,7 +2091,7 @@ public class IotHubTransportTest
 
     //Tests_SRS_IOTHUBTRANSPORT_28_005:[This function shall updated the saved connection status if the connection status has changed.]
     //Tests_SRS_IOTHUBTRANSPORT_28_006:[This function shall invoke all callbacks listening for the state change if the connection status has changed.]
-    //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt if connection status is changed to CONNECTED.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt and reconnectionAttemptStartTimeMillis if connection status is changed to CONNECTED.]
     @Test
     public void updateStatusConnectionStatusChangedToConnected()
     {
@@ -2077,6 +2099,7 @@ public class IotHubTransportTest
         final IotHubTransport transport = new IotHubTransport(mockedConfig);
         Deencapsulation.setField(transport, "connectionStatus", IotHubConnectionStatus.DISCONNECTED_RETRYING);
         Deencapsulation.setField(transport, "currentReconnectionAttempt", 5);
+        Deencapsulation.setField(transport, "reconnectionAttemptStartTimeMillis", 5);
         new Expectations(IotHubTransport.class)
         {
             {
@@ -2094,6 +2117,7 @@ public class IotHubTransportTest
         //assert
         assertEquals(IotHubConnectionStatus.CONNECTED, Deencapsulation.getField(transport, "connectionStatus"));
         assertEquals(0, Deencapsulation.getField(transport, "currentReconnectionAttempt"));
+        assertEquals(0L, Deencapsulation.getField(transport, "reconnectionAttemptStartTimeMillis"));
         new Verifications()
         {
             {
@@ -2107,7 +2131,7 @@ public class IotHubTransportTest
 
     //Tests_SRS_IOTHUBTRANSPORT_28_005:[This function shall updated the saved connection status if the connection status has changed.]
     //Tests_SRS_IOTHUBTRANSPORT_28_006:[This function shall invoke all callbacks listening for the state change if the connection status has changed.]
-    //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt if connection status is changed to CONNECTED.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt and reconnectionAttemptStartTimeMillis if connection status is changed to CONNECTED.]
     @Test
     public void updateStatusConnectionStatusNotChanged()
     {
@@ -2145,7 +2169,7 @@ public class IotHubTransportTest
 
     //Tests_SRS_IOTHUBTRANSPORT_28_005:[This function shall updated the saved connection status if the connection status has changed.]
     //Tests_SRS_IOTHUBTRANSPORT_28_006:[This function shall invoke all callbacks listening for the state change if the connection status has changed.]
-    //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt if connection status is changed to CONNECTED.]
+    //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt and reconnectionAttemptStartTimeMillis if connection status is changed to CONNECTED.]
     @Test
     public void updateStatusConnectionStatusChangedToDisconnected()
     {

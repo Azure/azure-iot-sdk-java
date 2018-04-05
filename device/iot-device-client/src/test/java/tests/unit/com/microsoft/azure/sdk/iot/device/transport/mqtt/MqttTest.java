@@ -412,7 +412,7 @@ public class MqttTest
         new Verifications()
         {
             {
-                mockMqttAsyncClient.close();
+                Deencapsulation.invoke(mockedMqttConnection, "close");
                 times = 1;
             }
         };
@@ -420,7 +420,7 @@ public class MqttTest
 
     //Tests_SRS_Mqtt_34_055: [If an MQTT connection is connected, the function shall disconnect that connection.]
     @Test
-    public void disconnectDisconnectsIfConnected() throws IOException, MqttException, TransportException
+    public void disconnectDisconnectsIfConnected() throws MqttException, TransportException
     {
         baseConstructorExpectations();
         baseConnectExpectation();
@@ -430,7 +430,7 @@ public class MqttTest
         new NonStrictExpectations()
         {
             {
-                mockMqttAsyncClient.isConnected();
+                Deencapsulation.invoke(mockedMqttConnection, "isConnected");
                 result = true;
             }
         };
@@ -442,7 +442,7 @@ public class MqttTest
         new Verifications()
         {
             {
-                mockMqttAsyncClient.disconnect();
+                Deencapsulation.invoke(mockedMqttConnection, "disconnect");
                 times = 1;
             }
         };
@@ -461,7 +461,7 @@ public class MqttTest
         new NonStrictExpectations()
         {
             {
-                mockMqttAsyncClient.isConnected();
+                Deencapsulation.invoke(mockedMqttConnection, "isConnected");
                 result = false;
             }
         };
@@ -473,45 +473,11 @@ public class MqttTest
         new Verifications()
         {
             {
-                mockMqttAsyncClient.disconnect();
+                Deencapsulation.invoke(mockedMqttConnection, "disconnect");
                 times = 0;
             }
         };
     }
-
-    /*
-    **Tests_SRS_Mqtt_25_010: [If the MQTT connection is closed, the function shall do nothing.]
-     */
-    @Test
-    public void disconnectDoesNothingWhenNotConnected() throws TransportException, MqttException
-    {
-        //arrange
-        baseConstructorExpectations();
-        baseConnectExpectation();
-        new NonStrictExpectations()
-        {
-            {
-                mockMqttAsyncClient.isConnected();
-                result = false;
-            }
-        };
-
-        Mqtt mockMqtt = instantiateMqtt(true);
-        Deencapsulation.invoke(mockMqtt, "connect");
-
-        //act
-        Deencapsulation.invoke(mockMqtt, "disconnect");
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockMqttAsyncClient.isConnected();
-                times = 2;
-            }
-        };
-    }
-
 
     //Tests_SRS_Mqtt_25_014: [The function shall publish message payload on the publishTopic specified to the IoT Hub given in the configuration.]
     @Test
@@ -1344,7 +1310,7 @@ public class MqttTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockedMqttConnection, "getMqttAsyncClient");
+                Deencapsulation.invoke(mockedMqttConnection, "isConnected");
                 result = mqttException;
             }
         };

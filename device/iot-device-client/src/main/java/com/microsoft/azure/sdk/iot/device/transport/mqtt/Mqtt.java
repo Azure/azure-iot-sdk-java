@@ -115,22 +115,21 @@ abstract public class Mqtt implements MqttCallback
      */
     protected void disconnect() throws TransportException
     {
-        //Codes_SRS_Mqtt_25_010: [If the MQTT connection is closed, the function shall do nothing.]
         try
         {
-            if (this.mqttConnection.getMqttAsyncClient() != null)
+            if (this.mqttConnection.isConnected())
             {
-                    if (this.mqttConnection.getMqttAsyncClient().isConnected())
-                    {
-                        //Codes_SRS_Mqtt_34_055: [If an MQTT connection is connected, the function shall disconnect that connection.]
-                        IMqttToken disconnectToken = this.mqttConnection.getMqttAsyncClient().disconnect();
-                        disconnectToken.waitForCompletion();
-                    }
+                //Codes_SRS_Mqtt_34_055: [If an MQTT connection is connected, the function shall disconnect that connection.]
+                IMqttToken disconnectToken = this.mqttConnection.disconnect();
 
-                    //Codes_SRS_Mqtt_25_009: [The function shall close the MQTT client.]
-                    this.mqttConnection.getMqttAsyncClient().close();
+                if (disconnectToken != null)
+                {
+                    disconnectToken.waitForCompletion();
                 }
+            }
 
+            //Codes_SRS_Mqtt_25_009: [The function shall close the MQTT client.]
+            this.mqttConnection.close();
             this.mqttConnection.setMqttAsyncClient(null);
         }
         catch (MqttException e)

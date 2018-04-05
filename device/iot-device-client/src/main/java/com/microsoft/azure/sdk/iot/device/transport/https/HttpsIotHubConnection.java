@@ -88,8 +88,8 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_003: [The function shall send a POST request.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_004: [The function shall set the request body to the message body.]
-            HttpsRequest request =
-                    new HttpsRequest(eventUrl, HttpsMethod.POST, httpsMessage.getBody());
+            HttpsRequest request = new HttpsRequest(eventUrl, HttpsMethod.POST, httpsMessage.getBody());
+
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_005: [The function shall write each message property as a request header.]
             for (MessageProperty property : httpsMessage.getProperties())
             {

@@ -22,9 +22,7 @@ import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /*
     Unit test for MqttConnection
@@ -329,5 +327,149 @@ public class MqttConnectionTest
 
         //act
         boolean returnedValue = Deencapsulation.invoke(mqttConnection, "sendMessageAcknowledgement", expectedMessageId);
+    }
+
+    //Tests_SRS_MQTTCONNECTION_34_014: [If the saved mqttAsyncClient is not null, this function shall return the
+    // result of invoking isConnected on that object.]
+    @Test
+    public void isConnectedChecksMqttAsyncClientFalse()
+    {
+        //arrange
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, USER_NAME, PASSWORD, mockIotHubSSLContext);
+        Deencapsulation.setField(mqttConnection, "mqttAsyncClient", mockMqttAsyncClient);
+        
+        new NonStrictExpectations()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                result = false;
+            }
+        };
+        
+        //act
+        boolean isConnected = Deencapsulation.invoke(mqttConnection, "isConnected");
+        
+        //assert
+        new Verifications()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                times = 1;
+            }
+        };
+        assertFalse(isConnected);
+    }
+
+    //Tests_SRS_MQTTCONNECTION_34_014: [If the saved mqttAsyncClient is not null, this function shall return the
+    // result of invoking isConnected on that object.]
+    @Test
+    public void isConnectedChecksMqttAsyncClientTrue()
+    {
+        //arrange
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, USER_NAME, PASSWORD, mockIotHubSSLContext);
+        Deencapsulation.setField(mqttConnection, "mqttAsyncClient", mockMqttAsyncClient);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                result = true;
+            }
+        };
+
+        //act
+        boolean isConnected = Deencapsulation.invoke(mqttConnection, "isConnected");
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                times = 1;
+            }
+        };
+        assertTrue(isConnected);
+    }
+    
+    //Tests_SRS_MQTTCONNECTION_34_015: [If the saved mqttAsyncClient is null, this function shall return false.]
+    @Test
+    public void isConnectedReturnsFalseIfMqttAsyncClientIsNull()
+    {
+        //arrange
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, USER_NAME, PASSWORD, mockIotHubSSLContext);
+        Deencapsulation.setField(mqttConnection, "mqttAsyncClient", null);
+
+        //act
+        boolean isConnected = Deencapsulation.invoke(mqttConnection, "isConnected");
+
+        //assert
+        assertFalse(isConnected);
+    }
+    
+    //Tests_SRS_MQTTCONNECTION_34_016: [If the saved mqttAsyncClient is not null, this function shall return the
+    // result of invoking disconnect on that object.]
+    @Test
+    public void disconnectInvokesDisconnectOnAsyncClient() throws MqttException
+    {
+        //arrange
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, USER_NAME, PASSWORD, mockIotHubSSLContext);
+        Deencapsulation.setField(mqttConnection, "mqttAsyncClient", mockMqttAsyncClient);
+        new NonStrictExpectations()
+        {
+            {
+                mockMqttAsyncClient.disconnect();
+                result = mockMqttToken;
+            }
+        };
+
+        //act
+        IMqttToken actualToken = Deencapsulation.invoke(mqttConnection, "disconnect");
+
+        //assert
+        assertEquals(mockMqttToken, actualToken);
+        new Verifications()
+        {
+            {
+                mockMqttAsyncClient.disconnect();
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MQTTCONNECTION_34_017: [If the saved mqttAsyncClient is null, this function shall return null.]
+    @Test
+    public void disconnectReturnsNullIfNullAsyncClient() throws MqttException
+    {
+        //arrange
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, USER_NAME, PASSWORD, mockIotHubSSLContext);
+        Deencapsulation.setField(mqttConnection, "mqttAsyncClient", null);
+
+        //act
+        IMqttToken actualToken = Deencapsulation.invoke(mqttConnection, "disconnect");
+
+        //assert
+        assertNull(actualToken);
+    }
+
+    //Tests_SRS_MQTTCONNECTION_34_018: [If the saved mqttAsyncClient is not null, this function shall invoke 
+    // close on that object.]
+    @Test
+    public void closeInvokesCloseOnAsyncClient() throws MqttException
+    {
+        //arrange
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, USER_NAME, PASSWORD, mockIotHubSSLContext);
+        Deencapsulation.setField(mqttConnection, "mqttAsyncClient", mockMqttAsyncClient);
+
+        //act
+        Deencapsulation.invoke(mqttConnection, "close");
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockMqttAsyncClient.close();
+                times = 1;
+            }
+        };
     }
 }

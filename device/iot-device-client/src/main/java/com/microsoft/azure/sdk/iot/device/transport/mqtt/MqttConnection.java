@@ -8,10 +8,7 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import javax.net.ssl.SSLContext;
@@ -127,6 +124,42 @@ public class MqttConnection
     {
         //Codes_SRS_MQTTCONNECTION_25_007: [Getter for the MqttAsyncClient.]
         return this.mqttAsyncClient;
+    }
+
+    boolean isConnected()
+    {
+        if (this.mqttAsyncClient != null)
+        {
+            //Codes_SRS_MQTTCONNECTION_34_014: [If the saved mqttAsyncClient is not null, this function shall return the
+            // result of invoking isConnected on that object.]
+            return this.mqttAsyncClient.isConnected();
+        }
+
+        //Codes_SRS_MQTTCONNECTION_34_015: [If the saved mqttAsyncClient is null, this function shall return false.]
+        return false;
+    }
+
+    IMqttToken disconnect() throws MqttException
+    {
+        if (this.mqttAsyncClient != null)
+        {
+            //Codes_SRS_MQTTCONNECTION_34_016: [If the saved mqttAsyncClient is not null, this function shall return the
+            // result of invoking disconnect on that object.]
+            return this.mqttAsyncClient.disconnect();
+        }
+
+        //Codes_SRS_MQTTCONNECTION_34_017: [If the saved mqttAsyncClient is null, this function shall return null.]
+        return null;
+    }
+
+    void close() throws MqttException
+    {
+        if (this.mqttAsyncClient != null)
+        {
+            //Codes_SRS_MQTTCONNECTION_34_018: [If the saved mqttAsyncClient is not null, this function shall invoke
+            // close on that object.]
+            this.mqttAsyncClient.close();
+        }
     }
 
     /**
