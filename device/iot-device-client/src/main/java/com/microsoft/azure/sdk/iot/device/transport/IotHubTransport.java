@@ -65,6 +65,8 @@ public class IotHubTransport implements IotHubListener
 
     private final CustomLogger logger;
 
+    final private Object reconnectionLock = new Object();
+
     /**
      * Constructor for an IotHubTransport object with default values
      * @param defaultConfig the config used for opening connections, retrieving retry policy, and checking protocol
@@ -177,25 +179,28 @@ public class IotHubTransport implements IotHubListener
     @Override
     public void onConnectionLost(Throwable e)
     {
-        if (this.connectionStatus != IotHubConnectionStatus.CONNECTED)
+        synchronized (this.reconnectionLock)
         {
-            //Codes_SRS_IOTHUBTRANSPORT_34_011: [If this function is called while the connection status is DISCONNECTED,
-            // this function shall do nothing.]
-            return;
-        }
+            if (this.connectionStatus != IotHubConnectionStatus.CONNECTED)
+            {
+                //Codes_SRS_IOTHUBTRANSPORT_34_011: [If this function is called while the connection status is DISCONNECTED,
+                // this function shall do nothing.]
+                return;
+            }
 
-        if (e instanceof TransportException)
-        {
-            //Codes_SRS_IOTHUBTRANSPORT_34_012: [If this function is called with a TransportException, this function
-            // shall call handleDisconnection with that exception.]
-            this.handleDisconnection((TransportException) e);
-        }
-        else
-        {
-            //Codes_SRS_IOTHUBTRANSPORT_34_013: [If this function is called with any other type of exception, this
-            // function shall call handleDisconnection with that exception as the inner exception in a new
-            // TransportException.]
-            this.handleDisconnection(new TransportException(e));
+            if (e instanceof TransportException)
+            {
+                //Codes_SRS_IOTHUBTRANSPORT_34_012: [If this function is called with a TransportException, this function
+                // shall call handleDisconnection with that exception.]
+                this.handleDisconnection((TransportException) e);
+            }
+            else
+            {
+                //Codes_SRS_IOTHUBTRANSPORT_34_013: [If this function is called with any other type of exception, this
+                // function shall call handleDisconnection with that exception as the inner exception in a new
+                // TransportException.]
+                this.handleDisconnection(new TransportException(e));
+            }
         }
     }
 

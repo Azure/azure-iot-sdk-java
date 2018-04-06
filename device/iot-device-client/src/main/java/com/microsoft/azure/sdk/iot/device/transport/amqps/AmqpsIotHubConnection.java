@@ -34,7 +34,7 @@ import java.util.concurrent.*;
  */
 public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTransportConnection
 {
-    private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 30*1000; // 30 second timeout
+    private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 60*1000; // 60 second timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
     private IotHubConnectionStatus state;
 
@@ -213,9 +213,11 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                     throw this.savedException;
                 }
 
-                if (!this.amqpsSessionManager.isAuthenticationOpened() || this.state != IotHubConnectionStatus.CONNECTED)
+                if (!this.amqpsSessionManager.isAuthenticationOpened() || !this.amqpsSessionManager.areAllLinksOpen() || this.state != IotHubConnectionStatus.CONNECTED)
                 {
-                    // Codes_SRS_AMQPSIOTHUBCONNECTION_12_074: [If authentication has not succeeded after calling authenticate() and openLinks(), this function shall throw a retriable transport exception.]
+                    // Codes_SRS_AMQPSIOTHUBCONNECTION_12_074: [If authentication has not succeeded after calling
+                    // authenticate() and openLinks(), or if all links are not open yet,
+                    // this function shall throw a retryable transport exception.]
                     TransportException transportException = new TransportException("Timed out waiting to connect to service");
                     transportException.setRetryable(true);
                     throw transportException;

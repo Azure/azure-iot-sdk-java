@@ -172,8 +172,8 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 [device-code]: ./doc/java-devbox-setup.md#installiotsource
 [service-code]: ./doc/java-devbox-setup.md#installiotsource
 [device-android]: ./doc/java-devbox-setup.md#installiotandroid
-[java-api-reference-device]: https://azure.github.io/azure-iot-sdk-java/device/
-[java-api-reference-service]: https://azure.github.io/azure-iot-sdk-java/service/
+[java-api-reference-device]: https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.device
+[java-api-reference-service]: https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.service
 [devbox-setup]: doc/java-devbox-setup.md
 [java-api-reference]: https://azure.github.io/azure-iot-sdk-java/
 [setup-iothub]: https://aka.ms/howtocreateazureiothub

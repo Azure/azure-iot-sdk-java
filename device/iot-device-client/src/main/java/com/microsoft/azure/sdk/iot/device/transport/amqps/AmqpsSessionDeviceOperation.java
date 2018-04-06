@@ -543,11 +543,15 @@ public class AmqpsSessionDeviceOperation
             try
             {
                 // Wait a while for existing tasks to terminate
-                if (!taskSchedulerTokenRenewal.awaitTermination(60, TimeUnit.SECONDS))
+                if (!taskSchedulerTokenRenewal.awaitTermination(10, TimeUnit.SECONDS))
                 {
                     taskSchedulerTokenRenewal.shutdownNow(); // Cancel currently executing tasks
+
                     // Wait a while for tasks to respond to being cancelled
-                    if (!taskSchedulerTokenRenewal.awaitTermination(60, TimeUnit.SECONDS)) System.err.println("taskSchedulerTokenRenewal did not terminate correctly");
+                    if (!taskSchedulerTokenRenewal.awaitTermination(10, TimeUnit.SECONDS))
+                    {
+                        System.err.println("taskSchedulerTokenRenewal did not terminate correctly");
+                    }
                 }
             }
             catch (InterruptedException ie)

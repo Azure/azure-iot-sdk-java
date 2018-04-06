@@ -174,6 +174,7 @@ public class AmqpsSessionManager
                 {
                     // Codes_SRS_AMQPSESSIONMANAGER_12_019: [The function shall call openLinks on all session list members.]
                     this.amqpsDeviceSessionList.get(i).openLinks(this.session);
+
                     synchronized (this.openLinksLock)
                     {
                         try
@@ -445,6 +446,26 @@ public class AmqpsSessionManager
         return isLinkFound;
     }
 
+    boolean areAllLinksOpen()
+    {
+        boolean areAllLinksOpen = true;
+        if (this.isAuthenticationOpened())
+        {
+            for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
+            {
+                // Codes_SRS_AMQPSESSIONMANAGER_34_044: [If this object's authentication is open, this function shall return if all saved sessions' links are open.]
+                areAllLinksOpen &= this.amqpsDeviceSessionList.get(i).operationLinksOpened();
+            }
+        }
+        else
+        {
+            // Codes_SRS_AMQPSESSIONMANAGER_34_045: [If this object's authentication is not open, this function shall return false.]
+            return false;
+        }
+
+        return areAllLinksOpen;
+    }
+
     /**
      * Get the status of the authentication links.
      *
@@ -524,11 +545,11 @@ public class AmqpsSessionManager
             try
             {
                 // Wait a while for existing tasks to terminate
-                if (!this.taskSchedulerCBSSend.awaitTermination(60, TimeUnit.SECONDS))
+                if (!this.taskSchedulerCBSSend.awaitTermination(10, TimeUnit.SECONDS))
                 {
                     this.taskSchedulerCBSSend.shutdownNow(); // Cancel currently executing tasks
                     // Wait a while for tasks to respond to being cancelled
-                    if (!this.taskSchedulerCBSSend.awaitTermination(60, TimeUnit.SECONDS))
+                    if (!this.taskSchedulerCBSSend.awaitTermination(10, TimeUnit.SECONDS))
                     {
                         System.err.println("taskSchedulerTokenRenewal did not terminate correctly");
                     }

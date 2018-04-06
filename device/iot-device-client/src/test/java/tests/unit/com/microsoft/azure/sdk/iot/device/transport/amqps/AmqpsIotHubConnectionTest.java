@@ -601,6 +601,9 @@ public class AmqpsIotHubConnectionTest {
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "areAllLinksOpen");
+                result = true;
             }
         };
 
@@ -2172,9 +2175,11 @@ public class AmqpsIotHubConnectionTest {
         };
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_12_074: [If authentication has not succeeded after calling authenticate() and openLinks(), this function shall throw a retriable transport exception.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_12_074: [If authentication has not succeeded after calling
+    // authenticate() and openLinks(), or if all links are not open yet,
+    // this function shall throw a retryable transport exception.]
     @Test (expected = TransportException.class)
-    public void openChecksIfActuallyOpen() throws TransportException, InterruptedException
+    public void openChecksIfActuallyOpenExceptionEncountered() throws TransportException, InterruptedException
     {
         // arrange
         baseExpectations();
@@ -2207,6 +2212,48 @@ public class AmqpsIotHubConnectionTest {
         // act
         connection.open(mockedQueue);
     }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_12_074: [If authentication has not succeeded after calling
+    // authenticate() and openLinks(), or if all links are not open yet,
+    // this function shall throw a retryable transport exception.]
+    @Test (expected = TransportException.class)
+    public void openChecksIfActuallyOpenNotAllLinksOpened() throws TransportException, InterruptedException
+    {
+        // arrange
+        baseExpectations();
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        connection.setListener(mockedIotHubListener);
+        Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
+
+        new StrictExpectations()
+        {
+            {
+                mockOpenLatch.await(anyLong, TimeUnit.MILLISECONDS);
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
+                result = true;
+
+                mockAmqpsSessionManager.authenticate();
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
+                result = true;
+
+                mockAmqpsSessionManager.openDeviceOperationLinks();
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
+                result = true;
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "areAllLinksOpen");
+                result = false;
+            }
+        };
+
+        // act
+        connection.open(mockedQueue);
+    }
+
 
     // Tests_SRS_AMQPSTRANSPORT_34_076: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
     @Test (expected = IllegalStateException.class)
