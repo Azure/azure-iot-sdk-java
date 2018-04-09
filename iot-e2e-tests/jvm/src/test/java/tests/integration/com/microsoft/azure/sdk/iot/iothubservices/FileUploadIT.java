@@ -5,6 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
+import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
@@ -211,10 +212,10 @@ public class FileUploadIT
         deviceClient = null;
     }
 
-    private void setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, IOException
+    private void setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException
     {
         deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, scDevice), protocol);
-        deviceClient.open();
+        SendMessagesCommon.openDeviceClientWithRetry(deviceClient);
     }
 
     private void tearDownDeviceClient() throws IOException

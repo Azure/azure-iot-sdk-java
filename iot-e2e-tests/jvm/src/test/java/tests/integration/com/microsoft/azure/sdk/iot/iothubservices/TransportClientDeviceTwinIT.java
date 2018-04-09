@@ -1,5 +1,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
+import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -203,7 +204,7 @@ public class TransportClientDeviceTwinIT
             devicesUnderTest.get(i).dCDeviceForTwin = new TransportClientDeviceTwinIT.DeviceExtension();
         }
 
-        transportClient.open();
+        SendMessagesCommon.openTransportClientWithRetry(transportClient);
 
         for (int i = 0; i < MAX_DEVICES; i++)
         {

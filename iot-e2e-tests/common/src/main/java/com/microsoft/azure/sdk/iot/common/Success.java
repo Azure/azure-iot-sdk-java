@@ -3,17 +3,42 @@
 
 package com.microsoft.azure.sdk.iot.common;
 
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+
 public class Success
 {
-    public Boolean result = false;
+    public Boolean result = null;
+    private IotHubStatusCode callbackStatusCode;
+    private boolean callbackWasFired = false;
 
     public void setResult(Boolean result)
     {
         this.result = result;
     }
 
+    public void setCallbackStatusCode(IotHubStatusCode callbackStatusCode)
+    {
+        this.callbackStatusCode = callbackStatusCode;
+        this.callbackWasFired = true;
+    }
+
     public Boolean getResult()
     {
         return this.result;
+    }
+
+    public boolean wasCallbackFired()
+    {
+        return this.callbackWasFired;
+    }
+
+    public IotHubStatusCode getCallbackStatusCode()
+    {
+        return this.callbackStatusCode;
+    }
+
+    public void callbackWasFired()
+    {
+        callbackWasFired = true;
     }
 }

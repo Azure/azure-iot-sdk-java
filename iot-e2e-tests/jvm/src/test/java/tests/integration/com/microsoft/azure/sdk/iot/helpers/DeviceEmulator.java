@@ -5,6 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
+import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
@@ -65,7 +66,7 @@ public class DeviceEmulator  implements Runnable
     {
         this.deviceClient = new DeviceClient(connectionString, protocol);
         clearStatistics();
-        deviceClient.open();
+        SendMessagesCommon.openDeviceClientWithRetry(deviceClient);
     }
 
     /**
@@ -82,7 +83,7 @@ public class DeviceEmulator  implements Runnable
     {
         this.deviceClient = new DeviceClient(connectionString, protocol, publicKeyCert, false, privateKey, false);
         clearStatistics();
-        deviceClient.open();
+        SendMessagesCommon.openDeviceClientWithRetry(deviceClient);
     }
 
     @Override

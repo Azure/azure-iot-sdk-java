@@ -1,11 +1,14 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
+import com.microsoft.azure.sdk.iot.common.Success;
+import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import junit.framework.AssertionFailedError;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
@@ -16,6 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
+import static junit.framework.TestCase.fail;
 
 public class TransportClientReceiveMessagesIT
 {
@@ -32,7 +36,7 @@ public class TransportClientReceiveMessagesIT
     private static Device[] deviceListAmqps = new Device[MAX_DEVICE_MULTIPLEX];
 
     // How much to wait until receiving a message from the server, in milliseconds
-    private int receiveTimeout = 240000; //4 minutes
+    private int receiveTimeout = 4 * 60 * 1000; //4 minutes
 
     private static String expectedCorrelationId = "1234";
     private static String expectedMessageId = "5678";
@@ -109,11 +113,11 @@ public class TransportClientReceiveMessagesIT
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        transportClient.open();
+        SendMessagesCommon.openTransportClientWithRetry(transportClient);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
-            TransportClientReceiveMessagesIT.Success messageReceived = new TransportClientReceiveMessagesIT.Success();
+            Success messageReceived = new Success();
             com.microsoft.azure.sdk.iot.device.MessageCallback callback = new TransportClientReceiveMessagesIT.MessageCallback();
             clientArrayList.get(i).setMessageCallback(callback, messageReceived);
 
@@ -137,11 +141,11 @@ public class TransportClientReceiveMessagesIT
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        transportClient.open();
+        SendMessagesCommon.openTransportClientWithRetry(transportClient);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
-            TransportClientReceiveMessagesIT.Success messageReceived = new TransportClientReceiveMessagesIT.Success();
+            Success messageReceived = new Success();
             com.microsoft.azure.sdk.iot.device.MessageCallback callback = new TransportClientReceiveMessagesIT.MessageCallback();
             clientArrayList.get(i).setMessageCallback(callback, messageReceived);
 
@@ -160,29 +164,16 @@ public class TransportClientReceiveMessagesIT
         {
             Boolean resultValue = true;
             HashMap<String, String> messageProperties = (HashMap<String, String>) TransportClientReceiveMessagesIT.messageProperties;
-            TransportClientReceiveMessagesIT.Success messageReceived = (TransportClientReceiveMessagesIT.Success)context;
+            Success messageReceived = (Success)context;
             if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg))
             {
                 resultValue = false;
             }
 
+            messageReceived.callbackWasFired();
+
             messageReceived.setResult(resultValue);
             return IotHubMessageResult.COMPLETE;
-        }
-    }
-
-    private class Success
-    {
-        public Boolean result = false;
-
-        public void setResult(Boolean result)
-        {
-            this.result = result;
-        }
-
-        public Boolean getResult()
-        {
-            return this.result;
         }
     }
 
@@ -225,25 +216,24 @@ public class TransportClientReceiveMessagesIT
         serviceClient.send(deviceId, serviceMessage);
     }
 
-    private void waitForMessageToBeReceived(TransportClientReceiveMessagesIT.Success messageReceived, String protocolName)
+    private void waitForMessageToBeReceived(Success messageReceived, String protocolName)
     {
         try
         {
-            int waitDuration = 0;
-            while (!messageReceived.getResult() && waitDuration <= receiveTimeout)
+            long startTime = System.currentTimeMillis();
+            while (!messageReceived.wasCallbackFired())
             {
                 Thread.sleep(100);
-                waitDuration += 100;
-            }
 
-            if (waitDuration > receiveTimeout)
-            {
-                Assert.fail("Receiving messages over " + protocolName + " protocol timed out.");
+                if (System.currentTimeMillis() - startTime > receiveTimeout)
+                {
+                    fail("Timed out waiting for message to be received");
+                }
             }
 
             if (!messageReceived.getResult())
             {
-                Assert.fail("Receiving message over " + protocolName + " protocol failed");
+                Assert.fail("Receiving message over " + protocolName + " protocol failed. Received message was missing one or more properties");
             }
         }
         catch (InterruptedException e)

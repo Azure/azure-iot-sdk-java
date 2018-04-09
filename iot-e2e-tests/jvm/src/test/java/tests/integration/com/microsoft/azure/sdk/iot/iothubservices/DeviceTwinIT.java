@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -221,7 +222,7 @@ public class DeviceTwinIT
         {
             deviceState.dCDeviceForTwin = new DeviceExtension();
             deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager), IotHubClientProtocol.MQTT);
-            deviceClient.open();
+            SendMessagesCommon.openDeviceClientWithRetry(deviceClient);
             deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
             deviceState.deviceTwinStatus = STATUS.SUCCESS;
         }
@@ -240,7 +241,7 @@ public class DeviceTwinIT
         deviceState.dCDeviceForTwin = new DeviceExtension();
         String connString = DeviceConnectionString.get(iotHubConnectionString, x509DeviceUnderTest.sCDeviceForRegistryManager);
         x509DeviceClient = new DeviceClient(connString, protocol, publicKeyCert, false, privateKey, false);
-        x509DeviceClient.open();
+        SendMessagesCommon.openDeviceClientWithRetry(x509DeviceClient);
         x509DeviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
         deviceState.deviceTwinStatus = STATUS.SUCCESS;
 

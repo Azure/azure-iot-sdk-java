@@ -1958,7 +1958,7 @@ public class AmqpsIotHubConnectionTest {
         };
     }
 
-    //Tests_SRS_n [If the provided event object's transport holds a remote error condition object, this function shall report the associated TransportException to this object's listeners.]
+    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_061 [If the provided event object's transport holds a remote error condition object, this function shall report the associated TransportException to this object's listeners.]
     @Test
     public void OnLinkRemoteCloseReportsErrorCodeIfPresent() throws TransportException
     {

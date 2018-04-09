@@ -1,5 +1,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
+import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.service.Device;
@@ -194,7 +195,7 @@ public class TransportClientDeviceMethodIT
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        transportClient.open();
+        SendMessagesCommon.openTransportClientWithRetry(transportClient);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
@@ -225,7 +226,7 @@ public class TransportClientDeviceMethodIT
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        transportClient.open();
+        SendMessagesCommon.openTransportClientWithRetry(transportClient);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
@@ -266,7 +267,7 @@ public class TransportClientDeviceMethodIT
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        transportClient.open();
+        SendMessagesCommon.openTransportClientWithRetry(transportClient);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
@@ -297,7 +298,7 @@ public class TransportClientDeviceMethodIT
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        transportClient.open();
+        SendMessagesCommon.openTransportClientWithRetry(transportClient);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {

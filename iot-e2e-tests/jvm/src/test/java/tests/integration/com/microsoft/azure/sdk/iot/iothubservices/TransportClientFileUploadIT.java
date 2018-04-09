@@ -1,5 +1,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
+import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -255,7 +256,7 @@ public class TransportClientFileUploadIT
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        transportClient.open();
+        SendMessagesCommon.openTransportClientWithRetry(transportClient);
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
@@ -326,7 +327,7 @@ public class TransportClientFileUploadIT
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        transportClient.open();
+        SendMessagesCommon.openTransportClientWithRetry(transportClient);
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
 

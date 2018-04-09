@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -198,7 +199,7 @@ public class DeviceTwinAmqpsWsIT
         {
             deviceState.dCDeviceForTwin = new DeviceExtension();
             deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager), IotHubClientProtocol.AMQPS_WS);
-            deviceClient.open();
+            SendMessagesCommon.openDeviceClientWithRetry(deviceClient);
             deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
             deviceState.deviceTwinStatus = STATUS.SUCCESS;
         }

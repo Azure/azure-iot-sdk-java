@@ -5,35 +5,49 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
+import com.microsoft.azure.sdk.iot.common.ErrorInjectionHelper;
 import com.microsoft.azure.sdk.iot.common.EventCallback;
 import com.microsoft.azure.sdk.iot.common.Success;
 import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.device.transport.NoRetry;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
+import com.microsoft.azure.sdk.iot.common.MessageAndResult;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon.sendMessages;
+import static com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon.sendMessagesExpectingConnectionStatusChangeUpdate;
+import static com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon.sendMessagesExpectingUnrecoverableConnectionLossAndTimeout;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
+import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.fail;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenGenerator.generateSasTokenForIotDevice;
 
+@RunWith(Parameterized.class)
 public class SendMessagesIT
 {
     //How much devices the multithreaded test will create in parallel.
@@ -43,7 +57,17 @@ public class SendMessagesIT
     private static final Integer NUM_CONNECTIONS_PER_DEVICE = 10;
 
     //How much messages each device will send to the hub for each connection.
-    private static final Integer NUM_MESSAGES_PER_CONNECTION = 10;
+    private static final Integer NUM_MESSAGES_PER_CONNECTION = 6;
+
+    //The messages to be sent in these tests. Some contain error injection messages surrounded by normal messages
+    private static final List<MessageAndResult> NORMAL_MESSAGES_TO_SEND = new ArrayList<>();
+    private static final List<MessageAndResult> TCP_CONNECTION_DROP_MESSAGES_TO_SEND = new ArrayList<>();
+    private static final List<MessageAndResult> AMQP_CONNECTION_DROP_MESSAGES_TO_SEND = new ArrayList<>();
+    private static final List<MessageAndResult> AMQP_SESSION_DROP_MESSAGES_TO_SEND = new ArrayList<>();
+    private static final List<MessageAndResult> AMQP_CBS_REQUEST_LINK_DROP_MESSAGES_TO_SEND = new ArrayList<>();
+    private static final List<MessageAndResult> AMQP_CBS_RESPONSE_LINK_DROP_MESSAGES_TO_SEND = new ArrayList<>();
+    private static final List<MessageAndResult> AMQP_C2D_LINK_DROP_MESSAGES_TO_SEND = new ArrayList<>();
+    private static final List<MessageAndResult> AMQP_D2C_LINK_DROP_MESSAGES_TO_SEND = new ArrayList<>();
 
     //How many keys each message will cary.
     private static final Integer NUM_KEYS_PER_MESSAGE = 10;
@@ -73,6 +97,8 @@ public class SendMessagesIT
     private static Device deviceMqttX509;
     private static Device deviceHttpsX509;
     private static Device deviceAmqpsX509;
+    private static Device deviceMqttWsX509;
+    private static Device deviceAmqpsWsX509;
 
     private static Device[] deviceListAmqps = new Device[MAX_DEVICE_PARALLEL];
     private static final AtomicBoolean succeed = new AtomicBoolean();
@@ -81,6 +107,158 @@ public class SendMessagesIT
     private static final long SECONDS_FOR_SAS_TOKEN_TO_LIVE = 3;
     private static final long MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE = 5000;
     private static final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 1;
+
+    private SendMessagesITRunner testInstance;
+
+    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
+    @Parameterized.Parameters(name = "{1} with {3} auth")
+    public static Collection inputs() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException
+    {
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        X509Cert cert = new X509Cert(0,false, "TestLeaf", "TestRoot");
+        privateKey =  cert.getPrivateKeyLeafPem();
+        publicKeyCert = cert.getPublicCertLeafPem();
+        x509Thumbprint = cert.getThumbPrintLeaf();
+
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        String uuid = UUID.randomUUID().toString();
+        String deviceIdHttps = "java-device-client-e2e-test-https".concat("-" + uuid);
+        String deviceIdAmqps = "java-device-client-e2e-test-amqps".concat("-" + uuid);
+        String deviceIdAmqpsWs = "java-device-client-e2e-test-amqpsws".concat("-" + uuid);
+        String deviceIdMqtt = "java-device-client-e2e-test-mqtt".concat("-" + uuid);
+        String deviceIdMqttWs = "java-device-client-e2e-test-mqttws".concat("-" + uuid);
+        String deviceIdMqttX509 = "java-device-client-e2e-test-mqtt-X509".concat("-" + uuid);
+        String deviceIdHttpsX509 = "java-device-client-e2e-test-https-X509".concat("-" + uuid);
+        String deviceIdAmqpsX509 = "java-device-client-e2e-test-amqps-X509".concat("-" + uuid);
+        String deviceIdMqttWsX509 = "java-device-client-e2e-test-mqttws-X509".concat("-" + uuid);
+        String deviceIdAmqpsWsX509 = "java-device-client-e2e-test-amqpsws-X509".concat("-" + uuid);
+
+        deviceHttps = Device.createFromId(deviceIdHttps, null, null);
+        deviceAmqps = Device.createFromId(deviceIdAmqps, null, null);
+        deviceAmqpsWs = Device.createFromId(deviceIdAmqpsWs, null, null);
+        deviceMqtt = Device.createFromId(deviceIdMqtt, null, null);
+        deviceMqttWs = Device.createFromId(deviceIdMqttWs, null, null);
+
+        deviceMqttX509 = Device.createDevice(deviceIdMqttX509, AuthenticationType.SELF_SIGNED);
+        deviceHttpsX509 = Device.createDevice(deviceIdHttpsX509, AuthenticationType.SELF_SIGNED);
+        deviceAmqpsX509 = Device.createDevice(deviceIdAmqpsX509, AuthenticationType.SELF_SIGNED);
+        deviceMqttWsX509 = Device.createDevice(deviceIdMqttWsX509, AuthenticationType.SELF_SIGNED);
+        deviceAmqpsWsX509 = Device.createDevice(deviceIdAmqpsWsX509, AuthenticationType.SELF_SIGNED);
+
+        deviceMqttX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        deviceHttpsX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        deviceAmqpsX509.setThumbprint(x509Thumbprint,x509Thumbprint);
+        deviceMqttWsX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        deviceAmqpsWsX509.setThumbprint(x509Thumbprint,x509Thumbprint);
+
+        registryManager.addDevice(deviceHttps);
+        registryManager.addDevice(deviceAmqps);
+        registryManager.addDevice(deviceAmqpsWs);
+        registryManager.addDevice(deviceMqtt);
+        registryManager.addDevice(deviceMqttWs);
+
+        registryManager.addDevice(deviceMqttX509);
+        registryManager.addDevice(deviceHttpsX509);
+        registryManager.addDevice(deviceAmqpsX509);
+
+        for (int i = 0; i < MAX_DEVICE_PARALLEL; i++)
+        {
+            deviceIdAmqps = "java-device-client-e2e-test-amqps".concat(i + "-" + uuid);
+            deviceListAmqps[i] = Device.createFromId(deviceIdAmqps, null, null);
+            registryManager.addDevice(deviceListAmqps[i]);
+        }
+
+        buildMessageLists();
+
+        hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
+        return Arrays.asList(
+                new Object[][]
+                {
+                    //sas token
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceHttps), IotHubClientProtocol.HTTPS), IotHubClientProtocol.HTTPS, deviceHttps, SAS},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqtt), IotHubClientProtocol.MQTT), IotHubClientProtocol.MQTT, deviceMqtt, SAS},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqttWs), IotHubClientProtocol.MQTT_WS), IotHubClientProtocol.MQTT_WS, deviceMqttWs, SAS},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqps), AMQPS), AMQPS, deviceAmqps, SAS},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqpsWs), IotHubClientProtocol.AMQPS_WS), IotHubClientProtocol.AMQPS_WS, deviceAmqpsWs, SAS},
+
+                    //x509
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceHttpsX509), IotHubClientProtocol.HTTPS, publicKeyCert, false, privateKey, false), IotHubClientProtocol.HTTPS, deviceHttpsX509, AuthenticationType.SELF_SIGNED},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqttX509), IotHubClientProtocol.MQTT, publicKeyCert, false, privateKey, false), IotHubClientProtocol.MQTT, deviceMqttX509, AuthenticationType.SELF_SIGNED},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqpsX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceAmqpsX509, AuthenticationType.SELF_SIGNED}
+
+                    //not supported yet
+                                //{new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqpsWsX509), IotHubClientProtocol.AMQPS_WS, publicKeyCert, false, privateKey, false), IotHubClientProtocol.AMQPS_WS, deviceAmqpsWsX509, AuthenticationType.SELF_SIGNED},
+                                //{new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqttWsX509), IotHubClientProtocol.MQTT_WS, publicKeyCert, false, privateKey, false), IotHubClientProtocol.MQTT_WS, deviceMqttWsX509, AuthenticationType.SELF_SIGNED}
+                }
+        );
+    }
+
+    private static void buildMessageLists()
+    {
+        MessageAndResult normalMessageAndExpectedResult = new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY);
+        for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; i++)
+        {
+            //error injection should take place in the middle of normal communications
+            if (i == (NUM_MESSAGES_PER_CONNECTION / 2))
+            {
+                //messages that tests should recover from
+                Message tcpConnectionDropErrorInjectionMessage = ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
+                TCP_CONNECTION_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(tcpConnectionDropErrorInjectionMessage, null));
+
+                Message amqpConnectionDropErrorInjectionMessage = ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
+                AMQP_CONNECTION_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpConnectionDropErrorInjectionMessage, null));
+
+                Message amqpSessionDropErrorInjectionMessage = ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
+                AMQP_SESSION_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpSessionDropErrorInjectionMessage, null));
+
+                Message amqpCbsRequestLinkDropErrorInjectionMessage = ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
+                AMQP_CBS_REQUEST_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpCbsRequestLinkDropErrorInjectionMessage, null));
+
+                Message amqpCbsResponseLinkDropErrorInjectionMessage = ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
+                AMQP_CBS_RESPONSE_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpCbsResponseLinkDropErrorInjectionMessage, null));
+
+                Message amqpC2DLinkDropErrorInjectionMessage = ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
+                AMQP_C2D_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpC2DLinkDropErrorInjectionMessage, null));
+
+                Message amqpD2CLinkDropErrorInjectionMessage = ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
+                AMQP_D2C_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpD2CLinkDropErrorInjectionMessage, null));
+            }
+            else
+            {
+                TCP_CONNECTION_DROP_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
+                AMQP_CONNECTION_DROP_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
+                AMQP_SESSION_DROP_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
+                AMQP_CBS_REQUEST_LINK_DROP_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
+                AMQP_CBS_RESPONSE_LINK_DROP_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
+                AMQP_C2D_LINK_DROP_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
+                AMQP_D2C_LINK_DROP_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
+            }
+
+            NORMAL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY));
+        }
+    }
+
+    public SendMessagesIT(DeviceClient deviceClient, IotHubClientProtocol protocol, Device device, AuthenticationType authenticationType)
+    {
+        super();
+        this.testInstance = new SendMessagesITRunner(deviceClient, protocol, device, authenticationType);
+    }
+
+    private class SendMessagesITRunner
+    {
+        private DeviceClient deviceClient;
+        private IotHubClientProtocol protocol;
+        private Device device;
+        private AuthenticationType authenticationType;
+
+        public SendMessagesITRunner(DeviceClient deviceClient, IotHubClientProtocol protocol, Device device, AuthenticationType authenticationType)
+        {
+            this.deviceClient = deviceClient;
+            this.protocol = protocol;
+            this.device = device;
+            this.authenticationType = authenticationType;
+        }
+    }
 
     protected static class testDevice implements Runnable
     {
@@ -132,10 +310,11 @@ public class SendMessagesIT
         private void openConnection() throws IOException, URISyntaxException
         {
             client = new DeviceClient(connString, protocol);
-            client.open();
+            SendMessagesCommon.openDeviceClientWithRetry(client);
         }
 
-        public void sendMessages() {
+        public void sendMessages()
+        {
             for (int i = 0; i < numMessagesPerConnection; ++i)
             {
                 try
@@ -145,25 +324,24 @@ public class SendMessagesIT
                     for (int j = 0; j < numKeys; j++) {
                         msgSend.setProperty("key"+j, "value"+j);
                     }
-                    msgSend.setExpiryTime(5000);
 
                     Success messageSent = new Success();
                     EventCallback callback = new EventCallback(IotHubStatusCode.OK_EMPTY);
                     client.sendEventAsync(msgSend, callback, messageSent);
 
-                    Integer waitDuration = 0;
-                    while(!messageSent.getResult())
+                    long startTime = System.currentTimeMillis();
+                    while(!messageSent.wasCallbackFired())
                     {
                         Thread.sleep(RETRY_MILLISECONDS);
-                        if ((waitDuration += RETRY_MILLISECONDS) > sendTimeout)
+                        if (System.currentTimeMillis() - startTime > sendTimeout)
                         {
-                            break;
+                            fail("Timed out waiting for event callback");
                         }
                     }
 
-                    if (!messageSent.getResult())
+                    if (messageSent.getCallbackStatusCode() != IotHubStatusCode.OK_EMPTY)
                     {
-                        Assert.fail("Sending message over AMQPS protocol failed");
+                        Assert.fail("Sending message over AMQPS protocol failed: expected OK_EMPTY but received " + messageSent.getCallbackStatusCode());
                     }
                 }
                 catch (Exception e)
@@ -177,57 +355,6 @@ public class SendMessagesIT
         {
             client.closeNow();
         }
-    }
-
-    @BeforeClass
-    public static void setUp() throws Exception
-    {
-        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        X509Cert cert = new X509Cert(0,false, "TestLeaf", "TestRoot");
-        privateKey =  cert.getPrivateKeyLeafPem();
-        publicKeyCert = cert.getPublicCertLeafPem();
-        x509Thumbprint = cert.getThumbPrintLeaf();
-
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-        String uuid = UUID.randomUUID().toString();
-        String deviceIdHttps = "java-device-client-e2e-test-https".concat("-" + uuid);
-        String deviceIdAmqps = "java-device-client-e2e-test-amqps".concat("-" + uuid);
-        String deviceIdAmqpsWs = "java-device-client-e2e-test-amqpsws".concat("-" + uuid);
-        String deviceIdMqtt = "java-device-client-e2e-test-mqtt".concat("-" + uuid);
-        String deviceIdMqttWs = "java-device-client-e2e-test-mqttws".concat("-" + uuid);
-        String deviceIdMqttX509 = "java-device-client-e2e-test-mqtt-X509".concat("-" + uuid);
-        String deviceIdHttpsX509 = "java-device-client-e2e-test-https-X509".concat("-" + uuid);
-        String deviceIdAmqpsX509 = "java-device-client-e2e-test-amqps-X509".concat("-" + uuid);
-
-        deviceHttps = Device.createFromId(deviceIdHttps, null, null);
-        deviceAmqps = Device.createFromId(deviceIdAmqps, null, null);
-        deviceAmqpsWs = Device.createFromId(deviceIdAmqpsWs, null, null);
-        deviceMqtt = Device.createFromId(deviceIdMqtt, null, null);
-        deviceMqttWs = Device.createFromId(deviceIdMqttWs, null, null);
-        deviceMqttX509 = Device.createDevice(deviceIdMqttX509, AuthenticationType.SELF_SIGNED);
-        deviceHttpsX509 = Device.createDevice(deviceIdHttpsX509, AuthenticationType.SELF_SIGNED);
-        deviceAmqpsX509 = Device.createDevice(deviceIdAmqpsX509, AuthenticationType.SELF_SIGNED);
-
-        deviceMqttX509.setThumbprint(x509Thumbprint, x509Thumbprint);
-        deviceHttpsX509.setThumbprint(x509Thumbprint, x509Thumbprint);
-        deviceAmqpsX509.setThumbprint(x509Thumbprint,x509Thumbprint);
-
-        registryManager.addDevice(deviceHttps);
-        registryManager.addDevice(deviceAmqps);
-        registryManager.addDevice(deviceAmqpsWs);
-        registryManager.addDevice(deviceMqtt);
-        registryManager.addDevice(deviceMqttWs);
-        registryManager.addDevice(deviceMqttX509);
-        registryManager.addDevice(deviceHttpsX509);
-        registryManager.addDevice(deviceAmqpsX509);
-
-        for (int i = 0; i < MAX_DEVICE_PARALLEL; i++) {
-            deviceIdAmqps = "java-device-client-e2e-test-amqps".concat(i + "-" + uuid);
-            deviceListAmqps[i] = Device.createFromId(deviceIdAmqps, null, null);
-            registryManager.addDevice(deviceListAmqps[i]);
-        }
-
-        hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
     }
 
     @AfterClass
@@ -267,54 +394,35 @@ public class SendMessagesIT
     }
 
     @Test
-    public void sendMessagesOverHttps() throws IOException, URISyntaxException, InterruptedException
+    public void sendMessages() throws IOException, InterruptedException
     {
-        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceHttps), IotHubClientProtocol.HTTPS);
-        client.open();
-        sendMessages(client, IotHubClientProtocol.HTTPS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-        client.closeNow();
+        if (testInstance.protocol == IotHubClientProtocol.MQTT_WS &&(testInstance.authenticationType == AuthenticationType.SELF_SIGNED || testInstance.authenticationType == AuthenticationType.CERTIFICATE_AUTHORITY))
+        {
+            //mqtt_ws does not support x509 auth currently
+            return;
+        }
+
+        SendMessagesCommon.sendMessages(testInstance.deviceClient, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0);
     }
 
     @Test
-    public void sendMessagesOverHttpsWithX509() throws IOException, URISyntaxException, InterruptedException
+    public void sendMessagesOverAmqpsMultithreaded() throws InterruptedException
     {
-        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceHttpsX509), IotHubClientProtocol.HTTPS, publicKeyCert, false, privateKey, false);
-        client.open();
-        sendMessages(client, IotHubClientProtocol.HTTPS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-        client.closeNow();
-    }
+        if (!(testInstance.protocol == AMQPS && testInstance.authenticationType == SAS))
+        {
+            //this test only applicable for AMQPS with SAS auth
+            return;
+        }
 
-    @Test
-    public void sendMessagesOverAmqps() throws IOException, URISyntaxException, InterruptedException
-    {
-        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqps), IotHubClientProtocol.AMQPS);
-        client.open();
-        sendMessages(client, IotHubClientProtocol.AMQPS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-        client.closeNow();
-    }
-
-    @Test
-    public void sendMessagesOverAmqpsWs() throws IOException, InterruptedException, URISyntaxException
-    {
-        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqps), IotHubClientProtocol.AMQPS_WS);
-        client.open();
-        sendMessages(client, IotHubClientProtocol.AMQPS_WS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-        client.closeNow();
-    }
-
-    @Test
-    public void sendMessagesOverAmqpsMultithreaded() throws IOException, InterruptedException
-    {
         List<Thread> threads = new ArrayList<>(deviceListAmqps.length);
         CountDownLatch cdl = new CountDownLatch(deviceListAmqps.length);
 
-        Integer count = 0;
         for(Device deviceAmqps: deviceListAmqps)
         {
             Thread thread = new Thread(
                     new testDevice(
                             deviceAmqps,
-                            IotHubClientProtocol.AMQPS,
+                            AMQPS,
                             NUM_CONNECTIONS_PER_DEVICE,
                             NUM_MESSAGES_PER_CONNECTION,
                             NUM_KEYS_PER_MESSAGE,
@@ -322,7 +430,6 @@ public class SendMessagesIT
                             cdl));
             thread.start();
             threads.add(thread);
-            count++;
         }
 
         cdl.await(1, TimeUnit.MINUTES);
@@ -334,49 +441,17 @@ public class SendMessagesIT
     }
 
     @Test
-    public void sendMessagesOverMqtt() throws IOException, URISyntaxException, InterruptedException
+    public void tokenRenewalWorks() throws InterruptedException
     {
-        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqtt), IotHubClientProtocol.MQTT);
-        client.open();
-        sendMessages(client, IotHubClientProtocol.MQTT, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-        client.closeNow();
-    }
-
-    @Test
-    public void sendMessagesOverMqttWS() throws IOException, URISyntaxException, InterruptedException
-    {
-        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqtt), IotHubClientProtocol.MQTT_WS);
-        client.open();
-        sendMessages(client, IotHubClientProtocol.MQTT_WS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-        client.closeNow();
-    }
-
-    @Test
-    public void sendMessagesOverMqttWithX509() throws IOException, URISyntaxException, InterruptedException
-    {
-        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqttX509), IotHubClientProtocol.MQTT, publicKeyCert, false, privateKey, false);
-        client.open();
-        sendMessages(client, IotHubClientProtocol.MQTT, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-        client.closeNow();
-    }
-
-    @Test
-    public void sendMessagesOverAmqpsWithX509() throws IOException, URISyntaxException, InterruptedException
-    {
-        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqpsX509), IotHubClientProtocol.AMQPS, publicKeyCert, false, privateKey, false);
-        client.open();
-        sendMessages(client, IotHubClientProtocol.AMQPS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-        client.closeNow();
-    }
-
-    @Test
-    public void tokenRenewalWorksForHTTPS() throws IOException, InterruptedException, URISyntaxException
-    {
-        DeviceClient client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceHttps), IotHubClientProtocol.HTTPS);
+        if (testInstance.authenticationType != SAS)
+        {
+            //this scenario is not applicable for x509 auth
+            return;
+        }
 
         //set it so a newly generated sas token only lasts for a small amount of time
-        client.setOption("SetSASTokenExpiryTime", SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
-        client.open();
+        testInstance.deviceClient.setOption("SetSASTokenExpiryTime", SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
+        SendMessagesCommon.openDeviceClientWithRetry(testInstance.deviceClient);
 
         for (int messageAttempt = 0; messageAttempt < NUM_MESSAGES_PER_CONNECTION; messageAttempt++)
         {
@@ -385,123 +460,176 @@ public class SendMessagesIT
 
             Success messageSent = new Success();
             EventCallback callback = new EventCallback(IotHubStatusCode.OK_EMPTY);
-            client.sendEventAsync(new Message("some message body"), callback, messageSent);
+            testInstance.deviceClient.sendEventAsync(new Message("some message body"), callback, messageSent);
 
-            Integer waitDuration = 0;
-            while(!messageSent.getResult())
+            long startTime = System.currentTimeMillis();
+            while(!messageSent.wasCallbackFired())
             {
                 Thread.sleep(RETRY_MILLISECONDS);
-                if ((waitDuration += RETRY_MILLISECONDS) > SEND_TIMEOUT_MILLISECONDS)
+                if (System.currentTimeMillis() - startTime > SEND_TIMEOUT_MILLISECONDS)
                 {
                     fail("Timed out waiting for successful message callback");
-                    break;
                 }
+            }
+
+            if (messageSent.getCallbackStatusCode() != IotHubStatusCode.OK_EMPTY)
+            {
+                fail("Sending messages over " + testInstance.protocol + " failed: expected OK_EMPTY message callback but received " + messageSent.getCallbackStatusCode());
             }
         }
     }
 
     @Test
-    public void tokenExpiredAfterOpenButBeforeSendHTTPS() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
+    public void tokenExpiredAfterOpenButBeforeSendHttp() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
     {
-        String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, deviceHttps.getDeviceId(), deviceHttps.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
-        DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, IotHubClientProtocol.HTTPS);
-        client.open();
+        if (testInstance.protocol != IotHubClientProtocol.HTTPS || testInstance.authenticationType != SAS)
+        {
+            //This scenario only applies to HTTP since MQTT and AMQP allow expired sas tokens for 30 minutes after open
+            // as long as token did not expire before open. X509 doesn't apply either
+            return;
+        }
+
+        String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, deviceHttps.getDeviceId(), testInstance.device.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
+        DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, testInstance.protocol);
+        SendMessagesCommon.openDeviceClientWithRetry(client);
 
         //Force the SAS token to expire before sending messages
         Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
-        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.HTTPS.toString(), 1, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, testInstance.protocol.toString(), 1, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
         client.closeNow();
     }
 
-    @Test
-    public void tokenExpiredAfterOpenButBeforeSendMqtt() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
-    {
-        String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, deviceMqtt.getDeviceId(), deviceMqtt.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
-        DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, IotHubClientProtocol.MQTT);
-        client.open();
 
-        //Force the SAS token to expire before sending messages
-        Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
-        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.MQTT.toString(), 1, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-        client.closeNow();
+    @Test
+    public void expiredMessagesAreNotSent() throws URISyntaxException, IOException
+    {
+
+
+        SendMessagesCommon.sendExpiredMessageExpectingMessageExpiredCallback(testInstance.deviceClient, testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
     }
 
     @Test
-    public void tokenExpiredAfterOpenButBeforeSendMqttWs() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
+    public void sendMessagesWithTcpConnectionDrop() throws IOException, InterruptedException
     {
-        String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, deviceMqttWs.getDeviceId(), deviceMqttWs.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
-        DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, IotHubClientProtocol.MQTT_WS);
-        client.open();
+        if (testInstance.protocol == IotHubClientProtocol.HTTPS || (testInstance.protocol == IotHubClientProtocol.MQTT_WS && testInstance.authenticationType != SAS))
+        {
+            //TCP connection is not maintained between device and service when using HTTPS, so this test case isn't applicable
+            //MQTT_WS + x509 is not supported for sending messages
+            return;
+        }
 
-        //Force the SAS token to expire before sending messages
-        Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
-        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.MQTT_WS.toString(), 1, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-        client.closeNow();
+        sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.deviceClient, testInstance.protocol, TCP_CONNECTION_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 400);
     }
 
     @Test
-    public void tokenExpiredAfterOpenButBeforeSendAmqps() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
+    public void sendMessagesOverAmqpWithConnectionDrop() throws IOException, InterruptedException
     {
-        String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, deviceAmqps.getDeviceId(), deviceAmqps.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
-        DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, IotHubClientProtocol.AMQPS);
-        client.open();
+        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == IotHubClientProtocol.AMQPS_WS && testInstance.authenticationType == SAS)))
+        {
+            //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
+            return;
+        }
 
-        //Force the SAS token to expire before sending messages
-        Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
-        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.AMQPS.toString(), 1, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-        client.closeNow();
+        SendMessagesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.deviceClient, testInstance.protocol, AMQP_CONNECTION_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 400);
     }
 
     @Test
-    public void tokenExpiredAfterOpenButBeforeSendAmqpsWS() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
+    public void sendMessagesOverAmqpWithSessionDrop() throws IOException, InterruptedException
     {
-        String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, deviceAmqpsWs.getDeviceId(), deviceAmqpsWs.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
-        DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, IotHubClientProtocol.AMQPS_WS);
-        client.open();
+        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == IotHubClientProtocol.AMQPS_WS && testInstance.authenticationType == SAS)))
+        {
+            //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
+            return;
+        }
 
-        //Force the SAS token to expire before sending messages
-        Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
-        SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, IotHubClientProtocol.AMQPS_WS.toString(), 1, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-        client.closeNow();
+        SendMessagesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.deviceClient, testInstance.protocol, AMQP_SESSION_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 400);
     }
 
     @Test
-    public void expiredMessagesAreNotSentMQTT() throws URISyntaxException, IOException, InterruptedException
+    public void sendMessagesOverAmqpWithCbsRequestLinkDrop() throws IOException, InterruptedException
     {
-        IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
-        String connectionString = DeviceConnectionString.get(iotHubConnectionString, deviceMqtt);
-        SendMessagesCommon.sendExpiredMessageExpectingMessageExpiredCallback(connectionString, protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == IotHubClientProtocol.AMQPS_WS && testInstance.authenticationType == SAS)))
+        {
+            //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. C2D link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        SendMessagesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.deviceClient, testInstance.protocol, AMQP_CBS_REQUEST_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 600);
     }
 
     @Test
-    public void expiredMessagesAreNotSentMQTTWS() throws URISyntaxException, IOException, InterruptedException
+    public void sendMessagesOverAmqpWithCbsResponseLinkDrop() throws IOException, InterruptedException
     {
-        IotHubClientProtocol protocol = IotHubClientProtocol.MQTT_WS;
-        String connectionString = DeviceConnectionString.get(iotHubConnectionString, deviceMqttWs);
-        SendMessagesCommon.sendExpiredMessageExpectingMessageExpiredCallback(connectionString, protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == IotHubClientProtocol.AMQPS_WS && testInstance.authenticationType == SAS)))
+        {
+            //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. C2D link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        SendMessagesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.deviceClient, testInstance.protocol, AMQP_CBS_RESPONSE_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 600);
     }
 
     @Test
-    public void expiredMessagesAreNotSentAMQPS() throws URISyntaxException, IOException, InterruptedException
+    public void sendMessagesOverAmqpWithD2CLinkDrop() throws IOException, InterruptedException
     {
-        IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        String connectionString = DeviceConnectionString.get(iotHubConnectionString, deviceAmqps);
-        SendMessagesCommon.sendExpiredMessageExpectingMessageExpiredCallback(connectionString, protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == IotHubClientProtocol.AMQPS_WS && testInstance.authenticationType == SAS)))
+        {
+            //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
+            return;
+        }
+
+        SendMessagesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.deviceClient, testInstance.protocol, AMQP_D2C_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 600);
     }
 
     @Test
-    public void expiredMessagesAreNotSentAMQPSWS() throws URISyntaxException, IOException, InterruptedException
+    public void sendMessagesOverAmqpWithC2DLinkDrop() throws IOException, InterruptedException
     {
-        IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
-        String connectionString = DeviceConnectionString.get(iotHubConnectionString, deviceAmqpsWs);
-        SendMessagesCommon.sendExpiredMessageExpectingMessageExpiredCallback(connectionString, protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == IotHubClientProtocol.AMQPS_WS && testInstance.authenticationType == SAS)))
+        {
+            //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. C2D link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        SendMessagesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.deviceClient, testInstance.protocol, AMQP_C2D_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 600);
     }
 
     @Test
-    public void expiredMessagesAreNotSentHTTPS() throws URISyntaxException, IOException, InterruptedException
+    public void sendMessagesWithTcpConnectionDropNotifiesUserIfRetryExpires() throws IOException, InterruptedException
     {
-        IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
-        String connectionString = DeviceConnectionString.get(iotHubConnectionString, deviceHttps);
-        SendMessagesCommon.sendExpiredMessageExpectingMessageExpiredCallback(connectionString, protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        if (testInstance.protocol == IotHubClientProtocol.HTTPS || (testInstance.protocol == IotHubClientProtocol.MQTT_WS && testInstance.authenticationType != SAS))
+        {
+            //TCP connection is not maintained between device and service when using HTTPS, so this test case isn't applicable
+            //MQTT_WS + x509 is not supported for sending messages
+            return;
+        }
+
+        testInstance.deviceClient.setRetryPolicy(new NoRetry());
+
+        Message tcpConnectionDropErrorInjectionMessageUnrecoverable = ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(1, 100000);
+        sendMessagesExpectingUnrecoverableConnectionLossAndTimeout(testInstance.deviceClient, testInstance.protocol, tcpConnectionDropErrorInjectionMessageUnrecoverable);
+
+        //reset back to default
+        testInstance.deviceClient.setRetryPolicy(new ExponentialBackoffWithJitter());
     }
 }

@@ -7,10 +7,13 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
+import com.microsoft.azure.sdk.iot.common.MessageAndResult;
 import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -29,9 +32,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.UUID;
+import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol.*;
@@ -62,6 +63,8 @@ public class ProvisioningClientIT
     private static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // milli secs of time to wait
 
     private static final Integer IOTHUB_NUM_OF_MESSAGES_TO_SEND = 3; // milli secs of time to wait
+    private static final List<MessageAndResult> messagesToSendAndResultsExpected = new ArrayList<>();
+
     // How much to wait until a message makes it to the server, in milliseconds
     private static final Integer IOTHUB_MAX_SEND_TIMEOUT = 60000; // milli secs of time to wait
 
@@ -91,6 +94,11 @@ public class ProvisioningClientIT
         provisioningServiceClient =
                 ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+
+        for (int i = 0; i < IOTHUB_NUM_OF_MESSAGES_TO_SEND; i++)
+        {
+            messagesToSendAndResultsExpected.add(new MessageAndResult(new Message("Java client e2e test message"), IotHubStatusCode.OK_EMPTY));
+        }
     }
 
     @After
@@ -329,7 +337,7 @@ public class ProvisioningClientIT
                 DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri(),
                                                                                     provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId(),
                                                                                     securityProviderTPMEmulator, iotHubClientProtocol);
-                SendMessagesCommon.sendMessages(deviceClient, iotHubClientProtocol, IOTHUB_NUM_OF_MESSAGES_TO_SEND, IOTHUB_RETRY_MILLISECONDS, IOTHUB_MAX_SEND_TIMEOUT);
+                SendMessagesCommon.sendMessages(deviceClient, iotHubClientProtocol, messagesToSendAndResultsExpected, IOTHUB_RETRY_MILLISECONDS, IOTHUB_MAX_SEND_TIMEOUT, 200);
 
                 System.out.println("Send Messages over " + iotHubClientProtocol + " for TPM registration over " + protocol + " succeeded");
             }
@@ -400,7 +408,7 @@ public class ProvisioningClientIT
                 DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri(),
                                                                                     provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId(),
                                                                                     securityProviderX509, iotHubClientProtocol);
-                SendMessagesCommon.sendMessages(deviceClient, iotHubClientProtocol, IOTHUB_NUM_OF_MESSAGES_TO_SEND, IOTHUB_RETRY_MILLISECONDS, IOTHUB_MAX_SEND_TIMEOUT);
+                SendMessagesCommon.sendMessages(deviceClient, iotHubClientProtocol, messagesToSendAndResultsExpected, IOTHUB_RETRY_MILLISECONDS, IOTHUB_MAX_SEND_TIMEOUT, 200);
 
                 System.out.println("Send Messages over " + iotHubClientProtocol + " for X509 registration over " + protocol + " succeeded");
             }
