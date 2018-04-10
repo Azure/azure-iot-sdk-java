@@ -16,11 +16,12 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 /** Unit tests for CustomLogger. */
+@Ignore
 public class CustomLoggerTest
 {
     // Tests_SRS_CUSTOMERLOGGER_25_001: [The constructor shall create the logger instance.]
     @Test
-    public void contructorCreatesLogger()
+    public void constructorCreatesLogger()
     {
         CustomLogger logger = new CustomLogger(this.getClass());
         assertThat(logger, notNullValue());
@@ -193,7 +194,6 @@ public class CustomLoggerTest
     }
 
     // Tests_SRS_CUSTOMERLOGGER_25_002: [The function shall print message for ERROR level.]
-    @Ignore
     @Test
     public void testLogError(@Mocked final Logger mockLogger)
     {
