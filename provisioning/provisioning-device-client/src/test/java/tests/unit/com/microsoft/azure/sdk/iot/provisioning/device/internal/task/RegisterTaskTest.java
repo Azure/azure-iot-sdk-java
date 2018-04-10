@@ -9,26 +9,25 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.device.internal.task
 
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.TpmRegistrationResultParser;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.TpmRegistrationResultParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.Authorization;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RegisterTask;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.json.JsonException;
 import javax.net.ssl.SSLContext;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
@@ -280,6 +279,7 @@ public class RegisterTaskTest
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
                                                                 mockedDpsSecurityProviderX509, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
+        Deencapsulation.setField(registerTask, "MAX_WAIT_FOR_REGISTRATION_RESPONSE", 50);
 
         new NonStrictExpectations()
         {
@@ -303,6 +303,7 @@ public class RegisterTaskTest
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
                                                                 mockedDpsSecurityProviderX509, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
+        Deencapsulation.setField(registerTask, "MAX_WAIT_FOR_REGISTRATION_RESPONSE", 50);
 
         new NonStrictExpectations()
         {
@@ -533,7 +534,7 @@ public class RegisterTaskTest
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
                                                                 mockedSecurityProviderTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
-
+        Deencapsulation.setField(registerTask, "MAX_WAIT_FOR_REGISTRATION_RESPONSE", 50);
         new NonStrictExpectations()
         {
             {
@@ -560,6 +561,7 @@ public class RegisterTaskTest
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
                                                                 mockedSecurityProviderTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
+        Deencapsulation.setField(registerTask, "MAX_WAIT_FOR_REGISTRATION_RESPONSE", 50);
 
         new NonStrictExpectations()
         {
@@ -951,7 +953,7 @@ public class RegisterTaskTest
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
                                                                 mockedSecurityProviderTpm, mockedProvisioningDeviceClientContract,
                                                                 mockedAuthorization);
-
+        Deencapsulation.setField(registerTask, "MAX_WAIT_FOR_REGISTRATION_RESPONSE", 50);
         new NonStrictExpectations()
         {
             {
