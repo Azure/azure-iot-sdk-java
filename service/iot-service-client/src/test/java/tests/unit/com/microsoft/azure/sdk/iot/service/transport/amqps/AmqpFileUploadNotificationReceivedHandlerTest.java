@@ -219,7 +219,7 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_010: [The event handler shall set ANONYMUS_PEER authentication mode on the domain of the Transport]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_010: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_017: [The event handler shall not initialize WebSocket if the protocol is AMQP]
     @Test
     public void onConnectionBoundCallFlowAndInitOkAmqp()
@@ -239,7 +239,7 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
                 sasl.plain(anyString, anyString);
                 sslDomain = Proton.sslDomain();
                 sslDomain.init(SslDomain.Mode.CLIENT);
-                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
+                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 transport.ssl(sslDomain);
             }
         };
@@ -248,7 +248,7 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_010: [The event handler shall set ANONYMUS_PEER authentication mode on the domain of the Transport]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_010: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_018: [The event handler shall initialize WebSocket if the protocol is AMQP_WS]
     @Test
     public void onConnectionBoundCallFlowAndInitOkAmqps()
@@ -276,7 +276,7 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
                 Proton.sslDomain();
                 result = sslDomain;
                 sslDomain.init(SslDomain.Mode.CLIENT);
-                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
+                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 transportInternal.ssl(sslDomain);
             }
         };

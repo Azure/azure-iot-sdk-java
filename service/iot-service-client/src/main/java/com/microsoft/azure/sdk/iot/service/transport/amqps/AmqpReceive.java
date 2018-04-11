@@ -107,15 +107,14 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
             
             while(this.reactor.process())
             {
-             if (System.currentTimeMillis() > endTime) break;
+                if (System.currentTimeMillis() > endTime) break;
             }
             
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_008: [The function shall stop and free the Proton reactor object]
             this.reactor.stop();
             this.reactor.process();
             this.reactor.free();   
-            
-          
+            this.amqpReceiveHandler.receiveComplete();
         }
         else
         {

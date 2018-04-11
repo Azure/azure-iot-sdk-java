@@ -39,7 +39,7 @@ import static org.junit.Assert.assertEquals;
 
 /** Unit tests for AmqpFeedbackReceivedHandler */
 @RunWith(JMockit.class)
-public class AmqpReceiveHandlerTest
+public class AmqpFeedbackReceivedHandlerTest
 {
     @Mocked Handshaker handshaker;
     @Mocked FlowController flowcontroller;
@@ -137,7 +137,7 @@ public class AmqpReceiveHandlerTest
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_010: [The event handler shall set ANONYMUS_PEER authentication mode on the domain of the Transport]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_010: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_017: [The event handler shall not initialize WebSocket if the protocol is AMQP]
     @Test
     public void onConnectionBound_call_flow_and_init_ok_amqp()
@@ -157,7 +157,7 @@ public class AmqpReceiveHandlerTest
                 sasl.plain(anyString, anyString);
                 sslDomain = Proton.sslDomain();
                 sslDomain.init(SslDomain.Mode.CLIENT);
-                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
+                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 transport.ssl(sslDomain);
             }
         };
@@ -166,7 +166,7 @@ public class AmqpReceiveHandlerTest
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_010: [The event handler shall set ANONYMUS_PEER authentication mode on the domain of the Transport]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_010: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_018: [The event handler shall initialize WebSocket if the protocol is AMQP_WS]
     @Test
     public void onConnectionBound_call_flow_and_init_ok_amqps()
@@ -193,7 +193,7 @@ public class AmqpReceiveHandlerTest
                 Proton.sslDomain();
                 result = sslDomain;
                 sslDomain.init(SslDomain.Mode.CLIENT);
-                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
+                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 transportInternal.ssl(sslDomain);
             }
         };
