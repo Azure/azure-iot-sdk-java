@@ -12,6 +12,10 @@ class SDKUtils
     private static final String PROVISIONING_SERVICE_CLIENT = "com.microsoft.azure.sdk.iot.provisioning.service.provisioning-service-client/";
     private static final String PROVISIONING_SERVICE_CLIENT_VERSION = "1.2.0";
 
+    private static String JAVA_RUNTIME = System.getProperty("java.version");
+    private static String OPERATING_SYSTEM = System.getProperty("os.name");
+    private static String PROCESSOR_ARCHITECTURE = System.getProperty("os.arch");
+
     /**
      * Getter for the rest API version
      *

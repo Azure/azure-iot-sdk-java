@@ -59,7 +59,7 @@ public class AmqpsDeviceOperations
     {
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_001: [The constructor shall initialize amqpProperties with device client identifier and version.]
         this.amqpProperties = new HashMap<>();
-        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION);
+        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), TransportUtils.USER_AGENT_STRING);
 
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_002: [The constructor shall initialize sender and receiver tags with UUID string.]
         String uuidStr = UUID.randomUUID().toString();

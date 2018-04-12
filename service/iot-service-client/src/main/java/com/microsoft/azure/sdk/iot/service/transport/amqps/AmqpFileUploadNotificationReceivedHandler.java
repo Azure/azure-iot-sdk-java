@@ -190,7 +190,7 @@ public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_013: [The event handler shall create a Receiver (Proton) object and set the protocol tag on it to a predefined constant]
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_017: [The Receiver object shall have the properties set to service client version identifier.]
         Map<Symbol, Object> properties = new HashMap<>();
-        properties.put(Symbol.getSymbol(TransportUtils.versionIdentifierKey), TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion);
+        properties.put(Symbol.getSymbol(TransportUtils.versionIdentifierKey), TransportUtils.USER_AGENT_STRING);
 
         Receiver notificationReceiver = ssn.receiver(FILE_NOTIFICATION_RECEIVE_TAG);
         notificationReceiver.setProperties(properties);

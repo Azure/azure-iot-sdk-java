@@ -10,14 +10,9 @@ public class TransportUtils
     public static String javaServiceClientIdentifier = "com.microsoft.azure.sdk.iot.iot-service-client/";
     public static String serviceVersion = "1.13.0";
 
-    public static String getJavaServiceClientIdentifier()
-    {
-        return javaServiceClientIdentifier;
-    }
+    private static String JAVA_RUNTIME = System.getProperty("java.version");
+    private static String OPERATING_SYSTEM = System.getProperty("os.name");
+    private static String PROCESSOR_ARCHITECTURE = System.getProperty("os.arch");
 
-    public static String getServiceVersion()
-    {
-        return serviceVersion;
-    }
-
+    public static final String USER_AGENT_STRING = javaServiceClientIdentifier + serviceVersion + " (" + JAVA_RUNTIME + "; " + OPERATING_SYSTEM +"; " + PROCESSOR_ARCHITECTURE + ")";
 }

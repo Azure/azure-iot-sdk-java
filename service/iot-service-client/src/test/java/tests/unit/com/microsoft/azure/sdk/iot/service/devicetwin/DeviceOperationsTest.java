@@ -417,7 +417,7 @@ public class DeviceOperationsTest
                 result = httpRequest;
                 httpRequest.setHeaderField(REQUEST_ID, STANDARD_REQUEST_ID);
                 result = httpRequest;
-                httpRequest.setHeaderField(USER_AGENT, TransportUtils.getJavaServiceClientIdentifier() + TransportUtils.getServiceVersion());
+                httpRequest.setHeaderField(USER_AGENT, anyString);
                 result = new IllegalArgumentException();
             }
         };
@@ -451,7 +451,7 @@ public class DeviceOperationsTest
                 result = httpRequest;
                 httpRequest.setHeaderField(REQUEST_ID, STANDARD_REQUEST_ID);
                 result = httpRequest;
-                httpRequest.setHeaderField(USER_AGENT, TransportUtils.getJavaServiceClientIdentifier() + TransportUtils.getServiceVersion());
+                httpRequest.setHeaderField(USER_AGENT, TransportUtils.USER_AGENT_STRING);
                 result = httpRequest;
                 httpRequest.setHeaderField(ACCEPT, ACCEPT_VALUE);
                 result = new IllegalArgumentException();
@@ -487,7 +487,7 @@ public class DeviceOperationsTest
                 result = httpRequest;
                 httpRequest.setHeaderField(REQUEST_ID, STANDARD_REQUEST_ID);
                 result = httpRequest;
-                httpRequest.setHeaderField(USER_AGENT, TransportUtils.getJavaServiceClientIdentifier() + TransportUtils.getServiceVersion());
+                httpRequest.setHeaderField(USER_AGENT, TransportUtils.USER_AGENT_STRING);
                 result = httpRequest;
                 httpRequest.setHeaderField(ACCEPT, ACCEPT_VALUE);
                 result = httpRequest;
@@ -525,7 +525,7 @@ public class DeviceOperationsTest
                 result = httpRequest;
                 httpRequest.setHeaderField(REQUEST_ID, STANDARD_REQUEST_ID);
                 result = httpRequest;
-                httpRequest.setHeaderField(USER_AGENT, TransportUtils.getJavaServiceClientIdentifier() + TransportUtils.getServiceVersion());
+                httpRequest.setHeaderField(USER_AGENT, TransportUtils.USER_AGENT_STRING);
                 result = httpRequest;
                 httpRequest.setHeaderField(ACCEPT, ACCEPT_VALUE);
                 result = httpRequest;
@@ -571,7 +571,7 @@ public class DeviceOperationsTest
                 result = httpRequest;
                 httpRequest.setHeaderField(REQUEST_ID, STANDARD_REQUEST_ID);
                 result = httpRequest;
-                httpRequest.setHeaderField(USER_AGENT, TransportUtils.getJavaServiceClientIdentifier() + TransportUtils.getServiceVersion());
+                httpRequest.setHeaderField(USER_AGENT, TransportUtils.USER_AGENT_STRING);
                 result = httpRequest;
                 httpRequest.setHeaderField(ACCEPT, ACCEPT_VALUE);
                 result = httpRequest;
@@ -619,7 +619,7 @@ public class DeviceOperationsTest
                 result = httpRequest;
                 httpRequest.setHeaderField(REQUEST_ID, STANDARD_REQUEST_ID);
                 result = httpRequest;
-                httpRequest.setHeaderField(USER_AGENT, TransportUtils.getJavaServiceClientIdentifier() + TransportUtils.getServiceVersion());
+                httpRequest.setHeaderField(USER_AGENT, TransportUtils.USER_AGENT_STRING);
                 result = httpRequest;
                 httpRequest.setHeaderField(ACCEPT, ACCEPT_VALUE);
                 result = httpRequest;
@@ -690,7 +690,7 @@ public class DeviceOperationsTest
                 result = httpRequest;
                 httpRequest.setHeaderField(REQUEST_ID, STANDARD_REQUEST_ID);
                 result = httpRequest;
-                httpRequest.setHeaderField(USER_AGENT, TransportUtils.getJavaServiceClientIdentifier() + TransportUtils.getServiceVersion());
+                httpRequest.setHeaderField(USER_AGENT, TransportUtils.USER_AGENT_STRING);
                 result = httpRequest;
                 httpRequest.setHeaderField(ACCEPT, ACCEPT_VALUE);
                 result = httpRequest;

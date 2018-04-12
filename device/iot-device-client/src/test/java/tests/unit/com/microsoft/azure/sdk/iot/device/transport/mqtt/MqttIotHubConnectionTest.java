@@ -294,7 +294,7 @@ public class MqttIotHubConnectionTest
 
         final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
 
-        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION, "UTF-8");
+        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.USER_AGENT_STRING, "UTF-8").replaceAll("\\+", "%20");
         assertEquals(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&" + clientIdentifier, actualIotHubUserName);
 
         final String actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
@@ -343,7 +343,7 @@ public class MqttIotHubConnectionTest
 
         final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
 
-        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION, "UTF-8");
+        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.USER_AGENT_STRING, "UTF-8").replaceAll("\\+", "%20");
         assertEquals(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&" + clientIdentifier, actualIotHubUserName);
 
         String actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");

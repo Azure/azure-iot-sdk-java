@@ -7,8 +7,14 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 public class TransportUtils
 {
-    public static final String JAVA_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.iot-device-client/";
+    public static final String JAVA_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.iot-device-client";
     public static final String CLIENT_VERSION = "1.9.0";
+
+    private static String JAVA_RUNTIME = System.getProperty("java.version");
+    private static String OPERATING_SYSTEM = System.getProperty("os.name");
+    private static String PROCESSOR_ARCHITECTURE = System.getProperty("os.arch");
+
+    public static final String USER_AGENT_STRING = JAVA_DEVICE_CLIENT_IDENTIFIER + "/" + CLIENT_VERSION + " (" + JAVA_RUNTIME + "; " + OPERATING_SYSTEM +"; " + PROCESSOR_ARCHITECTURE + ")";
 
     public static void throwTransportExceptionWithIotHubServiceType(String message, TransportException.IotHubService service) throws TransportException
     {

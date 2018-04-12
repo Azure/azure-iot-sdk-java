@@ -9,6 +9,8 @@ import com.microsoft.azure.sdk.iot.device.transport.*;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Queue;
@@ -146,7 +148,9 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                     sslContext = this.config.getX509Authentication().getSSLContext();
                 }
 
-                String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION, "UTF-8");
+                //URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
+                // We want "%20" for spaces, not '+', however, so replace them manually
+                String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.USER_AGENT_STRING, "UTF-8").replaceAll("\\+", "%20");
                 this.iotHubUserName = this.config.getIotHubHostname() + "/" + this.config.getDeviceId() + "/" + TWIN_API_VERSION + "&" + clientIdentifier;
 
                 if (this.config.isUseWebsocket())

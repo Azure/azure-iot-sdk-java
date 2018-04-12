@@ -111,7 +111,7 @@ public class AmqpsDeviceOperationsTest
         String senderLinkAddress = Deencapsulation.invoke(amqpsDeviceOperations, "getSenderLinkAddress");
         String receiverLinkAddress = Deencapsulation.invoke(amqpsDeviceOperations, "getReceiverLinkAddress");
 
-        assertTrue(propertiesMap.get(Symbol.getSymbol(VERSION_IDENTIFIER_KEY)).equals(TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION));
+        assertTrue(propertiesMap.get(Symbol.getSymbol(VERSION_IDENTIFIER_KEY)).equals(TransportUtils.USER_AGENT_STRING));
 
         assertTrue(senderLinkTag.endsWith(uuidStr));
         assertTrue(receiverLinkTag.endsWith(uuidStr));
