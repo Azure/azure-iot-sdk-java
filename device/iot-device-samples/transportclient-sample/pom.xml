@@ -27,7 +27,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.MultiplexingSample</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.TransportClientSample</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
