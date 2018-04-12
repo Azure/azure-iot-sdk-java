@@ -34,7 +34,9 @@ import java.util.concurrent.ExecutionException;
 import static com.microsoft.azure.sdk.iot.common.ErrorInjectionHelper.DefaultDelayInSec;
 import static com.microsoft.azure.sdk.iot.common.ErrorInjectionHelper.DefaultDurationInSec;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.CERTIFICATE_AUTHORITY;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -76,6 +78,7 @@ public class ReceiveMessagesIT
     private static String expectedCorrelationId = "1234";
     private static String expectedMessageId = "5678";
     private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
+    private static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
 
     private ReceiveMessagesITRunner testInstance;
 
@@ -234,8 +237,6 @@ public class ReceiveMessagesIT
         testInstance.deviceClient.closeNow();
     }
 
-    //test needs timing tinkering. Currently, error injection message doesn't seem to take effect for a long period of time
-    @Ignore
     @Test
     public void receiveMessagesWithTCPConnectionDrop() throws IOException, IotHubException, InterruptedException
     {
@@ -248,8 +249,6 @@ public class ReceiveMessagesIT
         this.errorInjectionTestFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    //test needs timing tinkering. Currently, error injection message doesn't seem to take effect for a long period of time
-    @Ignore
     @Test
     public void receiveMessagesWithAmqpsConnectionDrop() throws IOException, IotHubException, InterruptedException
     {
@@ -262,8 +261,6 @@ public class ReceiveMessagesIT
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    //test needs timing tinkering. Currently, error injection message doesn't seem to take effect for a long period of time
-    @Ignore
     @Test
     public void receiveMessagesWithAmqpsSessionDrop() throws IOException, IotHubException, InterruptedException
     {
@@ -276,8 +273,6 @@ public class ReceiveMessagesIT
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    //test needs timing tinkering. Currently, error injection message doesn't seem to take effect for a long period of time
-    @Ignore
     @Test
     public void receiveMessagesWithAmqpsCBSReqLinkDrop() throws IOException, IotHubException, InterruptedException
     {
@@ -287,11 +282,15 @@ public class ReceiveMessagesIT
             return;
         }
 
+        if (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY)
+        {
+            //cbs links aren't established in these scenarios, so it would be impossible/irrelevant if a cbs link dropped
+            return;
+        }
+
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    //test needs timing tinkering. Currently, error injection message doesn't seem to take effect for a long period of time
-    @Ignore
     @Test
     public void receiveMessagesWithAmqpsCBSRespLinkDrop() throws IOException, IotHubException, InterruptedException
     {
@@ -301,11 +300,15 @@ public class ReceiveMessagesIT
             return;
         }
 
+        if (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY)
+        {
+            //cbs links aren't established in these scenarios, so it would be impossible/irrelevant if a cbs link dropped
+            return;
+        }
+
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    //test needs timing tinkering. Currently, error injection message doesn't seem to take effect for a long period of time
-    @Ignore
     @Test
     public void receiveMessagesWithAmqpsD2CLinkDrop() throws IOException, IotHubException, InterruptedException
     {
@@ -318,14 +321,18 @@ public class ReceiveMessagesIT
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    //test needs timing tinkering. Currently, error injection message doesn't seem to take effect for a long period of time
-    @Ignore
     @Test
     public void receiveMessagesWithAmqpsC2DLinkDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
         {
             //test case not applicable
+            return;
+        }
+
+        if (testInstance.authenticationType != SAS)
+        {
+            //TODO X509 case never seems to get callback about the connection dying. Needs investigation because this should pass, but doesn't
             return;
         }
 
@@ -390,6 +397,17 @@ public class ReceiveMessagesIT
 
     private void errorInjectionTestFlow(Message errorInjectionMessage) throws IOException, IotHubException, InterruptedException
     {
+        final ArrayList<IotHubConnectionStatus> connectionStatusUpdates = new ArrayList<>();
+        testInstance.deviceClient.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback()
+        {
+            @Override
+            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+            {
+                System.out.println(status);
+                connectionStatusUpdates.add(status);
+            }
+        }, null);
+
         SendMessagesCommon.openDeviceClientWithRetry(testInstance.deviceClient);
 
         com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
@@ -401,16 +419,6 @@ public class ReceiveMessagesIT
 
         Success messageReceived = new Success();
         testInstance.deviceClient.setMessageCallback(callback, messageReceived);
-
-        final ArrayList<IotHubConnectionStatus> connectionStatusUpdates = new ArrayList<>();
-        testInstance.deviceClient.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback()
-        {
-            @Override
-            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
-            {
-                connectionStatusUpdates.add(status);
-            }
-        }, null);
 
         //error injection message is not guaranteed to be ack'd by service so it may be re-sent. By setting expiry time,
         // we ensure that error injection message isn't resent to service too many times. The message will still likely
@@ -427,7 +435,7 @@ public class ReceiveMessagesIT
             timeElapsed = System.currentTimeMillis() - startTime;
 
             //2 minute timeout waiting for error injection to occur
-            if (timeElapsed > 60 * 60 * 1000)
+            if (timeElapsed > ERROR_INJECTION_WAIT_TIMEOUT)
             {
                 fail("Timed out waiting for error injection message to take effect");
             }

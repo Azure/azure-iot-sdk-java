@@ -35,7 +35,7 @@ public class TransportClientSendMessagesIT
     private static final Integer MAX_DEVICE_MULTIPLEX = 3;
     private static final Integer NUM_MESSAGES_PER_CONNECTION = 3;
     private static final Integer RETRY_MILLISECONDS = 100;
-    private static final Integer SEND_TIMEOUT_MILLISECONDS = 4 * 60 * 1000; //4 minutes
+    private static final Integer SEND_TIMEOUT_MILLISECONDS = 5 * 60 * 1000; //5 minutes
 
     private static Device[] deviceListAmqps = new Device[MAX_DEVICE_MULTIPLEX];
     private static final AtomicBoolean succeed = new AtomicBoolean();

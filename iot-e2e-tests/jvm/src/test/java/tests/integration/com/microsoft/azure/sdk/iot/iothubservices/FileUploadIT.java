@@ -228,7 +228,7 @@ public class FileUploadIT
     {
         assertEquals("Received notification for a different device not belonging to this test", scDevice.getDeviceId(), fileUploadNotification.getDeviceId());
 
-        assertTrue(fileUploadNotification.getBlobSizeInBytes() == fileUploadState.fileLength);
+        assertTrue("File upload notification blob size not equal to expected file length", fileUploadNotification.getBlobSizeInBytes() == fileUploadState.fileLength);
 
         URL u = new URL(fileUploadNotification.getBlobUri());
         try (InputStream inputStream = u.openStream())

@@ -13,8 +13,7 @@ import java.util.concurrent.*;
 
 /**
  * Manage multiple device clients and the authentication 
- * mechanism 
- *
+ * mechanism
  */
 public class AmqpsSessionManager
 {

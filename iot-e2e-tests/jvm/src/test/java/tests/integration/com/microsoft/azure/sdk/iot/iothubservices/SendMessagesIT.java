@@ -548,16 +548,15 @@ public class SendMessagesIT
     @Test
     public void sendMessagesOverAmqpWithCbsRequestLinkDrop() throws IOException, InterruptedException
     {
-        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == IotHubClientProtocol.AMQPS_WS && testInstance.authenticationType == SAS)))
+        if (testInstance.protocol != AMQPS && testInstance.protocol != IotHubClientProtocol.AMQPS_WS)
         {
-            //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
+            //This error injection test only applies for AMQPS and AMQPS_WS
             return;
         }
 
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        if (testInstance.authenticationType != SAS)
         {
-            //TODO error injection seems to fail under these circumstances. C2D link is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
+            //CBS links are only established when using sas authentication
             return;
         }
 
@@ -567,16 +566,15 @@ public class SendMessagesIT
     @Test
     public void sendMessagesOverAmqpWithCbsResponseLinkDrop() throws IOException, InterruptedException
     {
-        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == IotHubClientProtocol.AMQPS_WS && testInstance.authenticationType == SAS)))
+        if (testInstance.protocol != AMQPS && testInstance.protocol != IotHubClientProtocol.AMQPS_WS)
         {
-            //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
+            //This error injection test only applies for AMQPS and AMQPS_WS
             return;
         }
 
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        if (testInstance.authenticationType != SAS)
         {
-            //TODO error injection seems to fail under these circumstances. C2D link is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
+            //CBS links are only established when using sas authentication
             return;
         }
 
