@@ -2,13 +2,15 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.Success;
 import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.TransportClient;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import junit.framework.AssertionFailedError;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 

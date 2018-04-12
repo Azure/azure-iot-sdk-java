@@ -14,7 +14,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,7 +22,6 @@ import static com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesComm
 import static com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon.sendMessagesMultiplex;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
-import static junit.framework.TestCase.fail;
 
 public class TransportClientSendMessagesIT
 {

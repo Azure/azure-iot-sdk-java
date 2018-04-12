@@ -34,9 +34,7 @@ import java.util.concurrent.ExecutionException;
 import static com.microsoft.azure.sdk.iot.common.ErrorInjectionHelper.DefaultDelayInSec;
 import static com.microsoft.azure.sdk.iot.common.ErrorInjectionHelper.DefaultDurationInSec;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.CERTIFICATE_AUTHORITY;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.*;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -403,7 +401,6 @@ public class ReceiveMessagesIT
             @Override
             public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
             {
-                System.out.println(status);
                 connectionStatusUpdates.add(status);
             }
         }, null);

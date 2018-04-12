@@ -1,11 +1,13 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.TransportClient;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
-import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -21,8 +23,6 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothubservices.TransportClientFileUploadIT.STATUS.FAILURE;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothubservices.TransportClientFileUploadIT.STATUS.SUCCESS;
 

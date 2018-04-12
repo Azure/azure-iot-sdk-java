@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.ErrorInjectionHelper;
 import com.microsoft.azure.sdk.iot.common.EventCallback;
+import com.microsoft.azure.sdk.iot.common.MessageAndResult;
 import com.microsoft.azure.sdk.iot.common.Success;
 import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -21,11 +22,13 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
-import com.microsoft.azure.sdk.iot.common.MessageAndResult;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
 
@@ -43,7 +46,6 @@ import static com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesComm
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
-import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.fail;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenGenerator.generateSasTokenForIotDevice;
 
@@ -503,8 +505,6 @@ public class SendMessagesIT
     @Test
     public void expiredMessagesAreNotSent() throws URISyntaxException, IOException
     {
-
-
         SendMessagesCommon.sendExpiredMessageExpectingMessageExpiredCallback(testInstance.deviceClient, testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
     }
 
