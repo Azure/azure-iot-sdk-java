@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-deps</artifactId>
-            <version>0.5.0</version>
+            <version>0.5.1</version>
         </dependency>
         <!-- test dependencies -->
         <dependency>
