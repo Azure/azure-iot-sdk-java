@@ -8,7 +8,7 @@ public class TransportUtils
     /** Version identifier key */
     public static final String versionIdentifierKey = "com.microsoft:client-version";
     public static String javaServiceClientIdentifier = "com.microsoft.azure.sdk.iot.iot-service-client/";
-    public static String serviceVersion = "1.13.0";
+    public static String serviceVersion = "1.13.1";
 
     private static String JAVA_RUNTIME = System.getProperty("java.version");
     private static String OPERATING_SYSTEM = System.getProperty("os.name");
