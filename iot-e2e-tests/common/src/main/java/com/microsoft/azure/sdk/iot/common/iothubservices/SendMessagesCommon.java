@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.common.*;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.sun.org.apache.bcel.internal.generic.RET;
 import org.junit.Assert;
 
 import java.io.IOException;
