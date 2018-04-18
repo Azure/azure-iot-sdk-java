@@ -21,6 +21,8 @@ For downloads and installation instructions go [here](http://www.oracle.com/tech
 * Please make sure that the `PATH` environment variable includes the full path to the `jdk1.8.x\bin` directory. (Example: C:\\Program Files\\Java\\jdk1.8.0_60\\bin)
 * Please make sure that the `JAVA_HOME` environment variable includes the full path to the `jdk1.8.x` directory. (Example: JAVA_HOME=C:\\Program Files\\Java\\jdk1.8.0_60)
 
+You can change environment variables at the tab Advanced in the Advanced System Settings under System in your Control Panel.
+
 You can test whether your `PATH` variable is set correctly by restarting your console and running `java -version`.
 
 ### Linux
