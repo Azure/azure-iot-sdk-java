@@ -175,7 +175,17 @@ public class TwinState extends RegisterManager
         /* SRS_TWIN_STATE_21_003: [If the tags is null, the toJsonElement shall not include the `tags` in the final JSON.] */
         /* SRS_TWIN_STATE_21_004: [If the property is null, the toJsonElement shall not include the `properties` in the final JSON.] */
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-        return gson.toJsonTree(this).getAsJsonObject();
+        JsonElement json = gson.toJsonTree(this).getAsJsonObject();
+
+        //since null values are lost when building the json tree, need to manually re-add properties as reported properties
+        // may have contained a property with a null value. Those must be preserved so users can delete properties
+        if (json != null && this.properties != null)
+        {
+            //Codes_SRS_TWIN_STATE_34_024: [The json element shall include all null desired and reported properties.]
+            json.getAsJsonObject().add("properties", this.properties.toJsonElement());
+        }
+
+        return json;
     }
 
     /**

@@ -12,9 +12,7 @@ import mockit.Deencapsulation;
 import org.junit.Test;
 import tests.unit.com.microsoft.azure.sdk.iot.deps.Helpers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the TwinState
@@ -37,6 +35,15 @@ public class TwinStateTest
             put("prop1", "val1");
             put("prop2", "val2");
             put("prop3", "val3");
+        }
+    };
+
+    private final static TwinCollection PROPERTIES_WITH_NULL_VALUES = new TwinCollection()
+    {
+        {
+            put("prop1", null);
+            put("prop2", null);
+            put("prop3", null);
         }
     };
 
@@ -220,6 +227,34 @@ public class TwinStateTest
 
         // assert
         Helpers.assertJson(jsonElement.toString(), "{}");
+    }
+
+    //Tests_SRS_TWIN_STATE_34_024: [The json element shall include all null desired and reported properties.]
+    @Test
+    public void toJsonElementPreservesNullDesiredProperties()
+    {
+        // arrange
+        TwinState twinState = new TwinState(null, PROPERTIES_WITH_NULL_VALUES, PROPERTIES);
+
+        // act
+        JsonElement jsonElement = Deencapsulation.invoke(twinState, "toJsonElement");
+
+        // assert
+        assertTrue(jsonElement.toString().contains(PROPERTIES_WITH_NULL_VALUES.toString()));
+    }
+
+    //Tests_SRS_TWIN_STATE_34_024: [The json element shall include all null desired and reported properties.]
+    @Test
+    public void toJsonElementPreservesNullReportedProperties()
+    {
+        // arrange
+        TwinState twinState = new TwinState(null, PROPERTIES, PROPERTIES_WITH_NULL_VALUES);
+
+        // act
+        JsonElement jsonElement = Deencapsulation.invoke(twinState, "toJsonElement");
+
+        // assert
+        assertTrue(jsonElement.toString().contains(PROPERTIES_WITH_NULL_VALUES.toString()));
     }
 
     /* SRS_TWIN_STATE_21_005: [The getTags shall return a TwinCollection with the stored tags.] */
