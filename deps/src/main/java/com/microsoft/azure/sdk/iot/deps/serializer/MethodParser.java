@@ -35,13 +35,13 @@ public class MethodParser
     private static final String RESPONSE_TIMEOUT_IN_SECONDS_TAG = "responseTimeoutInSeconds";
     @Expose(serialize = true, deserialize = false)
     @SerializedName(RESPONSE_TIMEOUT_IN_SECONDS_TAG)
-    private Long responseTimeout;
+    private Integer responseTimeout;
 
     /* Codes_SRS_METHODPARSER_21_031: [The toJsonElement shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.] */
     private static final String CONNECT_TIMEOUT_IN_SECONDS_TAG = "connectTimeoutInSeconds";
     @Expose(serialize = true, deserialize = false)
     @SerializedName(CONNECT_TIMEOUT_IN_SECONDS_TAG)
-    private Long connectTimeout;
+    private Integer connectTimeout;
 
     /* Codes_SRS_METHODPARSER_21_024: [The class toJsonElement include status as `status` in the json.] */
     private static final String STATUS_TAG = "status";
@@ -82,7 +82,7 @@ public class MethodParser
      * @param payload - Object that contains the payload defined by the user. It can be {@code null}.
      * @throws IllegalArgumentException This exception is thrown if the one of the provided information do not fits the requirements.
      */
-    public MethodParser(String name, Long responseTimeout, Long connectTimeout, Object payload) throws IllegalArgumentException
+    public MethodParser(String name, Integer responseTimeout, Integer connectTimeout, Object payload) throws IllegalArgumentException
     {
         /* Codes_SRS_METHODPARSER_21_001: [The constructor shall create an instance of the MethodParser.] */
         this();
@@ -417,7 +417,7 @@ public class MethodParser
      * @param timeout is the timeout value in seconds.
      * @throws IllegalArgumentException This exception is thrown if the provided timeout value do not fits the requirements.
      */
-    private void validateTimeout(Long timeout) throws IllegalArgumentException
+    private void validateTimeout(Integer timeout) throws IllegalArgumentException
     {
         /* Codes_SRS_METHODPARSER_21_005: [If the responseTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
         /* Codes_SRS_METHODPARSER_21_033: [If the connectTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
