@@ -190,6 +190,9 @@ public class ReceiveMessagesIT
             registryManager.removeDevice(deviceMqttWs.getDeviceId());
             registryManager.removeDevice(deviceAmqpsWs.getDeviceId());
             registryManager.removeDevice(deviceMqttX509.getDeviceId());
+            registryManager.removeDevice(deviceAmqpsX509.getDeviceId());
+            registryManager.removeDevice(deviceAmqpsWsX509.getDeviceId());
+            registryManager.removeDevice(deviceHttpsX509.getDeviceId());
             registryManager.close();
             registryManager = null;
         }

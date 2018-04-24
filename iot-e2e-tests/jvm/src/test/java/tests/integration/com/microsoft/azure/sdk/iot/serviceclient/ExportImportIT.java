@@ -5,7 +5,6 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.serviceclient;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.AuthenticationTypeParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
@@ -13,11 +12,7 @@ import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.*;
 import mockit.Deencapsulation;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.Ignore;
+import org.junit.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

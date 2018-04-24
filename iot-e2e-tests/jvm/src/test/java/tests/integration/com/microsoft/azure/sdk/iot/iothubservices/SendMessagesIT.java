@@ -366,14 +366,20 @@ public class SendMessagesIT
         {
             registryManager.removeDevice(deviceHttps.getDeviceId());
             registryManager.removeDevice(deviceAmqps.getDeviceId());
-            registryManager.removeDevice(deviceAmqpsWs.getDeviceId());
             registryManager.removeDevice(deviceMqtt.getDeviceId());
             registryManager.removeDevice(deviceMqttWs.getDeviceId());
-            registryManager.removeDevice(deviceMqttX509.getDeviceId());
-            registryManager.removeDevice(deviceHttpsX509.getDeviceId());
-            registryManager.removeDevice(deviceAmqpsX509.getDeviceId());
+            registryManager.removeDevice(deviceAmqpsWs.getDeviceId());
 
-            for (int i = 0; i < MAX_DEVICE_PARALLEL; i++) {
+            registryManager.removeDevice(deviceMqttX509.getDeviceId());
+            registryManager.removeDevice(deviceAmqpsX509.getDeviceId());
+            registryManager.removeDevice(deviceHttpsX509.getDeviceId());
+
+            //devices not needed for these tests as neither amqps_ws nor mqtt_ws supports sending messages when using x509
+            //registryManager.removeDevice(deviceAmqpsWsX509.getDeviceId());
+            //registryManager.removeDevice(deviceMqttWsX509.getDeviceId());
+
+            for (int i = 0; i < MAX_DEVICE_PARALLEL; i++)
+            {
                 registryManager.removeDevice(deviceListAmqps[i].getDeviceId());
             }
 
@@ -500,7 +506,6 @@ public class SendMessagesIT
         SendMessagesCommon.sendMessagesExpectingSASTokenExpiration(client, testInstance.protocol.toString(), 1, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
         client.closeNow();
     }
-
 
     @Test
     public void expiredMessagesAreNotSent() throws URISyntaxException, IOException
