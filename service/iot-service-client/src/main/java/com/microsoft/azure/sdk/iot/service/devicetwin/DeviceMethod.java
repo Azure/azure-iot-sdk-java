@@ -61,7 +61,7 @@ public class DeviceMethod
      * @throws IotHubException This exception is thrown if the response verification failed
      * @throws IOException This exception is thrown if the IO operation failed
      */
-    public synchronized MethodResult invoke(String deviceId, String methodName, int responseTimeoutInSeconds, int connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
+    public synchronized MethodResult invoke(String deviceId, String methodName, Integer responseTimeoutInSeconds, Integer connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
     {
         /* Codes_SRS_DEVICEMETHOD_21_004: [The invoke shall throw IllegalArgumentException if the provided deviceId is null or empty.] */
         if((deviceId == null) || deviceId.isEmpty())
