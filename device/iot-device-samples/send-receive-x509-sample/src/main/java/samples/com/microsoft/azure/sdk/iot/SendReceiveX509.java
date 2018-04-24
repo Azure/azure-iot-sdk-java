@@ -121,7 +121,7 @@ public class SendReceiveX509
             System.out.format(
                     "Expected 2 or 3 arguments but received: %d.\n"
                             + "The program should be called with the following args: \n"
-                            + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
+                            + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<host_name>;DeviceId=<device_id>;x509=true\n"
                             + "2. [number of requests to send]\n"
                             + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n",
                     args.length);
