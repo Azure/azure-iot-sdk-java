@@ -699,7 +699,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
-        TransportException transportException = new TransportException("Unknown transport exception occured");
+        TransportException transportException = new TransportException("Unknown transport exception occurred");
         transportException.setRetryable(true);
         if (event.getSender() != null && event.getSender().getRemoteCondition() != null && event.getSender().getRemoteCondition().getCondition() != null)
         {
@@ -725,7 +725,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
-        TransportException transportException = new TransportException("Unknown transport exception occured");
+        TransportException transportException = new TransportException("Unknown transport exception occurred");
         transportException.setRetryable(true);
         if (event.getTransport() != null && event.getTransport().getCondition() != null && event.getTransport().getCondition().getCondition() != null)
         {

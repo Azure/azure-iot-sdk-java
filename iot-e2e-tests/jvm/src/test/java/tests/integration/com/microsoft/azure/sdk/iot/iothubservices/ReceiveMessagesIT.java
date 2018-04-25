@@ -41,6 +41,7 @@ import static org.junit.Assert.fail;
 @RunWith(Parameterized.class)
 public class ReceiveMessagesIT
 {
+    private static final long DEFAULT_TEST_TIMEOUT = 3 * 60 * 1000;
     public static Map<String, String> messageProperties = new HashMap<>(3);
 
     private final static String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
@@ -58,25 +59,18 @@ public class ReceiveMessagesIT
     private static String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
     private static RegistryManager registryManager;
-    private static Device deviceHttps;
-    private static Device deviceHttpsX509;
-    private static Device deviceAmqps;
-    private static Device deviceAmqpsX509;
-    private static Device deviceMqtt;
-    private static Device deviceMqttWs;
-    private static Device deviceAmqpsWs;
-    private static Device deviceAmqpsWsX509;
-    private static Device deviceMqttX509;
+    private static Device device;
+    private static Device deviceX509;
 
     private static ServiceClient serviceClient;
 
     // How much to wait until receiving a message from the server, in milliseconds
-    private Integer receiveTimeout = 240000; // 4 minutes
+    private static final int RECEIVE_TIMEOUT = 2 * 60 * 1000; // 2 minutes
 
     private static String expectedCorrelationId = "1234";
     private static String expectedMessageId = "5678";
     private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
-    private static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
+    private static final long ERROR_INJECTION_RECOVERY_TIMEOUT = 1 * 60 * 1000; // 1 minute
 
     private ReceiveMessagesITRunner testInstance;
 
@@ -91,40 +85,17 @@ public class ReceiveMessagesIT
         x509Thumbprint = cert.getThumbPrintLeaf();
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         String uuid = UUID.randomUUID().toString();
-        String deviceIdHttps = "java-device-client-e2e-test-https".concat("-" + uuid);
-        String deviceIdAmqps = "java-device-client-e2e-test-amqps".concat("-" + uuid);
-        String deviceIdMqtt = "java-device-client-e2e-test-mqtt".concat("-" + uuid);
-        String deviceIdMqttWs = "java-device-client-e2e-test-mqttws".concat("-" + uuid);
-        String deviceIdAmqpsWS = "java-device-client-e2e-test-amqpsws".concat("-" + uuid);
-        String deviceIdMqttX509 = "java-device-client-e2e-test-mqtt-x509".concat("-" + uuid);
-        String deviceIdHttpsX509 = "java-device-client-e2e-test-https-x509".concat("-" + uuid);
-        String deviceIdAmqpsX509 = "java-device-client-e2e-test-amqps-x509".concat("-" + uuid);
-        String deviceIdAmqpsWsX509 = "java-device-client-e2e-test-amqpsws-x509".concat("-" + uuid);
 
-        deviceHttps = Device.createFromId(deviceIdHttps, null, null);
-        deviceAmqps = Device.createFromId(deviceIdAmqps, null, null);
-        deviceMqtt = Device.createFromId(deviceIdMqtt, null, null);
-        deviceMqttWs = Device.createFromId(deviceIdMqttWs, null, null);
-        deviceAmqpsWs = Device.createFromId(deviceIdAmqpsWS, null, null);
-        deviceMqttX509 = Device.createDevice(deviceIdMqttX509, AuthenticationType.SELF_SIGNED);
-        deviceHttpsX509 = Device.createDevice(deviceIdHttpsX509, AuthenticationType.SELF_SIGNED);
-        deviceAmqpsX509 = Device.createDevice(deviceIdAmqpsX509, AuthenticationType.SELF_SIGNED);
-        deviceAmqpsWsX509 = Device.createDevice(deviceIdAmqpsWsX509, AuthenticationType.SELF_SIGNED);
+        String deviceId = "java-device-client-e2e-test-receive-messages".concat("-" + uuid);
+        String x509DeviceId = "java-device-client-e2e-test-receive-messages-x509".concat("-" + uuid);
 
-        deviceMqttX509.setThumbprint(x509Thumbprint, x509Thumbprint);
-        deviceHttpsX509.setThumbprint(x509Thumbprint, x509Thumbprint);
-        deviceAmqpsX509.setThumbprint(x509Thumbprint, x509Thumbprint);
-        deviceAmqpsWsX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        device = Device.createFromId(deviceId, null, null);
+        deviceX509 = Device.createDevice(x509DeviceId, SELF_SIGNED);
 
-        registryManager.addDevice(deviceHttps);
-        registryManager.addDevice(deviceAmqps);
-        registryManager.addDevice(deviceMqtt);
-        registryManager.addDevice(deviceMqttWs);
-        registryManager.addDevice(deviceAmqpsWs);
-        registryManager.addDevice(deviceMqttX509);
-        registryManager.addDevice(deviceAmqpsWsX509);
-        registryManager.addDevice(deviceHttpsX509);
-        registryManager.addDevice(deviceAmqpsX509);
+        deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+
+        registryManager.addDevice(device);
+        registryManager.addDevice(deviceX509);
 
         messageProperties = new HashMap<>(3);
         messageProperties.put("name1", "value1");
@@ -136,29 +107,26 @@ public class ReceiveMessagesIT
 
         return Arrays.asList(
                 new Object[][]
-                        {
-                                //sas token
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceHttps), IotHubClientProtocol.HTTPS), IotHubClientProtocol.HTTPS, deviceHttps, SAS},
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqtt), IotHubClientProtocol.MQTT), IotHubClientProtocol.MQTT, deviceMqtt, SAS},
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqttWs), IotHubClientProtocol.MQTT_WS), IotHubClientProtocol.MQTT_WS, deviceMqttWs, SAS},
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqps), AMQPS), AMQPS, deviceAmqps, SAS},
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqpsWs), IotHubClientProtocol.AMQPS_WS), IotHubClientProtocol.AMQPS_WS, deviceAmqpsWs, SAS},
+                {
+                    //TODO need service to fix mqtt topic string bug before these tests can be re-enabled for MQTT/MQTT_WS
 
-                                //x509
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceHttpsX509), IotHubClientProtocol.HTTPS, publicKeyCert, false, privateKey, false), IotHubClientProtocol.HTTPS, deviceHttpsX509, AuthenticationType.SELF_SIGNED},
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqttX509), IotHubClientProtocol.MQTT, publicKeyCert, false, privateKey, false), IotHubClientProtocol.MQTT, deviceMqttX509, AuthenticationType.SELF_SIGNED},
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqpsX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceAmqpsX509, AuthenticationType.SELF_SIGNED}
+                    //sas token
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), HTTPS), HTTPS, device, SAS},
+                    //{new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT), MQTT, device, SAS},
+                    //{new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT_WS), MQTT_WS, device, SAS},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS), AMQPS, device, SAS},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS},
 
-                                //not supported yet
-                                //{new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceAmqpsWsX509), IotHubClientProtocol.AMQPS_WS, publicKeyCert, false, privateKey, false), IotHubClientProtocol.AMQPS_WS, deviceAmqpsWsX509, AuthenticationType.SELF_SIGNED},
-                                //{new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceMqttWsX509), IotHubClientProtocol.MQTT_WS, publicKeyCert, false, privateKey, false), IotHubClientProtocol.MQTT_WS, deviceMqttWsX509, AuthenticationType.SELF_SIGNED}
-                        }
+                    //x509
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), HTTPS, publicKeyCert, false, privateKey, false), HTTPS, deviceX509, SELF_SIGNED},
+                    //{new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), MQTT, publicKeyCert, false, privateKey, false), MQTT, deviceX509, SELF_SIGNED},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceX509, SELF_SIGNED}
+                }
         );
     }
 
     public ReceiveMessagesIT(DeviceClient deviceClient, IotHubClientProtocol protocol, Device device, AuthenticationType authenticationType)
     {
-        super();
         this.testInstance = new ReceiveMessagesITRunner(deviceClient, protocol, device, authenticationType);
     }
 
@@ -184,15 +152,8 @@ public class ReceiveMessagesIT
         serviceClient.close();
         if (registryManager != null)
         {
-            registryManager.removeDevice(deviceHttps.getDeviceId());
-            registryManager.removeDevice(deviceAmqps.getDeviceId());
-            registryManager.removeDevice(deviceMqtt.getDeviceId());
-            registryManager.removeDevice(deviceMqttWs.getDeviceId());
-            registryManager.removeDevice(deviceAmqpsWs.getDeviceId());
-            registryManager.removeDevice(deviceMqttX509.getDeviceId());
-            registryManager.removeDevice(deviceAmqpsX509.getDeviceId());
-            registryManager.removeDevice(deviceAmqpsWsX509.getDeviceId());
-            registryManager.removeDevice(deviceHttpsX509.getDeviceId());
+            registryManager.removeDevice(device.getDeviceId());
+            registryManager.removeDevice(deviceX509.getDeviceId());
             registryManager.close();
             registryManager = null;
         }
@@ -211,7 +172,7 @@ public class ReceiveMessagesIT
         }
     }
 
-    @Test
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
     public void receiveMessagesOverIncludingProperties() throws Exception
     {
         if (testInstance.protocol == HTTPS)
@@ -238,7 +199,7 @@ public class ReceiveMessagesIT
         testInstance.deviceClient.closeNow();
     }
 
-    @Test
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
     public void receiveMessagesWithTCPConnectionDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol == HTTPS)
@@ -250,7 +211,7 @@ public class ReceiveMessagesIT
         this.errorInjectionTestFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
     public void receiveMessagesWithAmqpsConnectionDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -262,7 +223,7 @@ public class ReceiveMessagesIT
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
     public void receiveMessagesWithAmqpsSessionDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -274,7 +235,7 @@ public class ReceiveMessagesIT
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
     public void receiveMessagesWithAmqpsCBSReqLinkDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -292,7 +253,7 @@ public class ReceiveMessagesIT
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
     public void receiveMessagesWithAmqpsCBSRespLinkDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -310,7 +271,7 @@ public class ReceiveMessagesIT
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
     public void receiveMessagesWithAmqpsD2CLinkDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -322,7 +283,7 @@ public class ReceiveMessagesIT
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
     public void receiveMessagesWithAmqpsC2DLinkDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -374,7 +335,7 @@ public class ReceiveMessagesIT
             messageIdListStoredOnC2DSend.add(Integer.toString(i));
 
             // send the message. Service client uses AMQPS protocol
-            CompletableFuture<Void> future = serviceClient.sendAsync(deviceAmqps.getDeviceId(), serviceMessage);
+            CompletableFuture<Void> future = serviceClient.sendAsync(testInstance.device.getDeviceId(), serviceMessage);
             futureList.add(future);
         }
 
@@ -393,7 +354,7 @@ public class ReceiveMessagesIT
         // Now wait for messages to be received in the device client
         waitForBackToBackC2DMessagesToBeReceived();
         testInstance.deviceClient.closeNow(); //close the device client connection
-        assertTrue("Received messages don't match up with sent messages", messageIdListStoredOnReceive.containsAll(messageIdListStoredOnC2DSend)); // check if the received list is same as the actual list that was created on sending the messages
+        assertTrue(testInstance.protocol + ", " + testInstance.authenticationType + ": Received messages don't match up with sent messages", messageIdListStoredOnReceive.containsAll(messageIdListStoredOnC2DSend)); // check if the received list is same as the actual list that was created on sending the messages
     }
 
     private void errorInjectionTestFlow(Message errorInjectionMessage) throws IOException, IotHubException, InterruptedException
@@ -426,20 +387,9 @@ public class ReceiveMessagesIT
         errorInjectionMessage.setExpiryTime(200);
         testInstance.deviceClient.sendEventAsync(errorInjectionMessage, new EventCallback(null), null);
 
-        //wait to send the message because we want to ensure that the tcp connection drop happens before the message is received
-        long startTime = System.currentTimeMillis();
-        long timeElapsed = 0;
-        while (!connectionStatusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING))
-        {
-            Thread.sleep(200);
-            timeElapsed = System.currentTimeMillis() - startTime;
-
-            //2 minute timeout waiting for error injection to occur
-            if (timeElapsed > ERROR_INJECTION_WAIT_TIMEOUT)
-            {
-                fail("Timed out waiting for error injection message to take effect");
-            }
-        }
+        //wait to send the message because we want to ensure that the tcp connection drop happens beforehand and we
+        // want the connection to be re-established before sending anything from service client
+        SendMessagesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT);
 
         sendMessageToDevice(testInstance.device.getDeviceId(), testInstance.protocol.toString());
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
@@ -447,7 +397,7 @@ public class ReceiveMessagesIT
         Thread.sleep(200);
         testInstance.deviceClient.closeNow();
 
-        assertTrue("Error Injection message did not cause service to drop TCP connection", connectionStatusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING));
+        assertTrue(testInstance.protocol + ", " + testInstance.authenticationType + ": Error Injection message did not cause service to drop TCP connection", connectionStatusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING));
     }
 
     private static class MessageCallbackForBackToBackC2DMessages implements com.microsoft.azure.sdk.iot.device.MessageCallback
@@ -530,6 +480,7 @@ public class ReceiveMessagesIT
         serviceMessage.setCorrelationId(expectedCorrelationId);
         serviceMessage.setMessageId(expectedMessageId);
         serviceMessage.setProperties(messageProperties);
+        serviceClient.open();
         serviceClient.send(deviceId, serviceMessage);
     }
 
@@ -540,22 +491,22 @@ public class ReceiveMessagesIT
             long startTime = System.currentTimeMillis();
             while (!messageReceived.wasCallbackFired())
             {
-                Thread.sleep(100);
+                Thread.sleep(300);
 
-                if (System.currentTimeMillis() - startTime > receiveTimeout)
+                if (System.currentTimeMillis() - startTime > RECEIVE_TIMEOUT)
                 {
-                    fail("Timed out waiting to receive message");
+                    fail(testInstance.protocol + ", " + testInstance.authenticationType + ": Timed out waiting to receive message");
                 }
             }
 
             if (!messageReceived.getResult())
             {
-                Assert.fail("Receiving message over " + protocolName + " protocol failed. Received message was missing expected properties");
+                Assert.fail(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message over " + protocolName + " protocol failed. Received message was missing expected properties");
             }
         }
         catch (InterruptedException e)
         {
-            Assert.fail("Receiving message over " + protocolName + " protocol failed");
+            Assert.fail(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message over " + protocolName + " protocol failed. Unexpected interrupted exception occurred");
         }
     }
 
@@ -570,15 +521,15 @@ public class ReceiveMessagesIT
             {
                 Thread.sleep(100);
 
-                if (System.currentTimeMillis() - startTime > receiveTimeout)
+                if (System.currentTimeMillis() - startTime > RECEIVE_TIMEOUT)
                 {
-                    Assert.fail("Receiving messages timed out.");
+                    Assert.fail(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving messages timed out.");
                 }
             }
         }
         catch (InterruptedException e)
         {
-            Assert.fail("Receiving message failed");
+            Assert.fail(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message failed. Unexpected interrupted exception occurred.");
         }
     }
 }

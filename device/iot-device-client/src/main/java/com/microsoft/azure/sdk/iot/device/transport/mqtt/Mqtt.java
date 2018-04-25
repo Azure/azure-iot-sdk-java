@@ -22,6 +22,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 abstract public class Mqtt implements MqttCallback
 {
+    private static final int CONNECTION_TIMEOUT = 60 * 1000;
+    private static final int DISCONNECTION_TIMEOUT = 60 * 1000;
+
     private MqttConnection mqttConnection;
     private MqttMessageListener messageListener;
     ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
@@ -91,7 +94,7 @@ abstract public class Mqtt implements MqttCallback
                 {
                     //Codes_SRS_Mqtt_25_005: [The function shall establish an MQTT connection with an IoT Hub using the provided host name, user name, device ID, and sas token.]
                     IMqttToken connectToken = this.mqttConnection.getMqttAsyncClient().connect(Mqtt.this.mqttConnection.getConnectionOptions());
-                    connectToken.waitForCompletion();
+                    connectToken.waitForCompletion(CONNECTION_TIMEOUT);
 
                     //Codes_SRS_Mqtt_34_020: [If the MQTT connection is established successfully, this function shall notify its listener that connection was established.]
                     if (this.listener != null)
@@ -124,7 +127,7 @@ abstract public class Mqtt implements MqttCallback
 
                 if (disconnectToken != null)
                 {
-                    disconnectToken.waitForCompletion();
+                    disconnectToken.waitForCompletion(DISCONNECTION_TIMEOUT);
                 }
             }
 

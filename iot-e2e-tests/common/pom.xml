@@ -39,6 +39,11 @@
             <artifactId>junit</artifactId>
             <version>4.12</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-service-client</artifactId>
+            <version>1.13.1</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

@@ -350,7 +350,7 @@ public class MqttTest
                 minTimes = 1;
                 mockMqttAsyncClient.connect(mockMqttConnectionOptions);
                 times = 1;
-                mockMqttToken.waitForCompletion();
+                mockMqttToken.waitForCompletion(anyLong);
                 times = 1;
                 mockedIotHubListener.onConnectionEstablished();
                 times = 1;

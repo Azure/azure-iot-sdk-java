@@ -36,9 +36,7 @@ import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class ProvisioningClientIT
 {
@@ -60,7 +58,7 @@ public class ProvisioningClientIT
     private static final String TPM_SIMULATOR_IP_ADDRESS_ENV_NAME = "IOT_DPS_TPM_SIMULATOR_IP_ADDRESS"; // ip address of TPM simulator
     private static String tpmSimulatorIpAddress = "";
 
-    private static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // milli secs of time to wait
+    private static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1 * 60 * 1000; //
 
     private static final Integer IOTHUB_NUM_OF_MESSAGES_TO_SEND = 3; // milli secs of time to wait
     private static final List<MessageAndResult> messagesToSendAndResultsExpected = new ArrayList<>();
@@ -81,6 +79,7 @@ public class ProvisioningClientIT
     private RegistryManager registryManager = null;
 
     private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
+    private static final int OVERALL_TEST_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 
     @Before
     public void setUp() throws Exception
@@ -102,7 +101,7 @@ public class ProvisioningClientIT
     }
 
     @After
-    public void tearDown() throws Exception
+    public void tearDown()
     {
         try
         {
@@ -145,6 +144,7 @@ public class ProvisioningClientIT
 
     private void waitForRegistrationCallback(ProvisioningStatus provisioningStatus) throws InterruptedException
     {
+        long startTime = System.currentTimeMillis();
         while (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() != PROVISIONING_DEVICE_STATUS_ASSIGNED)
         {
             if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ERROR ||
@@ -156,7 +156,13 @@ public class ProvisioningClientIT
                 throw new InterruptedException(provisioningStatus.exception.getMessage());
             }
             System.out.println("Waiting for Provisioning Service to register");
-            Thread.sleep(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
+
+            Thread.sleep(2000);
+
+            if (System.currentTimeMillis() - startTime > MAX_TIME_TO_WAIT_FOR_REGISTRATION)
+            {
+                fail("Timed out waiting for registration to succeed");
+            }
         }
 
         assertEquals(PROVISIONING_DEVICE_STATUS_ASSIGNED, provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus());
@@ -282,7 +288,7 @@ public class ProvisioningClientIT
         registryManager.removeDevice(deviceId);
     }
 
-    @Test
+    @Test (timeout = OVERALL_TEST_TIMEOUT)
     public void individualEnrollmentTPMSimulator() throws Exception
     {
         for (ProvisioningDeviceClientTransportProtocol protocol : provisioningDeviceClientTransportProtocols)
@@ -337,7 +343,7 @@ public class ProvisioningClientIT
                 DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri(),
                                                                                     provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId(),
                                                                                     securityProviderTPMEmulator, iotHubClientProtocol);
-                SendMessagesCommon.sendMessages(deviceClient, iotHubClientProtocol, messagesToSendAndResultsExpected, IOTHUB_RETRY_MILLISECONDS, IOTHUB_MAX_SEND_TIMEOUT, 200);
+                SendMessagesCommon.sendMessages(deviceClient, iotHubClientProtocol, messagesToSendAndResultsExpected, IOTHUB_RETRY_MILLISECONDS, IOTHUB_MAX_SEND_TIMEOUT, 200, null);
 
                 System.out.println("Send Messages over " + iotHubClientProtocol + " for TPM registration over " + protocol + " succeeded");
             }
@@ -350,7 +356,7 @@ public class ProvisioningClientIT
         }
     }
 
-    @Test
+    @Test (timeout = OVERALL_TEST_TIMEOUT)
     public void individualEnrollmentX509() throws Exception
     {
         for (ProvisioningDeviceClientTransportProtocol protocol : provisioningDeviceClientTransportProtocols)
@@ -408,7 +414,7 @@ public class ProvisioningClientIT
                 DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri(),
                                                                                     provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId(),
                                                                                     securityProviderX509, iotHubClientProtocol);
-                SendMessagesCommon.sendMessages(deviceClient, iotHubClientProtocol, messagesToSendAndResultsExpected, IOTHUB_RETRY_MILLISECONDS, IOTHUB_MAX_SEND_TIMEOUT, 200);
+                SendMessagesCommon.sendMessages(deviceClient, iotHubClientProtocol, messagesToSendAndResultsExpected, IOTHUB_RETRY_MILLISECONDS, IOTHUB_MAX_SEND_TIMEOUT, 200, null);
 
                 System.out.println("Send Messages over " + iotHubClientProtocol + " for X509 registration over " + protocol + " succeeded");
             }
