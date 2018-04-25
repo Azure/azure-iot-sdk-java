@@ -7,7 +7,7 @@ build_root=$(cd "$(dirname "$0")/.." && pwd)
 # -- Java SDK Run E2E --
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root
-mvn install -DskipITs=false -T 1C
+mvn install -DskipITs=false -T 1C -Dfailsafe.rerunFailingTestsCount=2
 [ $? -eq 0 ] || exit $?
 
 # -- Java Dependencies --
