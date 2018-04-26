@@ -23,6 +23,7 @@ import java.util.UUID;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
 import static junit.framework.TestCase.fail;
 
+@Ignore
 public class TransportClientReceiveMessagesIT
 {
     private static final Integer MAX_DEVICE_MULTIPLEX = 3;

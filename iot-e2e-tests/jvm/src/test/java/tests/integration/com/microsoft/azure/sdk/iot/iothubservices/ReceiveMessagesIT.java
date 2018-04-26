@@ -301,6 +301,82 @@ public class ReceiveMessagesIT
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    public void receiveMessagesWithAmqpsMethodReqLinkDrop() throws IOException, IotHubException, InterruptedException
+    {
+        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
+        {
+            //test case not applicable
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Method Req link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsMethodReqLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
+    }
+
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    public void receiveMessagesWithAmqpsMethodRespLinkDrop() throws IOException, IotHubException, InterruptedException
+    {
+        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
+        {
+            //test case not applicable
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Method Resp link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
+    }
+
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    public void receiveMessagesWithAmqpsTwinReqLinkDrop() throws IOException, IotHubException, InterruptedException
+    {
+        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
+        {
+            //test case not applicable
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Twin Req link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsTwinReqLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
+    }
+
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    public void receiveMessagesWithAmqpsTwinRespLinkDrop() throws IOException, IotHubException, InterruptedException
+    {
+        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
+        {
+            //test case not applicable
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Twin Req link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
+    }
+
     //Test times out very frequently
     @Ignore
     @Test

@@ -69,6 +69,27 @@ public class ErrorInjectionHelper
         return createMessageWithErrorInjectionProperties(FaultType_AmqpC2D, FaultCloseReason_Boom, delayInSecs, durationInSecs);
     }
 
+    public static Message amqpsMethodReqLinkDropErrorInjectionMessage(int delayInSecs, int durationInSecs)
+    {
+        return createMessageWithErrorInjectionProperties(FaultType_AmqpMethodReq, FaultCloseReason_Boom, delayInSecs, durationInSecs);
+    }
+
+    public static Message amqpsMethodRespLinkDropErrorInjectionMessage(int delayInSecs, int durationInSecs)
+    {
+        return createMessageWithErrorInjectionProperties(FaultType_AmqpMethodResp, FaultCloseReason_Boom, delayInSecs, durationInSecs);
+    }
+
+    public static Message amqpsTwinReqLinkDropErrorInjectionMessage(int delayInSecs, int durationInSecs)
+    {
+        return createMessageWithErrorInjectionProperties(FaultType_AmqpTwinReq, FaultCloseReason_Boom, delayInSecs, durationInSecs);
+    }
+
+    public static Message amqpsTwinRespLinkDropErrorInjectionMessage(int delayInSecs, int durationInSecs)
+    {
+        return createMessageWithErrorInjectionProperties(FaultType_AmqpTwinResp, FaultCloseReason_Boom, delayInSecs, durationInSecs);
+    }
+
+
     public static Message createMessageWithErrorInjectionProperties(String faultType, String reason, int delayInSecs, int durationInSecs)
     {
         String dataBuffer = UUID.randomUUID().toString();

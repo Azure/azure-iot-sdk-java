@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.ErrorInjectionHelper;
 import com.microsoft.azure.sdk.iot.common.MessageAndResult;
+import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
@@ -76,6 +77,7 @@ public class DeviceMethodIT
 
     private DeviceMethodIT.DeviceMethodITRunner testInstance;
     private static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
+    private static final long ERROR_INJECTION_EXECUTION_TIMEOUT = 2* 60 * 1000; // 2 minute
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
     @Parameterized.Parameters(name = "{1} with {2} auth")
@@ -492,7 +494,7 @@ public class DeviceMethodIT
         }
     }
 
-    @Test
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void invokeMethodRecoveredFromTcpConnectionDrop() throws Exception
     {
         this.errorInjectionTestFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
@@ -500,7 +502,7 @@ public class DeviceMethodIT
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void invokeMethodRecoveredFromAmqpsConnectionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -513,7 +515,7 @@ public class DeviceMethodIT
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void invokeMethodRecoveredFromAmqpsSessionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -526,7 +528,7 @@ public class DeviceMethodIT
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void invokeMethodRecoveredFromAmqpsCBSReqLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -545,7 +547,7 @@ public class DeviceMethodIT
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void invokeMethodRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -564,7 +566,7 @@ public class DeviceMethodIT
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void invokeMethodRecoveredFromAmqpsD2CLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -577,7 +579,7 @@ public class DeviceMethodIT
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void invokeMethodRecoveredFromAmqpsC2DLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -597,6 +599,86 @@ public class DeviceMethodIT
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void invokeMethodRecoveredFromAmqpsMethodReqLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Method Req is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void invokeMethodRecoveredFromAmqpsMethodRespLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Method Resp is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void invokeMethodRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Twin Req is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsTwinReqLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void invokeMethodRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Twin Resp is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
     private void setConnectionStatusCallBack(final List actualStatusUpdates)
     {
 
@@ -609,38 +691,6 @@ public class DeviceMethodIT
         };
 
         this.testInstance.deviceTestManager.getDeviceClient().registerConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
-    }
-
-    private void waitForStabilizedConnection(List actualStatusUpdates) throws InterruptedException
-    {
-        //wait to send the message because we want to ensure that the tcp connection drop happens before the message is received
-        long startTime = System.currentTimeMillis();
-        long timeElapsed = 0;
-        while (!actualStatusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING))
-        {
-            Thread.sleep(200);
-            timeElapsed = System.currentTimeMillis() - startTime;
-
-            // 2 minutes timeout waiting for error injection to occur
-            if (timeElapsed > ERROR_INJECTION_WAIT_TIMEOUT)
-            {
-                fail("Timed out waiting for error injection message to take effect");
-            }
-        }
-
-        int numOfUpdates = 0;
-        while (numOfUpdates != actualStatusUpdates.size() || actualStatusUpdates.get(actualStatusUpdates.size()-1) != IotHubConnectionStatus.CONNECTED)
-        {
-            numOfUpdates = actualStatusUpdates.size();
-            Thread.sleep(200);
-            timeElapsed = System.currentTimeMillis() - startTime;
-
-            // 2 minutes timeout waiting for connection to stabilized
-            if (timeElapsed > ERROR_INJECTION_WAIT_TIMEOUT)
-            {
-                fail("Timed out waiting for a stable connection after error injection");
-            }
-        }
     }
 
     private void errorInjectionTestFlow(Message errorInjectionMessage) throws Exception
@@ -660,7 +710,7 @@ public class DeviceMethodIT
                 this.testInstance.protocol);
 
         // Assert
-        waitForStabilizedConnection(actualStatusUpdates);
+        SendMessagesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
         invokeMethodSucceed();
     }
 

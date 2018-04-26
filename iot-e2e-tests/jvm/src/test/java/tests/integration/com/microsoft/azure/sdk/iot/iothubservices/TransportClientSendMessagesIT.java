@@ -23,6 +23,7 @@ import static com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesComm
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
 
+@Ignore
 public class TransportClientSendMessagesIT
 {
     //Huw much sequential connections each device will open and close in the multithreaded test.

@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.RawTwinQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
@@ -26,6 +27,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
 import static org.junit.Assert.*;
 
+@Ignore
 public class TransportClientDeviceTwinIT
 {
     // Max time to wait to see it on Hub

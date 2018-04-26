@@ -7,35 +7,42 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.microsoft.azure.sdk.iot.common.ErrorInjectionHelper;
+import com.microsoft.azure.sdk.iot.common.MessageAndResult;
 import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static org.junit.Assert.*;
 
+@RunWith(Parameterized.class)
 public class DeviceTwinIT
 {
     // Max time to wait to see it on Hub
@@ -76,12 +83,21 @@ public class DeviceTwinIT
     // States of SDK
     private static RegistryManager registryManager;
     private static DeviceClient deviceClient;
-    private static DeviceClient x509DeviceClient;
     private static RawTwinQuery scRawTwinQueryClient;
     private static DeviceTwin sCDeviceTwin;
     private static DeviceState deviceUnderTest = null;
-    private static DeviceState x509DeviceUnderTest = null;
+
     private static DeviceState[] devicesUnderTest;
+
+    private DeviceTwinIT.DeviceTwinITRunner testInstance;
+    private static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
+    private static final long ERROR_INJECTION_EXECUTION_TIMEOUT = 2 * 60 * 1000; // 2 minute
+
+    //How many milliseconds between retry
+    private static final Integer RETRY_MILLISECONDS = 100;
+
+    // How much to wait until a message makes it to the server, in milliseconds
+    private static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
 
     private enum STATUS
     {
@@ -197,8 +213,8 @@ public class DeviceTwinIT
         for (int i = 0; i < numberOfDevices; i++)
         {
             devicesUnderTest[i] = new DeviceState();
-            String deviceIdMqtt = "java-device-twin-e2e-test-mqtt".concat(UUID.randomUUID().toString());
-            devicesUnderTest[i].sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceIdMqtt, null, null);
+            String id = "java-device-twin-e2e-test-" + this.testInstance.protocol.toString() + UUID.randomUUID().toString();
+            devicesUnderTest[i].sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(id, null, null);
             devicesUnderTest[i].sCDeviceForRegistryManager = registryManager.addDevice(devicesUnderTest[i].sCDeviceForRegistryManager);
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
             setUpTwin(devicesUnderTest[i]);
@@ -221,29 +237,24 @@ public class DeviceTwinIT
         if (deviceClient == null)
         {
             deviceState.dCDeviceForTwin = new DeviceExtension();
-            deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager), IotHubClientProtocol.MQTT);
+            if (this.testInstance.authenticationType == SAS)
+            {
+                deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager),
+                        this.testInstance.protocol);
+            }
+            else if (this.testInstance.authenticationType == SELF_SIGNED)
+            {
+                deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceUnderTest.sCDeviceForRegistryManager),
+                        this.testInstance.protocol,
+                        publicKeyCert,
+                        false,
+                        privateKey,
+                        false);
+            }
             SendMessagesCommon.openDeviceClientWithRetry(deviceClient);
             deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
             deviceState.deviceTwinStatus = STATUS.SUCCESS;
         }
-        // set up twin on ServiceClient
-        if (sCDeviceTwin != null)
-        {
-            deviceState.sCDeviceForTwin = new DeviceTwinDevice(deviceState.sCDeviceForRegistryManager.getDeviceId());
-            sCDeviceTwin.getTwin(deviceState.sCDeviceForTwin);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        }
-    }
-
-    private void setUpTwinForX509(DeviceState deviceState, IotHubClientProtocol protocol) throws IOException, URISyntaxException, IotHubException, InterruptedException
-    {
-        // set up twin on DeviceClient
-        deviceState.dCDeviceForTwin = new DeviceExtension();
-        String connString = DeviceConnectionString.get(iotHubConnectionString, x509DeviceUnderTest.sCDeviceForRegistryManager);
-        x509DeviceClient = new DeviceClient(connString, protocol, publicKeyCert, false, privateKey, false);
-        SendMessagesCommon.openDeviceClientWithRetry(x509DeviceClient);
-        x509DeviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
-        deviceState.deviceTwinStatus = STATUS.SUCCESS;
 
         // set up twin on ServiceClient
         if (sCDeviceTwin != null)
@@ -254,7 +265,7 @@ public class DeviceTwinIT
         }
     }
 
-    private void tearDownTwin(DeviceState deviceState) throws IOException
+    private static void tearDownTwin(DeviceState deviceState) throws IOException
     {
         // tear down twin on device client
         if (deviceState.sCDeviceForTwin != null)
@@ -270,48 +281,79 @@ public class DeviceTwinIT
             deviceClient.closeNow();
             deviceClient = null;
         }
-        if (x509DeviceClient != null)
-        {
-            x509DeviceClient.closeNow();
-            x509DeviceClient = null;
-        }
     }
 
-    @BeforeClass
-    public static void setUp() throws Exception
+    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
+    @Parameterized.Parameters(name = "{1} with {2} auth")
+    public static Collection setUp() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-
         X509Cert cert = new X509Cert(0, false, "TestLeaf", "TestRoot");
         privateKey =  cert.getPrivateKeyLeafPem();
         publicKeyCert = cert.getPublicCertLeafPem();
         x509Thumbprint = cert.getThumbPrintLeaf();
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         scRawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
+
+        String uuid = UUID.randomUUID().toString();
+        String deviceIdAmqps = "java-device-client-e2e-test-amqps".concat("-" + uuid);
+        String deviceIdAmqpsWs = "java-device-client-e2e-test-amqpsws".concat("-" + uuid);
+        String deviceIdMqtt = "java-device-client-e2e-test-mqtt".concat("-" + uuid);
+        String deviceIdMqttWs = "java-device-client-e2e-test-mqttws".concat("-" + uuid);
+        String deviceIdMqttX509 = "java-device-client-e2e-test-mqtt-X509".concat("-" + uuid);
+        String deviceIdAmqpsX509 = "java-device-client-e2e-test-amqps-X509".concat("-" + uuid);
+
+        return Arrays.asList(
+            new Object[][]
+                {
+                    //sas token
+                    {deviceIdAmqps, AMQPS, SAS},
+                    {deviceIdAmqpsWs, AMQPS_WS, SAS},
+                    {deviceIdMqtt, MQTT, SAS},
+                    {deviceIdMqttWs,  MQTT_WS, SAS},
+
+                    //x509
+                    {deviceIdAmqpsX509, AMQPS, SELF_SIGNED},
+                    {deviceIdMqttX509, MQTT, SELF_SIGNED}
+               }
+        );
     }
 
-    @AfterClass
-    public static void tearDown()
+    public DeviceTwinIT(String deviceId, IotHubClientProtocol protocol, AuthenticationType authenticationType)
     {
-        if (registryManager != null)
-        {
-            registryManager.close();
-        }
+        super();
+        this.testInstance = new DeviceTwinIT.DeviceTwinITRunner(deviceId, protocol, authenticationType);
+    }
 
-        registryManager = null;
-        sCDeviceTwin = null;
-        deviceClient = null;
-        x509DeviceClient = null;
+    private class DeviceTwinITRunner
+    {
+        private String deviceId;
+        private IotHubClientProtocol protocol;
+        private AuthenticationType authenticationType;
+
+        public DeviceTwinITRunner(String deviceId, IotHubClientProtocol protocol, AuthenticationType authenticationType)
+        {
+            this.deviceId = deviceId;
+            this.protocol = protocol;
+            this.authenticationType = authenticationType;
+        }
     }
 
     @Before
-    public void setUpNewDevice() throws IOException, IotHubException, NoSuchAlgorithmException, URISyntaxException, InterruptedException
+    public void setUpNewDevice() throws IOException, IotHubException, NoSuchAlgorithmException, URISyntaxException, InterruptedException, GeneralSecurityException
     {
         deviceUnderTest = new DeviceState();
-        String deviceIdMqtt = "java-device-twin-e2e-test-mqtt".concat(UUID.randomUUID().toString());
-        deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceIdMqtt, null, null);
+        if (this.testInstance.authenticationType == SAS)
+        {
+            deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(this.testInstance.deviceId, null, null);
+        }
+        else if (this.testInstance.authenticationType == SELF_SIGNED)
+        {
+            deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createDevice(this.testInstance.deviceId, SELF_SIGNED);
+            deviceUnderTest.sCDeviceForRegistryManager.setThumbprint(x509Thumbprint, x509Thumbprint);
+        }
         deviceUnderTest.sCDeviceForRegistryManager = registryManager.addDevice(deviceUnderTest.sCDeviceForRegistryManager);
         setUpTwin(deviceUnderTest);
     }
@@ -329,6 +371,19 @@ public class DeviceTwinIT
         {
             throw new RuntimeException(e);
         }
+    }
+
+    @AfterClass
+    public static void tearDown() throws IOException, IotHubException
+    {
+        if (registryManager != null)
+        {
+            registryManager.close();
+        }
+
+        registryManager = null;
+        sCDeviceTwin = null;
+        deviceClient = null;
     }
 
     private int readReportedProperties(DeviceState deviceState, String startsWithKey, String startsWithValue) throws IOException, IotHubException, InterruptedException
@@ -349,23 +404,25 @@ public class DeviceTwinIT
         return totalCount;
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testSendReportedProperties() throws IOException, IotHubException, InterruptedException
+    private void sendReportedPropertiesAndVerify(int numOfProp) throws IOException, IotHubException, InterruptedException
     {
-        // arrange
-
-        // act
+        // Act
         // send max_prop RP all at once
-        deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
+        deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(numOfProp);
         deviceClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
-        // assert
-        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
-
+        // Assert
+        assertEquals(STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
         // verify if they are received by SC
         int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE);
-        assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
+        assertEquals(numOfProp, actualReportedPropFound);
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testSendReportedProperties() throws IOException, IotHubException, InterruptedException
+    {
+        sendReportedPropertiesAndVerify(MAX_PROPERTIES_TO_TEST);
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -530,11 +587,10 @@ public class DeviceTwinIT
         assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testSubscribeToDesiredProperties() throws IOException, InterruptedException, IotHubException
+    private void subscribeToDesiredPropertiesAndVerify(int numOfProp) throws IOException, InterruptedException, IotHubException
     {
         // arrange
-        for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
+        for (int i = 0; i < numOfProp; i++)
         {
             PropertyState propertyState = new PropertyState();
             propertyState.callBackTriggered = false;
@@ -548,7 +604,7 @@ public class DeviceTwinIT
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         Set<Pair> desiredProperties = new HashSet<>();
-        for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
+        for (int i = 0; i < numOfProp; i++)
         {
             desiredProperties.add(new Pair(PROPERTY_KEY + i, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
         }
@@ -564,6 +620,12 @@ public class DeviceTwinIT
             assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
             assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
         }
+    }
+
+    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void testSubscribeToDesiredProperties() throws IOException, InterruptedException, IotHubException
+    {
+        subscribeToDesiredPropertiesAndVerify(MAX_PROPERTIES_TO_TEST);
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -1299,75 +1361,560 @@ public class DeviceTwinIT
         removeMultipleDevices(MAX_DEVICES);
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testUpdateDesiredUpdatesMQTTWithX509() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void sendReportedPropertiesRecoveredFromTcpConnectionDrop() throws Exception
     {
-        //arrange
-        setUpX509Device(IotHubClientProtocol.MQTT);
-
-        // Add desired properties for the device
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair(PROPERTY_KEY, PROPERTY_VALUE));
-        x509DeviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
-        sCDeviceTwin.updateTwin(x509DeviceUnderTest.sCDeviceForTwin);
-        x509DeviceUnderTest.sCDeviceForTwin.clearTwin();
-
-        // Update desired properties on multiple devices
-        sCDeviceTwin.getTwin(x509DeviceUnderTest.sCDeviceForTwin);
-        Set<Pair> updatedDesiredProperties = x509DeviceUnderTest.sCDeviceForTwin.getDesiredProperties();
-        for (Pair dp : updatedDesiredProperties)
-        {
-            dp.setValue(PROPERTY_VALUE_UPDATE);
-        }
-        x509DeviceUnderTest.sCDeviceForTwin.setDesiredProperties(updatedDesiredProperties);
-        sCDeviceTwin.updateTwin(x509DeviceUnderTest.sCDeviceForTwin);
-        x509DeviceUnderTest.sCDeviceForTwin.clearTwin();
-
-        // Read updates on multiple devices
-        sCDeviceTwin.getTwin(x509DeviceUnderTest.sCDeviceForTwin);
-
-        for (Pair dp : x509DeviceUnderTest.sCDeviceForTwin.getDesiredProperties())
-        {
-            assertEquals(dp.getKey(), PROPERTY_KEY);
-            assertEquals(dp.getValue(), PROPERTY_VALUE_UPDATE);
-        }
-
-        tearDownTwin(x509DeviceUnderTest);
-        registryManager.removeDevice(x509DeviceUnderTest.sCDeviceForRegistryManager.getDeviceId());
+        this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testSendReportedPropertiesMQTTWithX509() throws IOException, IotHubException, InterruptedException, URISyntaxException
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void subscribeToDesiredPropertiesRecoveredFromTcpConnectionDrop() throws Exception
     {
-        //arrange
-        setUpX509Device(IotHubClientProtocol.MQTT);
-
-        // act
-        // send max_prop RP all at once
-        x509DeviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
-        x509DeviceClient.sendReportedProperties(x509DeviceUnderTest.dCDeviceForTwin.getReportedProp());
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-
-        // assert
-        assertEquals(x509DeviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
-
-        // verify if they are received by SC
-        Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
-        int actualReportedPropFound = readReportedProperties(x509DeviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE);
-        assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
-
-        tearDownTwin(x509DeviceUnderTest);
-        registryManager.removeDevice(x509DeviceUnderTest.sCDeviceForRegistryManager.getDeviceId());
+        this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    private void setUpX509Device(IotHubClientProtocol protocol) throws IOException, IotHubException, URISyntaxException, InterruptedException
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void getDeviceTwinRecoveredFromTcpConnectionDrop() throws Exception
     {
-        x509DeviceUnderTest = new DeviceState();
-        String deviceIdX509 = "java-device-twin-e2e-test-" + protocol + "-x509".concat(UUID.randomUUID().toString());
-        x509DeviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createDevice(deviceIdX509, AuthenticationType.SELF_SIGNED);
-        x509DeviceUnderTest.sCDeviceForRegistryManager.setThumbprint(x509Thumbprint, x509Thumbprint);
-        x509DeviceUnderTest.sCDeviceForRegistryManager = registryManager.addDevice(x509DeviceUnderTest.sCDeviceForRegistryManager);
-        setUpTwinForX509(x509DeviceUnderTest, protocol);
+        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void sendReportedPropertiesRecoveredFromAmqpsConnectionDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void subscribeToDesiredPropertiesRecoveredFromAmqpsConnectionDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void getDeviceTwinRecoveredFromAmqpsConnectionDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void sendReportedPropertiesRecoveredFromAmqpsSessionDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void subscribeToDesiredPropertiesRecoveredFromAmqpsSessionDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void getDeviceTwinRecoveredFromAmqpsSessionDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void sendReportedPropertiesRecoveredFromAmqpsCBSReqLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.authenticationType != SAS)
+        {
+            //CBS links are only established when using sas authentication
+            return;
+        }
+
+        this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void subscribeToDesiredPropertiesRecoveredFromAmqpsCBSReqLinkrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.authenticationType != SAS)
+        {
+            //CBS links are only established when using sas authentication
+            return;
+        }
+
+        this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void getDeviceTwinRecoveredFromAmqpsCBSReqLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.authenticationType != SAS)
+        {
+            //CBS links are only established when using sas authentication
+            return;
+        }
+
+        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void sendReportedPropertiesRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.authenticationType != SAS)
+        {
+            //CBS links are only established when using sas authentication
+            return;
+        }
+
+        this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void subscribeToDesiredPropertiesRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.authenticationType != SAS)
+        {
+            //CBS links are only established when using sas authentication
+            return;
+        }
+
+        this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void getDeviceTwinRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.authenticationType != SAS)
+        {
+            //CBS links are only established when using sas authentication
+            return;
+        }
+
+        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void sendReportedPropertiesRecoveredFromAmqpsD2CLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void subscribeToDesiredPropertiesRecoveredFromAmqpsD2CDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void getDeviceTwinRecoveredFromAmqpsD2CLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void sendReportedPropertiesRecoveredFromAmqpsC2DLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. C2D link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void subscribeToDesiredPropertiesRecoveredFromC2DDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. C2D link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void getDeviceTwinRecoveredFromAmqpsC2DLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. C2D link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+
+        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void sendReportedPropertiesRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Twin Req link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsTwinReqLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void subscribeToDesiredPropertiesRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Twin Req link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsTwinReqLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void getDeviceTwinRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Twin Req link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsTwinReqLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void sendReportedPropertiesRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Twin Resp link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void subscribeToDesiredPropertiesRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Twin Resp link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void getDeviceTwinRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Twin Resp link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void sendReportedPropertiesRecoveredFromAmqpsMethodReqLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Method Resp link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsMethodReqLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void subscribeToDesiredPropertiesRecoveredFromAmqpsMethodReqLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Method Req link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsMethodReqLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void getDeviceTwinRecoveredFromAmqpsMethodReqLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Method Req link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsMethodReqLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void sendReportedPropertiesRecoveredFromAmqpsMethodRespLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Method Resp link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void subscribeToDesiredPropertiesRecoveredFromAmqpsMethodRespLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Method Resp link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void getDeviceTwinRecoveredFromAmqpsMethodRespLinkDrop() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
+        {
+            //TODO error injection seems to fail under these circumstances. Method Resp link is never dropped even if waiting a long time
+            // Need to talk to service folks about this strange behavior
+            return;
+        }
+
+        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     private void setDesiredProperties(String queryProperty, String queryPropertyValue, int numberOfDevices) throws IOException, IotHubException
@@ -1380,6 +1927,123 @@ public class DeviceTwinIT
 
             sCDeviceTwin.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
             devicesUnderTest[i].sCDeviceForTwin.clearTwin();
+        }
+    }
+
+    private void setConnectionStatusCallBack(final List actualStatusUpdates)
+    {
+        IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = new IotHubConnectionStatusChangeCallback()
+        {
+            @Override
+            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+            {
+                actualStatusUpdates.add(status);
+            }
+        };
+
+        this.deviceClient.registerConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
+    }
+
+    private void errorInjectionSendReportedPropertiesFlow(Message errorInjectionMessage) throws Exception
+    {
+        // Arrange
+        final List<IotHubConnectionStatus> actualStatusUpdates = new ArrayList<>();
+        setConnectionStatusCallBack(actualStatusUpdates);
+        sendReportedPropertiesAndVerify(1);
+
+        // Act
+        errorInjectionMessage.setExpiryTime(100);
+        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
+        SendMessagesCommon.sendMessageAndWaitForResponse(
+                deviceClient,
+                errorInjectionMsgAndRet,
+                RETRY_MILLISECONDS,
+                SEND_TIMEOUT_MILLISECONDS,
+                this.testInstance.protocol);
+
+        // Assert
+        SendMessagesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
+        // add one new reported property
+        deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
+        deviceClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        assertEquals(STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
+        // verify if they are received by SC
+        int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE);
+        assertEquals(2 , actualReportedPropFound);
+    }
+
+    private void errorInjectionSubscribeToDesiredPropertiesFlow(Message errorInjectionMessage) throws Exception
+    {
+        // Arrange
+        final List<IotHubConnectionStatus> actualStatusUpdates = new ArrayList<>();
+        setConnectionStatusCallBack(actualStatusUpdates);
+        subscribeToDesiredPropertiesAndVerify(1);
+
+        // Act
+        errorInjectionMessage.setExpiryTime(100);
+        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
+        SendMessagesCommon.sendMessageAndWaitForResponse(
+                deviceClient,
+                errorInjectionMsgAndRet,
+                RETRY_MILLISECONDS,
+                SEND_TIMEOUT_MILLISECONDS,
+                this.testInstance.protocol);
+
+        // Assert
+        SendMessagesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
+        deviceUnderTest.dCDeviceForTwin.propertyStateList.get(0).callBackTriggered = false;
+        assertEquals(1, deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size());
+        Set<Pair> dp = new HashSet<>();
+        Pair p = deviceUnderTest.sCDeviceForTwin.getDesiredProperties().iterator().next();
+        p.setValue(PROPERTY_VALUE_UPDATE + "2" + UUID.randomUUID());
+        dp.add(p);
+        deviceUnderTest.sCDeviceForTwin.setDesiredProperties(dp);
+
+        sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        assertTrue("Callback was not triggered for one or more properties", deviceUnderTest.dCDeviceForTwin.propertyStateList.get(0).callBackTriggered);
+        assertTrue(((String) deviceUnderTest.dCDeviceForTwin.propertyStateList.get(0).propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE + "2"));
+        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+    }
+
+    private void errorInjectionGetDeviceTwinFlow(Message errorInjectionMessage) throws Exception
+    {
+        // Arrange
+        final List<IotHubConnectionStatus> actualStatusUpdates = new ArrayList<>();
+        setConnectionStatusCallBack(actualStatusUpdates);
+        testGetDeviceTwin();
+
+        // Act
+        errorInjectionMessage.setExpiryTime(100);
+        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
+        SendMessagesCommon.sendMessageAndWaitForResponse(
+                deviceClient,
+                errorInjectionMsgAndRet,
+                RETRY_MILLISECONDS,
+                SEND_TIMEOUT_MILLISECONDS,
+                this.testInstance.protocol);
+
+        // Assert
+        SendMessagesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
+        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
+        {
+            propertyState.callBackTriggered = false;
+            propertyState.propertyNewVersion = -1;
+        }
+
+        deviceClient.getDeviceTwin();
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+
+        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
+        {
+            assertTrue("Callback was not triggered for one or more properties", propertyState.callBackTriggered);
+            assertNotEquals("Version was not set in the callback", (int)propertyState.propertyNewVersion, -1);
+            assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
+            assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
         }
     }
 }

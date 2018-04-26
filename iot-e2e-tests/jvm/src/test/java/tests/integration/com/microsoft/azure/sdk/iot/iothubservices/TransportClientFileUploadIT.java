@@ -26,6 +26,7 @@ import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothubservices.TransportClientFileUploadIT.STATUS.FAILURE;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothubservices.TransportClientFileUploadIT.STATUS.SUCCESS;
 
+@Ignore
 public class TransportClientFileUploadIT
 {
     private static final Integer MAX_DEVICE_MULTIPLEX = 2;
