@@ -5,7 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
-import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
+import com.microsoft.azure.sdk.iot.common.iothubservices.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
@@ -215,7 +215,7 @@ public class FileUploadIT
     private void setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException
     {
         deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, scDevice), protocol);
-        SendMessagesCommon.openDeviceClientWithRetry(deviceClient);
+        IotHubServicesCommon.openDeviceClientWithRetry(deviceClient);
     }
 
     private void tearDownDeviceClient() throws IOException
@@ -224,7 +224,7 @@ public class FileUploadIT
         deviceClient = null;
     }
 
-    private void verifyNotification(FileUploadNotification fileUploadNotification, FileUploadState fileUploadState) throws IOException, URISyntaxException
+    private void verifyNotification(FileUploadNotification fileUploadNotification, FileUploadState fileUploadState) throws IOException
     {
         assertEquals("Received notification for a different device not belonging to this test", scDevice.getDeviceId(), fileUploadNotification.getDeviceId());
 
@@ -285,7 +285,7 @@ public class FileUploadIT
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void uploadToBlobAsyncMultipleFilesSequentially() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException
+    public void uploadToBlobAsyncMultipleFilesSequentially() throws URISyntaxException, IOException, InterruptedException
     {
         // arrange
         setUpDeviceClient(IotHubClientProtocol.MQTT);

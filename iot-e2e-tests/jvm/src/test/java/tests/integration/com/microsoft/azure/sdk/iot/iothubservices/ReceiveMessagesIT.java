@@ -8,7 +8,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 import com.microsoft.azure.sdk.iot.common.ErrorInjectionHelper;
 import com.microsoft.azure.sdk.iot.common.EventCallback;
 import com.microsoft.azure.sdk.iot.common.Success;
-import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
+import com.microsoft.azure.sdk.iot.common.iothubservices.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.Device;
@@ -180,7 +180,7 @@ public class ReceiveMessagesIT
             testInstance.deviceClient.setOption(SET_MINIMUM_POLLING_INTERVAL, ONE_SECOND_POLLING_INTERVAL);
         }
 
-        SendMessagesCommon.openDeviceClientWithRetry(testInstance.deviceClient);
+        IotHubServicesCommon.openDeviceClientWithRetry(testInstance.deviceClient);
 
         com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
 
@@ -392,7 +392,7 @@ public class ReceiveMessagesIT
         List<CompletableFuture<Void>> futureList = new ArrayList<>();
 
         // set device to receive back to back different commands using AMQPS protocol
-        SendMessagesCommon.openDeviceClientWithRetry(testInstance.deviceClient);
+        IotHubServicesCommon.openDeviceClientWithRetry(testInstance.deviceClient);
 
         // set call back for device client for receiving message
         com.microsoft.azure.sdk.iot.device.MessageCallback callBackOnRx = new MessageCallbackForBackToBackC2DMessages();
@@ -445,7 +445,7 @@ public class ReceiveMessagesIT
             }
         }, null);
 
-        SendMessagesCommon.openDeviceClientWithRetry(testInstance.deviceClient);
+        IotHubServicesCommon.openDeviceClientWithRetry(testInstance.deviceClient);
 
         com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
 
@@ -465,7 +465,7 @@ public class ReceiveMessagesIT
 
         //wait to send the message because we want to ensure that the tcp connection drop happens beforehand and we
         // want the connection to be re-established before sending anything from service client
-        SendMessagesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT);
+        IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT);
 
         sendMessageToDevice(testInstance.device.getDeviceId(), testInstance.protocol.toString());
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());

@@ -9,8 +9,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.common.ErrorInjectionHelper;
 import com.microsoft.azure.sdk.iot.common.MessageAndResult;
-import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.common.iothubservices.IotHubServicesCommon;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
@@ -251,7 +252,7 @@ public class DeviceTwinIT
                         privateKey,
                         false);
             }
-            SendMessagesCommon.openDeviceClientWithRetry(deviceClient);
+            IotHubServicesCommon.openDeviceClientWithRetry(deviceClient);
             deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
             deviceState.deviceTwinStatus = STATUS.SUCCESS;
         }
@@ -1954,7 +1955,7 @@ public class DeviceTwinIT
         // Act
         errorInjectionMessage.setExpiryTime(100);
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
-        SendMessagesCommon.sendMessageAndWaitForResponse(
+        IotHubServicesCommon.sendMessageAndWaitForResponse(
                 deviceClient,
                 errorInjectionMsgAndRet,
                 RETRY_MILLISECONDS,
@@ -1962,7 +1963,7 @@ public class DeviceTwinIT
                 this.testInstance.protocol);
 
         // Assert
-        SendMessagesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
         // add one new reported property
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
         deviceClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
@@ -1984,7 +1985,7 @@ public class DeviceTwinIT
         // Act
         errorInjectionMessage.setExpiryTime(100);
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
-        SendMessagesCommon.sendMessageAndWaitForResponse(
+        IotHubServicesCommon.sendMessageAndWaitForResponse(
                 deviceClient,
                 errorInjectionMsgAndRet,
                 RETRY_MILLISECONDS,
@@ -1992,7 +1993,7 @@ public class DeviceTwinIT
                 this.testInstance.protocol);
 
         // Assert
-        SendMessagesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
         deviceUnderTest.dCDeviceForTwin.propertyStateList.get(0).callBackTriggered = false;
         assertEquals(1, deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size());
         Set<Pair> dp = new HashSet<>();
@@ -2019,7 +2020,7 @@ public class DeviceTwinIT
         // Act
         errorInjectionMessage.setExpiryTime(100);
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
-        SendMessagesCommon.sendMessageAndWaitForResponse(
+        IotHubServicesCommon.sendMessageAndWaitForResponse(
                 deviceClient,
                 errorInjectionMsgAndRet,
                 RETRY_MILLISECONDS,
@@ -2027,7 +2028,7 @@ public class DeviceTwinIT
                 this.testInstance.protocol);
 
         // Assert
-        SendMessagesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
         for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
         {
             propertyState.callBackTriggered = false;

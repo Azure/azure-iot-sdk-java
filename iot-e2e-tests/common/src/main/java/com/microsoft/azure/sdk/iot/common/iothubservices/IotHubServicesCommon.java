@@ -22,7 +22,7 @@ import static junit.framework.TestCase.fail;
 /*
  * This class contains common code for Junit and Android test cases
  */
-public class SendMessagesCommon
+public class IotHubServicesCommon
 {
     private final static long OPEN_RETRY_TIMEOUT = 3*60*1000; //3 minutes, or about 3 retries if open's keep timing out
 
@@ -35,9 +35,9 @@ public class SendMessagesCommon
     public static void sendMessages(DeviceClient client,
                                     IotHubClientProtocol protocol,
                                     List<MessageAndResult> messagesToSend,
-                                    final Integer RETRY_MILLISECONDS,
-                                    final Integer SEND_TIMEOUT_MILLISECONDS,
-                                    int interMessageDelay,
+                                    final long RETRY_MILLISECONDS,
+                                    final long SEND_TIMEOUT_MILLISECONDS,
+                                    long interMessageDelay,
                                     List<IotHubConnectionStatus> statusUpdates) throws IOException, InterruptedException
     {
         openDeviceClientWithRetry(client);
@@ -80,8 +80,8 @@ public class SendMessagesCommon
     public static void sendMessagesExpectingConnectionStatusChangeUpdate(DeviceClient client,
                                                                          IotHubClientProtocol protocol,
                                                                          List<MessageAndResult> messagesToSend,
-                                                                         final Integer RETRY_MILLISECONDS,
-                                                                         final Integer SEND_TIMEOUT_MILLISECONDS,
+                                                                         final long RETRY_MILLISECONDS,
+                                                                         final long SEND_TIMEOUT_MILLISECONDS,
                                                                          final IotHubConnectionStatus expectedStatus,
                                                                          int interMessageDelay,
                                                                          AuthenticationType authType) throws IOException, InterruptedException
@@ -109,7 +109,7 @@ public class SendMessagesCommon
     public static void sendMessagesExpectingSASTokenExpiration(DeviceClient client,
                                                                String protocol,
                                                                int numberOfMessages,
-                                                               Integer retryMilliseconds,
+                                                               long retryMilliseconds,
                                                                long timeoutMilliseconds,
                                                                AuthenticationType authType)
     {
@@ -157,8 +157,8 @@ public class SendMessagesCommon
     public static void sendMessagesMultiplex(DeviceClient client,
                                              IotHubClientProtocol protocol,
                                              final int NUM_MESSAGES_PER_CONNECTION,
-                                             final Integer RETRY_MILLISECONDS,
-                                             final Integer SEND_TIMEOUT_MILLISECONDS)
+                                             final long RETRY_MILLISECONDS,
+                                             final long SEND_TIMEOUT_MILLISECONDS)
     {
         String messageString = "Java client e2e test message over " + protocol + " protocol";
         Message msg = new Message(messageString);
@@ -195,8 +195,8 @@ public class SendMessagesCommon
 
     public static void sendExpiredMessageExpectingMessageExpiredCallback(DeviceClient deviceClient,
                                                                          IotHubClientProtocol protocol,
-                                                                         final Integer RETRY_MILLISECONDS,
-                                                                         final Integer SEND_TIMEOUT_MILLISECONDS,
+                                                                         final long RETRY_MILLISECONDS,
+                                                                         final long SEND_TIMEOUT_MILLISECONDS,
                                                                          AuthenticationType authType) throws IOException
     {
         try
@@ -267,7 +267,7 @@ public class SendMessagesCommon
         client.closeNow();
     }
 
-    public static void sendMessageAndWaitForResponse(DeviceClient client, MessageAndResult messageAndResult, int RETRY_MILLISECONDS, int SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
+    public static void sendMessageAndWaitForResponse(DeviceClient client, MessageAndResult messageAndResult, long RETRY_MILLISECONDS, long SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
     {
         try
         {

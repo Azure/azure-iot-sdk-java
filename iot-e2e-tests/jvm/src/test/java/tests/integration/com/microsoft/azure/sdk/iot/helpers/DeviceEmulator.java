@@ -5,19 +5,15 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
-import com.microsoft.azure.sdk.iot.common.EventCallback;
 import com.microsoft.azure.sdk.iot.common.MessageAndResult;
-import com.microsoft.azure.sdk.iot.common.Success;
-import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
+import com.microsoft.azure.sdk.iot.common.iothubservices.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import org.junit.Assert;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -73,7 +69,7 @@ public class DeviceEmulator  implements Runnable
     {
         this.deviceClient = new DeviceClient(connectionString, protocol);
         clearStatistics();
-        SendMessagesCommon.openDeviceClientWithRetry(deviceClient);
+        IotHubServicesCommon.openDeviceClientWithRetry(deviceClient);
     }
 
     /**
@@ -90,7 +86,7 @@ public class DeviceEmulator  implements Runnable
     {
         this.deviceClient = new DeviceClient(connectionString, protocol, publicKeyCert, false, privateKey, false);
         clearStatistics();
-        SendMessagesCommon.openDeviceClientWithRetry(deviceClient);
+        IotHubServicesCommon.openDeviceClientWithRetry(deviceClient);
     }
 
     @Override
@@ -226,7 +222,7 @@ public class DeviceEmulator  implements Runnable
 
     public void sendMessageAndWaitForResponse(MessageAndResult messageAndResult, int RETRY_MILLISECONDS, int SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
     {
-        SendMessagesCommon.sendMessageAndWaitForResponse(this.deviceClient, messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
+        IotHubServicesCommon.sendMessageAndWaitForResponse(this.deviceClient, messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
     }
 
     /**

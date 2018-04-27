@@ -5,7 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
-import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
+import com.microsoft.azure.sdk.iot.common.iothubservices.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
@@ -180,7 +180,7 @@ public class DeviceTwinWithVersionIT
     private void createDevice(IotHubClientProtocol protocol) throws IOException, URISyntaxException
     {
         testDevice.deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceForRegistryManager), protocol);
-        SendMessagesCommon.openDeviceClientWithRetry(testDevice.deviceClient);
+        IotHubServicesCommon.openDeviceClientWithRetry(testDevice.deviceClient);
         testDevice.deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), testDevice, new DeviceTwinPropertyCallback(), testDevice);
     }
 
