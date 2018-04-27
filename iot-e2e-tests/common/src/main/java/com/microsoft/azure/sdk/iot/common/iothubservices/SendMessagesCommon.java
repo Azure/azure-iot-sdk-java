@@ -267,7 +267,7 @@ public class SendMessagesCommon
         client.closeNow();
     }
 
-    private static void sendMessageAndWaitForResponse(DeviceClient client, MessageAndResult messageAndResult, int RETRY_MILLISECONDS, int SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
+    public static void sendMessageAndWaitForResponse(DeviceClient client, MessageAndResult messageAndResult, int RETRY_MILLISECONDS, int SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
     {
         try
         {

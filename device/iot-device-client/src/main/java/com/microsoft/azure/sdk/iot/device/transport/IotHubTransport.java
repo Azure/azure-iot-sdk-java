@@ -931,7 +931,7 @@ public class IotHubTransport implements IotHubListener
 
             if (newConnectionStatus == IotHubConnectionStatus.CONNECTED)
             {
-                //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt and reconnectionAttemptStartTimeMillis if connection status is changed to CONNECTED.]
+                //Codes_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt and reconnectionAttemptStartTimeMillis if connection status is changed to CONNECTED.]
                 this.currentReconnectionAttempt = 0;
                 this.reconnectionAttemptStartTimeMillis = 0;
             }
