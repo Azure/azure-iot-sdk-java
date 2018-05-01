@@ -42,13 +42,8 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
      */
     AmqpsDeviceMethods(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
     {
-        super();
-
-        // Codes_SRS_AMQPSDEVICEMETHODS_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig argument is null.]
-        if (deviceClientConfig == null)
-        {
-            throw new IllegalArgumentException("The deviceClientConfig cannot be null or empty.");
-        }
+        // Codes_SRS_AMQPSDEVICEMETHODS_34_050: [This constructor shall call super with the provided user agent string.]
+        super(deviceClientConfig);
 
         this.deviceClientConfig = deviceClientConfig;
 

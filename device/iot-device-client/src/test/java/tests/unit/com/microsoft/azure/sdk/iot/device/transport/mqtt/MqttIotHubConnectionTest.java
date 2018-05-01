@@ -51,6 +51,9 @@ public class MqttIotHubConnectionTest
     final byte[] expectedMessageBody = { 0x61, 0x62, 0x63 };
 
     @Mocked
+    private ProductInfo mockedProductInfo;
+
+    @Mocked
     private DeviceClientConfig mockConfig;
 
     @Mocked
@@ -105,7 +108,6 @@ public class MqttIotHubConnectionTest
     @Test
     public void constructorSavesCorrectConfigAndListener() throws IOException, TransportException
     {
-
         baseExpectations();
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
@@ -295,7 +297,7 @@ public class MqttIotHubConnectionTest
         final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
 
         String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.USER_AGENT_STRING, "UTF-8").replaceAll("\\+", "%20");
-        assertEquals(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&" + clientIdentifier, actualIotHubUserName);
+        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION));
 
         final String actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
 
@@ -343,8 +345,7 @@ public class MqttIotHubConnectionTest
 
         final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
 
-        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.USER_AGENT_STRING, "UTF-8").replaceAll("\\+", "%20");
-        assertEquals(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&" + clientIdentifier, actualIotHubUserName);
+        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&"));
 
         String actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
 
@@ -1503,6 +1504,12 @@ public class MqttIotHubConnectionTest
                 mockConfig.getDeviceId(); result = deviceId;
                 mockConfig.getIotHubConnectionString().getSharedAccessKey();
                 result = deviceKey;
+
+                mockConfig.getProductInfo();
+                result = mockedProductInfo;
+
+                mockedProductInfo.getUserAgentString();
+                result = "some user agent string";
 
                 mockedMessage.getBytes();
                 result = expectedMessageBody;

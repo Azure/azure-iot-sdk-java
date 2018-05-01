@@ -11,6 +11,12 @@ import java.util.UUID;
 
 public class AmqpsDeviceAuthentication extends AmqpsDeviceOperations
 {
+    AmqpsDeviceAuthentication(DeviceClientConfig deviceClientConfig)
+    {
+        // Codes_SRS_AMQPSDEVICEAUTHENTICATION_34_009: [This constructor shall call super with the provided user agent string.]
+        super(deviceClientConfig);
+    }
+
     /**
      * Create Proton SslDomain object from Address using the given Ssl context
      *

@@ -28,7 +28,7 @@ public class HttpsRequestIT
         HttpsMethod method = HttpsMethod.GET;
         byte[] body = new byte[0];
         String encoding = "UTF-8";
-        HttpsRequest request = new HttpsRequest(url, method, body);
+        HttpsRequest request = new HttpsRequest(url, method, body, "");
         request.setHeaderField("accept-charset", encoding);
 
         HttpsResponse response = request.send();

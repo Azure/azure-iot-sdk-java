@@ -88,7 +88,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_003: [The function shall send a POST request.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_004: [The function shall set the request body to the message body.]
-            HttpsRequest request = new HttpsRequest(eventUrl, HttpsMethod.POST, httpsMessage.getBody());
+            HttpsRequest request = new HttpsRequest(eventUrl, HttpsMethod.POST, httpsMessage.getBody(), this.config.getProductInfo().getUserAgentString());
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_005: [The function shall write each message property as a request header.]
             for (MessageProperty property : httpsMessage.getProperties())
@@ -156,7 +156,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_042: [The function shall send a `httpsMethod` request.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_043: [The function shall set the request body to the message body.]
-            HttpsRequest request = new HttpsRequest(messageUrl, httpsMethod, httpsMessage.getBody());
+            HttpsRequest request = new HttpsRequest(messageUrl, httpsMethod, httpsMessage.getBody(), this.config.getProductInfo().getUserAgentString());
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_044: [The function shall write each message property as a request header.]
             for (MessageProperty property : httpsMessage.getProperties())
@@ -202,7 +202,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_014: [The function shall send a GET request.]
             HttpsRequest request =
-                    new HttpsRequest(messageUrl, HttpsMethod.GET, new byte[0]).
+                    new HttpsRequest(messageUrl, HttpsMethod.GET, new byte[0], this.config.getProductInfo().getUserAgentString()).
                             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_017: [The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/messages/devicebound'.]
                                     setHeaderField(HTTPS_PROPERTY_IOTHUB_TO_TAG,
                                     messageUri.getPath()).
@@ -326,8 +326,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                     resultPath = completeUri.getPath();
                     resultUrl = this.buildUrlFromString(resultUri);
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_025: [If the result is COMPLETE, the function shall send a DELETE request.]
-                    request = new HttpsRequest(resultUrl, HttpsMethod.DELETE,
-                            new byte[0]);
+                    request = new HttpsRequest(resultUrl, HttpsMethod.DELETE, new byte[0], this.config.getProductInfo().getUserAgentString());
                     break;
                 case ABANDON:
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_027: [If the result is ABANDON, the function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]/abandon?api-version=2016-02-03'.]
@@ -343,8 +342,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                     // set but the Java SE connection omits content-length
                     // if content-length == 0. We include a placeholder body to
                     // make the connection include a content-length.
-                    request = new HttpsRequest(resultUrl, HttpsMethod.POST,
-                            new byte[1]);
+                    request = new HttpsRequest(resultUrl, HttpsMethod.POST, new byte[1], this.config.getProductInfo().getUserAgentString());
                     break;
                 case REJECT:
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_030: [If the result is REJECT, the function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2016-02-03' (the query parameters can be in any order).]
@@ -356,8 +354,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                     resultPath = rejectUri.getPath();
                     resultUrl = this.buildUrlFromString(resultUri);
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_031: [If the result is REJECT, the function shall send a DELETE request.]
-                    request = new HttpsRequest(resultUrl, HttpsMethod.DELETE,
-                            new byte[0]);
+                    request = new HttpsRequest(resultUrl, HttpsMethod.DELETE, new byte[0], this.config.getProductInfo().getUserAgentString());
                     break;
                 default:
                     // should never happen.

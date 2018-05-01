@@ -45,7 +45,7 @@ public class HttpsRequestTest
             }
         };
 
-        new HttpsRequest(mockUrl, httpsMethod, body);
+        new HttpsRequest(mockUrl, httpsMethod, body, "");
 
         new Verifications()
         {
@@ -69,7 +69,7 @@ public class HttpsRequestTest
             }
         };
 
-        new HttpsRequest(mockUrl, httpsMethod, body);
+        new HttpsRequest(mockUrl, httpsMethod, body, "");
 
         final byte[] expectedBody = body;
         new Verifications()
@@ -95,7 +95,7 @@ public class HttpsRequestTest
             }
         };
 
-        new HttpsRequest(mockUrl, httpsMethod, body);
+        new HttpsRequest(mockUrl, httpsMethod, body, "");
 
         new Verifications()
         {
@@ -121,7 +121,7 @@ public class HttpsRequestTest
             }
         };
 
-        new HttpsRequest(mockUrl, httpsMethod, body);
+        new HttpsRequest(mockUrl, httpsMethod, body, "");
     }
 
     // Tests_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
@@ -198,7 +198,7 @@ public class HttpsRequestTest
         };
 
         HttpsRequest request =
-                new HttpsRequest(mockUrl, expectedMethod, body);
+                new HttpsRequest(mockUrl, expectedMethod, body, "");
         request.send();
     }
 
@@ -213,7 +213,7 @@ public class HttpsRequestTest
         final String field1 = "test-field1";
         final String value1 = "test-value1";
         final String userAgent = "User-Agent";
-        final String userAgentValue = TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION;
+        final String userAgentValue = TransportUtils.USER_AGENT_STRING;
         new MockUp<HttpsConnection>()
         {
             Map<String, String> testHeaderFields = new HashMap<>();
@@ -284,7 +284,7 @@ public class HttpsRequestTest
             }
         };
 
-        HttpsRequest request = new HttpsRequest(mockUrl, expectedMethod, body);
+        HttpsRequest request = new HttpsRequest(mockUrl, expectedMethod, body, userAgentValue);
         request.setHeaderField(field0, value0);
         request.setHeaderField(field1, value1);
         request.send();
@@ -363,7 +363,7 @@ public class HttpsRequestTest
         };
 
         HttpsRequest request =
-                new HttpsRequest(mockUrl, httpsMethod, expectedBody);
+                new HttpsRequest(mockUrl, httpsMethod, expectedBody, "");
         request.send();
     }
 
@@ -385,7 +385,7 @@ public class HttpsRequestTest
         };
 
         HttpsRequest request =
-                new HttpsRequest(mockUrl, httpsMethod, body);
+                new HttpsRequest(mockUrl, httpsMethod, body, "");
         HttpsResponse response = request.send();
         int testStatus = response.getStatus();
 
@@ -413,7 +413,7 @@ public class HttpsRequestTest
         };
 
         HttpsRequest request =
-                new HttpsRequest(mockUrl, httpsMethod, requestBody);
+                new HttpsRequest(mockUrl, httpsMethod, requestBody, "");
         HttpsResponse response = request.send();
         byte[] testBody = response.getBody();
 
@@ -446,7 +446,7 @@ public class HttpsRequestTest
         };
 
         HttpsRequest request =
-                new HttpsRequest(mockUrl, httpsMethod, body);
+                new HttpsRequest(mockUrl, httpsMethod, body, "");
         HttpsResponse response = request.send();
         String testValues = response.getHeaderField(field);
 
@@ -471,7 +471,7 @@ public class HttpsRequestTest
         };
 
         HttpsRequest request =
-                new HttpsRequest(mockUrl, httpsMethod, body);
+                new HttpsRequest(mockUrl, httpsMethod, body, "");
         request.setHeaderField(field, value);
 
         new Verifications()
@@ -498,7 +498,7 @@ public class HttpsRequestTest
         };
 
         HttpsRequest request =
-                new HttpsRequest(mockUrl, httpsMethod, body);
+                new HttpsRequest(mockUrl, httpsMethod, body, "");
         request.setReadTimeoutMillis(readTimeout);
 
         final int expectedReadTimeout = readTimeout;
@@ -526,7 +526,7 @@ public class HttpsRequestTest
         };
 
         HttpsRequest request =
-                new HttpsRequest(mockUrl, httpsMethod, body);
+                new HttpsRequest(mockUrl, httpsMethod, body, "");
         request.setSSLContext(mockedContext);
 
         new Verifications()
@@ -552,7 +552,7 @@ public class HttpsRequestTest
         };
 
         HttpsRequest request =
-                new HttpsRequest(mockUrl, httpsMethod, body);
+                new HttpsRequest(mockUrl, httpsMethod, body, "");
         request.setSSLContext(null);
     }
 }

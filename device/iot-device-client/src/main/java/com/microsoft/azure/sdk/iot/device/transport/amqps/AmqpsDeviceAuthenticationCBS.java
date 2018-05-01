@@ -58,10 +58,8 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
      */
     public AmqpsDeviceAuthenticationCBS(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
     {
-        if (deviceClientConfig == null)
-        {
-            throw new IllegalArgumentException("The deviceClientConfig cannot be null.");
-        }
+        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_34_050: [This constructor shall call super with the provided user agent string.]
+        super(deviceClientConfig);
 
         this.deviceClientConfig = deviceClientConfig;
 

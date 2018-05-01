@@ -35,11 +35,8 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
      */
     AmqpsDeviceTelemetry(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
     {
-        // Codes_SRS_AMQPSDEVICETELEMETRY_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig argument is null.]
-        if (deviceClientConfig == null)
-        {
-            new IllegalArgumentException("The deviceId cannot be null or empty.");
-        }
+        // Codes_SRS_AMQPSDEVICETELEMETRY_34_050: [This constructor shall call super with the provided user agent string.]
+        super(deviceClientConfig);
 
         this.deviceClientConfig = deviceClientConfig;
 

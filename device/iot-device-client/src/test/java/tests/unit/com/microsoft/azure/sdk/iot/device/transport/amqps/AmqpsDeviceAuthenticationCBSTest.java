@@ -2,9 +2,11 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.MessageType;
+import com.microsoft.azure.sdk.iot.device.ProductInfo;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import mockit.*;
 import org.apache.qpid.proton.Proton;
+import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Properties;
@@ -103,6 +105,9 @@ public class AmqpsDeviceAuthenticationCBSTest
     @Mocked
     Section mockSection;
 
+    @Mocked
+    ProductInfo mockedProductInfo;
+
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_005: [If there is no message in the queue to send the function shall do nothing.]
     @Test
     public void sendAuthenticationMessagesEmpty()
@@ -130,6 +135,32 @@ public class AmqpsDeviceAuthenticationCBSTest
                 times = 0;
             }
         };
+    }
+
+    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_34_050: [This constructor shall call super with the provided user agent string.]
+    @Test
+    public void constructorCallsSuperWithConfigUserAgentString()
+    {
+        //arrange
+        final String expectedUserAgentString = "asdf";
+
+        new NonStrictExpectations()
+        {
+            {
+                mockDeviceClientConfig.getProductInfo();
+                result = mockedProductInfo;
+
+                mockedProductInfo.getUserAgentString();
+                result = expectedUserAgentString;
+            }
+        };
+
+        //act
+        AmqpsDeviceAuthenticationCBS actual = Deencapsulation.newInstance(AmqpsDeviceAuthenticationCBS.class, mockDeviceClientConfig);
+
+        //assert
+        Map<Symbol, Object> amqpProperties = Deencapsulation.getField(actual, "amqpProperties");
+        assertTrue(amqpProperties.containsValue(expectedUserAgentString));
     }
 
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_008: [The function shall doubles the buffer if encode throws BufferOverflowException.]

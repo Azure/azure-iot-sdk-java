@@ -35,6 +35,9 @@ public class AmqpsSessionManagerTest
     AmqpsSessionDeviceOperation mockAmqpsSessionDeviceOperation1;
 
     @Mocked
+    AmqpsDeviceOperations mockedAmqpsDeviceOperations;
+
+    @Mocked
     ScheduledExecutorService mockScheduledExecutorService;
 
     @Mocked

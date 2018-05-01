@@ -57,11 +57,8 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
      */
     AmqpsDeviceTwin(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
     {
-        // Codes_SRS_AMQPSDEVICETWIN_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig argument is null or empty.]
-        if (deviceClientConfig == null)
-        {
-            throw new IllegalArgumentException("The deviceClientConfig cannot be null or empty.");
-        }
+        // Codes_SRS_AMQPSDEVICETWIN_34_051: [This constructor shall call super with the provided user agent string.]
+        super(deviceClientConfig);
 
         this.deviceClientConfig = deviceClientConfig;
 

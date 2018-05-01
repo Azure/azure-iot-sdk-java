@@ -8,15 +8,18 @@ import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.apache.qpid.proton.Proton;
+import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.engine.SslDomain;
 import org.apache.qpid.proton.engine.Transport;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
 
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for AmqpsDeviceAuthentication.
@@ -55,7 +58,7 @@ public class AmqpsDeviceAuthenticationTest
     public void makeDomainSuccess()
     {
         // arrange
-        final AmqpsDeviceAuthentication amqpsDeviceAuthentication = new AmqpsDeviceAuthentication();
+        final AmqpsDeviceAuthentication amqpsDeviceAuthentication = Deencapsulation.newInstance(AmqpsDeviceAuthentication.class, mockDeviceClientConfig);
 
         new NonStrictExpectations()
         {
@@ -90,7 +93,7 @@ public class AmqpsDeviceAuthenticationTest
     public void setSslDomain()
     {
         // arrange
-        final AmqpsDeviceAuthentication amqpsDeviceAuthentication = new AmqpsDeviceAuthentication();
+        final AmqpsDeviceAuthentication amqpsDeviceAuthentication = Deencapsulation.newInstance(AmqpsDeviceAuthentication.class, mockDeviceClientConfig);
 
         // act
         Deencapsulation.invoke(amqpsDeviceAuthentication, "setSslDomain", mockTransport);
@@ -101,7 +104,7 @@ public class AmqpsDeviceAuthenticationTest
     public void authenticate()
     {
         // arrange
-        final AmqpsDeviceAuthentication amqpsDeviceAuthentication = new AmqpsDeviceAuthentication();
+        final AmqpsDeviceAuthentication amqpsDeviceAuthentication = Deencapsulation.newInstance(AmqpsDeviceAuthentication.class, mockDeviceClientConfig);
 
         // act
         Deencapsulation.invoke(amqpsDeviceAuthentication, "authenticate", mockDeviceClientConfig, mockUUID);
@@ -112,12 +115,34 @@ public class AmqpsDeviceAuthenticationTest
     public void authenticationMessageReceived()
     {
         // arrange
-        final AmqpsDeviceAuthentication amqpsDeviceAuthentication = new AmqpsDeviceAuthentication();
+        final AmqpsDeviceAuthentication amqpsDeviceAuthentication = Deencapsulation.newInstance(AmqpsDeviceAuthentication.class, mockDeviceClientConfig);
 
         // act
         Boolean actualReturn = Deencapsulation.invoke(amqpsDeviceAuthentication, "authenticationMessageReceived", mockAmqpsMessage, mockUUID);
 
         // assert
         assertEquals(false, actualReturn);
+    }
+
+    // Tests_SRS_AMQPSDEVICEAUTHENTICATION_34_009: [This constructor shall call super with the provided user agent string.]
+    @Test
+    public void constructorCallsSuperWithUserAgentString()
+    {
+        //arrange
+        final String expectedUserAgentString = "asdf";
+        new NonStrictExpectations()
+        {
+            {
+                mockDeviceClientConfig.getProductInfo().getUserAgentString();
+                result = expectedUserAgentString;
+            }
+        };
+
+        //act
+        AmqpsDeviceAuthentication actual = Deencapsulation.newInstance(AmqpsDeviceAuthentication.class, mockDeviceClientConfig);
+
+        //assert
+        Map<Symbol, Object> amqpProperties = Deencapsulation.getField(actual, "amqpProperties");
+        assertTrue(amqpProperties.containsValue(expectedUserAgentString));
     }
 }

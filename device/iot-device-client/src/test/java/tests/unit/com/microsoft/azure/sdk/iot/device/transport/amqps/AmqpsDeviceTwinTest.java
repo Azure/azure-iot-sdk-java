@@ -55,14 +55,9 @@ public class AmqpsDeviceTwinTest
     @Mocked
     DeviceClientConfig mockDeviceClientConfig;
 
-    // Tests_SRS_AMQPSDEVICETWIN_12_001: [The constructor shall throw IllegalArgumentException if the deviceId argument is null or empty.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsIfDeviceIdNull()
-    {
-        //act
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class);
-    }
-
+    @Mocked
+    ProductInfo mockedProductInfo;
+    
     // Tests_SRS_AMQPSDEVICETWIN_12_001: [The constructor shall throw IllegalArgumentException if the deviceId argument is null or empty.]
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsIfDeviceIdEmpty()
@@ -70,6 +65,33 @@ public class AmqpsDeviceTwinTest
         //act
         AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, "");
     }
+
+    // Tests_SRS_AMQPSDEVICETWIN_34_051: [This constructor shall call super with the provided user agent string.]
+    @Test
+    public void constructorCallsSuperWithConfigUserAgentString()
+    {
+        //arrange
+        final String expectedUserAgentString = "asdf";
+
+        new NonStrictExpectations()
+        {
+            {
+                mockDeviceClientConfig.getProductInfo();
+                result = mockedProductInfo;
+
+                mockedProductInfo.getUserAgentString();
+                result = expectedUserAgentString;
+            }
+        };
+
+        //act
+        AmqpsDeviceTwin actual = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+
+        //assert
+        Map<Symbol, Object> amqpProperties = Deencapsulation.getField(actual, "amqpProperties");
+        assertTrue(amqpProperties.containsValue(expectedUserAgentString));
+    }
+
 
     // Tests_SRS_AMQPSDEVICETWIN_12_002: [The constructor shall set the sender and receiver endpoint path to IoTHub specific values.]
     // Tests_SRS_AMQPSDEVICETWIN_12_003: [The constructor shall concatenate a sender specific prefix to the sender link tag's current value.]

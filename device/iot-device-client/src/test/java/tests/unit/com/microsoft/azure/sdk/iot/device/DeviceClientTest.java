@@ -62,6 +62,9 @@ public class DeviceClientTest
     @Mocked
     IotHubConnectionStatusChangeCallback mockedIotHubConnectionStatusChangeCallback;
 
+    @Mocked
+    ProductInfo mockedProductInfo;
+
     private static long SEND_PERIOD_MILLIS = 10L;
     private static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
     private static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
@@ -3390,5 +3393,30 @@ public class DeviceClientTest
                 times = 1;
             }
         };
+    }
+
+    // Tests_SRS_DEVICECLIENT_34_071: [This function shall return the product info saved in config.]
+    @Test
+    public void getProductInfoFetchesFromConfig() throws URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessKey=adjkl234j52=";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        DeviceClient client = new DeviceClient(connString, protocol);
+
+        new StrictExpectations()
+        {
+            {
+                mockConfig.getProductInfo();
+                result = mockedProductInfo;
+            }
+        };
+
+        //act
+        ProductInfo productInfo = client.getProductInfo();
+
+        //assert
+        assertEquals(mockedProductInfo, productInfo);
     }
 }

@@ -6,6 +6,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.MessageCallback;
+import com.microsoft.azure.sdk.iot.device.ProductInfo;
 import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
@@ -53,6 +54,7 @@ public class DeviceClientConfigTest
     @Mocked SecurityProviderTpm mockSecurityProviderSAS;
     @Mocked SSLContext mockSSLContext;
     @Mocked RetryPolicy mockRetryPolicy;
+    @Mocked ProductInfo mockedProductInfo;
 
     private static String expectedDeviceId = "deviceId";
     private static String expectedHostname = "hostname";
@@ -769,5 +771,83 @@ public class DeviceClientConfigTest
 
         //assert
         assertEquals(expectedOperationTimeout, actual);
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_34_040: [This function shall return the saved product info.]
+    @Test
+    public void getProductInfoReturnsSavedProductInfo()
+    {
+        //arrange
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
+        Deencapsulation.setField(config, "productInfo", mockedProductInfo);
+
+        //act
+        ProductInfo actualProductInfo = config.getProductInfo();
+
+        //assert
+        assertEquals(mockedProductInfo, actualProductInfo);
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_34_041: [This function shall save a new default product info.]
+    @Test
+    public void ConstructorSavesNewProductInfo()
+    {
+        //act
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
+
+        //assert
+        assertNotNull(Deencapsulation.getField(config, "productInfo"));
+        new Verifications()
+        {
+            {
+                new ProductInfo();
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_34_042: [This function shall save a new default product info.]
+    @Test
+    public void ConstructorX509SavesNewProductInfo()
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockIotHubConnectionString.isUsingX509();
+                result = true;
+            }
+        };
+
+        //act
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, "", true, "", true);
+
+        //assert
+        assertNotNull(Deencapsulation.getField(config, "productInfo"));
+        new Verifications()
+        {
+            {
+                new ProductInfo();
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_34_043: [This function shall save a new default product info.]
+    @Test
+    public void ConstructorSecurityProviderSavesNewProductInfo()
+    {
+        //act
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, mockSecurityProviderSAS);
+
+        //assert
+        assertNotNull(Deencapsulation.getField(config, "productInfo"));
+        new Verifications()
+        {
+            {
+                new ProductInfo();
+                times = 1;
+            }
+        };
     }
 }

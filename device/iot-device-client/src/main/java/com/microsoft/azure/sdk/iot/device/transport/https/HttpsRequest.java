@@ -33,13 +33,13 @@ public class HttpsRequest
      * @throws TransportException if the endpoint given does not use the
      * HTTPS protocol.
      */
-    public HttpsRequest(URL url, HttpsMethod method, byte[] body) throws TransportException
+    public HttpsRequest(URL url, HttpsMethod method, byte[] body, String userAgentString) throws TransportException
     {
         // Codes_SRS_HTTPSREQUEST_11_005: [If an IOException occurs in setting up the HTTPS connection, the function shall throw a TransportException.]
         // Codes_SRS_HTTPSREQUEST_11_001: [The function shall open a connection with the given URL as the endpoint.]
         // Codes_SRS_HTTPSREQUEST_11_004: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
         this.connection = new HttpsConnection(url, method);
-        this.connection.setRequestHeader("User-Agent", TransportUtils.JAVA_DEVICE_CLIENT_IDENTIFIER + TransportUtils.CLIENT_VERSION);
+        this.connection.setRequestHeader("User-Agent", userAgentString);
         // Codes_SRS_HTTPSREQUEST_11_002: [The function shall write the body to the connection.]
         this.connection.writeOutput(body);
     }

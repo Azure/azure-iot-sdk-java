@@ -58,14 +58,33 @@ public class AmqpsDeviceMethodsTest
     @Mocked
     IotHubConnectionString mockIotHubConnectionString;
 
-    /*
-    **Tests_SRS_AMQPSDEVICEMETHODS_12_001: [**The constructor shall throw IllegalArgumentException if the deviceId argument is null or empty.**]**
-    */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsIfDeviceClientConfigNull()
+    @Mocked
+    ProductInfo mockedProductInfo;
+
+    // Tests_SRS_AMQPSDEVICEMETHODS_34_050: [This constructor shall call super with the provided user agent string.]
+    @Test
+    public void constructorCallsSuperWithConfigUserAgentString()
     {
+        //arrange
+        final String expectedUserAgentString = "asdf";
+
+        new NonStrictExpectations()
+        {
+            {
+                mockDeviceClientConfig.getProductInfo();
+                result = mockedProductInfo;
+
+                mockedProductInfo.getUserAgentString();
+                result = expectedUserAgentString;
+            }
+        };
+
         //act
-        AmqpsDeviceMethods amqpsDeviceMethods = Deencapsulation.newInstance(AmqpsDeviceMethods.class);
+        AmqpsDeviceMethods actual = Deencapsulation.newInstance(AmqpsDeviceMethods.class, mockDeviceClientConfig);
+
+        //assert
+        Map<Symbol, Object> amqpProperties = Deencapsulation.getField(actual, "amqpProperties");
+        assertTrue(amqpProperties.containsValue(expectedUserAgentString));
     }
 
     // Tests_SRS_AMQPSDEVICEMETHODS_12_047: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]

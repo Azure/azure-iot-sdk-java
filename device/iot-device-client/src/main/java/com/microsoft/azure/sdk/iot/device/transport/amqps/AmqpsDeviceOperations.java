@@ -54,12 +54,22 @@ public class AmqpsDeviceOperations
 
     /**
      * This constructor creates an instance of device operation class and initializes member variables
+     *
+     * @param deviceClientConfig the config to pull the user agent string from
+     *
+     * @throws IllegalArgumentException if the provided deviceClientConfig is null
      */
-    AmqpsDeviceOperations()
+    AmqpsDeviceOperations(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
     {
+        if (deviceClientConfig == null)
+        {
+            // Codes_SRS_AMQPSDEVICEOPERATIONS_34_048: [If the provided deviceClientConfig is null, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("device config cannot be null");
+        }
+
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_001: [The constructor shall initialize amqpProperties with device client identifier and version.]
         this.amqpProperties = new HashMap<>();
-        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), TransportUtils.USER_AGENT_STRING);
+        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), deviceClientConfig.getProductInfo().getUserAgentString());
 
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_002: [The constructor shall initialize sender and receiver tags with UUID string.]
         String uuidStr = UUID.randomUUID().toString();

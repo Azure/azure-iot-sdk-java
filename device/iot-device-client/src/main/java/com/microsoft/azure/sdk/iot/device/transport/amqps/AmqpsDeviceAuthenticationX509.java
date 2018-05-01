@@ -22,16 +22,13 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
      */
     public AmqpsDeviceAuthenticationX509(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
     {
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_001: [The constructor shall throw IllegalArgumentException if the  deviceClientConfig parameter is null.]
-        if (deviceClientConfig == null)
-        {
-            throw new IllegalArgumentException("The deviceClientConfig cannot be null.");
-        }
+        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_34_007: [This constructor shall call super with the provided user agent string.]
+        super(deviceClientConfig);
 
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_002: [The constructor shall save the deviceClientConfig parameter value to a member variable.]
+        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_002: [The constructor shall save the deviceClientConfig parameter value to a member variable.]
         this.deviceClientConfig = deviceClientConfig;
 
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_003: [The constructor shall set both the sender and the receiver link state to OPENED.]
+        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_003: [The constructor shall set both the sender and the receiver link state to OPENED.]
         this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.OPENED;
         this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.OPENED;
 
@@ -44,7 +41,7 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
     @Override
     protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag)
     {
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_004: [The function shall override the default behaviour and return null.]
+        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_004: [The function shall override the default behaviour and return null.]
         return null;
     }
 
@@ -54,7 +51,7 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
     @Override
     protected AmqpsMessage getMessageFromReceiverLink(String linkName)
     {
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_005: [The function shall override the default behaviour and return null.]
+        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_005: [The function shall override the default behaviour and return null.]
         return null;
     }
 
@@ -67,16 +64,16 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
     @Override
     protected void setSslDomain(Transport transport) throws TransportException
     {
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_006: [The function shall throw IllegalArgumentException if any of the input parameter is null.]
         if (transport == null)
         {
+            // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_006: [The function shall throw IllegalArgumentException if any of the input parameter is null.]
             throw new IllegalArgumentException("Input parameter transport cannot be null.");
         }
 
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_010: [The function shall call the prototype class makeDomain function with the sslContext.]
         SslDomain domain = null;
         try
         {
+            // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_010: [The function shall call the prototype class makeDomain function with the sslContext.]
             domain = makeDomain(this.deviceClientConfig.getX509Authentication().getSSLContext());
         }
         catch (IOException e)
@@ -85,7 +82,7 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
             throw new TransportException(e);
         }
 
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_011: [The function shall set the domain on the transport.]
+        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_011: [The function shall set the domain on the transport.]
         transport.ssl(domain);
     }
 
@@ -98,8 +95,7 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
     @Override
     protected Boolean isLinkFound(String linkName)
     {
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONSAS_12_012: [The function shall override the default behaviour and return null.]
+        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_012: [The function shall override the default behaviour and return true.]
         return true;
     }
-
 }

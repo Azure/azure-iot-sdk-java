@@ -7,6 +7,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
+import com.microsoft.azure.sdk.iot.device.ProductInfo;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import mockit.Deencapsulation;
@@ -70,6 +71,9 @@ public class AmqpsDeviceOperationsTest
     @Mocked
     Message mockMessage;
 
+    @Mocked
+    ProductInfo mockedProductInfo;
+
     /*
     **Tests_SRS_AMQPSDEVICEOPERATIONS_12_001: [**The constructor shall initialize amqpProperties with device client identifier and version.**]**
     **Tests_SRS_AMQPSDEVICEOPERATIONS_12_002: [**The constructor shall initialize sender and receiver tags with UUID string.**]**
@@ -78,12 +82,11 @@ public class AmqpsDeviceOperationsTest
     **Tests_SRS_AMQPSDEVICEOPERATIONS_12_005: [**The constructor shall initialize sender and receiver link objects to null.**]**
     */
     @Test
-    public void constructorInitializesAllMembers(
-            @Mocked final UUID mockUUID
-    )
+    public void constructorInitializesAllMembers(@Mocked final UUID mockUUID)
     {
         // arrange
         final String uuidStr = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+        final String expectedUserAgentString = "some user agent string";
         new NonStrictExpectations()
         {
             {
@@ -91,11 +94,15 @@ public class AmqpsDeviceOperationsTest
                 result = mockUUID;
                 mockUUID.toString();
                 result = uuidStr;
+                mockDeviceClientConfig.getProductInfo();
+                result = mockedProductInfo;
+                mockedProductInfo.getUserAgentString();
+                result = expectedUserAgentString;
             }
         };
 
         //act
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
 
         //assert
         assertNotNull(amqpsDeviceOperations);
@@ -111,7 +118,7 @@ public class AmqpsDeviceOperationsTest
         String senderLinkAddress = Deencapsulation.invoke(amqpsDeviceOperations, "getSenderLinkAddress");
         String receiverLinkAddress = Deencapsulation.invoke(amqpsDeviceOperations, "getReceiverLinkAddress");
 
-        assertTrue(propertiesMap.get(Symbol.getSymbol(VERSION_IDENTIFIER_KEY)).equals(TransportUtils.USER_AGENT_STRING));
+        assertTrue(propertiesMap.get(Symbol.getSymbol(VERSION_IDENTIFIER_KEY)).equals(expectedUserAgentString));
 
         assertTrue(senderLinkTag.endsWith(uuidStr));
         assertTrue(receiverLinkTag.endsWith(uuidStr));
@@ -126,6 +133,17 @@ public class AmqpsDeviceOperationsTest
         assertTrue(receiverLink == null);
     }
 
+    //Tests_SRS_AMQPSDEVICEOPERATIONS_34_048: [If the provided deviceClientConfig is null, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorThrowsForNullConfig()
+    {
+        //arrange
+        DeviceClientConfig nullConfig = null;
+
+        //act
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, nullConfig);
+    }
+
     /*
     **Tests_SRS_AMQPSDEVICEOPERATIONS_12_032: [**The class has static members for version identifier, api version keys and api version value.**]**
      */
@@ -133,7 +151,7 @@ public class AmqpsDeviceOperationsTest
     public void apiVersionAndVersionIdFieldsValues()
     {
         //act
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         String VERSION_IDENTIFIER_KEY = Deencapsulation.getField(amqpsDeviceOperations, "VERSION_IDENTIFIER_KEY");
         String API_VERSION_KEY = Deencapsulation.getField(amqpsDeviceOperations, "API_VERSION_KEY");
         String API_VERSION_VALUE = Deencapsulation.getField(amqpsDeviceOperations, "API_VERSION_VALUE");
@@ -151,7 +169,7 @@ public class AmqpsDeviceOperationsTest
     public void openLinksThrowsIllegalArgumentException() throws IllegalArgumentException
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
 
         //act
         Deencapsulation.invoke(amqpsDeviceOperations, "openLinks", null);
@@ -166,7 +184,7 @@ public class AmqpsDeviceOperationsTest
     public void openLinksCreatesReceiverAndSenderLinksWithTag()
     {
         //arrange
-        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
 
         //act
         AmqpsDeviceOperationLinkState amqpsSendLinkState1 = Deencapsulation.getField(amqpsDeviceOperations, "amqpsSendLinkState");
@@ -203,7 +221,7 @@ public class AmqpsDeviceOperationsTest
     public void openLinksCreatesReceiverAndSenderLinksWithTag_CBS()
     {
         //arrange
-        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
 
         //act
         AmqpsDeviceOperationLinkState amqpsSendLinkState1 = Deencapsulation.getField(amqpsDeviceOperations, "amqpsSendLinkState");
@@ -243,7 +261,7 @@ public class AmqpsDeviceOperationsTest
     public void openLinksSetsAmqpsProperties()
     {
         //arrange
-        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
 
         //act
         Deencapsulation.invoke(amqpsDeviceOperations, "openLinks", mockSession);
@@ -270,7 +288,7 @@ public class AmqpsDeviceOperationsTest
     public void openLinksOpensLinks()
     {
         //arrange
-        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
 
         //act
         Deencapsulation.invoke(amqpsDeviceOperations, "openLinks", mockSession);
@@ -297,7 +315,7 @@ public class AmqpsDeviceOperationsTest
     public void closeLinksClosesLinks()
     {
         //arrange
-        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceOperations, "openLinks", mockSession);
         Deencapsulation.setField(amqpsDeviceOperations, "receiverLink", mockReceiver);
         Deencapsulation.setField(amqpsDeviceOperations, "senderLink", mockSender);
@@ -330,7 +348,7 @@ public class AmqpsDeviceOperationsTest
     public void initLinkThrowsIllegalArgumentException()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
 
         //act
         Deencapsulation.invoke(amqpsDeviceOperations, "initLink", null);
@@ -345,7 +363,7 @@ public class AmqpsDeviceOperationsTest
     public void initLinkSetsSenderLink()
     {
         //arrange
-        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         final String senderLinkTag = "senderLinkTag";
         Deencapsulation.setField(amqpsDeviceOperations, "senderLinkTag",senderLinkTag);
         final String senderLinkAddress = "senderLinkAddress";
@@ -387,7 +405,7 @@ public class AmqpsDeviceOperationsTest
     public void initLinkSetsReceiverLink()
     {
         //arrange
-        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         final String receiverLinkTag = "receiverLinkTag";
         Deencapsulation.setField(amqpsDeviceOperations, "receiverLinkTag", receiverLinkTag);
         final String receiverLinkAddress = "receiverLinkAddress";
@@ -423,7 +441,7 @@ public class AmqpsDeviceOperationsTest
     public void initLinkDoesNothing()
     {
         //arrange
-        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         final String senderLinkTag = "senderLinkTag";
         Deencapsulation.setField(amqpsDeviceOperations, "senderLinkTag",senderLinkTag);
         final String receiverLinkTag = "receiverLinkTag";
@@ -473,7 +491,7 @@ public class AmqpsDeviceOperationsTest
     public void sendMessageAndGetDeliveryHashThrowsIllegalStateExceptionIfSenderLinkNull()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         byte[] msgData = new byte[1];
         int offset = 0;
         int length = 1;
@@ -489,7 +507,7 @@ public class AmqpsDeviceOperationsTest
     public void sendMessageAndGetDeliveryHashThrowsIllegalArgumentExceptionIfDeliveryTagNull()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
@@ -511,7 +529,7 @@ public class AmqpsDeviceOperationsTest
     public void sendMessageAndGetDeliveryHashSendSuccessful()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
@@ -557,7 +575,7 @@ public class AmqpsDeviceOperationsTest
     public void sendMessageAndGetDeliveryHashSendFails()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
@@ -599,7 +617,7 @@ public class AmqpsDeviceOperationsTest
     public void getMessageFromReceiverLinkThrowIfLinkNameEmpty()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
 
         //act
         AmqpsMessage amqpsMessage = Deencapsulation.invoke(amqpsDeviceOperations, "getMessageFromReceiverLink", "");
@@ -614,7 +632,7 @@ public class AmqpsDeviceOperationsTest
         //arrange
         String linkName1 = "receiver1";
         String linkName2 = "receiver2";
-        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        final AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceOperations, "openLinks", mockSession);
         Deencapsulation.setField(amqpsDeviceOperations, "receiverLink", mockReceiver);
         Deencapsulation.setField(amqpsDeviceOperations, "senderLink", mockSender);
@@ -648,7 +666,7 @@ public class AmqpsDeviceOperationsTest
     {
         //arrange
         String linkName = "receiver";
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceOperations, "openLinks", mockSession);
         Deencapsulation.setField(amqpsDeviceOperations, "receiverLink", mockReceiver);
         Deencapsulation.setField(amqpsDeviceOperations, "senderLink", mockSender);
@@ -691,7 +709,7 @@ public class AmqpsDeviceOperationsTest
     {
         //arrange
         String linkName = "receiver";
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceOperations, "openLinks", mockSession);
         Deencapsulation.setField(amqpsDeviceOperations, "receiverLink", mockReceiver);
         Deencapsulation.setField(amqpsDeviceOperations, "senderLink", mockSender);
@@ -737,7 +755,7 @@ public class AmqpsDeviceOperationsTest
     {
         //arrange
         String linkName = "receiver";
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceOperations, "openLinks", mockSession);
         Deencapsulation.setField(amqpsDeviceOperations, "receiverLink", mockReceiver);
         Deencapsulation.setField(amqpsDeviceOperations, "senderLink", mockSender);
@@ -778,7 +796,7 @@ public class AmqpsDeviceOperationsTest
     public void operationLinksOpenedTrue()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceOperations, "amqpsSendLinkState", AmqpsDeviceOperationLinkState.OPENED);
         Deencapsulation.setField(amqpsDeviceOperations, "amqpsRecvLinkState", AmqpsDeviceOperationLinkState.OPENED);
 
@@ -794,7 +812,7 @@ public class AmqpsDeviceOperationsTest
     public void operationLinksOpenedFalse()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceOperations, "amqpsSendLinkState", AmqpsDeviceOperationLinkState.OPENED);
         Deencapsulation.setField(amqpsDeviceOperations, "amqpsRecvLinkState", AmqpsDeviceOperationLinkState.CLOSED);
 
@@ -810,7 +828,7 @@ public class AmqpsDeviceOperationsTest
     public void isLinkFound()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
 
         //act
         Boolean isFound = Deencapsulation.invoke(amqpsDeviceOperations, "isLinkFound", "linkName");
@@ -826,7 +844,7 @@ public class AmqpsDeviceOperationsTest
     public void convertFromProton()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
 
         //act
         AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
@@ -842,7 +860,7 @@ public class AmqpsDeviceOperationsTest
     public void convertToProton()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
 
         //act
         AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "convertToProton", mockMessage);
@@ -858,7 +876,7 @@ public class AmqpsDeviceOperationsTest
     public void protonMessageToIoTHubMessage()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
 
         //act
         AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "protonMessageToIoTHubMessage", mockMessageImpl);
@@ -874,7 +892,7 @@ public class AmqpsDeviceOperationsTest
     public void iotHubMessageToProtonMessage()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
 
         //act
         AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "iotHubMessageToProtonMessage", mockMessage);
@@ -890,7 +908,7 @@ public class AmqpsDeviceOperationsTest
     public void getAmqpPropertiesReturnsAmqpsProperties()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceOperations, "amqpProperties", mockHashMap);
 
         //act
@@ -908,7 +926,7 @@ public class AmqpsDeviceOperationsTest
     {
         //arrange
         String linkTag = "linkTag";
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceOperations, "senderLinkTag", linkTag);
 
         //act
@@ -925,7 +943,7 @@ public class AmqpsDeviceOperationsTest
     public void getReceiverLinkTagReturnsReceiverLinkTag()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceOperations, "receiverLinkTag", "xxx");
 
         //act
@@ -942,7 +960,7 @@ public class AmqpsDeviceOperationsTest
     public void getSenderLinkAddressReturnsSenderLinkAddress()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceOperations, "senderLinkAddress", "xxx");
 
         //act
@@ -959,7 +977,7 @@ public class AmqpsDeviceOperationsTest
     public void getReceiverLinkAddressReturnsReceiverLinkAddress()
     {
         //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class);
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceOperations, "receiverLinkAddress", "xxx");
 
         //act

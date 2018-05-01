@@ -56,6 +56,8 @@ public final class DeviceClientConfig
 
     private CustomLogger logger;
 
+    private ProductInfo productInfo;
+
     public enum AuthType
     {
         X509_CERTIFICATE,
@@ -113,6 +115,9 @@ public final class DeviceClientConfig
                 this.iotHubConnectionString.getSharedAccessKey(),
                 this.iotHubConnectionString.getSharedAccessToken());
 
+        //Codes_SRS_DEVICECLIENTCONFIG_34_041: [This function shall save a new default product info.]
+        this.productInfo = new ProductInfo();
+
         this.logger = new CustomLogger(this.getClass());
         logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
                 iotHubConnectionString.getHostName(), iotHubConnectionString.getDeviceId(), logger.getMethodName());
@@ -140,6 +145,9 @@ public final class DeviceClientConfig
             //Codes_SRS_DEVICECLIENTCONFIG_34_069: [If the provided connection string is null or does not use x509 auth, and IllegalArgumentException shall be thrown.]
             throw new IllegalArgumentException("Cannot use this constructor for connection strings that don't use x509 authentication.");
         }
+
+        //Codes_SRS_DEVICECLIENTCONFIG_34_042: [This function shall save a new default product info.]
+        this.productInfo = new ProductInfo();
 
         this.authenticationType = AuthType.X509_CERTIFICATE;
         this.useWebsocket = false;
@@ -195,6 +203,9 @@ public final class DeviceClientConfig
 
         //Codes_SRS_DEVICECLIENTCONFIG_34_081: [This constructor shall save the provided connection string.]
         this.iotHubConnectionString = connectionString;
+
+        //Codes_SRS_DEVICECLIENTCONFIG_34_043: [This function shall save a new default product info.]
+        this.productInfo = new ProductInfo();
 
         this.logger = new CustomLogger(this.getClass());
         logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
@@ -509,6 +520,12 @@ public final class DeviceClientConfig
     {
         //Codes_SRS_DEVICECLIENTCONFIG_34_032: [This function shall return the saved operation timeout.]
         return this.operationTimeout;
+    }
+
+    public ProductInfo getProductInfo()
+    {
+        //Codes_SRS_DEVICECLIENTCONFIG_34_040: [This function shall return the saved product info.]
+        return this.productInfo;
     }
 
     @SuppressWarnings("unused")

@@ -11,6 +11,7 @@ import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.apache.qpid.proton.amqp.Binary;
+import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Properties;
@@ -58,13 +59,8 @@ public class AmqpsDeviceTelemetryTest
     @Mocked
     DeviceClientConfig mockDeviceClientConfig;
 
-    // Tests_SRS_AMQPSDEVICETELEMETRY_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig argument is null.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsIfDeviceIdNull()
-    {
-        //act
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class);
-    }
+    @Mocked
+    ProductInfo mockedProductInfo;
 
     /*
     **Tests_SRS_AMQPSDEVICETELEMETRY_12_002: [**The constructor shall set the sender and receiver endpoint path to IoTHub specific values.**]**
@@ -117,6 +113,32 @@ public class AmqpsDeviceTelemetryTest
 
         assertTrue(senderLinkAddress.contains(mockDeviceClientConfig.getDeviceId()));
         assertTrue(receiverLinkAddress.contains(mockDeviceClientConfig.getDeviceId()));
+    }
+
+    // Tests_SRS_AMQPSDEVICETELEMETRY_34_050: [This constructor shall call super with the provided user agent string.]
+    @Test
+    public void constructorCallsSuperWithConfigUserAgentString()
+    {
+        //arrange
+        final String expectedUserAgentString = "asdf";
+
+        new NonStrictExpectations()
+        {
+            {
+                mockDeviceClientConfig.getProductInfo();
+                result = mockedProductInfo;
+
+                mockedProductInfo.getUserAgentString();
+                result = expectedUserAgentString;
+            }
+        };
+
+        //act
+        AmqpsDeviceTelemetry actual = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+
+        //assert
+        Map<Symbol, Object> amqpProperties = Deencapsulation.getField(actual, "amqpProperties");
+        assertTrue(amqpProperties.containsValue(expectedUserAgentString));
     }
 
     // Tests_SRS_AMQPSDEVICETELEMETRY_12_026: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]

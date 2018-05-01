@@ -122,7 +122,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                new HttpsRequest((URL) any, expectedMethod, (byte[]) any);
+                new HttpsRequest((URL) any, expectedMethod, (byte[]) any, anyString);
             }
         };
     }
@@ -149,7 +149,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                new HttpsRequest((URL) any, (HttpsMethod) any, expectedBody);
+                new HttpsRequest((URL) any, (HttpsMethod) any, expectedBody, anyString);
             }
         };
     }
@@ -296,7 +296,7 @@ public class HttpsIotHubConnectionTest
             {
                 new IotHubEventUri((String)any, (String)any);
                 result = mockUri;
-                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any);
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
                 result = mockRequest;
                 mockUri.getPath();
                 result = path;
@@ -329,7 +329,7 @@ public class HttpsIotHubConnectionTest
             {
                 new IotHubEventUri((String)any, (String)any);
                 result = mockUri;
-                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any);
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
                 result = mockRequest;
                 mockMsg.getContentType();
                 result = contentType;
@@ -362,7 +362,7 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any);
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
                 result = mockRequest;
                 mockRequest.send();
                 result = mockResponse;
@@ -389,7 +389,7 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                new HttpsRequest((URL) any, (HttpsMethod) any, (byte[]) any);
+                new HttpsRequest((URL) any, (HttpsMethod) any, (byte[]) any, anyString);
                 result = mockRequest;
                 mockRequest.send();
                 result = exception;
@@ -450,7 +450,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                new HttpsRequest((URL) any, httpsMethod, (byte[]) any);
+                new HttpsRequest((URL) any, httpsMethod, (byte[]) any, anyString);
             }
         };
     }
@@ -478,7 +478,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                new HttpsRequest((URL) any, (HttpsMethod) any, expectedBody);
+                new HttpsRequest((URL) any, (HttpsMethod) any, expectedBody, anyString);
             }
         };
     }
@@ -487,7 +487,7 @@ public class HttpsIotHubConnectionTest
     @Test
     public void sendHttpsMessageSendsMessageProperties(
             @Mocked final IotHubUri mockUri,
-            @Mocked final MessageProperty mockProperty) throws IOException, TransportException
+            @Mocked final MessageProperty mockProperty) throws TransportException
     {
         final MessageProperty[] properties = { mockProperty };
         final String propertyName = "test-property-name";
@@ -627,7 +627,7 @@ public class HttpsIotHubConnectionTest
             {
                 new IotHubUri((String)any, (String)any, uriPath);
                 result = mockUri;
-                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any);
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
                 result = mockRequest;
                 mockUri.getPath();
                 result = path;
@@ -658,7 +658,7 @@ public class HttpsIotHubConnectionTest
             {
                 new IotHubUri((String)any, (String)any, uriPath);
                 result = mockUri;
-                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any);
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
                 result = mockRequest;
                 mockMsg.getContentType();
                 result = contentType;
@@ -689,7 +689,7 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any);
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
                 result = mockRequest;
                 mockRequest.send();
                 result = mockResponse;
@@ -760,7 +760,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                new HttpsRequest((URL) any, expectedMethod, (byte[]) any);
+                new HttpsRequest((URL) any, expectedMethod, (byte[]) any, anyString);
             }
         };
     }
@@ -1084,7 +1084,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                new HttpsRequest((URL) any, expectedMethod, (byte[]) any);
+                new HttpsRequest((URL) any, expectedMethod, (byte[]) any, anyString);
             }
         };
     }
@@ -1210,7 +1210,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                new HttpsRequest((URL) any, expectedMethod, (byte[]) any);
+                new HttpsRequest((URL) any, expectedMethod, (byte[]) any, anyString);
             }
         };
     }
@@ -1335,7 +1335,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                new HttpsRequest((URL) any, expectedMethod, (byte[]) any);
+                new HttpsRequest((URL) any, expectedMethod, (byte[]) any, anyString);
             }
         };
     }

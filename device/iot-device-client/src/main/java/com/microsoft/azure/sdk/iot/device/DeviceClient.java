@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
+import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 
@@ -116,7 +117,6 @@ public final class DeviceClient implements Closeable
     private IoTHubConnectionType ioTHubConnectionType = IoTHubConnectionType.UNKNOWN;
 
     private TransportClient transportClient;
-
 
     /**
      * Constructor that takes a connection string and a transport client as an argument.
@@ -882,6 +882,12 @@ public final class DeviceClient implements Closeable
         /* Codes_SRS_DEVICECLIENT_21_050: [The uploadToBlobAsync shall start the stream upload process, by calling uploadToBlobAsync on the FileUpload class.] */
         /* Codes_SRS_DEVICECLIENT_21_051: [If uploadToBlobAsync failed to start the upload using the FileUpload, it shall bypass the exception.] */
         this.fileUpload.uploadToBlobAsync(destinationBlobName, inputStream, streamLength, callback, callbackContext);
+    }
+
+    public ProductInfo getProductInfo()
+    {
+        // Codes_SRS_DEVICECLIENT_34_071: [This function shall return the product info saved in config.]
+        return this.config.getProductInfo();
     }
 
     @SuppressWarnings("unused")
