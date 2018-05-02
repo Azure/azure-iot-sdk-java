@@ -13,10 +13,7 @@ import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
 
@@ -31,6 +28,10 @@ import static org.junit.Assert.*;
 /**
  * Integration E2E test for Job Client on the service client.
  */
+
+//service bug exists where failed jobs are counted as active, leading to automatic and permanent throttling of newly
+// scheduled jobs. These tests should stay disabled until service fixes this bug.
+@Ignore
 public class JobClientIT
 {
     private static String iotHubConnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
