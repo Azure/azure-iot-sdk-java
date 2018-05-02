@@ -333,13 +333,9 @@ public class IotHubServicesCommon
                 System.out.println("Encountered exception while opening device client, retrying...");
                 e.printStackTrace();
             }
-
-            if (clientOpenSucceeded)
-            {
-                //only write this debug if connection failed at least once
-                System.out.println("Successfully opened connection after previously failing");
-            }
         }
+
+        System.out.println("Successfully opened connection!");
     }
 
     public static void openTransportClientWithRetry(TransportClient client)
@@ -364,13 +360,9 @@ public class IotHubServicesCommon
                 System.out.println("Encountered exception while opening transport client, retrying...");
                 e.printStackTrace();
             }
-
-            if (clientOpenSucceeded)
-            {
-                //only write this debug if connection failed at least once
-                System.out.println("Successfully opened connection after previously failing");
-            }
         }
+
+        System.out.println("Successfully opened connection!");
     }
 
     public static void waitForStabilizedConnection(List actualStatusUpdates, long timeout) throws InterruptedException
