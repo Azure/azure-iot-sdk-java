@@ -57,6 +57,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private IotHubListener listener;
 
+    //When the connection is lost for any reason, a thread is spawned to notify the Transport layer to re-establish
+    // this connection. The original thread completes its shutdown. That thread should only be spawned once.
+    private boolean reconnectionScheduled = false;
+
     private ExecutorService executorService;
 
     private CountDownLatch openLatch;
@@ -1019,8 +1023,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
      */
     private void scheduleReconnection(Throwable throwable)
     {
-        ScheduledExecutorService reconnectThread = Executors.newScheduledThreadPool(1);
-        reconnectThread.schedule(new ReconnectionTask(throwable, this.listener), 0, TimeUnit.MILLISECONDS);
+        if (!reconnectionScheduled)
+        {
+            reconnectionScheduled = true;
+            ScheduledExecutorService reconnectThread = Executors.newScheduledThreadPool(1);
+            reconnectThread.schedule(new ReconnectionTask(throwable, this.listener), 0, TimeUnit.MILLISECONDS);
+        }
     }
 
     /**
