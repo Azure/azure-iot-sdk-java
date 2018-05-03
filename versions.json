@@ -1,0 +1,15 @@
+{
+    "device": "1.8.1",
+    "service": "1.12.1",
+    "deps": "0.4.1",
+    "securityProvider": "1.0.0",
+    "tpmEmulator": "1.0.1",
+    "tpmHsm": "1.0.1",
+    "diceEmulator": "1.0.0",
+    "dice": "1.0.0",
+    "x509": "1.0.2",
+    "provisioning": "1.2.0",
+    "provisioningDevice": "1.2.0",
+    "provisioningService": "1.1.0",
+    "java": "0.15.1"
+}
