@@ -5,6 +5,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -39,6 +40,10 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.BufferOverflowException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -72,6 +77,7 @@ public class AmqpSendHandlerTest
     @Mocked Delivery delivery;
     @Mocked Disposition disposition;
     @Mocked AmqpResponseVerification responseVerification;
+    @Mocked IotHubSSLContext mockedIotHubSSLContext;
 
     // Test_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall copy all input parameters to private member variables for event processing]
     // Test_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_002: [The constructor shall concatenate the host name with the port]
@@ -257,7 +263,7 @@ public class AmqpSendHandlerTest
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_010: [The event handler shall set ANONYMUS_PEER authentication mode on the domain of the Transport]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_010: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_023: [The event handler shall not initialize WebSocket if the protocol is AMQP]
     @Test
     public void onConnectionBound_call_flow_and_init_ok_amqp()
@@ -278,7 +284,7 @@ public class AmqpSendHandlerTest
                 sasl.plain(anyString, anyString);
                 sslDomain = Proton.sslDomain();
                 sslDomain.init(SslDomain.Mode.CLIENT);
-                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
+                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 transport.ssl(sslDomain);
             }
         };
@@ -287,10 +293,10 @@ public class AmqpSendHandlerTest
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_010: [The event handler shall set ANONYMUS_PEER authentication mode on the domain of the Transport]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_010: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_024: [The event handler shall initialize WebSocket if the protocol is AMQP_WS]
     @Test
-    public void onConnectionBound_call_flow_and_init_ok_amqp_ws()
+    public void onConnectionBound_call_flow_and_init_ok_amqp_ws() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException
     {
         // Arrange
         String hostName = "aaa";
@@ -315,8 +321,10 @@ public class AmqpSendHandlerTest
                 Proton.sslDomain();
                 result = sslDomain;
                 sslDomain.init(SslDomain.Mode.CLIENT);
-                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
+                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 transportInternal.ssl(sslDomain);
+                new IotHubSSLContext();
+                result = mockedIotHubSSLContext;
             }
         };
         // Act

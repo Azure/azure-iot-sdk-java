@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
@@ -18,6 +19,7 @@ import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,6 +48,8 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
 
     private AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent;
 
+    private Exception savedException;
+
     /**
      * Constructor to set up connection parameters and initialize
      * handshaker and flow controller for transport
@@ -72,6 +76,7 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
         this.userName = userName;
         this.sasToken = sasToken;
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
+        this.savedException = null;
 
         // Add a child handler that performs some default handshaking
         // behaviour.
@@ -137,7 +142,7 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
     public void onConnectionBound(Event event)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_010: [The event handler shall set ANONYMUS_PEER authentication mode on the domain of the Transport]
+        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_010: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport]
         Transport transport = event.getConnection().getTransport();
         if (transport != null)
         {
@@ -151,7 +156,18 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
             sasl.plain(this.userName, this.sasToken);
 
             SslDomain domain = makeDomain(SslDomain.Mode.CLIENT);
-            domain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
+            domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
+
+            try
+            {
+                // Need the base trusted certs for IotHub in our ssl context. IotHubSSLContext handles that
+                domain.setSslContext(new IotHubSSLContext().getSSLContext());
+            }
+            catch (Exception e)
+            {
+                this.savedException = e;
+            }
+
             Ssl ssl = transport.ssl(domain);
         }
     }
@@ -202,6 +218,19 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
             source.setAddress(ENDPOINT);
             link.setTarget(t);
             link.setSource(source);
+        }
+    }
+
+    /**
+     * If an exception was encountered while opening the AMQP connection, this function shall throw that saved exception
+     * @throws IOException if an exception was encountered while openinging the AMQP connection. The encountered
+     * exception will be the inner exception
+     */
+    void receiveComplete() throws IOException
+    {
+        if (this.savedException != null)
+        {
+            throw new IOException("Connection failed to be established", this.savedException);
         }
     }
 }

@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
+package tests.unit.com.microsoft.azure.sdk.iot.deps.auth;
 
-import com.microsoft.azure.sdk.iot.device.auth.IotHubCertificateManager;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.deps.auth.IotHubCertificateManager;
+import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -553,5 +553,25 @@ public class IotHubSSLContextTest
 
         //assert
         assertEquals(mockedX509Certificate, actualPublicKeyCertificate);
+    }
+
+    //Tests_SRS_IOTHUBSSLCONTEXT_34_027: [This constructor shall save the provided ssl context.]
+    @Test
+    public void constructorWithSSLContextSavesSSLContext()
+    {
+        //act
+        IotHubSSLContext iotHubSSLContext = new IotHubSSLContext(mockedSSLContext);
+
+        //assert
+        SSLContext savedSSLContext = Deencapsulation.getField(iotHubSSLContext, "sslContext");
+        assertEquals(mockedSSLContext, savedSSLContext);
+    }
+
+    //Tests_SRS_IOTHUBSSLCONTEXT_34_028: [If the provided sslContext is null, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorThrowsForNullSSLContext()
+    {
+        //act
+        new IotHubSSLContext(null);
     }
 }

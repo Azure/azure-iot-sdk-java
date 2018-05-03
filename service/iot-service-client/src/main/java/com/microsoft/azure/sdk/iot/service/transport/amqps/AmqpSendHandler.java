@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Tools;
@@ -169,6 +170,17 @@ public class AmqpSendHandler extends BaseHandler
     private SslDomain makeDomain(SslDomain.Mode mode)
     {
         SslDomain domain = Proton.sslDomain();
+
+        try
+        {
+            // Need the base trusted certs for IotHub in our ssl context. IotHubSSLContext handles that
+            domain.setSslContext(new IotHubSSLContext().getSSLContext());
+        }
+        catch (Exception e)
+        {
+            this.isConnectionError = true;
+        }
+
         domain.init(mode);
 
         return domain;
@@ -182,7 +194,7 @@ public class AmqpSendHandler extends BaseHandler
     public void onConnectionBound(Event event)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_010: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_011: [The event handler shall set ANONYMUS_PEER authentication mode on the domain of the Transport]
+        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_011: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport]
         Transport transport = event.getConnection().getTransport();
         if (transport != null)
         {
@@ -196,7 +208,7 @@ public class AmqpSendHandler extends BaseHandler
             sasl.plain(this.userName, this.sasToken);
 
             SslDomain domain = makeDomain(SslDomain.Mode.CLIENT);
-            domain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
+            domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
             Ssl ssl = transport.ssl(domain);
         }
     }
@@ -335,21 +347,20 @@ public class AmqpSendHandler extends BaseHandler
 
     public void sendComplete() throws IotHubException, IOException
     {
-        //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_029: [ The event handler shall check the status queue to get the response for the sent message **]**
+        //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_029: [ The event handler shall check the status queue to get the response for the sent message]
         if (isConnectionError)
         {
             throw new IOException("Connection failed to be established");
         }
         if (!sendStatusQueue.isEmpty())
         {
-            //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_030: [ The event handler shall remove the response from the queue **]**
+            //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_030: [ The event handler shall remove the response from the queue]
             AmqpResponseVerification verifier = sendStatusQueue.remove();
             if (verifier.getException() != null)
             {
-                //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [ The event handler shall get the exception from the response and throw is it is not null **]**
+                //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [ The event handler shall get the exception from the response and throw is it is not null]
                 throw verifier.getException();
             }
         }
     }
-
 }
