@@ -28,10 +28,6 @@ import static org.junit.Assert.*;
 /**
  * Integration E2E test for Job Client on the service client.
  */
-
-//service bug exists where failed jobs are counted as active, leading to automatic and permanent throttling of newly
-// scheduled jobs. These tests should stay disabled until service fixes this bug.
-@Ignore
 public class JobClientIT
 {
     private static String iotHubConnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
