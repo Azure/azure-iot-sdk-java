@@ -6,5 +6,7 @@ com.microsoft.azure.sdk.iot.device.fileupload
 com.microsoft.azure.sdk.iot.device.net
 com.microsoft.azure.sdk.iot.device.transport
 com.microsoft.azure.sdk.iot.device.transport.amqps
+com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions
 com.microsoft.azure.sdk.iot.device.transport.https
 com.microsoft.azure.sdk.iot.device.transport.mqtt
+com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions
