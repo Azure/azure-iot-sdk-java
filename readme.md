@@ -154,7 +154,7 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
 | Maven Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removed Date |
 | :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
-| [2018-02-9](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2018-2-9) | lts_01_2018   | Active     | 2018-02-09     | 2018-06-30            | 2018-12-31   |
+| [LTS_01_2018_Rev01](https://github.com/Azure/azure-iot-sdk-java/releases/tag/LTS_01_2018_Rev01) <br><br> [2018-02-9](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2018-2-9) | lts_01_2018   | Active     | 2018-02-09     | 2018-06-30            | 2018-12-31   |
 | [2017-07-24](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2017-3-24) | lts_07_2017 | Deprecated | 2017-07-01 | 2017-12-31 | 2018-06-30 |
 
 * <sup>1</sup> All scheduled dates are subject to change by the Azure IoT SDK team.
