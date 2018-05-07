@@ -98,9 +98,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19.1</version>
                 <configuration>
-                    <!--1 thread per available core-->
-                    <forkCount>1C</forkCount>
-                    <reuseForks>true</reuseForks>
                     <argLine>
                         -javaagent:${settings.localRepository}/org/jmockit/jmockit/1.22/jmockit-1.22.jar
                     </argLine>
@@ -119,7 +116,15 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <reuseForks>true</reuseForks>
+                    <!--
+                    Maximum of 8 jvm instances active at a time, may be running test methods
+                    from different test classes at the same time. But since they are in seperate JVM's, race conditions
+                    or other threading issues won't be a problem
+
+                    See:
+                    http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html
+                    -->
+                    <forkCount>8</forkCount>
                     <skipITs>${skipITs}</skipITs>
                     <argLine>
                         -javaagent:${settings.localRepository}/org/jmockit/jmockit/1.22/jmockit-1.22.jar
