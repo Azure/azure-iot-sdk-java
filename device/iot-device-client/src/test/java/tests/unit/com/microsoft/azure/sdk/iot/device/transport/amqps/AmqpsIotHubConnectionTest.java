@@ -33,6 +33,7 @@ import org.apache.qpid.proton.message.impl.MessageImpl;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
+import org.junit.Assert;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
@@ -2037,7 +2038,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(AmqpsIotHubConnection.ReconnectionTask.class, new Class[] {Throwable.class, IotHubListener.class}, any, mockedIotHubListener);
+                Deencapsulation.newInstance(AmqpsIotHubConnection.ReconnectionTask.class, new Class[] {Throwable.class, IotHubListener.class, String.class}, any, mockedIotHubListener, connection.getConnectionId());
                 times = 1;
             }
         };
@@ -2048,7 +2049,7 @@ public class AmqpsIotHubConnectionTest {
     public void OnLinkRemoteCloseReportsErrorCodeIfPresent() throws TransportException
     {
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         new NonStrictExpectations()
         {
@@ -2071,7 +2072,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(AmqpsIotHubConnection.ReconnectionTask.class, new Class[] {Throwable.class, IotHubListener.class}, any, mockedIotHubListener);
+                Deencapsulation.newInstance(AmqpsIotHubConnection.ReconnectionTask.class, new Class[] {Throwable.class, IotHubListener.class, String.class}, any, mockedIotHubListener, connection.getConnectionId());
                 times = 1;
             }
         };
@@ -2339,7 +2340,6 @@ public class AmqpsIotHubConnectionTest {
         connection.open(mockedQueue);
     }
 
-
     // Tests_SRS_AMQPSTRANSPORT_34_076: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
     @Test (expected = IllegalStateException.class)
     public void sendMessageThrowsIfNoHandler() throws TransportException
@@ -2454,6 +2454,24 @@ public class AmqpsIotHubConnectionTest {
             }
         };
     }
+
+    // Tests_SRS_AMQPSTRANSPORT_34_094: [This function shall return the saved connection id.]
+    @Test
+    public void getConnectionIdReturnsSavedConnectionId() throws TransportException
+    {
+        //arrange
+        String expectedConnectionId = "1234";
+        baseExpectations();
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "connectionId", expectedConnectionId);
+
+        //act
+        String actualConnectionId = connection.getConnectionId();
+
+        //assert
+        Assert.assertEquals(expectedConnectionId, actualConnectionId);
+    }
+
 
     private void baseExpectations()
     {

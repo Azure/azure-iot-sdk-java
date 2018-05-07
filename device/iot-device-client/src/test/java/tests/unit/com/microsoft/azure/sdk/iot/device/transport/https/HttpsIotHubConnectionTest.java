@@ -1910,6 +1910,20 @@ public class HttpsIotHubConnectionTest
         };
     }
 
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_071: [This function shall return the empty string.]
+    @Test
+    public void getConnectionIdReturnsEmptyString()
+    {
+        //arrange
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+
+        //act
+        String actualConnectionId = conn.getConnectionId();
+
+        //assert
+        assertEquals("", actualConnectionId);
+    }
+
     //Just for code coverage over dummy methods
     @Test
     public void openAndCloseDoNothing() throws IOException, TransportException

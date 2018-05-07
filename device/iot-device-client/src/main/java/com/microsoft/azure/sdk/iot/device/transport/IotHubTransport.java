@@ -177,10 +177,19 @@ public class IotHubTransport implements IotHubListener
     }
 
     @Override
-    public void onConnectionLost(Throwable e)
+    public void onConnectionLost(Throwable e, String connectionId)
     {
         synchronized (this.reconnectionLock)
         {
+            if (!connectionId.equals(this.iotHubTransportConnection.getConnectionId()))
+            {
+                //Codes_SRS_IOTHUBTRANSPORT_34_078: [If this function is called with a connection id that is not the same
+                // as the current connection id, this function shall do nothing.]
+
+                //This connection status update is for a connection that is no longer tracked at this level, so it can be ignored.
+                return;
+            }
+
             if (this.connectionStatus != IotHubConnectionStatus.CONNECTED)
             {
                 //Codes_SRS_IOTHUBTRANSPORT_34_011: [If this function is called while the connection status is DISCONNECTED,
@@ -205,13 +214,16 @@ public class IotHubTransport implements IotHubListener
     }
 
     @Override
-    public void onConnectionEstablished()
+    public void onConnectionEstablished(String connectionId)
     {
-        logger.LogInfo("The connection to the IoT Hub has been established, method name is %s ", logger.getMethodName());
+        if (connectionId.equals(this.iotHubTransportConnection.getConnectionId()))
+        {
+            logger.LogInfo("The connection to the IoT Hub has been established, method name is %s ", logger.getMethodName());
 
-        //Codes_SRS_IOTHUBTRANSPORT_34_014: [This function shall invoke updateStatus with status CONNECTED, change
-        // reason CONNECTION_OK and a null throwable.]
-        this.updateStatus(IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, null);
+            //Codes_SRS_IOTHUBTRANSPORT_34_014: [If the provided connectionId is associated with the current connection, This function shall invoke updateStatus with status CONNECTED, change
+            // reason CONNECTION_OK and a null throwable.]
+            this.updateStatus(IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, null);
+        }
     }
 
     /**

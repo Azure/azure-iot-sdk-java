@@ -59,4 +59,12 @@ public interface IotHubTransportConnection
      * @throws TransportException if an exception occurred while sending the acknowledgement
      */
     boolean sendMessageResult(Message message, IotHubMessageResult result) throws TransportException;
+
+    /**
+     * Gives the UUID associated with this connection instance. This string is used in conjunction with the callbacks
+     * with connection status updates to ensure that all connection status updates are relevant to this connection object
+     *
+     * @return the UUID associated with this connection instance
+     */
+    String getConnectionId();
 }

@@ -393,6 +393,13 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         }
     }
 
+    @Override
+    public String getConnectionId()
+    {
+        //Codes_SRS_HTTPSIOTHUBCONNECTION_34_071: [This function shall return the empty string.]
+        return "";
+    }
+
     private HttpsResponse sendRequest(HttpsRequest request) throws TransportException
     {
         request.setReadTimeoutMillis(this.config.getReadTimeoutMillis());

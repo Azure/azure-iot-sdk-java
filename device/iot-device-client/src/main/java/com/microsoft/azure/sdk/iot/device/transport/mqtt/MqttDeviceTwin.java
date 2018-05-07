@@ -50,10 +50,10 @@ public class MqttDeviceTwin extends Mqtt
     private final int DESIRED_TOKEN = 4;
     private final int PATCH_VERSION_TOKEN = 5;
 
-    public MqttDeviceTwin(MqttConnection mqttConnection) throws TransportException
+    public MqttDeviceTwin(MqttConnection mqttConnection, String connectionId) throws TransportException
     {
         //Codes_SRS_MQTTDEVICETWIN_25_001: [The constructor shall instantiate super class without any parameters.]
-        super(mqttConnection, null, null);
+        super(mqttConnection, null, null, connectionId);
 
         //Codes_SRS_MQTTDEVICETWIN_25_002: [The constructor shall construct device twin response subscribeTopic.]
         this.subscribeTopic = RES + BACKSLASH + POUND;
@@ -126,9 +126,9 @@ public class MqttDeviceTwin extends Mqtt
                     //Codes_SRS_MQTTDEVICETWIN_25_027: [send method shall throw an IllegalArgumentException if message contains a null or empty request id if the operation is of type DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST.]
                     throw new IllegalArgumentException("Request Id is Mandatory");
                 }
-                
+
                 String version = message.getVersion();
-                
+
                 //Codes_SRS_MQTTDEVICETWIN_25_028: [send method shall not throw an exception if message contains a null or empty version if the operation is of type DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST as version is optional]
                 if (version != null)
                 {
@@ -196,7 +196,7 @@ public class MqttDeviceTwin extends Mqtt
 
         String publishTopic = buildTopic(message);
         requestMap.put(message.getRequestId(), message.getDeviceOperationType());
-        
+
         //Codes_SRS_MqttMessaging_25_024: [send method shall publish a message to the IOT Hub on the publish topic by calling method publish().]
         if (message.getDeviceOperationType() == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
         {
@@ -209,7 +209,7 @@ public class MqttDeviceTwin extends Mqtt
                     DESIRED +
                     BACKSLASH +
                     POUND;
-            
+
             //Codes_SRS_MQTTDEVICETWIN_25_032: [send method shall subscribe to desired properties by calling method subscribe() on topic "$iothub/twin/PATCH/properties/desired/#" specified in spec if the operation is DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.]
             this.subscribe(subscribeTopic);
         }
@@ -368,7 +368,7 @@ public class MqttDeviceTwin extends Mqtt
                                 }
                                 else
                                 {
-                                    
+
                                     //Codes_SRS_MQTTDEVICETWIN_25_047: [If the topic is of type patch for desired properties then this method shall throw TransportException if data is null or empty]
                                     this.throwDeviceTwinTransportException(new UnsupportedOperationException());
                                 }

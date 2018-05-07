@@ -296,6 +296,7 @@ public class IotHubTransportTest
         //arrange
         final IotHubTransport transport = new IotHubTransport(mockedConfig);
         Deencapsulation.setField(transport, "connectionStatus", IotHubConnectionStatus.DISCONNECTED);
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedIotHubTransportConnection);
         new NonStrictExpectations(IotHubTransport.class)
         {
             {
@@ -304,7 +305,41 @@ public class IotHubTransportTest
         };
 
         //act
-        transport.onConnectionLost(mockedTransportException);
+        transport.onConnectionLost(mockedTransportException, "");
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(transport, "handleDisconnection", new Class[] {TransportException.class}, mockedTransportException);
+                times = 0;
+            }
+        };
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_34_078: [If this function is called with a connection id that is not the same
+    // as the current connection id, this function shall do nothing.]
+    @Test
+    public void onConnectionLostWithWrongConnectionIdDoesNothing()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        final String expectedConnectionId = "1234";
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedIotHubTransportConnection);
+
+        new Expectations(IotHubTransport.class)
+        {
+            {
+                Deencapsulation.invoke(transport, "handleDisconnection", new Class[] {TransportException.class}, mockedTransportException);
+                times = 0;
+
+                mockedIotHubTransportConnection.getConnectionId();
+                result = expectedConnectionId;
+            }
+        };
+
+        //act
+        transport.onConnectionLost(mockedTransportException, "not the expected connection id");
 
         //assert
         new Verifications()
@@ -323,16 +358,22 @@ public class IotHubTransportTest
         //arrange
         final IotHubTransport transport = new IotHubTransport(mockedConfig);
         final IOException nonTransportException = new IOException();
+        final String expectedConnectionId = "1234";
         Deencapsulation.setField(transport, "connectionStatus", IotHubConnectionStatus.CONNECTED);
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedIotHubTransportConnection);
+
         new Expectations(IotHubTransport.class)
         {
             {
                 Deencapsulation.invoke(transport, "handleDisconnection", new Class[] {TransportException.class}, mockedTransportException);
+
+                mockedIotHubTransportConnection.getConnectionId();
+                result = expectedConnectionId;
             }
         };
 
         //act
-        transport.onConnectionLost(mockedTransportException);
+        transport.onConnectionLost(mockedTransportException, expectedConnectionId);
 
         //assert
         new Verifications()
@@ -352,6 +393,9 @@ public class IotHubTransportTest
         final IotHubTransport transport = new IotHubTransport(mockedConfig);
         final IOException nonTransportException = new IOException();
         Deencapsulation.setField(transport, "connectionStatus", IotHubConnectionStatus.CONNECTED);
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedIotHubTransportConnection);
+        final String expectedConnectionId = "1234";
+
         new Expectations(IotHubTransport.class)
         {
             {
@@ -359,11 +403,14 @@ public class IotHubTransportTest
                 result = mockedTransportException;
 
                 Deencapsulation.invoke(transport, "handleDisconnection", new Class[] {TransportException.class}, mockedTransportException);
+
+                mockedIotHubTransportConnection.getConnectionId();
+                result = expectedConnectionId;
             }
         };
 
         //act
-        transport.onConnectionLost(nonTransportException);
+        transport.onConnectionLost(nonTransportException, expectedConnectionId);
 
         //assert
         new Verifications()
@@ -375,23 +422,28 @@ public class IotHubTransportTest
         };
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_014: [This function shall invoke updateStatus with status CONNECTED, change reason CONNECTION_OK and a null throwable.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_014: [If the provided connectionId is associated with the current connection, This function shall invoke updateStatus with status CONNECTED, change reason CONNECTION_OK and a null throwable.]
     @Test
     public void onConnectionEstablishedCallsUpdateStatus()
     {
         //arrange
         final IotHubTransport transport = new IotHubTransport(mockedConfig);
+        final String expectedConnectionId = "1234";
+        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedIotHubTransportConnection);
+
         new Expectations(IotHubTransport.class)
         {
             {
                 Deencapsulation.invoke(transport, "updateStatus",
                         new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
                         CONNECTED, CONNECTION_OK, null);
+                mockedIotHubTransportConnection.getConnectionId();
+                result = expectedConnectionId;
             }
         };
 
         //act
-        transport.onConnectionEstablished();
+        transport.onConnectionEstablished(expectedConnectionId);
 
         //assert
         new Verifications()

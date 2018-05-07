@@ -64,7 +64,7 @@ public class MqttDeviceTwinTest
         //arrange
 
         //act
-        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
         //assert
         String actualSubscribeTopic = Deencapsulation.getField(testTwin, "subscribeTopic");
         assertNotNull(actualSubscribeTopic);
@@ -77,7 +77,7 @@ public class MqttDeviceTwinTest
     public void startSubscribesToDeviceTwinResponse(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
-        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
 
         //act
 
@@ -109,7 +109,7 @@ public class MqttDeviceTwinTest
                 }
             };
 
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
 
             //act
             testTwin.start();
@@ -130,7 +130,7 @@ public class MqttDeviceTwinTest
         //arrange
         final byte[] actualPayload = {0x61, 0x62, 0x63};
         final String expectedTopic = "$iothub/twin/GET/?$rid="+mockReqId;
-        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
         testTwin.start();
         new NonStrictExpectations()
         {
@@ -171,7 +171,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             testTwin.start();
             new NonStrictExpectations()
             {
@@ -214,7 +214,7 @@ public class MqttDeviceTwinTest
         //arrange
         final byte[] actualPayload = {0x61, 0x62, 0x63};
         final String expectedTopic = "$iothub/twin/PATCH/properties/reported/?$rid="+ mockReqId + "&$version=" + mockVersion;
-        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
         testTwin.start();
         new NonStrictExpectations()
         {
@@ -257,7 +257,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             testTwin.start();
             new NonStrictExpectations()
             {
@@ -300,7 +300,7 @@ public class MqttDeviceTwinTest
         //arrange
         final byte[] actualPayload = {0x61, 0x62, 0x63};
         final String expectedTopic = "$iothub/twin/PATCH/properties/desired/#";
-        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
         testTwin.start();
         new NonStrictExpectations()
         {
@@ -340,7 +340,7 @@ public class MqttDeviceTwinTest
     {
         //arrange
         final byte[] actualPayload = {0x61, 0x62, 0x63};
-        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
         testTwin.start();
         new NonStrictExpectations()
         {
@@ -386,7 +386,7 @@ public class MqttDeviceTwinTest
         final byte[] actualPayload = {0x61, 0x62, 0x63};
         final String expectedTopic = "$iothub/twin/PATCH/properties/desired/?$version="+ mockVersion;
         final String expectedSubscribeTopic = "$iothub/twin/PATCH/properties/desired/#";
-        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
         testTwin.start();
         new NonStrictExpectations()
         {
@@ -429,7 +429,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
 
             //act
             testTwin.send(null);
@@ -455,7 +455,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             testTwin.start();
             new NonStrictExpectations()
             {
@@ -502,7 +502,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -541,7 +541,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -579,7 +579,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -613,7 +613,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -641,7 +641,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -671,7 +671,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -708,7 +708,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -747,7 +747,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -787,7 +787,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -823,7 +823,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -874,7 +874,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -916,7 +916,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -958,7 +958,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -998,7 +998,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -1039,7 +1039,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -1068,7 +1068,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             String insertTopic = expectedTopic;
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
@@ -1096,7 +1096,7 @@ public class MqttDeviceTwinTest
         try
         {
             //arrange
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection);
+            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             Deencapsulation.setField(mockMqtt, "allReceivedMessages", testAllReceivedMessages);
             Deencapsulation.setField(testTwin, "mqttLock", new Object());

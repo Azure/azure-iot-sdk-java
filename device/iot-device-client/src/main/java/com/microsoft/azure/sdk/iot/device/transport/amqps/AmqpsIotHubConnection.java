@@ -27,6 +27,7 @@ import org.apache.qpid.proton.reactor.ReactorOptions;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 /**
@@ -67,13 +68,15 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private CountDownLatch openLatch;
     private CountDownLatch closeLatch;
 
+    public String connectionId = UUID.randomUUID().toString();
+
     private Reactor reactor;
 
     private CustomLogger logger;
 
     private TransportException savedException;
 
-	public AmqpsSessionManager amqpsSessionManager;
+    public AmqpsSessionManager amqpsSessionManager;
     private final static String APPLICATION_PROPERTY_STATUS_CODE = "status-code";
     private final static String APPLICATION_PROPERTY_STATUS_DESCRIPTION = "status-description";
 
@@ -235,7 +238,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
         }
 
-        this.listener.onConnectionEstablished();
+        this.listener.onConnectionEstablished(this.connectionId);
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
@@ -260,7 +263,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         IotHubReactor iotHubReactor = new IotHubReactor(reactor);
-        ReactorRunner reactorRunner = new ReactorRunner(iotHubReactor, this.listener);
+        ReactorRunner reactorRunner = new ReactorRunner(iotHubReactor, this.listener, this.connectionId);
         executorService.submit(reactorRunner);
 
         logger.LogInfo("Reactor is assigned to executor service, method name is %s ", logger.getMethodName());
@@ -798,11 +801,13 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         private static final String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
         private final IotHubReactor iotHubReactor;
         private final IotHubListener listener;
+        private String connectionId;
 
-        ReactorRunner(IotHubReactor iotHubReactor, IotHubListener listener)
+        ReactorRunner(IotHubReactor iotHubReactor, IotHubListener listener, String connectionId)
         {
             this.listener = listener;
             this.iotHubReactor = iotHubReactor;
+            this.connectionId = connectionId;
         }
 
         @Override
@@ -815,7 +820,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
             catch (HandlerException e)
             {
-                this.listener.onConnectionLost(new TransportException(e));
+                this.listener.onConnectionLost(new TransportException(e), connectionId);
             }
 
             return null;
@@ -1032,6 +1037,13 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         return false;
     }
 
+    @Override
+    public String getConnectionId()
+    {
+        // Codes_SRS_AMQPSTRANSPORT_34_094: [This function shall return the saved connection id.]
+        return this.connectionId;
+    }
+
     /**
      * Schedules a thread to start the reconnection process for AMQP
      * @param throwable the reason why the reconnection needs to take place, for reporting purposes
@@ -1042,7 +1054,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             reconnectionScheduled = true;
             ScheduledExecutorService reconnectThread = Executors.newScheduledThreadPool(1);
-            reconnectThread.schedule(new ReconnectionTask(throwable, this.listener), 0, TimeUnit.MILLISECONDS);
+            reconnectThread.schedule(new ReconnectionTask(throwable, this.listener, this.connectionId), 0, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -1055,17 +1067,19 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         private Throwable connectionLossCause;
         private IotHubListener listener;
+        private String connectionId;
 
-        private ReconnectionTask(Throwable connectionLossCause, IotHubListener listener)
+        private ReconnectionTask(Throwable connectionLossCause, IotHubListener listener, String connectionId)
         {
             this.connectionLossCause = connectionLossCause;
             this.listener = listener;
+            this.connectionId = connectionId;
         }
 
         @Override
         public Object call()
         {
-            this.listener.onConnectionLost(this.connectionLossCause);
+            this.listener.onConnectionLost(this.connectionLossCause, this.connectionId);
             return null;
         }
     }

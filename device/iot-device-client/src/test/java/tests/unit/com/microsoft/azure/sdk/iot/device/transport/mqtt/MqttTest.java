@@ -104,7 +104,7 @@ public class MqttTest
                     return new MutablePair<>(MOCK_PARSE_TOPIC, new byte[0]);
                 }
             };
-            return new MqttMessaging(mockedMqttConnection, CLIENT_ID, listener, mockedMessageListener);
+            return new MqttMessaging(mockedMqttConnection, CLIENT_ID, listener, mockedMessageListener, "");
         }
         else
         {
@@ -122,7 +122,7 @@ public class MqttTest
                     return new MutablePair<>(MOCK_PARSE_TOPIC, new byte[0]);
                 }
             };
-            return new MqttDeviceTwin(mockedMqttConnection);
+            return new MqttDeviceTwin(mockedMqttConnection, "");
         }
     }
 
@@ -298,7 +298,7 @@ public class MqttTest
     {
         Mqtt mockMqtt = null;
         //act
-        mockMqtt = new MqttMessaging(null, CLIENT_ID, mockedIotHubListener, null);
+        mockMqtt = new MqttMessaging(null, CLIENT_ID, mockedIotHubListener, null, "");
     }
 
     /*
@@ -352,7 +352,7 @@ public class MqttTest
                 times = 1;
                 mockMqttToken.waitForCompletion(anyLong);
                 times = 1;
-                mockedIotHubListener.onConnectionEstablished();
+                mockedIotHubListener.onConnectionEstablished(anyString);
                 times = 1;
             }
         };
@@ -880,7 +880,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
         new NonStrictExpectations()
         {
             {
@@ -925,7 +925,7 @@ public class MqttTest
                 return new MutablePair<>(null, payload);
             }
         };
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
 
         new NonStrictExpectations()
         {
@@ -960,7 +960,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
         //act
         Message receivedMessage = mockMqtt.receive();
     }
@@ -981,7 +981,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
         Deencapsulation.setField(mockMqtt, "mqttConnection", null);
 
         //act
@@ -1047,7 +1047,7 @@ public class MqttTest
         new StrictExpectations()
         {
             {
-                mockedIotHubListener.onConnectionLost((TransportException) any);
+                mockedIotHubListener.onConnectionLost((TransportException) any, anyString);
             }
         };
 
@@ -1073,7 +1073,7 @@ public class MqttTest
         try
         {
             //arrange
-            MqttMessaging testMqttClient = new MqttMessaging(mockedMqttConnection,"deviceId", mockedIotHubListener, null);
+            MqttMessaging testMqttClient = new MqttMessaging(mockedMqttConnection,"deviceId", mockedIotHubListener, null, "");
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             Deencapsulation.setField(testMqttClient, "allReceivedMessages", testAllReceivedMessages);
 
@@ -1107,7 +1107,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
         new NonStrictExpectations()
         {
             {
@@ -1142,7 +1142,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
 
         new NonStrictExpectations()
         {
@@ -1181,7 +1181,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
         new NonStrictExpectations()
         {
             {
@@ -1227,7 +1227,7 @@ public class MqttTest
         new Verifications()
         {
             {
-                mockedIotHubListener.onConnectionLost((TransportException) any);
+                mockedIotHubListener.onConnectionLost((TransportException) any, anyString);
                 times = 1;
             }
         };
@@ -1235,7 +1235,7 @@ public class MqttTest
 
     //Tests_SRS_Mqtt_34_042: [If this object has a saved listener, that listener shall be notified of the successfully delivered message.]
     @Test
-    public void deliveryCompleteNotifiesListener() throws TransportException, MqttException
+    public void deliveryCompleteNotifiesListener() throws TransportException
     {
         //arrange
         final int expectedMessageId = 13;

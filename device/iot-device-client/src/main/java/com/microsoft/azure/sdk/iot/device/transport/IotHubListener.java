@@ -34,11 +34,13 @@ public interface IotHubListener
     /**
      * Callback to be fired when connection has been lost
      * @param e the cause of the connection loss
+     * @param connectionId the id of the connection this update is relevant to
      */
-    void onConnectionLost(Throwable e);
+    void onConnectionLost(Throwable e, String connectionId);
 
     /**
      * Callback to be fired when the connection has been successfully established
+     * @param connectionId the id of the connection this update is relevant to
      */
-    void onConnectionEstablished();
+    void onConnectionEstablished(String connectionId);
 }

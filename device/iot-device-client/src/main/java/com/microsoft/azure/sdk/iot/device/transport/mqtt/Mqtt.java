@@ -53,6 +53,7 @@ abstract public class Mqtt implements MqttCallback
     private final static String IOTHUB_ACK = "iothub-ack";
 
     private IotHubListener listener;
+    private String connectionId;
 
     /**
      * Constructor to instantiate mqtt broker connection.
@@ -61,7 +62,7 @@ abstract public class Mqtt implements MqttCallback
      * @param messageListener the listener to be called back upon a message arriving
      * @throws IllegalArgumentException if the provided mqttConnection is null
      */
-    public Mqtt(MqttConnection mqttConnection, IotHubListener listener, MqttMessageListener messageListener) throws IllegalArgumentException
+    public Mqtt(MqttConnection mqttConnection, IotHubListener listener, MqttMessageListener messageListener, String connectionId) throws IllegalArgumentException
     {
         if (mqttConnection == null)
         {
@@ -76,6 +77,7 @@ abstract public class Mqtt implements MqttCallback
         this.userSpecifiedSASTokenExpiredOnRetry = false;
         this.listener = listener;
         this.messageListener = messageListener;
+        this.connectionId = connectionId;
     }
 
     /**
@@ -99,7 +101,7 @@ abstract public class Mqtt implements MqttCallback
                     //Codes_SRS_Mqtt_34_020: [If the MQTT connection is established successfully, this function shall notify its listener that connection was established.]
                     if (this.listener != null)
                     {
-                        this.listener.onConnectionEstablished();
+                        this.listener.onConnectionEstablished(this.connectionId);
                     }
                 }
             }
@@ -341,7 +343,7 @@ abstract public class Mqtt implements MqttCallback
             }
 
             //Codes_SRS_Mqtt_34_045: [If this object has a saved listener, this function shall notify the listener that connection was lost.]
-            this.listener.onConnectionLost(throwable);
+            this.listener.onConnectionLost(throwable, this.connectionId);
         }
     }
 

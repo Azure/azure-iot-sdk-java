@@ -5,15 +5,17 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.transport.*;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportConnection;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
@@ -42,6 +44,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String SSL_PORT_SUFFIX = ":8883";
 
     private static final String TWIN_API_VERSION = "api-version=2016-11-14";
+
+    private String connectionId = UUID.randomUUID().toString();
 
     private IotHubListener listener;
 
@@ -169,10 +173,10 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 }
 
                 //Codes_SRS_MQTTIOTHUBCONNECTION_34_030: [This function shall instantiate this object's MqttMessaging object with this object as the listener.]
-                this.deviceMessaging = new MqttMessaging(mqttConnection, this.config.getDeviceId(), this.listener, this);
+                this.deviceMessaging = new MqttMessaging(mqttConnection, this.config.getDeviceId(), this.listener, this, this.connectionId);
                 this.mqttConnection.setMqttCallback(this.deviceMessaging);
-                this.deviceMethod = new MqttDeviceMethod(mqttConnection);
-                this.deviceTwin = new MqttDeviceTwin(mqttConnection);
+                this.deviceMethod = new MqttDeviceMethod(mqttConnection, this.connectionId);
+                this.deviceTwin = new MqttDeviceTwin(mqttConnection, this.connectionId);
 
                 this.deviceMessaging.start();
                 this.state = IotHubConnectionStatus.CONNECTED;
@@ -457,6 +461,13 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
 
         return ackSent;
+    }
+
+    @Override
+    public String getConnectionId()
+    {
+        //Codes_SRS_MQTTIOTHUBCONNECTION_34_064: [This function shall return the saved connectionId.]
+        return this.connectionId;
     }
 
     @Override

@@ -15,10 +15,10 @@ public class MqttMessaging extends Mqtt
     private String publishTopic;
     private String parseTopic;
 
-    public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener) throws TransportException
+    public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId) throws TransportException
     {
         //Codes_SRS_MqttMessaging_25_002: [The constructor shall use the configuration to instantiate super class and passing the parameters.]
-        super(mqttConnection, listener, messageListener);
+        super(mqttConnection, listener, messageListener, connectionId);
 
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -43,8 +43,8 @@ public class MqttMessaging extends Mqtt
 
     public void stop() throws TransportException
     {
-       //Codes_SRS_MqttMessaging_25_022: [stop method shall be call disconnect to tear down a connection to IOT Hub with the given configuration.]
-       this.disconnect();
+        //Codes_SRS_MqttMessaging_25_022: [stop method shall be call disconnect to tear down a connection to IOT Hub with the given configuration.]
+        this.disconnect();
     }
 
     /**
