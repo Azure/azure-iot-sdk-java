@@ -33,6 +33,7 @@ public class ErrorInjectionHelper
 
     public static final int DefaultDelayInSec = 1;
     public static final int DefaultDurationInSec = 5;
+    public static final int Duration10Sec = 10;
 
     public static Message tcpConnectionDropErrorInjectionMessage(int delayInSecs, int durationInSecs)
     {
@@ -87,6 +88,31 @@ public class ErrorInjectionHelper
     public static Message amqpsTwinRespLinkDropErrorInjectionMessage(int delayInSecs, int durationInSecs)
     {
         return createMessageWithErrorInjectionProperties(FaultType_AmqpTwinResp, FaultCloseReason_Boom, delayInSecs, durationInSecs);
+    }
+
+    public static Message throttledConnectionErrorInjectionMessage(int delayInSecs, int durationInSecs)
+    {
+        return createMessageWithErrorInjectionProperties(FaultType_Throttle, FaultCloseReason_Boom, delayInSecs, durationInSecs);
+    }
+
+    public static Message authErrorInjectionMessage(int delayInSecs, int durationInSecs)
+    {
+        return createMessageWithErrorInjectionProperties(FaultType_Auth, FaultCloseReason_Boom, delayInSecs, durationInSecs);
+    }
+
+    public static Message quotaExceededErrorInjectionMessage(int delayInSecs, int durationInSecs)
+    {
+        return createMessageWithErrorInjectionProperties(FaultType_QuotaExceeded, FaultCloseReason_Boom, delayInSecs, durationInSecs);
+    }
+
+    public static Message amqpsGracefulShutdownErrorInjectionMessage(int delayInSecs, int durationInSecs)
+    {
+        return createMessageWithErrorInjectionProperties(FaultType_GracefulShutdownAmqp, FaultCloseReason_Bye, delayInSecs, durationInSecs);
+    }
+
+    public static Message mqttGracefulShutdownErrorInjectionMessage(int delayInSecs, int durationInSecs)
+    {
+        return createMessageWithErrorInjectionProperties(FaultType_GracefulShutdownMqtt, FaultCloseReason_Bye, delayInSecs, durationInSecs);
     }
 
 

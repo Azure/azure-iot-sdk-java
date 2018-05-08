@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionForcedException;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpLinkRedirectException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpSessionWindowViolationException;
 import mockit.*;
@@ -66,6 +67,9 @@ public class AmqpsIotHubConnectionTest {
 
     @Mocked
     TransportException mockedTransportException;
+
+    @Mocked
+    AmqpConnectionThrottledException mockedAmqpConnectionThrottledException;
 
     @Mocked
     protected Handshaker mockHandshaker;
@@ -1461,6 +1465,84 @@ public class AmqpsIotHubConnectionTest {
         };
     }
 
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_28_001: [If the acknowledgement sent from the service is "Rejected", this function shall map the error condition if it exists to amqp exceptions.]
+    @Test
+    public void onDeliverySendRejectedMessageWithAmqpErrorCondition(@Mocked final Map<Integer, com.microsoft.azure.sdk.iot.device.Message> mockInProgressMessages) throws TransportException
+    {
+        baseExpectations();
+        final String receiverLinkName = "receiver";
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "inProgressMessages", mockInProgressMessages);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsSessionManager, "getMessageFromReceiverLink", anyString);
+                result = null;
+
+                mockEvent.getLink();
+                result = mockLink;
+
+                mockLink.getName();
+                result = receiverLinkName;
+
+                mockEvent.getType();
+                result = Event.Type.DELIVERY;
+
+                mockEvent.getDelivery();
+                result = mockDelivery;
+
+                mockDelivery.getRemoteState();
+                result = mockedRejected;
+
+                mockInProgressMessages.containsKey(anyInt);
+                result = true;
+
+                mockedRejected.getError();
+                result = mockedErrorCondition;
+
+                mockedErrorCondition.getCondition();
+                result = mockedSymbol;
+
+                mockedSymbol.toString();
+                result = AmqpConnectionThrottledException.errorCode;
+
+                mockInProgressMessages.remove(anyInt);
+                result = mockedTransportMessage;
+
+                Deencapsulation.newInstance(AmqpConnectionThrottledException.class);
+                result = mockedTransportException;
+            }
+        };
+
+        connection.setListener(mockedIotHubListener);
+
+        //act
+        connection.onDelivery(mockEvent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockEvent.getType();
+                times = 1;
+                mockEvent.getDelivery();
+                times = 1;
+                mockDelivery.getRemoteState();
+                times = 1;
+                mockedRejected.getError();
+                times = 1;
+                mockedErrorCondition.getCondition();
+                times = 2;
+                mockedIotHubListener.onMessageSent(mockedTransportMessage, mockedTransportException);
+                times = 1;
+                mockDelivery.free();
+                times = 1;
+            }
+        };
+    }
+
     // Tests_SRS_AMQPSIOTHUBCONNECTION_34_065: [If the acknowledgement sent from the service is "Rejected", this function shall notify its listener that the sent message was rejected and that it should not be retried.]
     @Test
     public void onDeliverySendRejectedMessage(@Mocked final Map<Integer, com.microsoft.azure.sdk.iot.device.Message> mockInProgressMessages) throws TransportException
@@ -1491,6 +1573,9 @@ public class AmqpsIotHubConnectionTest {
 
                 mockDelivery.getRemoteState();
                 result = mockedRejected;
+
+                mockedRejected.getError();
+                result = null;
 
                 mockInProgressMessages.containsKey(anyInt);
                 result = true;

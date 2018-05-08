@@ -1918,6 +1918,32 @@ public class DeviceTwinIT
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void getDeviceTwinRecoveredFromGracefulShutdownAmqp() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void getDeviceTwinRecoveredFromGracefulShutdownMqtt() throws Exception
+    {
+        if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS))
+        {
+            return;
+        }
+
+        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
     private void setDesiredProperties(String queryProperty, String queryPropertyValue, int numberOfDevices) throws IOException, IotHubException
     {
         for (int i = 0; i < numberOfDevices; i++)
