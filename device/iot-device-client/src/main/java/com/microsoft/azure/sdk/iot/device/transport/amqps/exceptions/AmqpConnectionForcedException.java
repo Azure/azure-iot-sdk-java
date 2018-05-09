@@ -31,10 +31,12 @@ public class AmqpConnectionForcedException extends ProtocolException
     public AmqpConnectionForcedException(String message, Throwable cause)
     {
         super(message, cause);
+        this.isRetryable = true;
     }
 
     public AmqpConnectionForcedException(Throwable cause)
     {
         super(cause);
+        this.isRetryable = true;
     }
 }

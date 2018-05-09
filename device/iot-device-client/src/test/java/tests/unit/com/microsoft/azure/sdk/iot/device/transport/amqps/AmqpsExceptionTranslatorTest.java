@@ -41,6 +41,7 @@ public class AmqpsExceptionTranslatorTest
     //Tests_SRS_AMQPSEXCEPTIONTRANSLATOR_34_024: [The function shall map amqp exception code "amqp:link:redirect" to TransportException "AmqpLinkRedirectException".]
     //Tests_SRS_AMQPSEXCEPTIONTRANSLATOR_34_025: [The function shall map amqp exception code "amqp:link:stolen" to TransportException "AmqpLinkStolenException".]
     //Tests_SRS_AMQPSEXCEPTIONTRANSLATOR_34_026: [The function shall map all other amqp exception codes to the generic TransportException "ProtocolException".]
+    //Tests_SRS_AMQPSEXCEPTIONTRANSLATOR_28_001: [The function shall map amqp exception code "com.microsoft:device-container-throttled" to TransportException "AmqpConnectionThrottledException".]
     @Test
     public void getConnectionStatusExceptionFromAMQPExceptionCodeReturnsExpectedMappings()
     {
@@ -70,6 +71,7 @@ public class AmqpsExceptionTranslatorTest
         assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkMessageSizeExceededException.errorCode) instanceof AmqpLinkMessageSizeExceededException);
         assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkStolenException.errorCode) instanceof AmqpLinkStolenException);
         assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkRedirectException.errorCode) instanceof AmqpLinkRedirectException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpConnectionThrottledException.errorCode) instanceof AmqpConnectionThrottledException);
         assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", "Not a protocol standard error code") instanceof ProtocolException);
     }
 }

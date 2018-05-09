@@ -38,12 +38,9 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.*;
+import static org.junit.Assert.*;
 
 /**
  * Integration E2E test for Device Method on the service client.
@@ -687,6 +684,32 @@ public class DeviceMethodIT
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void invokeMethodRecoveredFromGracefulShutdownAmqp() throws Exception
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            return;
+        }
+
+        this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
+    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    public void invokeMethodRecoveredFromGracefulShutdownMqtt() throws Exception
+    {
+        if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS))
+        {
+            return;
+        }
+
+        this.errorInjectionTestFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(
+                ErrorInjectionHelper.DefaultDelayInSec,
+                ErrorInjectionHelper.DefaultDurationInSec));
+    }
+
     private void setConnectionStatusCallBack(final List actualStatusUpdates)
     {
 
@@ -709,7 +732,7 @@ public class DeviceMethodIT
         invokeMethodSucceed();
 
         // Act
-        errorInjectionMessage.setExpiryTime(100);
+        errorInjectionMessage.setExpiryTime(200);
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
         this.testInstance.deviceTestManager.sendMessageAndWaitForResponse(
                 errorInjectionMsgAndRet,
@@ -721,5 +744,4 @@ public class DeviceMethodIT
         IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
         invokeMethodSucceed();
     }
-
 }

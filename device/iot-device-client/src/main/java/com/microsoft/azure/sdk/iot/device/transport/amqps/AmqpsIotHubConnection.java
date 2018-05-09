@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
+import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
@@ -600,8 +601,22 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                     }
                     else if (remoteState instanceof Rejected)
                     {
-                        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_065: [If the acknowledgement sent from the service is "Rejected", this function shall notify its listener that the sent message was rejected and that it should not be retried.]
-                        this.listener.onMessageSent(inProgressMessages.remove(d.hashCode()), new TransportException("IotHub rejected the message"));
+                        TransportException transportException;
+                        ErrorCondition errorCondition = ((Rejected) remoteState).getError();
+                        if (errorCondition !=  null && errorCondition.getCondition() != null)
+                        {
+                            // Codes_SRS_AMQPSIOTHUBCONNECTION_28_001: [If the acknowledgement sent from the service is "Rejected", this function shall map the error condition if it exists to amqp exceptions.]
+                            String errorCode = errorCondition.getCondition().toString();
+                            transportException = AmqpsExceptionTranslator.convertToAmqpException(errorCode);
+                        }
+                        else
+                        {
+                            // Codes_SRS_AMQPSIOTHUBCONNECTION_34_065: [If the acknowledgement sent from the service is "Rejected", this function shall notify its listener that the sent message was rejected and that it should not be retried.]
+                            transportException = new TransportException("IotHub rejected the message");
+                        }
+
+                        this.listener.onMessageSent(inProgressMessages.remove(d.hashCode()), transportException);
+
                     }
                     else if (remoteState instanceof Modified || remoteState instanceof Released || remoteState instanceof Received)
                     {

@@ -32,10 +32,12 @@ import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
 
+import javax.print.attribute.URISyntax;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -73,6 +75,8 @@ public class SendMessagesIT
     private static final List<MessageAndResult> AMQP_METHOD_RESP_LINK_DROP_MESSAGES_TO_SEND = new ArrayList<>();
     private static final List<MessageAndResult> AMQP_TWIN_REQ_LINK_DROP_MESSAGES_TO_SEND = new ArrayList<>();
     private static final List<MessageAndResult> AMQP_TWIN_RESP_LINK_DROP_MESSAGES_TO_SEND = new ArrayList<>();
+    private static final List<MessageAndResult> AMQP_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND = new ArrayList<>();
+    private static final List<MessageAndResult> MQTT_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND = new ArrayList<>();
 
     //How many keys each message will cary.
     private static final Integer NUM_KEYS_PER_MESSAGE = 3;
@@ -202,6 +206,12 @@ public class SendMessagesIT
 
                 Message amqpTwinRespLinkDropErrorInjectionMessage = ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
                 AMQP_TWIN_RESP_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpTwinRespLinkDropErrorInjectionMessage, null));
+
+                Message amqpGracefulShutdownErrorInjectionMessage = ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
+                AMQP_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND.add(new MessageAndResult(amqpGracefulShutdownErrorInjectionMessage, null));
+
+                Message mqttGracefulShutdownErrorInjectionMessage = ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
+                MQTT_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND.add(new MessageAndResult(mqttGracefulShutdownErrorInjectionMessage, null));
             }
             else
             {
@@ -216,6 +226,8 @@ public class SendMessagesIT
                 AMQP_METHOD_RESP_LINK_DROP_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
                 AMQP_TWIN_REQ_LINK_DROP_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
                 AMQP_TWIN_RESP_LINK_DROP_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
+                AMQP_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
+                MQTT_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
             }
 
             NORMAL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY));
@@ -667,6 +679,92 @@ public class SendMessagesIT
     }
 
     @Test
+    public void sendMessagesWithThrottling() throws URISyntaxException, IOException, IotHubException, NoSuchAlgorithmException, InterruptedException
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            //This error injection test only applies for AMQPS and AMQPS_WS
+            return;
+        }
+
+        errorInjectionTestFlowNoDisconnect(
+                ErrorInjectionHelper.throttledConnectionErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.Duration10Sec),
+                IotHubStatusCode.OK_EMPTY,
+                false);
+
+    }
+
+    @Test
+    public void sendMessagesWithThrottlingNoRetry() throws URISyntaxException, IOException, IotHubException, NoSuchAlgorithmException, InterruptedException
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            //This error injection test only applies for AMQPS and AMQPS_WS
+            return;
+        }
+
+        errorInjectionTestFlowNoDisconnect(
+                ErrorInjectionHelper.throttledConnectionErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.Duration10Sec),
+                IotHubStatusCode.ERROR,
+                true);
+
+    }
+
+    @Test
+    public void sendMessagesWithAuthenticationError() throws URISyntaxException, IOException, IotHubException, NoSuchAlgorithmException, InterruptedException
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            //This error injection test only applies for AMQPS and AMQPS_WS
+            return;
+        }
+
+        errorInjectionTestFlowNoDisconnect(
+                ErrorInjectionHelper.authErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.Duration10Sec),
+                IotHubStatusCode.ERROR,
+                false);
+    }
+
+    @Test
+    public void sendMessagesWithQuotaExceeded() throws URISyntaxException, IOException, IotHubException, NoSuchAlgorithmException, InterruptedException
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            //This error injection test only applies for AMQPS and AMQPS_WS
+            return;
+        }
+
+        errorInjectionTestFlowNoDisconnect(
+                ErrorInjectionHelper.quotaExceededErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.Duration10Sec),
+                IotHubStatusCode.ERROR,
+                false);
+    }
+
+    @Test
+    public void sendMessagesOverAmqpWithGracefulShutdown() throws IOException, InterruptedException
+    {
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        {
+            //This error injection test only applies for AMQPS and AMQPS_WS
+            return;
+        }
+
+        IotHubServicesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.deviceClient, testInstance.protocol, AMQP_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
+    }
+
+    @Test
+    public void sendMessagesOverMqttWithGracefulShutdown() throws IOException, InterruptedException
+    {
+        if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS))
+        {
+            //This error injection test only applies for MQTT and MQTT_WS
+            return;
+        }
+
+        IotHubServicesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.deviceClient, testInstance.protocol, MQTT_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
+    }
+
+    @Test
     public void sendMessagesWithTcpConnectionDropNotifiesUserIfRetryExpires() throws IOException, InterruptedException
     {
         if (testInstance.protocol == HTTPS || (testInstance.protocol == MQTT_WS && testInstance.authenticationType != SAS))
@@ -683,5 +781,59 @@ public class SendMessagesIT
 
         //reset back to default
         testInstance.deviceClient.setRetryPolicy(new ExponentialBackoffWithJitter());
+    }
+
+    private void errorInjectionTestFlowNoDisconnect(Message errorInjectionMessage, IotHubStatusCode expectedStatus, boolean noRetry) throws IOException, NoSuchAlgorithmException, IotHubException, URISyntaxException, InterruptedException
+    {
+        // Arrange
+        // This test case creates a device instead of re-using the one in this.testInstance due to state changes
+        // introduced by injected errors
+        String uuid = UUID.randomUUID().toString();
+        String deviceId = "java-device-client-e2e-test-send-messages".concat("-" + uuid);
+
+        Device target;
+        DeviceClient dc;
+        if (this.testInstance.authenticationType == SELF_SIGNED)
+        {
+            target = Device.createDevice(deviceId, SELF_SIGNED);
+            target.setThumbprint(x509Thumbprint, x509Thumbprint);
+            registryManager.addDevice(target);
+            dc = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, target), this.testInstance.protocol, publicKeyCert, false, privateKey, false);
+        }
+        else
+        {
+            target = Device.createFromId(deviceId, null, null);
+            registryManager.addDevice(target);
+            dc = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, target), this.testInstance.protocol);
+        }
+
+        if (noRetry)
+        {
+            dc.setRetryPolicy(new NoRetry());
+        }
+        IotHubServicesCommon.openDeviceClientWithRetry(dc);
+
+        // Act
+        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage,null);
+        IotHubServicesCommon.sendMessageAndWaitForResponse(
+                dc,
+                errorInjectionMsgAndRet,
+                RETRY_MILLISECONDS,
+                SEND_TIMEOUT_MILLISECONDS,
+                this.testInstance.protocol);
+
+        // time for the error injection to take effect on the service side
+        Thread.sleep(2000);
+
+        MessageAndResult normalMessageAndExpectedResult = new MessageAndResult(new Message("test message"), expectedStatus);
+        IotHubServicesCommon.sendMessageAndWaitForResponse(
+                dc,
+                normalMessageAndExpectedResult,
+                RETRY_MILLISECONDS,
+                SEND_TIMEOUT_MILLISECONDS,
+                this.testInstance.protocol);
+
+        //cleanup
+        registryManager.removeDevice(target.getDeviceId());
     }
 }

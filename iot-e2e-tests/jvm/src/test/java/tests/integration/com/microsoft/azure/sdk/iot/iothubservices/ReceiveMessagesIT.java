@@ -377,6 +377,30 @@ public class ReceiveMessagesIT
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    public void receiveMessagesWithGracefulShutdownAmqp() throws IOException, IotHubException, InterruptedException
+    {
+        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
+        {
+            //test case not applicable
+            return;
+        }
+
+        this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
+    }
+
+    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    public void receiveMessagesWithGracefulShutdownMqtt() throws IOException, IotHubException, InterruptedException
+    {
+        if (testInstance.protocol != MQTT && testInstance.protocol != MQTT_WS)
+        {
+            //test case not applicable
+            return;
+        }
+
+        this.errorInjectionTestFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
+    }
+
     //Test times out very frequently
     @Ignore
     @Test

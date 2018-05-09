@@ -88,10 +88,12 @@ public class AmqpsExceptionTranslator
             case AmqpSessionWindowViolationException.errorCode:
                 // Codes_SRS_AMQPSEXCEPTIONTRANSLATOR_34_017: [The function shall map amqp exception code "amqp:session:window-violation" to TransportException "AmqpSessionWindowViolationException".]
                 return new AmqpSessionWindowViolationException();
+            case AmqpConnectionThrottledException.errorCode:
+                // Codes_SRS_AMQPSEXCEPTIONTRANSLATOR_28_001: [The function shall map amqp exception code "com.microsoft:device-container-throttled" to TransportException "AmqpConnectionThrottledException".]
+                return new AmqpConnectionThrottledException();
             default:
                 // Codes_SRS_AMQPSEXCEPTIONTRANSLATOR_34_026: [The function shall map all other amqp exception codes to the generic TransportException "ProtocolException".]
-                return new ProtocolException();
+                return new ProtocolException("Exception: " + exceptionCode);
         }
     }
-
 }
