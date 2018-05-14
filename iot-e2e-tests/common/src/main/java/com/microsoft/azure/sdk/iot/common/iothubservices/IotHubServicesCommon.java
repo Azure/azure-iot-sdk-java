@@ -388,7 +388,7 @@ public class IotHubServicesCommon
         while (numOfUpdates != actualStatusUpdates.size() || actualStatusUpdates.get(actualStatusUpdates.size()-1) != IotHubConnectionStatus.CONNECTED)
         {
             numOfUpdates = actualStatusUpdates.size();
-            Thread.sleep(200);
+            Thread.sleep(6 * 1000);
             timeElapsed = System.currentTimeMillis() - startTime;
 
             // 2 minutes timeout waiting for connection to stabilized
