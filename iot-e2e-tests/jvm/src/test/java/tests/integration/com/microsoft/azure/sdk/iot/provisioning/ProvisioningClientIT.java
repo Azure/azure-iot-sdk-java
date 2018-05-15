@@ -262,7 +262,6 @@ public class ProvisioningClientIT
         assertNotNull(individualEnrollmentResult.getLastUpdatedDateTimeUtc()); //
         assertNotNull(individualEnrollmentResult.getDeviceId()); // expected device ID
         assertEquals(deviceId, individualEnrollmentResult.getDeviceId()); // expected device ID
-        assertNull(individualEnrollmentResult.getProvisioningStatus()); // null
         if (twinState == null)
         {
             assertNull(individualEnrollmentResult.getInitialTwin()); // expected null
@@ -301,7 +300,6 @@ public class ProvisioningClientIT
         assertNotNull(individualEnrollmentResult.getLastUpdatedDateTimeUtc()); //
         assertNotNull(individualEnrollmentResult.getDeviceId()); // expected device ID
         assertEquals(deviceId, individualEnrollmentResult.getDeviceId()); // expected device ID
-        assertNull(individualEnrollmentResult.getProvisioningStatus()); // null
         if (twinState == null)
         {
             assertNull(individualEnrollmentResult.getInitialTwin()); // expected null
