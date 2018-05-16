@@ -491,6 +491,11 @@ public class DeviceTwinDevice
         {
             for (Pair p : set)
             {
+                if (map.containsKey(p.getKey()))
+                {
+                    throw new IllegalArgumentException("Set must not contain multiple pairs with the same keys. Duplicate key: " + p.getKey());
+                }
+
                 map.put(p.getKey(), p.getValue());
             }
         }

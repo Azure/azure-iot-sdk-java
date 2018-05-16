@@ -1258,7 +1258,7 @@ public class DeviceTwinIT
             desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
             if (i % 2 == 0)
             {
-                desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
+                desiredProperties.add(new Pair(queryPropertyEven, queryPropertyValueEven));
                 noOfEvenDevices++;
             }
             devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
