@@ -37,7 +37,8 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     private static final String URL_SEPARATOR_2 = "&";
     private static final String URL_HTTPS = "https:" + URL_SEPARATOR_0 + URL_SEPARATOR_0;
     private static final String URL_PATH_DEVICES = "devices";
-    private static final String URL_API_VERSION = "api-version=2017-07-11";
+    private static final String URL_PATH_MODULES = "modules";
+    private static final String URL_API_VERSION = "api-version=2017-11-08-preview";
     private static final String URL_MAX_COUNT = "top=";
     private static final String URL_PATH_DEVICESTATISTICS = "statistics";
     private static final String USER_SEPARATOR = "@";
@@ -359,6 +360,82 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         stringBuilder.append(URL_PATH_DEVICES);
         stringBuilder.append(URL_SEPARATOR_0);
         stringBuilder.append(deviceId);
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
+    }
+
+    /**
+     * Create url for requesting module data
+     *
+     * @param deviceId The name of the device
+     * @param moduleId The name of the device
+     * @return The device Url in the following format: "https:hostname/devices/deviceId?api-version=201X-XX-XX"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     * @throws IllegalArgumentException This exception is thrown if device id is null or empty
+     */
+    public URL getUrlModule(String deviceId, String moduleId) throws MalformedURLException, IllegalArgumentException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_002: [The function shall throw IllegalArgumentException
+        // if the input string is empty or null]
+        if (Tools.isNullOrEmpty(deviceId))
+        {
+            throw new IllegalArgumentException("device name cannot be empty or null");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_002: [The function shall throw IllegalArgumentException
+        // if the input string is empty or null]
+        if (Tools.isNullOrEmpty(moduleId))
+        {
+            throw new IllegalArgumentException("module name cannot be empty or null");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_003: [The function shall create a URL object
+        // from the given deviceId using the following format: https:hostname/devices/deviceId?api-version=201X-XX-XX]
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_DEVICES);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(deviceId);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_MODULES);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(moduleId);
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
+    }
+
+    /**
+     * Create url for requesting all modules data on a device
+     *
+     * @param deviceId The name of the device
+     * @return The device Url in the following format: "https:hostname/devices/deviceId?api-version=201X-XX-XX"
+     * @throws MalformedURLException This exception is thrown if the URL creation failed due to malformed string
+     * @throws IllegalArgumentException This exception is thrown if device id is null or empty
+     */
+    public URL getUrlModulesOnDevice(String deviceId) throws MalformedURLException, IllegalArgumentException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_002: [The function shall throw IllegalArgumentException
+        // if the input string is empty or null]
+        if (Tools.isNullOrEmpty(deviceId))
+        {
+            throw new IllegalArgumentException("device name cannot be empty or null");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_003: [The function shall create a URL object
+        // from the given deviceId using the following format: https:hostname/devices/deviceId/modules?api-version=201X-XX-XX]
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_DEVICES);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(deviceId);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_MODULES);
         stringBuilder.append(URL_SEPARATOR_1);
         stringBuilder.append(URL_API_VERSION);
         return new URL(stringBuilder.toString());

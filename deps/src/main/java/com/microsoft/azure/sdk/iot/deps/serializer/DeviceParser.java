@@ -22,6 +22,11 @@ public class DeviceParser
     @SerializedName(DEVICE_ID_NAME)
     private String deviceId;
 
+    private static final String MODULE_ID_NAME = "moduleId";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(MODULE_ID_NAME)
+    private String moduleId;
+
     private static final String GENERATION_ID_NAME = "generationId";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(GENERATION_ID_NAME)
@@ -69,6 +74,11 @@ public class DeviceParser
     @Expose(serialize = true, deserialize = true)
     @SerializedName(AUTHENTICATION_NAME)
     private AuthenticationParser authenticationParser;
+
+    private static final String MANAGED_BY = "managedBy";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(MANAGED_BY)
+    private String managedBy;
 
     private transient Gson gson = new Gson();
 
@@ -144,12 +154,14 @@ public class DeviceParser
         this.authenticationParser = deviceParser.authenticationParser;
         this.connectionState = deviceParser.connectionState;
         this.deviceId = deviceParser.deviceId;
+        this.moduleId = deviceParser.moduleId;
         this.statusReason = deviceParser.statusReason;
         this.cloudToDeviceMessageCount = deviceParser.cloudToDeviceMessageCount;
         this.connectionState = deviceParser.connectionState;
         this.generationId = deviceParser.generationId;
         this.eTag = deviceParser.eTag;
         this.status = deviceParser.status;
+        this.managedBy = deviceParser.managedBy;
 
         //convert to date format
         if (deviceParser.lastActivityTimeString != null)
@@ -169,6 +181,35 @@ public class DeviceParser
             this.statusUpdatedTimeString = deviceParser.statusUpdatedTimeString;
             this.statusUpdatedTime = ParserUtility.getDateTimeUtc(deviceParser.statusUpdatedTimeString);
         }
+    }
+
+    /**
+     * Getter for DeviceId
+     *
+     * @return The value of DeviceId
+     */
+    public String getModuleId()
+    {
+        //Codes_SRS_DEVICE_PARSER_34_032: [This method shall return the value of this object's DeviceId.]
+        return moduleId;
+    }
+
+    /**
+     * Setter for DeviceId
+     * @param moduleId the value to set deviceId to
+     * @throws IllegalArgumentException if deviceId is null
+     */
+    public void setModuleId(String moduleId) throws IllegalArgumentException
+    {
+
+        //Codes_SRS_DEVICE_PARSER_34_010: [If the provided deviceId value is null, an IllegalArgumentException shall be thrown.]
+        if (moduleId == null || moduleId.isEmpty())
+        {
+            throw new IllegalArgumentException("DeviceId cannot not be null");
+        }
+
+        //Codes_SRS_DEVICE_PARSER_34_009: [This method shall set the value of deviceId to the provided value.]
+        this.moduleId = moduleId;
     }
 
     /**
@@ -447,5 +488,26 @@ public class DeviceParser
     {
         //Codes_SRS_DEVICE_PARSER_34_029: [This method shall set the value of this object's cloudToDeviceMessageCount equal to the provided value.]
         this.cloudToDeviceMessageCount = cloudToDeviceMessageCount;
+    }
+
+    /**
+     * Getter for ManagedBy
+     *
+     * @return The value of ManagedBy
+     */
+    public String getManagedBy()
+    {
+        //Codes_SRS_DEVICE_PARSER_34_018: [This method shall return the value of this object's Status.]
+        return managedBy;
+    }
+
+    /**
+     * Setter for Status
+     * @param managedBy the value to set managedBy to
+     */
+    public void setManagedBy(String managedBy)
+    {
+        //Codes_SRS_DEVICE_PARSER_34_017: [This method shall set the value of this object's Status equal to the provided value.]
+        this.managedBy = managedBy;
     }
 }

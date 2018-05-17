@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(JMockit.class)
 public class IotHubConnectionStringTest
 {
-    private static final String URL_API_VERSION = "api-version=2017-07-11";
+    private static final String URL_API_VERSION = "api-version=2017-11-08-preview";
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_001: [The function shall serialize the object properties to a string using the following format: SharedAccessKeyName@SAS.root.IotHubName]
     @Test

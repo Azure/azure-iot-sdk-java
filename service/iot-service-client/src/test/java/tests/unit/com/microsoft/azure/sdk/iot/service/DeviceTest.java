@@ -9,16 +9,11 @@ import com.microsoft.azure.sdk.iot.deps.serializer.*;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.DeviceConnectionState;
 import com.microsoft.azure.sdk.iot.service.DeviceStatus;
-import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
-import com.microsoft.azure.sdk.iot.service.auth.X509Thumbprint;
-import mockit.Deencapsulation;
-import mockit.Expectations;
-import mockit.NonStrictExpectations;
+import mockit.*;
 import org.junit.Test;
 
-import javax.crypto.KeyGenerator;
 import java.security.NoSuchAlgorithmException;
 
 import static junit.framework.TestCase.assertEquals;
@@ -34,17 +29,18 @@ public class DeviceTest
     private static final String SAMPLE_THUMBPRINT = "0000000000000000000000000000000000000000";
     private static final String SAMPLE_KEY = "000000000000000000000000";
 
-    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_001: [The Device class shall have the following properties: Id, Etag, Authentication.SymmetricKey, State, StateReason, StateUpdatedTime, ConnectionState, ConnectionStateUpdatedTime, LastActivityTime, symmetricKey, thumbprint, status, authentication]
+    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_001: [The Device class shall have the following properties:
+    // deviceId, Etag, Status, StatusReason, StatusUpdatedTime, ConnectionState, CloudToDeviceMessageCount
+    // ConnectionStateUpdatedTime, LastActivityTime, symmetricKey, thumbprint, authentication]
     // Assert
     @Test (expected = IllegalArgumentException.class)
-    public void device_get_all_properties() throws NoSuchAlgorithmException
+    public void device_get_all_properties()
     {
         // Arrange
         String deviceId = "xxx-device";
         SymmetricKey expectedSymmetricKey = new SymmetricKey();
         String expectedPrimaryThumbprint = "0000000000000000000000000000000000000000";
         String expectedSecondaryThumbprint = "1111111111111111111111111111111111111111";
-        AuthenticationMechanism expectedAuthentication = new AuthenticationMechanism(expectedPrimaryThumbprint, expectedSecondaryThumbprint);
 
         // Act
         Device device = Device.createFromId(deviceId, null, null);
@@ -78,13 +74,25 @@ public class DeviceTest
         device.setForceUpdate(null);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_002: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
+    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_002: [The function shall throw IllegalArgumentException if the input string is empty or null]
     // Assert
     @Test (expected = IllegalArgumentException.class)
-    public void createFromId_input_null() throws NoSuchAlgorithmException
+    public void createFromId_input_null()
     {
         // Arrange
         String deviceId = null;
+
+        // Act
+        Device.createFromId(deviceId, null, null);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_002: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void createFromId_input_empty()
+    {
+        // Arrange
+        String deviceId = "";
 
         // Act
         Device.createFromId(deviceId, null, null);
@@ -111,28 +119,18 @@ public class DeviceTest
         Device.createDevice("someDevice", null);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_002: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void createFromId_input_empty() throws NoSuchAlgorithmException
-    {
-        // Arrange
-        String deviceId = "";
-
-        // Act
-        Device.createFromId(deviceId, null, null);
-    }
 
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_003: [The constructor shall create a new instance of Device using the given deviceId and return with it]
     @Test
-    public void createFromId_good_case() throws NoSuchAlgorithmException
+    public void createFromId_success()
     {
         // Arrange
         String deviceId = "xxx-device";
         new Expectations()
         {
             {
-                Deencapsulation.newInstance(Device.class, deviceId, DeviceStatus.class, SymmetricKey.class);
+                Deencapsulation.newInstance(Device.class, new Class[]{String.class, DeviceStatus.class, SymmetricKey.class},
+                        deviceId, null, null);
             }
         };
 
@@ -143,55 +141,36 @@ public class DeviceTest
         assertNotEquals(device, null);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_004: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_string_null() throws NoSuchAlgorithmException
-    {
-        // Arrange
-        String deviceId = null;
-
-        // Act
-        Device device = Deencapsulation.newInstance(Device.class, deviceId, null, null);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_004: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_string_empty() throws NoSuchAlgorithmException
-    {
-        // Arrange
-        String deviceId = "";
-
-        // Act
-        Device device = Deencapsulation.newInstance(Device.class, deviceId, null, null);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_005: [If the input symmetric key is empty, the constructor shall create
-    // a new SymmetricKey instance using AES encryption and store it into a member variable]
+    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_28_001: [The constructor shall set the deviceId, status and symmetricKey.]
+    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_006: [The constructor shall initialize all properties to default values]
     @Test
-    public void constructor_create_symmetrickey() throws NoSuchAlgorithmException
+    public void constructor_create_initialize_properties()
     {
         // Arrange
-        String encryptionMethod = "AES";
         String deviceId = "xxx-device";
-        new NonStrictExpectations()
-        {
-            {
-                SymmetricKey symmetricKey = new SymmetricKey();
-                KeyGenerator.getInstance(encryptionMethod);
-            }
-        };
+        DeviceStatus expectedDeviceStatus = DeviceStatus.Enabled;
+        String utcTimeDefault = "0001-01-01T00:00:00";
+        String offsetTimeDefault = "0001-01-01T00:00:00-00:00";
 
         // Act
-        Device device = Deencapsulation.newInstance(Device.class, deviceId, DeviceStatus.class, SymmetricKey.class);
+        Device device = Deencapsulation.newInstance(Device.class, new Class[]{String.class, DeviceStatus.class, SymmetricKey.class},
+                deviceId, null, null);
 
         // Assert
-        assertNotEquals(device.getSymmetricKey(), null);
+        assertEquals(deviceId, device.getDeviceId());
+        assertNotEquals(null, device.getSymmetricKey());
+        assertEquals("", device.getGenerationId());
+        assertEquals("", device.geteTag());
+        assertEquals(DeviceStatus.Enabled, device.getStatus());
+        assertEquals("", device.getStatusReason());
+        assertEquals(utcTimeDefault, device.getStatusUpdatedTime());
+        assertEquals(DeviceConnectionState.Disconnected, device.getConnectionState());
+        assertEquals(utcTimeDefault, device.getConnectionStateUpdatedTime());
+        assertEquals(offsetTimeDefault, device.getLastActivityTime());
+        assertEquals(0, device.getCloudToDeviceMessageCount());
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_15_007: [The constructor shall store
-    // the input device status and symmetric key into a member variable]
+    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_28_001: [The constructor shall set the deviceId, status and symmetricKey.]
     @Test
     public void constructor_sets_status_and_symmetrickey() throws NoSuchAlgorithmException
     {
@@ -201,37 +180,38 @@ public class DeviceTest
         SymmetricKey expectedSymmetricKey = new SymmetricKey();
 
         // Act
-        Device device = Deencapsulation.newInstance(Device.class, deviceId, expectedDeviceStatus, expectedSymmetricKey); 
-        
+        Device device = Deencapsulation.newInstance(Device.class, new Class[]{String.class, DeviceStatus.class, SymmetricKey.class},
+                deviceId, expectedDeviceStatus, expectedSymmetricKey);
+
         // Assert
+        assertEquals(deviceId, device.getDeviceId());
         assertEquals(expectedDeviceStatus, device.getStatus());
         assertEquals(expectedSymmetricKey, device.getSymmetricKey());
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_006: [The constructor shall initialize all properties to default value]
+    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_28_002: [The constructor shall set the deviceId and symmetricKey.]
+    // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_28_003: [The constructor shall initialize all properties to default values]
     @Test
-    public void constructor_initialize_properties() throws NoSuchAlgorithmException
+    public void constructor2_create_initialize_properties()
     {
         // Arrange
+        String deviceId = "xxx-device";
         String utcTimeDefault = "0001-01-01T00:00:00";
         String offsetTimeDefault = "0001-01-01T00:00:00-00:00";
-        String deviceId = "xxx-device";
 
         // Act
-        Device device = Deencapsulation.newInstance(Device.class, deviceId, DeviceStatus.class, SymmetricKey.class);
+        Device device = Deencapsulation.newInstance(Device.class, new Class[]{String.class, AuthenticationType.class},
+                deviceId, AuthenticationType.SAS);
 
         // Assert
-        assertNotEquals(null, device);
-        assertNotEquals(device.getSymmetricKey(), null);
-
-        assertEquals("xxx-device", device.getDeviceId());
+        assertEquals(deviceId, device.getDeviceId());
+        assertNotNull( device.getSymmetricKey());
         assertEquals("", device.getGenerationId());
         assertEquals("", device.geteTag());
         assertEquals(DeviceStatus.Enabled, device.getStatus());
         assertEquals("", device.getStatusReason());
         assertEquals(utcTimeDefault, device.getStatusUpdatedTime());
         assertEquals(DeviceConnectionState.Disconnected, device.getConnectionState());
-        assertEquals(utcTimeDefault, device.getStatusUpdatedTime());
         assertEquals(utcTimeDefault, device.getConnectionStateUpdatedTime());
         assertEquals(offsetTimeDefault, device.getLastActivityTime());
         assertEquals(0, device.getCloudToDeviceMessageCount());
@@ -373,278 +353,6 @@ public class DeviceTest
         assertNull(deviceSAS.getSecondaryThumbprint());
         assertNotNull(deviceSAS.getSymmetricKey());
         assertEquals(AuthenticationType.SAS, deviceSAS.getAuthenticationType());
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_015: [If the provided parser is missing a value for its authentication or its device Id, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void conversionFromDeviceWithoutDeviceIdThrowsIllegalArgumentException()
-    {
-        // arrange
-        DeviceParser parser = new DeviceParser();
-        parser.setAuthenticationParser(Deencapsulation.newInstance(AuthenticationParser.class));
-        parser.getAuthenticationParser().setType(AuthenticationTypeParser.CERTIFICATE_AUTHORITY);
-
-        // act
-        reflectivelyInvokeDeviceParserConstructor(parser);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_015: [If the provided parser is missing a value for its authentication or its device Id, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void conversionFromDeviceWithoutAuthenticationTypeThrowsIllegalArgumentException()
-    {
-        // arrange
-        DeviceParser parser = new DeviceParser();
-        parser.setDeviceId("someDevice");
-
-        // act
-        reflectivelyInvokeDeviceParserConstructor(parser);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_011: [If the provided authenticationType is certificate authority, no symmetric key shall be generated and no thumbprint shall be generated]
-    @Test
-    public void deviceConstructorWithCertificateAuthorityGeneratesKeysCorrectly()
-    {
-        // act
-        Device device = Deencapsulation.newInstance(Device.class, new Class[] { String.class, AuthenticationType.class }, "someDevice", AuthenticationType.CERTIFICATE_AUTHORITY);
-
-        // assert
-        assertNull(device.getPrimaryThumbprint());
-        assertNull(device.getSecondaryThumbprint());
-        assertNull(device.getSymmetricKey());
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_012: [If the provided authenticationType is SAS, a symmetric key shall be generated but no thumbprint shall be generated]
-    @Test
-    public void deviceConstructorWithSharedAccessSignatureGeneratesKeysCorrectly()
-    {
-        // act
-        Device device = Deencapsulation.newInstance(Device.class, new Class[] { String.class, AuthenticationType.class }, "someDevice", AuthenticationType.SAS);
-
-        // assert
-        assertNull(device.getPrimaryThumbprint());
-        assertNull(device.getSecondaryThumbprint());
-        assertNotNull(device.getSymmetricKey());
-        assertNotNull(device.getPrimaryKey());
-        assertNotNull(device.getSecondaryKey());
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_013: [If the provided authenticationType is self signed, a thumbprint shall be generated but no symmetric key shall be generated]
-    @Test
-    public void deviceConstructorWithSelfSignedGeneratesKeysCorrectly()
-    {
-        // act
-        Device device = Deencapsulation.newInstance(Device.class, new Class[] { String.class, AuthenticationType.class }, "someDevice", AuthenticationType.SELF_SIGNED);
-
-        // assert
-        assertNotNull(device.getPrimaryThumbprint());
-        assertNotNull(device.getSecondaryThumbprint());
-        assertNull(device.getSymmetricKey());
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_009: [The function shall throw IllegalArgumentException if the provided deviceId or authenticationType is empty or null.]
-    @Test (expected = IllegalArgumentException.class)
-    public void createDeviceThrowsIllegalArgumentExceptionForNullDeviceId()
-    {
-        //act
-        Device.createDevice(null, AuthenticationType.CERTIFICATE_AUTHORITY);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_009: [The function shall throw IllegalArgumentException if the provided deviceId or authenticationType is empty or null.]
-    @Test (expected = IllegalArgumentException.class)
-    public void createDeviceThrowsIllegalArgumentExceptionForEmptyDeviceId()
-    {
-        //act
-        Device.createDevice("", AuthenticationType.CERTIFICATE_AUTHORITY);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_009: [The function shall throw IllegalArgumentException if the provided deviceId or authenticationType is empty or null.]
-    @Test (expected = IllegalArgumentException.class)
-    public void createDeviceThrowsIllegalArgumentExceptionForNullAuthenticationType()
-    {
-        //act
-        Device.createDevice("someDevice", null);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_016: [If the provided parser uses SAS authentication and is missing one or both symmetric keys, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithParserThrowsForMissingSymmetricKeyWhenSASAuthenticated()
-    {
-        //arrange
-        DeviceParser parser = new DeviceParser();
-        parser.setDeviceId("someDevice");
-        parser.setAuthenticationParser(new AuthenticationParser());
-        parser.getAuthenticationParser().setType(AuthenticationTypeParser.SAS);
-
-        //act
-        reflectivelyInvokeDeviceParserConstructor(parser);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_016: [If the provided parser uses SAS authentication and is missing one or both symmetric keys, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithParserThrowsForMissingKeysWhenSASAuthenticated()
-    {
-        //arrange
-        DeviceParser parser = new DeviceParser();
-        parser.setDeviceId("someDevice");
-        parser.setAuthenticationParser(new AuthenticationParser());
-        parser.getAuthenticationParser().setType(AuthenticationTypeParser.SAS);
-        parser.getAuthenticationParser().setSymmetricKey(new SymmetricKeyParser());
-
-        //act
-        reflectivelyInvokeDeviceParserConstructor(parser);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_016: [If the provided parser uses SAS authentication and is missing one or both symmetric keys, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithParserThrowsForMissingPrimaryKeyWhenSASAuthenticated()
-    {
-        //arrange
-        DeviceParser parser = new DeviceParser();
-        parser.setDeviceId("someDevice");
-        parser.setAuthenticationParser(new AuthenticationParser());
-        parser.getAuthenticationParser().setType(AuthenticationTypeParser.SAS);
-        parser.getAuthenticationParser().setSymmetricKey(new SymmetricKeyParser());
-        parser.getAuthenticationParser().getSymmetricKey().setSecondaryKey(SAMPLE_KEY);
-
-        //act
-        reflectivelyInvokeDeviceParserConstructor(parser);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_016: [If the provided parser uses SAS authentication and is missing one or both symmetric keys, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithParserThrowsForMissingSecondaryKeyWhenSASAuthenticated()
-    {
-        //arrange
-        DeviceParser parser = new DeviceParser();
-        parser.setDeviceId("someDevice");
-        parser.setAuthenticationParser(new AuthenticationParser());
-        parser.getAuthenticationParser().setType(AuthenticationTypeParser.SAS);
-        parser.getAuthenticationParser().setSymmetricKey(new SymmetricKeyParser());
-        parser.getAuthenticationParser().getSymmetricKey().setPrimaryKey(SAMPLE_KEY);
-
-        //act
-        reflectivelyInvokeDeviceParserConstructor(parser);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_017: [If the provided parser uses SELF_SIGNED authentication and is missing one or both thumbprint, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithParserThrowsForMissingX509ThumbprintWhenSelfSigned()
-    {
-        //arrange
-        DeviceParser parser = new DeviceParser();
-        parser.setDeviceId("someDevice");
-        parser.setAuthenticationParser(new AuthenticationParser());
-        parser.getAuthenticationParser().setType(AuthenticationTypeParser.SELF_SIGNED);
-
-        //act
-        reflectivelyInvokeDeviceParserConstructor(parser);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_017: [If the provided parser uses SELF_SIGNED authentication and is missing one or both thumbprint, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithParserThrowsForMissingBothThumbprintsWhenSelfSigned()
-    {
-        //arrange
-        DeviceParser parser = new DeviceParser();
-        parser.setDeviceId("someDevice");
-        parser.setAuthenticationParser(new AuthenticationParser());
-        parser.getAuthenticationParser().setType(AuthenticationTypeParser.SELF_SIGNED);
-        parser.getAuthenticationParser().setThumbprint(new X509ThumbprintParser());
-
-        //act
-        reflectivelyInvokeDeviceParserConstructor(parser);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_017: [If the provided parser uses SELF_SIGNED authentication and is missing one or both thumbprint, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithParserThrowsForMissingPrimaryThumbprintsWhenSelfSigned()
-    {
-        //arrange
-        DeviceParser parser = new DeviceParser();
-        parser.setDeviceId("someDevice");
-        parser.setAuthenticationParser(new AuthenticationParser());
-        parser.getAuthenticationParser().setType(AuthenticationTypeParser.SELF_SIGNED);
-        parser.getAuthenticationParser().setThumbprint(new X509ThumbprintParser());
-        parser.getAuthenticationParser().getThumbprint().setSecondaryThumbprint(SAMPLE_THUMBPRINT);
-
-        //act
-        reflectivelyInvokeDeviceParserConstructor(parser);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_017: [If the provided parser uses SELF_SIGNED authentication and is missing one or both thumbprint, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithParserThrowsForMissingSecondaryThumbprintsWhenSelfSigned()
-    {
-        //arrange
-        DeviceParser parser = new DeviceParser();
-        parser.setDeviceId("someDevice");
-        parser.setAuthenticationParser(new AuthenticationParser());
-        parser.getAuthenticationParser().setType(AuthenticationTypeParser.SELF_SIGNED);
-        parser.getAuthenticationParser().setThumbprint(new X509ThumbprintParser());
-        parser.getAuthenticationParser().getThumbprint().setPrimaryThumbprint(SAMPLE_THUMBPRINT);
-
-        //act
-        reflectivelyInvokeDeviceParserConstructor(parser);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_019: [If this device uses sas authentication, but does not have a primary and secondary symmetric key saved, an IllegalStateException shall be thrown.]
-    @Test (expected = IllegalStateException.class)
-    public void toParserIllegalStateThrownWhenUsingSASAuthenticationWithoutSymmetricKeySaved()
-    {
-        //arrange
-        Device device = Device.createDevice("someDevice", AuthenticationType.SAS);
-        AuthenticationMechanism authenticationMechanism = new AuthenticationMechanism(new SymmetricKey());
-        Deencapsulation.setField(authenticationMechanism.getSymmetricKey(), "primaryKey", null);
-        Deencapsulation.setField(device, "authentication", authenticationMechanism);
-
-        //act
-        reflectivelyInvokeToDeviceParser(device);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_019: [If this device uses sas authentication, but does not have a primary and secondary symmetric key saved, an IllegalStateException shall be thrown.]
-    @Test (expected = IllegalStateException.class)
-    public void toParserIllegalStateThrownWhenUsingSASAuthenticationWithoutPrimaryKeySaved()
-    {
-        //arrange
-        Device device = Device.createDevice("someDevice", AuthenticationType.SAS);
-        SymmetricKey symmetricKey = new SymmetricKey();
-        Deencapsulation.setField(symmetricKey, "primaryKey", null);
-        AuthenticationMechanism authenticationMechanism = new AuthenticationMechanism(symmetricKey);
-        Deencapsulation.setField(device, "authentication", authenticationMechanism);
-
-        //act
-        reflectivelyInvokeToDeviceParser(device);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_020: [If this device uses self signed authentication, but does not have a primary and secondary thumbprint saved, an IllegalStateException shall be thrown.]
-    @Test (expected = IllegalStateException.class)
-    public void toParserIllegalStateThrownWhenUsingSelfSignedAuthenticationWithoutThumbprintSaved()
-    {
-        //arrange
-        Device device = Device.createDevice("someDevice", AuthenticationType.SELF_SIGNED);
-        AuthenticationMechanism authenticationMechanism = new AuthenticationMechanism(SAMPLE_THUMBPRINT, SAMPLE_THUMBPRINT);
-        X509Thumbprint thumbprint = Deencapsulation.getField(authenticationMechanism, "thumbprint");
-        Deencapsulation.setField(thumbprint, "primaryThumbprint", null);
-        Deencapsulation.setField(device, "authentication", authenticationMechanism);
-
-        //act
-        reflectivelyInvokeToDeviceParser(device);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_020: [If this device uses self signed authentication, but does not have a primary and secondary thumbprint saved, an IllegalStateException shall be thrown.]
-    @Test (expected = IllegalStateException.class)
-    public void toParserIllegalStateThrownWhenUsingSelfSignedAuthenticationWithoutPrimaryThumbprintSaved()
-    {
-        //arrange
-        Device device = Device.createDevice("someDevice", AuthenticationType.SELF_SIGNED);
-        X509Thumbprint thumbprint = Deencapsulation.newInstance(X509Thumbprint.class);
-        Deencapsulation.setField(thumbprint, "primaryThumbprint", null);
-        AuthenticationMechanism authentication = new AuthenticationMechanism(SAMPLE_THUMBPRINT,SAMPLE_THUMBPRINT);
-        Deencapsulation.setField(authentication, "thumbprint", thumbprint);
-        Deencapsulation.setField(device, "authentication", authentication);
-
-        //act
-        reflectivelyInvokeToDeviceParser(device);
     }
 
     /**
