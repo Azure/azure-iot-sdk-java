@@ -250,6 +250,7 @@ public class JobsParserTest
                         "\"jobId\":\"" + jobId + "\"," +
                         "\"type\":\"scheduleDeviceMethod\"," +
                         "\"cloudToDeviceMethod\":" + cloudToDeviceMethod.toJson() + "," +
+                        "\"updateTwin\":null," +
                         "\"queryCondition\":\"" + queryCondition + "\"," +
                         "\"startTime\":\"" + Helpers.formatUTC(startTime) + "\"," +
                         "\"maxExecutionTimeInSeconds\":" + maxExecutionTimeInSeconds +
@@ -470,6 +471,7 @@ public class JobsParserTest
                 "{" +
                         "\"jobId\":\"" + jobId + "\"," +
                         "\"type\":\"scheduleUpdateTwin\"," +
+                        "\"cloudToDeviceMethod\":null," +
                         "\"updateTwin\":" + twinState.toJsonElement().toString() + "," +
                         "\"queryCondition\":\"" + queryCondition + "\"," +
                         "\"startTime\":\"" + Helpers.formatUTC(startTime) + "\"," +

@@ -188,7 +188,7 @@ public class JobsParser
      */
     public String toJson()
     {
-        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
         /* Codes_SRS_JOBSPARSER_21_013: [The toJson shall return a String with a json that represents the content of this class.] */
         return gson.toJson(this);
     }
