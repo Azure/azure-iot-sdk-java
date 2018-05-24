@@ -97,12 +97,6 @@ abstract public class Mqtt implements MqttCallback
                     //Codes_SRS_Mqtt_25_005: [The function shall establish an MQTT connection with an IoT Hub using the provided host name, user name, device ID, and sas token.]
                     IMqttToken connectToken = this.mqttConnection.getMqttAsyncClient().connect(Mqtt.this.mqttConnection.getConnectionOptions());
                     connectToken.waitForCompletion(CONNECTION_TIMEOUT);
-
-                    //Codes_SRS_Mqtt_34_020: [If the MQTT connection is established successfully, this function shall notify its listener that connection was established.]
-                    if (this.listener != null)
-                    {
-                        this.listener.onConnectionEstablished(this.connectionId);
-                    }
                 }
             }
             catch (MqttException e)

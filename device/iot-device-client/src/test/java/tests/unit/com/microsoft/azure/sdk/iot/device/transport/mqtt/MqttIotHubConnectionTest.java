@@ -292,6 +292,7 @@ public class MqttIotHubConnectionTest
         };
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
 
         final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
@@ -341,6 +342,7 @@ public class MqttIotHubConnectionTest
         };
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
 
         final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
@@ -548,6 +550,7 @@ public class MqttIotHubConnectionTest
         openExpectations();
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
         connection.open(mockedQueue);
 
@@ -569,6 +572,7 @@ public class MqttIotHubConnectionTest
 
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
         connection.close();
 
@@ -622,6 +626,7 @@ public class MqttIotHubConnectionTest
         openExpectations();
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
 
         new NonStrictExpectations()
@@ -684,6 +689,7 @@ public class MqttIotHubConnectionTest
         openExpectations();
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
         connection.close();
         connection.close();
@@ -723,6 +729,7 @@ public class MqttIotHubConnectionTest
         };
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
         IotHubStatusCode result = connection.sendMessage(mockedMessage);
 
@@ -746,6 +753,7 @@ public class MqttIotHubConnectionTest
         openExpectations();
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
         IotHubStatusCode result = connection.sendMessage(null);
 
@@ -770,6 +778,8 @@ public class MqttIotHubConnectionTest
         };
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
+
         connection.open(mockedQueue);
         IotHubStatusCode result = connection.sendMessage(null);
 
@@ -792,6 +802,7 @@ public class MqttIotHubConnectionTest
         };
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
         IotHubStatusCode result = connection.sendMessage(mockedMessage);
 
@@ -833,6 +844,8 @@ public class MqttIotHubConnectionTest
         };
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
+
         connection.open(mockedQueue);
         connection.close();
         connection.sendMessage(mockedMessage);
@@ -857,6 +870,7 @@ public class MqttIotHubConnectionTest
         };
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
         IotHubStatusCode result = connection.sendMessage(mockDeviceTwinMsg);
 
@@ -896,6 +910,7 @@ public class MqttIotHubConnectionTest
         };
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
         IotHubStatusCode result = connection.sendMessage(mockDeviceMethodMsg);
 
@@ -936,6 +951,7 @@ public class MqttIotHubConnectionTest
         };
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
 
         Message message = Deencapsulation.invoke(connection, "receiveMessage");
@@ -976,6 +992,7 @@ public class MqttIotHubConnectionTest
         };
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
 
         Message message = Deencapsulation.invoke(connection, "receiveMessage");
@@ -1014,6 +1031,7 @@ public class MqttIotHubConnectionTest
         };
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
 
         Message message = Deencapsulation.invoke(connection, "receiveMessage");
@@ -1109,6 +1127,7 @@ public class MqttIotHubConnectionTest
         };
 
         final MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
 
         //act
         connection.open(mockedQueue);
@@ -1122,6 +1141,43 @@ public class MqttIotHubConnectionTest
             }
         };
     }
+
+    //Tests_SRS_MQTTIOTHUBCONNECTION_34_065: [If the connection opens successfully, this function shall notify the listener that connection was established.]
+    @Test
+    public void openNotifiesListenerIfConnectionOpenedSuccessfully() throws IOException, TransportException
+    {
+        //arrange
+        final String expectedSasToken = "someToken";
+        baseExpectations();
+
+        new Expectations()
+        {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken();
+                result = expectedSasToken;
+                mockConfig.isUseWebsocket();
+                result = false;
+            }
+        };
+
+        final MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
+
+        //act
+        connection.open(mockedQueue);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedIotHubListener.onConnectionEstablished(anyString);
+                times = 1;
+            }
+        };
+    }
+
 
     //Tests_SRS_MQTTIOTHUBCONNECTION_34_049: [If the provided listener object is null, this function shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
@@ -1161,6 +1217,7 @@ public class MqttIotHubConnectionTest
         openExpectations();
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
         Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
         Deencapsulation.setField(connection, "receivedMessagesToAcknowledge", receivedMessagesToAcknowledge);
@@ -1178,6 +1235,7 @@ public class MqttIotHubConnectionTest
         openExpectations();
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
 
         //act
@@ -1193,6 +1251,7 @@ public class MqttIotHubConnectionTest
         openExpectations();
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
 
         //act
@@ -1210,6 +1269,7 @@ public class MqttIotHubConnectionTest
         openExpectations();
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
         final int expectedMessageId = 12;
         Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
@@ -1264,6 +1324,7 @@ public class MqttIotHubConnectionTest
         openExpectations();
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
         final int expectedMessageId = 12;
         Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
@@ -1316,6 +1377,7 @@ public class MqttIotHubConnectionTest
         openExpectations();
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
         final int expectedMessageId = 12;
         Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();

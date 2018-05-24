@@ -352,8 +352,6 @@ public class MqttTest
                 times = 1;
                 mockMqttToken.waitForCompletion(anyLong);
                 times = 1;
-                mockedIotHubListener.onConnectionEstablished(anyString);
-                times = 1;
             }
         };
     }

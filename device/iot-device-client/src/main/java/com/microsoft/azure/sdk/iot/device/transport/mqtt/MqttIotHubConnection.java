@@ -180,6 +180,9 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
                 this.deviceMessaging.start();
                 this.state = IotHubConnectionStatus.CONNECTED;
+
+                //Codes_SRS_MQTTIOTHUBCONNECTION_34_065: [If the connection opens successfully, this function shall notify the listener that connection was established.]
+                this.listener.onConnectionEstablished(this.connectionId);
             }
             catch (IOException e)
             {
