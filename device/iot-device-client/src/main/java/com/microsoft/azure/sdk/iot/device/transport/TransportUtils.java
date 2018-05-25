@@ -8,7 +8,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 public class TransportUtils
 {
     private static final String JAVA_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.iot-device-client";
-    private static final String CLIENT_VERSION = "1.11.0";
+    private static final String CLIENT_VERSION = "1.11.1";
 
     private static String JAVA_RUNTIME = System.getProperty("java.version");
     private static String OPERATING_SYSTEM = System.getProperty("os.name");
