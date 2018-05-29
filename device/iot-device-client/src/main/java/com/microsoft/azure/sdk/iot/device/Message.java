@@ -115,6 +115,10 @@ public class Message
     /// </summary>
     private IotHubConnectionString iotHubConnectionString;
 
+    private String connectionModuleId;
+    private String inputName;
+    private String outputName;
+
     private String deliveryAcknowledgement;
 
     /**
@@ -357,6 +361,12 @@ public class Message
         this.messageId = messageId;
     }
 
+    public void setUserId(String userId)
+    {
+        // Codes_SRS_MESSAGE_34_050: [The function shall set the message's user ID to the provided value.]
+        this.userId = userId;
+    }
+
     /**
      * Getter for the correlationId property
      * @return The property value
@@ -416,6 +426,30 @@ public class Message
         return this.messageType;
     }
 
+    public void setConnectionDeviceId(String connectionDeviceId)
+    {
+        // Codes_SRS_MESSAGE_34_051: [The function shall set the message's connection device id to the provided value.]
+        this.connectionDeviceId = connectionDeviceId;
+    }
+
+    public void setConnectionModuleId(String connectionModuleId)
+    {
+        // Codes_SRS_MESSAGE_34_052: [The function shall set the message's connection module id to the provided value.]
+        this.connectionModuleId = connectionModuleId;
+    }
+
+    public void setOutputName(String outputName)
+    {
+        // Codes_SRS_MESSAGE_34_053: [The function shall set the message's output name to the provided value.]
+        this.outputName = outputName;
+    }
+
+    public void setInputName(String inputName)
+    {
+        // Codes_SRS_MESSAGE_34_058: [The function shall set the message's input name to the provided value.]
+        this.inputName = inputName;
+    }
+
     /**
      * Setter for the Message type
      * @param type The enum containing the Message type value
@@ -434,6 +468,30 @@ public class Message
     {
         // Codes_SRS_MESSAGE_34_041: [The function shall return the message's To value.]
         return this.to;
+    }
+
+    public String getConnectionDeviceId()
+    {
+        // Codes_SRS_MESSAGE_34_054: [The function shall return the message's connection device id value.]
+        return connectionDeviceId;
+    }
+
+    public String getConnectionModuleId()
+    {
+        // Codes_SRS_MESSAGE_34_055: [The function shall return the message's connection module id value.]
+        return connectionModuleId;
+    }
+
+    public String getInputName()
+    {
+        // Codes_SRS_MESSAGE_34_056: [The function shall return the message's input name value.]
+        return inputName;
+    }
+
+    public String getOutputName()
+    {
+        // Codes_SRS_MESSAGE_34_057: [The function shall return the message's output name value.]
+        return outputName;
     }
 
     /**

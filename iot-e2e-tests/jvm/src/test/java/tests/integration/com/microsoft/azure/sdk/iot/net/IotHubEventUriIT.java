@@ -6,6 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.net;
 
 import com.microsoft.azure.sdk.iot.device.net.IotHubEventUri;
+import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
@@ -21,11 +22,11 @@ public class IotHubEventUriIT
     {
         String iotHubName = "test.iothub";
         String deviceId = "test-deviceid";
-        IotHubEventUri uri = new IotHubEventUri(iotHubName, deviceId);
+        IotHubEventUri uri = new IotHubEventUri(iotHubName, deviceId, "");
 
         String testUriStr = uri.toString();
 
-        String expectedUriStr = "test.iothub/devices/test-deviceid/messages/events?api-version=2016-02-03";
+        String expectedUriStr = "test.iothub/devices/test-deviceid/messages/events?api-version=" + TransportUtils.IOTHUB_API_VERSION;
         assertThat(testUriStr, is(expectedUriStr));
     }
 }

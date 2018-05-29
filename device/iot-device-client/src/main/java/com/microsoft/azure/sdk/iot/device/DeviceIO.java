@@ -264,7 +264,7 @@ public final class DeviceIO
      * Can be {@code null}.
      * @param callbackContext a context to be passed to the callback. Can be
      * {@code null} if no callback is provided.
-     * @param iotHubConnectionString the sender's connection string.
+     * @param deviceId the id of the device sending the message
      *
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
@@ -272,7 +272,7 @@ public final class DeviceIO
     public synchronized void sendEventAsync(Message message,
                                IotHubEventCallback callback,
                                Object callbackContext,
-                               IotHubConnectionString iotHubConnectionString)
+                               String deviceId)
     {
         /* Codes_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
         if (this.state == IotHubClientState.CLOSED)
@@ -288,10 +288,10 @@ public final class DeviceIO
             throw new IllegalArgumentException("Cannot send message 'null'.");
         }
 
-        // Codes_SRS_DEVICE_IO_12_001: [The function shall set the connection string on the message if the iotHubConnectionString parameter is not null.]
-        if (iotHubConnectionString != null)
+        // Codes_SRS_DEVICE_IO_12_001: [The function shall set the deviceId on the message if the deviceId parameter is not null.]
+        if (deviceId != null)
         {
-            message.setIotHubConnectionString(iotHubConnectionString);
+            message.setConnectionDeviceId(deviceId);
         }
 
         logger.LogInfo("Message with messageid %s along with callback and callbackcontext is added to the queue, method name is %s ", message.getMessageId(), logger.getMethodName());

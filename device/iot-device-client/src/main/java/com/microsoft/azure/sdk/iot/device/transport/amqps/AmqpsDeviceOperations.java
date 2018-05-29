@@ -59,7 +59,9 @@ public class AmqpsDeviceOperations
      *
      * @throws IllegalArgumentException if the provided deviceClientConfig is null
      */
-    AmqpsDeviceOperations(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
+    AmqpsDeviceOperations(DeviceClientConfig deviceClientConfig, String senderLinkEndpointPath, String receiverLinkEndpointpath,
+                          String senderLinkEndpointPathModules, String receiverLinkEndpointPathModules,
+                          String senderLinkTagPrefix, String receiverLinkTagPrefix) throws IllegalArgumentException
     {
         if (deviceClientConfig == null)
         {
@@ -92,6 +94,31 @@ public class AmqpsDeviceOperations
         this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.CLOSED;
 
         this.logger = new CustomLogger(this.getClass());
+
+        String moduleId = deviceClientConfig.getModuleId();
+        String deviceId = deviceClientConfig.getDeviceId();
+        if (moduleId != null && !moduleId.isEmpty())
+        {
+            this.senderLinkEndpointPath = senderLinkEndpointPathModules;
+            this.receiverLinkEndpointPath = receiverLinkEndpointPathModules;
+
+            this.senderLinkTag = senderLinkTagPrefix + deviceId + "/" + moduleId + "-" + senderLinkTag;
+            this.receiverLinkTag = receiverLinkTagPrefix + deviceId + "/" + moduleId + "-" + receiverLinkTag;
+
+            this.senderLinkAddress = String.format(this.senderLinkEndpointPath, deviceId, moduleId);
+            this.receiverLinkAddress = String.format(receiverLinkEndpointPath, deviceId, moduleId);
+        }
+        else
+        {
+            this.senderLinkEndpointPath = senderLinkEndpointPath;
+            this.receiverLinkEndpointPath = receiverLinkEndpointpath;
+
+            this.senderLinkTag = senderLinkTagPrefix + deviceId + "-" + senderLinkTag;
+            this.receiverLinkTag = receiverLinkTagPrefix + deviceId + "-" + receiverLinkTag;
+
+            this.senderLinkAddress = String.format(this.senderLinkEndpointPath, deviceId);
+            this.receiverLinkAddress = String.format(receiverLinkEndpointPath, deviceId);
+        }
     }
 
     /**

@@ -403,7 +403,7 @@ public class DeviceTwinTest
                 times = 1;
                 mockedDeviceTwinMessage.setVersion((String)any);
                 times = 0;
-                mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null, (IotHubConnectionString)any);
+                mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null, anyString);
                 times = 1;
             }
         };
@@ -455,7 +455,7 @@ public class DeviceTwinTest
                 times = 1;
                 mockedDeviceTwinMessage.setVersion("10");
                 times = 1;
-                mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null, (IotHubConnectionString)any);
+                mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null, anyString);
                 times = 1;
             }
         };
@@ -504,7 +504,7 @@ public class DeviceTwinTest
                 times = 1;
                 mockedDeviceTwinMessage.setVersion((String)any);
                 times = 0;
-                mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null, (IotHubConnectionString)any);
+                mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null, anyString);
                 times = 1;
             }
         };

@@ -34,13 +34,13 @@ public class IotHubRejectUriTest
         final String eTag = "test-etag";
         final String rejectPath = String.format(REJECT_PATH_FORMAT, eTag);
 
-        new IotHubRejectUri(iotHubHostname, deviceId, eTag);
+        new IotHubRejectUri(iotHubHostname, deviceId, eTag, null);
 
         new Verifications()
         {
             {
                 new IotHubUri(iotHubHostname, deviceId, rejectPath,
-                        (Map<String, String>) any);
+                        (Map<String, String>) any, null);
             }
         };
     }
@@ -61,7 +61,7 @@ public class IotHubRejectUriTest
             }
         };
         IotHubRejectUri rejectUri =
-                new IotHubRejectUri(iotHubHostname, deviceId, eTag);
+                new IotHubRejectUri(iotHubHostname, deviceId, eTag, null);
 
         String testUriStr = rejectUri.toString();
 
@@ -85,7 +85,7 @@ public class IotHubRejectUriTest
             }
         };
         IotHubRejectUri rejectUri =
-                new IotHubRejectUri(iotHubHostname, deviceId, eTag);
+                new IotHubRejectUri(iotHubHostname, deviceId, eTag, null);
 
         String testHostname = rejectUri.getHostname();
 
@@ -109,7 +109,7 @@ public class IotHubRejectUriTest
             }
         };
         IotHubRejectUri rejectUri =
-                new IotHubRejectUri(iotHubHostname, deviceId, eTag);
+                new IotHubRejectUri(iotHubHostname, deviceId, eTag, null);
 
         String testPath = rejectUri.getPath();
 

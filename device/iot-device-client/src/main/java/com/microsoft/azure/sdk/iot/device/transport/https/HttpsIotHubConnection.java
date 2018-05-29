@@ -80,9 +80,10 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
 
             String iotHubHostname = this.config.getIotHubHostname();
             String deviceId = this.config.getDeviceId();
+            String moduleId = this.config.getModuleId();
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_002: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2016-02-03'.]
-            IotHubEventUri iotHubEventUri = new IotHubEventUri(iotHubHostname, deviceId);
+            IotHubEventUri iotHubEventUri = new IotHubEventUri(iotHubHostname, deviceId, moduleId);
 
             URL eventUrl = this.buildUrlFromString(HTTPS_HEAD_TAG + iotHubEventUri.toString());
 
@@ -149,9 +150,10 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         {
             String iotHubHostname = this.config.getIotHubHostname();
             String deviceId = this.config.getDeviceId();
+            String moduleId = this.config.getModuleId();
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_041: [The function shall send a request to the URL https://[iotHubHostname]/devices/[deviceId]/[path]?api-version=2016-02-03.]
-            IotHubUri iotHubUri = new IotHubUri(iotHubHostname, deviceId, httpsPath);
+            IotHubUri iotHubUri = new IotHubUri(iotHubHostname, deviceId, httpsPath, moduleId);
             URL messageUrl = this.buildUrlFromString(HTTPS_HEAD_TAG + iotHubUri.toString());
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_042: [The function shall send a `httpsMethod` request.]
@@ -197,7 +199,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         synchronized (HTTPS_CONNECTION_LOCK)
         {
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_013: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03'.]
-            IotHubMessageUri messageUri = new IotHubMessageUri(this.config.getIotHubHostname(), this.config.getDeviceId());
+            IotHubMessageUri messageUri = new IotHubMessageUri(this.config.getIotHubHostname(), this.config.getDeviceId(), this.config.getModuleId());
             URL messageUrl = this.buildUrlFromString(HTTPS_HEAD_TAG + messageUri.toString());
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_014: [The function shall send a GET request.]
@@ -232,8 +234,8 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
 
                 //callbacks are always for telemetry as HTTPS does not support Twin or Methods
                 transportMessage = new IotHubTransportMessage(message.getBytes(), message.getMessageType(), message.getMessageId(), message.getCorrelationId(), message.getProperties());
-                transportMessage.setMessageCallback(this.config.getDeviceTelemetryMessageCallback());
-                transportMessage.setMessageCallbackContext(this.config.getDeviceTelemetryMessageContext());
+                transportMessage.setMessageCallback(this.config.getDeviceTelemetryMessageCallback(message.getInputName()));
+                transportMessage.setMessageCallbackContext(this.config.getDeviceTelemetryMessageContext(message.getInputName()));
 
                 // Codes_SRS_HTTPSIOTHUBCONNECTION_11_070: [If the message status was OK this function shall save the received message and its eTag into its map.]
                 this.messageToETagMap.put(transportMessage, messageEtag);
@@ -319,8 +321,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                 case COMPLETE:
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_024: [If the result is COMPLETE, the function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]?api-version=2016-02-03'.]
                     IotHubCompleteUri completeUri =
-                            new IotHubCompleteUri(iotHubHostname, deviceId,
-                                    messageEtag);
+                            new IotHubCompleteUri(iotHubHostname, deviceId, messageEtag, this.config.getModuleId());
                     resultUri += completeUri.toString();
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_026: [If the result is COMPLETE, the function shall set the header field 'iothub-to' to be '/devices/[deviceId]/messages/devicebound/[eTag]'.]
                     resultPath = completeUri.getPath();
@@ -331,8 +332,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                 case ABANDON:
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_027: [If the result is ABANDON, the function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]/abandon?api-version=2016-02-03'.]
                     IotHubAbandonUri abandonUri =
-                            new IotHubAbandonUri(iotHubHostname, deviceId,
-                                    messageEtag);
+                            new IotHubAbandonUri(iotHubHostname, deviceId, messageEtag, this.config.getModuleId());
                     resultUri += abandonUri.toString();
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_029: [If the result is ABANDON, the function shall set the header field 'iothub-to' to be '/devices/[deviceId]/messages/devicebound/[eTag]/abandon'.]
                     resultPath = abandonUri.getPath();
@@ -347,8 +347,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                 case REJECT:
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_030: [If the result is REJECT, the function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2016-02-03' (the query parameters can be in any order).]
                     IotHubRejectUri rejectUri =
-                            new IotHubRejectUri(iotHubHostname, deviceId,
-                                    messageEtag);
+                            new IotHubRejectUri(iotHubHostname, deviceId, messageEtag, this.config.getModuleId());
                     resultUri += rejectUri.toString();
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_11_032: [If the result is REJECT, the function shall set the header field 'iothub-to' to be '/devices/[deviceId]/messages/devicebound/[eTag]'.]
                     resultPath = rejectUri.getPath();

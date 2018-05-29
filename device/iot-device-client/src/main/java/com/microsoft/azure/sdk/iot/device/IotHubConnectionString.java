@@ -26,6 +26,10 @@ public class IotHubConnectionString
     /** The shared access signature attribute name in a connection string. */
     private static final String SHARED_ACCESS_TOKEN_ATTRIBUTE = "SharedAccessSignature=";
 
+    private static final String MODULE_ID_ATTRIBUTE = "ModuleId=";
+
+    private static final String GATEWAY_HOST_NAME_ATTRIBUTE = "GatewayHostName=";
+
     private static final String X509_ENABLED_ATTRIBUTE = "x509=true";
 
     /**
@@ -39,8 +43,10 @@ public class IotHubConnectionString
     private String deviceId = null;
     private String sharedAccessKey = null;
     private String sharedAccessToken = null;
+    private String moduleId = null;
     private boolean isUsingX509 = false;
     private CustomLogger logger = null;
+    private String gatewayHostName = null;
 
     /**
      * CONSTRUCTOR.
@@ -97,6 +103,22 @@ public class IotHubConnectionString
                     throw new SecurityException("Your SAS Token has expired");
                 }
             }
+            else if (attr.startsWith(MODULE_ID_ATTRIBUTE))
+            {
+                // Codes_SRS_IOTHUB_CONNECTIONSTRING_34_040: [The constructor shall save the module id as the value of 'ModuleId' in the connection string.]
+                this.moduleId = attr.substring(MODULE_ID_ATTRIBUTE.length());
+            }
+            else if (attr.startsWith(GATEWAY_HOST_NAME_ATTRIBUTE))
+            {
+                // Codes_SRS_IOTHUB_CONNECTIONSTRING_34_041: [The constructor shall save the gateway host name as the value of 'GatewayHostName' in the connection string.]
+                this.gatewayHostName = attr.substring(GATEWAY_HOST_NAME_ATTRIBUTE.length());
+            }
+        }
+
+        if (this.gatewayHostName != null)
+        {
+            // Codes_SRS_IOTHUB_CONNECTIONSTRING_34_042: [If the gateway host name is specified in the connection string, the constructor shall save the gateway host name as the host name.]
+            this.hostName = this.gatewayHostName;
         }
 
         /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_017: [If the connection string is not valid, the constructor shall throw an IllegalArgumentException.] */
@@ -125,6 +147,13 @@ public class IotHubConnectionString
                                   String sharedAccessKey, String sharedAccessToken)
             throws IllegalArgumentException, URISyntaxException
     {
+        this(hostName, deviceId, sharedAccessKey, sharedAccessToken, "");
+    }
+
+    public IotHubConnectionString(String hostName, String deviceId,
+                                  String sharedAccessKey, String sharedAccessToken, String gatewayHostName)
+            throws IllegalArgumentException, URISyntaxException
+    {
         this.isUsingX509 = (sharedAccessKey == null && sharedAccessToken == null);
 
         /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_025: [If the parameters for the connection string is not valid, the constructor shall throw an IllegalArgumentException.] */
@@ -149,6 +178,13 @@ public class IotHubConnectionString
         if (this.sharedAccessToken != null && IotHubSasToken.isExpired(this.sharedAccessToken))
         {
             throw new SecurityException("Your SAS Token has expired");
+        }
+
+        this.gatewayHostName = gatewayHostName;
+
+        if (this.gatewayHostName != null && !this.gatewayHostName.isEmpty())
+        {
+            this.hostName = gatewayHostName;
         }
 
         this.logger = new CustomLogger(this.getClass());
@@ -203,6 +239,11 @@ public class IotHubConnectionString
     {
         /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_034: [The getSharedAccessToken shall return the stored shared access token.] */
         return this.sharedAccessToken;
+    }
+
+    public String getModuleId()
+    {
+        return this.moduleId;
     }
 
     /**

@@ -1589,12 +1589,18 @@ public class MqttIotHubConnectionTest
                 mockedTransportMessage.getMessageType();
                 result = MessageType.DEVICE_TELEMETRY;
 
-                mockConfig.getDeviceTelemetryMessageCallback(null);
+                mockedTransportMessage.getInputName();
+                result = "inputName";
+
+                mockConfig.getDeviceTelemetryMessageCallback("inputName");
                 result = mockedMessageCallback;
 
                 mockedTransportMessage.setMessageCallback(mockedMessageCallback);
 
-                mockConfig.getDeviceTelemetryMessageContext(null);
+                mockedTransportMessage.getInputName();
+                result = "inputName";
+
+                mockConfig.getDeviceTelemetryMessageContext("inputName");
                 result = callbackContext;
 
                 mockedTransportMessage.setMessageCallbackContext(callbackContext);

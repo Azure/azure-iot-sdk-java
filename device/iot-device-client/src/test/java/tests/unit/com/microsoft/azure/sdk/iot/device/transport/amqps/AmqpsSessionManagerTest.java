@@ -730,15 +730,15 @@ public class AmqpsSessionManagerTest
         new StrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, mockIotHubConnectionString);
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, "someDeviceId");
                 result = -1;
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, mockIotHubConnectionString);
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, "someDeviceId");
                 result = -1;
             }
         };
 
         // act
-        Integer deliveryHash = Deencapsulation.invoke(amqpsSessionManager, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, mockIotHubConnectionString);
+        Integer deliveryHash = Deencapsulation.invoke(amqpsSessionManager, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, "someDeviceId");
 
         // assert
         assertTrue(deliveryHash == -1);
@@ -762,15 +762,15 @@ public class AmqpsSessionManagerTest
         new StrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, mockIotHubConnectionString);
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, "someDeviceId");
                 result = -1;
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, mockIotHubConnectionString);
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, "someDeviceId");
                 result = 42;
             }
         };
 
         // act
-        Integer deliveryHash = Deencapsulation.invoke(amqpsSessionManager, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, mockIotHubConnectionString);
+        Integer deliveryHash = Deencapsulation.invoke(amqpsSessionManager, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, "someDeviceId");
 
         // assert
         assertEquals((Integer)42, deliveryHash);

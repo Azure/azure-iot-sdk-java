@@ -29,6 +29,7 @@ import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
+import org.apache.qpid.proton.message.ProtonJMessage;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
@@ -1015,7 +1016,7 @@ public class AmqpsIotHubConnectionTest {
         Deencapsulation.setField(connection, "linkCredit", 100);
 
         Integer expectedDeliveryHash = -1;
-        Integer actualDeliveryHash = Deencapsulation.invoke(connection, "sendMessage", Message.Factory.create(), MessageType.DEVICE_TELEMETRY, mockConnectionString);
+        Integer actualDeliveryHash = Deencapsulation.invoke(connection, "sendMessage", Message.Factory.create(), MessageType.DEVICE_TELEMETRY, "someDeviceId");
 
         assertEquals(expectedDeliveryHash, actualDeliveryHash);
     }
@@ -1033,7 +1034,7 @@ public class AmqpsIotHubConnectionTest {
         Deencapsulation.setField(connection, "linkCredit", -1);
 
         Integer expectedDeliveryHash = -1;
-        Integer actualDeliveryHash = Deencapsulation.invoke(connection, "sendMessage", Message.Factory.create(), MessageType.DEVICE_TELEMETRY, mockConnectionString);
+        Integer actualDeliveryHash = Deencapsulation.invoke(connection, "sendMessage", Message.Factory.create(), MessageType.DEVICE_TELEMETRY, "someDeviceId");
 
         assertEquals(expectedDeliveryHash, actualDeliveryHash);
     }
@@ -1052,8 +1053,11 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockAmqpsSessionManager, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, mockConnectionString);
+                Deencapsulation.invoke(mockAmqpsSessionManager, "sendMessage", new Class[] {Message.class, MessageType.class, String.class}, mockProtonMessage, MessageType.DEVICE_TELEMETRY, "someDeviceId");
                 result = expectedDeliveryHash;
+
+                mockConfig.getDeviceId();
+                result = "someDeviceId";
             }
         };
 
@@ -1063,7 +1067,7 @@ public class AmqpsIotHubConnectionTest {
         Deencapsulation.setField(connection, "linkCredit", 100);
 
         // act
-        Integer actualDeliveryHash = Deencapsulation.invoke(connection, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, mockConnectionString);
+        Integer actualDeliveryHash = Deencapsulation.invoke(connection, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, "someDeviceId");
 
         // assert
         assertEquals(expectedDeliveryHash, actualDeliveryHash);
@@ -1071,7 +1075,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockAmqpsSessionManager, "sendMessage", mockProtonMessage, MessageType.DEVICE_TELEMETRY, mockConnectionString);
+                Deencapsulation.invoke(mockAmqpsSessionManager, "sendMessage", new Class[] {Message.class, MessageType.class, String.class}, mockProtonMessage, MessageType.DEVICE_TELEMETRY, "someDeviceId");
                 times = 1;
             }
         };
@@ -2385,8 +2389,14 @@ public class AmqpsIotHubConnectionTest {
                 mockIoTMessage.getIotHubConnectionString();
                 result = mockConnectionString;
 
-                Deencapsulation.invoke(mockAmqpsSessionManager, "sendMessage", new Class[] {Message.class, MessageType.class, IotHubConnectionString.class}, mockedMessageImpl, MessageType.DEVICE_TWIN, mockConnectionString);
+                Deencapsulation.invoke(mockAmqpsSessionManager, "sendMessage", new Class[] {Message.class, MessageType.class, String.class}, mockedMessageImpl, MessageType.DEVICE_TWIN, "someDeviceId");
                 result = expectedHash;
+
+                mockConfig.getDeviceId();
+                result = "someDeviceId";
+
+                mockIoTMessage.getConnectionDeviceId();
+                result = "someDeviceId";
             }
         };
 
@@ -2424,11 +2434,17 @@ public class AmqpsIotHubConnectionTest {
                 mockIoTMessage.getIotHubConnectionString();
                 result = mockConnectionString;
 
-                Deencapsulation.invoke(mockAmqpsSessionManager, "sendMessage", new Class[] {Message.class, MessageType.class, IotHubConnectionString.class}, mockedMessageImpl, MessageType.DEVICE_TWIN, mockConnectionString);
+                Deencapsulation.invoke(mockAmqpsSessionManager, "sendMessage", new Class[] {Message.class, MessageType.class, String.class}, mockedMessageImpl, MessageType.DEVICE_TWIN, "someDeviceId");
                 result = expectedHash;
 
                 new ProtocolException(anyString);
                 result = mockedProtocolException;
+
+                mockConfig.getDeviceId();
+                result = "someDeviceId";
+
+                mockIoTMessage.getConnectionDeviceId();
+                result = "someDeviceId";
             }
         };
 

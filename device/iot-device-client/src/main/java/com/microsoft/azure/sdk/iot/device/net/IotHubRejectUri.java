@@ -40,14 +40,15 @@ public final class IotHubRejectUri
      * @param iotHubHostname the IoT Hub name.
      * @param deviceId the device ID.
      * @param eTag the message e-tag.
+     * @param moduleId the module id, or null if not communicating as a module
      */
-    public IotHubRejectUri(String iotHubHostname, String deviceId, String eTag)
+    public IotHubRejectUri(String iotHubHostname, String deviceId, String eTag, String moduleId)
     {
         // Codes_SRS_IOTHUBREJECTURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]??reject=true&api-version=2016-02-03" (the query parameters can be in any order).]
         String rejectPath = String.format(REJECT_PATH_FORMAT, eTag);
 
         this.uri = new IotHubUri(iotHubHostname, deviceId, rejectPath,
-                        REJECT_QUERY_PARAM);
+                        REJECT_QUERY_PARAM, moduleId);
     }
 
     /**

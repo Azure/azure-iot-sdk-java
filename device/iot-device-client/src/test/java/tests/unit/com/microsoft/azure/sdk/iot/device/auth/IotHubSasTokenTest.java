@@ -49,11 +49,12 @@ public class IotHubSasTokenTest
             }
         };
 
-        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
                 iotHubConnectionString.getHostName(),
                 iotHubConnectionString.getDeviceId(),
                 iotHubConnectionString.getSharedAccessKey(),
                 iotHubConnectionString.getSharedAccessToken(),
+                iotHubConnectionString.getModuleId(),
                 expiryTime);
         String tokenStr = token.toString();
 
@@ -85,11 +86,12 @@ public class IotHubSasTokenTest
             }
         };
 
-        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
                 iotHubConnectionString.getHostName(),
                 iotHubConnectionString.getDeviceId(),
                 iotHubConnectionString.getSharedAccessKey(),
                 iotHubConnectionString.getSharedAccessToken(),
+                iotHubConnectionString.getModuleId(),
                 expiryTime);
         String tokenStr = token.toString();
         // extract the value assigned to se.
@@ -131,11 +133,12 @@ public class IotHubSasTokenTest
             }
         };
 
-        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
                 iotHubConnectionString.getHostName(),
                 iotHubConnectionString.getDeviceId(),
                 iotHubConnectionString.getSharedAccessKey(),
                 iotHubConnectionString.getSharedAccessToken(),
+                iotHubConnectionString.getModuleId(),
                 expiryTime);
 
         String tokenStr = token.toString();
@@ -172,11 +175,12 @@ public class IotHubSasTokenTest
 
         long expiryTimeBaseInSecs = System.currentTimeMillis() / 1000L + token_valid_secs + 1L;
 
-        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
                 iotHubConnectionString.getHostName(),
                 iotHubConnectionString.getDeviceId(),
                 iotHubConnectionString.getSharedAccessKey(),
                 iotHubConnectionString.getSharedAccessToken(),
+                iotHubConnectionString.getModuleId(),
                 expiryTimeBaseInSecs);
 
         String tokenStr = token.toString();
@@ -207,11 +211,12 @@ public class IotHubSasTokenTest
                         null,
                         sastoken);
 
-        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
                 iotHubConnectionString.getHostName(),
                 iotHubConnectionString.getDeviceId(),
                 iotHubConnectionString.getSharedAccessKey(),
                 iotHubConnectionString.getSharedAccessToken(),
+                iotHubConnectionString.getModuleId(),
                 0);
         String tokenStr = token.toString();
         assertTrue(tokenStr.equals(sastoken));
@@ -321,11 +326,12 @@ public class IotHubSasTokenTest
             }
         };
 
-        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
                 mockIotHubConnectionString.getHostName(),
                 mockIotHubConnectionString.getDeviceId(),
                 mockIotHubConnectionString.getSharedAccessKey(),
                 mockIotHubConnectionString.getSharedAccessToken(),
+                mockIotHubConnectionString.getModuleId(),
                 0);
     }
 
@@ -345,11 +351,12 @@ public class IotHubSasTokenTest
             }
         };
 
-        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
                 mockIotHubConnectionString.getHostName(),
                 mockIotHubConnectionString.getDeviceId(),
                 mockIotHubConnectionString.getSharedAccessKey(),
                 mockIotHubConnectionString.getSharedAccessToken(),
+                mockIotHubConnectionString.getModuleId(),
                 0);
     }
 
@@ -368,11 +375,12 @@ public class IotHubSasTokenTest
                         null,
                         sastoken);
 
-        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
                 iotHubConnectionString.getHostName(),
                 iotHubConnectionString.getDeviceId(),
                 iotHubConnectionString.getSharedAccessKey(),
                 iotHubConnectionString.getSharedAccessToken(),
+                iotHubConnectionString.getModuleId(),
                 0);
         String tokenStr = token.toString();
         assertTrue(tokenStr.equals(sastoken));
@@ -393,11 +401,12 @@ public class IotHubSasTokenTest
                         null,
                         sastoken);
 
-        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, long.class},
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
                 iotHubConnectionString.getHostName(),
                 iotHubConnectionString.getDeviceId(),
                 iotHubConnectionString.getSharedAccessKey(),
                 iotHubConnectionString.getSharedAccessToken(),
+                iotHubConnectionString.getModuleId(),
                 0);
         String tokenStr = token.toString();
         assertTrue(tokenStr.equals(sastoken));

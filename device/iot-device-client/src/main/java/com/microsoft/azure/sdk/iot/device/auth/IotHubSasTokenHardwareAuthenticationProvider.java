@@ -28,10 +28,11 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
      *
      * @param hostname The host name of the hub to authenticate against
      * @param deviceId The unique id of the device to authenticate
+     * @param moduleId the module id. May be null if not using a module
      * @param securityProvider the security provider to use for authentication
      * @throws IOException if the provided securityProvider throws while retrieving a sas token or ssl context instance
      */
-    public IotHubSasTokenHardwareAuthenticationProvider(String hostname, String deviceId, SecurityProvider securityProvider) throws IOException
+    public IotHubSasTokenHardwareAuthenticationProvider(String hostname, String deviceId, String moduleId, SecurityProvider securityProvider) throws IOException
     {
         try
         {
@@ -43,11 +44,12 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
 
             this.securityProvider = (SecurityProviderTpm) securityProvider;
 
-            // Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_032: [This constructor shall save the provided security provider, hostname, and device id.]
-            // Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_033: [This constructor shall generate and save a sas token from the security provder with the default time to live.]
+            // Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_032: [This constructor shall save the provided security provider, hostname, module id, and device id.]
+            // Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_033: [This constructor shall generate and save a sas token from the security provider with the default time to live.]
             this.hostname = hostname;
             this.deviceId = deviceId;
-            this.sasToken = new IotHubSasToken(hostname, deviceId, null, this.generateSasTokenSignatureFromSecurityProvider(this.tokenValidSecs), 0);
+            this.moduleId = moduleId;
+            this.sasToken = new IotHubSasToken(hostname, deviceId, null, this.generateSasTokenSignatureFromSecurityProvider(this.tokenValidSecs), moduleId, 0);
 
             // Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_034: [This constructor shall retrieve and save the ssl context from the security provider.]
             this.iotHubSSLContext = new IotHubSSLContext(securityProvider.getSSLContext());
@@ -73,7 +75,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
         {
             //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_035: [If the saved sas token has expired and there is a security provider, the saved sas token shall be refreshed with a new token from the security provider.]
             String sasTokenString = this.generateSasTokenSignatureFromSecurityProvider(this.tokenValidSecs);
-            this.sasToken = new IotHubSasToken(this.hostname, this.deviceId, null, sasTokenString, 0);
+            this.sasToken = new IotHubSasToken(this.hostname, this.deviceId, null, sasTokenString, this.moduleId, 0);
         }
 
         //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_005: [This function shall return the saved sas token.]

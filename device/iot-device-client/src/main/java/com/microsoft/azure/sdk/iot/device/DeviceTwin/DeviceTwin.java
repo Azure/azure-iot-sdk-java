@@ -309,7 +309,7 @@ public class DeviceTwin
         /*
          **Codes_SRS_DEVICETWIN_25_008: [**This method shall send the message to the lower transport layers by calling sendEventAsync.**]**
          */
-        this.deviceIO.sendEventAsync(getTwinRequestMessage, new deviceTwinRequestMessageCallback(), null, this.config.getIotHubConnectionString());
+        this.deviceIO.sendEventAsync(getTwinRequestMessage, new deviceTwinRequestMessageCallback(), null, this.config.getDeviceId());
     }
 
     public synchronized void updateReportedProperties(Set<Property> reportedProperties) throws IOException
@@ -368,7 +368,7 @@ public class DeviceTwin
         /*
          **Codes_SRS_DEVICETWIN_25_015: [**This method shall send the message to the lower transport layers by calling sendEventAsync.**]**
          */
-        this.deviceIO.sendEventAsync(updateReportedPropertiesRequest, new deviceTwinRequestMessageCallback(), null, this.config.getIotHubConnectionString());
+        this.deviceIO.sendEventAsync(updateReportedPropertiesRequest, new deviceTwinRequestMessageCallback(), null, this.config.getDeviceId());
 
     }
 
@@ -428,7 +428,7 @@ public class DeviceTwin
             /*
              **Codes_SRS_DEVICETWIN_25_019: [**If not already subscribed then this method shall send the message using sendEventAsync.**]**
              */
-            this.deviceIO.sendEventAsync(desiredPropertiesNotificationRequest, new deviceTwinRequestMessageCallback(), null, this.config.getIotHubConnectionString());
+            this.deviceIO.sendEventAsync(desiredPropertiesNotificationRequest, new deviceTwinRequestMessageCallback(), null, this.config.getDeviceId());
         }
     }
 
