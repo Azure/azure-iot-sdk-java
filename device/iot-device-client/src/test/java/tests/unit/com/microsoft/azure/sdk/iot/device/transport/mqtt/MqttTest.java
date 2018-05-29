@@ -30,8 +30,11 @@ import static org.junit.Assert.*;
  */
 public class MqttTest
 {
+    private static final String expectedInputName = "someInputName";
+    private static final String expectedModuleId = "someModuleId";
     private static final String CLIENT_ID = "test.iothub";
     private static final String MOCK_PARSE_TOPIC = "devices/deviceID/messages/devicebound/%24.mid=69ea4caf-d83e-454b-81f2-caafda4c81c8&%24.exp=0&%24.to=%2Fdevices%2FdeviceID%2Fmessages%2FdeviceBound&%24.cid=169c34b3-99b0-49f9-b0f6-8fa9d2c99345&iothub-ack=full&property1=value1";
+    private static final String MOCK_PARSE_TOPIC_WITH_INPUT_NAME = "devices/deviceID/modules/" + expectedModuleId + "/inputs/" + expectedInputName + "/messages/devicebound/%24.mid=69ea4caf-d83e-454b-81f2-caafda4c81c8&%24.exp=0&%24.to=%2Fdevices%2FdeviceID%2Fmessages%2FdeviceBound&%24.cid=169c34b3-99b0-49f9-b0f6-8fa9d2c99345&iothub-ack=full&property1=value1";
     private static final byte[] EXPECTED_PAYLOAD = {0x61, 0x62, 0x63};
     private Message expectedMessage;
     private static final String EXPECTED_EXPIRED_SAS_TOKEN = "SharedAccessSignature sr=hostname&sig=Signature&se=0";
@@ -104,7 +107,7 @@ public class MqttTest
                     return new MutablePair<>(MOCK_PARSE_TOPIC, new byte[0]);
                 }
             };
-            return new MqttMessaging(mockedMqttConnection, CLIENT_ID, listener, mockedMessageListener, "");
+            return new MqttMessaging(mockedMqttConnection, CLIENT_ID, listener, mockedMessageListener, "", "");
         }
         else
         {
@@ -298,7 +301,7 @@ public class MqttTest
     {
         Mqtt mockMqtt = null;
         //act
-        mockMqtt = new MqttMessaging(null, CLIENT_ID, mockedIotHubListener, null, "");
+        mockMqtt = new MqttMessaging(null, CLIENT_ID, mockedIotHubListener, null, "", "");
     }
 
     /*
@@ -878,7 +881,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "");
         new NonStrictExpectations()
         {
             {
@@ -907,6 +910,43 @@ public class MqttTest
         assertEquals(expectedMessage.getProperties()[0].getValue(), receivedMessage.getProperties()[0].getValue());
     }
 
+    //Tests_SRS_Mqtt_34_050: [This function shall extract the inputName from the topic if the topic string fits the following convention: 'devices/<deviceId>/modules/<moduleId>/inputs/<inputName>']
+    //Tests_SRS_Mqtt_34_051: [This function shall extract the moduleId from the topic if the topic string fits the following convention: 'devices/<deviceId>/modules/<moduleId>']
+    @Test
+    public void receiveSuccessWithModuleIdAndInputName() throws MqttException, TransportException
+    {
+        //arrange
+        final byte[] payload = {0x61, 0x62, 0x63};
+        baseConstructorExpectations();
+        baseConnectExpectation();
+        new MockUp<MqttMessaging>()
+        {
+            @Mock
+            Pair<String, byte[]> peekMessage() throws IOException
+            {
+                return new MutablePair<>(MOCK_PARSE_TOPIC_WITH_INPUT_NAME, payload);
+            }
+        };
+
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "");
+        new NonStrictExpectations()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                result = true;
+            }
+        };
+
+        Deencapsulation.invoke(mockMqtt, "connect");
+
+        //act
+        Message receivedMessage = mockMqtt.receive();
+
+        //assert
+        assertEquals(expectedInputName, receivedMessage.getInputName());
+        assertEquals(expectedModuleId, receivedMessage.getConnectionModuleId());
+    }
+
     // Tests_SRS_Mqtt_34_022: [If the call peekMessage returns a null or empty string then this method shall do nothing and return null]
     @Test
     public void receiveReturnsNullMessageWhenParseTopicReturnsNull() throws TransportException, MqttException
@@ -923,7 +963,7 @@ public class MqttTest
                 return new MutablePair<>(null, payload);
             }
         };
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "");
 
         new NonStrictExpectations()
         {
@@ -958,7 +998,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "");
         //act
         Message receivedMessage = mockMqtt.receive();
     }
@@ -979,7 +1019,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "");
         Deencapsulation.setField(mockMqtt, "mqttConnection", null);
 
         //act
@@ -1071,7 +1111,7 @@ public class MqttTest
         try
         {
             //arrange
-            MqttMessaging testMqttClient = new MqttMessaging(mockedMqttConnection,"deviceId", mockedIotHubListener, null, "");
+            MqttMessaging testMqttClient = new MqttMessaging(mockedMqttConnection,"deviceId", mockedIotHubListener, null, "", "");
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             Deencapsulation.setField(testMqttClient, "allReceivedMessages", testAllReceivedMessages);
 
@@ -1105,7 +1145,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "");
         new NonStrictExpectations()
         {
             {
@@ -1140,7 +1180,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "");
 
         new NonStrictExpectations()
         {
@@ -1179,7 +1219,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "");
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "");
         new NonStrictExpectations()
         {
             {
