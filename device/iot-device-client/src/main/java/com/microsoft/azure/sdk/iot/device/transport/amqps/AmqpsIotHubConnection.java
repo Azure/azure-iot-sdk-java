@@ -108,13 +108,20 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
         if (config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
-            if (config.getIotHubConnectionString().getSharedAccessKey() == null || config.getIotHubConnectionString().getSharedAccessKey().isEmpty())
-            {
-                if(config.getSasTokenAuthentication().getCurrentSasToken() == null || config.getSasTokenAuthentication().getCurrentSasToken().isEmpty())
+            //try
+            //{
+                if (config.getIotHubConnectionString().getSharedAccessKey() == null || config.getIotHubConnectionString().getSharedAccessKey().isEmpty())
                 {
-                    throw new IllegalArgumentException("Both deviceKey and shared access signature cannot be null or empty.");
+                    if(config.getSasTokenAuthentication().getCurrentSasToken() == null || config.getSasTokenAuthentication().getCurrentSasToken().isEmpty())
+                    {
+                        throw new IllegalArgumentException("Both deviceKey and shared access signature cannot be null or empty.");
+                    }
                 }
-            }
+            //}
+            //catch (IOException e)
+            //{
+            //    throw new TransportException(e);
+            //}
         }
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_002: [The constructor shall save the configuration into private member variables.]
@@ -401,11 +408,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
      *
      * @param message The message to be sent.
      * @param messageType the type of the message being sent
-     * @param iotHubConnectionString the connection string to use for sender identification.
      * @throws TransportException if send message fails
      * @return An {@link Integer} representing the hash of the message, or -1 if the connection is closed.
      */
-    private synchronized Integer sendMessage(Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws TransportException
+    private synchronized Integer sendMessage(Message message, MessageType messageType, String deviceId) throws TransportException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -420,7 +426,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         else
         {
             // Codes_SRS_AMQPSIOTHUBCONNECTION_12_024: [The function shall call AmqpsSessionManager.sendMessage with the given parameters.]
-            deliveryHash = this.amqpsSessionManager.sendMessage(message, messageType, iotHubConnectionString);
+            deliveryHash = this.amqpsSessionManager.sendMessage(message, messageType, deviceId);
         }
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_021: [The function shall return the delivery hash.]
@@ -970,7 +976,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         // Codes_SRS_AMQPSTRANSPORT_34_077: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
-        Integer sendHash = this.sendMessage(amqpsConvertToProtonReturnValue.getMessageImpl(), amqpsConvertToProtonReturnValue.getMessageType(), message.getIotHubConnectionString());
+        Integer sendHash = this.sendMessage(amqpsConvertToProtonReturnValue.getMessageImpl(), amqpsConvertToProtonReturnValue.getMessageType(), message.getConnectionDeviceId());
 
         if (sendHash != -1)
         {

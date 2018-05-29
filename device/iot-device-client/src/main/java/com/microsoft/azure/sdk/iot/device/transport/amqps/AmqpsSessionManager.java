@@ -354,7 +354,7 @@ public class AmqpsSessionManager
      *
      * @return Integer
      */
-    Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws TransportException
+    Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, String deviceId) throws TransportException
     {
         Integer deliveryHash = -1;
 
@@ -363,7 +363,7 @@ public class AmqpsSessionManager
             for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
             {
                 // Codes_SRS_AMQPSESSIONMANAGER_12_032: [The function shall call sendMessage on all session list member and if there is a successful send return with the deliveryHash, otherwise return -1.]
-                deliveryHash = this.amqpsDeviceSessionList.get(i).sendMessage(message, messageType, iotHubConnectionString);
+                deliveryHash = this.amqpsDeviceSessionList.get(i).sendMessage(message, messageType, deviceId);
                 if (deliveryHash != -1)
                 {
                     break;

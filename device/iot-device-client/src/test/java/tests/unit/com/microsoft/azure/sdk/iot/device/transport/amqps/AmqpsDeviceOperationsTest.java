@@ -145,21 +145,22 @@ public class AmqpsDeviceOperationsTest
     }
 
     /*
-    **Tests_SRS_AMQPSDEVICEOPERATIONS_12_032: [**The class has static members for version identifier, api version keys and api version value.**]**
+    **Tests_SRS_AMQPSDEVICEOPERATIONS_12_032: [**The class has static members for version identifier and api version keys.**]**
      */
     @Test
     public void apiVersionAndVersionIdFieldsValues()
     {
+        //arrange
+        String API_VERSION = TransportUtils.IOTHUB_API_VERSION;
+
         //act
         AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig);
         String VERSION_IDENTIFIER_KEY = Deencapsulation.getField(amqpsDeviceOperations, "VERSION_IDENTIFIER_KEY");
         String API_VERSION_KEY = Deencapsulation.getField(amqpsDeviceOperations, "API_VERSION_KEY");
-        String API_VERSION_VALUE = Deencapsulation.getField(amqpsDeviceOperations, "API_VERSION_VALUE");
 
         //assert
         assertTrue(VERSION_IDENTIFIER_KEY.equals("com.microsoft:client-version"));
         assertTrue(API_VERSION_KEY.equals("com.microsoft:api-version"));
-        assertTrue(API_VERSION_VALUE.equals("2016-11-14"));
     }
 
     /*

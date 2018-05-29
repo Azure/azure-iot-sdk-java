@@ -158,6 +158,71 @@ public class AmqpsDeviceTwinTest
         assertNotNull(correlationIdList);
     }
 
+    // Tests_SRS_AMQPSDEVICETELEMETRY_34_034: [If a moduleId is present, the constructor shall set the sender and receiver endpoint path to IoTHub specific values for module communication.]
+    // Tests_SRS_AMQPSDEVICETELEMETRY_34_035: [If a moduleId is present, the constructor shall concatenate a sender specific prefix including the moduleId to the sender link tag's current value.]
+    // Tests_SRS_AMQPSDEVICETELEMETRY_34_036: [If a moduleId is present, the constructor shall insert the given deviceId and moduleId argument to the sender and receiver link address.]
+    // Tests_SRS_AMQPSDEVICETELEMETRY_34_037: [If a moduleId is present, the constructor shall add correlation ID key and <deviceId>/<moduleId> value to the amqpProperties.]
+    @Test
+    public void constructorInitializesAllMembersWithModuleId(
+            @Mocked final UUID mockUUID
+    )
+    {
+        // arrange
+        final String deviceId = "deviceId";
+        final String moduleId = "moduleId";
+        final String uuidStr = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+        new NonStrictExpectations()
+        {
+            {
+                UUID.randomUUID();
+                result = mockUUID;
+                mockUUID.toString();
+                result = uuidStr;
+                mockDeviceClientConfig.getDeviceId();
+                result = deviceId;
+                mockDeviceClientConfig.getModuleId();
+                result = moduleId;
+            }
+        };
+
+        //act
+        AmqpsDeviceTwin amqpsDeviceMethods = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+
+
+        String SENDER_LINK_ENDPOINT_PATH_MODULES = Deencapsulation.getField(amqpsDeviceMethods, "SENDER_LINK_ENDPOINT_PATH_MODULES");
+        String RECEIVER_LINK_ENDPOINT_PATH_MODULES = Deencapsulation.getField(amqpsDeviceMethods, "RECEIVER_LINK_ENDPOINT_PATH_MODULES");
+        String SENDER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceMethods, "SENDER_LINK_TAG_PREFIX");
+        String RECEIVER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceMethods, "RECEIVER_LINK_TAG_PREFIX");
+        String senderLinkEndpointPath = Deencapsulation.getField(amqpsDeviceMethods, "senderLinkEndpointPath");
+        String receiverLinkEndpointPath = Deencapsulation.getField(amqpsDeviceMethods, "receiverLinkEndpointPath");
+
+        String senderLinkTag = Deencapsulation.invoke(amqpsDeviceMethods, "getSenderLinkTag");
+        String receiverLinkTag = Deencapsulation.invoke(amqpsDeviceMethods, "getReceiverLinkTag");
+        String senderLinkAddress = Deencapsulation.invoke(amqpsDeviceMethods, "getSenderLinkAddress");
+        String receiverLinkAddress = Deencapsulation.invoke(amqpsDeviceMethods, "getReceiverLinkAddress");
+
+        //assert
+        assertNotNull(amqpsDeviceMethods);
+
+        assertTrue(SENDER_LINK_ENDPOINT_PATH_MODULES.equals(senderLinkEndpointPath));
+        assertTrue(RECEIVER_LINK_ENDPOINT_PATH_MODULES.equals(receiverLinkEndpointPath));
+
+        assertTrue(senderLinkTag.startsWith(SENDER_LINK_TAG_PREFIX));
+        assertTrue(receiverLinkTag.startsWith(RECEIVER_LINK_TAG_PREFIX));
+
+        assertTrue(senderLinkTag.contains(moduleId));
+        assertTrue(receiverLinkTag.contains(moduleId));
+
+        assertTrue(senderLinkTag.endsWith(uuidStr));
+        assertTrue(receiverLinkTag.endsWith(uuidStr));
+
+        assertTrue(senderLinkAddress.contains(mockDeviceClientConfig.getDeviceId()));
+        assertTrue(receiverLinkAddress.contains(mockDeviceClientConfig.getDeviceId()));
+
+        assertTrue(senderLinkAddress.contains(mockDeviceClientConfig.getModuleId()));
+        assertTrue(receiverLinkAddress.contains(mockDeviceClientConfig.getModuleId()));
+    }
+
     // Tests_SRS_AMQPSDEVICETWIN_12_008: [The class has static members for AMQP annotation fields containing IoTHub specific values.]
     @Test
     public void classHasAnnotationFieldsValues()
@@ -1243,6 +1308,67 @@ public class AmqpsDeviceTwinTest
     }
 
     // Tests_SRS_AMQPSDEVICETWIN_12_026: [The function shall copy the Proton application properties to IotHubTransportMessage properties excluding the reserved property names.]
+    // Tests_SRS_AMQPSDEVICETELEMETRY_34_053: [If the amqp message contains an application property of
+    // "x-opt-input-name", this function shall assign its value to the IotHub message's input name.]
+    @Test
+    public void convertFromProtonApplicationWithInputName(
+            @Mocked final Map<String, String> mockMapStringString,
+            @Mocked final ApplicationProperties mockApplicationProperties,
+            @Mocked final Map.Entry<String, String> mockStringStringEntry,
+            @Mocked final DeviceClientConfig mockDeviceClientConfig
+    ) throws IOException
+    {
+        //arrange
+        String deviceId = "deviceId";
+        final byte[] bytes = new byte[] {1, 2};
+        final Object messageContext = "context";
+        final String inputNameValue = "someInputName";
+        final String inputNameKey = Deencapsulation.getField(AmqpsDeviceTelemetry.class, "INPUT_NAME_PROPERTY_KEY");
+
+        AmqpsMessage amqpsMessage = new AmqpsMessage();
+        Binary binary = new Binary(bytes);
+        Section section = new Data(binary);
+        amqpsMessage.setBody(section);
+        amqpsMessage.setAmqpsMessageType(MessageType.DEVICE_TWIN);
+        amqpsMessage.setMessageAnnotations(null);
+        amqpsMessage.setProperties(null);
+        amqpsMessage.setApplicationProperties(mockApplicationProperties);
+
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockApplicationProperties.getValue();
+                result = mockMapStringString;
+                mockMapStringString.entrySet();
+                result = mockStringStringEntry;
+                mockStringStringEntry.getKey();
+                result = inputNameKey;
+                mockStringStringEntry.getValue();
+                result = inputNameValue;
+
+                mockDeviceClientConfig.getDeviceTwinMessageCallback();
+                result = mockMessageCallback;
+                mockDeviceClientConfig.getDeviceTwinMessageContext();
+                result = messageContext;
+            }
+        };
+
+        //act
+        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
+        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
+        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
+        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+
+        //assert
+        assertNotNull(actualMessage);
+        assertEquals(null, ((IotHubTransportMessage)actualMessage).getProperty(inputNameKey));
+        assertEquals(inputNameValue, actualMessage.getInputName());
+    }
+
+    // Tests_SRS_AMQPSDEVICETWIN_12_026: [The function shall copy the Proton application properties to IotHubTransportMessage properties excluding the reserved property names.]
     @Test
     public void convertFromProtonApplicationPropertiesSet(
             @Mocked final Map<String, String> mockMapStringString,
@@ -1366,6 +1492,8 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_031: [The function shall copy the correlationId, messageId properties to the Proton message properties.]
     // Tests_SRS_AMQPSDEVICETWIN_12_045: [The function shall add the correlationId to the correlationIdList if it is not null.]
+    // Tests_SRS_AMQPSDEVICETWIN_34_052: [If the message has an outputName saved, this function shall set that
+    // value to the "iothub-outputname" application property in the proton message.]
     @Test
     public void convertToProtonSetsProperties(
             @Mocked final Properties mockProperties,
@@ -1395,7 +1523,11 @@ public class AmqpsDeviceTwinTest
                 times = 2;
                 result = messageId;
                 mockIotHubTransportMessage.getCorrelationId();
+                result = "some correlation id";
                 times = 3;
+                mockIotHubTransportMessage.getOutputName();
+                times = 2;
+                result = "Some outputname";
                 result = correlationId;
             }
         };

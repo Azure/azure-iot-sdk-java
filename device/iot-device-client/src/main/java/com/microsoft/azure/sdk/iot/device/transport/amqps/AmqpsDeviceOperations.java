@@ -24,14 +24,14 @@ import java.util.UUID;
 
 public class AmqpsDeviceOperations
 {
-    // Codes_SRS_AMQPSDEVICEOPERATIONS_12_032: [The class has static members for version identifier, api version keys and api version value.]
+    // Codes_SRS_AMQPSDEVICEOPERATIONS_12_032: [The class has static members for version identifier and api version keys.]
     protected static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
     protected static final String API_VERSION_KEY = "com.microsoft:api-version";
-    protected static final String API_VERSION_VALUE = "2016-11-14";
 
     protected static final String TO_KEY = "to";
     protected static final String USER_ID_KEY = "userId";
     protected static final String AMQPS_APP_PROPERTY_PREFIX = "iothub-app-";
+    protected static final String INPUT_NAME_PROPERTY_KEY = "x-opt-input-name";
 
     protected AmqpsDeviceOperationLinkState amqpsSendLinkState = AmqpsDeviceOperationLinkState.UNKNOWN;
     protected AmqpsDeviceOperationLinkState amqpsRecvLinkState = AmqpsDeviceOperationLinkState.UNKNOWN;

@@ -281,19 +281,18 @@ public class AmqpsSessionDeviceOperation
      *
      * @param message the message to send.
      * @param messageType the message type to find the sender.
-     * @param iotHubConnectionString the deviceconnection string to
-     *                               find the sender.
+     * @param deviceId the deviceId of the message
      * @throws IllegalStateException if sender link has not been initialized
      * @throws IllegalArgumentException if deliveryTag's length is 0
      * @return Integer
      */
-    Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, IotHubConnectionString iotHubConnectionString) throws IllegalStateException, IllegalArgumentException
+    Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, String deviceId) throws IllegalStateException, IllegalArgumentException
     {
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_012: [The function shall return -1 if the state is not authenticated.]
         if (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED)
         {
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_013: [The function shall return -1 if the deviceId int he connection string is not equeal to the deviceId in the config.]
-            if (this.deviceClientConfig.getDeviceId() == iotHubConnectionString.getDeviceId())
+            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_013: [The function shall return -1 if the deviceId int he connection string is not equal to the deviceId in the config.]
+            if (this.deviceClientConfig.getDeviceId() == deviceId)
             {
                 // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_014: [The function shall encode the message and copy the contents to the byte buffer.]
                 byte[] msgData = new byte[1024];
