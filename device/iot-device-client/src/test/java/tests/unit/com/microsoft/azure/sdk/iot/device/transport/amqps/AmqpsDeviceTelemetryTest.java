@@ -115,6 +115,71 @@ public class AmqpsDeviceTelemetryTest
         assertTrue(receiverLinkAddress.contains(mockDeviceClientConfig.getDeviceId()));
     }
 
+    // Tests_SRS_AMQPSDEVICETELEMETRY_34_034: [If a moduleId is present, the constructor shall set the sender and receiver endpoint path to IoTHub specific values for module communication.]
+    // Tests_SRS_AMQPSDEVICETELEMETRY_34_035: [If a moduleId is present, the constructor shall concatenate a sender specific prefix including the moduleId to the sender link tag's current value.]
+    // Tests_SRS_AMQPSDEVICETELEMETRY_34_036: [If a moduleId is present, the constructor shall insert the given deviceId and moduleId argument to the sender and receiver link address.]
+    // Tests_SRS_AMQPSDEVICETELEMETRY_34_037: [If a moduleId is present, the constructor shall add correlation ID key and <deviceId>/<moduleId> value to the amqpProperties.]
+    @Test
+    public void constructorInitializesAllMembersWithModuleId(
+            @Mocked final UUID mockUUID
+    )
+    {
+        // arrange
+        final String deviceId = "deviceId";
+        final String moduleId = "moduleId";
+        final String uuidStr = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+        new NonStrictExpectations()
+        {
+            {
+                UUID.randomUUID();
+                result = mockUUID;
+                mockUUID.toString();
+                result = uuidStr;
+                mockDeviceClientConfig.getDeviceId();
+                result = deviceId;
+                mockDeviceClientConfig.getModuleId();
+                result = moduleId;
+            }
+        };
+
+        //act
+        AmqpsDeviceTelemetry amqpsDeviceMethods = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+
+
+        String SENDER_LINK_ENDPOINT_PATH_MODULES = Deencapsulation.getField(amqpsDeviceMethods, "SENDER_LINK_ENDPOINT_PATH_MODULES");
+        String RECEIVER_LINK_ENDPOINT_PATH_MODULES = Deencapsulation.getField(amqpsDeviceMethods, "RECEIVER_LINK_ENDPOINT_PATH_MODULES");
+        String SENDER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceMethods, "SENDER_LINK_TAG_PREFIX");
+        String RECEIVER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceMethods, "RECEIVER_LINK_TAG_PREFIX");
+        String senderLinkEndpointPath = Deencapsulation.getField(amqpsDeviceMethods, "senderLinkEndpointPath");
+        String receiverLinkEndpointPath = Deencapsulation.getField(amqpsDeviceMethods, "receiverLinkEndpointPath");
+
+        String senderLinkTag = Deencapsulation.invoke(amqpsDeviceMethods, "getSenderLinkTag");
+        String receiverLinkTag = Deencapsulation.invoke(amqpsDeviceMethods, "getReceiverLinkTag");
+        String senderLinkAddress = Deencapsulation.invoke(amqpsDeviceMethods, "getSenderLinkAddress");
+        String receiverLinkAddress = Deencapsulation.invoke(amqpsDeviceMethods, "getReceiverLinkAddress");
+
+        //assert
+        assertNotNull(amqpsDeviceMethods);
+
+        assertTrue(SENDER_LINK_ENDPOINT_PATH_MODULES.equals(senderLinkEndpointPath));
+        assertTrue(RECEIVER_LINK_ENDPOINT_PATH_MODULES.equals(receiverLinkEndpointPath));
+
+        assertTrue(senderLinkTag.startsWith(SENDER_LINK_TAG_PREFIX));
+        assertTrue(receiverLinkTag.startsWith(RECEIVER_LINK_TAG_PREFIX));
+
+        assertTrue(senderLinkTag.contains(moduleId));
+        assertTrue(receiverLinkTag.contains(moduleId));
+
+        assertTrue(senderLinkTag.endsWith(uuidStr));
+        assertTrue(receiverLinkTag.endsWith(uuidStr));
+
+        assertTrue(senderLinkAddress.contains(mockDeviceClientConfig.getDeviceId()));
+        assertTrue(receiverLinkAddress.contains(mockDeviceClientConfig.getDeviceId()));
+
+        assertTrue(senderLinkAddress.contains(mockDeviceClientConfig.getModuleId()));
+        assertTrue(receiverLinkAddress.contains(mockDeviceClientConfig.getModuleId()));
+    }
+
     // Tests_SRS_AMQPSDEVICETELEMETRY_34_050: [This constructor shall call super with the provided user agent string.]
     @Test
     public void constructorCallsSuperWithConfigUserAgentString()
@@ -296,9 +361,9 @@ public class AmqpsDeviceTelemetryTest
                 result = null;
                 mockAmqpsMessage.getProperties();
                 result = null;
-                mockDeviceClientConfig.getDeviceTelemetryMessageCallback();
+                mockDeviceClientConfig.getDeviceTelemetryMessageCallback(null);
                 result = mockMessageCallback;
-                mockDeviceClientConfig.getDeviceTelemetryMessageContext();
+                mockDeviceClientConfig.getDeviceTelemetryMessageContext(null);
                 result = messageContext;
                 mockAmqpsMessage.getBody();
                 result = null;
@@ -326,6 +391,7 @@ public class AmqpsDeviceTelemetryTest
     **Tests_SRS_AMQPSDEVICETELEMETRY_12_012: [**The function shall create a new AmqpsConvertFromProtonReturnValue object and fill it with the converted message and the user callback and user context values from the deviceClientConfig.**]**
     **Tests_SRS_AMQPSDEVICETELEMETRY_12_013: [**The function shall return with the new AmqpsConvertFromProtonReturnValue object.**]**
     **Tests_SRS_AMQPSDEVICETELEMETRY_12_024: [**The function shall shall create a new buffer for message body and copy the proton message body to it.**]**
+    **Tests_SRS_AMQPSDEVICETELEMETRY_34_052: [**If the amqp message contains an application property of "x-opt-input-name", this function shall assign its value to the IotHub message's input name.**]**
     */
     @Test
     public void convertFromProtonSuccess(
@@ -345,10 +411,12 @@ public class AmqpsDeviceTelemetryTest
         final String customPropertyValue = "appValue";
         final String toKey = "to";
         final String userIdKey = "userId";
+        final String inputNameValue = "someInputName";
+        final String inputNameKey = Deencapsulation.getField(AmqpsDeviceTelemetry.class, "INPUT_NAME_PROPERTY_KEY");
 
         Map<String, Object> applicationPropertiesMap = new HashMap();
         applicationPropertiesMap.put(customPropertyKey, customPropertyValue);
-
+        applicationPropertiesMap.put(inputNameKey, inputNameValue);
         final ApplicationProperties applicationProperties = new ApplicationProperties(applicationPropertiesMap);
 
         AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
@@ -377,11 +445,10 @@ public class AmqpsDeviceTelemetryTest
                 result = userId;
                 properties.getAbsoluteExpiryTime();
                 result = absoluteExpiryTime;
-                mockDeviceClientConfig.getDeviceTelemetryMessageCallback();
+                mockDeviceClientConfig.getDeviceTelemetryMessageCallback(inputNameValue);
                 result = mockMessageCallback;
-                mockDeviceClientConfig.getDeviceTelemetryMessageContext();
+                mockDeviceClientConfig.getDeviceTelemetryMessageContext(inputNameValue);
                 result = "myContext";
-
             }
         };
 
@@ -408,7 +475,7 @@ public class AmqpsDeviceTelemetryTest
         assertEquals(to, actualMessage.getProperty(AMQPS_APP_PROPERTY_PREFIX + toKey));
         assertNotNull(actualMessage.getProperty(AMQPS_APP_PROPERTY_PREFIX + userIdKey));
         assertEquals(userId.toString(), actualMessage.getProperty(AMQPS_APP_PROPERTY_PREFIX + userIdKey));
-
+        assertEquals(inputNameValue, actualMessage.getInputName());
     }
 
     /*
@@ -449,6 +516,7 @@ public class AmqpsDeviceTelemetryTest
     **Tests_SRS_AMQPSDEVICETELEMETRY_12_017: [**The function shall copy the user properties to Proton message application properties excluding the reserved property names.**]**
     **Tests_SRS_AMQPSDEVICETELEMETRY_12_018: [**The function shall create a new AmqpsConvertToProtonReturnValue object and fill it with the Proton message and the message type.**]**
     **Tests_SRS_AMQPSDEVICETELEMETRY_12_019: [**The function shall return with the new AmqpsConvertToProtonReturnValue object.**]**
+    **Tests_SRS_AMQPSDEVICETELEMETRY_34_051: [This function shall set the message's saved outputname in the application properties of the new proton message.]
     */
     @Test
     public void convertToProtonSuccess(
@@ -485,6 +553,10 @@ public class AmqpsDeviceTelemetryTest
                 result = correlationId;
                 mockMessage.getProperties();
                 result = iotHubMessageProperties;
+                mockMessage.getOutputName();
+                result = "some output name";
+                times = 2;
+
                 new ApplicationProperties(userProperties);
             }
         };

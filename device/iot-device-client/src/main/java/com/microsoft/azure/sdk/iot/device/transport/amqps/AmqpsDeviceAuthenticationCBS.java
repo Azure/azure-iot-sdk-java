@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
@@ -76,7 +77,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         this.receiverLinkAddress = receiverLinkEndpointPath;
 
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_004: [The constructor shall add API version key and API version value to the amqpProperties.*]
-        this.amqpProperties.put(Symbol.getSymbol(API_VERSION_KEY), API_VERSION_VALUE);
+        this.amqpProperties.put(Symbol.getSymbol(API_VERSION_KEY), TransportUtils.IOTHUB_API_VERSION);
 
         this.logger = new CustomLogger(this.getClass());
     }

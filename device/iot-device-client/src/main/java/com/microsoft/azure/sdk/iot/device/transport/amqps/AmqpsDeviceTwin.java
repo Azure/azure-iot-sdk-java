@@ -30,6 +30,9 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
     private static final String SENDER_LINK_ENDPOINT_PATH = "/devices/%s/twin";
     private static final String RECEIVER_LINK_ENDPOINT_PATH = "/devices/%s/twin";
 
+    private static final String SENDER_LINK_ENDPOINT_PATH_MODULES = "/devices/%s/modules/%s/twin";
+    private static final String RECEIVER_LINK_ENDPOINT_PATH_MODULES = "/devices/%s/modules/%s/twin";
+
     private static final String SENDER_LINK_TAG_PREFIX = "sender_link_devicetwin-";
     private static final String RECEIVER_LINK_TAG_PREFIX = "receiver_link_devicetwin-";
 
@@ -62,21 +65,39 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
 
         this.deviceClientConfig = deviceClientConfig;
 
-        // Codes_SRS_AMQPSDEVICETWIN_12_002: [The constructor shall set the sender and receiver endpoint path to IoTHub specific values.]
-        this.senderLinkEndpointPath = SENDER_LINK_ENDPOINT_PATH;
-        this.receiverLinkEndpointPath = RECEIVER_LINK_ENDPOINT_PATH;
+        String moduleId = this.deviceClientConfig.getModuleId();
+        if (moduleId != null && !moduleId.isEmpty())
+        {
+            // Codes_SRS_AMQPSDEVICETWIN_34_034: [If a moduleId is present, the constructor shall set the sender and receiver endpoint path to IoTHub specific values for module communication.]
+            this.senderLinkEndpointPath = SENDER_LINK_ENDPOINT_PATH_MODULES;
+            this.receiverLinkEndpointPath = RECEIVER_LINK_ENDPOINT_PATH_MODULES;
 
-        // Codes_SRS_AMQPSDEVICETWIN_12_003: [The constructor shall concatenate a sender specific prefix to the sender link tag's current value.]
-        this.senderLinkTag = SENDER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "-" + senderLinkTag;
-        // Codes_SRS_AMQPSDEVICETWIN_12_004: [The constructor shall concatenate a receiver specific prefix to the receiver link tag's current value.]
-        this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "-" + receiverLinkTag;
+            // Codes_SRS_AMQPSDEVICETWIN_34_035: [If a moduleId is present, the constructor shall concatenate a sender specific prefix including the moduleId to the sender link tag's current value.]
+            this.senderLinkTag = SENDER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "/" + moduleId + "-" + senderLinkTag;
+            this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "/" + moduleId + "-" + receiverLinkTag;
 
-        // Codes_SRS_AMQPSDEVICETWIN_12_005: [The constructor shall insert the given deviceId argument to the sender and receiver link address.]
-        this.senderLinkAddress = String.format(senderLinkEndpointPath, this.deviceClientConfig.getDeviceId());
-        this.receiverLinkAddress = String.format(receiverLinkEndpointPath, this.deviceClientConfig.getDeviceId());
+            // Codes_SRS_AMQPSDEVICETWIN_34_036: [If a moduleId is present, the constructor shall insert the given deviceId and moduleId argument to the sender and receiver link address.]
+            this.senderLinkAddress = String.format(senderLinkEndpointPath, this.deviceClientConfig.getDeviceId(), moduleId);
+            this.receiverLinkAddress = String.format(receiverLinkEndpointPath, this.deviceClientConfig.getDeviceId(), moduleId);
+        }
+        else
+        {
+            // Codes_SRS_AMQPSDEVICETWIN_12_002: [The constructor shall set the sender and receiver endpoint path to IoTHub specific values.]
+            this.senderLinkEndpointPath = SENDER_LINK_ENDPOINT_PATH;
+            this.receiverLinkEndpointPath = RECEIVER_LINK_ENDPOINT_PATH;
 
+            // Codes_SRS_AMQPSDEVICETWIN_12_003: [The constructor shall concatenate a sender specific prefix to the sender link tag's current value.]
+            this.senderLinkTag = SENDER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "-" + senderLinkTag;
+            // Codes_SRS_AMQPSDEVICETWIN_12_004: [The constructor shall concatenate a receiver specific prefix to the receiver link tag's current value.]
+            this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "-" + receiverLinkTag;
+
+            // Codes_SRS_AMQPSDEVICETWIN_12_005: [The constructor shall insert the given deviceId argument to the sender and receiver link address.]
+            this.senderLinkAddress = String.format(senderLinkEndpointPath, this.deviceClientConfig.getDeviceId());
+            this.receiverLinkAddress = String.format(receiverLinkEndpointPath, this.deviceClientConfig.getDeviceId());
+        }
+        
         // Codes_SRS_AMQPSDEVICETWIN_12_006: [The constructor shall add the API version key to the amqpProperties.]
-        this.amqpProperties.put(Symbol.getSymbol(API_VERSION_KEY), API_VERSION_VALUE);
+        this.amqpProperties.put(Symbol.getSymbol(API_VERSION_KEY), TransportUtils.IOTHUB_API_VERSION);
         // Codes_SRS_AMQPSDEVICETWIN_12_007: [The constructor shall generate a UUID amd add it as a correlation ID to the amqpProperties.]
         this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(CORRELATION_ID_KEY_PREFIX +  UUID.randomUUID().toString()));
 
@@ -343,7 +364,13 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
             for (Map.Entry<String, Object> entry : applicationProperties.entrySet())
             {
                 String propertyKey = entry.getKey();
-                if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(propertyKey))
+                if (propertyKey.equals(INPUT_NAME_PROPERTY_KEY))
+                {
+                    // Codes_SRS_AMQPSDEVICETELEMETRY_34_053: [If the amqp message contains an application property of
+                    // "x-opt-input-name", this function shall assign its value to the IotHub message's input name.]
+                    iotHubTransportMessage.setInputName(entry.getValue().toString());
+                }
+                else if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(propertyKey))
                 {
                     iotHubTransportMessage.setProperty(entry.getKey(), entry.getValue().toString());
                 }
@@ -382,7 +409,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
 
         // Codes_SRS_AMQPSDEVICETWIN_12_032: [The function shall copy the user properties to Proton message application properties excluding the reserved property names.]
         int propertiesLength = deviceTwinMessage.getProperties().length;
-        Map<String, Object> userProperties = new HashMap<>(propertiesLength);
+        Map<String, Object> userProperties = new HashMap<>();
         if (propertiesLength > 0)
         {
             for(MessageProperty messageProperty : deviceTwinMessage.getProperties())
@@ -393,6 +420,14 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
                 }
             }
         }
+
+        if (message.getOutputName() != null)
+        {
+            // Codes_SRS_AMQPSDEVICETWIN_34_052: [If the message has an outputName saved, this function shall set that
+            // value to the "iothub-outputname" application property in the proton message.]
+            userProperties.put(MessageProperty.OUTPUT_NAME_PROPERTY, message.getOutputName());
+        }
+
         ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
         outgoingMessage.setApplicationProperties(applicationProperties);
 
