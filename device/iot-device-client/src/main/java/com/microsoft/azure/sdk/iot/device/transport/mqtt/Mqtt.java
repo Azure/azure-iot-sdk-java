@@ -50,7 +50,11 @@ abstract public class Mqtt implements MqttCallback
     final static String MESSAGE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".mid";
     final static String TO = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".to";
     final static String USER_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".uid";
+    final static String OUTPUT_NAME = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".on";
     private final static String IOTHUB_ACK = "iothub-ack";
+
+    private final static String INPUTS_PATH_STRING = "inputs";
+    private final static String MODULES_PATH_STRING = "modules";
 
     private IotHubListener listener;
     private String connectionId;
@@ -412,6 +416,21 @@ abstract public class Mqtt implements MqttCallback
 
             //Codes_SRS_Mqtt_34_041: [This method shall call assignPropertiesToMessage so that all properties from the topic string can be assigned to the message]
             assignPropertiesToMessage(message, propertiesString);
+
+            String routeString = topic.substring(0, propertiesStringStartingIndex);
+            String[] routeComponents = routeString.split("/");
+
+            if (routeComponents.length > 2 && routeComponents[2].equals(MODULES_PATH_STRING))
+            {
+                //Codes_SRS_Mqtt_34_051: [This function shall extract the moduleId from the topic if the topic string fits the following convention: 'devices/<deviceId>/modules/<moduleId>']
+                message.setConnectionModuleId(routeComponents[3]);
+            }
+
+            if (routeComponents.length > 4 && routeComponents[4].equals(INPUTS_PATH_STRING))
+            {
+                //Codes_SRS_Mqtt_34_050: [This function shall extract the inputName from the topic if the topic string fits the following convention: 'devices/<deviceId>/modules/<moduleId>/inputs/<inputName>']
+                message.setInputName(routeComponents[5]);
+            }
         }
 
         return message;
@@ -464,6 +483,9 @@ abstract public class Mqtt implements MqttCallback
                         break;
                     case USER_ID:
                         //do nothing
+                        break;
+                    case OUTPUT_NAME:
+                        message.setOutputName(value);
                         break;
                     case ABSOLUTE_EXPIRY_TIME:
                         //do nothing

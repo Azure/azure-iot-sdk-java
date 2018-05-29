@@ -15,7 +15,7 @@ public class MqttMessaging extends Mqtt
     private String publishTopic;
     private String parseTopic;
 
-    public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId) throws TransportException
+    public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId, String moduleId) throws TransportException
     {
         //Codes_SRS_MqttMessaging_25_002: [The constructor shall use the configuration to instantiate super class and passing the parameters.]
         super(mqttConnection, listener, messageListener, connectionId);
@@ -26,11 +26,20 @@ public class MqttMessaging extends Mqtt
             throw new IllegalArgumentException("Device id cannot be null or empty");
         }
 
-        //Codes_SRS_MqttMessaging_25_003: [The constructor construct publishTopic and subscribeTopic from deviceId.]
-        //Codes_SRS_MqttMessaging_25_004: [The constructor shall save the provided listener.]
-        this.publishTopic = "devices/" + deviceId + "/messages/events/";
-        this.subscribeTopic = "devices/" + deviceId + "/messages/devicebound/#";
-        this.parseTopic = "devices/" + deviceId + "/messages/devicebound/";
+        if (moduleId == null || moduleId.isEmpty())
+        {
+            //Codes_SRS_MqttMessaging_25_003: [The constructor construct publishTopic and subscribeTopic from deviceId.]
+            this.publishTopic = "devices/" + deviceId + "/messages/events/";
+            this.subscribeTopic = "devices/" + deviceId + "/messages/devicebound/#";
+            this.parseTopic = "devices/" + deviceId + "/messages/devicebound/";
+        }
+        else
+        {
+            //Codes_SRS_MqttMessaging_34_031: [The constructor construct publishTopic and subscribeTopic from deviceId and moduleId.]
+            this.publishTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/events/";
+            this.subscribeTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/devicebound/#";
+            this.parseTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/devicebound/";
+        }
     }
 
     public void start() throws TransportException
@@ -117,6 +126,21 @@ public class MqttMessaging extends Mqtt
             stringBuilder.append(TO);
             stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
             stringBuilder.append(message.getTo());
+
+            separatorNeeded = true;
+        }
+
+        if (message.getOutputName() != null)
+        {
+            if (separatorNeeded)
+            {
+                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+            }
+
+            //Codes_SRS_MqttMessaging_34_032: [If the message has a OutputName, this method shall append that To to publishTopic before publishing using the key name `$.on`.]
+            stringBuilder.append(OUTPUT_NAME);
+            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+            stringBuilder.append(message.getOutputName());
 
             separatorNeeded = true;
         }

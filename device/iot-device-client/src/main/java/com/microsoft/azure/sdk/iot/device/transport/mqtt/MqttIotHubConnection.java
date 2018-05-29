@@ -5,10 +5,7 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportConnection;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import com.microsoft.azure.sdk.iot.device.transport.*;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -43,7 +40,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
 
-    private static final String TWIN_API_VERSION = "api-version=2016-11-14";
+    private static final String API_VERSION = "?api-version=" + TransportUtils.IOTHUB_API_VERSION;
 
     private String connectionId = UUID.randomUUID().toString();
 
@@ -154,26 +151,35 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
                 //URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
                 // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding
-                String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(this.config.getProductInfo().getUserAgentString(), "UTF-8").replaceAll("\\+", "%20");
-                this.iotHubUserName = this.config.getIotHubHostname() + "/" + this.config.getDeviceId() + "/" + TWIN_API_VERSION + "&" + clientIdentifier;
+                String clientUserAgentIdentifier = "DeviceClientType=" + URLEncoder.encode(this.config.getProductInfo().getUserAgentString(), "UTF-8").replaceAll("\\+", "%20");
+                String clientId = this.config.getDeviceId();
+
+                String moduleId = this.config.getModuleId();
+                if (moduleId != null && !moduleId.isEmpty())
+                {
+                    //Codes_SRS_MQTTIOTHUBCONNECTION_34_065: [If the config contains a module id, this function shall create the clientId for the connection to be <deviceId>/<moduleId>.]
+                    clientId += "/" + moduleId;
+                }
+
+                this.iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/" + API_VERSION + "&" + clientUserAgentIdentifier;
 
                 if (this.config.isUseWebsocket())
                 {
                     //Codes_SRS_MQTTIOTHUBCONNECTION_25_018: [The function shall establish an MQTT WS connection with a server uri as wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true if websocket was enabled.]
                     final String wsServerUri = WS_SSL_PREFIX + this.config.getIotHubHostname() + WEBSOCKET_RAW_PATH + WEBSOCKET_QUERY ;
                     mqttConnection = new MqttConnection(wsServerUri,
-                            this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword, sslContext);
+                            clientId, this.iotHubUserName, this.iotHubUserPassword, sslContext);
                 }
                 else
                 {
                     //Codes_SRS_MQTTIOTHUBCONNECTION_25_019: [The function shall establish an MQTT connection with a server uri as ssl://<hostName>:8883 if websocket was not enabled.]
                     final String serverUri = SSL_PREFIX + this.config.getIotHubHostname() + SSL_PORT_SUFFIX;
                     mqttConnection = new MqttConnection(serverUri,
-                            this.config.getDeviceId(), this.iotHubUserName, this.iotHubUserPassword, sslContext);
+                            clientId, this.iotHubUserName, this.iotHubUserPassword, sslContext);
                 }
 
                 //Codes_SRS_MQTTIOTHUBCONNECTION_34_030: [This function shall instantiate this object's MqttMessaging object with this object as the listener.]
-                this.deviceMessaging = new MqttMessaging(mqttConnection, this.config.getDeviceId(), this.listener, this, this.connectionId);
+                this.deviceMessaging = new MqttMessaging(mqttConnection, this.config.getDeviceId(), this.listener, this, this.connectionId, this.config.getModuleId());
                 this.mqttConnection.setMqttCallback(this.deviceMessaging);
                 this.deviceMethod = new MqttDeviceMethod(mqttConnection, this.connectionId);
                 this.deviceTwin = new MqttDeviceTwin(mqttConnection, this.connectionId);
@@ -514,8 +520,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                     break;
                 case DEVICE_TELEMETRY:
                     //Codes_SRS_MQTTIOTHUBCONNECTION_34_062: [If a transport message is successfully received, and the message has a type of DEVICE_TELEMETRY, this function shall set the callback and callback context of this object from the saved values in config for telemetry.]
-                    transportMessage.setMessageCallback(this.config.getDeviceTelemetryMessageCallback());
-                    transportMessage.setMessageCallbackContext(this.config.getDeviceTelemetryMessageContext());
+                    transportMessage.setMessageCallback(this.config.getDeviceTelemetryMessageCallback(transportMessage.getInputName()));
+                    transportMessage.setMessageCallbackContext(this.config.getDeviceTelemetryMessageContext(transportMessage.getInputName()));
                     break;
                 case UNKNOWN:
                 case CBS_AUTHENTICATION:
