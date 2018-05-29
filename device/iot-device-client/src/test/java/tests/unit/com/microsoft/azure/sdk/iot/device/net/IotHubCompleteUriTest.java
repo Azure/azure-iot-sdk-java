@@ -33,12 +33,12 @@ public class IotHubCompleteUriTest
         final String eTag = "test-etag";
         final String completePath = String.format(COMPLETE_PATH_FORMAT, eTag);
 
-        new IotHubCompleteUri(iotHubHostname, deviceId, eTag);
+        new IotHubCompleteUri(iotHubHostname, deviceId, eTag, null);
 
         new Verifications()
         {
             {
-                new IotHubUri(iotHubHostname, deviceId, completePath);
+                new IotHubUri(iotHubHostname, deviceId, completePath, null);
             }
         };
     }
@@ -58,8 +58,7 @@ public class IotHubCompleteUriTest
                 result = uriStr;
             }
         };
-        IotHubCompleteUri completeUri =
-                new IotHubCompleteUri(iotHubHostname, deviceId, eTag);
+        IotHubCompleteUri completeUri = new IotHubCompleteUri(iotHubHostname, deviceId, eTag, null);
 
         String testUriStr = completeUri.toString();
 
@@ -82,8 +81,7 @@ public class IotHubCompleteUriTest
                 result = hostname;
             }
         };
-        IotHubCompleteUri completeUri =
-                new IotHubCompleteUri(iotHubHostname, deviceId, eTag);
+        IotHubCompleteUri completeUri = new IotHubCompleteUri(iotHubHostname, deviceId, eTag, null);
 
         String testHostname = completeUri.getHostname();
 
@@ -106,8 +104,7 @@ public class IotHubCompleteUriTest
                 result = path;
             }
         };
-        IotHubCompleteUri completeUri =
-                new IotHubCompleteUri(iotHubHostname, deviceId, eTag);
+        IotHubCompleteUri completeUri = new IotHubCompleteUri(iotHubHostname, deviceId, eTag, null);
 
         String testPath = completeUri.getPath();
 

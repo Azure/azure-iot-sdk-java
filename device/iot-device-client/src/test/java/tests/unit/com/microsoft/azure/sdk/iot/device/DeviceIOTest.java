@@ -513,7 +513,7 @@ public class DeviceIOTest
 
 
     /* Tests_SRS_DEVICE_IO_21_022: [The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.] */
-    // Tests_SRS_DEVICE_IO_12_001: [The function shall set the connection string on the message if the iotHubConnectionString parameter is not null.]
+    // Tests_SRS_DEVICE_IO_12_001: [The function shall set the deviceId on the message if the deviceId parameter is not null.]
     @Test
     public void sendEventAsyncAddsMessageToTransportSuccess(
             @Mocked final Message mockMsg,
@@ -527,14 +527,14 @@ public class DeviceIOTest
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync",
-                new Class[] {Message.class, IotHubEventCallback.class, Object.class, IotHubConnectionString.class},
-                mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
+                new Class[] {Message.class, IotHubEventCallback.class, Object.class, String.class},
+                mockMsg, mockCallback, context, "someDeviceId");
 
         // assert
         new Verifications()
         {
             {
-                mockMsg.setIotHubConnectionString(mockConfig.getIotHubConnectionString());
+                mockMsg.setConnectionDeviceId("someDeviceId");
                 times = 1;
                 mockedTransport.addMessage(mockMsg, mockCallback, context);
                 times = 1;
@@ -571,8 +571,8 @@ public class DeviceIOTest
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync",
-                new Class[] {Message.class, IotHubEventCallback.class, Object.class, IotHubConnectionString.class},
-                mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
+                new Class[] {Message.class, IotHubEventCallback.class, Object.class, String.class},
+                mockMsg, mockCallback, context, mockConfig.getDeviceId());
     }
 
     /* Tests_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
@@ -590,7 +590,7 @@ public class DeviceIOTest
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
 
         // act
-        Deencapsulation.invoke(deviceIO, "sendEventAsync", mockMsg, mockCallback, context, mockConfig.getIotHubConnectionString());
+        Deencapsulation.invoke(deviceIO, "sendEventAsync", new Class[] {Message.class, IotHubEventCallback.class, Object.class, String.class}, mockMsg, mockCallback, context, mockConfig.getDeviceId());
     }
 
     /* Tests_SRS_DEVICE_IO_21_025: [The getProtocol shall return the protocol for transport.] */

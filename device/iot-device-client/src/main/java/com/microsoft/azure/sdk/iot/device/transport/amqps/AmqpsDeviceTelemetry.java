@@ -19,14 +19,14 @@ import java.util.Map;
 
 public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
 {
-    private final String SENDER_LINK_ENDPOINT_PATH = "/devices/%s/messages/events";
-    private final String RECEIVER_LINK_ENDPOINT_PATH = "/devices/%s/messages/devicebound";
+    private static final String SENDER_LINK_ENDPOINT_PATH = "/devices/%s/messages/events";
+    private static final String RECEIVER_LINK_ENDPOINT_PATH = "/devices/%s/messages/devicebound";
 
-    private final String SENDER_LINK_ENDPOINT_PATH_MODULES = "/devices/%s/modules/%s/messages/events";
-    private final String RECEIVER_LINK_ENDPOINT_PATH_MODULES = "/devices/%s/modules/%s/messages/devicebound";
+    private static final String SENDER_LINK_ENDPOINT_PATH_MODULES = "/devices/%s/modules/%s/messages/events";
+    private static final String RECEIVER_LINK_ENDPOINT_PATH_MODULES = "/devices/%s/modules/%s/messages/devicebound";
 
-    private final String SENDER_LINK_TAG_PREFIX = "sender_link_telemetry-";
-    private final String RECEIVER_LINK_TAG_PREFIX = "receiver_link_telemetry-";
+    private static final String SENDER_LINK_TAG_PREFIX = "sender_link_telemetry-";
+    private static final String RECEIVER_LINK_TAG_PREFIX = "receiver_link_telemetry-";
 
     private DeviceClientConfig deviceClientConfig;
 
@@ -39,7 +39,9 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
     AmqpsDeviceTelemetry(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
     {
         // Codes_SRS_AMQPSDEVICETELEMETRY_34_050: [This constructor shall call super with the provided user agent string.]
-        super(deviceClientConfig);
+        super(deviceClientConfig, SENDER_LINK_ENDPOINT_PATH, RECEIVER_LINK_ENDPOINT_PATH,
+                SENDER_LINK_ENDPOINT_PATH_MODULES, RECEIVER_LINK_ENDPOINT_PATH_MODULES,
+                SENDER_LINK_TAG_PREFIX, RECEIVER_LINK_TAG_PREFIX);
 
         this.deviceClientConfig = deviceClientConfig;
 

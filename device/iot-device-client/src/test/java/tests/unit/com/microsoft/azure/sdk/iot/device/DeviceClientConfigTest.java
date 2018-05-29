@@ -3,10 +3,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.device.MessageCallback;
-import com.microsoft.azure.sdk.iot.device.ProductInfo;
+import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
@@ -24,6 +22,8 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -36,18 +36,12 @@ import static org.junit.Assert.*;
  */
 public class DeviceClientConfigTest
 {
-    @Mocked
-    IotHubSasTokenAuthenticationProvider mockSasTokenAuthentication;
-    @Mocked
-    IotHubSasTokenSoftwareAuthenticationProvider mockSasTokenSoftwareAuthentication;
-    @Mocked
-    IotHubSasTokenHardwareAuthenticationProvider mockSasTokenHardwareAuthentication;
-    @Mocked
-    IotHubX509AuthenticationProvider mockX509Authentication;
-    @Mocked
-    IotHubX509HardwareAuthenticationProvider mockX509HardwareAuthentication;
-    @Mocked
-    IotHubX509SoftwareAuthenticationProvider mockX509SoftwareAuthentication;
+    @Mocked IotHubSasTokenAuthenticationProvider mockSasTokenAuthentication;
+    @Mocked IotHubSasTokenSoftwareAuthenticationProvider mockSasTokenSoftwareAuthentication;
+    @Mocked IotHubSasTokenHardwareAuthenticationProvider mockSasTokenHardwareAuthentication;
+    @Mocked IotHubX509AuthenticationProvider mockX509Authentication;
+    @Mocked IotHubX509HardwareAuthenticationProvider mockX509HardwareAuthentication;
+    @Mocked IotHubX509SoftwareAuthenticationProvider mockX509SoftwareAuthentication;
     @Mocked IotHubConnectionString mockIotHubConnectionString;
     @Mocked SecurityProvider mockSecurityProvider;
     @Mocked SecurityProviderX509 mockSecurityProviderX509;
@@ -55,8 +49,10 @@ public class DeviceClientConfigTest
     @Mocked SSLContext mockSSLContext;
     @Mocked RetryPolicy mockRetryPolicy;
     @Mocked ProductInfo mockedProductInfo;
+    @Mocked MessageCallback mockedMessageCallback;
 
     private static String expectedDeviceId = "deviceId";
+    private static String expectedModuleId = "moduleId";
     private static String expectedHostname = "hostname";
 
     // Tests_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
@@ -148,7 +144,7 @@ public class DeviceClientConfigTest
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_11_006: [The function shall set the message callback, with its associated context.]
-    // Tests_SRS_DEVICECLIENTCONFIG_11_010: [The function shall return the current message callback.]
+    // Tests_SRS_DEVICECLIENTCONFIG_11_010: [If the inputName is null, or the message callbacks map does not contain the provided inputName, this function shall return the default message callback.]
     @Test
     public void getAndSetMessageCallbackMatch(
             @Mocked final MessageCallback mockCallback)
@@ -169,14 +165,14 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
-        MessageCallback testCallback = config.getDeviceTelemetryMessageCallback();
+        MessageCallback testCallback = config.getDeviceTelemetryMessageCallback(null);
 
         final MessageCallback expectedCallback = mockCallback;
         assertThat(testCallback, is(expectedCallback));
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_11_006: [The function shall set the message callback, with its associated context.]
-    // Tests_SRS_DEVICECLIENTCONFIG_11_011: [The function shall return the current message context.]
+    // Tests_SRS_DEVICECLIENTCONFIG_11_011: [If the inputName is null, or the message callbacks map does not contain the provided inputName, this function shall return the default message callback context.]
     @Test
     public void getAndSetMessageCallbackContextsMatch(
             @Mocked final MessageCallback mockCallback)
@@ -197,8 +193,72 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
-        Object testContext = config.getDeviceTelemetryMessageContext();
+        Object testContext = config.getDeviceTelemetryMessageContext(null);
 
+        final Object expectedContext = context;
+        assertThat(testContext, is(expectedContext));
+    }
+
+    // Tests_SRS_DEVICECLIENTCONFIG_34_045: [If the message callbacks map contains the provided inputName, this function
+    // shall return the callback associated with that inputName.]
+    @Test
+    public void getMessageCallbackWithSavedInput(@Mocked final MessageCallback mockCallback)
+            throws URISyntaxException, IOException
+    {
+        //arrange
+        String inputName = "someValidInputName";
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+        final IotHubConnectionString iotHubConnectionString =
+                Deencapsulation.newInstance(IotHubConnectionString.class,
+                        new Class[] {String.class, String.class, String.class, String.class},
+                        iotHubHostname,
+                        deviceId,
+                        deviceKey,
+                        sharedAccessToken);
+
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
+        Object context = new Object();
+        config.setMessageCallback(inputName, mockedMessageCallback, context);
+
+        //act
+        MessageCallback actualMessageCallback = config.getDeviceTelemetryMessageCallback(inputName);
+
+        //assert
+        assertEquals(mockedMessageCallback, actualMessageCallback);
+    }
+
+    // Tests_SRS_DEVICECLIENTCONFIG_34_046: [If the message callbacks map contains the provided inputName, this function
+    // shall return the context associated with that inputName.]
+    @Test
+    public void getMessageCallbackContextWithSavedInput(
+            @Mocked final MessageCallback mockCallback)
+            throws URISyntaxException, IOException
+    {
+        //arrange
+        String inputName = "someValidInputName";
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+        final IotHubConnectionString iotHubConnectionString =
+                Deencapsulation.newInstance(IotHubConnectionString.class,
+                        new Class[] {String.class, String.class, String.class, String.class},
+                        iotHubHostname,
+                        deviceId,
+                        deviceKey,
+                        sharedAccessToken);
+
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
+        Object context = new Object();
+        config.setMessageCallback(inputName, mockCallback, context);
+
+        //act
+        Object testContext = config.getDeviceTelemetryMessageContext(inputName);
+
+        //assert
         final Object expectedContext = context;
         assertThat(testContext, is(expectedContext));
     }
@@ -400,7 +460,7 @@ public class DeviceClientConfigTest
     @Test(expected = IllegalArgumentException.class)
     public void constructorFailsNullConnectionString()
     {
-        DeviceClientConfig config = new DeviceClientConfig(null, DeviceClientConfig.AuthType.SAS_TOKEN);
+        DeviceClientConfig config = new DeviceClientConfig((IotHubConnectionString) null, DeviceClientConfig.AuthType.SAS_TOKEN);
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_039: [This function shall return the type of authentication that the config is set up to use.]
@@ -473,7 +533,7 @@ public class DeviceClientConfigTest
     public void constructorWithX509AuthThrows(@Mocked final IotHubConnectionString mockIotHubConnectionString) throws IOException
     {
         //act
-        new DeviceClientConfig(null, DeviceClientConfig.AuthType.X509_CERTIFICATE);
+        new DeviceClientConfig((IotHubConnectionString) null, DeviceClientConfig.AuthType.X509_CERTIFICATE);
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_076: [If the provided `iotHubConnectionString` uses x509 authentication, the constructor shall throw an IllegalArgumentException.]
@@ -627,7 +687,10 @@ public class DeviceClientConfigTest
                 mockIotHubConnectionString.getDeviceId();
                 result = expectedDeviceId;
 
-                new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedDeviceId, mockSecurityProviderSAS);
+                mockIotHubConnectionString.getModuleId();
+                result = expectedModuleId;
+
+                new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderSAS);
                 result = mockSasTokenHardwareAuthentication;
             }
         };
@@ -641,7 +704,7 @@ public class DeviceClientConfigTest
         new Verifications()
         {
             {
-                new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedDeviceId, mockSecurityProviderSAS);
+                new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderSAS);
                 times = 1;
             }
         };
@@ -849,5 +912,25 @@ public class DeviceClientConfigTest
                 times = 1;
             }
         };
+    }
+
+    //Tests_SRS_DEVICECLIENTCONFIG_34_044: [The function shall map the provided inputName to the callback and context in the saved inputChannelMessageCallbacks map.]
+    @Test
+    public void setMessageCallbackWithInput()
+    {
+        //arrange
+        final String inputName = "someInputName";
+        final Object context = new Object();
+        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
+
+        //act
+        config.setMessageCallback(inputName, mockedMessageCallback, context);
+
+        //assert
+        Map<String, Pair<MessageCallback, Object>> actualMap = Deencapsulation.getField(config, "inputChannelMessageCallbacks");
+        assertNotNull(actualMap);
+        assertTrue(actualMap.containsKey(inputName));
+        assertTrue(actualMap.get(inputName).getKey().equals(mockedMessageCallback));
+        assertTrue(actualMap.get(inputName).getValue().equals(context));
     }
 }

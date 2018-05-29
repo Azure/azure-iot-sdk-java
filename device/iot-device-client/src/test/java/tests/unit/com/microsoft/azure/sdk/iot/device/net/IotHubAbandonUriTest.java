@@ -34,12 +34,12 @@ public class IotHubAbandonUriTest
         final String eTag = "test-etag";
         final String abandonPath = String.format(ABANDON_PATH_FORMAT, eTag);
 
-        new IotHubAbandonUri(iotHubHostname, deviceId, eTag);
+        new IotHubAbandonUri(iotHubHostname, deviceId, eTag, null);
 
         new Verifications()
         {
             {
-                new IotHubUri(iotHubHostname, deviceId, abandonPath);
+                new IotHubUri(iotHubHostname, deviceId, abandonPath, null);
             }
         };
     }
@@ -60,7 +60,7 @@ public class IotHubAbandonUriTest
             }
         };
         IotHubAbandonUri abandonUri =
-                new IotHubAbandonUri(iotHubHostname, deviceId, eTag);
+                new IotHubAbandonUri(iotHubHostname, deviceId, eTag, null);
 
         String testUriStr = abandonUri.toString();
 
@@ -84,7 +84,7 @@ public class IotHubAbandonUriTest
             }
         };
         IotHubAbandonUri abandonUri =
-                new IotHubAbandonUri(iotHubHostname, deviceId, eTag);
+                new IotHubAbandonUri(iotHubHostname, deviceId, eTag, null);
 
         String testHostname = abandonUri.getHostname();
 
@@ -108,7 +108,7 @@ public class IotHubAbandonUriTest
             }
         };
         IotHubAbandonUri abandonUri =
-                new IotHubAbandonUri(iotHubHostname, deviceId, eTag);
+                new IotHubAbandonUri(iotHubHostname, deviceId, eTag, null);
 
         String testPath = abandonUri.getPath();
 

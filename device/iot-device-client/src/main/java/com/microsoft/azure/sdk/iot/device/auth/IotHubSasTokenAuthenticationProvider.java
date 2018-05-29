@@ -31,6 +31,7 @@ public abstract class IotHubSasTokenAuthenticationProvider
 
     protected String hostname;
     protected String deviceId;
+    protected String moduleId;
 
     protected boolean sslContextNeedsUpdate;
 

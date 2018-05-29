@@ -18,11 +18,11 @@ public final class IotHubEventUri
      *
      * @param iotHubHostname the IoT Hub name.
      * @param deviceId the device ID.
+     * @param moduleId the module ID. May be null
      */
-    public IotHubEventUri(String iotHubHostname, String deviceId)
+    public IotHubEventUri(String iotHubHostname, String deviceId, String moduleId)
     {
-        // Codes_SRS_IOTHUBEVENTURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2016-02-03".]
-        this.uri = new IotHubUri(iotHubHostname, deviceId, EVENT_PATH);
+        this.uri = new IotHubUri(iotHubHostname, deviceId, EVENT_PATH, moduleId);
     }
 
     /**

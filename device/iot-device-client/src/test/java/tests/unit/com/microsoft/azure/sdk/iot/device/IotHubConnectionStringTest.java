@@ -28,6 +28,8 @@ public class IotHubConnectionStringTest
     private static final String VALID_SHARED_ACCESS_TOKEN = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + Long.MAX_VALUE;
     private static final String EXPIRED_SHARED_ACCESS_TOKEN = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=0";
     private static final String IOTHUB_CONNECTION_STRING_CLASS = "com.microsoft.azure.sdk.iot.device.IotHubConnectionString";
+    private static final String VALID_MODULEID = "moduleId";
+    private static final String VALID_GATEWAYHOSTNAME = ".gateway.com";
 
     private void assertConnectionString(Object iotHubConnectionString, String expectedHostName,
                                         String expectedDeviceId, String expectedSharedAccessKey, String expectedSharedAccessToken)
@@ -69,6 +71,25 @@ public class IotHubConnectionStringTest
 
         // assert
         assertConnectionString(iotHubConnectionString, VALID_HOSTNAME, VALID_DEVICEID, VALID_SHARED_ACCESS_KEY, null);
+    }
+
+    // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_040: [The constructor shall save the module id as the value of 'ModuleId' in the connection string.]
+    // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_041: [The constructor shall save the gateway host name as the value of 'GatewayHostName' in the connection string.]
+    // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_042: [If the gateway host name is specified in the connection string, the constructor shall save the gateway host name as the host name.]
+    @Test
+    public void ConstructorSavesModuleIdAndGatewayHostname() throws URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey;" +
+                "DeviceId=" + VALID_DEVICEID + ";SharedAccessKey=" + VALID_SHARED_ACCESS_KEY + ";ModuleId=" +
+                VALID_MODULEID +";GatewayHostName=" + VALID_GATEWAYHOSTNAME + ";";
+
+        //act
+        IotHubConnectionString connectionString = new IotHubConnectionString(connString);
+
+        //assert
+        assertEquals(VALID_MODULEID, connectionString.getModuleId());
+        assertEquals(VALID_GATEWAYHOSTNAME, connectionString.getHostName());
     }
 
     /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_020: [The constructor shall save the IoT Hub hostname as the value of `hostName` in the connection string.] */

@@ -89,7 +89,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                new IotHubEventUri(iotHubHostname, deviceId);
+                new IotHubEventUri(iotHubHostname, deviceId, null);
                 result = mockUri;
                 mockUri.toString();
                 result = eventUri;
@@ -294,7 +294,7 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                new IotHubEventUri((String)any, (String)any);
+                new IotHubEventUri((String)any, (String)any, null);
                 result = mockUri;
                 new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
                 result = mockRequest;
@@ -327,7 +327,7 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                new IotHubEventUri((String)any, (String)any);
+                new IotHubEventUri((String)any, (String)any, null);
                 result = mockUri;
                 new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
                 result = mockRequest;
@@ -417,7 +417,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                new IotHubUri(iotHubHostname, deviceId, uriPath);
+                new IotHubUri(iotHubHostname, deviceId, uriPath, null);
                 result = mockUri;
                 mockUri.toString();
                 result = eventUri;
@@ -625,7 +625,7 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                new IotHubUri((String)any, (String)any, uriPath);
+                new IotHubUri((String)any, (String)any, uriPath, null);
                 result = mockUri;
                 new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
                 result = mockRequest;
@@ -656,7 +656,7 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                new IotHubUri((String)any, (String)any, uriPath);
+                new IotHubUri((String)any, (String)any, uriPath, null);
                 result = mockUri;
                 new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
                 result = mockRequest;
@@ -730,7 +730,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                new IotHubMessageUri(iotHubHostname, deviceId);
+                new IotHubMessageUri(iotHubHostname, deviceId, null);
                 result = mockUri;
                 mockUri.toString();
                 result = messageUri;
@@ -1031,7 +1031,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                new IotHubCompleteUri(iotHubHostname, deviceId, eTag);
+                new IotHubCompleteUri(iotHubHostname, deviceId, eTag, null);
                 result = mockUri;
                 mockUri.toString();
                 result = completeUri;
@@ -1113,7 +1113,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                new IotHubCompleteUri(iotHubHostname, deviceId, eTag);
+                new IotHubCompleteUri(iotHubHostname, deviceId, eTag, null);
                 result = mockUri;
                 mockUri.toString();
                 result = completeUri;
@@ -1161,7 +1161,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                new IotHubAbandonUri(iotHubHostname, deviceId, eTag);
+                new IotHubAbandonUri(iotHubHostname, deviceId, eTag, null);
                 result = mockUri;
                 mockUri.toString();
                 result = abandonUri;
@@ -1239,7 +1239,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                new IotHubAbandonUri(iotHubHostname, deviceId, eTag);
+                new IotHubAbandonUri(iotHubHostname, deviceId, eTag, null);
                 result = mockUri;
                 mockUri.toString();
                 result = abandonUri;
@@ -1286,7 +1286,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                new IotHubRejectUri(iotHubHostname, deviceId, eTag);
+                new IotHubRejectUri(iotHubHostname, deviceId, eTag, null);
                 result = mockUri;
                 mockUri.toString();
                 result = rejectUri;
@@ -1364,7 +1364,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                new IotHubRejectUri(iotHubHostname, deviceId, eTag);
+                new IotHubRejectUri(iotHubHostname, deviceId, eTag, null);
                 result = mockUri;
                 mockUri.toString();
                 result = rejectUri;
@@ -1837,7 +1837,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                new IotHubEventUri(iotHubHostname, deviceId);
+                new IotHubEventUri(iotHubHostname, deviceId, null);
                 result = mockUri;
                 mockUri.toString();
                 result = eventUri;
@@ -1881,7 +1881,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                new IotHubEventUri(iotHubHostname, deviceId);
+                new IotHubEventUri(iotHubHostname, deviceId, null);
                 result = mockUri;
                 mockUri.toString();
                 result = eventUri;

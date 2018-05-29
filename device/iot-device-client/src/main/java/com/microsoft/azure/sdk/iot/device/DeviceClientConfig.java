@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
@@ -11,6 +12,8 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Configuration settings for an IoT Hub client. Validates all user-defined
@@ -33,6 +36,8 @@ public final class DeviceClientConfig
     /* information in the connection string that unique identify the device */
     private IotHubConnectionString iotHubConnectionString;
 
+    //private AuthenticationMethod authenticationMethod;
+
     /**
      * The callback to be invoked if a message of Device Method type received.
      */
@@ -50,9 +55,11 @@ public final class DeviceClientConfig
     /**
      * The callback to be invoked if a message is received.
      */
-    private MessageCallback deviceTelemetryMessageCallback;
+    private MessageCallback defaultDeviceTelemetryMessageCallback;
     /** The context to be passed in to the message callback. */
-    private Object deviceTelemetryMessageContext;
+    private Object defaultDeviceTelemetryMessageContext;
+
+    private Map<String, Pair<MessageCallback, Object>> inputChannelMessageCallbacks = new HashMap<>();
 
     private CustomLogger logger;
 
@@ -112,6 +119,7 @@ public final class DeviceClientConfig
         this.sasTokenAuthentication = new IotHubSasTokenSoftwareAuthenticationProvider(
                 this.iotHubConnectionString.getHostName(),
                 this.iotHubConnectionString.getDeviceId(),
+                this.iotHubConnectionString.getModuleId(),
                 this.iotHubConnectionString.getSharedAccessKey(),
                 this.iotHubConnectionString.getSharedAccessToken());
 
@@ -123,10 +131,35 @@ public final class DeviceClientConfig
                 iotHubConnectionString.getHostName(), iotHubConnectionString.getDeviceId(), logger.getMethodName());
     }
 
+    /*public DeviceClientConfig(AuthenticationMethod authenticationMethod, AuthType authType) throws IllegalArgumentException, IOException
+    {
+        this.authenticationMethod = authenticationMethod;
+        this.iotHubConnectionString = authenticationMethod.createConnectionString();
+        this.useWebsocket = false;
+
+        // Codes_SRS_DEVICECLIENTCONFIG_12_001: [The constructor shall set the authentication type to the given authType value.]
+        this.authenticationType = authType;
+        this.iotHubConnectionString = iotHubConnectionString;
+
+        this.sasTokenAuthentication = new IotHubSasTokenSoftwareAuthenticationProvider(
+                this.iotHubConnectionString.getHostName(),
+                this.iotHubConnectionString.getDeviceId(),
+                this.iotHubConnectionString.getModuleId(),
+                this.iotHubConnectionString.getSharedAccessKey(),
+                this.iotHubConnectionString.getSharedAccessToken());
+
+        //Codes_SRS_DEVICECLIENTCONFIG_34_041: [This function shall save a new default product info.]
+        this.productInfo = new ProductInfo();
+
+        this.logger = new CustomLogger(this.getClass());
+        logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
+                iotHubConnectionString.getHostName(), iotHubConnectionString.getDeviceId(), logger.getMethodName());
+    }*/
+
     /**
      * Constructor for device configs that use x509 authentication
      *
-     * @param iotHubConnectionString The connection string for the device. (format: "HostName=...;DeviceId=...;x509=true")
+     * @param iotHubConnectionString The connection string for the device. (format: "HostName=...;deviceId=...;x509=true")
      * @param publicKeyCertificate The PEM encoded public key certificate or the path to the PEM encoded public key certificate file
      * @param isPathForPublic If the provided publicKeyCertificate is a path to the actual public key certificate
      * @param privateKey The PEM encoded private key or the path to the PEM encoded private key file
@@ -185,7 +218,7 @@ public final class DeviceClientConfig
         {
             //Codes_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security provider is a SecurityProviderTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthenticationProvider instance using the security provider.]
             this.authenticationType = AuthType.SAS_TOKEN;
-            this.sasTokenAuthentication = new IotHubSasTokenHardwareAuthenticationProvider(connectionString.getHostName(), connectionString.getDeviceId(), securityProvider);
+            this.sasTokenAuthentication = new IotHubSasTokenHardwareAuthenticationProvider(connectionString.getHostName(), connectionString.getDeviceId(), connectionString.getModuleId(), securityProvider);
         }
         else if (securityProvider instanceof SecurityProviderX509)
         {
@@ -278,8 +311,13 @@ public final class DeviceClientConfig
      *
      * @return The value of IotHubConnectionString
      */
-    public IotHubConnectionString getIotHubConnectionString()
+    public IotHubConnectionString getIotHubConnectionString() //throws IOException
     {
+        //if (this.authenticationMethod != null)
+        //{
+            //return this.authenticationMethod.createConnectionString();
+        //}
+
         // Codes_SRS_DEVICECLIENTCONFIG_34_079: [This function shall return the saved IotHubConnectionString object.]
         return this.iotHubConnectionString;
     }
@@ -309,12 +347,17 @@ public final class DeviceClientConfig
      * @param callback the message callback. Can be {@code null}.
      * @param context the context to be passed in to the callback.
      */
-    public void setMessageCallback(MessageCallback callback,
-                                   Object context)
+    public void setMessageCallback(MessageCallback callback, Object context)
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_006: [The function shall set the message callback, with its associated context.]
-        this.deviceTelemetryMessageCallback = callback;
-        this.deviceTelemetryMessageContext = context;
+        this.defaultDeviceTelemetryMessageCallback = callback;
+        this.defaultDeviceTelemetryMessageContext = context;
+    }
+
+    public void setMessageCallback(String inputName, MessageCallback callback, Object context)
+    {
+        // Codes_SRS_DEVICECLIENTCONFIG_34_044: [The function shall map the provided inputName to the callback and context in the saved inputChannelMessageCallbacks map.]
+        this.inputChannelMessageCallbacks.put(inputName, new Pair<>(callback, context));
     }
 
     /**
@@ -348,6 +391,11 @@ public final class DeviceClientConfig
         return this.iotHubConnectionString.getDeviceId();
     }
 
+    public String getModuleId()
+    {
+        return this.iotHubConnectionString.getModuleId();
+    }
+
     /**
      * Getter for the timeout, in milliseconds, after a connection is
      * established for the server to respond to the request.
@@ -364,23 +412,47 @@ public final class DeviceClientConfig
     /**
      * Getter for the message callback.
      *
+     * @param inputName the inputName that the desired callback is tied to, or null for the default callback
+     *
      * @return the message callback.
      */
-    public MessageCallback getDeviceTelemetryMessageCallback()
+    public MessageCallback getDeviceTelemetryMessageCallback(String inputName)
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_010: [The function shall return the current message callback.]
-        return this.deviceTelemetryMessageCallback;
+        if (inputName == null || !this.inputChannelMessageCallbacks.containsKey(inputName))
+        {
+            // Codes_SRS_DEVICECLIENTCONFIG_34_010: [If the inputName is null, or the message callbacks map does not
+            // contain the provided inputName, this function shall return the default message callback.]
+            return this.defaultDeviceTelemetryMessageCallback;
+        }
+        else
+        {
+            // Codes_SRS_DEVICECLIENTCONFIG_34_045: [If the message callbacks map contains the provided inputName, this function
+            // shall return the callback associated with that inputName.]
+            return this.inputChannelMessageCallbacks.get(inputName).getKey();
+        }
     }
 
     /**
      * Getter for the context to be passed in to the message callback.
      *
+     * @param inputName the inputName that the desired callback context is tied to, or null for the default callback context
+     *
      * @return the message context.
      */
-    public Object getDeviceTelemetryMessageContext()
+    public Object getDeviceTelemetryMessageContext(String inputName)
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_011: [The function shall return the current message context.]
-        return this.deviceTelemetryMessageContext;
+        if (inputName == null || !this.inputChannelMessageCallbacks.containsKey(inputName))
+        {
+            // Codes_SRS_DEVICECLIENTCONFIG_34_011: [If the inputName is null, or the message callbacks map does not
+            // contain the provided inputName, this function shall return the default message callback context.]
+            return this.defaultDeviceTelemetryMessageContext;
+        }
+        else
+        {
+            // Codes_SRS_DEVICECLIENTCONFIG_34_046: [If the message callbacks map contains the provided inputName, this function
+            // shall return the context associated with that inputName.]
+            return this.inputChannelMessageCallbacks.get(inputName).getValue();
+        }
     }
 
     /**
@@ -535,10 +607,10 @@ public final class DeviceClientConfig
         this.x509Authentication = null;
         this.iotHubConnectionString = null;
         this.deviceMethodsMessageCallback = null;
-        this.deviceTelemetryMessageCallback = null;
+        this.defaultDeviceTelemetryMessageCallback = null;
         this.deviceTwinMessageCallback = null;
         this.deviceMethodsMessageContext = null;
-        this.deviceTelemetryMessageContext = null;
+        this.defaultDeviceTelemetryMessageContext = null;
         this.deviceTwinMessageContext = null;
         this.logger = null;
         this.useWebsocket = false;

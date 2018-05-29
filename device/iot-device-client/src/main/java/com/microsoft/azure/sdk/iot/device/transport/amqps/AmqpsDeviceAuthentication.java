@@ -14,7 +14,7 @@ public class AmqpsDeviceAuthentication extends AmqpsDeviceOperations
     AmqpsDeviceAuthentication(DeviceClientConfig deviceClientConfig)
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATION_34_009: [This constructor shall call super with the provided user agent string.]
-        super(deviceClientConfig);
+        super(deviceClientConfig, "", "", "", "", "", "");
     }
 
     /**

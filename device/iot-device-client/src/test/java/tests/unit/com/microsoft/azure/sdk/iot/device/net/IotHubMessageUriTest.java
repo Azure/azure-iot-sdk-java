@@ -30,12 +30,12 @@ public class IotHubMessageUriTest
         final String iotHubHostname = "test.iothub";
         final String deviceId = "test-deviceid";
 
-        new IotHubMessageUri(iotHubHostname, deviceId);
+        new IotHubMessageUri(iotHubHostname, deviceId, "");
 
         new Verifications()
         {
             {
-                new IotHubUri(iotHubHostname, deviceId, MESSAGE_PATH);
+                new IotHubUri(iotHubHostname, deviceId, MESSAGE_PATH, "");
             }
         };
     }
@@ -55,7 +55,7 @@ public class IotHubMessageUriTest
             }
         };
         IotHubMessageUri messageUri =
-                new IotHubMessageUri(iotHubHostname, deviceId);
+                new IotHubMessageUri(iotHubHostname, deviceId, "");
 
         String testUriStr = messageUri.toString();
 
@@ -78,7 +78,7 @@ public class IotHubMessageUriTest
             }
         };
         IotHubMessageUri messageUri =
-                new IotHubMessageUri(iotHubHostname, deviceId);
+                new IotHubMessageUri(iotHubHostname, deviceId, "");
 
         String testHostname = messageUri.getHostname();
 
@@ -101,7 +101,7 @@ public class IotHubMessageUriTest
             }
         };
         IotHubMessageUri messageUri =
-                new IotHubMessageUri(iotHubHostname, deviceId);
+                new IotHubMessageUri(iotHubHostname, deviceId, "");
 
         String testPath = messageUri.getPath();
 

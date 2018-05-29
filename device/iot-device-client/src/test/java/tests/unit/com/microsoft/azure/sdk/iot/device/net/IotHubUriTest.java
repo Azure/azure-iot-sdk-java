@@ -4,6 +4,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.net;
 
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
+import mockit.Deencapsulation;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -15,6 +16,8 @@ import static org.junit.Assert.assertThat;
 /** Unit tests for IotHubUri. */
 public class IotHubUriTest
 {
+    private static final String API_VERSION = Deencapsulation.getField(IotHubUri.class, "API_VERSION");
+    
     // Tests_SRS_IOTHUBURI_11_007: [The constructor shall return a URI pointing to the address '[iotHubHostname] /devices/[deviceId]/[IoT Hub method path]?api-version=2016-02-03'.]
     // Tests_SRS_IOTHUBURI_11_001: [The string representation of the IoT Hub URI shall be constructed with the format '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]?api-version=2016-02-03(&[queryFragment]) '.]
     @Test
@@ -24,11 +27,11 @@ public class IotHubUriTest
         final String deviceId = "sample-deviceid";
         final String iotHubMethodPath = "/sample-path";
 
-        IotHubUri uri = new IotHubUri(iotHubHostname, deviceId, iotHubMethodPath);
+        IotHubUri uri = new IotHubUri(iotHubHostname, deviceId, iotHubMethodPath, null);
         String testUriStr = uri.toString();
 
         final String expectedUriStr =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path?api-version=2016-02-03";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path?" + API_VERSION;
         assertThat(testUriStr, is(expectedUriStr));
     }
 
@@ -40,11 +43,11 @@ public class IotHubUriTest
         final String deviceId = "?&sample-deviceid";
         final String iotHubMethodPath = "/sample-path";
 
-        IotHubUri uri = new IotHubUri(iotHubHostname, deviceId, iotHubMethodPath);
+        IotHubUri uri = new IotHubUri(iotHubHostname, deviceId, iotHubMethodPath, null);
         String testUriStr = uri.toString();
 
         final String expectedUriStr =
-                "sample.iothubhostname/devices/%3F%26sample-deviceid/sample-path?api-version=2016-02-03";
+                "sample.iothubhostname/devices/%3F%26sample-deviceid/sample-path?" + API_VERSION;
         assertThat(testUriStr, is(expectedUriStr));
     }
 
@@ -56,11 +59,11 @@ public class IotHubUriTest
         final String deviceId = "sample-deviceid";
         final String iotHubMethodPath = "/sample-path?";
 
-        IotHubUri uri = new IotHubUri(iotHubHostname, deviceId, iotHubMethodPath);
+        IotHubUri uri = new IotHubUri(iotHubHostname, deviceId, iotHubMethodPath, null);
         String testUriStr = uri.toString();
 
         final String expectedUriStr =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path%3F?api-version=2016-02-03";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path%3F?" + API_VERSION;
         assertThat(testUriStr, is(expectedUriStr));
     }
 
@@ -75,13 +78,13 @@ public class IotHubUriTest
         queryParams.put("test", "true");
 
         IotHubUri uri = new IotHubUri(iotHubHostname, deviceId, iotHubMethodPath,
-                queryParams);
+                queryParams, "");
         String testUriStr = uri.toString();
 
         final String expectedUriStr0 =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path?test=true&api-version=2016-02-03";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path?test=true&?" + API_VERSION;
         final String expectedUriStr1 =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path?api-version=2016-02-03&test=true";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path?" + API_VERSION + "&test=true";
         assertThat(testUriStr, is(
                 anyOf(equalTo(expectedUriStr0), equalTo(expectedUriStr1))));
     }
@@ -99,7 +102,7 @@ public class IotHubUriTest
         String testUriStr = uri.toString();
 
         final String expectedUriStr =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path?api-version=2016-02-03";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path?" + API_VERSION;
         assertThat(testUriStr, is(expectedUriStr));
     }
 
@@ -116,7 +119,7 @@ public class IotHubUriTest
         String testUriStr = uri.toString();
 
         final String expectedUriStr =
-                "sample.iothubhostname/devices/%3F%26sample-deviceid/sample-path?api-version=2016-02-03";
+                "sample.iothubhostname/devices/%3F%26sample-deviceid/sample-path?" + API_VERSION;
         assertThat(testUriStr, is(expectedUriStr));
     }
 
@@ -133,7 +136,7 @@ public class IotHubUriTest
         String testUriStr = uri.toString();
 
         final String expectedUriStr =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path%3F?api-version=2016-02-03";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path%3F?" + API_VERSION;
         assertThat(testUriStr, is(expectedUriStr));
     }
 
@@ -148,13 +151,13 @@ public class IotHubUriTest
         queryParams.put("test?", "true?");
 
         IotHubUri uri = new IotHubUri(iotHubHostname, deviceId, iotHubMethodPath,
-                queryParams);
+                queryParams, "");
         String testUriStr = uri.toString();
 
         final String expectedUriStr0 =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path?test%3F=true%3F&api-version=2016-02-03";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path?test%3F=true%3F&?" + API_VERSION;
         final String expectedUriStr1 =
-                "sample.iothubhostname/devices/sample-deviceid/sample-path?api-version=2016-02-03&test%3F=true%3F";
+                "sample.iothubhostname/devices/sample-deviceid/sample-path?" + API_VERSION + "&test%3F=true%3F";
         assertThat(testUriStr, is(
                 anyOf(equalTo(expectedUriStr0), equalTo(expectedUriStr1))));
     }
@@ -166,7 +169,7 @@ public class IotHubUriTest
         final String iotHubHostname = "sample.iothubhostname";
         final String deviceId = "sample-deviceid";
 
-        String testResourceUri = IotHubUri.getResourceUri(iotHubHostname, deviceId);
+        String testResourceUri = IotHubUri.getResourceUri(iotHubHostname, deviceId, "");
 
         final String expectedResourceUri =
                 "sample.iothubhostname/devices/sample-deviceid";
@@ -180,7 +183,7 @@ public class IotHubUriTest
         final String iotHubHostname = "sample.iothubhostname";
         final String deviceId = "sample-deviceid?";
 
-        String testResourceUri = IotHubUri.getResourceUri(iotHubHostname, deviceId);
+        String testResourceUri = IotHubUri.getResourceUri(iotHubHostname, deviceId, "");
 
         final String expectedResourceUri =
                 "sample.iothubhostname/devices/sample-deviceid%3F";
@@ -195,7 +198,7 @@ public class IotHubUriTest
         final String deviceId = "sample-deviceid";
         final String iotHubMethodPath = "/sample-path";
 
-        IotHubUri uri = new IotHubUri(iotHubHostname, deviceId, iotHubMethodPath);
+        IotHubUri uri = new IotHubUri(iotHubHostname, deviceId, iotHubMethodPath, null);
         String testHostname = uri.getHostname();
 
         final String expectedHostname =
@@ -211,7 +214,7 @@ public class IotHubUriTest
         final String deviceId = "sample-deviceid";
         final String iotHubMethodPath = "/sample-path";
 
-        IotHubUri uri = new IotHubUri(iotHubHostname, deviceId, iotHubMethodPath);
+        IotHubUri uri = new IotHubUri(iotHubHostname, deviceId, iotHubMethodPath, null);
         String testPath = uri.getPath();
 
         final String expectedPath = "/devices/sample-deviceid/sample-path";

@@ -16,6 +16,8 @@ public final class MessageProperty {
      */
     public static final Set<String> RESERVED_PROPERTY_NAMES;
 
+    public static final String OUTPUT_NAME_PROPERTY = "iothub-outputname";
+
     static {
         HashSet<String> reservedPropertyNames = new HashSet<>();
         reservedPropertyNames.add("iothub-enqueuedtime");
@@ -35,6 +37,10 @@ public final class MessageProperty {
         reservedPropertyNames.add("iothub-content-encoding");
         reservedPropertyNames.add("iothub-absolute-expiry-time");
         reservedPropertyNames.add("IoThub-methodname");
+        reservedPropertyNames.add("connectionDeviceId");
+        reservedPropertyNames.add("connectionModuleId");
+        reservedPropertyNames.add(OUTPUT_NAME_PROPERTY);
+        reservedPropertyNames.add("iothub-inputname");
 
         RESERVED_PROPERTY_NAMES = Collections.unmodifiableSet(reservedPropertyNames);
     }

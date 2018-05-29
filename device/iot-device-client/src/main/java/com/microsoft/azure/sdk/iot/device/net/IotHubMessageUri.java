@@ -18,11 +18,12 @@ public final class IotHubMessageUri
      *
      * @param iotHubHostname the IoT Hub name.
      * @param deviceId the device ID.
+     * @param moduleId the module ID. May be null
      */
-    public IotHubMessageUri(String iotHubHostname, String deviceId)
+    public IotHubMessageUri(String iotHubHostname, String deviceId, String moduleId)
     {
         // Codes_SRS_IOTHUBMESSAGEURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03".]
-        this.uri = new IotHubUri(iotHubHostname, deviceId, MESSAGE_PATH);
+        this.uri = new IotHubUri(iotHubHostname, deviceId, MESSAGE_PATH, moduleId);
     }
 
     /**
