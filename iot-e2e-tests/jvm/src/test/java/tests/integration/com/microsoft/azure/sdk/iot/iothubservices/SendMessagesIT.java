@@ -705,7 +705,7 @@ public class SendMessagesIT
 
         errorInjectionTestFlowNoDisconnect(
                 ErrorInjectionHelper.throttledConnectionErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.Duration10Sec),
-                IotHubStatusCode.ERROR,
+                IotHubStatusCode.THROTTLED,
                 true);
 
     }

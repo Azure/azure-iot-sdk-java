@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpUnauthorizedAccessException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
@@ -35,9 +36,6 @@ public class IotHubTransportTest
 {
     @Mocked
     DeviceClientConfig mockedConfig;
-
-    @Mocked
-    IotHubStatusCode mockedStatus;
 
     @Mocked
     Message mockedMessage;
@@ -1221,7 +1219,7 @@ public class IotHubTransportTest
     //Tests_SRS_IOTHUBTRANSPORT_34_045: [This function shall dequeue each packet in the callback queue and execute
     // their saved callback with their saved status and context]
     @Test
-    public void invokeCallbacksInvokesAllCallbacks()
+    public void invokeCallbacksInvokesAllCallbacks(final @Mocked IotHubStatusCode mockedStatus)
     {
         //arrange
         final IotHubTransport transport = new IotHubTransport(mockedConfig);
@@ -1682,7 +1680,7 @@ public class IotHubTransportTest
     //Tests_SRS_IOTHUBTRANSPORT_34_064: [If the provided transportException is not retryable, the packet has expired,
     // or if the retry policy says to not retry, this function shall add the provided packet to the callback queue.]
     @Test
-    public void handleMessageExceptionDoesNotRetryIfDeviceOperationTimedOut()
+    public void handleMessageExceptionDoesNotRetryIfDeviceOperationTimedOut(final @Mocked IotHubStatusCode mockedStatus)
     {
         //arrange
         final IotHubTransport transport = new IotHubTransport(mockedConfig);
@@ -1733,7 +1731,7 @@ public class IotHubTransportTest
     //Tests_SRS_IOTHUBTRANSPORT_34_064: [If the provided transportException is not retryable, the packet has expired,
     // or if the retry policy says to not retry, this function shall add the provided packet to the callback queue.]
     @Test
-    public void handleMessageExceptionDoesNotRetryIfExceptionIsNotRetryable()
+    public void handleMessageExceptionDoesNotRetryIfExceptionIsNotRetryable(final @Mocked IotHubStatusCode mockedStatus)
     {
         //arrange
         final IotHubTransport transport = new IotHubTransport(mockedConfig);
@@ -1784,7 +1782,7 @@ public class IotHubTransportTest
     //Tests_SRS_IOTHUBTRANSPORT_34_064: [If the provided transportException is not retryable, the packet has expired,
     // or if the retry policy says to not retry, this function shall add the provided packet to the callback queue.]
     @Test
-    public void handleMessageExceptionDoesNotRetryIfRetryPolicySaysToNotRetry()
+    public void handleMessageExceptionDoesNotRetryIfRetryPolicySaysToNotRetry(final @Mocked IotHubStatusCode mockedStatus)
     {
         //arrange
         final IotHubTransport transport = new IotHubTransport(mockedConfig);
@@ -2770,4 +2768,26 @@ public class IotHubTransportTest
             }
         };
     }
+
+    //Tests_SRS_IOTHUBTRANSPORT_34_079: [If the provided transportException is an AmqpConnectionThrottledException,
+    // this function shall set the status of the callback packet to the error code for THROTTLED.]
+    @Test
+    public void handleMessageExceptionChecksForAmqpThrottling()
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+
+        //act
+        Deencapsulation.invoke(transport, "handleMessageException", new Class[] {IotHubTransportPacket.class, TransportException.class}, mockedPacket, new AmqpConnectionThrottledException());
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedPacket.setStatus(IotHubStatusCode.THROTTLED);
+                times = 1;
+            }
+        };
+    }
+
 }

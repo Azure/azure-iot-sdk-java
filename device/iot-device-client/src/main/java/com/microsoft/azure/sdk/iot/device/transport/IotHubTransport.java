@@ -10,6 +10,7 @@ package com.microsoft.azure.sdk.iot.device.transport;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.*;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpUnauthorizedAccessException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
@@ -817,6 +818,14 @@ public class IotHubTransport implements IotHubListener
         // or if the retry policy says to not retry, this function shall add the provided packet to the callback queue.]
         IotHubStatusCode errorCode = (transportException instanceof IotHubServiceException) ?
                 ((IotHubServiceException) transportException).getStatusCode() : IotHubStatusCode.ERROR;
+
+        if (transportException instanceof AmqpConnectionThrottledException)
+        {
+            //Codes_SRS_IOTHUBTRANSPORT_34_079: [If the provided transportException is an AmqpConnectionThrottledException,
+            // this function shall set the status of the callback packet to the error code for THROTTLED.]
+            errorCode = IotHubStatusCode.THROTTLED;
+        }
+
         packet.setStatus(errorCode);
         this.addToCallbackQueue(packet);
     }
