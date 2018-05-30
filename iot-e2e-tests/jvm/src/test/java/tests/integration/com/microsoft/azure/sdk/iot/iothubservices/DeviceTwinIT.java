@@ -877,6 +877,29 @@ public class DeviceTwinIT
                 assertEquals(t.getValue(), TAG_VALUE_UPDATE + i);
             }
         }
+
+        // Delete tags
+        for (int i = 0; i < MAX_DEVICES; i++)
+        {
+            sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
+            Set<Pair> tags = devicesUnderTest[i].sCDeviceForTwin.getTags();
+            for (Pair tag : tags)
+            {
+                tag.setValue(null);
+            }
+            devicesUnderTest[i].sCDeviceForTwin.setTags(tags);
+            sCDeviceTwin.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
+            devicesUnderTest[i].sCDeviceForTwin.clearTwin();
+        }
+
+        // Verify tags were deleted successfully
+        for (int i = 0; i < MAX_DEVICES; i++)
+        {
+            sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
+
+            assertEquals("Tags were not deleted by being set null", 0, devicesUnderTest[i].sCDeviceForTwin.getTags().size());
+        }
+
         removeMultipleDevices(MAX_DEVICES);
     }
 
@@ -922,6 +945,29 @@ public class DeviceTwinIT
             Integer version = devicesUnderTest[i].sCDeviceForTwin.getDesiredPropertiesVersion();
             assertNotNull(version);
         }
+
+        // Remove desired properties
+        for (int i = 0; i < MAX_DEVICES; i++)
+        {
+            sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
+            Set<Pair> desiredProperties = devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties();
+            for (Pair dp : desiredProperties)
+            {
+                dp.setValue(null);
+            }
+            devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
+            sCDeviceTwin.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
+            devicesUnderTest[i].sCDeviceForTwin.clearTwin();
+        }
+
+        // Read updates
+        for (int i = 0; i < MAX_DEVICES; i++)
+        {
+            sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
+
+            assertEquals("Desired properties were not deleted by setting to null", 0, devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties().size());
+        }
+
         removeMultipleDevices(MAX_DEVICES);
     }
 

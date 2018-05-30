@@ -164,11 +164,7 @@ public class TwinStateTest
     public void toJsonElementReturnsTagsAndProperties()
     {
         // arrange
-        final String json =
-            "{" +
-                TAGS_SAMPLE + "," +
-                PROPERTIES_SAMPLE +
-            "}";
+        final String json = "{\"tags\":{\"tag1\":\"val1\",\"tag2\":\"val2\",\"tag3\":\"val3\"},\"properties\":{\"desired\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"},\"reported\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"}},\"deviceId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null}";
         TwinState twinState = new TwinState(TAGS, PROPERTIES, PROPERTIES);
 
         // act
@@ -184,9 +180,7 @@ public class TwinStateTest
     {
         // arrange
         final String json =
-            "{" +
-                PROPERTIES_SAMPLE +
-            "}";
+            "{\"tags\":null,\"properties\":{\"desired\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"},\"reported\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"}},\"deviceId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null}";
         TwinState twinState = new TwinState(null, PROPERTIES, PROPERTIES);
 
         // act
@@ -202,9 +196,7 @@ public class TwinStateTest
     {
         // arrange
         final String json =
-            "{" +
-                TAGS_SAMPLE +
-            "}";
+            "{\"tags\":{\"tag1\":\"val1\",\"tag2\":\"val2\",\"tag3\":\"val3\"},\"properties\":null,\"deviceId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null}";
         TwinState twinState = new TwinState(TAGS, null, null);
 
         // act
@@ -226,7 +218,7 @@ public class TwinStateTest
         JsonElement jsonElement = Deencapsulation.invoke(twinState, "toJsonElement");
 
         // assert
-        Helpers.assertJson(jsonElement.toString(), "{}");
+        Helpers.assertJson(jsonElement.toString(), "{\"tags\":null,\"properties\":null,\"deviceId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null}");
     }
 
     //Tests_SRS_TWIN_STATE_34_024: [The json element shall include all null desired and reported properties.]
@@ -410,10 +402,7 @@ public class TwinStateTest
     {
         // arrange
         final String json =
-                "{" +
-                    TAGS_SAMPLE + "," +
-                    PROPERTIES_SAMPLE +
-                "}";
+                "{\"tags\":{\"tag1\":\"val1\",\"tag2\":\"val2\",\"tag3\":\"val3\"},\"properties\":{\"desired\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"},\"reported\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"}},\"deviceId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null}";
 
         // act
         TwinState twinState = TwinState.createFromTwinJson(json);
@@ -581,13 +570,13 @@ public class TwinStateTest
     public void createFromPropertiesJsonSucceed()
     {
         // arrange
-        final String json =  "{" + DESIRED_PROPERTY_SAMPLE + ", " + REPORTED_PROPERTY_SAMPLE + "}";
+        final String json =  "{\"tags\":null,\"properties\":null,\"deviceId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null}";
 
         // act
         TwinState twinState = TwinState.createFromPropertiesJson(json);
 
         // assert
-        Helpers.assertJson(Deencapsulation.invoke(twinState, "toJsonElement").toString(),"{" + PROPERTIES_SAMPLE + "}");
+        Helpers.assertJson(Deencapsulation.invoke(twinState, "toJsonElement").toString(), json);
     }
 
     /* SRS_TWIN_STATE_21_023: [The TwinState shall provide an empty constructor to make GSON happy.] */

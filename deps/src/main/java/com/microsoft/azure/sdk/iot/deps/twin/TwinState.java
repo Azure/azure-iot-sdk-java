@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
 
@@ -174,7 +175,7 @@ public class TwinState extends RegisterManager
         /* SRS_TWIN_STATE_21_002: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
         /* SRS_TWIN_STATE_21_003: [If the tags is null, the toJsonElement shall not include the `tags` in the final JSON.] */
         /* SRS_TWIN_STATE_21_004: [If the property is null, the toJsonElement shall not include the `properties` in the final JSON.] */
-        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
         JsonElement json = gson.toJsonTree(this).getAsJsonObject();
 
         //since null values are lost when building the json tree, need to manually re-add properties as reported properties
