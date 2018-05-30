@@ -12,7 +12,11 @@ public class X509Thumbprint
     private String primaryThumbprint;
     private String secondaryThumbprint;
 
+    //Thumbprint format used by devices created manually
     private static final String THUMBPRINT_REGEX = "^([A-Fa-f0-9]{2}){20}$";
+
+    //Thumbprint format used by devices that are provisioned by DPS
+    private static final String THUMBPRINT_REGEX_DPS = "^([A-Fa-f0-9]{2}){32}$";
 
     //Thumbprints are made up of 40 hex characters
     private static final int THUMBPRINT_DIGIT_MAX = 16;
@@ -124,7 +128,7 @@ public class X509Thumbprint
             throw new IllegalArgumentException("Invalid format for primary/secondary thumbprint: thumbprint may not be empty");
         }
 
-        if (!thumbprint.matches(THUMBPRINT_REGEX))
+        if (!thumbprint.matches(THUMBPRINT_REGEX) && !thumbprint.matches(THUMBPRINT_REGEX_DPS))
         {
             throw new IllegalArgumentException("Invalid format for primary/secondary thumbprint");
         }
