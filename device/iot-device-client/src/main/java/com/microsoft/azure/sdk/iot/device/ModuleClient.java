@@ -278,7 +278,7 @@ public class ModuleClient extends InternalClient
         if (protocol != IotHubClientProtocol.MQTT && protocol != IotHubClientProtocol.AMQPS
                 && protocol != IotHubClientProtocol.MQTT_WS && protocol != IotHubClientProtocol.AMQPS_WS)
         {
-            throw new UnsupportedOperationException("Only MQTT and AMQPS are supported for ModuleClient.");
+            throw new UnsupportedOperationException("Only MQTT, MQTT_WS, AMQPS and AMQPS_WS are supported for ModuleClient.");
         }
 
         if (config.getModuleId() == null || config.getModuleId().isEmpty())

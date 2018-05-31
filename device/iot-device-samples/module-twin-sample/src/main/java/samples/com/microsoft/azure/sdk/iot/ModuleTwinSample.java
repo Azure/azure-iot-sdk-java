@@ -3,11 +3,9 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -15,11 +13,18 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Device Twin Sample for an IoT Hub. Default protocol is to use
+ * Device Twin Sample for sending module twin updates to an IoT Hub. Default protocol is to use
  * MQTT transport.
  */
-public class DeviceTwinSample
+public class ModuleTwinSample
 {
+    private static String SAMPLE_USAGE = "The program should be called with the following args: \n"
+            + "1. [Device connection string] - String containing Hostname, Device Id, Module Id & Device Key in one of the following formats: HostName=<iothub_host_name>;deviceId=<device_id>;SharedAccessKey=<device_key>;moduleId=<module_id>\n"
+            + "2. (mqtt | amqps | amqps_ws | mqtt_ws)\n";
+
+    private static String SAMPLE_USAGE_WITH_WRONG_ARGS = "Expected 2 or 3 arguments but received: %d.\n" + SAMPLE_USAGE;
+    private static String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
+
     private enum LIGHTS{ ON, OFF, DISABLED }
     private enum CAMERA{ DETECTED_BURGLAR, SAFELY_WORKING }
     private static final int MAX_EVENTS_TO_REPORT = 5;
@@ -90,8 +95,7 @@ public class DeviceTwinSample
      * @param args 
      * args[0] = IoT Hub connection string
      */
-    public static void main(String[] args)
-            throws IOException, URISyntaxException
+    public static void main(String[] args) throws IOException, URISyntaxException, ModuleClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -99,12 +103,7 @@ public class DeviceTwinSample
 
         if (args.length < 1)
         {
-            System.out.format(
-                    "Expected the following argument but received: %d.\n"
-                            + "The program should be called with the following args: \n"
-                            + "[Device connection string] - String containing Hostname, Device Id & Device Key in the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                            + "[Protocol] - (mqtt | amqps | amqps_ws)\n",
-                    args.length);
+            System.out.format(SAMPLE_USAGE_WITH_WRONG_ARGS, args.length);
             return;
         }
 
@@ -136,12 +135,7 @@ public class DeviceTwinSample
             }
             else
             {
-                System.out.format(
-                        "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' , 'mqtt_ws' or 'amqps_ws' but received %s\n"
-                                + "The program should be called with the following args: \n"
-                                + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                                + "2. (mqtt | amqps | amqps_ws | mqtt_ws)\n",
-                        protocolStr);
+                System.out.format(SAMPLE_USAGE_WITH_INVALID_PROTOCOL, protocolStr);
                 return;
             }
         }
@@ -150,7 +144,7 @@ public class DeviceTwinSample
         System.out.format("Using communication protocol %s.\n",
                 protocol.name());
 
-        DeviceClient client = new DeviceClient(connString, protocol);
+        ModuleClient client = new ModuleClient(connString, protocol);
         System.out.println("Successfully created an IoT Hub client.");
 
         try
@@ -230,6 +224,5 @@ public class DeviceTwinSample
         client.closeNow();
 
         System.out.println("Shutting down...");
-
     }
 }

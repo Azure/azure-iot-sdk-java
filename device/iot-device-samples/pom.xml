@@ -14,11 +14,14 @@
     </developers>
     <modules>
         <module>send-event</module>
-		<module>send-serialized-event</module>
+        <module>send-receive-module-sample</module>
+        <module>send-serialized-event</module>
         <module>handle-messages</module>
         <module>send-receive-sample</module>
         <module>device-twin-sample</module>
         <module>device-method-sample</module>
+        <module>module-twin-sample</module>
+        <module>module-method-sample</module>
         <module>file-upload-sample</module>
         <module>send-event-x509</module>
         <module>send-receive-x509-sample</module>
