@@ -12,8 +12,8 @@ public class X509Thumbprint
     private String primaryThumbprint;
     private String secondaryThumbprint;
 
-    private static final String THUMBPRINT_REGEX = "^([A-Fa-f0-9]{2}){20}$";
-
+	private static final String THUMBPRINT_REGEX_40 = "^([A-Fa-f0-9]{2}){20}$";
+	private static final String THUMBPRINT_REGEX_64 = "^([A-Fa-f0-9]{2}){32}$";
     //Thumbprints are made up of 40 hex characters
     private static final int THUMBPRINT_DIGIT_MAX = 16;
     private static final int THUMBPRINT_LENGTH = 40;
@@ -124,7 +124,7 @@ public class X509Thumbprint
             throw new IllegalArgumentException("Invalid format for primary/secondary thumbprint: thumbprint may not be empty");
         }
 
-        if (!thumbprint.matches(THUMBPRINT_REGEX))
+		if (!thumbprint.matches(THUMBPRINT_REGEX_40) && !thumbprint.matches(THUMBPRINT_REGEX_64)) {
         {
             throw new IllegalArgumentException("Invalid format for primary/secondary thumbprint");
         }
