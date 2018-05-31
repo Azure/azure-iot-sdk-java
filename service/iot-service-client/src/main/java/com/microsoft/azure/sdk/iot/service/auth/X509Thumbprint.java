@@ -12,7 +12,7 @@ public class X509Thumbprint
     private String primaryThumbprint;
     private String secondaryThumbprint;
 
-    private static final String THUMBPRINT_REGEX = "^([A-Fa-f0-9]{2}){20}$";
+    private static final String THUMBPRINT_REGEX = "^([A-Fa-f0-9]{2}){20}$|^([A-Fa-f0-9]{2}){32}$";
 
     //Thumbprints are made up of 40 hex characters
     private static final int THUMBPRINT_DIGIT_MAX = 16;
