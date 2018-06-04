@@ -163,8 +163,8 @@ public class IotHubTransport implements IotHubListener
         {
             //Codes_SRS_IOTHUBTRANSPORT_34_009: [If this function is called with a non-null message and a null
             // exception, this function shall add that message to the receivedMessagesQueue.]
-            logger.LogInfo("Message with hashcode %s is received from IotHub on %s, method name is %s ",
-                    message.hashCode(), new Date(), logger.getMethodName());
+            logger.LogInfo("Message with hashcode %s is received from IotHub on %s, method name is onMessageReceived",
+                    message.hashCode(), new Date());
             this.receivedMessagesQueue.add(message);
         }
         else if (e != null)
@@ -415,9 +415,6 @@ public class IotHubTransport implements IotHubListener
         //Codes_SRS_IOTHUBTRANSPORT_34_046: [If this object's connection status is not CONNECTED, this function shall do nothing.]
         if (this.connectionStatus == IotHubConnectionStatus.CONNECTED)
         {
-            logger.LogDebug("Get the callback function for the received message, method name is %s ",
-                    logger.getMethodName());
-
             if (this.iotHubTransportConnection instanceof HttpsIotHubConnection)
             {
                 //Codes_SRS_IOTHUBTRANSPORT_34_047: [If this object's connection status is CONNECTED and is using HTTPS,
@@ -568,6 +565,8 @@ public class IotHubTransport implements IotHubListener
         if (transportMessage != null)
         {
             //Codes_SRS_IOTHUBTRANSPORT_34_056: [If the saved http transport connection can receive a message, add it to receivedMessagesQueue.]
+            logger.LogInfo("Message with hashcode %s is received from IotHub on %s, method name is addReceivedMessagesOverHttpToReceivedQueue",
+                    transportMessage.hashCode(), new Date());
             this.receivedMessagesQueue.add(transportMessage);
         }
     }
