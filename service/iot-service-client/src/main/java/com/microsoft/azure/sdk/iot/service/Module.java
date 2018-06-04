@@ -9,14 +9,12 @@ import com.microsoft.azure.sdk.iot.deps.serializer.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 
-import java.security.NoSuchAlgorithmException;
-
 public class Module extends BaseDevice
 {
     /**
      * Static create function
-     * Creates device object using the given name.
-     * If input device status and symmetric key are null then they will be auto generated.
+     * Creates module object using the given name.
+     * If input symmetric key are null then they will be auto generated.
      *
      * @param deviceId - String containing the device name
      * @param moduleId - String containing the module name
@@ -79,7 +77,7 @@ public class Module extends BaseDevice
     }
 
     /**
-     * Create an Device instance using the given device name
+     * Create an Module instance using the given module name
      *
      * @param deviceId Name of the device (used as device id)
      * @param moduleId - ame of the module (used as module id)
