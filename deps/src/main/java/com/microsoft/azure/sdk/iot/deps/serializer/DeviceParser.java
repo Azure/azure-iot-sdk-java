@@ -79,6 +79,21 @@ public class DeviceParser
     @Expose(serialize = true, deserialize = true)
     @SerializedName(MANAGED_BY)
     private String managedBy;
+//
+//    private static final String CONFIGURATIONS_NAME = "configurations";
+//    @Expose(serialize = true, deserialize = true)
+//    @SerializedName(CONFIGURATIONS_NAME)
+//    private String configurations;
+//
+//    private static final String CAPABILITIES_NAME = "capabilities";
+//    @Expose(serialize = true, deserialize = true)
+//    @SerializedName(CAPABILITIES_NAME)
+//    private String capabilities;
+//
+//    private static final String IOT_EDGE_NAME = "iotEdge";
+//    @Expose(serialize = true, deserialize = true)
+//    @SerializedName(IOT_EDGE_NAME)
+//    private String iotEdge;
 
     private transient Gson gson = new Gson();
 
@@ -184,25 +199,24 @@ public class DeviceParser
     }
 
     /**
-     * Getter for DeviceId
+     * Getter for moduleId
      *
-     * @return The value of DeviceId
+     * @return The value of moduleId
      */
     public String getModuleId()
     {
-        //Codes_SRS_DEVICE_PARSER_34_032: [This method shall return the value of this object's DeviceId.]
+        //Codes_SRS_DEVICE_PARSER_28_001: [This method shall return the value of this object's Module.]
         return moduleId;
     }
 
     /**
-     * Setter for DeviceId
-     * @param moduleId the value to set deviceId to
-     * @throws IllegalArgumentException if deviceId is null
+     * Setter for moduleId
+     * @param moduleId the value to set moduleId to
+     * @throws IllegalArgumentException if moduleId is null
      */
     public void setModuleId(String moduleId) throws IllegalArgumentException
     {
-
-        //Codes_SRS_DEVICE_PARSER_34_010: [If the provided deviceId value is null, an IllegalArgumentException shall be thrown.]
+        //Codes_SRS_DEVICE_PARSER_28_002: [If the provided deviceId value is null, an IllegalArgumentException shall be thrown.]
         if (moduleId == null || moduleId.isEmpty())
         {
             throw new IllegalArgumentException("DeviceId cannot not be null");

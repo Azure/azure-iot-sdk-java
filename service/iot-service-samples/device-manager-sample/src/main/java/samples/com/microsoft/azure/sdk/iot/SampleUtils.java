@@ -23,6 +23,7 @@ public class SampleUtils
     public static final String deviceId = "[Device Id goes here]";
     public static final String moduleId0 = "[Module0 Id goes here]";
     public static final String moduleId1 = "[Module1 Id goes here]";
+    public static final String configurationId = "[Configuration Id goes here]";
     public static final String exportFileLocation = "[Insert local folder here - something like C:\\foldername\\]";
 
     public static String getContainerSasUri(CloudBlobContainer container) throws InvalidKeyException, StorageException

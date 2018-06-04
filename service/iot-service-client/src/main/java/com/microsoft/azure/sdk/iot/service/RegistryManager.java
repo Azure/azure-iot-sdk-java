@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.google.gson.JsonSyntaxException;
+import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.DeviceParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobPropertiesParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.RegistryStatisticsParser;
@@ -818,37 +819,37 @@ public class RegistryManager
      * Add module using the given Module object
      * Return with the response module object from IotHub
      *
-     * @param module The device object to add
+     * @param module The module object to add
      * @return The module object for the requested operation
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
     public Module addModule(Module module) throws IOException, IotHubException, JsonSyntaxException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_004: [The constructor shall throw IllegalArgumentException if the input device is null]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_001: [The constructor shall throw IllegalArgumentException if the input module is null]
         if (module == null)
         {
             throw new IllegalArgumentException("module cannot be null");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_005: [The function shall deserialize the given device object to Json string]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_002: [The function shall deserialize the given module object to Json string]
         String moduleJson = module.toDeviceParser().toJson();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_006: [The function shall get the URL for the device]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_003: [The function shall get the URL for the module]
         URL url = iotHubConnectionString.getUrlModule(module.getDeviceId(), module.getId());
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_007: [The function shall create a new SAS token for the device]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_004: [The function shall create a new SAS token for the module]
         String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_008: [The function shall create a new HttpRequest for adding the device to IotHub]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_005: [The function shall create a new HttpRequest for adding the module to IotHub]
         HttpRequest request = CreateRequest(url, HttpMethod.PUT, moduleJson.getBytes(), sasTokenString);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_009: [The function shall send the created request and get the response]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_006: [The function shall send the created request and get the response]
         HttpResponse response = request.send();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_010: [The function shall verify the response status and throw proper Exception]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_007: [The function shall verify the response status and throw proper Exception]
         IotHubExceptionManager.httpResponseVerification(response);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_011: [The function shall create a new Device object from the response and return with it]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_008: [The function shall create a new Module object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
 
         Module iotHubModule = new Module(new DeviceParser(bodyStr));
@@ -867,33 +868,33 @@ public class RegistryManager
      */
     public Module getModule(String deviceId, String moduleId) throws IOException, IotHubException, JsonSyntaxException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_014: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_009: [The constructor shall throw IllegalArgumentException if the deviceId string is null or empty]
         if (Tools.isNullOrEmpty(deviceId))
         {
             throw new IllegalArgumentException("deviceId cannot be null or empty");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_014: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_010: [The constructor shall throw IllegalArgumentException if the moduleId string is null or empty]
         if (Tools.isNullOrEmpty(moduleId))
         {
             throw new IllegalArgumentException("moduleId cannot be null or empty");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_015: [The function shall get the URL for the device]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_011: [The function shall get the URL for the device]
         URL url = iotHubConnectionString.getUrlModule(deviceId, moduleId);
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_016: [The function shall create a new SAS token for the device]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_012: [The function shall create a new SAS token for the device]
         String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_017: [The function shall create a new HttpRequest for getting a device from IotHub]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_013: [The function shall create a new HttpRequest for getting a device from IotHub]
         HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0], sasTokenString);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_018: [The function shall send the created request and get the response]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_014: [The function shall send the created request and get the response]
         HttpResponse response = request.send();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_019: [The function shall verify the response status and throw proper Exception]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_015: [The function shall verify the response status and throw proper Exception]
         IotHubExceptionManager.httpResponseVerification(response);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_020: [The function shall create a new Device object from the response and return with it]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_016: [The function shall create a new Device object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
 
         Module iotHubModule = new Module(new DeviceParser(bodyStr));
@@ -910,27 +911,27 @@ public class RegistryManager
      */
     public ArrayList<Module> getModulesOnDevice(String deviceId) throws IOException, IotHubException, JsonSyntaxException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_014: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_017: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
         if (Tools.isNullOrEmpty(deviceId))
         {
             throw new IllegalArgumentException("deviceId cannot be null or empty");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_015: [The function shall get the URL for the device]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_018: [The function shall get the URL for the device]
         URL url = iotHubConnectionString.getUrlModulesOnDevice(deviceId);
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_016: [The function shall create a new SAS token for the device]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_019: [The function shall create a new SAS token for the device]
         String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_017: [The function shall create a new HttpRequest for getting a device from IotHub]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_020: [The function shall create a new HttpRequest for getting a device from IotHub]
         HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0], sasTokenString);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_018: [The function shall send the created request and get the response]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_021: [The function shall send the created request and get the response]
         HttpResponse response = request.send();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_019: [The function shall verify the response status and throw proper Exception]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_022: [The function shall verify the response status and throw proper Exception]
         IotHubExceptionManager.httpResponseVerification(response);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_029: [The function shall create a new ArrayList<Device> object from the response and return with it]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_023: [The function shall create a new ArrayList<Device> object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
         try (JsonReader jsonReader = Json.createReader(new StringReader(bodyStr)))
         {
@@ -957,12 +958,12 @@ public class RegistryManager
      */
     public Module updateModule(Module module) throws IOException, IotHubException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_032: [The function shall throw IllegalArgumentException if the input module is null]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_024: [The function shall throw IllegalArgumentException if the input module is null]
         if (module == null)
         {
             throw new IllegalArgumentException("module cannot be null");
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_033: [The function shall call updateModule with forceUpdate = false]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_025: [The function shall call updateModule with forceUpdate = false]
         return updateModule(module, false);
     }
 
@@ -977,31 +978,31 @@ public class RegistryManager
      */
     public Module updateModule(Module module, Boolean forceUpdate) throws IOException, IotHubException, JsonSyntaxException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_034: [The function shall throw IllegalArgumentException if the input module is null]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_026: [The function shall throw IllegalArgumentException if the input module is null]
         if (module == null)
         {
             throw new IllegalArgumentException("module cannot be null");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_035: [The function shall set forceUpdate on the module]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_027: [The function shall set forceUpdate on the module]
         module.setForceUpdate(forceUpdate);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_036: [The function shall get the URL for the device]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_028: [The function shall get the URL for the module]
         URL url = iotHubConnectionString.getUrlModule(module.getDeviceId(), module.getId());
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_037: [The function shall create a new SAS token for the device]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_029: [The function shall create a new SAS token for the module]
         String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_038: [The function shall create a new HttpRequest for updating the device on IotHub]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_030: [The function shall create a new HttpRequest for updating the module on IotHub]
         HttpRequest request = CreateRequest(url, HttpMethod.PUT, module.toDeviceParser().toJson().getBytes(), sasTokenString);
         request.setHeaderField("If-Match", "*");
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_039: [The function shall send the created request and get the response]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_031: [The function shall send the created request and get the response]
         HttpResponse response = request.send();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_040: [The function shall verify the response status and throw proper Exception]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_032: [The function shall verify the response status and throw proper Exception]
         IotHubExceptionManager.httpResponseVerification(response);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_041: [The function shall create a new Device object from the response and return with it]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_033: [The function shall create a new Module object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
         Module iotHubModule = new Module(new DeviceParser(bodyStr));
 
@@ -1018,36 +1019,258 @@ public class RegistryManager
      */
     public void removeModule(String deviceId, String moduleId) throws IOException, IotHubException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_046: [The function shall throw IllegalArgumentException if the input string is null or empty]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_034: [The function shall throw IllegalArgumentException if the deviceId is null or empty]
         if (Tools.isNullOrEmpty(deviceId))
         {
             throw new IllegalArgumentException("deviceId cannot be null or empty");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_046: [The function shall throw IllegalArgumentException if the input string is null or empty]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_035: [The function shall throw IllegalArgumentException if the moduleId is null or empty]
         if (Tools.isNullOrEmpty(moduleId))
         {
             throw new IllegalArgumentException("moduleId cannot be null or empty");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_047: [The function shall get the URL for the device]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_036: [The function shall get the URL for the module]
         URL url = iotHubConnectionString.getUrlModule(deviceId, moduleId);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_048: [The function shall create a new SAS token for the device]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_037: [The function shall create a new SAS token for the module]
         String sasToken = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_049: [The function shall create a new HttpRequest for removing the module from IotHub]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_038: [The function shall create a new HttpRequest for removing the module from IotHub]
         HttpRequest request = new HttpRequest(url, HttpMethod.DELETE, new byte[0]);
         request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
         request.setHeaderField("authorization", sasToken);
         request.setHeaderField("If-Match", "*");
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_050: [The function shall send the created request and get the response]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_039: [The function shall send the created request and get the response]
         HttpResponse response = request.send();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_051: [The function shall verify the response status and throw proper Exception]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_040: [The function shall verify the response status and throw proper Exception]
         IotHubExceptionManager.httpResponseVerification(response);
     }
+
+    /**
+     * Add configuration using the given Configuration object
+     * Return with the response configuration object from IotHub
+     *
+     * @param configuration The configuration object to add
+     * @return The configuration object for the requested operation
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public Configuration addConfiguration(Configuration configuration) throws IOException, IotHubException, JsonSyntaxException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_041: [The constructor shall throw IllegalArgumentException if the input configuration is null]
+        if (configuration == null)
+        {
+            throw new IllegalArgumentException("configuration cannot be null");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_042: [The function shall deserialize the given configuration object to Json string]
+        String configurationJson = configuration.toConfigurationParser().toJson();
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_043: [The function shall get the URL for the configuration]
+        URL url = iotHubConnectionString.getUrlConfiguration(configuration.getId());
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_044: [The function shall create a new SAS token for the configuration]
+        String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_045: [The function shall create a new HttpRequest for adding the configuration to IotHub]
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, configurationJson.getBytes(), sasTokenString);
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_046: [The function shall send the created request and get the response]
+        HttpResponse response = request.send();
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_047: [The function shall verify the response status and throw proper Exception]
+        IotHubExceptionManager.httpResponseVerification(response);
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_048: [The function shall create a new Configuration object from the response and return with it]
+        String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
+
+        Configuration iotHubConfiguration = new Configuration(new ConfigurationParser(bodyStr));
+
+        return iotHubConfiguration;
+    }
+
+    /**
+     * Get configuration by configuration Id from IotHub
+     *
+     * @param configurationId The id of requested configuration
+     * @return The configuration object of requested configuration on the specific device
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public Configuration getConfiguration(String configurationId) throws IOException, IotHubException, JsonSyntaxException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_049: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
+        if (Tools.isNullOrEmpty(configurationId))
+        {
+            throw new IllegalArgumentException("configurationId cannot be null or empty");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_050: [The function shall get the URL for the device]
+        URL url = iotHubConnectionString.getUrlConfiguration(configurationId);
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_051: [The function shall create a new SAS token for the device]
+        String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_052: [The function shall create a new HttpRequest for getting a device from IotHub]
+        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0], sasTokenString);
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_053: [The function shall send the created request and get the response]
+        HttpResponse response = request.send();
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_054: [The function shall verify the response status and throw proper Exception]
+        IotHubExceptionManager.httpResponseVerification(response);
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_055: [The function shall create a new Device object from the response and return with it]
+        String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
+
+        Configuration iotHubConfiguration = new Configuration(new ConfigurationParser(bodyStr));
+        return iotHubConfiguration;
+    }
+
+    /**
+     * Get list of Configuration
+     *
+     * @param maxCount The requested count of configurations
+     * @return The array of requested configuration objects
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public ArrayList<Configuration> getConfigurations(Integer maxCount) throws IOException, IotHubException, JsonSyntaxException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_056: [The function shall throw IllegalArgumentException if the input count number is less than 1]
+        if (maxCount < 1)
+        {
+            throw new IllegalArgumentException("maxCount cannot be less then 1");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_057: [The function shall get the URL for the device]
+        URL url = iotHubConnectionString.getUrlConfigurationsList(maxCount);
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_058: [The function shall create a new SAS token for the device]
+        String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_059: [The function shall create a new HttpRequest for getting a device from IotHub]
+        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0], sasTokenString);
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_060: [The function shall send the created request and get the response]
+        HttpResponse response = request.send();
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_061: [The function shall verify the response status and throw proper Exception]
+        IotHubExceptionManager.httpResponseVerification(response);
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_062: [The function shall create a new ArrayList<Device> object from the response and return with it]
+        String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
+        try (JsonReader jsonReader = Json.createReader(new StringReader(bodyStr)))
+        {
+            ArrayList<Configuration> configurationList = new ArrayList<>();
+            JsonArray deviceArray = jsonReader.readArray();
+
+            for (int i = 0; i < deviceArray.size(); i++)
+            {
+                JsonObject jsonObject = deviceArray.getJsonObject(i);
+                Configuration iotHubConfiguration = new Configuration(new ConfigurationParser(jsonObject.toString()));
+                configurationList.add(iotHubConfiguration);
+            }
+            return configurationList;
+        }
+    }
+
+    /**
+     * Update configuration not forced
+     *
+     * @param configuration The configuration object containing updated data
+     * @return The updated configuration object
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public Configuration updateConfiguration(Configuration configuration) throws IOException, IotHubException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_063: [The function shall throw IllegalArgumentException if the configuration is null]
+        if (configuration == null)
+        {
+            throw new IllegalArgumentException("configuration cannot be null");
+        }
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_064: [The function shall call updateConfiguration with forceUpdate = false]
+        return updateConfiguration(configuration, false);
+    }
+
+    /**
+     * Update configuration with forceUpdate input parameter
+     *
+     * @param configuration The configuration object containing updated data
+     * @param forceUpdate True if the update has to be forced regardless of the configuration state
+     * @return The updated configuration object
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public Configuration updateConfiguration(Configuration configuration, Boolean forceUpdate) throws IOException, IotHubException, JsonSyntaxException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_065: [The function shall throw IllegalArgumentException if the input configuration is null]
+        if (configuration == null)
+        {
+            throw new IllegalArgumentException("configuration cannot be null");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_066: [The function shall set forceUpdate on the configuration]
+        configuration.setForceUpdate(forceUpdate);
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_067: [The function shall get the URL for the configuration]
+        URL url = iotHubConnectionString.getUrlConfiguration(configuration.getId());
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_068: [The function shall create a new SAS token for the configuration]
+        String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_069: [The function shall create a new HttpRequest for updating the device on IotHub]
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, configuration.toConfigurationParser().toJson().getBytes(), sasTokenString);
+        request.setHeaderField("If-Match", "*");
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_070: [The function shall send the created request and get the response]
+        HttpResponse response = request.send();
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_071: [The function shall verify the response status and throw proper Exception]
+        IotHubExceptionManager.httpResponseVerification(response);
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_072: [The function shall create a new Configuration object from the response and return with it]
+        String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
+        Configuration iotHubConfiguration = new Configuration(new ConfigurationParser(bodyStr));
+
+        return iotHubConfiguration;
+    }
+
+    /**
+     * Remove configuration
+     *
+     * @param configurationId The configuration to be removed
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public void removeConfiguration(String configurationId) throws IOException, IotHubException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_073: [The function shall throw IllegalArgumentException if the input string is null or empty]
+        if (Tools.isNullOrEmpty(configurationId))
+        {
+            throw new IllegalArgumentException("configurationId cannot be null or empty");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_074: [The function shall get the URL for the configuration]
+        URL url = iotHubConnectionString.getUrlConfiguration(configurationId);
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_075: [The function shall create a new SAS token for the configuration]
+        String sasToken = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_076: [The function shall create a new HttpRequest for removing the configuration from IotHub]
+        HttpRequest request = new HttpRequest(url, HttpMethod.DELETE, new byte[0]);
+        request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
+        request.setHeaderField("authorization", sasToken);
+        request.setHeaderField("If-Match", "*");
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_077: [The function shall send the created request and get the response]
+        HttpResponse response = request.send();
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_078: [The function shall verify the response status and throw proper Exception]
+        IotHubExceptionManager.httpResponseVerification(response);
+    }
+
 
     private String CreateExportJobPropertiesJson(String exportBlobContainerUri, Boolean excludeKeysInExport)
     {
