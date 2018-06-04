@@ -250,7 +250,7 @@ public class JobProperties {
 
         if (this.type != null)
         {
-            jobPropertiesParser.setType(this.type.toString());
+            jobPropertiesParser.setType(this.type.toString().toLowerCase());
         }
 
         return jobPropertiesParser;

@@ -76,7 +76,7 @@ public class JobPropertiesTest
         assertEquals(parser.getInputBlobContainerUri(), jobProperties.getInputBlobContainerUri());
         assertEquals(parser.getOutputBlobContainerUri(), jobProperties.getOutputBlobContainerUri());
         assertEquals(parser.isExcludeKeysInExport(), jobProperties.getExcludeKeysInExport());
-        assertEquals(parser.getType(), jobProperties.getType().toString());
+        assertEquals(parser.getType().toUpperCase(), jobProperties.getType().toString());
         assertEquals(parser.getStatus(), jobProperties.getStatus().toString());
         assertEquals(parser.getProgress(), jobProperties.getProgress());
         assertEquals(parser.getJobId(), jobProperties.getJobId());
