@@ -1,0 +1,167 @@
+/*
+ *  Copyright (c) Microsoft. All rights reserved.
+ *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
+ */
+
+package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
+
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.auth.ModuleAuthenticationWithHsm;
+import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import mockit.*;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+
+public class ModuleAuthenticationWithHsmTest
+{
+    @Mocked
+    SignatureProvider mockedSignatureProvider;
+
+    @Mocked
+    IotHubSasToken mockedIotHubSasToken;
+
+    @Mocked
+    IotHubSasTokenAuthenticationProvider mockedIotHubSasTokenAuthenticationProvider;
+
+    private static final String expectedHostname = "hostname";
+    private static final String expectedGatewayHostname = "gatewayHostname";
+    private static final String expectedDeviceId = "device";
+    private static final String expectedModuleId = "module";
+    private static final int expectedTimeToLive = 56;
+    private static final int expectedBufferPercent = 25;
+    private static final String expectedSignature = "someSignature";
+
+    // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_001: [This function shall construct a sas token from the provided arguments and then return a ModuleAuthenticationWithHsm instance that uses that sas token.]
+    // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_003: [If the gatewayHostname is not null or empty, this function shall construct the sas token using the gateway hostname instead of the hostname.]
+    @Test
+    public void staticConstructorSuccess(@Mocked final System mockedSystem) throws IOException, TransportException
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockedSignatureProvider.sign("module", anyString);
+                result = expectedSignature;
+
+                Deencapsulation.newInstance(IotHubSasToken.class,
+                        new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
+                        expectedGatewayHostname, expectedDeviceId, null, expectedSignature, expectedModuleId, expectedTimeToLive);
+                result = mockedIotHubSasToken;
+
+                System.currentTimeMillis();
+                result = 0;
+            }
+        };
+
+        //act
+        ModuleAuthenticationWithHsm.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedTimeToLive, expectedBufferPercent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.newInstance(IotHubSasToken.class,
+                        new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
+                        expectedGatewayHostname, expectedDeviceId, null, expectedSignature, expectedModuleId, expectedTimeToLive);
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_004: [If the gatewayHostname is null or empty, this function shall construct the sas token using the hostname instead of the gateway hostname.]
+    @Test
+    public void staticConstructorSuccessWithoutGatewayHostname(@Mocked final System mockedSystem) throws IOException, TransportException
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockedSignatureProvider.sign("module", anyString);
+                result = expectedSignature;
+
+                Deencapsulation.newInstance(IotHubSasToken.class,
+                        new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
+                        expectedHostname, expectedDeviceId, null, expectedSignature, expectedModuleId, expectedTimeToLive);
+                result = mockedIotHubSasToken;
+
+                System.currentTimeMillis();
+                result = 0;
+            }
+        };
+
+        //act
+        ModuleAuthenticationWithHsm.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, null, expectedTimeToLive, expectedBufferPercent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.newInstance(IotHubSasToken.class,
+                        new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
+                        expectedHostname, expectedDeviceId, null, expectedSignature, expectedModuleId, expectedTimeToLive);
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_005: [This function shall create a new sas token and save it locally.]
+    @Test
+    public void refreshSasTokenCreatesNewSasToken(@Mocked final System mockedSystem) throws TransportException, IOException
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockedSignatureProvider.sign("module", anyString);
+                result = expectedSignature;
+
+                Deencapsulation.newInstance(IotHubSasToken.class,
+                        new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
+                        expectedHostname, expectedDeviceId, null, expectedSignature, expectedModuleId, expectedTimeToLive);
+                result = mockedIotHubSasToken;
+
+                System.currentTimeMillis();
+                result = 0;
+
+                System.currentTimeMillis();
+                result = 0;
+            }
+        };
+
+        ModuleAuthenticationWithHsm auth = ModuleAuthenticationWithHsm.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, "", expectedTimeToLive, expectedBufferPercent);
+        Deencapsulation.setField(auth, "hostname", expectedHostname);
+        Deencapsulation.setField(auth, "gatewayHostname", "");
+        Deencapsulation.setField(auth, "deviceId", expectedDeviceId);
+        Deencapsulation.setField(auth, "moduleId", expectedModuleId);
+        Deencapsulation.setField(auth, "signatureProvider", mockedSignatureProvider);
+        Deencapsulation.setField(auth, "tokenValidSecs", expectedTimeToLive);
+
+        //act
+        auth.refreshSasToken();
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.newInstance(IotHubSasToken.class,
+                        new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
+                        expectedHostname, expectedDeviceId, null, expectedSignature, expectedModuleId, expectedTimeToLive);
+                times = 2; //once for constuctor, once for call to refreshSasToken
+            }
+        };
+    }
+
+    // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_002: [If the provided signature provider is null, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void staticConstructorThrowsForNullSignatureProvider() throws IOException, TransportException
+    {
+        //act
+        ModuleAuthenticationWithHsm auth = ModuleAuthenticationWithHsm.create(null, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedTimeToLive, expectedBufferPercent);
+
+    }
+}
