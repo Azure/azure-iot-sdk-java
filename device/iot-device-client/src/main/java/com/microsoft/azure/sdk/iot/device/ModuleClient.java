@@ -5,9 +5,17 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 
+import com.microsoft.azure.sdk.iot.device.auth.AuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.auth.HttpHsmSignatureProvider;
+import com.microsoft.azure.sdk.iot.device.auth.ModuleAuthenticationWithHsm;
+import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
+import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 /**
@@ -22,6 +30,9 @@ public class ModuleClient extends InternalClient
     private static long RECEIVE_PERIOD_MILLIS_MQTT = 10;
     private static long RECEIVE_PERIOD_MILLIS_HTTPS = 25 * 60 * 1000; /*25 minutes*/
 
+    private static int DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS = 60 * 60; //1 hour
+    private static int DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE = 85; //Token will go 85% of its life before renewing
+
     private static final String IotEdgedUriVariableName = "IOTEDGE_IOTEDGEDURI";
     private static final String IotEdgedApiVersionVariableName = "IOTEDGE_IOTEDGEDVERSION";
     private static final String IotHubHostnameVariableName = "IOTEDGE_IOTHUBHOSTNAME";
@@ -30,6 +41,7 @@ public class ModuleClient extends InternalClient
     private static final String ModuleIdVariableName = "IOTEDGE_MODULEID";
     private static final String AuthSchemeVariableName = "IOTEDGE_AUTHSCHEME";
     private static final String SasTokenAuthScheme = "SasToken";
+
     private static final String EdgehubConnectionstringVariableName = "EdgeHubConnectionString";
     private static final String IothubConnectionstringVariableName = "IotHubConnectionString";
     
@@ -56,7 +68,7 @@ public class ModuleClient extends InternalClient
 
         //Codes_SRS_MODULECLIENT_34_007: [If the provided protocol is not MQTT, AMQPS, MQTT_WS, or AMQPS_WS, this function shall throw an UnsupportedOperationException.]
         //Codes_SRS_MODULECLIENT_34_004: [If the provided connection string does not contain a module id, this function shall throw an IllegalArgumentException.]
-        commonConstructorVerifications(protocol, this.getConfig());
+        commonConstructorVerifications(protocol, this.config);
     }
 
     /**
@@ -99,10 +111,11 @@ public class ModuleClient extends InternalClient
     {
         Map<String, String> envVariables = System.getenv();
 
+        //Codes_SRS_MODULECLIENT_34_013: [This function shall check for a saved edgehub connection string.]
         String connectionString = envVariables.get(EdgehubConnectionstringVariableName);
-
         if (connectionString == null)
         {
+            //Codes_SRS_MODULECLIENT_34_019: [If no edgehub connection string is present, this function shall check for a saved iothub connection string.]
             connectionString = envVariables.get(IothubConnectionstringVariableName);
         }
 
@@ -111,7 +124,8 @@ public class ModuleClient extends InternalClient
         {
             try
             {
-                return new ModuleClient(connectionString, IotHubClientProtocol.AMQPS);
+                //Codes_SRS_MODULECLIENT_34_020: [If an edgehub or iothub connection string is present, this function shall create a module client instance using that connection string and the provided protocol.]
+                return new ModuleClient(connectionString, protocol);
             }
             catch (URISyntaxException e)
             {
@@ -120,9 +134,9 @@ public class ModuleClient extends InternalClient
         }
         else
         {
-            throw new UnsupportedOperationException("createFromEnvironment does not support using HSM for authentication. Please use a connection string with a sas token or shared access key");
-
-            /*
+            //Codes_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
+            // hostname, authScheme, gatewayHostname, and apiVersion. If any of these other than apiVersion or gatewayHostname is missing,
+            // this function shall throw a ModuleClientException.]
             String edgedUri = envVariables.get(IotEdgedUriVariableName);
             String deviceId = envVariables.get(DeviceIdVariableName);
             String moduleId = envVariables.get(ModuleIdVariableName);
@@ -157,37 +171,52 @@ public class ModuleClient extends InternalClient
 
             if (!authScheme.equals(SasTokenAuthScheme))
             {
+                //Codes_SRS_MODULECLIENT_34_014: [If the auth scheme environment variable is not "SasToken", this function shall throw a moduleClientException.]
                 throw new ModuleClientException("Unsupported authentication scheme. Supported scheme is " + SasTokenAuthScheme + ".");
             }
 
             SignatureProvider signatureProvider;
-            if (apiVersion == null || apiVersion.isEmpty())
+            try
             {
-                signatureProvider = new HttpHsmSignatureProvider(edgedUri);
+                if (apiVersion == null || apiVersion.isEmpty())
+                {
+                    //Codes_SRS_MODULECLIENT_34_015: [If the environment variables do not include an API version, this function shall
+                    // construct a signature provider with no api version specified.]
+                    signatureProvider = new HttpHsmSignatureProvider(edgedUri);
+                }
+                else
+                {
+                    //Codes_SRS_MODULECLIENT_34_016: [If the environment variables does include an API version, this function shall
+                    // construct a signature provider with that api version.]
+                    signatureProvider = new HttpHsmSignatureProvider(edgedUri, apiVersion);
+                }
             }
-            else
+            catch (NoSuchAlgorithmException e)
             {
-                signatureProvider = new HttpHsmSignatureProvider(edgedUri, apiVersion);
+                throw new ModuleClientException("Could not use Hsm Signature Provider", e);
             }
 
             try
             {
-                AuthenticationMethod authenticationMethod = new ModuleAuthenticationWithHsm(signatureProvider, deviceId, moduleId, hostname, gatewayHostname);
-                return new ModuleClient(authenticationMethod, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+                //Codes_SRS_MODULECLIENT_34_017: [This function shall create an authentication provider using the created
+                // signature provider, and the environment variables for deviceid, moduleid, hostname, gatewayhostname,
+                // and the default time for tokens to live and the default sas token buffer time.]
+                AuthenticationProvider authenticationProvider = ModuleAuthenticationWithHsm.create(signatureProvider, deviceId, moduleId, hostname, gatewayHostname, DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS, DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE);
+
+                //Codes_SRS_MODULECLIENT_34_018: [This function return a new ModuleClient instance built from the created authentication provider and the provided protocol.]
+                return new ModuleClient(authenticationProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
             }
-            catch (IOException e)
+            catch (IOException | TransportException e)
             {
                 throw new ModuleClientException(e);
             }
-            */
         }
     }
 
-    //private ModuleClient(AuthenticationMethod authenticationMethod, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException
-    //{
-    //    super(authenticationMethod, protocol, sendPeriodMillis, receivePeriodMillis);
-    //}
-
+    private ModuleClient(AuthenticationProvider authenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException, IOException
+    {
+        super(authenticationProvider, protocol, sendPeriodMillis, receivePeriodMillis);
+    }
 
     /**
      * Sends a message to a particular outputName asynchronously

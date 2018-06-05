@@ -128,7 +128,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     public DeviceClient(String connString, TransportClient transportClient) throws URISyntaxException
     {
         // Codes_SRS_DEVICECLIENT_12_009: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
-        this.config = new DeviceClientConfig(new IotHubConnectionString(connString), DeviceClientConfig.AuthType.SAS_TOKEN);
+        this.config = new DeviceClientConfig(new IotHubConnectionString(connString));
         this.deviceIO = null;
 
         // Codes_SRS_DEVICECLIENT_12_018: [If the transportClient is null, the function shall throw an IllegalArgumentException.]
@@ -564,7 +564,7 @@ public final class DeviceClient extends InternalClient implements Closeable
                      *                                  2. If transport is already open
                      *                                 after updating expiry time
                     */
-                        if (this.getConfig().getIotHubConnectionString().getSharedAccessKey() != null)
+                        if (this.getConfig().getSasTokenAuthentication().canRefreshToken())
                         {
                             if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
                             {

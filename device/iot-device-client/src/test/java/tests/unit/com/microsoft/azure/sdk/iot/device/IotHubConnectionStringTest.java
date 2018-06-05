@@ -76,6 +76,7 @@ public class IotHubConnectionStringTest
     // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_040: [The constructor shall save the module id as the value of 'ModuleId' in the connection string.]
     // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_041: [The constructor shall save the gateway host name as the value of 'GatewayHostName' in the connection string.]
     // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_042: [If the gateway host name is specified in the connection string, the constructor shall save the gateway host name as the host name.]
+    // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_043: [The getGatewayHostName shall return the stored gateway host name.]
     @Test
     public void ConstructorSavesModuleIdAndGatewayHostname() throws URISyntaxException
     {
@@ -90,6 +91,7 @@ public class IotHubConnectionStringTest
         //assert
         assertEquals(VALID_MODULEID, connectionString.getModuleId());
         assertEquals(VALID_GATEWAYHOSTNAME, connectionString.getHostName());
+        assertEquals(VALID_GATEWAYHOSTNAME, connectionString.getGatewayHostName());
     }
 
     /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_020: [The constructor shall save the IoT Hub hostname as the value of `hostName` in the connection string.] */
@@ -518,7 +520,7 @@ public class IotHubConnectionStringTest
         // arrange
         final String connString =
                 "HostName=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey;CredentialScope=Device;" +
-                        "DeviceId=" + VALID_DEVICEID + ";SharedAccessKey=" + VALID_SHARED_ACCESS_KEY + ";";
+                        "DeviceId=" + VALID_DEVICEID + ";SharedAccessKey=" + VALID_SHARED_ACCESS_KEY;
         Object iotHubConnectionString = Deencapsulation.newInstance(Class.forName(IOTHUB_CONNECTION_STRING_CLASS),
                 new Class[] {String.class}, connString);
         assertConnectionString(iotHubConnectionString, VALID_HOSTNAME, VALID_DEVICEID, VALID_SHARED_ACCESS_KEY, null);

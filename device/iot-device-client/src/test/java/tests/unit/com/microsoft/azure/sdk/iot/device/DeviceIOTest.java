@@ -556,7 +556,7 @@ public class DeviceIOTest
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync",
                 new Class[] {Message.class, IotHubEventCallback.class, Object.class, IotHubConnectionString.class},
-                null, mockCallback, context, mockConfig.getIotHubConnectionString());
+                null, mockCallback, context, mockConfig.getDeviceId());
     }
 
     /* Tests_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */

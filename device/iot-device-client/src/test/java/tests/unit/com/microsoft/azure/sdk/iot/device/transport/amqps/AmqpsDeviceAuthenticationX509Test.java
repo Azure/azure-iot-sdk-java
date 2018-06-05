@@ -8,6 +8,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.ProductInfo;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import mockit.*;
 import org.apache.qpid.proton.Proton;
@@ -203,7 +204,7 @@ public class AmqpsDeviceAuthenticationX509Test
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_010: [The function shall call the prototype class makeDomain function with the sslContext.]
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_011: [The function shall set the domain on the transport.]
     @Test
-    public void setSSLContextCallsMakeDomainAndSetsDomain() throws IOException
+    public void setSSLContextCallsMakeDomainAndSetsDomain() throws IOException, TransportException
     {
         //arrange
         final AmqpsDeviceAuthenticationX509 auth = new AmqpsDeviceAuthenticationX509(mockDeviceClientConfig);
@@ -211,7 +212,7 @@ public class AmqpsDeviceAuthenticationX509Test
         new StrictExpectations(auth)
         {
             {
-                mockDeviceClientConfig.getX509Authentication().getSSLContext();
+                mockDeviceClientConfig.getAuthenticationProvider().getSSLContext();
                 result = mockSSLContext;
 
                 Deencapsulation.invoke(auth, "makeDomain", mockSSLContext);

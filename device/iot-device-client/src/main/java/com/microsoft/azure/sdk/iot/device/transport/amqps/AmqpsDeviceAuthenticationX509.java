@@ -74,7 +74,7 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
         try
         {
             // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_010: [The function shall call the prototype class makeDomain function with the sslContext.]
-            domain = makeDomain(this.deviceClientConfig.getX509Authentication().getSSLContext());
+            domain = makeDomain(this.deviceClientConfig.getAuthenticationProvider().getSSLContext());
         }
         catch (IOException e)
         {

@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -474,4 +475,64 @@ public class IotHubSasTokenTest
                 iotHubConnectionString.getSharedAccessToken(),
                 0);
     }
+
+    // Tests_SRS_IOTHUBSASTOKEN_34_011: [This function shall return the saved sas token.]
+    @Test
+    public void getSasTokenReturnsSavedSasToken()
+    {
+        //arrange
+        String sastoken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + Long.MAX_VALUE;
+        final IotHubConnectionString iotHubConnectionString =
+                Deencapsulation.newInstance(IotHubConnectionString.class,
+                        new Class[] {String.class, String.class, String.class, String.class},
+                        "iothub.sample-iothub-hostname.net",
+                        "sample-device-ID",
+                        null,
+                        sastoken);
+
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken(),
+                iotHubConnectionString.getModuleId(),
+                0);
+
+        //act
+        String actualSasToken = token.getSasToken();
+
+        //assert
+        assertEquals(iotHubConnectionString.getSharedAccessToken(), actualSasToken);
+    }
+
+    // Codes_SRS_IOTHUBSASTOKEN_34_012: [If their is no deviceKey or sharedAccessToken provided, this function shall
+    // throw and IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorThrowsIfNoKeyOrTokenPresent()
+    {
+        //arrange
+        String sastoken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + Long.MAX_VALUE;
+        final IotHubConnectionString iotHubConnectionString =
+                Deencapsulation.newInstance(IotHubConnectionString.class,
+                        new Class[] {String.class, String.class, String.class, String.class},
+                        "iothub.sample-iothub-hostname.net",
+                        "sample-device-ID",
+                        null,
+                        sastoken);
+
+        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getDeviceId(),
+                null,
+                null,
+                iotHubConnectionString.getModuleId(),
+                0);
+
+        //act
+        String actualSasToken = token.getSasToken();
+
+        //assert
+        assertEquals(iotHubConnectionString.getSharedAccessToken(), actualSasToken);
+    }
+
 }

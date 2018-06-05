@@ -5,18 +5,15 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
+import com.microsoft.azure.sdk.iot.device.auth.AuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 
 import java.io.IOError;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,7 +40,7 @@ public class InternalClient
         /* Codes_SRS_INTERNALCLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.] */
         commonConstructorVerification(iotHubConnectionString, protocol);
 
-        this.config = new DeviceClientConfig(iotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
+        this.config = new DeviceClientConfig(iotHubConnectionString);
         this.config.setProtocol(protocol);
 
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
@@ -51,16 +48,13 @@ public class InternalClient
         this.logger = new CustomLogger(this.getClass());
     }
 
-    //InternalClient(AuthenticationMethod authenticationMethod, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException
-    //{
-    //    this.config = new DeviceClientConfig(authenticationMethod, DeviceClientConfig.AuthType.SAS_TOKEN);
-    //    this.config.setProtocol(protocol);
-
-    //    this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
-
-            //this.logger = new CustomLogger(this.getClass());
-
-    //}
+    InternalClient(AuthenticationProvider authenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
+    {
+        this.config = new DeviceClientConfig(authenticationProvider);
+        this.config.setProtocol(protocol);
+        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+        this.logger = new CustomLogger(this.getClass());
+    }
 
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath, long sendPeriodMillis, long receivePeriodMillis) throws URISyntaxException
     {
@@ -714,7 +708,7 @@ public class InternalClient
                          *                                  2. If transport is already open
                          *                                 after updating expiry time
                          */
-                        if (this.config.getIotHubConnectionString().getSharedAccessKey() != null)
+                        if (this.config.getSasTokenAuthentication().canRefreshToken())
                         {
                             this.deviceIO.close();
                             this.deviceIO.open();

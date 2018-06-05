@@ -91,17 +91,6 @@ public class TransportClient
         }
 
         // Codes_SRS_TRANSPORTCLIENT_12_009: [The function shall do nothing if the the registration list is empty.]
-        for (int i = 0; i < this.deviceClientList.size(); i++)
-        {
-            // Codes_SRS_TRANSPORTCLIENT_12_010: [The function shall renew each device client token if it is expired.]
-            if (deviceClientList.get(i).getConfig().getSasTokenAuthentication() != null &&
-                deviceClientList.get(i).getConfig().getSasTokenAuthentication().isRenewalNecessary())
-            {
-                deviceClientList.get(i).getConfig().getSasTokenAuthentication().getRenewedSasToken();
-            }
-        }
-
-        // Codes_SRS_TRANSPORTCLIENT_12_009: [The function shall do nothing if the the registration list is empty.]
         if (this.deviceClientList.size() > 0)
         {
             // Codes_SRS_TRANSPORTCLIENT_12_011: [The function shall create a new DeviceIO using the first registered device client's configuration.]

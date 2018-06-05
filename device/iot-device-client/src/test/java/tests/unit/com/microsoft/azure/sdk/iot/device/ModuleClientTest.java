@@ -6,10 +6,20 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.auth.AuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.auth.HttpHsmSignatureProvider;
+import com.microsoft.azure.sdk.iot.device.auth.ModuleAuthenticationWithHsm;
+import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
+import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import mockit.*;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static junit.framework.TestCase.assertNotNull;
 
@@ -37,6 +47,15 @@ public class ModuleClientTest
 
     @Mocked
     MessageCallback mockedMessageCallback;
+
+    @Mocked
+    HttpHsmSignatureProvider mockedHttpHsmSignatureProvider;
+
+    @Mocked
+    AuthenticationProvider mockedAuthenticationProvider;
+
+    @Mocked
+    ModuleAuthenticationWithHsm mockedModuleAuthenticationWithHsm;
 
     private void baseExpectations() throws URISyntaxException
     {
@@ -301,4 +320,413 @@ public class ModuleClientTest
             }
         };
     }
+
+    //Tests_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
+    // hostname, authScheme, gatewayHostname, and apiVersion. If any of these other than apiVersion or gatewayHostname is missing,
+    // this function shall throw a ModuleClientException.]
+    @Test (expected = ModuleClientException.class)
+    public void createFromEnvironmentChecksForHostname(final @Mocked System mockedSystem) throws ModuleClientException
+    {
+        //arrange
+        IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        String expectedIotEdgedUri = "someUri";
+        String expectedApiVersion = "1.1.1";
+        String expectedHostname = null;
+        String expectedGatewayHostname = "someGatewayHostname";
+        String expectedDeviceId = "1234";
+        String expectedModuleId = "5678";
+        String expectedAuthScheme = Deencapsulation.getField(ModuleClient.class, "SasTokenAuthScheme");
+
+        final Map<String, String> mockedSystemVariables = new HashMap<>();
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotHubHostnameVariableName").toString(), expectedHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "DeviceIdVariableName").toString(), expectedDeviceId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleIdVariableName").toString(), expectedModuleId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "AuthSchemeVariableName").toString(), expectedAuthScheme);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedApiVersionVariableName").toString(), expectedApiVersion);
+        new NonStrictExpectations()
+        {
+            {
+                mockedSystem.getenv();
+                result = mockedSystemVariables;
+            }
+        };
+
+        //act
+        ModuleClient.createFromEnvironment(protocol);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
+    // hostname, authScheme, gatewayHostname, and apiVersion. If any of these other than apiVersion or gatewayHostname is missing,
+    // this function shall throw a ModuleClientException.]
+    @Test (expected = ModuleClientException.class)
+    public void createFromEnvironmentChecksForDeviceId(final @Mocked System mockedSystem) throws ModuleClientException
+    {
+        //arrange
+        IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        String expectedIotEdgedUri = "someUri";
+        String expectedApiVersion = "1.1.1";
+        String expectedHostname = "someHostname";
+        String expectedGatewayHostname = "someGatewayHostname";
+        String expectedDeviceId = null;
+        String expectedModuleId = "5678";
+        String expectedAuthScheme = Deencapsulation.getField(ModuleClient.class, "SasTokenAuthScheme");
+
+        final Map<String, String> mockedSystemVariables = new HashMap<>();
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotHubHostnameVariableName").toString(), expectedHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "DeviceIdVariableName").toString(), expectedDeviceId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleIdVariableName").toString(), expectedModuleId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "AuthSchemeVariableName").toString(), expectedAuthScheme);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedApiVersionVariableName").toString(), expectedApiVersion);
+        new NonStrictExpectations()
+        {
+            {
+                mockedSystem.getenv();
+                result = mockedSystemVariables;
+            }
+        };
+
+        //act
+        ModuleClient.createFromEnvironment(protocol);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
+    // hostname, authScheme, gatewayHostname, and apiVersion. If any of these other than apiVersion or gatewayHostname is missing,
+    // this function shall throw a ModuleClientException.]
+    @Test (expected = ModuleClientException.class)
+    public void createFromEnvironmentChecksForModuleId(final @Mocked System mockedSystem) throws ModuleClientException
+    {
+        //arrange
+        IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        String expectedIotEdgedUri = "someUri";
+        String expectedApiVersion = "1.1.1";
+        String expectedHostname = "someHostname";
+        String expectedGatewayHostname = "someGatewayHostname";
+        String expectedDeviceId = "1234";
+        String expectedModuleId = null;
+        String expectedAuthScheme = Deencapsulation.getField(ModuleClient.class, "SasTokenAuthScheme");
+
+        final Map<String, String> mockedSystemVariables = new HashMap<>();
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotHubHostnameVariableName").toString(), expectedHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "DeviceIdVariableName").toString(), expectedDeviceId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleIdVariableName").toString(), expectedModuleId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "AuthSchemeVariableName").toString(), expectedAuthScheme);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedApiVersionVariableName").toString(), expectedApiVersion);
+        new NonStrictExpectations()
+        {
+            {
+                mockedSystem.getenv();
+                result = mockedSystemVariables;
+            }
+        };
+
+        //act
+        ModuleClient.createFromEnvironment(protocol);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
+    // hostname, authScheme, gatewayHostname, and apiVersion. If any of these other than apiVersion or gatewayHostname is missing,
+    // this function shall throw a ModuleClientException.]
+    @Test (expected = ModuleClientException.class)
+    public void createFromEnvironmentChecksForAuthScheme(final @Mocked System mockedSystem) throws ModuleClientException
+    {
+        //arrange
+        IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        String expectedIotEdgedUri = "someUri";
+        String expectedApiVersion = "1.1.1";
+        String expectedHostname = "someHostname";
+        String expectedGatewayHostname = "someGatewayHostname";
+        String expectedDeviceId = "1234";
+        String expectedModuleId = "5678";
+        String expectedAuthScheme = null;
+
+        final Map<String, String> mockedSystemVariables = new HashMap<>();
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotHubHostnameVariableName").toString(), expectedHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "DeviceIdVariableName").toString(), expectedDeviceId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleIdVariableName").toString(), expectedModuleId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "AuthSchemeVariableName").toString(), expectedAuthScheme);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedApiVersionVariableName").toString(), expectedApiVersion);
+        new NonStrictExpectations()
+        {
+            {
+                mockedSystem.getenv();
+                result = mockedSystemVariables;
+            }
+        };
+
+        //act
+        ModuleClient.createFromEnvironment(protocol);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_014: [If the auth scheme environment variable is not "SasToken", this function shall throw a moduleClientException.]
+    @Test (expected = ModuleClientException.class)
+    public void createFromEnvironmentChecksForAuthSchemeToBeSasToken(final @Mocked System mockedSystem) throws ModuleClientException
+    {
+        //arrange
+        IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        String expectedIotEdgedUri = "someUri";
+        String expectedApiVersion = "1.1.1";
+        String expectedHostname = "someHostname";
+        String expectedGatewayHostname = "someGatewayHostname";
+        String expectedDeviceId = "1234";
+        String expectedModuleId = "5678";
+        String expectedAuthScheme = "not sas token auth";
+
+        final Map<String, String> mockedSystemVariables = new HashMap<>();
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotHubHostnameVariableName").toString(), expectedHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "DeviceIdVariableName").toString(), expectedDeviceId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleIdVariableName").toString(), expectedModuleId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "AuthSchemeVariableName").toString(), expectedAuthScheme);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedApiVersionVariableName").toString(), expectedApiVersion);
+        new NonStrictExpectations()
+        {
+            {
+                mockedSystem.getenv();
+                result = mockedSystemVariables;
+            }
+        };
+
+        //act
+        ModuleClient.createFromEnvironment(protocol);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_015: [If the environment variables do not include an API version, this function shall
+    // construct a signature provider with no api version specified.]
+    @Test
+    public void signatureProviderWithoutApiVersionSpecified(final @Mocked System mockedSystem) throws ModuleClientException, NoSuchAlgorithmException
+    {
+        //arrange
+        IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        final String expectedIotEdgedUri = "someUri";
+        String expectedApiVersion = null;
+        String expectedHostname = "someHostname";
+        String expectedGatewayHostname = "someGatewayHostname";
+        String expectedDeviceId = "1234";
+        String expectedModuleId = "5678";
+        String expectedAuthScheme = Deencapsulation.getField(ModuleClient.class, "SasTokenAuthScheme");
+
+        final Map<String, String> mockedSystemVariables = new HashMap<>();
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotHubHostnameVariableName").toString(), expectedHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "DeviceIdVariableName").toString(), expectedDeviceId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleIdVariableName").toString(), expectedModuleId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "AuthSchemeVariableName").toString(), expectedAuthScheme);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedApiVersionVariableName").toString(), expectedApiVersion);
+        new NonStrictExpectations()
+        {
+            {
+                mockedSystem.getenv();
+                result = mockedSystemVariables;
+            }
+        };
+
+        //act
+        ModuleClient.createFromEnvironment(protocol);
+
+        //assert
+        new Verifications()
+        {
+            {
+                new HttpHsmSignatureProvider(expectedIotEdgedUri);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MODULECLIENT_34_016: [If the environment variables does include an API version, this function shall
+    // construct a signature provider with that api version.]
+    //Tests_SRS_MODULECLIENT_34_017: [This function shall create an authentication provider using the created
+    // signature provider, and the environment variables for deviceid, moduleid, hostname, gatewayhostname,
+    // and the default time for tokens to live and the default sas token buffer time.]
+    //Tests_SRS_MODULECLIENT_34_018: [This function return a new ModuleClient instance built from the created authentication provider and the provided protocol.]
+    @Test
+    public void signatureProviderWithApiVersionSpecified(final @Mocked System mockedSystem, @Mocked InternalClient internalClient) throws ModuleClientException, NoSuchAlgorithmException, IOException, TransportException
+    {
+        //arrange
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        final String expectedIotEdgedUri = "someUri";
+        final String expectedApiVersion = "1.1.1";
+        final String expectedHostname = "someHostname";
+        final String expectedGatewayHostname = "someGatewayHostname";
+        final String expectedDeviceId = "1234";
+        final String expectedModuleId = "5678";
+        String expectedAuthScheme = Deencapsulation.getField(ModuleClient.class, "SasTokenAuthScheme");
+
+        final Map<String, String> mockedSystemVariables = new HashMap<>();
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotHubHostnameVariableName").toString(), expectedHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "DeviceIdVariableName").toString(), expectedDeviceId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleIdVariableName").toString(), expectedModuleId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "AuthSchemeVariableName").toString(), expectedAuthScheme);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedApiVersionVariableName").toString(), expectedApiVersion);
+        new NonStrictExpectations()
+        {
+            {
+                mockedSystem.getenv();
+                result = mockedSystemVariables;
+
+                new HttpHsmSignatureProvider(expectedIotEdgedUri, expectedApiVersion);
+                result = mockedHttpHsmSignatureProvider;
+
+                ModuleAuthenticationWithHsm.create(mockedHttpHsmSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, anyInt, anyInt);
+                result = mockedModuleAuthenticationWithHsm;
+            }
+        };
+
+        //act
+        ModuleClient.createFromEnvironment(protocol);
+
+        //assert
+        new Verifications()
+        {
+            {
+                new HttpHsmSignatureProvider(expectedIotEdgedUri, expectedApiVersion);
+                times = 1;
+
+                ModuleAuthenticationWithHsm.create((SignatureProvider) any, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, anyInt, anyInt);
+                times = 1;
+
+                Deencapsulation.newInstance(ModuleClient.class,
+                        new Class[] {AuthenticationProvider.class, IotHubClientProtocol.class, long.class, long.class},
+                        mockedModuleAuthenticationWithHsm, protocol, anyLong, anyLong);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
+    // hostname, authScheme, gatewayHostname, and apiVersion. If any of these other than apiVersion or gatewayHostname is missing,
+    // this function shall throw a ModuleClientException.]
+    @Test (expected = ModuleClientException.class)
+    public void createFromEnvironmentChecksForEdgedUri(final @Mocked System mockedSystem) throws ModuleClientException
+    {
+        //arrange
+        IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        String expectedIotEdgedUri = null;
+        String expectedApiVersion = "1.1.1";
+        String expectedHostname = "someHostname";
+        String expectedGatewayHostname = "someGatewayHostname";
+        String expectedDeviceId = "1234";
+        String expectedModuleId = "5678";
+        String expectedAuthScheme = Deencapsulation.getField(ModuleClient.class, "SasTokenAuthScheme");
+
+        final Map<String, String> mockedSystemVariables = new HashMap<>();
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotHubHostnameVariableName").toString(), expectedHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "DeviceIdVariableName").toString(), expectedDeviceId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleIdVariableName").toString(), expectedModuleId);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "AuthSchemeVariableName").toString(), expectedAuthScheme);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
+
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedApiVersionVariableName").toString(), expectedApiVersion);
+        new NonStrictExpectations()
+        {
+            {
+                mockedSystem.getenv();
+                result = mockedSystemVariables;
+            }
+        };
+
+        //act
+        ModuleClient.createFromEnvironment(protocol);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_013: [This function shall check for a saved edgehub connection string.]
+    //Tests_SRS_MODULECLIENT_34_020: [If an edgehub or iothub connection string is present, this function shall create a module client instance using that connection string and the provided protocol.]
+    @Test
+    public void createFromEnvironmentChecksForEnvVarOfEdgeHub(final @Mocked System mockedSystem) throws ModuleClientException, URISyntaxException
+    {
+        //arrange
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        final String expectedEdgeHubConnectionString = "edgehubConnString";
+        final String expectedIotHubConnectionString = "iothubConnString";
+
+        final Map<String, String> mockedSystemVariables = new HashMap<>();
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "EdgehubConnectionstringVariableName").toString(), expectedEdgeHubConnectionString);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IothubConnectionstringVariableName").toString(), expectedIotHubConnectionString);
+
+        //assert
+        new Expectations()
+        {
+            {
+                mockedSystem.getenv();
+                result = mockedSystemVariables;
+
+                new IotHubConnectionString(expectedEdgeHubConnectionString);
+                result = mockedIotHubConnectionString;
+
+                new DeviceClientConfig(mockedIotHubConnectionString);
+                result = mockedDeviceClientConfig;
+
+                mockedDeviceClientConfig.getModuleId();
+                result = "someModuleId";
+            }
+        };
+
+        //act
+        ModuleClient.createFromEnvironment(protocol);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_019: [If no edgehub connection string is present, this function shall check for a saved iothub connection string.]
+    //Tests_SRS_MODULECLIENT_34_020: [If an edgehub or iothub connection string is present, this function shall create a module client instance using that connection string and the provided protocol.]
+    @Test
+    public void createFromEnvironmentChecksForEnvVarOfIotHub(final @Mocked System mockedSystem) throws ModuleClientException, URISyntaxException
+    {
+        //arrange
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        final String expectedEdgeHubConnectionString = null;
+        final String expectedIotHubConnectionString = "HostName=hub.azure-devices.net;DeviceId=device;ModuleId=module;SharedAccessKey=ecI+YlN6YFCACtVXaPM73/z/Pradyfh4IbtHusg4zEbE=";
+
+        final Map<String, String> mockedSystemVariables = new HashMap<>();
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "EdgehubConnectionstringVariableName").toString(), expectedEdgeHubConnectionString);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IothubConnectionstringVariableName").toString(), expectedIotHubConnectionString);
+
+        //assert
+        new Expectations()
+        {
+            {
+                mockedSystem.getenv();
+                result = mockedSystemVariables;
+
+                new IotHubConnectionString(expectedIotHubConnectionString);
+                result = mockedIotHubConnectionString;
+
+                new DeviceClientConfig(mockedIotHubConnectionString);
+                result = mockedDeviceClientConfig;
+
+                mockedDeviceClientConfig.getModuleId();
+                result = "someModuleId";
+            }
+        };
+
+        //act
+        ModuleClient.createFromEnvironment(protocol);
+    }
+
 }

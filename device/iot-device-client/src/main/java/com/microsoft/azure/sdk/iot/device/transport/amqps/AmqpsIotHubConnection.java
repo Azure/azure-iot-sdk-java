@@ -106,23 +106,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             throw new IllegalArgumentException("hubName cannot be null or empty.");
         }
-        if (config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
-        {
-            //try
-            //{
-                if (config.getIotHubConnectionString().getSharedAccessKey() == null || config.getIotHubConnectionString().getSharedAccessKey().isEmpty())
-                {
-                    if(config.getSasTokenAuthentication().getCurrentSasToken() == null || config.getSasTokenAuthentication().getCurrentSasToken().isEmpty())
-                    {
-                        throw new IllegalArgumentException("Both deviceKey and shared access signature cannot be null or empty.");
-                    }
-                }
-            //}
-            //catch (IOException e)
-            //{
-            //    throw new TransportException(e);
-            //}
-        }
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_002: [The constructor shall save the configuration into private member variables.]
         this.deviceClientConfig = config;

@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -31,16 +32,26 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      * @param sharedAccessToken the sas token string for accessing the device. Must be null if the provided deviceKey is not.
      * @throws SecurityException if the provided sas token has expired
      */
-    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken) throws SecurityException
+    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken, int tokenValidSecs, int timeBufferPercentage) throws SecurityException
     {
-        this.hostname = hostname;
-        this.deviceId = deviceId;
+        super(hostname, gatewayHostname, deviceId, moduleId, tokenValidSecs, timeBufferPercentage);
+
         this.deviceKey = deviceKey;
-        this.moduleId = moduleId;
 
         this.sslContextNeedsUpdate = true;
 
         //Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_002: [This constructor shall save the provided hostname, device id, module id, deviceKey, and sharedAccessToken.]
+        this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
+    }
+
+    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken) throws SecurityException
+    {
+        super(hostname, gatewayHostname, deviceId, moduleId);
+
+        this.deviceKey = deviceKey;
+        this.sslContextNeedsUpdate = true;
+
+        //Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_003: [This constructor shall save the provided hostname, device id, module id, deviceKey, and sharedAccessToken.]
         this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
     }
 
@@ -51,7 +62,15 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
     @Override
     public boolean isRenewalNecessary()
     {
+        // Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_018: [This function shall return true if a deviceKey is present and if super.isRenewalNecessary returns true.]
         return (super.isRenewalNecessary() && this.deviceKey == null);
+    }
+
+    @Override
+    public boolean canRefreshToken()
+    {
+        // Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_017: [This function shall return true if a deviceKey is present.]
+        return this.deviceKey != null;
     }
 
     /**
@@ -60,7 +79,7 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      * @return The value of SasToken
      */
     @Override
-    public String getRenewedSasToken() throws IOException
+    public String getRenewedSasToken() throws IOException, TransportException
     {
         if (this.sasToken.isExpired())
         {

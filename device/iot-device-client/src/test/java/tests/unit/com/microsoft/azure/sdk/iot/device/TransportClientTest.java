@@ -2,6 +2,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.NoRetry;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import mockit.Deencapsulation;
@@ -144,12 +145,11 @@ public class TransportClientTest
         };
     }
 
-    // Tests_SRS_TRANSPORTCLIENT_12_010: [The function shall renew each device client token if it is expired.]
     // Tests_SRS_TRANSPORTCLIENT_12_011: [The function shall create a new DeviceIO using the first registered device client's configuration.]
     // Tests_SRS_TRANSPORTCLIENT_12_012: [The function shall set the created DeviceIO to all registered device client.]
     // Tests_SRS_TRANSPORTCLIENT_12_013: [The function shall open the transport in multiplexing mode.]
     @Test
-    public void openSuccess() throws IOException
+    public void openSuccess() throws IOException, TransportException
     {
         // arrange
         IotHubClientProtocol iotHubClientProtocol = IotHubClientProtocol.AMQPS;
@@ -181,8 +181,6 @@ public class TransportClientTest
         new Verifications()
         {
             {
-                mockIotHubSasTokenAuthenticationProvider.getRenewedSasToken();
-                times = 1;
                 Deencapsulation.invoke(mockDeviceClient, "setDeviceIO", actualDeviceIO);
                 times = 1;
                 Deencapsulation.invoke(mockDeviceIO, "open");

@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 
-public abstract class IotHubX509AuthenticationProvider
+public abstract class IotHubX509AuthenticationProvider extends AuthenticationProvider
 {
     IotHubSSLContext iotHubSSLContext;
 
@@ -32,4 +32,9 @@ public abstract class IotHubX509AuthenticationProvider
      * @param certificate valid user trusted certificate string
      */
     public abstract void setIotHubTrustedCert(String certificate);
+
+    public IotHubX509AuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId)
+    {
+        super(hostname, gatewayHostname, deviceId, moduleId);
+    }
 }

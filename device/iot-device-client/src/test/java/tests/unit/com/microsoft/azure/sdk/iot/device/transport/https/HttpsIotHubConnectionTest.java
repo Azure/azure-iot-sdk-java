@@ -60,13 +60,11 @@ public class HttpsIotHubConnectionTest
     private static final String testSasToken = "SharedAccessSignature sr=test&sig=test&se=0";
 
     @Before
-    public void setup() throws IOException
+    public void setup() throws IOException, TransportException
     {
         new NonStrictExpectations()
         {
             {
-                mockConfig.getSasTokenAuthentication().getCurrentSasToken();
-                result=testSasToken;
                 mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 result=testSasToken;
             }
@@ -263,8 +261,6 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = deviceKey;
                 mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 result = tokenStr;
                 mockConfig.getAuthenticationType();
@@ -595,8 +591,6 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = tokenStr;
                 mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 result = tokenStr;
             }
@@ -807,8 +801,6 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = tokenStr;
                 mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 result = tokenStr;
             }
@@ -1450,8 +1442,6 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = tokenStr;
                 mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 result = tokenStr;
             }
@@ -1696,7 +1686,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockConfig.getX509Authentication().getSSLContext();
+                mockConfig.getAuthenticationProvider().getSSLContext();
                 times = 1;
             }
         };
@@ -1725,7 +1715,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockConfig.getX509Authentication().getSSLContext();
+                mockConfig.getAuthenticationProvider().getSSLContext();
                 times = 1;
             }
         };
@@ -1752,7 +1742,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockConfig.getX509Authentication().getSSLContext();
+                mockConfig.getAuthenticationProvider().getSSLContext();
                 times = 1;
             }
         };
@@ -1790,7 +1780,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockConfig.getX509Authentication().getSSLContext();
+                mockConfig.getAuthenticationProvider().getSSLContext();
                 times = 1;
             }
         };

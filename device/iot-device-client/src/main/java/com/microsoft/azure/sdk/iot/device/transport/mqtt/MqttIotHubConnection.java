@@ -83,17 +83,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             {
                 throw new IllegalArgumentException("hubName cannot be null or empty.");
             }
-            if (config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
-            {
-                if (config.getIotHubConnectionString().getSharedAccessKey() == null || config.getIotHubConnectionString().getSharedAccessKey().isEmpty())
-                {
-                    if(config.getSasTokenAuthentication().getCurrentSasToken() == null || config.getSasTokenAuthentication().getCurrentSasToken().isEmpty())
-                    {
-                        //Codes_SRS_MQTTIOTHUBCONNECTION_34_020: [If the config has no shared access token, device key, or x509 certificates, this constructor shall throw an IllegalArgumentException.]
-                        throw new IllegalArgumentException("Must have a deviceKey, a shared access token, or x509 certificate saved.");
-                    }
-                }
-            }
 
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_001: [The constructor shall save the configuration.]
             this.config = config;
@@ -131,11 +120,10 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             // with an IoT Hub using the provided host name, user name, device ID, and sas token.]
             try
             {
-                SSLContext sslContext = null;
+                SSLContext sslContext = this.config.getAuthenticationProvider().getSSLContext();
                 if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
                 {
                     this.iotHubUserPassword = this.config.getSasTokenAuthentication().getRenewedSasToken();
-                    sslContext = this.config.getSasTokenAuthentication().getSSLContext();
                 }
                 else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
                 {
@@ -146,7 +134,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                     }
 
                     this.iotHubUserPassword = null;
-                    sslContext = this.config.getX509Authentication().getSSLContext();
                 }
 
                 //URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
