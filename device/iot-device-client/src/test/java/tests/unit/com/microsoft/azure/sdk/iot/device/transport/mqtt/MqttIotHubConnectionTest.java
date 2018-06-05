@@ -130,8 +130,6 @@ public class MqttIotHubConnectionTest
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = deviceKey;
             }
         };
 
@@ -151,8 +149,6 @@ public class MqttIotHubConnectionTest
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = deviceKey;
             }
         };
 
@@ -173,8 +169,6 @@ public class MqttIotHubConnectionTest
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = deviceKey;
             }
         };
 
@@ -195,8 +189,6 @@ public class MqttIotHubConnectionTest
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = "";
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = deviceKey;
             }
         };
 
@@ -217,8 +209,6 @@ public class MqttIotHubConnectionTest
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = null;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = deviceKey;
             }
         };
 
@@ -239,8 +229,6 @@ public class MqttIotHubConnectionTest
                 result = "";
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = deviceKey;
             }
         };
 
@@ -261,8 +249,6 @@ public class MqttIotHubConnectionTest
                 result = null;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = deviceKey;
             }
         };
 
@@ -381,8 +367,6 @@ public class MqttIotHubConnectionTest
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getRenewedSasToken();
                 result = expectedToken;
-                mockConfig.getIotHubConnectionString().getSharedAccessToken();
-                result = "someToken";
                 mockConfig.isUseWebsocket();
                 result = false;
             }
@@ -431,8 +415,6 @@ public class MqttIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getIotHubConnectionString().getSharedAccessToken();
-                result = "someToken";
                 mockConfig.isUseWebsocket();
                 result = false;
             }
@@ -489,8 +471,6 @@ public class MqttIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getIotHubConnectionString().getSharedAccessToken();
-                result = "someToken";
                 mockConfig.isUseWebsocket();
                 result = false;
             }
@@ -1057,35 +1037,6 @@ public class MqttIotHubConnectionTest
         };
     }
 
-    //Tests_SRS_MQTTIOTHUBCONNECTION_34_020: [If the config has no shared access token, device key, or x509 certificates, this constructor shall throw an IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorConfigMissingTokenKeyAndCertThrowsIllegalArgumentException() throws TransportException
-    {
-        //arrange
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getIotHubHostname();
-                result = "someValidHost";
-                mockConfig.getDeviceId();
-                result = "someValidDeviceId";
-                mockConfig.getIotHubName();
-                result = "someValidHubName";
-
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = null;
-                mockConfig.getIotHubConnectionString().getSharedAccessToken();
-                result = null;
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-            }
-        };
-
-        //act
-        new MqttIotHubConnection(mockConfig);
-    }
-
-
     //Tests_SRS_MQTTIOTHUBCONNECTION_34_027: [If this function is called while using websockets and x509 authentication, an UnsupportedOperationException shall be thrown.]
     @Test (expected = UnsupportedOperationException.class)
     public void websocketWithX509ThrowsAtOpen() throws TransportException
@@ -1168,8 +1119,6 @@ public class MqttIotHubConnectionTest
                 result = "hostname.com";
                 mockConfig.getIotHubName();
                 result = "hostname";
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = deviceKey;
                 mockConfig.getProductInfo();
                 result = mockedProductInfo;
                 mockedProductInfo.getUserAgentString();
@@ -1637,8 +1586,6 @@ public class MqttIotHubConnectionTest
                 mockConfig.getIotHubHostname(); result = iotHubHostName;
                 mockConfig.getIotHubName(); result = hubName;
                 mockConfig.getDeviceId(); result = deviceId;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = deviceKey;
 
                 mockConfig.getProductInfo();
                 result = mockedProductInfo;
@@ -1660,8 +1607,6 @@ public class MqttIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getIotHubConnectionString().getSharedAccessToken();
-                result = expectedToken;
                 Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, anyString, anyString, anyString, anyString, any);
                 result = mockedMqttConnection;
                 new MqttMessaging(mockedMqttConnection, anyString, (IotHubListener) any, null, null, anyString);

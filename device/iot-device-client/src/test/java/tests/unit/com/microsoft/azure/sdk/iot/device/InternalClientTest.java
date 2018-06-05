@@ -1363,11 +1363,8 @@ public class InternalClientTest
     @Test (expected = SecurityException.class)
     public void tokenExpiresAfterDeviceClientInitializedBeforeOpen() throws SecurityException, URISyntaxException, IOException
     {
-        final Long expiryTime = Long.MAX_VALUE;
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
-
         new NonStrictExpectations()
         {
             {
@@ -1376,9 +1373,6 @@ public class InternalClientTest
 
                 mockConfig.getSasTokenAuthentication().isRenewalNecessary();
                 result = true;
-
-                mockConfig.getIotHubConnectionString().getSharedAccessToken();
-                result = "SharedAccessSignature sr=hub.azure-devices.net%2Fdevices%2F2&sig=3V1oYPdtyhGPHDDpjS2SnwxoU7CbI%2BYxpLjsecfrtgY%3D&se=" + expiryTime;
             }
         };
 
@@ -2125,8 +2119,8 @@ public class InternalClientTest
                 result = true;
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = anyString;
+                mockConfig.getSasTokenAuthentication().canRefreshToken();
+                result = true;
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
@@ -2175,10 +2169,8 @@ public class InternalClientTest
                 result = IotHubClientProtocol.HTTPS;
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.getIotHubConnectionString();
-                result = mockIotHubConnectionString;
-                mockIotHubConnectionString.getSharedAccessKey();
-                result = "some key";
+                mockConfig.getSasTokenAuthentication().canRefreshToken();
+                result = true;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2257,8 +2249,8 @@ public class InternalClientTest
                 result = true;
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = anyString;
+                mockConfig.getSasTokenAuthentication().canRefreshToken();
+                result = true;
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
@@ -2300,8 +2292,8 @@ public class InternalClientTest
                 result = false;
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = anyString;
+                mockConfig.getSasTokenAuthentication().canRefreshToken();
+                result = true;
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
@@ -2340,8 +2332,8 @@ public class InternalClientTest
                 result = true;
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = anyString;
+                mockConfig.getSasTokenAuthentication().canRefreshToken();
+                result = true;
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
@@ -2384,8 +2376,8 @@ public class InternalClientTest
                 result = true;
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = anyString;
+                mockConfig.getSasTokenAuthentication().canRefreshToken();
+                result = true;
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockDeviceIO.close();
@@ -2418,8 +2410,8 @@ public class InternalClientTest
                 result = true;
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = anyString;
+                mockConfig.getSasTokenAuthentication().canRefreshToken();
+                result = true;
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 Deencapsulation.invoke(mockDeviceIO, "open");

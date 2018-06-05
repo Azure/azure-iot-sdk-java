@@ -442,14 +442,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     {
         try
         {
-            if (authType == DeviceClientConfig.AuthType.X509_CERTIFICATE)
-            {
-                return this.config.getX509Authentication().getSSLContext();
-            }
-            else
-            {
-                return this.config.getSasTokenAuthentication().getSSLContext();
-            }
+            return this.config.getAuthenticationProvider().getSSLContext();
         }
         catch (IOException e)
         {

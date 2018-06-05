@@ -32,8 +32,10 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
      * @param securityProvider the security provider to use for authentication
      * @throws IOException if the provided securityProvider throws while retrieving a sas token or ssl context instance
      */
-    public IotHubSasTokenHardwareAuthenticationProvider(String hostname, String deviceId, String moduleId, SecurityProvider securityProvider) throws IOException
+    public IotHubSasTokenHardwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SecurityProvider securityProvider) throws IOException
     {
+        super(hostname, gatewayHostname, deviceId, moduleId);
+
         try
         {
             if (!(securityProvider instanceof SecurityProviderTpm))
@@ -82,6 +84,13 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
         return this.sasToken.toString();
     }
 
+    @Override
+    public boolean canRefreshToken()
+    {
+        //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_013: [This function shall return true.]
+        return true;
+    }
+
     /**
      * Getter for SSLContext
      * @throws IOException if an error occurs when generating the SSLContext
@@ -114,6 +123,14 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
     {
         //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_002: [This function shall throw an UnsupportedOperationException.]
         throw new UnsupportedOperationException("Cannot change the trusted certificate when using security provider for authentication.");
+    }
+
+    @Override
+    public boolean isRenewalNecessary()
+    {
+        //Hardware will always be able to generate new sas tokens
+        //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_012: [This function shall return false.]
+        return false;
     }
 
     private String generateSasTokenSignatureFromSecurityProvider(long secondsToLive) throws IOException

@@ -6,6 +6,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.device.auth.AuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import mockit.Deencapsulation;
@@ -50,6 +51,15 @@ public class IotHubSasTokenAuthenticationProviderTest
     {
         public mockIotHubSasTokenAuthenticationImplementation()
         {
+            super(expectedHostname, null, expectedDeviceId, null);
+            this.sasToken = mockSasToken;
+            this.deviceId = expectedDeviceId;
+            this.hostname = expectedHostname;
+        }
+
+        public mockIotHubSasTokenAuthenticationImplementation(long expectedTimeToLive, int expectedBufferPercentage)
+        {
+            super(expectedHostname, null, expectedDeviceId, null, expectedTimeToLive, expectedBufferPercentage);
             this.sasToken = mockSasToken;
             this.deviceId = expectedDeviceId;
             this.hostname = expectedHostname;
@@ -76,6 +86,12 @@ public class IotHubSasTokenAuthenticationProviderTest
         {
             return null;
         }
+
+        @Override
+        public boolean canRefreshToken()
+        {
+            return false;
+        }
     }
 
     // Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_12_001: [This function shall return the tokenValidSecs as the number of seconds the current sas token valid for.]
@@ -94,7 +110,6 @@ public class IotHubSasTokenAuthenticationProviderTest
         assertEquals(newTokenValidSecs, actualTokenValidSecs);
     }
 
-
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_012: [This function shall save the provided tokenValidSecs as the number of seconds that created sas tokens are valid for.]
     @Test
     public void setTokenValidSecsSets() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException
@@ -109,28 +124,6 @@ public class IotHubSasTokenAuthenticationProviderTest
         //assert
         long actualTokenValidSecs = Deencapsulation.getField(sasAuth, "tokenValidSecs");
         assertEquals(newTokenValidSecs, actualTokenValidSecs);
-    }
-
-    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_018: [This function shall return the current sas token without renewing it.]
-    @Test
-    public void getCurrentSasTokenGetsCurrentToken()
-    {
-        //arrange
-        new NonStrictExpectations()
-        {
-            {
-                mockSasToken.toString();
-                result = expectedSasToken;
-            }
-        };
-
-        IotHubSasTokenAuthenticationProvider sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
-
-        //act
-        String actualCurrentSasToken = sasAuth.getCurrentSasToken();
-
-        //assert
-        assertEquals(expectedSasToken, actualCurrentSasToken);
     }
 
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the saved sas token has expired, this function shall return true.]
@@ -201,4 +194,88 @@ public class IotHubSasTokenAuthenticationProviderTest
         //assert
         assertEquals(expectedExpiryTime, actualExpiryTime);
     }
+
+    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_015: [This function shall save the provided tokenValidSecs as the number of seconds that created sas tokens are valid for.]
+    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_018: [This function shall save the provided timeBufferPercentage.]
+    @Test
+    public void constructorSavesArguments(@Mocked AuthenticationProvider mockedAuthenticationProvider)
+    {
+        //arrange
+        long expectedTokenValidSecs = 1234;
+        int expectedTimeBufferPercentage = 34;
+
+        //act
+        IotHubSasTokenAuthenticationProvider authenticationProvider = new mockIotHubSasTokenAuthenticationImplementation(expectedTokenValidSecs, expectedTimeBufferPercentage);
+
+        //assert
+        assertEquals(expectedTokenValidSecs, Deencapsulation.getField(authenticationProvider, "tokenValidSecs"));
+        assertEquals(expectedTimeBufferPercentage, Deencapsulation.getField(authenticationProvider, "timeBufferPercentage"));
+    }
+
+    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_016: [If the provided tokenValidSecs is less than 1, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorThrowsForTTLBelowOneSecond(@Mocked AuthenticationProvider mockedAuthenticationProvider)
+    {
+        //arrange
+        long expectedTokenValidSecs = 0;
+        int expectedTimeBufferPercentage = 34;
+
+        //act
+        new mockIotHubSasTokenAuthenticationImplementation(expectedTokenValidSecs, expectedTimeBufferPercentage);
+    }
+
+    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the provided timeBufferPercentage is less than 1 or greater than 100, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorThrowsForBufferBelowOnePercent(@Mocked AuthenticationProvider mockedAuthenticationProvider)
+    {
+        //arrange
+        long expectedTokenValidSecs = 2;
+        int expectedTimeBufferPercentage = 0;
+
+        //act
+        new mockIotHubSasTokenAuthenticationImplementation(expectedTokenValidSecs, expectedTimeBufferPercentage);
+    }
+
+    //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the provided timeBufferPercentage is less than 1 or greater than 100, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorThrowsForBufferAboveOneHundred(@Mocked AuthenticationProvider mockedAuthenticationProvider)
+    {
+        //arrange
+        long expectedTokenValidSecs = 2;
+        int expectedTimeBufferPercentage = 101;
+
+        //act
+        new mockIotHubSasTokenAuthenticationImplementation(expectedTokenValidSecs, expectedTimeBufferPercentage);
+    }
+
+    //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_019: [This function shall return true if the saved token has lived for longer
+    // than its buffered threshold.]
+    @Test
+    public void shouldRefreshTokenReturnsTrueIfBeyondBuffer()
+    {
+        //arrange
+        IotHubSasTokenAuthenticationProvider authenticationProvider = new mockIotHubSasTokenAuthenticationImplementation(10, 1);
+
+        //act
+        boolean result = authenticationProvider.shouldRefreshToken();
+
+        //assert
+        assertTrue(result);
+    }
+
+    //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_020: [This function shall return false if the saved token has not lived for longer
+    // than its buffered threshold.]
+    @Test
+    public void shouldRefreshTokenReturnsFalseIfNotBeyondBuffer()
+    {
+        //arrange
+        IotHubSasTokenAuthenticationProvider authenticationProvider = new mockIotHubSasTokenAuthenticationImplementation(100000, 100);
+
+        //act
+        boolean result = authenticationProvider.shouldRefreshToken();
+
+        //assert
+        assertFalse(result);
+    }
+
 }

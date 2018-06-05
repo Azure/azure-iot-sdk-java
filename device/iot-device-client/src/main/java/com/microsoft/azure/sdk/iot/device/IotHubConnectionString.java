@@ -201,6 +201,12 @@ public class IotHubConnectionString
         return this.hostName;
     }
 
+    public String getGatewayHostName()
+    {
+        // Codes_SRS_IOTHUB_CONNECTIONSTRING_34_043: [The getGatewayHostName shall return the stored gateway host name.]
+        return this.gatewayHostName;
+    }
+
     /**
      * Getter for the hubName.
      * @return string with the hubName in the connectionString
@@ -314,7 +320,7 @@ public class IotHubConnectionString
         }
     }
 
-    private static String parseHubName(String hostName) throws IllegalArgumentException
+    static String parseHubName(String hostName) throws IllegalArgumentException
     {
         int iotHubNameEndIdx = hostName.indexOf(".");
         if (iotHubNameEndIdx == -1)

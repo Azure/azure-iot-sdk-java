@@ -199,7 +199,6 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
         {
             // Codes_SRS_AMQPSDEVICETWIN_12_016: [The function shall convert the amqpsMessage to IoTHubTransportMessage.]
             Message message = protonMessageToIoTHubMessage(amqpsMessage);
-            message.setIotHubConnectionString(this.deviceClientConfig.getIotHubConnectionString());
 
             MessageCallback messageCallback = deviceClientConfig.getDeviceTwinMessageCallback();
             Object messageContext = deviceClientConfig.getDeviceTwinMessageContext();

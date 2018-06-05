@@ -101,8 +101,9 @@ public final class IotHubSasToken
         }
         else
         {
-            this.signature = null;
-            this.sasToken = null;
+            // Codes_SRS_IOTHUBSASTOKEN_34_012: [If their is no deviceKey or sharedAccessToken provided, this function shall
+            // throw and IllegalArgumentException.]
+            throw new IllegalArgumentException("deviceKey and sharedAccessToken may not both be null");
         }
     }
 
@@ -135,6 +136,12 @@ public final class IotHubSasToken
         {
             return null;
         }
+    }
+
+    public String getSasToken()
+    {
+        // Codes_SRS_IOTHUBSASTOKEN_34_011: [This function shall return the saved sas token.]
+        return this.sasToken;
     }
 
     private boolean isSasFormat()
@@ -192,7 +199,7 @@ public final class IotHubSasToken
      * @param sasToken the token to return the expiry time
      * @return a long with the expiry time in seconds.
      */
-    private static Long getExpiryTimeFromToken(String sasToken)
+    static Long getExpiryTimeFromToken(String sasToken)
     {
         Map<String, String> fieldValues = extractFieldValues(sasToken);
         return Long.parseLong(fieldValues.get(ExpiryTimeFieldKey));

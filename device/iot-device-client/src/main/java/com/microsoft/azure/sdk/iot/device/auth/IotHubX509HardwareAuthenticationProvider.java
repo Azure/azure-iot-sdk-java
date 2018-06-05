@@ -18,8 +18,10 @@ public class IotHubX509HardwareAuthenticationProvider extends IotHubX509Authenti
     protected IotHubSSLContext iotHubSSLContext;
     protected SecurityProviderX509 securityProviderX509;
 
-    public IotHubX509HardwareAuthenticationProvider(SecurityProvider securityProvider)
+    public IotHubX509HardwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SecurityProvider securityProvider)
     {
+        super(hostname, gatewayHostname, deviceId, moduleId);
+
         if (!(securityProvider instanceof SecurityProviderX509))
         {
             //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_002: [If the provided security provider is not an instance of SecurityProviderX509, an IllegalArgumentException shall be thrown.]

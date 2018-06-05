@@ -160,7 +160,6 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
         {
             // Codes_SRS_AMQPSDEVICEMETHODS_12_016: [The function shall convert the amqpsMessage to IoTHubTransportMessage.]
             Message message = protonMessageToIoTHubMessage(amqpsMessage);
-            message.setIotHubConnectionString(this.deviceClientConfig.getIotHubConnectionString());
 
             MessageCallback messageCallback = deviceClientConfig.getDeviceMethodsMessageCallback();
             Object messageContext = deviceClientConfig.getDeviceMethodsMessageContext();

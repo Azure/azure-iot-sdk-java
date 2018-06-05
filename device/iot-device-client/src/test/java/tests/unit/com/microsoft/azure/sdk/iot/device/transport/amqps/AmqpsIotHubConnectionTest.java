@@ -331,57 +331,6 @@ public class AmqpsIotHubConnectionTest {
         new AmqpsIotHubConnection(mockConfig);
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
-    // any of the parameters of the configuration is null or empty.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfDeviceKeyIsNull() throws TransportException
-    {
-        new NonStrictExpectations() {
-            {
-                mockConfig.getIotHubHostname();
-                result = hostName;
-                mockConfig.getIotHubName();
-                result = hubName;
-                mockConfig.getDeviceId();
-                result = deviceId;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = null;
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.isUseWebsocket();
-                result = false;
-            }
-        };
-
-        new AmqpsIotHubConnection(mockConfig);
-    }
-
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
-    // any of the parameters of the configuration is null or empty.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfDeviceKeyIsEmpty() throws TransportException
-    {
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getIotHubHostname();
-                result = hostName;
-                mockConfig.getIotHubName();
-                result = hubName;
-                mockConfig.getDeviceId();
-                result = deviceId;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = "";
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.isUseWebsocket();
-                result = false;
-            }
-        };
-
-        new AmqpsIotHubConnection(mockConfig);
-    }
-
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_002: [The constructor shall save the configuration into private member variables.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_003: [The constructor shall initialize the sender and receiver
     // endpoint private member variables using the send/receiveEndpointFormat constants and device id.]
@@ -2501,8 +2450,6 @@ public class AmqpsIotHubConnectionTest {
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getIotHubConnectionString().getSharedAccessKey();
-                result = deviceKey;
                 mockConfig.isUseWebsocket();
                 result = false;
             }

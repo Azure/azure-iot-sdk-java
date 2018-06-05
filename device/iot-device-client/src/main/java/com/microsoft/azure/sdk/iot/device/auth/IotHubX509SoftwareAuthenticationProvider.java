@@ -31,8 +31,10 @@ public class IotHubX509SoftwareAuthenticationProvider extends IotHubX509Authenti
      * @param isPrivateKeyPath If the provided privateKey is a path to the PEM encoded private key file
      * @throws IllegalArgumentException if the public key certificate or private key is null or empty
      */
-    public IotHubX509SoftwareAuthenticationProvider(String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws IllegalArgumentException
+    public IotHubX509SoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws IllegalArgumentException
     {
+        super(hostname, gatewayHostname, deviceId, moduleId);
+
         //Codes_SRS_IOTHUBX509AUTHENTICATION_34_002: [This constructor will create and save an IotHubX509 object using the provided public key certificate and private key.]
         this.iotHubX509 = new IotHubX509(publicKeyCertificate, isCertificatePath, privateKey, isPrivateKeyPath);
         this.sslContextNeedsUpdate = false;
@@ -46,7 +48,6 @@ public class IotHubX509SoftwareAuthenticationProvider extends IotHubX509Authenti
     @Override
     public SSLContext getSSLContext() throws IOException
     {
-
         try
         {
             if (this.iotHubSSLContext == null || this.sslContextNeedsUpdate)

@@ -171,7 +171,6 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
             // Codes_SRS_AMQPSDEVICETELEMETRY_12_010: [**The function shall copy the correlationId, messageId, To and userId properties to the IotHubMessage properties.]
             // Codes_SRS_AMQPSDEVICETELEMETRY_12_011: [The function shall copy the Proton application properties to IoTHubMessage properties excluding the reserved property names.]
             Message message = protonMessageToIoTHubMessage(amqpsMessage);
-            message.setIotHubConnectionString(this.deviceClientConfig.getIotHubConnectionString());
 
             MessageCallback messageCallback = deviceClientConfig.getDeviceTelemetryMessageCallback(message.getInputName());
             Object messageContext = deviceClientConfig.getDeviceTelemetryMessageContext(message.getInputName());
