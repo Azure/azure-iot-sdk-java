@@ -64,6 +64,8 @@ public class ProvisioningClientIT
 
     private static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1 * 60 * 1000; //
 
+    private static final long TPM_CONNECTION_TIMEOUT = 1 * 60 * 1000;
+
     private static final Integer IOTHUB_NUM_OF_MESSAGES_TO_SEND = 3; // milli secs of time to wait
     private static final List<MessageAndResult> messagesToSendAndResultsExpected = new ArrayList<>();
 
@@ -332,7 +334,30 @@ public class ProvisioningClientIT
         }
 
         String registrationId = REGISTRATION_ID_TPM_PREFIX + UUID.randomUUID().toString();
-        SecurityProvider securityProviderTPMEmulator = new SecurityProviderTPMEmulator(registrationId, tpmSimulatorIpAddress);
+
+        SecurityProvider securityProviderTPMEmulator = null;
+        long startTime = System.currentTimeMillis();
+        while (securityProviderTPMEmulator == null)
+        {
+            try
+            {
+                if (System.currentTimeMillis() - startTime > TPM_CONNECTION_TIMEOUT)
+                {
+                    fail("Timed out trying to reach TPM emulator");
+                }
+
+                securityProviderTPMEmulator = new SecurityProviderTPMEmulator(registrationId, tpmSimulatorIpAddress);
+            }
+            catch (Exception e)
+            {
+                System.out.println("Encountered exception while connecting to TPM, trying again: \n");
+                e.printStackTrace();
+
+                //2 second buffer before attempting to connect again
+                Thread.sleep(2000);
+            }
+        }
+
 
         String deviceID = DEVICE_ID_TPM_PREFIX + UUID.randomUUID().toString();
 
