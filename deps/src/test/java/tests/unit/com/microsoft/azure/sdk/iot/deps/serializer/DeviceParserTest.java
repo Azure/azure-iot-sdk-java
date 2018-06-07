@@ -64,7 +64,9 @@ public class DeviceParserTest
                 "  \"connectionStateUpdatedTime\": \"" + validDateString + "\",\n" +
                 "  \"lastActivityTime\": \"" + validDateString + "\",\n" +
                 "  \"cloudToDeviceMessageCount\": 0,\n" +
-                "  \"forceUpdate\": false,\n" +
+                "  \"managedBy\": \"someentity\",\n" +
+                "  \"capabilities\": {\n" +
+                "    \"iotEdge\": true },\n" +
                 "  \"authentication\": {\n" +
                 "    \"type\": \"" + SELF_SIGNED_JSON_VALUE + "\",\n" +
                 "    \"x509Thumbprint\": {\n" +
@@ -105,6 +107,9 @@ public class DeviceParserTest
                 "  \"lastActivityTime\": \"" + validDateString + "\",\n" +
                 "  \"cloudToDeviceMessageCount\": 0,\n" +
                 "  \"forceUpdate\": false,\n" +
+                "  \"managedBy\": \"someentity\",\n" +
+                "  \"capabilities\": {\n" +
+                "    \"iotEdge\": true },\n" +
                 "  \"authentication\": {\n" +
                 "    \"type\": \"" + SAS_JSON_VALUE + "\",\n" +
                 "    \"symmetricKey\": {\n" +
@@ -137,6 +142,7 @@ public class DeviceParserTest
         String statusUpdatedTime = validDateString;
         String connectionState = "Disconnected";
         String connectionStateUpdatedTime = validDateString;
+        String managedBy = "someentity";
         String lastActivityTime = ParserUtility.getDateStringFromDate(new Date());
         int cloudToDeviceMessageCount = 20;
 
@@ -153,6 +159,9 @@ public class DeviceParserTest
                 "  \"lastActivityTime\": \"" + lastActivityTime + "\",\n" +
                 "  \"cloudToDeviceMessageCount\": \"" + cloudToDeviceMessageCount + "\",\n" +
                 "  \"forceUpdate\": \"false\",\n" +
+                "  \"managedBy\": \"" + managedBy + "\",\n" +
+                "  \"capabilities\": {\n" +
+                "    \"iotEdge\": true },\n" +
                 "  \"authentication\": {\n" +
                 "    \"type\": \"" + CERTIFICATE_AUTHORITY_JSON_VALUE + "\"\n" +
                 "  }\n" +
@@ -172,6 +181,8 @@ public class DeviceParserTest
         assertEquals(statusReason, parser.getStatusReason());
         assertEquals(connectionState, parser.getConnectionState());
         assertEquals(cloudToDeviceMessageCount, parser.getCloudToDeviceMessageCount());
+        assertEquals(managedBy, parser.getManagedBy());
+        assertTrue(parser.getCapabilities().getIotEdge());
 
         String actualStatusUpdatedTime = Deencapsulation.getField(parser, "statusUpdatedTimeString");
         String actualConnectionStateUpdatedTime = Deencapsulation.getField(parser, "connectionStateUpdatedTimeString");
@@ -276,6 +287,7 @@ public class DeviceParserTest
         String status = "Enabled";
         String statusReason = "no reason";
         long cloudToDeviceMessageCount = 2;
+        String managedBy = "someentity";
 
         //act
         parser.setAuthenticationParser(new AuthenticationParser());
@@ -289,6 +301,8 @@ public class DeviceParserTest
         parser.setStatusReason(statusReason);
         parser.setCloudToDeviceMessageCount(cloudToDeviceMessageCount);
         parser.setStatusUpdatedTime(statusUpdatedTime);
+        parser.setManagedBy(managedBy);
+        parser.setCapabilities(new DeviceCapabilitiesParser());
 
         //assert
         assertEquals(new AuthenticationParser().getType(), parser.getAuthenticationParser().getType());
@@ -304,6 +318,8 @@ public class DeviceParserTest
         assertEquals(statusReason, parser.getStatusReason());
         assertEquals(cloudToDeviceMessageCount, parser.getCloudToDeviceMessageCount());
         assertEquals(statusUpdatedTime, parser.getStatusUpdatedTime());
+        assertEquals(managedBy, parser.getManagedBy());
+        assertEquals(new DeviceCapabilitiesParser().getIotEdge(), parser.getCapabilities().getIotEdge());
     }
 
     //Tests_SRS_DEVICE_PARSER_34_004: [For each of this parser's properties, if the setter is called with a null argument, an IllegalArgumentException shall be thrown.]
@@ -367,6 +383,9 @@ public class DeviceParserTest
                 "  \"lastActivityTime\": \"" + validDateString + "\",\n" +
                 "  \"cloudToDeviceMessageCount\": 0,\n" +
                 "  \"forceUpdate\": false\n" +
+                "  \"managedBy\": \"someentity\",\n" +
+                "  \"capabilities\": {\n" +
+                "    \"iotEdge\": true },\n" +
                 "}";
 
         //act
@@ -390,6 +409,9 @@ public class DeviceParserTest
                 "  \"lastActivityTime\": \"" + validDateString + "\",\n" +
                 "  \"cloudToDeviceMessageCount\": 0,\n" +
                 "  \"forceUpdate\": false,\n" +
+                "  \"managedBy\": \"someentity\",\n" +
+                "  \"capabilities\": {\n" +
+                "    \"iotEdge\": true },\n" +
                 "  \"authentication\": {\n" +
                 "    \"type\": \"" + SELF_SIGNED_JSON_VALUE + "\",\n" +
                 "    \"x509Thumbprint\": {\n" +
@@ -421,6 +443,9 @@ public class DeviceParserTest
                 "  \"lastActivityTime\": \"" + validDateString + "\",\n" +
                 "  \"cloudToDeviceMessageCount\": 0,\n" +
                 "  \"forceUpdate\": false,\n" +
+                "  \"managedBy\": \"someentity\",\n" +
+                "  \"capabilities\": {\n" +
+                "    \"iotEdge\": true },\n" +
                 "  \"authentication\": {\n" +
                 "    \"type\": \"" + SELF_SIGNED_JSON_VALUE + "\",\n" +
                 "    \"x509Thumbprint\": {\n" +

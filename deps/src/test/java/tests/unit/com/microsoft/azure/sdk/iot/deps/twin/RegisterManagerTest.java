@@ -2,8 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 package tests.unit.com.microsoft.azure.sdk.iot.deps.twin;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.deps.twin.RegisterManager;
 import mockit.Deencapsulation;
 import org.junit.Test;
@@ -19,6 +21,7 @@ public class RegisterManagerTest
     private final static String REGISTER_MANAGER_SAMPLE =
             "{" +
             "\"deviceId\":\"validDeviceId\"," +
+            "\"moduleId\":\"validModuleId\"," +
             "\"generationId\":\"validGenerationId\"," +
             "\"version\":3," +
             "\"status\":\"enabled\"," +
@@ -27,11 +30,13 @@ public class RegisterManagerTest
             "\"connectionState\":\"disconnected\"," +
             "\"connectionStateUpdatedTime\":\"2016-06-01T21:22:41+00:00\"," +
             "\"lastActivityTime\":\"xxx\"," +
+            "\"capabilities\": {\n" +
+            "  \"iotEdge\": true },\n" +
             "\"etag\":\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\"" +
             "}";
 
 
-    /* Codes_SRS_REGISTER_MANAGER_21_001: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId do not fits the criteria.] */
+    /* Tests_SRS_REGISTER_MANAGER_21_001: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId do not fits the criteria.] */
     @Test (expected = IllegalArgumentException.class)
     public void setDeviceIdThrowsOnNullDeviceId()
     {
@@ -43,7 +48,7 @@ public class RegisterManagerTest
         result.setDeviceId(null);
     }
 
-    /* Codes_SRS_REGISTER_MANAGER_21_002: [The setDeviceId shall replace the `deviceId` by the provided one.] */
+    /* Tests_SRS_REGISTER_MANAGER_21_002: [The setDeviceId shall replace the `deviceId` by the provided one.] */
     @Test
     public void setDeviceIdSucceed()
     {
@@ -58,7 +63,34 @@ public class RegisterManagerTest
         assertEquals("newDeviceId", Deencapsulation.getField(result, "deviceId"));
     }
 
-    /* Codes_SRS_REGISTER_MANAGER_21_003: [The setETag shall replace the `eTag` by the provided one.] */
+    /* Tests_SRS_REGISTER_MANAGER_28_001: [The setModuleId shall throw IllegalArgumentException if the provided moduleId do not fits the criteria.] */
+    @Test (expected = IllegalArgumentException.class)
+    public void setModuleIdThrowsOnNullModuleId()
+    {
+        // arrange
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        RegisterManager result = gson.fromJson(REGISTER_MANAGER_SAMPLE, RegisterManager.class);
+
+        // act - assert
+        result.setModuleId(null);
+    }
+
+    /* Tests_SRS_REGISTER_MANAGER_28_002: [The setModuleId shall replace the `moduleId` by the provided one.] */
+    @Test
+    public void setModuleIdSucceed()
+    {
+        // arrange
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        RegisterManager result = gson.fromJson(REGISTER_MANAGER_SAMPLE, RegisterManager.class);
+
+        // act
+        result.setModuleId("newModuleId");
+
+        // assert
+        assertEquals("newModuleId", Deencapsulation.getField(result, "moduleId"));
+    }
+
+    /* Tests_SRS_REGISTER_MANAGER_21_003: [The setETag shall replace the `eTag` by the provided one.] */
     @Test
     public void setETagSucceed()
     {
@@ -85,8 +117,10 @@ public class RegisterManagerTest
 
         // act - assert
         assertEquals("validDeviceId", result.getDeviceId());
+        assertEquals("validModuleId", result.getModuleId());
         assertEquals(3, (int)result.getVersion());
         assertEquals("xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", result.getETag());
+        assertEquals(true, result.getCapabilities().getIotEdge());
     }
 
     /* Codes_SRS_REGISTER_MANAGER_21_007: [The RegisterManager shall provide an empty constructor to make GSON happy.] */
@@ -99,6 +133,7 @@ public class RegisterManagerTest
 
         // act - assert
         assertEquals("validDeviceId", Deencapsulation.getField(result, "deviceId"));
+        assertEquals("validModuleId", Deencapsulation.getField(result, "moduleId"));
         assertEquals("validGenerationId", Deencapsulation.getField(result, "generationId"));
         assertEquals(3, Deencapsulation.getField(result, "version"));
         assertEquals("xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", Deencapsulation.getField(result, "eTag"));
@@ -107,6 +142,7 @@ public class RegisterManagerTest
         assertEquals("2016-06-01T21:22:41+00:00", Deencapsulation.getField(result, "statusUpdatedTime"));
         assertEquals("DISCONNECTED", Deencapsulation.getField(result, "connectionState").toString());
         assertEquals("2016-06-01T21:22:41+00:00", Deencapsulation.getField(result, "connectionStateUpdatedTime"));
-        assertEquals("xxx", Deencapsulation.getField(result, "lastActivityTime"));
+        DeviceCapabilities dc = Deencapsulation.getField(result, "capabilities");
+        assertEquals(true, Deencapsulation.getField(dc, "iotEdge"));
     }
 }

@@ -222,7 +222,7 @@ public class AmqpSendTest
         assertNull(Deencapsulation.getField(amqpSend, "amqpSendHandler"));
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_006: [The event handler shall create a Proton message with the given content]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_006: [The function shall create a binary message with the given content with deviceId only if moduleId is null]
     @Test
     public void send_creates_ProtonMessage() throws Exception
     {
@@ -247,19 +247,49 @@ public class AmqpSendTest
             }
         };
         // Act
-        amqpSend.send(deviceId, message);
+        amqpSend.send(deviceId, null, message);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_007: [The event handler shall initialize the Proton reactor object]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_008: [The event handler shall start the Proton reactor object]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_001: [The event handler shall create a Proton message with the given content]
     @Test
-    public void send_initializes_Reactor() throws Exception
+    public void sendToModule_creates_ProtonMessage() throws Exception
     {
         // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
         String deviceId = "deviceId";
+        String moduleId = "moduleId";
+        String content = "abcdefghijklmnopqrst";
+        Message message = new Message(content);
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        amqpSend.open();
+
+        AmqpSendHandler handler = Deencapsulation.getField(amqpSend, "amqpSendHandler");
+        // Assert
+        new Expectations()
+        {
+            {
+                Deencapsulation.invoke(handler, "createProtonMessage"
+                        , deviceId, moduleId, message);
+            }
+        };
+        // Act
+        amqpSend.send(deviceId, moduleId, message);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_002: [The event handler shall initialize the Proton reactor object]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_003: [The event handler shall start the Proton reactor object]
+    @Test
+    public void sendToModule_initializes_Reactor() throws Exception
+    {
+        // Arrange
+        String hostName = "aaa";
+        String userName = "bbb";
+        String sasToken = "ccc";
+        String deviceId = "deviceId";
+        String moduleId = "moduleId";
         String content = "abcdefghijklmnopqrst";
         Message message = new Message(content);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
@@ -274,24 +304,25 @@ public class AmqpSendTest
             }
         };
         // Act
-        amqpSend.send(deviceId, message);
+        amqpSend.send(deviceId, moduleId, message);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_009: [The event handler shall throw IOException if the send handler object is not initialized]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_005: [The event handler shall throw IOException if the send handler object is not initialized]
     // Assert
     @Test (expected = IOException.class)
-    public void send_throwsIOException_when_open_has_not_been_called() throws Exception
+    public void sendToModule_throwsIOException_when_open_has_not_been_called() throws Exception
     {
         // Arrange
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
         String deviceId = "deviceId";
+        String moduleId = "moduleId";
         String content = "abcdefghijklmnopqrst";
         Message message = new Message(content);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol);
         // Act
-        amqpSend.send(deviceId, message);
+        amqpSend.send(deviceId, moduleId, message);
     }
 }

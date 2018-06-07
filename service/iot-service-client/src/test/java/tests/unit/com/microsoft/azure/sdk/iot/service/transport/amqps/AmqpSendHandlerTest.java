@@ -207,7 +207,6 @@ public class AmqpSendHandlerTest
         AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
     }
 
-
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_004: [The function shall create a new Message (Proton) object]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_005: [The function shall set the “to” property on the Message object using the created device path]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_006: [The function shall create a Binary (Proton) object from the content string]
@@ -250,6 +249,61 @@ public class AmqpSendHandlerTest
         };
         // Act
         amqpSendHandler.createProtonMessage(deviceId, iotMessage);
+
+        new Verifications()
+        {
+            {
+                properties.setTo(toProperty);
+                properties.setMessageId(any);
+                properties.setAbsoluteExpiryTime((Date) any);
+                properties.setCorrelationId(any);
+            }
+        };
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_004: [The function shall create a new Message (Proton) object]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_005: [The function shall set the “to” property on the Message object using the created device path]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_006: [The function shall create a Binary (Proton) object from the content string]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_007: [The function shall create a data Section (Proton) object from the Binary]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_008: [The function shall set the Message body to the created data section]
+    @Test
+    public void createProtonMessage_creates_Message_and_sets_Properties_ForModule() throws UnsupportedEncodingException
+    {
+        // Arrange
+        String hostName = "aaa";
+        String userName = "bbb";
+        String sasToken = "ccc";
+        String deviceId = "deviceId";
+        String moduleId = "moduleId";
+        String content = "abcdefghijklmnopqrst";
+        String toProperty = "/devices/deviceId/modules/moduleId/messages/devicebound";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        com.microsoft.azure.sdk.iot.service.Message iotMessage = new com.microsoft.azure.sdk.iot.service.Message(content);
+        Map<String, String> userDefinedProperties = new HashMap<>(5);
+        userDefinedProperties.put("key1", "value1");
+        userDefinedProperties.put("key2", "value2");
+        userDefinedProperties.put("key3", "value3");
+        userDefinedProperties.put("key4", "value4");
+        userDefinedProperties.put("key5", "value5");
+        iotMessage.setProperties(userDefinedProperties);
+        // Assert
+        new Expectations()
+        {
+            {
+                message = Proton.message();
+                new Properties();
+                result = properties;
+                properties.setTo(toProperty);
+                message.setProperties(properties);
+                binary = new Binary(content.getBytes());
+                section = new Data(binary);
+                message.setApplicationProperties((ApplicationProperties) any);
+                message.setBody(section);
+            }
+        };
+        // Act
+        amqpSendHandler.createProtonMessage(deviceId, moduleId, iotMessage);
 
         new Verifications()
         {

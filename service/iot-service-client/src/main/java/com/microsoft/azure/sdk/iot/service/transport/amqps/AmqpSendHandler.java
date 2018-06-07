@@ -41,6 +41,7 @@ public class AmqpSendHandler extends BaseHandler
     public static final String SEND_PORT_AMQPS_WS = ":443";
     public static final String ENDPOINT = "/messages/devicebound";
     public static final String DEVICE_PATH_FORMAT = "/devices/%s/messages/devicebound";
+    public static final String MODULE_PATH_FORMAT = "/devices/%s/modules/%s/messages/devicebound";
     public static final String WEBSOCKET_PATH = "/$iothub/websocket";
     public static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
     private Queue<AmqpResponseVerification> sendStatusQueue = new LinkedBlockingQueue<>();
@@ -108,21 +109,27 @@ public class AmqpSendHandler extends BaseHandler
     }
 
     /**
-     * Create "to" parameter for AMQP message to address the device
-     * @param deviceId device name string
-     * @return full path tot he device
-     */
-    private String buildToDevicePath(String deviceId)
-    {
-        return String.format(DEVICE_PATH_FORMAT, deviceId);
-    }
-
-    /**
      * Create Proton message from deviceId and content string
      * @param deviceId The device name string
      * @param message The message to be sent
      */
     public void createProtonMessage(String deviceId, com.microsoft.azure.sdk.iot.service.Message message)
+    {
+        populateProtonMessage(String.format(DEVICE_PATH_FORMAT, deviceId), message);
+    }
+
+    /**
+     * Create Proton message from deviceId and content string
+     * @param deviceId The device name string
+     * @param moduleId The device name string
+     * @param message The message to be sent
+     */
+    public void createProtonMessage(String deviceId, String moduleId, com.microsoft.azure.sdk.iot.service.Message message)
+    {
+        populateProtonMessage(String.format(MODULE_PATH_FORMAT, deviceId, moduleId), message);
+    }
+
+    private void populateProtonMessage(String targetPath, com.microsoft.azure.sdk.iot.service.Message message)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_005: [The function shall create a new Message (Proton) object]
         org.apache.qpid.proton.message.Message protonMessage = Proton.message();
@@ -131,7 +138,7 @@ public class AmqpSendHandler extends BaseHandler
         // the standard properties on the Proton Message object]
         Properties properties = new Properties();
         properties.setMessageId(message.getMessageId());
-        properties.setTo(buildToDevicePath(deviceId));
+        properties.setTo(targetPath);
         properties.setAbsoluteExpiryTime(message.getExpiryTimeUtc());
         properties.setCorrelationId(message.getCorrelationId());
         if (message.getUserId() != null)

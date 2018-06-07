@@ -5,6 +5,8 @@ package com.microsoft.azure.sdk.iot.deps.twin;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationContentParser;
+import com.microsoft.azure.sdk.iot.deps.serializer.DeviceCapabilitiesParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 
 /**
@@ -24,6 +26,17 @@ public class RegisterManager
     @Expose(serialize = true, deserialize = true)
     @SerializedName(DEVICE_ID_TAG)
     protected String deviceId = null;
+
+    /**
+     * Module name
+     * A case-sensitive string (up to 128 char long)
+     * of ASCII 7-bit alphanumeric chars
+     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+     */
+    private static final String MODULE_ID_TAG = "moduleId";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(MODULE_ID_TAG)
+    protected String moduleId = null;
 
     /**
      * Device generation Id
@@ -102,6 +115,14 @@ public class RegisterManager
     @SerializedName(LAST_ACTIVITY_TIME_TAG)
     protected String lastActivityTime = null;
 
+    /**
+     * Datetime of last time the device authenticated, received, or sent a message.
+     */
+    private static final String CAPABILITIES_TAG = "capabilities";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(CAPABILITIES_TAG)
+    protected DeviceCapabilities capabilities = null;
+
 
     /**
      * Setter for the DeviceId
@@ -116,6 +137,21 @@ public class RegisterManager
 
         /* Codes_SRS_REGISTER_MANAGER_21_002: [The setDeviceId shall replace the `deviceId` by the provided one.] */
         this.deviceId = deviceId;
+    }
+
+    /**
+     * Setter for the ModuleId
+     *
+     * @param moduleId the {@code String} that contains the new ModuleId.
+     * @throws IllegalArgumentException If the new ModuleId do not fits the ID criteria.
+     */
+    public void setModuleId(String moduleId) throws IllegalArgumentException
+    {
+        /* Codes_SRS_REGISTER_MANAGER_28_001: [The setModuleId shall throw IllegalArgumentException if the provided moduleId do not fits the criteria.] */
+        ParserUtility.validateId(moduleId);
+
+        /* Codes_SRS_REGISTER_MANAGER_28_002: [The setModuleId shall replace the `moduleId` by the provided one.] */
+        this.moduleId = moduleId;
     }
 
     /**
@@ -147,6 +183,38 @@ public class RegisterManager
     {
         /* Codes_SRS_REGISTER_MANAGER_21_005: [The getDeviceId shall return the stored `deviceId` content.] */
         return this.deviceId;
+    }
+
+    /**
+     * Getter for the ModuleId
+     * @return The {@code String} with the stored ModuleId.
+     */
+    public String getModuleId()
+    {
+        /* Codes_SRS_REGISTER_MANAGER_28_003: [The getModuleId shall return the stored `moduleId` content.] */
+        return this.moduleId;
+    }
+
+    /**
+     * Getter for the Capabilities
+     * @return The {@code String} with the stored ModuleId.
+     */
+    public DeviceCapabilities getCapabilities()
+    {
+        /* Codes_SRS_REGISTER_MANAGER_28_004: [The getModuleId shall return the stored `moduleId` content.] */
+        return this.capabilities;
+    }
+
+    /**
+     * Setter for the Capabilities
+     *
+     * @param capabilities the capabilities
+     * @throws IllegalArgumentException If the new capabilities do not fits the ID criteria.
+     */
+    public void setCapabilities(DeviceCapabilities capabilities) throws IllegalArgumentException
+    {
+        /* Codes_SRS_REGISTER_MANAGER_28_005: [The setModuleId shall replace the `moduleId` by the provided one.] */
+        this.capabilities = capabilities;
     }
 
     /**

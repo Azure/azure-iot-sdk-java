@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.*;
+import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 
@@ -162,6 +163,27 @@ public class Device extends BaseDevice
         return statusUpdatedTime;
     }
 
+    protected DeviceCapabilities capabilities;
+
+    /**
+     * Getter for capabilities
+     *
+     * @return The DeviceCapabilities containing capabilites that are enabled on the device
+     */
+    public DeviceCapabilities getCapabilities()
+    {
+        return capabilities;
+    }
+
+    /**
+     * Setter for DeviceCapabilities object
+     *
+     * @param capabilities capabilities to be set
+     */
+    public void setCapabilities(DeviceCapabilities capabilities)
+    {
+        this.capabilities = capabilities;
+    }
 
     /**
      * Converts this into a DeviceParser object. To serialize a Device object, it must first be converted to a DeviceParser object.
@@ -174,6 +196,12 @@ public class Device extends BaseDevice
         deviceParser.setStatus(this.status.toString());
         deviceParser.setStatusReason(this.statusReason);
         deviceParser.setStatusUpdatedTime(ParserUtility.getDateTimeUtc(this.statusUpdatedTime));
+
+        if (this.capabilities != null)
+        {
+            deviceParser.setCapabilities(new DeviceCapabilitiesParser());
+            deviceParser.getCapabilities().setIotEdge(this.capabilities.getIotEdge());
+        }
 
         return  deviceParser;
     }
@@ -191,6 +219,12 @@ public class Device extends BaseDevice
         super(parser);
 
         this.statusReason = parser.getStatusReason();
+
+        if (parser.getCapabilities() != null)
+        {
+            this.capabilities = new DeviceCapabilities();
+            capabilities.setIotEdge(parser.getCapabilities().getIotEdge());
+        }
 
         if (parser.getStatusUpdatedTime() != null)
         {

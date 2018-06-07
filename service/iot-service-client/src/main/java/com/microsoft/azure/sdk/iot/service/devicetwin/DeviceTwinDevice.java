@@ -5,23 +5,34 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
+import com.microsoft.azure.sdk.iot.deps.twin.ConfigurationInfo;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
+import com.microsoft.azure.sdk.iot.deps.util.Tools;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * The DeviceTwinDevice class represent the twin on iotHub.
+ * implementing constructors and serialization functionality.
+ * If object is a representation of the module twin if and only if the moduleId is set.
+ */
 public class DeviceTwinDevice
 {
     /**
      *Codes_SRS_DEVICETWINDEVICE_25_001: [** The DeviceTwinDevice class has the following properties: deviceId, a container for tags, desired and reported properties, and a twin object. **]**
      */
     private String deviceId;
+    private String moduleId;
     private String eTag;
     private Integer version;
     private TwinCollection tag = null;
     private TwinCollection reportedProperties = null;
     private TwinCollection desiredProperties = null;
+    private Map<String, ConfigurationInfo> configurations = null;
+    private DeviceCapabilities capabilities = null;
 
     /**
      * Constructor to create instance for a device
@@ -32,12 +43,13 @@ public class DeviceTwinDevice
         **Codes_SRS_DEVICETWINDEVICE_25_003: [** The constructor shall create a new instance of twin object for this device and store the device id.**]**
          */
         this.deviceId = null;
+        this.moduleId = null;
         this.eTag = null;
         this.version = null;
     }
 
     /**
-     * Constructor to create instance for a device
+     * Constructor to create instance for a device.
      *
      * @param deviceId Device ID for this device
      * @throws IllegalArgumentException This exception is thrown if the device id is null or empty
@@ -46,7 +58,7 @@ public class DeviceTwinDevice
     {
         this();
 
-        if (deviceId == null || deviceId.length() == 0)
+        if (Tools.isNullOrEmpty(deviceId))
         {
             /*
             **Codes_SRS_DEVICETWINDEVICE_25_002: [** The constructor shall throw IllegalArgumentException if the input string is empty or null.**]**
@@ -54,6 +66,36 @@ public class DeviceTwinDevice
             throw new IllegalArgumentException("Device ID cannot be null or empty");
         }
         this.deviceId = deviceId;
+    }
+
+    /**
+     * Constructor to create instance for a module.
+     *
+     * @param deviceId Device ID for the device which this module belongs to
+     * @param moduleId Module ID for this module
+     * @throws IllegalArgumentException This exception is thrown if the device id is null or empty
+     */
+    public DeviceTwinDevice(String deviceId, String moduleId) throws IllegalArgumentException
+    {
+        this();
+
+        if (Tools.isNullOrEmpty(deviceId))
+        {
+            /*
+             **Codes_SRS_DEVICETWINDEVICE_28_005: [** The constructor shall throw IllegalArgumentException if the deviceId is empty or null.**]**
+             */
+            throw new IllegalArgumentException("Device ID cannot be null or empty");
+        }
+
+        if (Tools.isNullOrEmpty(moduleId))
+        {
+            /*
+             **Codes_SRS_DEVICETWINDEVICE_28_006: [** The constructor shall throw IllegalArgumentException if the moduleId is empty or null.**]**
+             */
+            throw new IllegalArgumentException("Module ID cannot be null or empty");
+        }
+        this.deviceId = deviceId;
+        this.moduleId = moduleId;
     }
 
     /**
@@ -69,6 +111,18 @@ public class DeviceTwinDevice
     }
 
     /**
+     * Getter to get module ID
+     * @return device id for this device
+     */
+    public String getModuleId()
+    {
+        /*
+         **Codes_SRS_DEVICETWINDEVICE_28_001: [** This method shall return the module id **]**
+         */
+        return this.moduleId;
+    }
+
+    /**
      * Setter for ETag
      *
      * @param eTag is the value of the etag
@@ -76,7 +130,7 @@ public class DeviceTwinDevice
      */
     public void setETag(String eTag) throws IllegalArgumentException
     {
-        if (eTag == null || eTag.length() == 0)
+        if (Tools.isNullOrEmpty(eTag))
         {
             /*
             **Codes_SRS_DEVICETWINDEVICE_21_029: [** The seteTag shall throw IllegalArgumentException if the input string is empty or null.**]**
@@ -377,6 +431,58 @@ public class DeviceTwinDevice
         **Codes_SRS_DEVICETWINDEVICE_25_026: [** This method shall return the reportedProperties map**]**
          */
         return this.reportedProperties;
+    }
+
+    /**
+     * Setter for the configuration properties
+     *
+     * @param configurations is the configuration properties.
+     */
+    protected void setConfigurations(Map<String, ConfigurationInfo> configurations)
+    {
+        /*
+         **Codes_SRS_DEVICETWINDEVICE_28_002: [** The getConfigurations shall return the stored configuration properties.**]**
+         */
+        this.configurations = configurations;
+    }
+
+    /**
+     * Getter for the configuration properties
+     *
+     * @return the configuration properties. It can be {@code null}.
+     */
+    public Map<String, ConfigurationInfo> getConfigurations()
+    {
+        /*
+         **Codes_SRS_DEVICETWINDEVICE_28_002: [** The getConfigurations shall return the stored configuration properties.**]**
+         */
+        return this.configurations;
+    }
+
+    /**
+     * Setter for capabilities
+     *
+     * @param capabilities is the value of the capabilities
+     */
+    protected void setCapabilities(DeviceCapabilities capabilities)
+    {
+        /*
+         **Codes_SRS_DEVICETWINDEVICE_28_003: [** The setCapabilities shall store the device capabilities.**]**
+         */
+        this.capabilities = capabilities;
+    }
+
+    /**
+     * Getter for capabilities
+     *
+     * @return the value of the capabilities. It can be {@code null}.
+     */
+    public DeviceCapabilities getCapabilities()
+    {
+        /*
+         **Codes_SRS_DEVICETWINDEVICE_28_004: [** The getCapabilities shall return the stored capabilities.**]**
+         */
+        return this.capabilities;
     }
 
     /**

@@ -5,6 +5,9 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
+import com.microsoft.azure.sdk.iot.deps.twin.ConfigurationInfo;
+import com.microsoft.azure.sdk.iot.deps.twin.ConfigurationStatus;
+import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
@@ -69,20 +72,105 @@ public class DeviceTwinDeviceTest
     }
 
     /*
-    **Tests_SRS_DEVICETWINDEVICE_25_002: [** The constructor shall throw IllegalArgumentException if the input string is empty or null.**]**
+     **Tests_SRS_DEVICETWINDEVICE_25_002: [** The constructor shall throw IllegalArgumentException if the input string is empty or null.**]**
      */
     @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsOnNullDeviceID()
+    public void constructorCreatesNewDeviceEmptyDeviceId()
     {
+        //arrange
+        final String deviceId = "";
+
         //act
-        DeviceTwinDevice testDevice = new DeviceTwinDevice((String)null);
+        new DeviceTwinDevice(deviceId);
     }
 
+    /*
+     **Tests_SRS_DEVICETWINDEVICE_25_002: [** The constructor shall throw IllegalArgumentException if the input string is empty or null.**]**
+     */
     @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsOnEmptyDeviceID()
+    public void constructorCreatesNewDeviceNullDeviceId()
     {
         //act
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("");
+        new DeviceTwinDevice(null);
+    }
+
+    /*
+     **Tests_SRS_DEVICETWINDEVICE_25_003: [** The constructor shall create a new instance of twin object for this device and store the device id.**]**
+     */
+    @Test
+    public void constructorCreatesNewDeviceForModule()
+    {
+        //arrange
+        final String deviceId = "testDevice";
+        final String moduleId = "testModule";
+
+        //act
+        DeviceTwinDevice testDevice = new DeviceTwinDevice(deviceId, moduleId);
+
+        //assert
+        assertEquals(deviceId, Deencapsulation.getField(testDevice, "deviceId"));
+        assertEquals(moduleId, Deencapsulation.getField(testDevice, "moduleId"));
+        assertNotNull(testDevice);
+        TwinCollection tagsMap = Deencapsulation.getField(testDevice, "tag");
+        assertNull(tagsMap);
+        TwinCollection repPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
+        assertNull(repPropMap);
+        TwinCollection desPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
+        assertNull(desPropMap);
+    }
+
+    /*
+     **Tests_SRS_DEVICETWINDEVICE_28__005: [** The constructor shall throw IllegalArgumentException if the deviceId is empty or null.**]**
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorCreatesNewDeviceForModuleEmptyDeviceId()
+    {
+        //arrange
+        final String deviceId = "";
+        final String moduleId = "somemodule";
+
+        //act
+        new DeviceTwinDevice(deviceId, moduleId);
+    }
+
+    /*
+     **Tests_SRS_DEVICETWINDEVICE_28_005: [** The constructor shall throw IllegalArgumentException if the deviceId is empty or null.**]**
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorCreatesNewDeviceForModuleNullDeviceId()
+    {
+        //arrange
+        final String moduleId = "somemodule";
+
+        //act
+        new DeviceTwinDevice(null, moduleId);
+    }
+
+    /*
+     **Tests_SRS_DEVICETWINDEVICE_28__006: [** The constructor shall throw IllegalArgumentException if the moduleId is empty or null.**]**
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorCreatesNewDeviceForModuleEmptyModuleId()
+    {
+        //arrange
+        final String deviceId = "somedevice";
+        final String moduleId = "";
+
+        //act
+        new DeviceTwinDevice(deviceId, moduleId);
+    }
+
+    /*
+     **Tests_SRS_DEVICETWINDEVICE_28_006: [** The constructor shall throw IllegalArgumentException if the moduleId is empty or null.**]**
+     */
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorCreatesNewDeviceForModuleNullModuleId()
+    {
+        //arrange
+        final String deviceId = "somedevice";
+
+        //act
+        new DeviceTwinDevice(deviceId, null);
     }
 
     /*
@@ -99,6 +187,23 @@ public class DeviceTwinDeviceTest
 
         //assert
         assertTrue(devId.equals("testDevice"));
+
+    }
+
+    /*
+     **Tests_SRS_DEVICETWINDEVICE_28_001: [** This method shall return the module id **]**
+     */
+    @Test
+    public void getModuleIdGets()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice", "testModule");
+
+        //act
+        String moduleId = testDevice.getModuleId();
+
+        //assert
+        assertTrue(moduleId.equals("testModule"));
 
     }
 
@@ -801,6 +906,69 @@ public class DeviceTwinDeviceTest
             assertTrue(test.getKey().equals("testRep"));
             assertTrue(test.getValue().equals("repObject"));
         }
+    }
+
+    /*
+     **Tests_SRS_DEVICETWINDEVICE_25_026: [** This method shall return the reportedProperties map**]**
+     */
+    @Test
+    public void getterGetsConfigurations()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        ConfigurationInfo info = new ConfigurationInfo();
+        info.setStatus(ConfigurationStatus.TARGETED);
+        Map<String, ConfigurationInfo> configs = new HashMap<String, ConfigurationInfo>(){{put("abc",info);}};
+        Deencapsulation.setField(testDevice, "configurations", configs);
+
+        //act
+        Map<String, ConfigurationInfo> actual = testDevice.getConfigurations();
+
+        //assert
+        assertEquals(1, actual.size());
+
+        for(Map.Entry<String, ConfigurationInfo> test : actual.entrySet())
+        {
+            assertTrue(test.getKey().equals("abc"));
+            assertTrue(test.getValue().equals(info));
+        }
+    }
+
+    /*
+     **Tests_SRS_DEVICETWINDEVICE_28_003: [** The setCapabilities shall store the device capabilities.**]**
+     */
+    @Test
+    public void setterSetsCapabilities()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        DeviceCapabilities cap = new DeviceCapabilities();
+        cap.setIotEdge(true);
+
+        //act
+        Deencapsulation.invoke(testDevice, "setCapabilities", new Class[]{DeviceCapabilities.class}, cap);
+
+        //assert
+        assertEquals(cap, Deencapsulation.getField(testDevice, "capabilities"));
+    }
+
+    /*
+     **Tests_SRS_DEVICETWINDEVICE_28_004: [** The getCapabilities shall return the stored capabilities.**]**
+     */
+    @Test
+    public void getterGetsCapabilities()
+    {
+        //arrange
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        DeviceCapabilities cap = new DeviceCapabilities();
+        cap.setIotEdge(true);
+        Deencapsulation.setField(testDevice, "capabilities", cap);
+
+        //act
+        DeviceCapabilities actual = testDevice.getCapabilities();
+
+        //assert
+        assertEquals(cap, actual);
     }
 
     /*

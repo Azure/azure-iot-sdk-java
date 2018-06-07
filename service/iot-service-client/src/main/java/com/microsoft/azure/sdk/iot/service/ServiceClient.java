@@ -119,13 +119,28 @@ public class ServiceClient
      */
     public void send(String deviceId, Message message) throws IOException, IotHubException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_012: [The function shall throw IOException if the member AMQP sender object has not been initialized]
+        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_013: [The function shall call send() with the given parameters and null moduleId]
+        this.send(deviceId, null, message);
+    }
+
+    /**
+     * Send a one-way message to the specified module
+     *
+     * @param deviceId The device identifier for the target device
+     * @param moduleId The module identifier for the target device
+     * @param message The message for the device
+     * @throws IOException This exception is thrown if the AmqpSender object is not initialized
+     * @throws IotHubException This exception is thrown if IotHub rejects the message for any reason
+     */
+    public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_28_001: [The function shall throw IOException if the member AMQP sender object has not been initialized]
         if (this.amqpMessageSender == null)
         {
             throw new IOException("AMQP sender is not initialized");
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_013: [The function shall call send() on the member AMQP sender object with the given parameters]
-        this.amqpMessageSender.send(deviceId, message);
+        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_28_002: [The function shall call send() on the member AMQP sender object with the given parameters]
+        this.amqpMessageSender.send(deviceId, moduleId, message);
     }
 
     /**

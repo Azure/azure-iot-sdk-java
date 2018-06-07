@@ -6,6 +6,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.*;
+import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.DeviceConnectionState;
 import com.microsoft.azure.sdk.iot.service.DeviceStatus;
@@ -69,6 +70,11 @@ public class DeviceTest
         device.getConnectionStateUpdatedTime();
         device.getLastActivityTime();
         device.getCloudToDeviceMessageCount();
+        DeviceCapabilities cap = new DeviceCapabilities();
+
+        cap.setIotEdge(true);
+        device.setCapabilities(cap);
+        assertEquals((Boolean)true, device.getCapabilities().getIotEdge());
 
         device.setForceUpdate(true);
         device.setForceUpdate(null);
@@ -168,6 +174,7 @@ public class DeviceTest
         assertEquals(utcTimeDefault, device.getConnectionStateUpdatedTime());
         assertEquals(offsetTimeDefault, device.getLastActivityTime());
         assertEquals(0, device.getCloudToDeviceMessageCount());
+        assertEquals(null, device.getCapabilities());
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_28_001: [The constructor shall set the deviceId, status and symmetricKey.]
@@ -215,6 +222,7 @@ public class DeviceTest
         assertEquals(utcTimeDefault, device.getConnectionStateUpdatedTime());
         assertEquals(offsetTimeDefault, device.getLastActivityTime());
         assertEquals(0, device.getCloudToDeviceMessageCount());
+        assertEquals(null, device.getCapabilities());
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_018: [This method shall return a new instance of a DeviceParser object that is populated using the properties of this.]
@@ -233,6 +241,7 @@ public class DeviceTest
         String expectedETag = "1234";
         String expectedGenerationId = "5678";
         String expectedLastActivityTime = "2001-09-09T09:09:09";
+        Boolean expectedCapabilities = false;
 
         Device device = Device.createDevice(expectedDeviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
         device.setStatus(expectedDeviceStatus);
@@ -245,6 +254,8 @@ public class DeviceTest
         Deencapsulation.setField(device, "eTag", expectedETag);
         Deencapsulation.setField(device, "generationId", expectedGenerationId);
         Deencapsulation.setField(device, "lastActivityTime", expectedLastActivityTime);
+        Deencapsulation.setField(device, "capabilities", new DeviceCapabilities());
+        device.getCapabilities().setIotEdge(expectedCapabilities);
 
         // act
         DeviceParser parser = reflectivelyInvokeToDeviceParser(device);
@@ -262,6 +273,7 @@ public class DeviceTest
         assertEquals(expectedETag, parser.geteTag());
         assertEquals(expectedGenerationId, parser.getGenerationId());
         assertEquals(ParserUtility.getDateTimeUtc(expectedLastActivityTime), parser.getLastActivityTime());
+        assertEquals(expectedCapabilities, parser.getCapabilities().getIotEdge());
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_018: [This method shall return a new instance of a DeviceParser object that is populated using the properties of this.]

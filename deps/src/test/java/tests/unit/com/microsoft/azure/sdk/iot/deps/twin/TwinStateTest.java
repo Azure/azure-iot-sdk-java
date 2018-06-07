@@ -59,6 +59,10 @@ public class TwinStateTest
             "\"lastActivityTime\":\"xxx\"," +
             "\"etag\":\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\"";
 
+    private final static String CONFIGURATIONS_SAMPLE =
+            "\"configurations\":{\"p1\":{\"status\":\"targeted\"}," +
+                    "\"p2\":{\"status\":\"applied\"}}";
+
     private final static String TAGS_SAMPLE =
             "\"tags\":{" +
                 "\"tag1\":\"val1\"," +
@@ -368,7 +372,8 @@ public class TwinStateTest
                 "{" +
                     REGISTER_MANAGER_SAMPLE + //Missing comma.
                     TAGS_SAMPLE + "," +
-                    PROPERTIES_SAMPLE +
+                    PROPERTIES_SAMPLE + "," +
+                    CONFIGURATIONS_SAMPLE +
                 "}";
 
         // act
@@ -386,7 +391,8 @@ public class TwinStateTest
                 "{" +
                     REGISTER_MANAGER_SAMPLE + "," +
                     TAGS_SAMPLE + "," +
-                    PROPERTIES_SAMPLE +
+                    PROPERTIES_SAMPLE + "," +
+                    CONFIGURATIONS_SAMPLE +
                 "}";
 
         // act
@@ -402,7 +408,7 @@ public class TwinStateTest
     {
         // arrange
         final String json =
-                "{\"tags\":{\"tag1\":\"val1\",\"tag2\":\"val2\",\"tag3\":\"val3\"},\"properties\":{\"desired\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"},\"reported\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"}},\"deviceId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null}";
+                "{\"tags\":{\"tag1\":\"val1\",\"tag2\":\"val2\",\"tag3\":\"val3\"},\"properties\":{\"desired\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"},\"reported\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"}},\"configurations\":null,\"deviceId\":null,\"moduleId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null,\"capabilities\":null}";
 
         // act
         TwinState twinState = TwinState.createFromTwinJson(json);
