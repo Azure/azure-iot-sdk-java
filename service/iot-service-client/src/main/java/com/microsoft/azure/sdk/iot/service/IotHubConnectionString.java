@@ -62,6 +62,9 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     private static final String URL_PATH_JOB_STATUS = "jobStatus";
     private static final String URL_PATH_CANCEL = "cancel";
 
+    // configurations
+    private static final String URL_PATH_APPLY_CONTENT_CONFIGURATION = "applyConfigurationContent";
+    
     protected IotHubConnectionString() {}
 
     /**
@@ -449,6 +452,39 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         stringBuilder.append(moduleId);
         stringBuilder.append(URL_SEPARATOR_1);
         stringBuilder.append(URL_API_VERSION);
+        return new URL(stringBuilder.toString());
+    }
+
+    /**
+     * Create the url needed to apply some configuration content to a device
+     * @param deviceId The device to apply the configuration content to
+     * @return The device Url in the following format: "https:[hostname]/devices/[deviceId]/applyConfigurationContent?api-version=201X-XX-XX"
+     * @throws MalformedURLException if the deviceId contains unexpected characters, and a URL cannot be constructed using it
+     * @throws IllegalArgumentException if deviceId is null or empty
+     */
+    public URL getUrlApplyConfigurationContent(String deviceId) throws MalformedURLException, IllegalArgumentException
+    {
+        if (Tools.isNullOrEmpty(deviceId))
+        {
+            // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_34_026: [The function shall throw IllegalArgumentException
+            // if the deviceId string is empty or null]
+            throw new IllegalArgumentException("deviceId cannot be null");
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(URL_HTTPS);
+        stringBuilder.append(hostName);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_DEVICES);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(deviceId);
+        stringBuilder.append(URL_SEPARATOR_0);
+        stringBuilder.append(URL_PATH_APPLY_CONTENT_CONFIGURATION);
+        stringBuilder.append(URL_SEPARATOR_1);
+        stringBuilder.append(URL_API_VERSION);
+
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_34_026: [The function shall return a URL in the format
+        // "https:[hostname]/devices/[deviceId]/applyConfigurationContent?api-version=201X-XX-XX"]
         return new URL(stringBuilder.toString());
     }
 
