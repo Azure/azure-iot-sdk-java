@@ -106,33 +106,40 @@ public class AmqpSend extends BaseHandler
      * Initialize and start Proton reactor
      * Send the created message
      * @param deviceId The device name string
+     * @param moduleId The module name string
      * @param message The message to be sent
      * @throws IOException This exception is thrown if the AmqpSend object is not initialized
      * @throws IotHubException If IotHub rejects the message for any reason
      */
-    public void send(String deviceId, Message message) throws IOException, IotHubException
+    public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException
     {
-      synchronized(this)
-      {
-        if  (amqpSendHandler != null)
+        synchronized(this)
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_006: [The function shall create a binary message with the given content]
-            amqpSendHandler.createProtonMessage(deviceId, message);
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_007: [The function shall initialize the Proton reactor object]
-            this.reactor = Proton.reactor(this);
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_008: [The function shall start the Proton reactor object]
-            this.reactor.run();
-            this.reactor.free();
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_25_010: [** The function shall call sendComplete to identify the status of sent message and throws exception if thrown by sendComplete **]**
-            amqpSendHandler.sendComplete();
+            if  (amqpSendHandler != null)
+            {
+                if (moduleId == null)
+                {
+                    // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_006: [The function shall create a binary message with the given content with deviceId only if moduleId is null]
+                    amqpSendHandler.createProtonMessage(deviceId, message);
+                }
+                else
+                {
+                    // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_001: [The function shall create a binary message with the given content with moduleId]
+                    amqpSendHandler.createProtonMessage(deviceId, moduleId, message);
+                }
+                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_002: [The function shall initialize the Proton reactor object]
+                this.reactor = Proton.reactor(this);
+                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_003: [The function shall start the Proton reactor object]
+                this.reactor.run();
+                this.reactor.free();
+                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_004: [** The function shall call sendComplete to identify the status of sent message and throws exception if thrown by sendComplete **]**
+                amqpSendHandler.sendComplete();
+            }
+            else
+            {
+                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_005: [The function shall throw IOException if the send handler object is not initialized]
+                throw new IOException("send handler is not initialized. call open before send");
+            }
         }
-        else
-        {
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_009: [The function shall throw IOException if the send handler object is not initialized]
-            throw new IOException("send handler is not initialized. call open before send");
-        }
-      }
-
     }
-
 }

@@ -12,6 +12,8 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
 
+import java.util.Map;
+
 /**
  * Representation of a single Twin.
  *
@@ -111,6 +113,11 @@ public class TwinState extends RegisterManager
     @SerializedName(PROPERTIES_TAG)
     private TwinProperties properties;
 
+    // the twin configurations
+    private static final String CONFIGURATION_TAG = "configurations";
+    @Expose(serialize = false, deserialize = true)
+    @SerializedName(CONFIGURATION_TAG)
+    private Map<String, ConfigurationInfo> configurations;
 
     /**
      * CONSTRUCTOR
@@ -228,6 +235,17 @@ public class TwinState extends RegisterManager
             return null;
         }
         return this.properties.getReported();
+    }
+
+    /**
+     * Getter for the configurations
+     *
+     * @return The configurations. It can be {@code null}.
+     */
+    public Map<String, ConfigurationInfo> getConfigurations()
+    {
+        /* SRS_TWIN_STATE_21_007: [The getReportedProperty shall return a TwinCollection with the stored reported property.] */
+        return configurations;
     }
 
     /**

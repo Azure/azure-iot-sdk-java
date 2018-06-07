@@ -52,7 +52,7 @@ public class DeviceMethod
     /**
      * Directly invokes a method on the device and return its result.
      *
-     * @param deviceId is the device identification.
+     * @param deviceId is the device where the request is send to.
      * @param methodName is the name of the method that shall be invoked on the device.
      * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
      * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
@@ -75,6 +75,65 @@ public class DeviceMethod
             throw new IllegalArgumentException("methodName is empty or null.");
         }
 
+        /* Codes_SRS_DEVICEMETHOD_21_008: [The invoke shall build the Method URL `{iot hub}/twins/{device id}/methods/` by calling getUrlMethod.] */
+        URL url = this.iotHubConnectionString.getUrlMethod(deviceId);
+
+        return invokeMethod(url, methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
+    }
+
+    /**
+     * Directly invokes a method on the module and return its result.
+     *
+     * @param deviceId is the device where the module is related to.
+     * @param moduleId is the module where the request is sent to.
+     * @param methodName is the name of the method that shall be invoked on the device.
+     * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
+     * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
+     * @param payload is the the method parameter
+     * @return the status and payload resulted from the method invoke
+     * @throws IotHubException This exception is thrown if the response verification failed
+     * @throws IOException This exception is thrown if the IO operation failed
+     */
+    public synchronized MethodResult invoke(String deviceId, String moduleId, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
+    {
+        /* Codes_SRS_DEVICEMETHOD_28_001: [The invoke shall throw IllegalArgumentException if the provided deviceId is null or empty.] */
+        if((deviceId == null) || deviceId.isEmpty())
+        {
+            throw new IllegalArgumentException("deviceId is empty or null.");
+        }
+
+        /* Codes_SRS_DEVICEMETHOD_28_002: [The invoke shall throw IllegalArgumentException if the provided moduleId is null or empty.] */
+        if((moduleId == null) || moduleId.isEmpty())
+        {
+            throw new IllegalArgumentException("moduleId is empty or null.");
+        }
+
+        /* Codes_SRS_DEVICEMETHOD_28_003: [The invoke shall throw IllegalArgumentException if the provided methodName is null, empty, or not valid.] */
+        if((methodName == null) || methodName.isEmpty())
+        {
+            throw new IllegalArgumentException("methodName is empty or null.");
+        }
+
+        /* Codes_SRS_DEVICEMETHOD_28_004: [The invoke shall build the Method URL `{iot hub}/twins/{device id}/modules/{module id}/methods/` by calling getUrlModuleMethod.] */
+        URL url = this.iotHubConnectionString.getUrlModuleMethod(deviceId, moduleId);
+
+        return invokeMethod(url, methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
+    }
+
+    /**
+     * Directly invokes a method on the device and return its result.
+     *
+     * @param url is the path where the request is send to.
+     * @param methodName is the name of the method that shall be invoked on the device.
+     * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
+     * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
+     * @param payload is the the method parameter
+     * @return the status and payload resulted from the method invoke
+     * @throws IotHubException This exception is thrown if the response verification failed
+     * @throws IOException This exception is thrown if the IO operation failed
+     */
+    private synchronized MethodResult invokeMethod(URL url, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
+    {
         /* Codes_SRS_DEVICEMETHOD_21_006: [The invoke shall throw IllegalArgumentException if the provided responseTimeoutInSeconds is negative.] */
         /* Codes_SRS_DEVICEMETHOD_21_007: [The invoke shall throw IllegalArgumentException if the provided connectTimeoutInSeconds is negative.] */
         /* Codes_SRS_DEVICEMETHOD_21_014: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
@@ -88,9 +147,6 @@ public class DeviceMethod
             throw new IllegalArgumentException("MethodParser return null Json");
         }
 
-        /* Codes_SRS_DEVICEMETHOD_21_008: [The invoke shall build the Method URL `{iot hub}/twins/{device id}/methods/` by calling getUrlMethod.] */
-        URL url = this.iotHubConnectionString.getUrlMethod(deviceId);
-       
         long  responseTimeout, connectTimeout;
         
         if (responseTimeoutInSeconds == null)

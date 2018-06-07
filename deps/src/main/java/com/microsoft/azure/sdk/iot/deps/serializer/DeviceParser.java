@@ -79,21 +79,11 @@ public class DeviceParser
     @Expose(serialize = true, deserialize = true)
     @SerializedName(MANAGED_BY)
     private String managedBy;
-//
-//    private static final String CONFIGURATIONS_NAME = "configurations";
-//    @Expose(serialize = true, deserialize = true)
-//    @SerializedName(CONFIGURATIONS_NAME)
-//    private String configurations;
-//
-//    private static final String CAPABILITIES_NAME = "capabilities";
-//    @Expose(serialize = true, deserialize = true)
-//    @SerializedName(CAPABILITIES_NAME)
-//    private String capabilities;
-//
-//    private static final String IOT_EDGE_NAME = "iotEdge";
-//    @Expose(serialize = true, deserialize = true)
-//    @SerializedName(IOT_EDGE_NAME)
-//    private String iotEdge;
+
+    private static final String CAPABILITIES_NAME = "capabilities";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(CAPABILITIES_NAME)
+    private DeviceCapabilitiesParser capabilities;
 
     private transient Gson gson = new Gson();
 
@@ -177,6 +167,7 @@ public class DeviceParser
         this.eTag = deviceParser.eTag;
         this.status = deviceParser.status;
         this.managedBy = deviceParser.managedBy;
+        this.capabilities = deviceParser.capabilities;
 
         //convert to date format
         if (deviceParser.lastActivityTimeString != null)
@@ -516,12 +507,33 @@ public class DeviceParser
     }
 
     /**
-     * Setter for Status
+     * Setter for ManagedBy
      * @param managedBy the value to set managedBy to
      */
     public void setManagedBy(String managedBy)
     {
         //Codes_SRS_DEVICE_PARSER_34_017: [This method shall set the value of this object's Status equal to the provided value.]
         this.managedBy = managedBy;
+    }
+
+    /**
+     * Getter for capabilities
+     *
+     * @return The value of capabilities
+     */
+    public DeviceCapabilitiesParser getCapabilities()
+    {
+        //Codes_SRS_DEVICE_PARSER_34_018: [This method shall return the value of this object's IotEdge.]
+        return capabilities;
+    }
+
+    /**
+     * Setter for capabilities
+     * @param capabilities the value to set capabilities to
+     */
+    public void setCapabilities(DeviceCapabilitiesParser capabilities)
+    {
+        //Codes_SRS_DEVICE_PARSER_34_017: [This method shall set the value of this object's capabilities equal to the provided value.]
+        this.capabilities = capabilities;
     }
 }
