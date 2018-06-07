@@ -72,9 +72,9 @@ public class ConfigurationContentParserTest
     public void gettersAndSetters()
     {
         //arrange
-        HashMap<String, HashMap<String, Object>> mc = new HashMap<String, HashMap<String, Object>>(){{put("mproperty",
+        Map<String, Map<String, Object>> mc = new HashMap<String, Map<String, Object>>() {{put("mproperty",
                 new HashMap<String, Object>(){{put("abc", "123"); put("cde", "456");}});}};
-        HashMap<String, Object> dc = new HashMap<String, Object>(){{put("dproperty",
+        Map<String, Object> dc = new HashMap<String, Object>(){{put("dproperty",
                 new HashMap<String, Integer>(){{put("c", 3);put("d", 4);}});}};
         ConfigurationContentParser parser = new ConfigurationContentParser();
 
@@ -118,9 +118,9 @@ public class ConfigurationContentParserTest
     public void toJsonNoDeviceContent()
     {
         //arrange
-        HashMap<String, HashMap<String, Object>> mc = new HashMap<String, HashMap<String, Object>>(){{put("mproperty",
+        Map<String, Map<String, Object>> mc = new HashMap<String, Map<String, Object>>(){{put("mproperty",
                 new HashMap<String, Object>(){{put("abc", "123"); put("cde", "456");}});}};
-        HashMap<String, Object> dc = new HashMap<String, Object>(){{put("dproperty",
+        Map<String, Object> dc = new HashMap<String, Object>(){{put("dproperty",
                 new HashMap<String, Integer>(){{put("c", 3);put("d", 4);}});}};
         ConfigurationContentParser parser = new ConfigurationContentParser();
         String modulesContent = "modulesContent";

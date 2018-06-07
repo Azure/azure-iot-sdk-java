@@ -1271,6 +1271,34 @@ public class RegistryManager
         IotHubExceptionManager.httpResponseVerification(response);
     }
 
+    /**
+     * Apply the provided configuration content to the provided device
+     * @param deviceId The device to apply the configuration to
+     * @param content The configuration content to apply to the device
+     * @throws IOException If the iot hub cannot be reached
+     * @throws IotHubException If the response from the hub was an error code. This exception will contain that code
+     */
+    public void applyConfigurationContentOnDevice(String deviceId, ConfigurationContent content) throws IOException, IotHubException
+    {
+        if (content == null)
+        {
+            // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_088: [The function shall throw IllegalArgumentException if the provided content is null]
+            throw new IllegalArgumentException("content cannot be null");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_089: [The function shall get the URL from the connection string using the provided deviceId]
+        URL url = iotHubConnectionString.getUrlApplyConfigurationContent(deviceId);
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_090: [The function shall create a new SAS token for the configuration]
+        String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_091: [The function shall send a new HTTP POST request with the created url, sas token, and the provided content in json form as the body.]
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, content.toConfigurationContentParser().toJson().getBytes(), sasTokenString);
+        HttpResponse response = request.send();
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_092: [The function shall verify the response status and throw proper Exception]
+        IotHubExceptionManager.httpResponseVerification(response);
+    }
 
     private String CreateExportJobPropertiesJson(String exportBlobContainerUri, Boolean excludeKeysInExport)
     {

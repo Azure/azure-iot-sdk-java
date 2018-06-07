@@ -9,7 +9,6 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 public class ConfigurationParser
 {
@@ -170,7 +169,7 @@ public class ConfigurationParser
         JsonObject jsonObject = gson.toJsonTree(this).getAsJsonObject();
 
         /* SRS_TWIN_STATE_21_009: [If the tags is null, the JSON shall not include the `tags`.] */
-        if(this.content != null)
+        if (this.content != null)
         {
             jsonObject.add(CONTENT_NAME, this.content.toJsonElement());
         }
@@ -379,7 +378,8 @@ public class ConfigurationParser
         if (lastUpdatedTimeUtc == null)
         {
             this.lastUpdatedTimeUtcString = null;
-        } else
+        }
+        else
         {
             this.lastUpdatedTimeUtcString = ParserUtility.getDateStringFromDate(lastUpdatedTimeUtc);
         }

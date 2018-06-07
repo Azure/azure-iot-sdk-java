@@ -1,11 +1,12 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class ConfigurationMetrics
 {
-    protected HashMap<String, Long> results;
-    protected HashMap<String, String> queries;
+    protected Map<String, Long> results;
+    protected Map<String, String> queries;
 
     /**
      * Create a ConfigurationMetrics instance
@@ -18,22 +19,22 @@ public class ConfigurationMetrics
     }
 
     // Codes_SRS_SERVICE_SDK_JAVA_CONFIGURATION_METRICS_28_002: [The ConfigurationMetrics class shall have the following properties: results and queries
-    public void setResults(HashMap<String, Long> results)
+    public void setResults(Map<String, Long> results)
     {
         this.results = results;
     }
 
-    public HashMap<String, Long> getResults()
+    public Map<String, Long> getResults()
     {
         return results;
     }
 
-    public void setQueries(HashMap<String, String> queries)
+    public void setQueries(Map<String, String> queries)
     {
         this.queries = queries;
     }
 
-    public HashMap<String, String> getQueries()
+    public Map<String, String> getQueries()
     {
         return queries;
     }

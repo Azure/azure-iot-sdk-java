@@ -6,18 +6,19 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class ConfigurationMetricsParser
 {
     private static final String RESULTS_NAME = "results";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(RESULTS_NAME)
-    private HashMap<String, Long> results;
+    private Map<String, Long> results;
 
     private static final String QUERIES_NAME = "queries";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(QUERIES_NAME)
-    private HashMap<String, String> queries;
+    private Map<String, String> queries;
 
     private static Gson gson = new Gson();
 
@@ -73,7 +74,7 @@ public class ConfigurationMetricsParser
      *
      * @return The value of results
      */
-    public HashMap<String, Long> getResults()
+    public Map<String, Long> getResults()
     {
         //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_005: [This method shall return the value of this object's results.]
         return results;
@@ -83,7 +84,7 @@ public class ConfigurationMetricsParser
      * Setter for results
      * @param results the value to set results to
      */
-    public void setResults(HashMap<String, Long> results)
+    public void setResults(Map<String, Long> results)
     {
         //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_006: [This method shall set the value of results to the provided value.]
         this.results = results;
@@ -94,7 +95,7 @@ public class ConfigurationMetricsParser
      *
      * @return The value of queries
      */
-    public HashMap<String, String> getQueries()
+    public Map<String, String> getQueries()
     {
         //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_007: [This method shall return the value of this object's queries.]
         return queries;
@@ -104,7 +105,7 @@ public class ConfigurationMetricsParser
      * Setter for queries
      * @param queries the value to set queries to
      */
-    public void setQueries(HashMap<String, String> queries)
+    public void setQueries(Map<String, String> queries)
     {
         //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_008: [This method shall set the value of queries to the provided value.]
         this.queries = queries;

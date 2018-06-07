@@ -13,6 +13,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -1029,5 +1031,38 @@ public class IotHubConnectionStringTest
 
         // assert
         assertEquals("Device URL mismatch!", expected, actual);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_34_026: [The function shall throw IllegalArgumentException
+    // if the deviceId string is empty or null]
+    @Test (expected = IllegalArgumentException.class)
+    public void getUrlApplyConfigurationContentThrowsIfDeviceIdNull() throws MalformedURLException
+    {
+        //arrange
+        String hostname = "somehostname.com";
+        IotHubConnectionString connectionString = Deencapsulation.newInstance(IotHubConnectionString.class);
+        Deencapsulation.setField(connectionString, "hostName", hostname);
+
+        //act
+        connectionString.getUrlApplyConfigurationContent(null);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_34_026: [The function shall return a URL in the format
+    // "https:[hostname]/devices/[deviceId]/applyConfigurationContent?api-version=201X-XX-XX"]
+    @Test
+    public void getUrlApplyConfigurationContentSuccess() throws MalformedURLException
+    {
+        //arrange
+        String hostname = "somehostname.com";
+        String deviceId = "someDevice";
+        String expectedUrl = "https://" + hostname + "/devices/" + deviceId + "/applyConfigurationContent?" + URL_API_VERSION;
+        IotHubConnectionString connectionString = Deencapsulation.newInstance(IotHubConnectionString.class);
+        Deencapsulation.setField(connectionString, "hostName", hostname);
+
+        //act
+        String actualUrl = connectionString.getUrlApplyConfigurationContent(deviceId).toString();
+
+        //assert
+        assertEquals(expectedUrl, actualUrl);
     }
 }

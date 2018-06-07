@@ -1,6 +1,9 @@
 package com.microsoft.azure.sdk.iot.deps.serializer;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -12,12 +15,12 @@ public class ConfigurationContentParser
     private static final String MODULES_CONTENT_NAME = "modulesContent";
     @Expose(serialize = false, deserialize = true)
     @SerializedName(MODULES_CONTENT_NAME)
-    private HashMap<String, HashMap<String, Object>> modulesContent;
+    private Map<String, Map<String, Object>> modulesContent;
 
     private static final String DEVICE_CONTENT_NAME = "deviceContent";
     @Expose(serialize = false, deserialize = true)
     @SerializedName(DEVICE_CONTENT_NAME)
-    private HashMap<String, Object> deviceContent;
+    private Map<String, Object> deviceContent;
 
     private static Gson gson = new Gson();
 
@@ -58,12 +61,17 @@ public class ConfigurationContentParser
         this.deviceContent = configurationContentParser.deviceContent;
     }
 
+    public String toJson()
+    {
+        return gson.toJson(this);
+    }
+
     /**
      * Getter for modulesContent
      *
      * @return The value of modulesContent
      */
-    public HashMap<String, HashMap<String, Object>> getModulesContent()
+    public Map<String, Map<String, Object>> getModulesContent()
     {
         //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_005: [This method shall return the value of this object's modulesContent.]
         return modulesContent;
@@ -73,7 +81,7 @@ public class ConfigurationContentParser
      * Setter for modulesContent
      * @param modulesContent the value to set results to
      */
-    public void setModulesContent(HashMap<String, HashMap<String, Object>> modulesContent)
+    public void setModulesContent(Map<String, Map<String, Object>> modulesContent)
     {
         //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_006: [This method shall set the value of results to the provided value.]
         this.modulesContent = modulesContent;
@@ -84,7 +92,7 @@ public class ConfigurationContentParser
      *
      * @return The value of queries
      */
-    public HashMap<String, Object> getDeviceContent()
+    public Map<String, Object> getDeviceContent()
     {
         //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_007: [This method shall return the value of this object's deviceContent.]
         return deviceContent;
@@ -94,7 +102,7 @@ public class ConfigurationContentParser
      * Setter for deviceContent
      * @param deviceContent the value to set deviceContent to
      */
-    public void setDeviceContent(HashMap<String, Object> deviceContent)
+    public void setDeviceContent(Map<String, Object> deviceContent)
     {
         //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_008: [This method shall set the value of queries to the provided value.]
         this.deviceContent = deviceContent;
@@ -107,8 +115,8 @@ public class ConfigurationContentParser
         /* Codes_SRS_CONFIGURATION_METRICS_PARSER_28_009: [If the modulesContent is null, the toJsonElement shall not include the `modulesContent` in the final JSON.] */
         if(this.modulesContent != null)
         {
-            HashMap<String, Object> map = new HashMap<>();
-            for (Map.Entry<String, HashMap<String, Object>> entry: this.modulesContent.entrySet())
+            Map<String, Object> map = new HashMap<>();
+            for (Map.Entry<String, Map<String, Object>> entry: this.modulesContent.entrySet())
             {
                 map.put(entry.getKey(), entry.getValue());
             }

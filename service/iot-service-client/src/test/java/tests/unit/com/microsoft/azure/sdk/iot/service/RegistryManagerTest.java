@@ -5,6 +5,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationContentParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.DeviceParser;
 import com.microsoft.azure.sdk.iot.service.*;
@@ -58,6 +59,10 @@ public class RegistryManagerTest
     Module module;
     @Mocked
     Configuration config;
+    @Mocked
+    ConfigurationContent mockedConfigurationContent;
+    @Mocked
+    ConfigurationContentParser mockedConfigurationContentParser;
 
     final String deviceJson = "{\"deviceId\":\"mockdevice\",\"generationId\":\"635864360921156105\",\"etag\":\"MA==\",\"" +
             "connectionState\":\"Disconnected\",\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"status\":\"" +
@@ -1927,6 +1932,75 @@ public class RegistryManagerTest
         };
     }
 
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_088: [The function shall throw IllegalArgumentException if the provided content is null]
+    @Test (expected = IllegalArgumentException.class)
+    public void applyConfigurationContentOnDeviceThrowsIfConfigurationContentIsNull() throws Exception
+    {
+        //arrange
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        String configId = "someconfiguration";
+
+        commonExpectations(connectionString, configId);
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+
+        //act
+        registryManager.applyConfigurationContentOnDevice("some device", null);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_089: [The function shall get the URL from the connection string using the provided deviceId]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_090: [The function shall create a new SAS token for the configuration]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_091: [The function shall create a new HTTP POST request with the created url, sas token, and the provided content in json form as the body.]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_092: [The function shall verify the response status and throw proper Exception]
+    @Test
+    public void applyConfigurationContentOnDeviceSuccess() throws Exception
+    {
+        //arrange
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        String configId = "someconfiguration";
+        String expectedJson = "some json";
+        String expectedDeviceId = "someDevice";
+
+        commonExpectations(connectionString, configId);
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedConfigurationContent.toConfigurationContentParser();
+                result = mockedConfigurationContentParser;
+
+                mockedConfigurationContentParser.toJson();
+                result = expectedJson;
+            }
+        };
+
+        //act
+        registryManager.applyConfigurationContentOnDevice(expectedDeviceId, mockedConfigurationContent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                iotHubConnectionString.getUrlApplyConfigurationContent(expectedDeviceId);
+                times = 1;
+
+                new HttpRequest(mockUrl, HttpMethod.POST, expectedJson.getBytes());
+                times = 1;
+
+                new IotHubServiceSasToken(iotHubConnectionString);
+                times = 1;
+
+                mockHttpRequest.send();
+                times = 1;
+
+                mockIotHubExceptionManager.httpResponseVerification(mockHttpResponse);
+                times = 1;
+
+            }
+        };
+    }
 
     private void commonExpectations(String connectionString, String deviceId) throws Exception
     {
