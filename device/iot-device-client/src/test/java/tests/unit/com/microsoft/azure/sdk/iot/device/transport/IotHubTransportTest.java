@@ -1271,6 +1271,14 @@ public class IotHubTransportTest
 
         Deencapsulation.setField(transport, "iotHubTransportConnection", mockedHttpsIotHubConnection);
 
+        new Expectations(transport)
+        {
+            {
+                Deencapsulation.invoke(transport, "addReceivedMessagesOverHttpToReceivedQueue");
+                times = 0;
+            }
+        };
+
         //act
         transport.handleMessage();
 
