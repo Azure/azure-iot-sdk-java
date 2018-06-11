@@ -7,9 +7,8 @@ package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubX509AuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
@@ -20,15 +19,12 @@ import org.junit.Test;
 
 import java.io.IOError;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for InternalClient.java
@@ -63,7 +59,7 @@ public class InternalClientTest
     IotHubSasTokenAuthenticationProvider mockIotHubSasTokenAuthenticationProvider;
 
     @Mocked
-    IotHubX509AuthenticationProvider mockIotHubX509AuthenticationProvider;
+    IotHubAuthenticationProvider mockIotHubAuthenticationProvider;
 
     @Mocked
     SecurityProvider mockSecurityProvider;
@@ -523,7 +519,7 @@ public class InternalClientTest
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
 
         // act
-        Deencapsulation.invoke(client, "setMessageCallback", mockCallback, context);
+        Deencapsulation.invoke(client, "setInternalMessageCallback", mockCallback, context);
 
         // assert
         new Verifications()
@@ -2492,11 +2488,9 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockConfig.getAuthenticationType();
-                times = 2;
-                mockConfig.getX509Authentication();
+                mockConfig.getAuthenticationProvider();
                 times = 1;
-                mockIotHubX509AuthenticationProvider.setPathToIotHubTrustedCert(value);
+                mockIotHubAuthenticationProvider.setPathToIotHubTrustedCert(value);
                 times = 1;
             }
         };
@@ -2515,8 +2509,6 @@ public class InternalClientTest
                 result = false;
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.AMQPS_WS;
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2534,11 +2526,9 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockConfig.getAuthenticationType();
+                mockConfig.getAuthenticationProvider();
                 times = 1;
-                mockConfig.getSasTokenAuthentication();
-                times = 1;
-                mockIotHubSasTokenAuthenticationProvider.setPathToIotHubTrustedCert(value);
+                mockIotHubAuthenticationProvider.setPathToIotHubTrustedCert(value);
                 times = 1;
             }
         };

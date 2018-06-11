@@ -27,6 +27,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
      * Creates a Sas Token based authentication object that uses the provided security provider to produce sas tokens.
      *
      * @param hostname The host name of the hub to authenticate against
+     * @param gatewayHostname The gateway hostname to use, or null if connecting to an IotHub
      * @param deviceId The unique id of the device to authenticate
      * @param moduleId the module id. May be null if not using a module
      * @param securityProvider the security provider to use for authentication
@@ -46,11 +47,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
 
             this.securityProvider = (SecurityProviderTpm) securityProvider;
 
-            // Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_032: [This constructor shall save the provided security provider, hostname, module id, and device id.]
             // Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_033: [This constructor shall generate and save a sas token from the security provider with the default time to live.]
-            this.hostname = hostname;
-            this.deviceId = deviceId;
-            this.moduleId = moduleId;
             this.sasToken = new IotHubSasToken(hostname, deviceId, null, this.generateSasTokenSignatureFromSecurityProvider(this.tokenValidSecs), moduleId, 0);
 
             // Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_034: [This constructor shall retrieve and save the ssl context from the security provider.]

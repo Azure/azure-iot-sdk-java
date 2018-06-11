@@ -15,16 +15,16 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
-public class IotHubX509SoftwareAuthenticationProvider extends IotHubX509AuthenticationProvider
+public class IotHubX509SoftwareAuthenticationProvider extends IotHubAuthenticationProvider
 {
-    protected String iotHubTrustedCert;
-    protected String pathToIotHubTrustedCert;
     protected IotHubX509 iotHubX509;
-
-    private boolean sslContextNeedsUpdate;
 
     /**
      * Constructor that takes in a connection string and certificate/private key pair needed to use x509 authentication
+     * @param hostname the IotHub host name
+     * @param gatewayHostname The gateway hostname to use, or null if connecting to an IotHub
+     * @param deviceId The device to be authenticated.
+     * @param moduleId The module to be authenticated. May be null if this authentication is not for a module
      * @param publicKeyCertificate The PEM encoded string for the public key certificate or the path to a file containing it
      * @param isCertificatePath If the provided publicKeyCertificate is a path to the PEM encoded public key certificate file
      * @param privateKey The PEM encoded string for the private key or the path to a file containing it.
@@ -95,39 +95,5 @@ public class IotHubX509SoftwareAuthenticationProvider extends IotHubX509Authenti
             // Codes_SRS_IOTHUBX509AUTHENTICATION_34_021: [If this has no saved iotHubTrustedCert or path, This function shall create and save a new IotHubSSLContext object with the saved public and private key combo.]
             return new IotHubSSLContext(this.iotHubX509.getPublicKeyCertificate(), this.iotHubX509.getPrivateKey());
         }
-    }
-
-    /**
-     * Setter for the providing trusted certificate.
-     * @param pathToCertificate path to the certificate for one way authentication.
-     */
-    @Override
-    public void setPathToIotHubTrustedCert(String pathToCertificate)
-    {
-        if (this.pathToIotHubTrustedCert == null || !this.pathToIotHubTrustedCert.equals(pathToCertificate))
-        {
-            //Codes_SRS_IOTHUBX509AUTHENTICATION_34_030: [If the provided pathToCertificate is different than the saved path, this function shall set sslContextNeedsRenewal to true.]
-            this.sslContextNeedsUpdate = true;
-        }
-
-        //Codes_SRS_IOTHUBX509AUTHENTICATION_34_059: [This function shall save the provided iotHubTrustedCert.]
-        this.pathToIotHubTrustedCert = pathToCertificate;
-    }
-
-    /**
-     * Setter for the user trusted certificate
-     * @param certificate valid user trusted certificate string
-     */
-    @Override
-    public void setIotHubTrustedCert(String certificate)
-    {
-        if (this.iotHubTrustedCert == null || !this.iotHubTrustedCert.equals(certificate))
-        {
-            //Codes_SRS_IOTHUBX509AUTHENTICATION_34_031: [If the provided certificate is different than the saved certificate, this function shall set sslContextNeedsRenewal to true.]
-            this.sslContextNeedsUpdate = true;
-        }
-
-        // Codes_SRS_IOTHUBX509AUTHENTICATION_34_064: [This function shall save the provided pathToIotHubTrustedCert.]
-        this.iotHubTrustedCert = certificate;
     }
 }

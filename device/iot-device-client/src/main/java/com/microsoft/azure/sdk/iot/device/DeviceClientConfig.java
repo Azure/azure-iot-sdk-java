@@ -30,7 +30,7 @@ public final class DeviceClientConfig
 
     private boolean useWebsocket;
 
-    private AuthenticationProvider authenticationProvider;
+    private IotHubAuthenticationProvider authenticationProvider;
 
     /**
      * The callback to be invoked if a message of Device Method type received.
@@ -65,7 +65,6 @@ public final class DeviceClientConfig
         SAS_TOKEN
     }
 
-    //private AuthType authenticationType;
     private long operationTimeout = DEFAULT_OPERATION_TIMEOUT;
     private IotHubClientProtocol protocol;
 
@@ -115,7 +114,7 @@ public final class DeviceClientConfig
                 iotHubConnectionString.getHostName(), iotHubConnectionString.getDeviceId(), logger.getMethodName());
     }
 
-    public DeviceClientConfig(AuthenticationProvider authenticationProvider) throws IllegalArgumentException
+    public DeviceClientConfig(IotHubAuthenticationProvider authenticationProvider) throws IllegalArgumentException
     {
         if (!(authenticationProvider instanceof IotHubSasTokenAuthenticationProvider))
         {
@@ -272,23 +271,6 @@ public final class DeviceClientConfig
     }
 
     /**
-     * Getter for X509Authentication
-     *
-     * @return The value of X509Authentication, or null if this object isn't using x509 authentication
-     */
-    public IotHubX509AuthenticationProvider getX509Authentication()
-    {
-        if (this.authenticationProvider instanceof IotHubX509AuthenticationProvider)
-        {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_053: [If the saved authentication provider uses x509, this function return the saved authentication provider.]
-            return (IotHubX509AuthenticationProvider) this.authenticationProvider;
-        }
-
-        // Codes_SRS_DEVICECLIENTCONFIG_34_054: [If the saved authentication provider doesn't use x509, this function return null.]
-        return null;
-    }
-
-    /**
      * Getter for SasTokenAuthentication
      *
      * @return The value of SasTokenAuthentication, or null if this object isn't using sas token authentication
@@ -305,7 +287,7 @@ public final class DeviceClientConfig
         return null;
     }
 
-    public AuthenticationProvider getAuthenticationProvider()
+    public IotHubAuthenticationProvider getAuthenticationProvider()
     {
         // Codes_SRS_DEVICECLIENTCONFIG_34_049: [This function return the saved authentication provider.]
         return this.authenticationProvider;

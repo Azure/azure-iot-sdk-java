@@ -145,8 +145,7 @@ public class SendReceiveModuleSample
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      * args[3] = path to certificate to enable one-way authentication over ssl for amqps (optional, default shall be used if unspecified).
      */
-    public static void main(String[] args)
-            throws IOException, URISyntaxException
+    public static void main(String[] args) throws IOException, URISyntaxException, ModuleClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");

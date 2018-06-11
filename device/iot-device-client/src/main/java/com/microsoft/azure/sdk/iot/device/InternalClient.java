@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-import com.microsoft.azure.sdk.iot.device.auth.AuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -48,9 +48,9 @@ public class InternalClient
         this.logger = new CustomLogger(this.getClass());
     }
 
-    InternalClient(AuthenticationProvider authenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
+    InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
     {
-        this.config = new DeviceClientConfig(authenticationProvider);
+        this.config = new DeviceClientConfig(iotHubAuthenticationProvider);
         this.config.setProtocol(protocol);
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
         this.logger = new CustomLogger(this.getClass());
@@ -106,6 +106,8 @@ public class InternalClient
 
         //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+
+        this.logger = new CustomLogger(this.getClass());
     }
 
     //unused
@@ -280,7 +282,7 @@ public class InternalClient
      * @throws IllegalStateException if the callback is set after the client is
      * closed.
      */
-    public InternalClient setMessageCallback(MessageCallback callback, Object context)
+    InternalClient setInternalMessageCallback(MessageCallback callback, Object context)
     {
         if (callback == null && context != null)
         {
@@ -618,15 +620,13 @@ public class InternalClient
     {
         if (value != null)
         {
-            if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
-            {
-                this.config.getSasTokenAuthentication().setPathToIotHubTrustedCert((String) value);
-            }
-            else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
-            {
-                this.config.getX509Authentication().setPathToIotHubTrustedCert((String) value);
-            }
+            this.config.getAuthenticationProvider().setPathToIotHubTrustedCert((String) value);
         }
+    }
+
+    void setTrustedCertificates(String certificates)
+    {
+        this.config.getAuthenticationProvider().setIotHubTrustedCert(certificates);
     }
 
     void setOption_SetSendInterval(Object value)

@@ -408,7 +408,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             request.setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG, this.getSasToken());
         }
 
-        request.setSSLContext(this.getSSLContext(this.config.getAuthenticationType()));
+        request.setSSLContext(this.getSSLContext());
 
         HttpsResponse response = request.send();
         return response;
@@ -438,7 +438,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         }
     }
 
-    private SSLContext getSSLContext(DeviceClientConfig.AuthType authType) throws TransportException
+    private SSLContext getSSLContext() throws TransportException
     {
         try
         {

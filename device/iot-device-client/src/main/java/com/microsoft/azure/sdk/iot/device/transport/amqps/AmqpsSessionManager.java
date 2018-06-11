@@ -38,6 +38,7 @@ public class AmqpsSessionManager
      *
      * @param deviceClientConfig the device configuration to use for 
      *                           session management.
+     * @throws TransportException if a transport error occurs.
      */
     public AmqpsSessionManager(DeviceClientConfig deviceClientConfig) throws TransportException
     {

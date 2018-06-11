@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import mockit.*;
+import org.junit.Assert;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -554,5 +556,50 @@ public class HttpsRequestTest
         HttpsRequest request =
                 new HttpsRequest(mockUrl, httpsMethod, body, "");
         request.setSSLContext(null);
+    }
+
+    // Tests_SRS_HTTPSREQUEST_34_020: [The function shall return the request headers saved in this object's connection instance.]
+    // Tests_SRS_HTTPSREQUEST_34_019: [The function shall return the http method saved in this object's connection instance.]
+    // Tests_SRS_HTTPSREQUEST_34_018: [The function shall return the request url saved in this object's connection instance.]
+    // Tests_SRS_HTTPSREQUEST_34_017: [The function shall return the body saved in this object's connection instance.]
+    @Test
+    public void gettersWork(@Mocked final HttpsConnection mockConn) throws TransportException
+    {
+        //arrange
+        HttpsRequest request = new HttpsRequest(mockUrl, HttpsMethod.POST, "some body".getBytes(), "some user agent string");
+
+        Deencapsulation.setField(request, "connection", mockConn);
+
+        final String expectedRequestHeaders = "some header string";
+        final String expectedMethod = "POST";
+        final byte[] expectedBody = "some body".getBytes();
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockConn, "getRequestUrl");
+                result = mockUrl;
+
+                Deencapsulation.invoke(mockConn, "getHttpMethod");
+                result = expectedMethod;
+
+                Deencapsulation.invoke(mockConn, "getBody");
+                result = expectedBody;
+
+                Deencapsulation.invoke(mockConn, "getRequestHeaders");
+                result = expectedRequestHeaders;
+            }
+        };
+
+        //act
+        String actualRequestHeaders = request.getRequestHeaders();
+        String actualMethod = request.getHttpMethod();
+        byte[] actualBody = request.getBody();
+        URL actualURL = request.getRequestUrl();
+
+        //assert
+        assertEquals(expectedMethod, actualMethod);
+        assertEquals(expectedRequestHeaders, actualRequestHeaders);
+        assertEquals(mockUrl, actualURL);
+        Assert.assertArrayEquals(expectedBody, actualBody);
     }
 }

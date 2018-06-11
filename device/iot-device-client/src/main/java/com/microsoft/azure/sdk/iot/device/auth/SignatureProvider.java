@@ -6,11 +6,25 @@
 package com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
+import java.io.IOException;
+import java.net.URISyntaxException;
 
+/**
+ * Interface for a valid signature provider
+ */
 public interface SignatureProvider
 {
-    String sign(String keyName, String data) throws UnsupportedEncodingException, MalformedURLException, TransportException;
+    /**
+     * Sign the provided data using the provided key name
+     * @param keyName the key used for signing
+     * @param data the data to be signed
+     * @param generationId the generation id
+     * @return the signed data
+     * @throws IOException If the http client cannot reach the signing party
+     * @throws TransportException If the http client cannot reach the signing party
+     * @throws URISyntaxException If the url for the signing party cannot be parsed
+     */
+    String sign(String keyName, String data, String generationId) throws IOException, TransportException, URISyntaxException, HsmException;
 }

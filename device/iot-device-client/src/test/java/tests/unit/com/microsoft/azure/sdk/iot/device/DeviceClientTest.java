@@ -4,16 +4,17 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubX509AuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
-import mockit.*;
+import mockit.Deencapsulation;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOError;
@@ -47,10 +48,10 @@ public class DeviceClientTest
     FileUpload mockFileUpload;
 
     @Mocked
-    IotHubSasTokenAuthenticationProvider mockIotHubSasTokenAuthenticationProvider;
+    IotHubAuthenticationProvider mockIotHubAuthenticationProvider;
 
     @Mocked
-    IotHubX509AuthenticationProvider mockIotHubX509AuthenticationProvider;
+    IotHubSasTokenAuthenticationProvider mockIotHubSasTokenAuthenticationProvider;
 
     @Mocked
     SecurityProvider mockSecurityProvider;
@@ -1248,11 +1249,10 @@ public class DeviceClientTest
                 Deencapsulation.invoke(mockTransportClient, "getTransportClientState");
                 result = TransportClient.TransportClientState.CLOSED;
 
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.getSasTokenAuthentication();
-                result = mockIotHubSasTokenAuthenticationProvider;
-                mockIotHubSasTokenAuthenticationProvider.setPathToIotHubTrustedCert(value);
+                mockConfig.getAuthenticationProvider();
+                result = mockIotHubAuthenticationProvider;
+
+                mockIotHubAuthenticationProvider.setPathToIotHubTrustedCert(value);
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
@@ -1268,11 +1268,9 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                mockConfig.getAuthenticationType();
+                mockConfig.getAuthenticationProvider();
                 times = 1;
-                mockConfig.getSasTokenAuthentication();
-                times = 1;
-                mockIotHubSasTokenAuthenticationProvider.setPathToIotHubTrustedCert(value);
+                mockIotHubAuthenticationProvider.setPathToIotHubTrustedCert(value);
                 times = 1;
             }
         };
@@ -1280,7 +1278,7 @@ public class DeviceClientTest
     // Tests_SRS_DEVICECLIENT_12_029: [*SetCertificatePath" shall throw if the transportClient or deviceIO already open, otherwise set the path on the config.]
     @Test (expected = IllegalStateException.class)
     public void setOptionSetCertificatePathDeviceIOOpenedThrows()
-            throws IOException, URISyntaxException
+            throws URISyntaxException
     {
         // arrange
         new NonStrictExpectations()
@@ -1367,51 +1365,9 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                mockConfig.getSasTokenAuthentication();
+                mockConfig.getAuthenticationProvider();
                 times = 1;
-                mockIotHubSasTokenAuthenticationProvider.setPathToIotHubTrustedCert(value);
-                times = 1;
-            }
-        };
-    }
-
-    // Tests_SRS_DEVICECLIENT_12_029: [*SetCertificatePath" shall throw if the transportClient or deviceIO already open, otherwise set the path on the config.]
-    @Test
-    public void setOptionSetCertificatePathX509Success()
-            throws IOException, URISyntaxException
-    {
-        // arrange
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceIO.isOpen();
-                result = false;
-                mockDeviceIO.getProtocol();
-                result = IotHubClientProtocol.AMQPS_WS;
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
-            }
-        };
-        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
-                + "SharedAccessKey=adjkl234j52=";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
-
-        DeviceClient client = new DeviceClient(connString, protocol);
-        Deencapsulation.setField(client, "config", mockConfig);
-        Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
-        final String value = "certificatePath";
-
-        // act
-        client.setOption("SetCertificatePath", value);
-
-        new Verifications()
-        {
-            {
-                mockConfig.getAuthenticationType();
-                times = 2;
-                mockConfig.getX509Authentication();
-                times = 1;
-                mockIotHubX509AuthenticationProvider.setPathToIotHubTrustedCert(value);
+                mockIotHubAuthenticationProvider.setPathToIotHubTrustedCert(value);
                 times = 1;
             }
         };
@@ -2004,7 +1960,7 @@ public class DeviceClientTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, DeviceClientConfig.AuthType.SAS_TOKEN);
+                Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString);
                 result = mockConfig;
                 Deencapsulation.newInstance(DeviceIO.class,
                         mockConfig, SEND_PERIOD_MILLIS, receivePeriod);

@@ -4,9 +4,9 @@
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 
 import javax.net.ssl.SSLContext;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +27,7 @@ public class HttpsRequest
      * @param method the HTTPS request method (i.e. GET).
      * @param body the request body. Must be an array of size 0 if the request
      * method is GET or DELETE.
-     *
+     * @param userAgentString the user agent string to attach to all http communications
      * @throws TransportException if an Exception occurs in setting up the HTTPS
      * connection.
      * @throws TransportException if the endpoint given does not use the
@@ -39,7 +39,12 @@ public class HttpsRequest
         // Codes_SRS_HTTPSREQUEST_11_001: [The function shall open a connection with the given URL as the endpoint.]
         // Codes_SRS_HTTPSREQUEST_11_004: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
         this.connection = new HttpsConnection(url, method);
-        this.connection.setRequestHeader("User-Agent", userAgentString);
+
+        if (userAgentString != null && !userAgentString.isEmpty())
+        {
+            this.connection.setRequestHeader("User-Agent", userAgentString);
+        }
+
         // Codes_SRS_HTTPSREQUEST_11_002: [The function shall write the body to the connection.]
         this.connection.writeOutput(body);
     }
@@ -121,6 +126,30 @@ public class HttpsRequest
         //Codes_SRS_HTTPSREQUEST_25_016: [The function shall set the SSL context for the IotHub.]
         this.connection.setSSLContext(sslContext);
         return this;
+    }
+
+    public byte[] getBody()
+    {
+        // Codes_SRS_HTTPSREQUEST_34_017: [The function shall return the body saved in this object's connection instance.]
+        return this.connection.getBody();
+    }
+
+    public URL getRequestUrl()
+    {
+        // Codes_SRS_HTTPSREQUEST_34_018: [The function shall return the request url saved in this object's connection instance.]
+        return this.connection.getRequestUrl();
+    }
+
+    public String getHttpMethod()
+    {
+        // Codes_SRS_HTTPSREQUEST_34_019: [The function shall return the http method saved in this object's connection instance.]
+        return this.connection.getHttpMethod();
+    }
+
+    public String getRequestHeaders()
+    {
+        // Codes_SRS_HTTPSREQUEST_34_020: [The function shall return the request headers saved in this object's connection instance.]
+        return this.connection.getRequestHeaders();
     }
 
     @SuppressWarnings("unused")

@@ -85,12 +85,12 @@ public class IotHubSSLContext
      * @throws CertificateException As per https://docs.oracle.com/javase/7/docs/api/java/security/cert/CertificateException.html
      * @throws NoSuchAlgorithmException if the default SSL Context cannot be created
      */
-    public IotHubSSLContext(String trustedCert, boolean isTrustedCert)
+    public IotHubSSLContext(String trustedCert, boolean isPath)
             throws KeyStoreException, KeyManagementException, IOException, CertificateException, NoSuchAlgorithmException
     {
         IotHubCertificateManager defaultCert = new IotHubCertificateManager();
 
-        if (isTrustedCert)
+        if (isPath)
         {
             //Codes_SRS_IOTHUBSSLCONTEXT_34_025: [If the provided cert is a path, this function shall set the path of the default cert to the provided cert path.]
             defaultCert.setValidCertPath(trustedCert);
