@@ -64,6 +64,7 @@ abstract public class Mqtt implements MqttCallback
      * @param mqttConnection the connection to use
      * @param listener the listener to be called back upon connection established/lost and upon a message being delivered
      * @param messageListener the listener to be called back upon a message arriving
+     * @param connectionId the id of the connection
      * @throws IllegalArgumentException if the provided mqttConnection is null
      */
     public Mqtt(MqttConnection mqttConnection, IotHubListener listener, MqttMessageListener messageListener, String connectionId) throws IllegalArgumentException

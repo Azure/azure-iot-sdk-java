@@ -3,9 +3,9 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
+package tests.unit.com.microsoft.azure.sdk.iot.device.hsm.parser;
 
-import com.microsoft.azure.sdk.iot.device.auth.HttpHsmSignRequest;
+import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import javax.crypto.Mac;
 
 import static junit.framework.TestCase.assertEquals;
 
-public class HttpHsmSignRequestTest
+public class SignRequestTest
 {
     @Mocked
     Mac mockedMac;
@@ -27,7 +27,7 @@ public class HttpHsmSignRequestTest
     public void gettersAndSettersWork()
     {
         //arrange
-        HttpHsmSignRequest request = new HttpHsmSignRequest();
+        SignRequest request = new SignRequest();
         String expectedKeyId = "some key id";
         byte[] expectedData = "some data".getBytes();
 

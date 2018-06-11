@@ -12,7 +12,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public abstract class IotHubSasTokenAuthenticationProvider extends AuthenticationProvider
+public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthenticationProvider
 {
     /**
      * The number of seconds after which the generated SAS token for a message
@@ -33,19 +33,12 @@ public abstract class IotHubSasTokenAuthenticationProvider extends Authenticatio
     protected static final String ENCODING_FORMAT_NAME = StandardCharsets.UTF_8.displayName();
 
     protected IotHubSasToken sasToken;
-    protected IotHubSSLContext iotHubSSLContext;
 
     protected String hostname;
     protected String deviceId;
     protected String moduleId;
 
-    protected boolean sslContextNeedsUpdate;
-
-    public abstract void setPathToIotHubTrustedCert(String pathToCertificate);
-    public abstract void setIotHubTrustedCert(String certificate);
-
-    public abstract SSLContext getSSLContext() throws IOException;
-
+    public abstract boolean canRefreshToken();
     public abstract String getRenewedSasToken() throws IOException, TransportException;
 
     public IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId)
@@ -82,12 +75,6 @@ public abstract class IotHubSasTokenAuthenticationProvider extends Authenticatio
         this.tokenValidSecs = tokenValidSecs;
     }
 
-    long getExpiryTimeInSeconds()
-    {
-        //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_001: [This function shall return the number of seconds from the UNIX Epoch that a sas token constructed now would expire.]
-        return (System.currentTimeMillis() / MILLISECONDS_PER_SECOND) + this.tokenValidSecs + MINIMUM_EXPIRATION_TIME_OFFSET;
-    }
-
     public boolean isRenewalNecessary()
     {
         //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the saved sas token has expired, this function shall return true.]
@@ -117,10 +104,14 @@ public abstract class IotHubSasTokenAuthenticationProvider extends Authenticatio
         return false;
     }
 
-    abstract public boolean canRefreshToken();
-
     public long getTokenValidSecs()
     {
         return this.tokenValidSecs;
+    }
+
+    long getExpiryTimeInSeconds()
+    {
+        //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_001: [This function shall return the number of seconds from the UNIX Epoch that a sas token constructed now would expire.]
+        return (System.currentTimeMillis() / MILLISECONDS_PER_SECOND) + this.tokenValidSecs + MINIMUM_EXPIRATION_TIME_OFFSET;
     }
 }

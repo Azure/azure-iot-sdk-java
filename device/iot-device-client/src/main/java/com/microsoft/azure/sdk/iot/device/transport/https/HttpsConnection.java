@@ -3,6 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -43,6 +46,8 @@ public class HttpsConnection
      */
     private byte[] body;
 
+    private URL url;
+
     /**
      * Constructor. Opens a connection to the given URL.
      *
@@ -53,6 +58,8 @@ public class HttpsConnection
      */
     public HttpsConnection(URL url, HttpsMethod method) throws TransportException
     {
+        this.url = url;
+
         // Codes_SRS_HTTPSCONNECTION_11_022: [If the URI given does not use the HTTPS protocol, the constructor shall throw an IllegalArgumentException.]
         String protocol = url.getProtocol();
         if (!protocol.equalsIgnoreCase("HTTPS"))
@@ -361,5 +368,47 @@ public class HttpsConnection
         }
 
         return transportException;
+    }
+
+    byte[] getBody()
+    {
+        //Codes_SRS_HTTPSCONNECTION_34_031: [The function shall return the saved body.]
+        return this.body;
+    }
+
+    URL getRequestUrl()
+    {
+        //Codes_SRS_HTTPSCONNECTION_34_028: [The function shall return the saved url.]
+        return this.url;
+    }
+
+    String getHttpMethod()
+    {
+        //Codes_SRS_HTTPSCONNECTION_34_029: [The function shall return the request method.]
+        return this.connection.getRequestMethod();
+    }
+
+    String getRequestHeaders()
+    {
+        String headerString = "";
+        Map<String, List<String>> headerFields = this.connection.getRequestProperties();
+
+        for (String key : headerFields.keySet())
+        {
+            headerString += (key);
+            headerString += ": ";
+
+            for (String value : headerFields.get(key))
+            {
+                headerString += value;
+                headerString += "; ";
+            }
+            headerString = headerString.substring(0, headerString.length() - 2);
+
+            headerString += "\r\n";
+        }
+
+        //Codes_SRS_HTTPSCONNECTION_34_030: [The function shall return all the request headers in the format "<key>: <value1>; <value2>\r\n <key>: <value1>\r\n...".]
+        return headerString;
     }
 }

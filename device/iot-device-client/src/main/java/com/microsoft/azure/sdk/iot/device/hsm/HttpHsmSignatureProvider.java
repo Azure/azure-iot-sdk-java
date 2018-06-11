@@ -3,34 +3,40 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.device.auth;
+package com.microsoft.azure.sdk.iot.device.hsm;
 
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
+import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
+import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
 
 import javax.crypto.Mac;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Provides a means to sign data for authentication purposes
+ */
 public class HttpHsmSignatureProvider implements SignatureProvider
 {
     private static final String ENCODING_CHARSET = "UTF-8";
     private static final String MAC = "HmacSHA256";
-    private static final String DEFAULT_API_VERSION = "2018-06-28";
     private static final String DEFAULT_KEY_ID = "primary";
     private Mac defaultSignRequestAlgo = Mac.getInstance(MAC);
 
     private String apiVersion;
-    private HsmHttpClient httpClient;
+    private HttpsHsmClient httpClient;
 
-    public HttpHsmSignatureProvider(String providerUri) throws NoSuchAlgorithmException
-    {
-        // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_001: [This constructor shall call the overloaded constructor with the default api version.]
-        this(providerUri, DEFAULT_API_VERSION);
-    }
-
-    public HttpHsmSignatureProvider(String providerUri, String apiVersion) throws NoSuchAlgorithmException
+    /**
+     * Constructor for an HttpHsmSignatureProvider but using the non-default api version
+     * @param providerUri the uri for the signing provider
+     * @param apiVersion the api version to call
+     * @throws URISyntaxException if the provided uri cannot be parsed
+     * @throws NoSuchAlgorithmException if the default sign request algorithm cannot be used
+     */
+    public HttpHsmSignatureProvider(String providerUri, String apiVersion) throws URISyntaxException, NoSuchAlgorithmException
     {
         if (providerUri == null || providerUri.isEmpty())
         {
@@ -44,14 +50,24 @@ public class HttpHsmSignatureProvider implements SignatureProvider
             throw new IllegalArgumentException("apiVersion cannot be null or empty");
         }
 
-        // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_002: [This constructor shall create a new HsmHttpClient with the provided providerUri.]
-        this.httpClient = new HsmHttpClient(providerUri);
+        // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_002: [This constructor shall create a new HttpsHsmClient with the provided providerUri.]
+        this.httpClient = new HttpsHsmClient(providerUri);
 
         // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_003: [This constructor shall save the provided api version.]
         this.apiVersion = apiVersion;
     }
 
-    public String sign(String keyName, String data) throws UnsupportedEncodingException, MalformedURLException, TransportException
+    /**
+     * Sign the provided data using the provided key name
+     * @param keyName the key used for signing
+     * @param data the data to be signed
+     * @param generationId the generation id
+     * @return the signed data
+     * @throws IOException If the http client cannot reach the signing party
+     * @throws TransportException If the http client cannot reach the signing party
+     * @throws URISyntaxException If the url for the signing party cannot be parsed
+     */
+    public String sign(String keyName, String data, String generationId) throws IOException, TransportException, URISyntaxException, HsmException
     {
         if (data == null || data.isEmpty())
         {
@@ -60,12 +76,12 @@ public class HttpHsmSignatureProvider implements SignatureProvider
         }
 
         // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_006: [This function shall create a signRequest for the hsm http client to sign, and shall return the base64 encoded result of that signing.]
-        HttpHsmSignRequest signRequest = new HttpHsmSignRequest();
+        SignRequest signRequest = new SignRequest();
         signRequest.setAlgo(defaultSignRequestAlgo);
         signRequest.setData(data.getBytes(ENCODING_CHARSET));
         signRequest.setKeyId(DEFAULT_KEY_ID);
 
-        HttpHsmSignResponse response = this.httpClient.sign(this.apiVersion, keyName, signRequest);
+        SignResponse response = this.httpClient.sign(this.apiVersion, keyName, signRequest, generationId);
 
         return Base64.encodeBase64StringLocal(response.getDigest());
     }

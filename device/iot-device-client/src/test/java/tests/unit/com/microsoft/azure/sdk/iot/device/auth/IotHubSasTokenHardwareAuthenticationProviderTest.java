@@ -50,7 +50,6 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
     private static String expectedGatewayHostname = "gateway";
     private static String expectedSasToken = "sasToken";
 
-    //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_032: [This constructor shall save the provided security provider, hostname, module id, and device id.]
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_033: [This constructor shall generate and save a sas token from the security provider with the default time to live.]
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_034: [This constructor shall retrieve and save the ssl context from the security provider.]
     @Test
@@ -86,9 +85,9 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider sasTokenAuthentication = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
 
         //assert
-        String actualHostname = Deencapsulation.getField(sasTokenAuthentication, "hostname");
-        String actualDeviceId = Deencapsulation.getField(sasTokenAuthentication, "deviceId");
-        String actualModuleId = Deencapsulation.getField(sasTokenAuthentication, "moduleId");
+        String actualHostname = sasTokenAuthentication.getHostname();
+        String actualDeviceId = sasTokenAuthentication.getDeviceId();
+        String actualModuleId = sasTokenAuthentication.getModuleId();
         SecurityProviderTpm actualSecurityProvider = Deencapsulation.getField(sasTokenAuthentication, "securityProvider");
         assertEquals(expectedHostname, actualHostname);
         assertEquals(expectedDeviceId, actualDeviceId);

@@ -11,6 +11,7 @@ import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
+import org.junit.Assert;
 import org.junit.Test;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -786,5 +787,135 @@ public class HttpsConnectionTest
         conn.connect();
 
         conn.getResponseHeaders();
+    }
+
+    //Tests_SRS_HTTPSCONNECTION_34_028: [The function shall return the saved url.]
+    @Test
+    public void getUrlReturnsSavedUrl() throws IOException, TransportException
+    {
+        //arrange
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+                mockUrlConn.getURL();
+                result = mockUrl;
+            }
+        };
+        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+
+        //act
+        URL actual = Deencapsulation.invoke(conn, "getRequestUrl");
+
+        //assert
+        assertEquals(mockUrl, actual);
+    }
+
+    //Tests_SRS_HTTPSCONNECTION_34_029: [The function shall return the request method.]
+    @Test
+    public void getMethodReturnsSavedMethod() throws IOException, TransportException
+    {
+        //arrange
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+                mockUrlConn.getURL();
+                result = mockUrl;
+            }
+        };
+        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+
+        //act
+        String actual = Deencapsulation.invoke(conn, "getHttpMethod");
+
+        //assert
+        assertEquals(httpsMethod.name(), actual);
+    }
+
+    //Tests_SRS_HTTPSCONNECTION_34_030: [The function shall return all the request headers in the format "<key>: <value1>; <value2>\n <key>: <value1>\n...".]
+    @Test
+    public void getHeadersReturnsHeaders() throws IOException, TransportException
+    {
+        //arrange
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        final Map<String, List<String>> expectedHeaders = new HashMap<>();
+        List<String> values1 = new LinkedList<>();
+        values1.add("someValue1");
+        values1.add("someValue2");
+        expectedHeaders.put("key1", values1);
+
+        List<String> values2 = new LinkedList<>();
+        values2.add("someValue1");
+        expectedHeaders.put("key2", values2);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+                mockUrlConn.getURL();
+                result = mockUrl;
+
+                mockUrlConn.getRequestProperties();
+                result = expectedHeaders;
+            }
+        };
+        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+
+        String expectedString = "key1: someValue1; someValue2\r\n" + "key2: someValue1\r\n";
+
+        //act
+        String actual = Deencapsulation.invoke(conn, "getRequestHeaders");
+
+        //assert
+        assertEquals(expectedString, actual);
+    }
+
+    //Tests_SRS_HTTPSCONNECTION_34_031: [The function shall return the saved body.]
+    @Test
+    public void getBodyReturnsSavedBody() throws IOException, TransportException
+    {
+        //arrange
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+                mockUrlConn.getURL();
+                result = mockUrl;
+            }
+        };
+        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+
+        byte[] expectedBody = "test".getBytes();
+        conn.writeOutput(expectedBody);
+
+        //act
+        byte[] actual = Deencapsulation.invoke(conn, "getBody");
+
+        //assert
+        Assert.assertArrayEquals(expectedBody, actual);
     }
 }

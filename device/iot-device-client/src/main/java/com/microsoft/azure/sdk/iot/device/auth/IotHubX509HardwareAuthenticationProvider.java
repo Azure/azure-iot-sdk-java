@@ -13,9 +13,8 @@ import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProv
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 
-public class IotHubX509HardwareAuthenticationProvider extends IotHubX509AuthenticationProvider
+public class IotHubX509HardwareAuthenticationProvider extends IotHubAuthenticationProvider
 {
-    protected IotHubSSLContext iotHubSSLContext;
     protected SecurityProviderX509 securityProviderX509;
 
     public IotHubX509HardwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SecurityProvider securityProvider)

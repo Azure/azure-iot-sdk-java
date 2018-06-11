@@ -4,9 +4,7 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
-import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 
@@ -17,11 +15,6 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Set;
-
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
 
 /**
  * <p>
@@ -228,6 +221,25 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
+     * Sets the message callback.
+     *
+     * @param callback the message callback. Can be {@code null}.
+     * @param context the context to be passed to the callback. Can be {@code null}.
+     *
+     * @return itself, for fluent setting.
+     *
+     * @throws IllegalArgumentException if the callback is {@code null} but a context is
+     * passed in.
+     * @throws IllegalStateException if the callback is set after the client is
+     * closed.
+     */
+    public DeviceClient setMessageCallback(MessageCallback callback, Object context)
+    {
+        this.setInternalMessageCallback(callback, context);
+        return this;
+    }
+
+    /**
      * Creates a device client that uses the provided security provider for authentication.
      *
      * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
@@ -243,7 +255,6 @@ public final class DeviceClient extends InternalClient implements Closeable
         super(uri, deviceId, securityProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
         commonConstructorSetup();
     }
-
 
     void closeFileUpload() throws IOException
     {

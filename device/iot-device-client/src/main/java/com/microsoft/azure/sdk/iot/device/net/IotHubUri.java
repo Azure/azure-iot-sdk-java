@@ -102,6 +102,7 @@ public final class IotHubUri
      * @param deviceId the device ID.
      * @param iotHubMethodPath the path from the IoT Hub resource to the
      * method.
+     * @param moduleId the module ID.
      */
     public IotHubUri(String iotHubHostname, String deviceId, String iotHubMethodPath, String moduleId)
     {
@@ -110,8 +111,6 @@ public final class IotHubUri
         // Codes_SRS_IOTHUBURI_11_016: [The constructor shall URL-encode the IoT Hub method path.]
         this(iotHubHostname, deviceId, iotHubMethodPath, null, moduleId);
     }
-
-
 
     /**
      * Returns the string representation of the IoT Hub URI.
@@ -155,7 +154,7 @@ public final class IotHubUri
      *
      * @param iotHubHostname the IoT Hub hostname.
      * @param deviceId the device ID.
-     *
+     * @param moduleId the module ID.
      * @return the string representation of the IoT Hub resource URI.
      */
     public static String getResourceUri(String iotHubHostname, String deviceId, String moduleId)
@@ -225,6 +224,11 @@ public final class IotHubUri
             // should never happen, since the encoding is hard-coded.
             throw new IllegalStateException(e);
         }
+    }
+
+    public static String getApiVersionString()
+    {
+        return API_VERSION;
     }
 
     @SuppressWarnings("unused")

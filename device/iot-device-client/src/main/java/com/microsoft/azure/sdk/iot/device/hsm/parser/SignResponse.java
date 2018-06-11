@@ -3,16 +3,16 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.device.auth;
+package com.microsoft.azure.sdk.iot.device.hsm.parser;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class HttpHsmSignResponse
+public class SignResponse
 {
     private static final String DIGEST_NAME = "digest";
-    @Expose(serialize = true, deserialize = true)
+    @Expose(serialize = false, deserialize = true)
     @SerializedName(DIGEST_NAME)
     private byte[] digest;
 
@@ -23,10 +23,10 @@ public class HttpHsmSignResponse
     }
 
     //empty constructor for Gson to use
-    public HttpHsmSignResponse() { }
+    public SignResponse() { }
 
-    public static HttpHsmSignResponse fromJson(String json)
+    public static SignResponse fromJson(String json)
     {
-        return new GsonBuilder().create().fromJson(json, HttpHsmSignResponse.class);
+        return new GsonBuilder().create().fromJson(json, SignResponse.class);
     }
 }

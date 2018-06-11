@@ -7,15 +7,15 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.auth.ModuleAuthenticationWithHsm;
+import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
+import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import mockit.*;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 
 public class ModuleAuthenticationWithHsmTest
 {
@@ -36,16 +36,16 @@ public class ModuleAuthenticationWithHsmTest
     private static final int expectedBufferPercent = 25;
     private static final String expectedSignature = "someSignature";
 
-    // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_001: [This function shall construct a sas token from the provided arguments and then return a ModuleAuthenticationWithHsm instance that uses that sas token.]
+    // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_001: [This function shall construct a sas token from the provided arguments and then return a IotHubSasTokenHsmAuthenticationProvider instance that uses that sas token.]
     // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_003: [If the gatewayHostname is not null or empty, this function shall construct the sas token using the gateway hostname instead of the hostname.]
     @Test
-    public void staticConstructorSuccess(@Mocked final System mockedSystem) throws IOException, TransportException
+    public void staticConstructorSuccess(@Mocked final System mockedSystem) throws IOException, TransportException, URISyntaxException, HsmException
     {
         //arrange
         new NonStrictExpectations()
         {
             {
-                mockedSignatureProvider.sign("module", anyString);
+                mockedSignatureProvider.sign("module", anyString, anyString);
                 result = expectedSignature;
 
                 Deencapsulation.newInstance(IotHubSasToken.class,
@@ -59,7 +59,7 @@ public class ModuleAuthenticationWithHsmTest
         };
 
         //act
-        ModuleAuthenticationWithHsm.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedTimeToLive, expectedBufferPercent);
+        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
 
         //assert
         new Verifications()
@@ -75,13 +75,13 @@ public class ModuleAuthenticationWithHsmTest
 
     // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_004: [If the gatewayHostname is null or empty, this function shall construct the sas token using the hostname instead of the gateway hostname.]
     @Test
-    public void staticConstructorSuccessWithoutGatewayHostname(@Mocked final System mockedSystem) throws IOException, TransportException
+    public void staticConstructorSuccessWithoutGatewayHostname(@Mocked final System mockedSystem) throws IOException, TransportException, URISyntaxException, HsmException
     {
         //arrange
         new NonStrictExpectations()
         {
             {
-                mockedSignatureProvider.sign("module", anyString);
+                mockedSignatureProvider.sign("module", anyString, anyString);
                 result = expectedSignature;
 
                 Deencapsulation.newInstance(IotHubSasToken.class,
@@ -95,7 +95,7 @@ public class ModuleAuthenticationWithHsmTest
         };
 
         //act
-        ModuleAuthenticationWithHsm.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, null, expectedTimeToLive, expectedBufferPercent);
+        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, null, "gen1", expectedTimeToLive, expectedBufferPercent);
 
         //assert
         new Verifications()
@@ -111,13 +111,13 @@ public class ModuleAuthenticationWithHsmTest
 
     // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_005: [This function shall create a new sas token and save it locally.]
     @Test
-    public void refreshSasTokenCreatesNewSasToken(@Mocked final System mockedSystem) throws TransportException, IOException
+    public void refreshSasTokenCreatesNewSasToken(@Mocked final System mockedSystem) throws TransportException, IOException, URISyntaxException, HsmException
     {
         //arrange
         new NonStrictExpectations()
         {
             {
-                mockedSignatureProvider.sign("module", anyString);
+                mockedSignatureProvider.sign("module", anyString, anyString);
                 result = expectedSignature;
 
                 Deencapsulation.newInstance(IotHubSasToken.class,
@@ -133,7 +133,7 @@ public class ModuleAuthenticationWithHsmTest
             }
         };
 
-        ModuleAuthenticationWithHsm auth = ModuleAuthenticationWithHsm.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, "", expectedTimeToLive, expectedBufferPercent);
+        IotHubSasTokenHsmAuthenticationProvider auth = IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, "", "gen1", expectedTimeToLive, expectedBufferPercent);
         Deencapsulation.setField(auth, "hostname", expectedHostname);
         Deencapsulation.setField(auth, "gatewayHostname", "");
         Deencapsulation.setField(auth, "deviceId", expectedDeviceId);
@@ -161,7 +161,6 @@ public class ModuleAuthenticationWithHsmTest
     public void staticConstructorThrowsForNullSignatureProvider() throws IOException, TransportException
     {
         //act
-        ModuleAuthenticationWithHsm auth = ModuleAuthenticationWithHsm.create(null, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedTimeToLive, expectedBufferPercent);
-
+        IotHubSasTokenHsmAuthenticationProvider.create(null, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
     }
 }

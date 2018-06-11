@@ -6,12 +6,12 @@
 package com.microsoft.azure.sdk.iot.device;
 
 
-import com.microsoft.azure.sdk.iot.device.auth.AuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.auth.HttpHsmSignatureProvider;
-import com.microsoft.azure.sdk.iot.device.auth.ModuleAuthenticationWithHsm;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.hsm.HttpHsmSignatureProvider;
+import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public class ModuleClient extends InternalClient
 {
+    private static final String DEFAULT_API_VERSION = "2018-06-28";
+
     private static long SEND_PERIOD_MILLIS = 10;
 
     private static long RECEIVE_PERIOD_MILLIS_AMQPS = 10;
@@ -33,12 +35,12 @@ public class ModuleClient extends InternalClient
     private static int DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS = 60 * 60; //1 hour
     private static int DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE = 85; //Token will go 85% of its life before renewing
 
-    private static final String IotEdgedUriVariableName = "IOTEDGE_IOTEDGEDURI";
-    private static final String IotEdgedApiVersionVariableName = "IOTEDGE_IOTEDGEDVERSION";
+    private static final String IotEdgedUriVariableName = "IOTEDGE_WORKLOADURI";
     private static final String IotHubHostnameVariableName = "IOTEDGE_IOTHUBHOSTNAME";
     private static final String GatewayHostnameVariableName = "IOTEDGE_GATEWAYHOSTNAME";
     private static final String DeviceIdVariableName = "IOTEDGE_DEVICEID";
     private static final String ModuleIdVariableName = "IOTEDGE_MODULEID";
+    private static final String ModuleGenerationIdVariableName = "IOTEDGE_MODULEGENERATIONID";
     private static final String AuthSchemeVariableName = "IOTEDGE_AUTHSCHEME";
     private static final String SasTokenAuthScheme = "SasToken";
 
@@ -60,8 +62,9 @@ public class ModuleClient extends InternalClient
      * @throws UnsupportedOperationException if using any protocol besides MQTT, if the connection string is missing
      * the "moduleId" field, or if the connection string uses x509
      * @throws IllegalArgumentException if the provided connection string is null or empty, or if the provided protocol is null
+     * @throws URISyntaxException if the connection string cannot be parsed for a valid hostname
      */
-    public ModuleClient(String connectionString, IotHubClientProtocol protocol) throws URISyntaxException, IllegalArgumentException, UnsupportedOperationException
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol) throws URISyntaxException, IllegalArgumentException, UnsupportedOperationException, ModuleClientException
     {
         //Codes_SRS_MODULECLIENT_34_006: [This function shall invoke the super constructor.]
         super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
@@ -143,55 +146,49 @@ public class ModuleClient extends InternalClient
             String hostname = envVariables.get(IotHubHostnameVariableName);
             String authScheme = envVariables.get(AuthSchemeVariableName);
             String gatewayHostname = envVariables.get(GatewayHostnameVariableName);
-            String apiVersion = envVariables.get(IotEdgedApiVersionVariableName);
+            String generationId = envVariables.get(ModuleGenerationIdVariableName);
 
             if (edgedUri == null)
             {
-                throw new ModuleClientException("Environment variable" + IotEdgedUriVariableName + " is required.");
+                throw new ModuleClientException("Environment variable " + IotEdgedUriVariableName + " is required.");
             }
 
             if (deviceId == null)
             {
-                throw new ModuleClientException("Environment variable" + DeviceIdVariableName + " is required.");
+                throw new ModuleClientException("Environment variable " + DeviceIdVariableName + " is required.");
             }
 
             if (moduleId == null)
             {
-                throw new ModuleClientException("Environment variable" + ModuleIdVariableName + " is required.");
+                throw new ModuleClientException("Environment variable " + ModuleIdVariableName + " is required.");
             }
             if (hostname == null)
             {
-                throw new ModuleClientException("Environment variable" + IotHubHostnameVariableName + " is required.");
+                throw new ModuleClientException("Environment variable " + IotHubHostnameVariableName + " is required.");
             }
 
             if (authScheme == null)
             {
-                throw new ModuleClientException("Environment variable" + AuthSchemeVariableName + " is required.");
+                throw new ModuleClientException("Environment variable " + AuthSchemeVariableName + " is required.");
+            }
+
+            if (generationId == null)
+            {
+                throw new ModuleClientException("Environment variable " + ModuleGenerationIdVariableName + " is required");
             }
 
             if (!authScheme.equals(SasTokenAuthScheme))
             {
-                //Codes_SRS_MODULECLIENT_34_014: [If the auth scheme environment variable is not "SasToken", this function shall throw a moduleClientException.]
+                //Codes_SRS_MODULECLIENT_34_030: [If the auth scheme environment variable is not "SasToken", this function shall throw a moduleClientException.]
                 throw new ModuleClientException("Unsupported authentication scheme. Supported scheme is " + SasTokenAuthScheme + ".");
             }
 
             SignatureProvider signatureProvider;
             try
             {
-                if (apiVersion == null || apiVersion.isEmpty())
-                {
-                    //Codes_SRS_MODULECLIENT_34_015: [If the environment variables do not include an API version, this function shall
-                    // construct a signature provider with no api version specified.]
-                    signatureProvider = new HttpHsmSignatureProvider(edgedUri);
-                }
-                else
-                {
-                    //Codes_SRS_MODULECLIENT_34_016: [If the environment variables does include an API version, this function shall
-                    // construct a signature provider with that api version.]
-                    signatureProvider = new HttpHsmSignatureProvider(edgedUri, apiVersion);
-                }
+                signatureProvider = new HttpHsmSignatureProvider(edgedUri, DEFAULT_API_VERSION);
             }
-            catch (NoSuchAlgorithmException e)
+            catch (NoSuchAlgorithmException | URISyntaxException e)
             {
                 throw new ModuleClientException("Could not use Hsm Signature Provider", e);
             }
@@ -201,10 +198,10 @@ public class ModuleClient extends InternalClient
                 //Codes_SRS_MODULECLIENT_34_017: [This function shall create an authentication provider using the created
                 // signature provider, and the environment variables for deviceid, moduleid, hostname, gatewayhostname,
                 // and the default time for tokens to live and the default sas token buffer time.]
-                AuthenticationProvider authenticationProvider = ModuleAuthenticationWithHsm.create(signatureProvider, deviceId, moduleId, hostname, gatewayHostname, DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS, DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE);
+                IotHubAuthenticationProvider iotHubAuthenticationProvider = IotHubSasTokenHsmAuthenticationProvider.create(signatureProvider, deviceId, moduleId, hostname, gatewayHostname, generationId, DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS, DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE);
 
                 //Codes_SRS_MODULECLIENT_34_018: [This function return a new ModuleClient instance built from the created authentication provider and the provided protocol.]
-                return new ModuleClient(authenticationProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+                return new ModuleClient(iotHubAuthenticationProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
             }
             catch (IOException | TransportException e)
             {
@@ -213,9 +210,9 @@ public class ModuleClient extends InternalClient
         }
     }
 
-    private ModuleClient(AuthenticationProvider authenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException, IOException
+    private ModuleClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
     {
-        super(authenticationProvider, protocol, sendPeriodMillis, receivePeriodMillis);
+        super(iotHubAuthenticationProvider, protocol, sendPeriodMillis, receivePeriodMillis);
     }
 
     /**
@@ -241,6 +238,25 @@ public class ModuleClient extends InternalClient
 
         //Codes_SRS_MODULECLIENT_34_003: [This function shall invoke super.sendEventAsync(message, callback, callbackContext).]
         super.sendEventAsync(message, callback, callbackContext);
+    }
+
+    /**
+     * Sets the message callback.
+     *
+     * @param callback the message callback. Can be {@code null}.
+     * @param context the context to be passed to the callback. Can be {@code null}.
+     *
+     * @return itself, for fluent setting.
+     *
+     * @throws IllegalArgumentException if the callback is {@code null} but a context is
+     * passed in.
+     * @throws IllegalStateException if the callback is set after the client is
+     * closed.
+     */
+    public ModuleClient setMessageCallback(MessageCallback callback, Object context)
+    {
+        this.setInternalMessageCallback(callback, context);
+        return this;
     }
 
     /**

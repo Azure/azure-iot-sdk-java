@@ -6,7 +6,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.device.auth.AuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import mockit.Deencapsulation;
@@ -198,7 +198,7 @@ public class IotHubSasTokenAuthenticationProviderTest
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_015: [This function shall save the provided tokenValidSecs as the number of seconds that created sas tokens are valid for.]
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_018: [This function shall save the provided timeBufferPercentage.]
     @Test
-    public void constructorSavesArguments(@Mocked AuthenticationProvider mockedAuthenticationProvider)
+    public void constructorSavesArguments(@Mocked IotHubAuthenticationProvider mockedIotHubAuthenticationProvider)
     {
         //arrange
         long expectedTokenValidSecs = 1234;
@@ -214,7 +214,7 @@ public class IotHubSasTokenAuthenticationProviderTest
 
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_016: [If the provided tokenValidSecs is less than 1, this function shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsForTTLBelowOneSecond(@Mocked AuthenticationProvider mockedAuthenticationProvider)
+    public void constructorThrowsForTTLBelowOneSecond(@Mocked IotHubAuthenticationProvider mockedIotHubAuthenticationProvider)
     {
         //arrange
         long expectedTokenValidSecs = 0;
@@ -226,7 +226,7 @@ public class IotHubSasTokenAuthenticationProviderTest
 
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the provided timeBufferPercentage is less than 1 or greater than 100, this function shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsForBufferBelowOnePercent(@Mocked AuthenticationProvider mockedAuthenticationProvider)
+    public void constructorThrowsForBufferBelowOnePercent(@Mocked IotHubAuthenticationProvider mockedIotHubAuthenticationProvider)
     {
         //arrange
         long expectedTokenValidSecs = 2;
@@ -238,7 +238,7 @@ public class IotHubSasTokenAuthenticationProviderTest
 
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the provided timeBufferPercentage is less than 1 or greater than 100, this function shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsForBufferAboveOneHundred(@Mocked AuthenticationProvider mockedAuthenticationProvider)
+    public void constructorThrowsForBufferAboveOneHundred(@Mocked IotHubAuthenticationProvider mockedIotHubAuthenticationProvider)
     {
         //arrange
         long expectedTokenValidSecs = 2;

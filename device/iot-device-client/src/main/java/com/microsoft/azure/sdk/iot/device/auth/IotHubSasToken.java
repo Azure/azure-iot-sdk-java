@@ -68,12 +68,14 @@ public final class IotHubSasToken
      * @param deviceId The id of the device the token is for
      * @param deviceKey The device key for connecting the device to the hub with. May be null if sharedAccessToken is not.
      * @param sharedAccessToken The sas token for connecting the device to the hub with. May be null if deviceKey is not.
+     * @param moduleId the module id. May be null if the sas token is not for a module
      * @param expiryTime the time, as a UNIX timestamp, after which the token will become invalid
      */
-    IotHubSasToken(String hostname, String deviceId, String deviceKey, String sharedAccessToken, String moduleId, long expiryTime)
+    public IotHubSasToken(String hostname, String deviceId, String deviceKey, String sharedAccessToken, String moduleId, long expiryTime)
     {
         // Codes_SRS_IOTHUBSASTOKEN_25_005: [**If device key is provided then the signature shall be correctly computed and set.**]**
-        if (deviceKey != null) {
+        if (deviceKey != null)
+        {
             // Tests_SRS_IOTHUBSASTOKEN_11_002: [**The constructor shall save all input parameters to member variables.**]
             this.scope = IotHubUri.getResourceUri(hostname, deviceId, moduleId);
             this.expiryTime = expiryTime;

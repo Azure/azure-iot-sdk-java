@@ -3,7 +3,7 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.device.auth;
+package com.microsoft.azure.sdk.iot.device.hsm.parser;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
@@ -11,20 +11,20 @@ import com.google.gson.annotations.SerializedName;
 
 import javax.crypto.Mac;
 
-public class HttpHsmSignRequest
+public class SignRequest
 {
     private static final String KEY_ID_NAME = "keyId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose(serialize = true, deserialize = false)
     @SerializedName(KEY_ID_NAME)
     private String keyId;
 
     private static final String ALGO_NAME = "algo";
-    @Expose(serialize = true, deserialize = true)
+    @Expose(serialize = true, deserialize = false)
     @SerializedName(ALGO_NAME)
     private Mac algo;
 
     private static final String DATA_NAME = "data";
-    @Expose(serialize = true, deserialize = true)
+    @Expose(serialize = true, deserialize = false)
     @SerializedName(DATA_NAME)
     private byte[] data;
 
@@ -58,5 +58,5 @@ public class HttpHsmSignRequest
     }
 
     //empty constructor for Gson to use
-    public HttpHsmSignRequest() {}
+    public SignRequest() {}
 }

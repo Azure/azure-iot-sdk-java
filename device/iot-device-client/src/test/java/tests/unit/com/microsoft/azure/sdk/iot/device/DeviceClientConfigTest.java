@@ -18,11 +18,6 @@ import org.junit.Test;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -36,13 +31,20 @@ import static org.junit.Assert.*;
  */
 public class DeviceClientConfigTest
 {
-    @Mocked AuthenticationProvider mockedAuthenticationProvider;
-    @Mocked IotHubSasTokenAuthenticationProvider mockSasTokenAuthentication;
-    @Mocked IotHubSasTokenSoftwareAuthenticationProvider mockSasTokenSoftwareAuthentication;
-    @Mocked IotHubSasTokenHardwareAuthenticationProvider mockSasTokenHardwareAuthentication;
-    @Mocked IotHubX509AuthenticationProvider mockX509Authentication;
-    @Mocked IotHubX509HardwareAuthenticationProvider mockX509HardwareAuthentication;
-    @Mocked IotHubX509SoftwareAuthenticationProvider mockX509SoftwareAuthentication;
+    @Mocked
+    IotHubAuthenticationProvider mockedIotHubAuthenticationProvider;
+    @Mocked
+    IotHubSasTokenAuthenticationProvider mockSasTokenAuthentication;
+    @Mocked
+    IotHubSasTokenSoftwareAuthenticationProvider mockSasTokenSoftwareAuthentication;
+    @Mocked
+    IotHubSasTokenHardwareAuthenticationProvider mockSasTokenHardwareAuthentication;
+    @Mocked
+    IotHubAuthenticationProvider mockAuthentication;
+    @Mocked
+    IotHubX509HardwareAuthenticationProvider mockX509HardwareAuthentication;
+    @Mocked
+    IotHubX509SoftwareAuthenticationProvider mockX509SoftwareAuthentication;
     @Mocked IotHubConnectionString mockIotHubConnectionString;
     @Mocked SecurityProvider mockSecurityProvider;
     @Mocked SecurityProviderX509 mockSecurityProviderX509;
@@ -164,13 +166,13 @@ public class DeviceClientConfigTest
     {
         //arrange
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString);
-        Deencapsulation.setField(config, "authenticationProvider", mockedAuthenticationProvider);
+        Deencapsulation.setField(config, "authenticationProvider", mockedIotHubAuthenticationProvider);
 
         //act
-        AuthenticationProvider authenticationProvider = config.getAuthenticationProvider();
+        IotHubAuthenticationProvider iotHubAuthenticationProvider = config.getAuthenticationProvider();
 
         //assert
-        assertEquals(mockedAuthenticationProvider, authenticationProvider);
+        assertEquals(mockedIotHubAuthenticationProvider, iotHubAuthenticationProvider);
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_34_050: [This function return the saved moduleId.]
@@ -179,11 +181,11 @@ public class DeviceClientConfigTest
     {
         //arrange
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString);
-        Deencapsulation.setField(config, "authenticationProvider", mockedAuthenticationProvider);
+        Deencapsulation.setField(config, "authenticationProvider", mockedIotHubAuthenticationProvider);
         new NonStrictExpectations()
         {
             {
-                mockedAuthenticationProvider.getModuleId();
+                mockedIotHubAuthenticationProvider.getModuleId();
                 result = expectedModuleId;
             }
         };
@@ -216,43 +218,13 @@ public class DeviceClientConfigTest
     {
         //arrange
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString);
-        Deencapsulation.setField(config, "authenticationProvider", mockX509Authentication);
+        Deencapsulation.setField(config, "authenticationProvider", mockAuthentication);
 
         //act
         DeviceClientConfig.AuthType actualAuthType = config.getAuthenticationType();
 
         //assert
         assertEquals(DeviceClientConfig.AuthType.X509_CERTIFICATE, actualAuthType);
-    }
-
-    // Tests_SRS_DEVICECLIENTCONFIG_34_053: [If the saved authentication provider uses x509, this function return the saved authentication provider.]
-    @Test
-    public void getX509AuthProviderReturnsX509Auth()
-    {
-        //arrange
-        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString);
-        Deencapsulation.setField(config, "authenticationProvider", mockX509Authentication);
-
-        //act
-        AuthenticationProvider actualAuthProvider = config.getX509Authentication();
-
-        //assert
-        assertEquals(mockX509Authentication, actualAuthProvider);
-    }
-
-    // Tests_SRS_DEVICECLIENTCONFIG_34_054: [If the saved authentication provider doesn't use x509, this function return null.]
-    @Test
-    public void getX509AuthProviderReturnsNull()
-    {
-        //arrange
-        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString);
-        Deencapsulation.setField(config, "authenticationProvider", mockSasTokenSoftwareAuthentication);
-
-        //act
-        AuthenticationProvider actualAuthProvider = config.getX509Authentication();
-
-        //assert
-        assertNull(actualAuthProvider);
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_34_055: [If the saved authentication provider uses sas tokens, this function return the saved authentication provider.]
@@ -264,7 +236,7 @@ public class DeviceClientConfigTest
         Deencapsulation.setField(config, "authenticationProvider", mockSasTokenSoftwareAuthentication);
 
         //act
-        AuthenticationProvider actualAuthProvider = config.getSasTokenAuthentication();
+        IotHubAuthenticationProvider actualAuthProvider = config.getSasTokenAuthentication();
 
         //assert
         assertEquals(mockSasTokenSoftwareAuthentication, actualAuthProvider);
@@ -276,10 +248,10 @@ public class DeviceClientConfigTest
     {
         //arrange
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString);
-        Deencapsulation.setField(config, "authenticationProvider", mockX509Authentication);
+        Deencapsulation.setField(config, "authenticationProvider", mockAuthentication);
 
         //act
-        AuthenticationProvider actualAuthProvider = config.getSasTokenAuthentication();
+        IotHubAuthenticationProvider actualAuthProvider = config.getSasTokenAuthentication();
 
         //assert
         assertNull(actualAuthProvider);
@@ -669,29 +641,6 @@ public class DeviceClientConfigTest
 
         //act
         Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString);
-    }
-
-    // Tests_SRS_DEVICECLIENTCONFIG_34_077: [This function shall return the saved IotHubX509AuthenticationProvider object.]
-    @Test
-    public void getIotHubX509AuthenticationWorks()
-    {
-        //arrange
-        new NonStrictExpectations()
-        {
-            {
-                mockIotHubConnectionString.isUsingX509();
-                result = true;
-            }
-        };
-
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, "", false, "", false);
-        Deencapsulation.setField(config, "authenticationProvider", mockX509Authentication);
-
-        //act
-        IotHubX509AuthenticationProvider auth = config.getX509Authentication();
-
-        //assert
-        assertEquals(mockX509Authentication, auth);
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_34_078: [This function shall return the saved IotHubSasTokenAuthenticationProvider object.]

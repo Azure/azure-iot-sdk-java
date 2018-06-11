@@ -3,15 +3,15 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
+package tests.unit.com.microsoft.azure.sdk.iot.device.hsm.parser;
 
-import com.microsoft.azure.sdk.iot.device.auth.HttpHsmErrorResponse;
+import com.microsoft.azure.sdk.iot.device.hsm.parser.ErrorResponse;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
 
-public class HttpHsmErrorResponseTest
+public class ErrorResponseTest
 {
     // Tests_SRS_HTTPHSMERRORRESPONSE_34_001: [This function shall return the saved message.]
     @Test
@@ -19,7 +19,7 @@ public class HttpHsmErrorResponseTest
     {
         //arrange
         String expectedMessage = "some error message";
-        HttpHsmErrorResponse errorResponse = new HttpHsmErrorResponse();
+        ErrorResponse errorResponse = new ErrorResponse();
         Deencapsulation.setField(errorResponse, "message", expectedMessage);
 
         //act

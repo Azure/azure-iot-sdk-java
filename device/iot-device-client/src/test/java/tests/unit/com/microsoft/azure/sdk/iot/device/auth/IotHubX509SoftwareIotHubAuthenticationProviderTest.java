@@ -7,8 +7,9 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.auth.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubX509AuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509SoftwareAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.Deencapsulation;
 import mockit.Mocked;
@@ -32,7 +33,7 @@ import static org.junit.Assert.assertTrue;
  * Methods: 100%
  * Lines: 100%
  */
-public class IotHubX509SoftwareAuthenticationProviderTest
+public class IotHubX509SoftwareIotHubAuthenticationProviderTest
 {
     private static final String publicKeyCertificate = "someCert";
     private static final String privateKey = "someKey";
@@ -130,7 +131,7 @@ public class IotHubX509SoftwareAuthenticationProviderTest
 
     //Tests_SRS_IOTHUBX509AUTHENTICATION_34_005: [This function shall return the saved IotHubSSLContext.]
     @Test
-    public void getSSLContextGets() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, IOException, KeyManagementException, KeyStoreException
+    public void getSSLContextGets() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, IOException, KeyManagementException, KeyStoreException, TransportException
     {
         //arrange
         new NonStrictExpectations()
@@ -140,7 +141,7 @@ public class IotHubX509SoftwareAuthenticationProviderTest
                 result = mockSSLContext;
             }
         };
-        IotHubX509AuthenticationProvider x509Auth = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
+        IotHubAuthenticationProvider x509Auth = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
         Deencapsulation.setField(x509Auth, "iotHubSSLContext", mockIotHubSSLContext);
 
         //act
@@ -157,7 +158,7 @@ public class IotHubX509SoftwareAuthenticationProviderTest
         //arrange
         commonExpectations();
         final String expectedCert = "someTrustedCert";
-        IotHubX509AuthenticationProvider x509Auth = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
+        IotHubAuthenticationProvider x509Auth = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
         x509Auth.setIotHubTrustedCert(expectedCert);
 
         //act
@@ -180,7 +181,7 @@ public class IotHubX509SoftwareAuthenticationProviderTest
         //arrange
         commonExpectations();
         final String expectedCertPath = "someTrustedCertPath";
-        IotHubX509AuthenticationProvider x509Auth = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
+        IotHubAuthenticationProvider x509Auth = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
         x509Auth.setPathToIotHubTrustedCert(expectedCertPath);
 
         //act
@@ -202,7 +203,7 @@ public class IotHubX509SoftwareAuthenticationProviderTest
     {
         //arrange
         commonExpectations();
-        IotHubX509AuthenticationProvider x509Auth = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
+        IotHubAuthenticationProvider x509Auth = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
 
         //act
         Deencapsulation.invoke(x509Auth, "generateSSLContext");
@@ -223,7 +224,7 @@ public class IotHubX509SoftwareAuthenticationProviderTest
     public void setPathToCertificateWorks() throws IOException
     {
         //arrange
-        IotHubX509AuthenticationProvider auth = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
+        IotHubAuthenticationProvider auth = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
         String pathToCert = "somePath";
 
         //act
@@ -242,7 +243,7 @@ public class IotHubX509SoftwareAuthenticationProviderTest
     public void setCertificateWorks() throws IOException
     {
         //arrange
-        IotHubX509AuthenticationProvider auth = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
+        IotHubAuthenticationProvider auth = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
         String cert = "somePath";
 
         //act
@@ -257,10 +258,10 @@ public class IotHubX509SoftwareAuthenticationProviderTest
 
     //Tests_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_004: [If the security provider throws a SecurityProviderException while generating an SSLContext, this function shall throw an IOException.]
     @Test (expected = IOException.class)
-    public void getSSLContextThrowsIOExceptionIfExceptionEncountered() throws SecurityProviderException, IOException
+    public void getSSLContextThrowsIOExceptionIfExceptionEncountered() throws SecurityProviderException, IOException, TransportException
     {
         //arrange
-        IotHubX509AuthenticationProvider authentication = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
+        IotHubAuthenticationProvider authentication = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
 
         new NonStrictExpectations()
         {
@@ -280,10 +281,10 @@ public class IotHubX509SoftwareAuthenticationProviderTest
     //Tests_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_003: [If this object's ssl context has not been generated yet, this function shall generate it from the saved security provider.]
     //Tests_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_005: [This function shall return the saved IotHubSSLContext.]
     @Test
-    public void getSSLContextSuccess() throws SecurityProviderException, IOException
+    public void getSSLContextSuccess() throws IOException, TransportException
     {
         //arrange
-        IotHubX509AuthenticationProvider authentication = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
+        IotHubAuthenticationProvider authentication = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, publicKeyCertificate, false, privateKey, false);
 
         new NonStrictExpectations()
         {
