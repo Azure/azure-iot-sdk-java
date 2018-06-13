@@ -1,11 +1,9 @@
 # Microsoft Azure IoT SDKs for Java
 This repository contains the following:
-* **Azure IoT Hub device SDK for Java**: to connect client devices to Azure IoT Hub (supports Java 7+ and Android API 17+)
+* **Azure IoT Hub device SDK for Java**: connect client devices to Azure IoT Hub (supports Java 7+)
 * **Azure IoT Hub service SDK for Java**: enables developing back-end applications for Azure IoT (supports Java 7+)
-
-The API reference documentation for the device SDK is [here][java-api-reference-device].
-
-The API reference documentation for the service SDK is [here][java-api-reference-service].
+* **Azure IoT Device Provisioning device SDK for Java**: provision devices to Azure IoT Hub using Azure IoT Device Provisioning
+* **Azure IoT Device Provisioning service SDK for Java**: manage your Provisioning service instance from a back-end Java application
 
 To find SDKs in other languages for Azure IoT, please refer to the [azure-iot-sdks][azure-iot-sdks] repository
 
@@ -29,6 +27,12 @@ Devices and data sources in an IoT solution can range from a simple network-conn
 * On Android: our Java device SDK can be used on Android using the API version 17 and higher:
    * [Device SDK][device-android]
 
+## API reference
+* [Azure IoT Hub device SDK][java-api-reference-device]
+* [Azure IoT Hub service SDK][java-api-reference-service]
+* [Azure IoT Hub Device Provisioning device SDK][java-api-reference-device-dps]
+* [Azure IoT Hub Device Provisioning service SDK][java-api-reference-service-dps]
+
 ## Key features and roadmap
 
 ### Device client SDK
@@ -43,7 +47,7 @@ Devices and data sources in an IoT solution can range from a simple network-conn
 | [Direct Methods](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-direct-methods)                 | :heavy_check_mark:*      | :heavy_check_mark:*      | :heavy_check_mark:*      | :heavy_check_mark:*      | :heavy_minus_sign:       | IoT Hub gives you the ability to invoke direct methods on devices from the cloud.  The SDK supports handler for generic operation.                                                                                                                                                                                                          |
 | [Upload file to Blob](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload)               | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_check_mark:*      | A device can initiate a file upload and notifies IoT Hub when the upload is complete.   File upload requires HTTPS connection, but can be initiated from client using any protocol for other operations.  *Upload file to Blob with X509 certificate is in progress.                                                                        |
 | [Connection Status and Error reporting](https://docs.microsoft.com/en-us/rest/api/iothub/common-error-codes)     | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: | Error reporting for IoT Hub supported error code.                                                                                                                                                                                                                                                                                           |
-| Retry policies                                                                                                   | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: | Retry policy for unsuccessful device-to-cloud messages have three options: no try, exponential backoff with jitter (default) and custom.                                                                                                                                                                                                    |
+| Retry policies                                                                                                   | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | Retry policy for unsuccessful device-to-cloud messages have three options: no try, exponential backoff with jitter (default) and custom.  Detail implementation is documented [here](https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md).                                                                                                                                                                                                    |
 | Devices multiplexing over single connection                                                                      | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_check_mark: | :heavy_check_mark: | :heavy_multiplication_x: |                                                                                                                                                                                                                                                                                                                                             |
 | Connection Pooling - Specifying number of connections                                                            | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_multiplication_x:       | :heavy_multiplication_x:       | :heavy_multiplication_x:       |                                                                                                                                                                                                                                                                                                                                             |
 
@@ -86,7 +90,8 @@ This repository contains [provisioning service client SDK](./provisioning/provis
 ## Samples
 Whithin the repository, you can find various types of simple samples that can help you get started.
 * [Device SDK Samples](./device/iot-device-samples/)
-* [Service SDK Samples](./service/iot-service-samples)
+* [Service SDK Samples](./service/iot-service-samples/)
+* [Provisioning SDK Samples](./provisioning/provisioning-samples/)
 
 ## Contribution, feedback and issues
 If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](.github/CONTRIBUTING.md).
@@ -172,9 +177,11 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 [device-code]: ./doc/java-devbox-setup.md#installiotsource
 [service-code]: ./doc/java-devbox-setup.md#installiotsource
 [device-android]: ./doc/java-devbox-setup.md#installiotandroid
-[java-api-reference-device]: https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.device
-[java-api-reference-service]: https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.service
+[java-api-reference-device]: https://docs.microsoft.com/java/api/com.microsoft.azure.sdk.iot.device
+[java-api-reference-service]: https://docs.microsoft.com/java/api/com.microsoft.azure.sdk.iot.service
 [devbox-setup]: doc/java-devbox-setup.md
 [java-api-reference]: https://azure.github.io/azure-iot-sdk-java/
 [setup-iothub]: https://aka.ms/howtocreateazureiothub
+[java-api-reference-device-dps]: https://docs.microsoft.com/java/api/com.microsoft.azure.sdk.iot.provisioning.device
+[java-api-reference-service-dps]: https://docs.microsoft.com/java/api/com.microsoft.azure.sdk.iot.provisioning.service
 
