@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
@@ -1494,7 +1495,7 @@ public class RegistryManagerTest
         getModulesExpectations(connectionString, deviceId);
 
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
-        ArrayList<Module> modules =  registryManager.getModulesOnDevice(deviceId);
+        List<Module> modules =  registryManager.getModulesOnDevice(deviceId);
 
         getModulesVerifications(deviceId, modules);
         assertEquals(3, modules.size());
@@ -1783,7 +1784,7 @@ public class RegistryManagerTest
         getConfigsExpectations(connectionString, numberOfConfigs);
 
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
-        ArrayList<Configuration> configs =  registryManager.getConfigurations(10);
+        List<Configuration> configs =  registryManager.getConfigurations(10);
 
         getConfigsVerifications(numberOfConfigs, configs);
         assertEquals(2, configs.size());
@@ -2139,7 +2140,7 @@ public class RegistryManagerTest
         };
     }
 
-    private void getModulesVerifications(String deviceId, ArrayList<Module> modules) throws Exception
+    private void getModulesVerifications(String deviceId, List<Module> modules) throws Exception
     {
         new VerificationsInOrder()
         {
@@ -2218,7 +2219,7 @@ public class RegistryManagerTest
         };
     }
 
-    private void getConfigsVerifications(int numOfConfigs, ArrayList<Configuration> configs) throws Exception
+    private void getConfigsVerifications(int numOfConfigs, List<Configuration> configs) throws Exception
     {
         new VerificationsInOrder()
         {
