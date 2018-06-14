@@ -26,6 +26,7 @@ import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -909,7 +910,7 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public ArrayList<Module> getModulesOnDevice(String deviceId) throws IOException, IotHubException, JsonSyntaxException
+    public List<Module> getModulesOnDevice(String deviceId) throws IOException, IotHubException, JsonSyntaxException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_017: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
         if (Tools.isNullOrEmpty(deviceId))
@@ -931,11 +932,11 @@ public class RegistryManager
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_022: [The function shall verify the response status and throw proper Exception]
         IotHubExceptionManager.httpResponseVerification(response);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_023: [The function shall create a new ArrayList<Device> object from the response and return with it]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_023: [The function shall create a new List<Modules> object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
         try (JsonReader jsonReader = Json.createReader(new StringReader(bodyStr)))
         {
-            ArrayList<Module> moduleList = new ArrayList<>();
+            List<Module> moduleList = new ArrayList<>();
             JsonArray deviceArray = jsonReader.readArray();
 
             for (int i = 0; i < deviceArray.size(); i++)
@@ -1137,7 +1138,7 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public ArrayList<Configuration> getConfigurations(Integer maxCount) throws IOException, IotHubException, JsonSyntaxException
+    public List<Configuration> getConfigurations(Integer maxCount) throws IOException, IotHubException, JsonSyntaxException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_056: [The function shall throw IllegalArgumentException if the input count number is less than 1]
         if (maxCount < 1)
@@ -1159,11 +1160,11 @@ public class RegistryManager
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_061: [The function shall verify the response status and throw proper Exception]
         IotHubExceptionManager.httpResponseVerification(response);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_062: [The function shall create a new ArrayList<Device> object from the response and return with it]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_062: [The function shall create a new ArrayList<Configuration> object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
         try (JsonReader jsonReader = Json.createReader(new StringReader(bodyStr)))
         {
-            ArrayList<Configuration> configurationList = new ArrayList<>();
+            List<Configuration> configurationList = new ArrayList<>();
             JsonArray deviceArray = jsonReader.readArray();
 
             for (int i = 0; i < deviceArray.size(); i++)

@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.List;
 
 /** Manages module on IotHub - CRUD operations */
 public class ModuleManagerSample
@@ -102,7 +103,7 @@ public class ModuleManagerSample
             e.printStackTrace();
         }
 
-        ArrayList<Module> list = registryManager.getModulesOnDevice(SampleUtils.deviceId);
+        List<Module> list = registryManager.getModulesOnDevice(SampleUtils.deviceId);
         for (int i = 0; i < list.size(); i++)
         {
             Module module = list.get(i);
