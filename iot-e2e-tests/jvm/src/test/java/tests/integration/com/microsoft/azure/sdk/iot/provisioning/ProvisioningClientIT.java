@@ -324,6 +324,8 @@ public class ProvisioningClientIT
         registryManager.removeDevice(deviceId);
     }
 
+    // disable this test due to stability issue off TPM simulator on linux.
+    @Ignore
     @Test (timeout = OVERALL_TEST_TIMEOUT)
     public void individualEnrollmentTPMSimulator() throws Exception
     {
