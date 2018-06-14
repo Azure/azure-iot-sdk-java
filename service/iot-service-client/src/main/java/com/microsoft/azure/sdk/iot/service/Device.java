@@ -10,8 +10,6 @@ import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 
-import java.security.NoSuchAlgorithmException;
-
 /**
  * The Device class extends the Device class
  * implementing constructors and serialization functionality.
@@ -200,7 +198,7 @@ public class Device extends BaseDevice
         if (this.capabilities != null)
         {
             deviceParser.setCapabilities(new DeviceCapabilitiesParser());
-            deviceParser.getCapabilities().setIotEdge(this.capabilities.getIotEdge());
+            deviceParser.getCapabilities().setIotEdge(this.capabilities.isIotEdge());
         }
 
         return  deviceParser;

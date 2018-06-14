@@ -7,6 +7,7 @@ import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
+import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
@@ -15,26 +16,26 @@ import java.util.Date;
 
 /**
  * Representation of a single Device Provisioning Service enrollment with a JSON serializer and deserializer.
- *
+ * <p>
  * <p> This object is used to send IndividualEnrollment information to the provisioning service, or receive IndividualEnrollment
- *     information from the provisioning service.
- *
+ * information from the provisioning service.
+ * <p>
  * <p> To create or update an IndividualEnrollment on the provisioning service you should fill this object and call the
- *     public API {@link ProvisioningServiceClient#createOrUpdateIndividualEnrollment(IndividualEnrollment)}.
- *     The minimum information required by the provisioning service is the {@code registrationId} and the
- *     {@code attestation}.
- *
+ * public API {@link ProvisioningServiceClient#createOrUpdateIndividualEnrollment(IndividualEnrollment)}.
+ * The minimum information required by the provisioning service is the {@code registrationId} and the
+ * {@code attestation}.
+ * <p>
  * <p> A new device can be provisioned by two attestation mechanisms, Trust Platform Module (see {@link TpmAttestation})
- *     or X509 (see {@link X509Attestation}). The definition of each one you should use depending on the
- *     physical authentication hardware that the device contains.
- *
+ * or X509 (see {@link X509Attestation}). The definition of each one you should use depending on the
+ * physical authentication hardware that the device contains.
+ * <p>
  * <p> The content of this class will be serialized in a JSON format and sent as a body of the rest API to the
- *     provisioning service.
- *
+ * provisioning service.
+ * <p>
  * <p> When serialized, an IndividualEnrollment will look like the following example:
  * <pre>
- *{@code
- *{
+ * {@code
+ * {
  *    "registrationId":"validRegistrationId",
  *    "deviceId":"ContosoDevice-123",
  *    "attestation":{
@@ -45,17 +46,17 @@ import java.util.Date;
  *    },
  *    "iotHubHostName":"ContosoIoTHub.azure-devices.net",
  *    "provisioningStatus":"enabled"
- *}
- *}
+ * }
+ * }
  * </pre>
- *
+ * <p>
  * <p> The content of this class can be filled by a JSON, received from the provisioning service, as result of a
- *     IndividualEnrollment operation like create, update, or query enrollment.
- *
+ * IndividualEnrollment operation like create, update, or query enrollment.
+ * <p>
  * <p> The following JSON is a sample or the IndividualEnrollment response, received from the provisioning service.
  * <pre>
- *{@code
- *{
+ * {@code
+ * {
  *    "registrationId":"validRegistrationId",
  *    "deviceId":"ContosoDevice-123",
  *    "attestation":{
@@ -69,8 +70,8 @@ import java.util.Date;
  *    "createdDateTimeUtc": "2017-09-28T16:29:42.3447817Z",
  *    "lastUpdatedDateTimeUtc": "2017-09-28T16:29:42.3447817Z",
  *    "etag": "\"00000000-0000-0000-0000-00000000000\""
- *}
- *}
+ * }
+ * }
  * </pre>
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
@@ -141,19 +142,24 @@ public class IndividualEnrollment extends Serializable
     @SerializedName(ETAG_TAG)
     private String etag;
 
+    private static final String DEVICE_CAPABILITIES_TAG = "capabilities";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(DEVICE_CAPABILITIES_TAG)
+    private DeviceCapabilities capabilities;
+
     /**
      * CONSTRUCTOR
-     * 
+     * <p>
      * <p> This constructor creates an instance of the enrollment with the minimum set of information
-     *     required by the provisioning service. A valid enrollment must contain the registrationId,
-     *     which uniquely identify this enrollment, and the attestation mechanism, which can be TPM or X509.
-     *
+     * required by the provisioning service. A valid enrollment must contain the registrationId,
+     * which uniquely identify this enrollment, and the attestation mechanism, which can be TPM or X509.
+     * <p>
      * <p> Other parameters can be added by calling the setters on this class.
-     *
+     * <p>
      * <p> When serialized, an IndividualEnrollment will look like the following example:
      * <pre>
-     *{@code
-     *{
+     * {@code
+     * {
      *    "registrationId":"validRegistrationId",
      *    "attestation":{
      *        "type":"tpm",
@@ -161,17 +167,15 @@ public class IndividualEnrollment extends Serializable
      *            "endorsementKey":"validEndorsementKey"
      *        }
      *    }
-     *}
-     *}
+     * }
+     * }
      * </pre>
      *
      * @param registrationId the {@code String} with an unique id for this enrollment.
-     * @param attestation the {@link Attestation} mechanism that can be {@link TpmAttestation} or {@link X509Attestation}.
+     * @param attestation    the {@link Attestation} mechanism that can be {@link TpmAttestation} or {@link X509Attestation}.
      * @throws IllegalArgumentException If one of the provided parameters is not correct.
      */
-    public IndividualEnrollment(
-            String registrationId,
-            Attestation attestation)
+    public IndividualEnrollment(String registrationId, Attestation attestation)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_001: [The constructor shall judge and store the provided parameters using the IndividualEnrollment setters.] */
         this.setRegistrationId(registrationId);
@@ -180,14 +184,14 @@ public class IndividualEnrollment extends Serializable
 
     /**
      * CONSTRUCTOR
-     *
+     * <p>
      * <p> This constructor creates an instance of the enrollment filling the class with the information
-     *     provided in the JSON. It is used by the SDK to parse enrollment responses from the provisioning service.
-     *
+     * provided in the JSON. It is used by the SDK to parse enrollment responses from the provisioning service.
+     * <p>
      * <p> The following JSON is a sample of the IndividualEnrollment response, received from the provisioning service.
      * <pre>
-     *{@code
-     *{
+     * {@code
+     * {
      *    "registrationId":"validRegistrationId",
      *    "deviceId":"ContosoDevice-123",
      *    "attestation":{
@@ -201,8 +205,8 @@ public class IndividualEnrollment extends Serializable
      *    "createdDateTimeUtc": "2017-09-28T16:29:42.3447817Z",
      *    "lastUpdatedDateTimeUtc": "2017-09-28T16:29:42.3447817Z",
      *    "etag": "\"00000000-0000-0000-0000-00000000000\""
-     *}
-     *}
+     * }
+     * }
      * </pre>
      *
      * @param json the {@code String} with the JSON received from the provisioning service.
@@ -211,7 +215,7 @@ public class IndividualEnrollment extends Serializable
     public IndividualEnrollment(String json)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_002: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
-        if(Tools.isNullOrEmpty(json))
+        if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
@@ -226,19 +230,19 @@ public class IndividualEnrollment extends Serializable
         this.setAttestation(result.attestation);
 
         /* SRS_INDIVIDUAL_ENROLLMENT_21_006: [If the `deviceId`, `iotHubHostName`, `provisioningStatus`, or `registrationState` is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
-        if(result.deviceId != null)
+        if (result.deviceId != null)
         {
             this.setDeviceId(result.deviceId);
         }
-        if(result.iotHubHostName != null)
+        if (result.iotHubHostName != null)
         {
             this.setIotHubHostName(result.iotHubHostName);
         }
-        if(result.provisioningStatus != null)
+        if (result.provisioningStatus != null)
         {
             this.setProvisioningStatus(result.provisioningStatus);
         }
-        if(result.registrationState != null)
+        if (result.registrationState != null)
         {
             this.setRegistrationState(result.registrationState);
         }
@@ -247,16 +251,16 @@ public class IndividualEnrollment extends Serializable
         if (result.initialTwin != null)
         {
             /*
-            * During the deserialization process, the GSON will convert both tags and
-            * properties to a raw Map, which will includes the $version and $metadata
-            * as part of the collection. So, we need to reorganize this map using the
-            * TwinCollection format. This constructor will do that.
-            */
+             * During the deserialization process, the GSON will convert both tags and
+             * properties to a raw Map, which will includes the $version and $metadata
+             * as part of the collection. So, we need to reorganize this map using the
+             * TwinCollection format. This constructor will do that.
+             */
             this.initialTwin = new TwinState(result.initialTwin.getTags(), result.initialTwin.getDesiredProperty());
         }
 
         /* SRS_INDIVIDUAL_ENROLLMENT_21_009: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
-        if(result.createdDateTimeUtc != null)
+        if (result.createdDateTimeUtc != null)
         {
             this.setCreatedDateTimeUtc(result.createdDateTimeUtc);
         }
@@ -268,23 +272,29 @@ public class IndividualEnrollment extends Serializable
         }
 
         /* SRS_INDIVIDUAL_ENROLLMENT_21_011: [If the etag is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
-        if(result.etag != null)
+        if (result.etag != null)
         {
             this.setEtag(result.etag);
+        }
+
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_052: [If the device capabilities is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
+        if (result.capabilities != null)
+        {
+            this.setCapabilities(result.capabilities);
         }
     }
 
     /**
      * Serializer
-     *
      * <p>
-     *     Creates a {@code JsonElement}, which the content represents
-     *     the information in this class and its subclasses in a JSON format.
-     *
-     *     This is useful if the caller will integrate this JSON with JSON from
-     *     other classes to generate a consolidated JSON.
+     * <p>
+     * Creates a {@code JsonElement}, which the content represents
+     * the information in this class and its subclasses in a JSON format.
+     * <p>
+     * This is useful if the caller will integrate this JSON with JSON from
+     * other classes to generate a consolidated JSON.
      * </p>
-
+     *
      * @return The {@code JsonElement} with the content of this class.
      */
     public JsonElement toJsonElement()
@@ -294,7 +304,7 @@ public class IndividualEnrollment extends Serializable
         JsonObject enrollmentJson = gson.toJsonTree(this).getAsJsonObject();
 
         /* SRS_INDIVIDUAL_ENROLLMENT_21_014: [If the initialTwin is not null, the toJsonElement shall include its content in the final JSON.] */
-        if(initialTwin != null)
+        if (initialTwin != null)
         {
             enrollmentJson.add(INITIAL_TWIN_STATE_TAG, initialTwin.toJsonElement());
         }
@@ -315,12 +325,12 @@ public class IndividualEnrollment extends Serializable
 
     /**
      * Setter for the registrationId.
-     *
      * <p>
-     *     A valid registration Id shall follow this criteria.
-     *         A case-sensitive string (up to 128 char long)
-     *         of ASCII 7-bit alphanumeric chars
-     *         + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+     * <p>
+     * A valid registration Id shall follow this criteria.
+     * A case-sensitive string (up to 128 char long)
+     * of ASCII 7-bit alphanumeric chars
+     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      * </p>
      *
      * @param registrationId the {@code String} with the new registrationId. It cannot be {@code null}, empty, or invalid.
@@ -348,12 +358,12 @@ public class IndividualEnrollment extends Serializable
 
     /**
      * Setter for the deviceId.
-     *
      * <p>
-     *     A valid device Id shall follow this criteria.
-     *         A case-sensitive string (up to 128 char long)
-     *         of ASCII 7-bit alphanumeric chars
-     *         + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+     * <p>
+     * A valid device Id shall follow this criteria.
+     * A case-sensitive string (up to 128 char long)
+     * of ASCII 7-bit alphanumeric chars
+     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      * </p>
      *
      * @param deviceId the {@code String} with the new deviceID. It cannot be {@code null}, empty, or invalid.
@@ -382,10 +392,9 @@ public class IndividualEnrollment extends Serializable
     /**
      * Setter for the registrationState.
      *
-     * @see DeviceRegistrationState
-     *
      * @param registrationState the {@code DeviceRegistrationState} with the new registrationState. It cannot be {@code null}.
      * @throws IllegalArgumentException If the provided registrationState is {@code null}.
+     * @see DeviceRegistrationState
      */
     protected void setRegistrationState(DeviceRegistrationState registrationState)
     {
@@ -410,16 +419,15 @@ public class IndividualEnrollment extends Serializable
 
     /**
      * Setter for the attestation.
-     *
      * <p>
-     *     Attestation mechanism is a mandatory parameter that provides the mechanism
-     *     type and the necessary keys/certificates
-     *
-     *     @see AttestationMechanism
-     * </p>
+     * <p>
+     * Attestation mechanism is a mandatory parameter that provides the mechanism
+     * type and the necessary keys/certificates
      *
      * @param attestationMechanism the {@code AttestationMechanism} with the new attestation mechanism. It can be `tpm` or `x509`.
      * @throws IllegalArgumentException If the provided attestation mechanism is {@code null} or invalid.
+     * @see AttestationMechanism
+     * </p>
      */
     protected void setAttestation(AttestationMechanism attestationMechanism)
     {
@@ -439,23 +447,22 @@ public class IndividualEnrollment extends Serializable
 
     /**
      * Setter for the attestation.
-     *
      * <p>
-     *     Attestation mechanism is a mandatory parameter that provides the mechanism
-     *     type and the necessary keys/certificates
-     *
-     *     @see Attestation
-     *     @see TpmAttestation
-     *     @see X509Attestation
-     * </p>
+     * <p>
+     * Attestation mechanism is a mandatory parameter that provides the mechanism
+     * type and the necessary keys/certificates
      *
      * @param attestation the {@link Attestation} with the new attestation mechanism. It can be {@link TpmAttestation} or {@link X509Attestation}.
      * @throws IllegalArgumentException If the provided attestation mechanism is {@code null}.
+     * @see Attestation
+     * @see TpmAttestation
+     * @see X509Attestation
+     * </p>
      */
     public void setAttestation(Attestation attestation)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_050: [The setAttestation shall throw IllegalArgumentException if the attestation is null.] */
-        if(attestation == null)
+        if (attestation == null)
         {
             throw new IllegalArgumentException("attestation cannot be null");
         }
@@ -477,13 +484,13 @@ public class IndividualEnrollment extends Serializable
 
     /**
      * Setter for the iotHubHostName.
-     *
      * <p>
-     *     A valid iothub host name shall follow this criteria.
-     *         A case-sensitive string (up to 128 char long)
-     *         of ASCII 7-bit alphanumeric chars
-     *         + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
-     *     A valid host name shall have, at least 2 parts separated by '.'.
+     * <p>
+     * A valid iothub host name shall follow this criteria.
+     * A case-sensitive string (up to 128 char long)
+     * of ASCII 7-bit alphanumeric chars
+     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+     * A valid host name shall have, at least 2 parts separated by '.'.
      * </p>
      *
      * @param iotHubHostName the {@code String} with the new iotHubHostName. It cannot be {@code null}, empty, or invalid.
@@ -511,9 +518,9 @@ public class IndividualEnrollment extends Serializable
 
     /**
      * Setter for the initialTwin.
-     *
      * <p>
-     *     It provides a Twin precondition for the provisioned device.
+     * <p>
+     * It provides a Twin precondition for the provisioned device.
      * </p>
      *
      * @param initialTwin the {@code TwinState} with the new initialTwin. It cannot be {@code null}.
@@ -541,9 +548,9 @@ public class IndividualEnrollment extends Serializable
 
     /**
      * Setter for the provisioningStatus.
-     *
      * <p>
-     *     It provides a Status precondition for the provisioned device.
+     * <p>
+     * It provides a Status precondition for the provisioned device.
      * </p>
      *
      * @param provisioningStatus the {@code ProvisioningStatus} with the new provisioningStatus. It cannot be {@code null}.
@@ -571,13 +578,13 @@ public class IndividualEnrollment extends Serializable
 
     /**
      * Setter for the createdDateTimeUtc.
-     *
      * <p>
-     *     This Date and Time is provided by the provisioning service. If the enrollment is not created yet,
-     *     this string can represent an invalid Date. In this case, it will be ignored.
-     *
-     *     Example of the expected format:
-     *         {@code "2016-06-01T21:22:43.7996883Z"}
+     * <p>
+     * This Date and Time is provided by the provisioning service. If the enrollment is not created yet,
+     * this string can represent an invalid Date. In this case, it will be ignored.
+     * <p>
+     * Example of the expected format:
+     * {@code "2016-06-01T21:22:43.7996883Z"}
      * </p>
      *
      * @param createdDateTimeUtc the {@code String} with the new createdDateTimeUtc. It can be {@code null}, empty or not valid.
@@ -602,13 +609,13 @@ public class IndividualEnrollment extends Serializable
 
     /**
      * Setter for the lastUpdatedDateTimeUtc.
-     *
      * <p>
-     *     This Date and Time is provided by the provisioning service. If the enrollment is not created yet,
-     *     this string can represent an invalid Date. In this case, it will be ignored.
-     *
-     *     Example of the expected format:
-     *         {@code "2016-06-01T21:22:43.7996883Z"}
+     * <p>
+     * This Date and Time is provided by the provisioning service. If the enrollment is not created yet,
+     * this string can represent an invalid Date. In this case, it will be ignored.
+     * <p>
+     * Example of the expected format:
+     * {@code "2016-06-01T21:22:43.7996883Z"}
      * </p>
      *
      * @param lastUpdatedDateTimeUtc the {@code String} with the new lastUpdatedDateTimeUtc. It can be {@code null}, empty or not valid.
@@ -646,11 +653,23 @@ public class IndividualEnrollment extends Serializable
         this.etag = etag;
     }
 
+    public DeviceCapabilities getCapabilities()
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_054: [This function shall return the saved capabilities.] */
+        return this.capabilities;
+    }
+
+    public void setCapabilities(DeviceCapabilities capabilities)
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_053: [This function shall save the provided capabilities.] */
+        this.capabilities = capabilities;
+    }
+
     /**
      * Empty constructor
-     *
      * <p>
-     *     Used only by the tools that will deserialize this class.
+     * <p>
+     * Used only by the tools that will deserialize this class.
      * </p>
      */
     @SuppressWarnings("unused")

@@ -120,7 +120,7 @@ public class RegisterManagerTest
         assertEquals("validModuleId", result.getModuleId());
         assertEquals(3, (int)result.getVersion());
         assertEquals("xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", result.getETag());
-        assertEquals(true, result.getCapabilities().getIotEdge());
+        assertEquals(true, result.getCapabilities().isIotEdge());
     }
 
     /* Codes_SRS_REGISTER_MANAGER_21_007: [The RegisterManager shall provide an empty constructor to make GSON happy.] */

@@ -39,6 +39,6 @@ public class DeviceCapabilitiesTest
         DeviceCapabilities result = gson.fromJson(DEVICECAPABILITIES_SAMPLE, DeviceCapabilities.class);
 
         // act - assert
-        assertEquals(false, result.getIotEdge());
+        assertEquals(false, result.isIotEdge());
     }
 }
