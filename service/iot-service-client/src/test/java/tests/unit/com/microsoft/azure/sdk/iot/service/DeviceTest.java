@@ -74,7 +74,7 @@ public class DeviceTest
 
         cap.setIotEdge(true);
         device.setCapabilities(cap);
-        assertEquals((Boolean)true, device.getCapabilities().getIotEdge());
+        assertEquals((Boolean)true, device.getCapabilities().isIotEdge());
 
         device.setForceUpdate(true);
         device.setForceUpdate(null);

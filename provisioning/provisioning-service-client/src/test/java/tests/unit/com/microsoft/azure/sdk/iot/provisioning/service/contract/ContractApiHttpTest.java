@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionString;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningSasToken;
+import com.microsoft.azure.sdk.iot.provisioning.service.contract.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientExceptionManager;
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
@@ -199,7 +200,7 @@ public class ContractApiHttpTest
         // arrange
         requestNonStrictExpectations();
         ContractApiHttp contractApiHttp = ContractApiHttp.createFromConnectionString(mockedProvisioningConnectionString);
-        String expectedURL = "https://" + VALID_HOST_NAME + "/" + VALID_PATH + "?api-version=2017-11-15";
+        String expectedURL = "https://" + VALID_HOST_NAME + "/" + VALID_PATH + "?api-version=" + SDKUtils.getServiceApiVersion();
 
         // act
         contractApiHttp.request(
