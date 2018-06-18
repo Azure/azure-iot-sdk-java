@@ -333,6 +333,12 @@ public class DeviceTwin
         TwinCollection reportedPropertiesMap = new TwinCollection();
         for(Property p : reportedProperties)
         {
+            if (reportedPropertiesMap.containsKey(p.getKey()))
+            {
+                //Codes_SRS_DEVICETWIN_34_032: [If the provided set of properties contains two keys with the same name, this function shall throw an IOException.]
+                throw new IOException("Duplicate keys found in reported properties: " + p.getKey());
+            }
+
             reportedPropertiesMap.put(p.getKey(), p.getValue());
         }
         String serializedReportedProperties = reportedPropertiesMap.toJsonElement().toString();

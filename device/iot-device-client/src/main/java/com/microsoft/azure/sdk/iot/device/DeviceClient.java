@@ -729,7 +729,6 @@ public final class DeviceClient implements Closeable
         **Codes_SRS_DEVICECLIENT_25_035: [**This method shall send to reported properties by calling updateReportedProperties on the twin object.**]**
          */
         this.deviceTwin.updateReportedProperties(reportedProperties);
-
     }
 
     /**

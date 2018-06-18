@@ -43,7 +43,7 @@ public class DeviceTwinTest
 
     /*
      **Tests_SRS_DEVICETWIN_25_003: [**The constructor shall save all the parameters specified i.e client, config, deviceTwinCallback.**]**
-     **Codes_SRS_DEVICETWIN_21_004: [**The constructor shall save the generic property callback.**]**
+     **Tests_SRS_DEVICETWIN_21_004: [**The constructor shall save the generic property callback.**]**
      */
     @Test
     public void contructorWithPropertyCallbackSetAllPrivateMembersCorrectly()
@@ -112,7 +112,7 @@ public class DeviceTwinTest
 
     /*
      **Tests_SRS_DEVICETWIN_25_005: [**The method shall create a device twin message with empty payload to be sent IotHub.**]**
-     **Codes_SRS_DEVICETWIN_25_007: [**This method shall set the request id for the message by calling setRequestId .**]**
+     **Tests_SRS_DEVICETWIN_25_007: [**This method shall set the request id for the message by calling setRequestId .**]**
      **Tests_SRS_DEVICETWIN_25_008: [**This method shall send the message to the lower transport layers by calling sendEventAsync.**]**
      */
     @Test
@@ -354,7 +354,7 @@ public class DeviceTwinTest
     }
 
     /*
-     **Codes_SRS_DEVICETWIN_25_011: [**The method shall serialize the properties using the TwinCollection.**]**
+     **Tests_SRS_DEVICETWIN_25_011: [**The method shall serialize the properties using the TwinCollection.**]**
      **Tests_SRS_DEVICETWIN_25_012: [**The method shall create a device twin message with the serialized payload if not null to be sent IotHub.**]**
      **Tests_SRS_DEVICETWIN_25_013: [**This method shall set the message type as DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST by calling setDeviceOperationType.**]**
      **Tests_SRS_DEVICETWIN_25_014: [**This method shall set the request id for the message by calling setRequestId .**]**
@@ -409,8 +409,34 @@ public class DeviceTwinTest
         };
     }
 
+    //Tests_SRS_DEVICETWIN_34_032: [If the provided set of properties contains two keys with the same name, this function shall throw an IOException.]                 
+    @Test (expected = IOException.class)
+    public void updateReportedPropThrowsForDuplicateKeys(
+            @Mocked final IotHubTransportMessage mockedDeviceTwinMessage) throws IOException
+    {
+        // arrange
+        final String prop1 = "prop1";
+        final String prop2 = "prop1";
+        final String val1 = "val1";
+        final int val2 = 100;
+
+        final HashSet<Property> reportedProp = new HashSet<Property>()
+        {
+            {
+                add(new Property(prop1, val1));
+                add(new Property(prop2, val2));
+            }
+        };
+
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
+                mockedStatusCB, null, mockedGenericPropertyCB, null);
+
+        // act
+        testTwin.updateReportedProperties(reportedProp);
+    }
+
     /*
-     **Codes_SRS_DEVICETWIN_21_024: [**If the version is provided, this method shall set the version for the message by calling setVersion .**]**
+     **Tests_SRS_DEVICETWIN_21_024: [**If the version is provided, this method shall set the version for the message by calling setVersion .**]**
      */
     @Test
     public void updateReportedPropWithVersionCallsTwinAPIForSerialization(
@@ -774,7 +800,7 @@ public class DeviceTwinTest
     }
 
     /*
-     **Codes_SRS_DEVICETWIN_25_025: [**On receiving a message from IOTHub with desired property changes, the callback deviceTwinResponseMessageCallback is triggered.**]**
+     **Tests_SRS_DEVICETWIN_25_025: [**On receiving a message from IOTHub with desired property changes, the callback deviceTwinResponseMessageCallback is triggered.**]**
      **Tests_SRS_DEVICETWIN_25_026: [**If the message is of type DEVICE_TWIN and DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE then the payload is deserialize by calling updateDesiredProperty.**]**
      */
     @Test
@@ -820,7 +846,7 @@ public class DeviceTwinTest
     }
 
     /*
-     **Codes_SRS_DEVICETWIN_25_023: [**OnDesiredPropertyChange callback shall look for the user registered call back on the property that changed and if no callback is registered or is null then OnDesiredPropertyChange shall call the user on generic callback providing with the desired property change key and value pair**]**
+     **Tests_SRS_DEVICETWIN_25_023: [**OnDesiredPropertyChange callback shall look for the user registered call back on the property that changed and if no callback is registered or is null then OnDesiredPropertyChange shall call the user on generic callback providing with the desired property change key and value pair**]**
      */
     @Test
     public void subscribeToDesiredCallsGenericCBOnDesiredChangeIfNoUserCBFound(
