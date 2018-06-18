@@ -1127,6 +1127,7 @@ public class MqttIotHubConnectionTest
         };
 
         final MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
 
         //act
         connection.open(mockedQueue);
