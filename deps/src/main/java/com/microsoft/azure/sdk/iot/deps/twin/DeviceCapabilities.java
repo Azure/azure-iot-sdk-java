@@ -34,7 +34,7 @@ public class DeviceCapabilities
      *
      * @return the iotEdge Boolean
      */
-    public Boolean getIotEdge()
+    public Boolean isIotEdge()
     {
         return this.iotEdge;
     }
