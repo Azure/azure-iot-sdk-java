@@ -492,10 +492,50 @@ public class RegistryManager
      */
     public void removeDevice(String deviceId) throws IOException, IotHubException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_046: [The function shall throw IllegalArgumentException if the input string is null or empty]
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_087: [The function shall use * as the etag]
+        removeDeviceOperation(deviceId, "*");
+    }
+
+    /**
+     * Remove device
+     *
+     * @param device The device name to remove
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     * @throws IllegalArgumentException This exception is thrown if the device is null
+     */
+    public void removeDevice(Device device) throws IOException, IotHubException, IllegalArgumentException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_081: [The function shall throw IllegalArgumentException if the input device is null]
+        if (device == null)
+        {
+            throw new IllegalArgumentException("device cannot be null or empty");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_084: [The function shall call provide device object's etag as with etag of device to be removed]
+        removeDeviceOperation(device.getDeviceId(), device.geteTag());
+    }
+
+    /**
+     * send remove device request and verify response
+     *
+     * @param deviceId The device name to remove
+     * @param etag The etag associated with the device to remove
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    private void removeDeviceOperation(String deviceId, String etag) throws IOException, IotHubException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_046: [The function shall throw IllegalArgumentException if the input deviceId is null or empty]
         if (Tools.isNullOrEmpty(deviceId))
         {
             throw new IllegalArgumentException("deviceId cannot be null or empty");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_087: [The function shall throw IllegalArgumentException if the input etag is null or empty]
+        if (Tools.isNullOrEmpty(etag))
+        {
+            throw new IllegalArgumentException("etag cannot be null or empty");
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_047: [The function shall get the URL for the device]
@@ -508,7 +548,7 @@ public class RegistryManager
         HttpRequest request = new HttpRequest(url, HttpMethod.DELETE, new byte[0]);
         request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
         request.setHeaderField("authorization", sasToken);
-        request.setHeaderField("If-Match", "*");
+        request.setHeaderField("If-Match", etag);
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_050: [The function shall send the created request and get the response]
         HttpResponse response = request.send();
@@ -527,7 +567,6 @@ public class RegistryManager
      */
     public CompletableFuture<Boolean> removeDeviceAsync(String deviceId) throws IOException, IotHubException
     {
-
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_052: [The function shall throw IllegalArgumentException if the input string is null or empty]
         if (Tools.isNullOrEmpty(deviceId))
@@ -1020,6 +1059,41 @@ public class RegistryManager
      */
     public void removeModule(String deviceId, String moduleId) throws IOException, IotHubException
     {
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_086: [The function shall use * as the etag]
+        removeModuleOperation(deviceId, moduleId, "*");
+    }
+
+    /**
+     * Remove module
+     *
+     * @param module The module to be removed
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     * @throws IllegalArgumentException This exception is thrown if the input module is null
+     */
+    public void removeModule(Module module) throws IOException, IotHubException, IllegalArgumentException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_082: [The function shall throw IllegalArgumentException if the input module is null]
+        if (module == null)
+        {
+            throw new IllegalArgumentException("module cannot be null or empty");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_083: [The function shall use the module's object etag as the etag module to be remove]
+        removeModuleOperation(module.getDeviceId(), module.getId(), module.geteTag());
+    }
+
+    /**
+     * Send remove module request and verify response
+     *
+     * @param deviceId The device name associated with the module to be removed
+     * @param moduleId The module name to be removed
+     * @param etag The etag of the module to be removed, "*" as wildcard.
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    private void removeModuleOperation(String deviceId, String moduleId, String etag) throws IOException, IotHubException
+    {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_034: [The function shall throw IllegalArgumentException if the deviceId is null or empty]
         if (Tools.isNullOrEmpty(deviceId))
         {
@@ -1032,6 +1106,12 @@ public class RegistryManager
             throw new IllegalArgumentException("moduleId cannot be null or empty");
         }
 
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_078: [The function shall throw IllegalArgumentException if the etag is null or empty]
+        if (Tools.isNullOrEmpty(etag))
+        {
+            throw new IllegalArgumentException("etag cannot be null or empty");
+        }
+
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_036: [The function shall get the URL for the module]
         URL url = iotHubConnectionString.getUrlModule(deviceId, moduleId);
 
@@ -1042,7 +1122,7 @@ public class RegistryManager
         HttpRequest request = new HttpRequest(url, HttpMethod.DELETE, new byte[0]);
         request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
         request.setHeaderField("authorization", sasToken);
-        request.setHeaderField("If-Match", "*");
+        request.setHeaderField("If-Match", etag);
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_039: [The function shall send the created request and get the response]
         HttpResponse response = request.send();
@@ -1239,7 +1319,7 @@ public class RegistryManager
     }
 
     /**
-     * Remove configuration
+     * Send remove configuration request and verify response
      *
      * @param configurationId The configuration to be removed
      * @throws IOException This exception is thrown if the IO operation failed
@@ -1247,10 +1327,50 @@ public class RegistryManager
      */
     public void removeConfiguration(String configurationId) throws IOException, IotHubException
     {
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_085: [The function shall call removeDeviceOperation with * as the etag]
+        removeConfigurationOperation(configurationId, "*");
+    }
+
+    /**
+     * Send remove configuration request and verify response
+     *
+     * @param config The configuration to be removed
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     * @throws IllegalArgumentException This exception is thrown if the input configuration is null
+     */
+    public void removeConfiguration(Configuration config) throws IOException, IotHubException, IllegalArgumentException
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_082: [The function shall throw IllegalArgumentException if the input module is null]
+        if (config == null)
+        {
+            throw new IllegalArgumentException("configuration cannot be null or empty");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_085: [The function shall use the configuration object's etag as the etag for the configuration to be removed]
+        removeConfigurationOperation(config.getId(), config.getEtag());
+    }
+
+    /**
+     * Send remove configuration request and verify response
+     *
+     * @param configurationId The configuration to be removed
+     * @param etag The etag of the configuration to be removed. "*" as wildcard
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    private void removeConfigurationOperation(String configurationId, String etag) throws IOException, IotHubException
+    {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_073: [The function shall throw IllegalArgumentException if the input string is null or empty]
         if (Tools.isNullOrEmpty(configurationId))
         {
             throw new IllegalArgumentException("configurationId cannot be null or empty");
+        }
+
+        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_080: [The function shall throw IllegalArgumentException if the input etag is null or empty]
+        if (Tools.isNullOrEmpty(etag))
+        {
+            throw new IllegalArgumentException("etag cannot be null or empty");
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_074: [The function shall get the URL for the configuration]
@@ -1263,7 +1383,7 @@ public class RegistryManager
         HttpRequest request = new HttpRequest(url, HttpMethod.DELETE, new byte[0]);
         request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
         request.setHeaderField("authorization", sasToken);
-        request.setHeaderField("If-Match", "*");
+        request.setHeaderField("If-Match", etag);
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_077: [The function shall send the created request and get the response]
         HttpResponse response = request.send();

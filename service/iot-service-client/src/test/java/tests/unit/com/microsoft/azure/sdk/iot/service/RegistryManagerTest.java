@@ -855,18 +855,115 @@ public class RegistryManagerTest
         completableFuture.get();
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_046: [The function shall throw IllegalArgumentException if the input string is null or empty]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_081: [The function shall throw IllegalArgumentException if the input device is null]
     // Assert
     @Test (expected = IllegalArgumentException.class)
-    public void removeDevice_input_null() throws Exception
+    public void removeDevice_input_null_Device() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
-        registryManager.removeDevice(null);
+        Device device = null;
+        registryManager.removeDevice(device);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_046: [The function shall throw IllegalArgumentException if the input string is null or empty]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_087: [The function shall throw IllegalArgumentException if the input etag is null or empty]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void removeDevice_input_Device_null_etag() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                device.getDeviceId();
+                result = "somedevice";
+                device.geteTag();
+                result = null;
+            }
+        };
+
+        registryManager.removeDevice(device);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_087: [The function shall throw IllegalArgumentException if the input etag is null or empty]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void removeDevice_input_Device_empty_etag() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                device.getDeviceId();
+                result = "somedevice";
+                device.geteTag();
+                result = "";
+            }
+        };
+
+        registryManager.removeDevice(device);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_047: [The function shall get the URL for the device]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_048: [The function shall create a new SAS token for the device]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_049: [The function shall create a new HttpRequest for removing the device from IotHub]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_050: [The function shall send the created request and get the response]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_051: [The function shall verify the response status and throw proper Exception]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_084: [The function shall call provide device object's etag as with etag of device to be removed]
+    @Test
+    public void removeDevice_with_etag() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        String deviceId = "somedevice";
+        String etag = "someetag";
+
+        commonExpectations(connectionString, deviceId);
+
+        new NonStrictExpectations()
+        {
+            {
+                device.getDeviceId();
+                result = deviceId;
+                device.geteTag();
+                result = etag;
+            }
+        };
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        registryManager.removeDevice(device);
+
+        new VerificationsInOrder()
+        {
+            {
+                iotHubConnectionString.getUrlDevice(deviceId);
+                times = 1;
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0]);
+                times = 1;
+                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setHeaderField("authorization", anyString);
+                mockHttpRequest.setHeaderField("If-Match", etag);
+            }
+        };
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_046: [The function shall throw IllegalArgumentException if the input deviceId is null or empty]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void removeDevice_input_null_String() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+
+        String deviceId = null;
+        registryManager.removeDevice(deviceId);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_046: [The function shall throw IllegalArgumentException if the input deviceId is null or empty]
     // Assert
     @Test (expected = IllegalArgumentException.class)
     public void removeDevice_input_empty() throws Exception
@@ -882,6 +979,7 @@ public class RegistryManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_049: [The function shall create a new HttpRequest for removing the device from IotHub]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_050: [The function shall send the created request and get the response]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_051: [The function shall verify the response status and throw proper Exception]
+    // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_087: [The function shall use * as the etag]
     @Test
     public void removeDevice_good_case() throws Exception
     {
@@ -1600,6 +1698,64 @@ public class RegistryManagerTest
         };
     }
 
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_082: [The function shall throw IllegalArgumentException if the input module is null]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void removeModule_input_null_Module() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+
+        Module module = null;
+        registryManager.removeModule(module);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_036: [The function shall get the URL for the module]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_037: [The function shall create a new SAS token for the device]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_038: [The function shall create a new HttpRequest for removing the device from IotHub]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_039: [The function shall send the created request and get the response]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_040: [The function shall verify the response status and throw proper Exception]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_083: [The function shall use the module's object etag as the etag module to be remove]
+    @Test
+    public void removeModule_with_etag() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        String deviceId = "somedevice";
+        String moduleId = "somemodule";
+        String etag = "someetag";
+
+        commonModuleExpectations(connectionString, deviceId, moduleId);
+
+        new NonStrictExpectations()
+        {
+            {
+                module.getDeviceId();
+                result = deviceId;
+                module.getId();
+                result = moduleId;
+                module.geteTag();
+                result = etag;
+            }
+        };
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        registryManager.removeModule(module);
+
+        new VerificationsInOrder()
+        {
+            {
+                iotHubConnectionString.getUrlModule(deviceId, moduleId);
+                times = 1;
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0]);
+                times = 1;
+                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setHeaderField("authorization", anyString);
+                mockHttpRequest.setHeaderField("If-Match", etag);
+            }
+        };
+    }
+
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_034: [The function shall throw IllegalArgumentException if the deviceId is null or empty]
     // Assert
     @Test (expected = IllegalArgumentException.class)
@@ -1644,11 +1800,58 @@ public class RegistryManagerTest
         registryManager.removeModule("somedevice", "");
     }
 
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_078: [The function shall throw IllegalArgumentException if the etag is null or empty]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void removeModule_Module_etag_null() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                module.getDeviceId();
+                result = "somedevice";
+                module.getId();
+                result = "somemodule";
+                module.geteTag();
+                result = null;
+            }
+        };
+
+        registryManager.removeModule(module);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_078: [The function shall throw IllegalArgumentException if the etag is null or empty]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void removeModule_Module_etag_empty() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                module.getDeviceId();
+                result = "somedevice";
+                module.getId();
+                result = "somemodule";
+                module.geteTag();
+                result = "";
+            }
+        };
+
+        registryManager.removeModule(module);
+    }
+
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_036: [The function shall get the URL for the module]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_037: [The function shall create a new SAS token for the device]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_038: [The function shall create a new HttpRequest for removing the device from IotHub]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_039: [The function shall send the created request and get the response]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_040: [The function shall verify the response status and throw proper Exception]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_086: [The function shall use * as the etag]
     @Test
     public void removeModule_good_case() throws Exception
     {
@@ -1881,6 +2084,59 @@ public class RegistryManagerTest
         };
     }
 
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_083: [The function shall throw IllegalArgumentException if the input configuration is null]
+    @Test (expected = IllegalArgumentException.class)
+    public void removeConfiguration_input_Configuration_Null() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+
+        Configuration config = null;
+        registryManager.removeConfiguration(config);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_087: [The function shall throw IllegalArgumentException if the input etag is null or empty]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void removeDevice_input_Configuration_null_etag() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                config.getId();
+                result = "someconfig";
+                device.geteTag();
+                result = null;
+            }
+        };
+
+        registryManager.removeConfiguration(config);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_087: [The function shall throw IllegalArgumentException if the input etag is null or empty]
+    // Assert
+    @Test (expected = IllegalArgumentException.class)
+    public void removeDevice_input_Configuration_empty_etag() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+
+        new NonStrictExpectations()
+        {
+            {
+                config.getId();
+                result = "someconfig";
+                config.getEtag();
+                result = "";
+            }
+        };
+
+        registryManager.removeConfiguration(config);
+    }
+
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_073: [The function shall throw IllegalArgumentException if the input string is null or empty]
     // Assert
     @Test (expected = IllegalArgumentException.class)
@@ -1889,7 +2145,7 @@ public class RegistryManagerTest
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
-        registryManager.removeConfiguration(null);
+        registryManager.removeConfiguration((String)null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_073: [The function shall throw IllegalArgumentException if the input string is null or empty]
@@ -1908,6 +2164,49 @@ public class RegistryManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_076: [The function shall create a new HttpRequest for removing the configuration from IotHub]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_077: [The function shall send the created request and get the response]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_078: [The function shall verify the response status and throw proper Exception]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_084: [The function shall call provide device object's etag as with etag of device to be removed]
+    @Test
+    public void removeConfiguration_with_etag() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        String configId = "someconfig";
+        String etag = "someetag";
+
+        commonExpectations(connectionString, configId);
+
+        new NonStrictExpectations()
+        {
+            {
+                config.getId();
+                result = configId;
+                config.getEtag();
+                result = etag;
+            }
+        };
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        registryManager.removeConfiguration(config);
+
+        new VerificationsInOrder()
+        {
+            {
+                iotHubConnectionString.getUrlConfiguration(configId);
+                times = 1;
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0]);
+                times = 1;
+                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setHeaderField("authorization", anyString);
+                mockHttpRequest.setHeaderField("If-Match", etag);
+            }
+        };
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_074: [The function shall get the URL for the configuration]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_075: [The function shall create a new SAS token for the configuration]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_076: [The function shall create a new HttpRequest for removing the configuration from IotHub]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_077: [The function shall send the created request and get the response]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_078: [The function shall verify the response status and throw proper Exception]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_085: [The function shall call removeDeviceOperation with * as the etag]
     @Test
     public void removeConfiguration_good_case() throws Exception
     {
