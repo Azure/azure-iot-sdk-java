@@ -6,6 +6,9 @@
 package com.microsoft.azure.sdk.iot.device;
 
 
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -105,11 +108,22 @@ public class ModuleClient extends InternalClient
         commonConstructorVerifications(protocol, this.getConfig());
     }
 
+    /**
+     * Create a module client instance from your environment variables
+     * @return the created module client instance
+     * @throws ModuleClientException if the module client cannot be created
+     */
     public static ModuleClient createFromEnvironment() throws ModuleClientException
     {
         return createFromEnvironment(IotHubClientProtocol.AMQPS);
     }
 
+    /**
+     * Create a module client instance from your environment variables
+     * @param protocol the protocol the module client instance will use
+     * @return the created module client instance
+     * @throws ModuleClientException if the module client cannot be created
+     */
     public static ModuleClient createFromEnvironment(IotHubClientProtocol protocol) throws ModuleClientException
     {
         Map<String, String> envVariables = System.getenv();
@@ -224,7 +238,7 @@ public class ModuleClient extends InternalClient
      * @param callbackContext the context to be included in the callback when fired
      * @throws IllegalArgumentException if the provided outputName is null or empty
      */
-    public void sendEventAsync(String outputName, Message message, IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException
+    public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext, String outputName) throws IllegalArgumentException
     {
         if (outputName == null || outputName.isEmpty())
         {
@@ -238,6 +252,71 @@ public class ModuleClient extends InternalClient
 
         //Codes_SRS_MODULECLIENT_34_003: [This function shall invoke super.sendEventAsync(message, callback, callbackContext).]
         super.sendEventAsync(message, callback, callbackContext);
+    }
+
+    /**
+     * Retrieves the twin's latest desired properties
+     * @throws IOException if the iothub cannot be reached
+     */
+    public void getTwin() throws IOException
+    {
+        this.getTwinInternal();
+    }
+
+    /**
+     * Starts the device twin.
+     *
+     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
+     * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     *
+     * @throws IllegalArgumentException if the callback is {@code null}
+     * @throws UnsupportedOperationException if called more than once on the same device
+     * @throws IOException if called when client is not opened
+     */
+    public void startTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
+                          PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+            throws IOException, IllegalArgumentException, UnsupportedOperationException
+    {
+        this.startTwinInternal(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, genericPropertyCallBack, genericPropertyCallBackContext);
+    }
+
+    /**
+     * Starts the device twin.
+     *
+     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
+     * @param genericPropertyCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     *
+     * @throws IllegalArgumentException if the callback is {@code null}
+     * @throws UnsupportedOperationException if called more than once on the same device
+     * @throws IOException if called when client is not opened
+     */
+    public void startTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
+                          TwinPropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+            throws IOException, IllegalArgumentException, UnsupportedOperationException
+    {
+        this.startTwinInternal(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, genericPropertyCallBack, genericPropertyCallBackContext);
+    }
+
+    /**
+     * Subscribes to method invocations on this module. This does not include method invocations on the device the module belongs to
+     *
+     * @param methodCallback Callback on which device methods shall be invoked. Cannot be {@code null}.
+     * @param methodCallbackContext Context for device method callback. Can be {@code null}.
+     * @param methodStatusCallback Callback for providing IotHub status for device methods. Cannot be {@code null}.
+     * @param methodStatusCallbackContext Context for device method status callback. Can be {@code null}.
+     *
+     * @throws IOException if called when client is not opened.
+     * @throws IllegalArgumentException if either callback are null.
+     */
+    public void subscribeToMethod(DeviceMethodCallback methodCallback, Object methodCallbackContext,
+                                        IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
+            throws IOException, IllegalArgumentException
+    {
+        this.subscribeToMethodsInternal(methodCallback, methodCallbackContext, methodStatusCallback, methodStatusCallbackContext);
     }
 
     /**
@@ -255,7 +334,7 @@ public class ModuleClient extends InternalClient
      */
     public ModuleClient setMessageCallback(MessageCallback callback, Object context)
     {
-        this.setInternalMessageCallback(callback, context);
+        this.setMessageCallbackInternal(callback, context);
         return this;
     }
 

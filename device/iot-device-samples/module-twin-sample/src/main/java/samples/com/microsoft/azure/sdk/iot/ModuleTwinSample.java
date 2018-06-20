@@ -155,7 +155,7 @@ public class ModuleTwinSample
             System.out.println("Start device Twin and get remaining properties...");
             // Properties already set in the Service will shows up in the generic onProperty callback, with value and version.
             Succeed.set(false);
-            client.startDeviceTwin(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
+            client.startTwin(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
             do
             {
                 Thread.sleep(1000);
@@ -176,7 +176,7 @@ public class ModuleTwinSample
             client.subscribeToTwinDesiredProperties(desiredProperties);
 
             System.out.println("Get device Twin...");
-            client.getDeviceTwin(); // For each desired property in the Service, the SDK will call the appropriate callback with the value and version.
+            client.getTwin(); // For each desired property in the Service, the SDK will call the appropriate callback with the value and version.
 
             System.out.println("Update reported properties...");
             Set<Property> reportProperties = new HashSet<Property>()

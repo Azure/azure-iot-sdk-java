@@ -142,7 +142,7 @@ public class ModuleMethodSample
 
             System.out.println("Opened connection to IoT Hub.");
 
-            client.subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+            client.subscribeToMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
 
             System.out.println("Subscribed to device method");
 

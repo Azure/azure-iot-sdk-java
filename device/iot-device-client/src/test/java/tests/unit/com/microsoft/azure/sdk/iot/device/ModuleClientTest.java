@@ -157,7 +157,7 @@ public class ModuleClientTest
         ModuleClient client = new ModuleClient("some connection string", IotHubClientProtocol.MQTT);
 
         //act
-        client.sendEventAsync("", mockedMessage, mockedIotHubEventCallback, new Object());
+        client.sendEventAsync(mockedMessage, mockedIotHubEventCallback, new Object(), "");
     }
 
     //Tests_SRS_MODULECLIENT_34_001: [If the provided outputName is null or empty, this function shall throw an IllegalArgumentException.]
@@ -169,7 +169,7 @@ public class ModuleClientTest
         ModuleClient client = new ModuleClient("some connection string", IotHubClientProtocol.MQTT);
 
         //act
-        client.sendEventAsync(null, mockedMessage, mockedIotHubEventCallback, new Object());
+        client.sendEventAsync(mockedMessage, mockedIotHubEventCallback, new Object(), null);
     }
 
     //Tests_SRS_MODULECLIENT_34_002: [This function shall set the provided message with the provided outputName, device id, and module id properties.]
@@ -196,7 +196,7 @@ public class ModuleClientTest
         };
 
         //act
-        client.sendEventAsync(expectedOutputName, mockedMessage, mockedIotHubEventCallback, new Object());
+        client.sendEventAsync(mockedMessage, mockedIotHubEventCallback, new Object(), expectedOutputName);
 
         //assert
         new Verifications()

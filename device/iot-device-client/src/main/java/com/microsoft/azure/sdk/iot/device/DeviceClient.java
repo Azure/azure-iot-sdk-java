@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -118,7 +119,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * RFC 3986 or if the provided {@code connString} is for an x509 authenticated device
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      */
-    public DeviceClient(String connString, TransportClient transportClient) throws URISyntaxException
+    public DeviceClient(String connString, TransportClient transportClient) throws URISyntaxException, IllegalArgumentException
     {
         // Codes_SRS_DEVICECLIENT_12_009: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
         this.config = new DeviceClientConfig(new IotHubConnectionString(connString));
@@ -168,7 +169,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * RFC 3986 or if the provided {@code connString} is for an x509 authenticated device
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      */
-    public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException
+    public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException, IllegalArgumentException
     {
         // Codes_SRS_DEVICECLIENT_21_001: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
         super(new IotHubConnectionString(connString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
@@ -233,9 +234,9 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @throws IllegalStateException if the callback is set after the client is
      * closed.
      */
-    public DeviceClient setMessageCallback(MessageCallback callback, Object context)
+    public DeviceClient setMessageCallback(MessageCallback callback, Object context) throws IllegalArgumentException
     {
-        this.setInternalMessageCallback(callback, context);
+        this.setMessageCallbackInternal(callback, context);
         return this;
     }
 
@@ -426,6 +427,90 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
+     * Retrieves the twin's latest desired properties
+     * @throws IOException if the iothub cannot be reached
+     */
+    public void getDeviceTwin() throws IOException
+    {
+        this.getTwinInternal();
+    }
+
+    /**
+     * Starts the device twin.
+     *
+     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
+     * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     *
+     * @throws IllegalArgumentException if the callback is {@code null}
+     * @throws UnsupportedOperationException if called more than once on the same device
+     * @throws IOException if called when client is not opened
+     */
+    public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
+                                        PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+            throws IOException, IllegalArgumentException, UnsupportedOperationException
+    {
+        this.startTwinInternal(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, genericPropertyCallBack, genericPropertyCallBackContext);
+    }
+
+    /**
+     * Starts the device twin.
+     *
+     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
+     * @param genericPropertyCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     *
+     * @throws IllegalArgumentException if the callback is {@code null}
+     * @throws UnsupportedOperationException if called more than once on the same device
+     * @throws IOException if called when client is not opened
+     */
+    public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
+                                 TwinPropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+            throws IOException, IllegalArgumentException, UnsupportedOperationException
+    {
+        this.startTwinInternal(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, genericPropertyCallBack, genericPropertyCallBackContext);
+    }
+
+    /**
+     * Registers a callback to be executed whenever the connection to the device is lost or established.
+     * @deprecated as of release 1.10.0 by {@link #registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)}
+     * @param callback the callback to be called.
+     * @param callbackContext a context to be passed to the callback. Can be
+     * {@code null} if no callback is provided.
+     * @throws IllegalArgumentException if the provided callback is null
+     */
+    @Deprecated
+    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext) throws IllegalArgumentException
+    {
+        if (null == callback)
+        {
+            throw new IllegalArgumentException("Callback object cannot be null");
+        }
+
+        this.deviceIO.registerConnectionStateCallback(callback, callbackContext);
+    }
+
+    /**
+     * Subscribes to device methods
+     *
+     * @param deviceMethodCallback Callback on which device methods shall be invoked. Cannot be {@code null}.
+     * @param deviceMethodCallbackContext Context for device method callback. Can be {@code null}.
+     * @param deviceMethodStatusCallback Callback for providing IotHub status for device methods. Cannot be {@code null}.
+     * @param deviceMethodStatusCallbackContext Context for device method status callback. Can be {@code null}.
+     *
+     * @throws IOException if called when client is not opened.
+     * @throws IllegalArgumentException if either callback are null.
+     */
+    public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext,
+                                        IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext)
+            throws IOException, IllegalArgumentException
+    {
+        this.subscribeToMethodsInternal(deviceMethodCallback, deviceMethodCallbackContext, deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
+    }
+
+    /**
      * Sets a runtime option identified by parameter {@code optionName}
      * to {@code value}.
      *
@@ -449,7 +534,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @param value an object of the appropriate type for the option's value
      * @throws IllegalArgumentException if the provided optionName is null
      */
-    public void setOption(String optionName, Object value)
+    public void setOption(String optionName, Object value) throws IllegalArgumentException
     {
         if (optionName == null)
         {
@@ -538,7 +623,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     @Override
-    void setOption_SetSASTokenExpiryTime(Object value)
+    void setOption_SetSASTokenExpiryTime(Object value) throws IllegalArgumentException
     {
         logger.LogInfo("Setting SASTokenExpiryTime as %s seconds, method name is %s ", value, logger.getMethodName());
 
