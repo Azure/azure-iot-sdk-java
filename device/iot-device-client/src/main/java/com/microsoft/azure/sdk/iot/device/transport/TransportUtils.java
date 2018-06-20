@@ -7,7 +7,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 public class TransportUtils
 {
-    public static String IOTHUB_API_VERSION = "2017-11-08-preview";
+    public static String IOTHUB_API_VERSION = "2018-06-30";
 
     private static final String JAVA_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.iot-device-client";
     private static final String CLIENT_VERSION = "1.11.2";
