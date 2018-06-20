@@ -388,8 +388,8 @@ public class Configuration
         if (parser.getMetrics() != null)
         {
             this.metrics = new ConfigurationMetrics();
-            this.metrics.queries = parser.getSystemMetrics().getQueries();
-            this.metrics.results = parser.getSystemMetrics().getResults();
+            this.metrics.queries = parser.getMetrics().getQueries();
+            this.metrics.results = parser.getMetrics().getResults();
         }
     }
 }
