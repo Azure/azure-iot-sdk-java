@@ -14,10 +14,26 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /** Manages configuration on IotHub - CRUD operations */
 public class ConfigurationManangerSample
 {
+    static final HashMap<String, Object> DEVICE_CONTENT_SAMPLE = new HashMap<String, Object>()
+    {
+        {
+            put("properties.desired.chiller-water", new HashMap<String, Object>()
+                    {
+                        {
+                            put("temperature", 66);
+                            put("pressure", 28);
+                        }
+                    }
+            );
+        }
+    };
+
     /**
      * A simple sample for doing CRUD operations
      * @param args
@@ -28,17 +44,29 @@ public class ConfigurationManangerSample
     {
         System.out.println("Starting sample...");
 
+        System.out.println("Get All Configuration started");
+        GetAllConfiguration();
+        System.out.println("Get All Configuration finished");
+
+        System.out.println("=================================");
+
         System.out.println("Add Configuration started");
         AddConfiguration();
         System.out.println("Add Configuration finished");
+
+        System.out.println("=================================");
 
         System.out.println("Get Configuration started");
         Configuration config = GetConfiguration();
         System.out.println("Get Configuration finished");
 
+        System.out.println("=================================");
+
         System.out.println("Update Device started");
         UpdateConfiguration(config);
         System.out.println("Update Device finished");
+
+        System.out.println("=================================");
 
         System.out.println("Remove Device started");
         RemoveConfiguration();
@@ -47,63 +75,50 @@ public class ConfigurationManangerSample
         System.out.println("Shutting down sample...");
     }
 
+    private static void GetAllConfiguration() throws Exception
+    {
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+
+        try
+        {
+            List<Configuration> configList = registryManager.getConfigurations(20);
+            System.out.println(configList.size() + " Configurations found");
+
+            for (int i = 0; i < configList.size(); i++)
+            {
+                Configuration config = configList.get(i);
+                System.out.println("Configuration Id: " + config.getId());
+            }
+        }
+        catch (IotHubException iote)
+        {
+            iote.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     private static void AddConfiguration() throws Exception
     {
-        final HashMap<String, HashMap<String, Object>> PROPERTIES_SAMPLE = new HashMap<String, HashMap<String, Object>>()
-        {
-            {
-                put("fakeModule", new HashMap<String, Object>()
-                {
-                    {
-                        put("properties.desired", new HashMap<String, Object>()
-                        {
-                            {
-                                put("prop1", "foo");
-                            }
-                        });
-                    }
-                });
-            }
-        };
-
-        final HashMap<String, Object> DEVICE_CONTENT_SAMPLE = new HashMap<String, Object>()
-        {
-            {
-                put("properties.desired.deviceContent_key", new HashMap<String, Object>()
-                        {
-                            {
-                                put("p1", new HashMap<String, Object>()
-                                        {{
-                                            put("p2", new HashMap<String,String>()
-                                            {{
-                                                put("new_key_value", "value_1");
-                                            }});
-                                        }}
-                                );
-
-                            }
-                        }
-                );
-
-            }
-        };
-
         RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
 
         ConfigurationContent content = new ConfigurationContent();
-        //content.setModulesContent(PROPERTIES_SAMPLE);
         content.setDeviceContent(DEVICE_CONTENT_SAMPLE);
 
         Configuration config = new Configuration(SampleUtils.configurationId);
         config.setContent(content);
-        config.setTargetCondition("");
-        config.setPriority(0);
+        config.getMetrics().setQueries(new HashMap<String, String>(){{put("waterSettingsPending",
+                "SELECT deviceId FROM devices WHERE properties.reported.chillerWaterSettings.status=\'pending\'");}});
+        config.setTargetCondition("properties.reported.chillerProperties.model=\'4000x\'");
+        config.setPriority(20);
 
         try
         {
             config = registryManager.addConfiguration(config);
-
-            System.out.println("Device created: " + config.getId());
+            System.out.println("Add configuration " + config.getId() + " succeeded.");
+            printConfiguration(config);
         }
         catch (IotHubException iote)
         {
@@ -125,10 +140,7 @@ public class ConfigurationManangerSample
         try
         {
             returnConfig = registryManager.getConfiguration(SampleUtils.configurationId);
-
-            System.out.println("Configuration: " + returnConfig.getId());
-            System.out.println("Configuration schema version: " + returnConfig.getSchemaVersion());
-            System.out.println("Configuration etag: " + returnConfig.getEtag());
+            printConfiguration(returnConfig);
         }
         catch (IotHubException iote)
         {
@@ -152,9 +164,7 @@ public class ConfigurationManangerSample
         try
         {
             config = registryManager.updateConfiguration(config);
-
-            System.out.println("Configuration updated: " + config.getId());
-            System.out.println("Device primary key: " + config.getPriority());
+            printConfiguration(config);
         }
         catch (IotHubException iote)
         {
@@ -187,5 +197,94 @@ public class ConfigurationManangerSample
         }
 
         registryManager.close();
+    }
+
+    private static void printConfiguration(Configuration config)
+    {
+        System.out.println("Configuration: " + config.getId());
+        System.out.println("  Etag: " + config.getEtag());
+
+        Map<String, String> queries = config.getMetrics().getQueries();
+        System.out.println("  Metric.Queries: ");
+        if (queries != null)
+        {
+            for (Map.Entry<String, String> entry : queries.entrySet())
+            {
+                String key = entry.getKey().toString();
+                String val = entry.getValue();
+                System.out.println("    " + key + " : " + val);
+            }
+        }
+
+        Map<String, Long> results = config.getMetrics().getResults();
+        System.out.println("  Metric.Results: ");
+        if (results != null)
+        {
+            for (Map.Entry<String, Long> entry : results.entrySet())
+            {
+                String key = entry.getKey().toString();
+                Long val = entry.getValue();
+                System.out.println("    " + key + " : " + val);
+            }
+        }
+
+        Map<String, String> squeries = config.getSystemMetrics().getQueries();
+        System.out.println("  SystemMetric.Queries: ");
+        if (squeries != null)
+        {
+            for (Map.Entry<String, String> entry : squeries.entrySet())
+            {
+                String key = entry.getKey().toString();
+                String val = entry.getValue();
+                System.out.println("    " + key + " : " + val);
+            }
+        }
+
+        Map<String, Long> sresults = config.getSystemMetrics().getResults();
+        System.out.println("  SystemMetric.Results: ");
+        if (sresults != null)
+        {
+            for (Map.Entry<String, Long> entry : sresults.entrySet())
+            {
+                String key = entry.getKey().toString();
+                Long val = entry.getValue();
+                System.out.println("    " + key + " : " + val);
+            }
+        }
+
+        System.out.println("  Target Condition: " + config.getTargetCondition());
+        System.out.println("  Last Updated Time: " + config.getLastUpdatedTimeUtc());
+        System.out.println("  Created Time UTC: " + config.getCreatedTimeUtc());
+        System.out.println("  Priority: " + config.getPriority());
+
+        Map<String, Object> dc = config.getContent().getDeviceContent();
+        System.out.println("  Content.DeviceContent: ");
+        if (dc != null)
+        {
+            for (Map.Entry<String, Object> entry : dc.entrySet())
+            {
+                String key = entry.getKey();
+                Object val = entry.getValue();
+                System.out.println("    " + key + " : " + val.toString());
+            }
+        }
+
+        Map<String, Map<String, Object>> mc = config.getContent().getModulesContent();
+        System.out.println("  Content.ModuleContent: ");
+        if (mc != null)
+        {
+            for (Map.Entry<String, Map<String, Object>> entry : mc.entrySet())
+            {
+                String key = entry.getKey();
+                System.out.println("    " + key + " : ");
+                Map<String, Object> innermap = entry.getValue();
+                for (Map.Entry<String, Object> innerEntry : innermap.entrySet())
+                {
+                    String innerKey = entry.getKey();
+                    Object innerVal = entry.getValue();
+                    System.out.println("        " + innerKey + " : " + innerVal.toString());
+                }
+            }
+        }
     }
 }

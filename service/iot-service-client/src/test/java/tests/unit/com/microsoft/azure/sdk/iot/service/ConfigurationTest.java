@@ -11,6 +11,7 @@ import mockit.Mocked;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -131,9 +132,9 @@ public class ConfigurationTest
         assertEquals(expectedLabels, parser.getLabels());
     }
 
-    //Tests_SRS_SERVICE_SDK_JAVA_BASEDEVICE_34_014: [This constructor shall create a new Device object using the values within the provided parser.]
+    //Tests_SRS_SERVICE_SDK_JAVA_CONFIGURATION_28_005: [This constructor shall create a new Configuration object using the values within the provided parser.]
     @Test
-    public void conversionFromDeviceParserWithCertificateAuthorityAuthentication()
+    public void conversionFromConfigurationParser()
     {
         // arrange
         String expectedConfigId = "configuration";
@@ -141,7 +142,10 @@ public class ConfigurationTest
         String expectedETag = "1234";
         String expectedTargetCondition = "*";
         Integer expectedPriority = 100;
-        HashMap<String, String> expectedLabels = new HashMap<String, String>(){{put("label1","val1");}};
+        HashMap<String, String> expectedLabels = new HashMap<String, String>()
+        {{
+            put("label1", "val1");
+        }};
 
         // arrange
         ConfigurationParser parserCA = new ConfigurationParser();
@@ -151,9 +155,29 @@ public class ConfigurationTest
         parserCA.setTargetCondition(expectedTargetCondition);
         parserCA.setPriority(expectedPriority);
         parserCA.setLabels(expectedLabels);
+        ConfigurationMetricsParser parserMetric = new ConfigurationMetricsParser();
+        parserMetric.setQueries(new HashMap<String, String>()
+        {{
+            put("queryKey", "queryVal");
+        }});
+        parserMetric.setResults(new HashMap<String, Long>()
+        {{
+            put("resultKey", new Long(100));
+        }});
+        parserCA.setMetrics(parserMetric);
+        ConfigurationMetricsParser parserSystemMetric = new ConfigurationMetricsParser();
+        parserSystemMetric.setQueries(new HashMap<String, String>()
+        {{
+            put("squeryKey", "squeryVal");
+        }});
+        parserSystemMetric.setResults(new HashMap<String, Long>()
+        {{
+            put("sresultKey", new Long(101));
+        }});
+        parserCA.setSystemMetrics(parserSystemMetric);
 
         // act
-        Configuration configurationCA = Deencapsulation.newInstance(Configuration.class, new Class[] { ConfigurationParser.class }, parserCA);
+        Configuration configurationCA = Deencapsulation.newInstance(Configuration.class, new Class[]{ConfigurationParser.class}, parserCA);
 
         // assert
         assertEquals(expectedConfigId, configurationCA.getId());
@@ -162,5 +186,10 @@ public class ConfigurationTest
         assertEquals(expectedTargetCondition, configurationCA.getTargetCondition());
         assertEquals(expectedPriority, configurationCA.getPriority());
         assertEquals(expectedLabels, parserCA.getLabels());
+        assertEquals(1, configurationCA.getMetrics().getQueries().size());
+        assertEquals("queryVal", configurationCA.getMetrics().getQueries().get("queryKey"));
+        assertEquals(new Long(100), configurationCA.getMetrics().getResults().get("resultKey"));
+        assertEquals("squeryVal", configurationCA.getSystemMetrics().getQueries().get("squeryKey"));
+        assertEquals(new Long(101), configurationCA.getSystemMetrics().getResults().get("sresultKey"));
     }
 }
