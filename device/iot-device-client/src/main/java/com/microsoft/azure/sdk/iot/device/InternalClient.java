@@ -30,8 +30,8 @@ public class InternalClient
     DeviceClientConfig config;
     DeviceIO deviceIO;
 
-    private DeviceTwin deviceTwin;
-    private DeviceMethod deviceMethod;
+    private DeviceTwin twin;
+    private DeviceMethod method;
 
     protected CustomLogger logger;
 
@@ -167,135 +167,6 @@ public class InternalClient
     }
 
     /**
-     * Starts the device twin.
-     *
-     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
-     * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
-     *
-     * @throws IllegalArgumentException if the callback is {@code null}
-     * @throws UnsupportedOperationException if called more than once on the same device
-     * @throws IOException if called when client is not opened
-     */
-    public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
-                                PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
-            throws IOException
-    {
-        if (!this.deviceIO.isOpen())
-        {
-            throw new IOException("Open the client connection before using it.");
-        }
-
-        if (deviceTwinStatusCallback == null || genericPropertyCallBack == null)
-        {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-        if (this.deviceTwin == null)
-        {
-            deviceTwin = new DeviceTwin(
-                    this.deviceIO,
-                    this.config,
-                    deviceTwinStatusCallback,
-                    deviceTwinStatusCallbackContext,
-                    genericPropertyCallBack,
-                    genericPropertyCallBackContext);
-
-            deviceTwin.getDeviceTwin();
-        }
-        else
-        {
-            throw new UnsupportedOperationException("You have already initialised twin");
-        }
-    }
-
-    /**
-     * Starts the device twin.
-     *
-     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
-     * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertyCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
-     *
-     * @throws IllegalArgumentException if the callback is {@code null}
-     * @throws UnsupportedOperationException if called more than once on the same device
-     * @throws IOException if called when client is not opened
-     */
-    public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
-                                TwinPropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
-            throws IOException
-    {
-        if (!this.deviceIO.isOpen())
-        {
-            //Codes_SRS_INTERNALCLIENT_34_081: [If device io has not been opened yet, this function shall throw an IOException.]
-            throw new IOException("Open the client connection before using it.");
-        }
-
-        if (deviceTwinStatusCallback == null || genericPropertyCallBack == null)
-        {
-            //Codes_SRS_INTERNALCLIENT_34_082: [If either callback is null, this function shall throw an IllegalArgumentException.]
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-        if (this.deviceTwin == null)
-        {
-            //Codes_SRS_INTERNALCLIENT_34_084: [This function shall initialize a DeviceTwin object and invoke getDeviceTwin on it.]
-            deviceTwin = new DeviceTwin(this.deviceIO, this.config, deviceTwinStatusCallback, deviceTwinStatusCallbackContext,
-                    genericPropertyCallBack, genericPropertyCallBackContext);
-            deviceTwin.getDeviceTwin();
-        }
-        else
-        {
-            //Codes_SRS_INTERNALCLIENT_34_083: [If either callback is null, this function shall throw an IllegalArgumentException.]
-            throw new UnsupportedOperationException("You have already initialised twin");
-        }
-    }
-
-    public void getDeviceTwin() throws IOException
-    {
-        if (this.deviceTwin == null)
-        {
-            //Codes_SRS_INTERNALCLIENT_21_040: [If the client has not started twin before calling this method, the function shall throw an IOException.]
-            throw new IOException("Start twin before using it");
-        }
-
-        if (!this.deviceIO.isOpen())
-        {
-
-            //Codes_SRS_INTERNALCLIENT_21_041: [If the client has not been open, the function shall throw an IOException.]
-            throw new IOException("Open the client connection before using it.");
-        }
-
-        //Codes_SRS_INTERNALCLIENT_21_042: [The function shall get all desired properties by calling getDeviceTwin.]
-        this.deviceTwin.getDeviceTwin();
-    }
-
-    /**
-     * Sets the message callback.
-     *
-     * @param callback the message callback. Can be {@code null}.
-     * @param context the context to be passed to the callback. Can be {@code null}.
-     *
-     * @return itself, for fluent setting.
-     *
-     * @throws IllegalArgumentException if the callback is {@code null} but a context is
-     * passed in.
-     * @throws IllegalStateException if the callback is set after the client is
-     * closed.
-     */
-    InternalClient setInternalMessageCallback(MessageCallback callback, Object context)
-    {
-        if (callback == null && context != null)
-        {
-            /* Codes_SRS_INTERNALCLIENT_11_014: [If the callback is null but the context is non-null, the function shall throw an IllegalArgumentException.] */
-            throw new IllegalArgumentException("Cannot give non-null context for a null callback.");
-        }
-
-        /* Codes_SRS_INTERNALCLIENT_11_013: [The function shall set the message callback, with its associated context.] */
-        this.config.setMessageCallback(callback, context);
-        return this;
-    }
-
-    /**
      * Subscribes to desired properties
      *
      * @param onDesiredPropertyChange the Map for desired properties and their corresponding callback and context. Can be {@code null}.
@@ -304,7 +175,7 @@ public class InternalClient
      */
     public void subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange) throws IOException
     {
-        if (this.deviceTwin == null)
+        if (this.twin == null)
         {
             //Codes_SRS_INTERNALCLIENT_25_029: [If the client has not started twin before calling this method, the function shall throw an IOException.]
             throw new IOException("Start twin before using it");
@@ -317,7 +188,7 @@ public class InternalClient
         }
 
         //Codes_SRS_INTERNALCLIENT_25_031: [This method shall subscribe to desired properties by calling subscribeDesiredPropertiesNotification on the twin object.]
-        this.deviceTwin.subscribeDesiredPropertiesNotification(onDesiredPropertyChange);
+        this.twin.subscribeDesiredPropertiesNotification(onDesiredPropertyChange);
     }
 
     /**
@@ -329,7 +200,7 @@ public class InternalClient
      */
     public void subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange) throws IOException
     {
-        if (this.deviceTwin == null)
+        if (this.twin == null)
         {
             //Codes_SRS_INTERNALCLIENT_34_087: [If the client has not started twin before calling this method, the function shall throw an IOException.]
             throw new IOException("Start twin before using it");
@@ -342,7 +213,7 @@ public class InternalClient
         }
 
         //Codes_SRS_INTERNALCLIENT_34_085: [This method shall subscribe to desired properties by calling subscribeDesiredPropertiesNotification on the twin object.]
-        this.deviceTwin.subscribeDesiredPropertiesTwinPropertyNotification(onDesiredPropertyChange);
+        this.twin.subscribeDesiredPropertiesTwinPropertyNotification(onDesiredPropertyChange);
     }
 
     /**
@@ -353,9 +224,9 @@ public class InternalClient
      * @throws IOException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty.
      */
-    public void sendReportedProperties(Set<Property> reportedProperties) throws IOException
+    public void sendReportedProperties(Set<Property> reportedProperties) throws IOException, IllegalArgumentException
     {
-        if (this.deviceTwin == null)
+        if (this.twin == null)
         {
             throw new IOException("Start twin before using it");
         }
@@ -370,7 +241,7 @@ public class InternalClient
             throw new IllegalArgumentException("Reported properties set cannot be null or empty.");
         }
 
-        this.deviceTwin.updateReportedProperties(reportedProperties);
+        this.twin.updateReportedProperties(reportedProperties);
     }
 
     /**
@@ -382,9 +253,9 @@ public class InternalClient
      * @throws IOException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty.
      */
-    public void sendReportedProperties(Set<Property> reportedProperties, int version) throws IOException
+    public void sendReportedProperties(Set<Property> reportedProperties, int version) throws IOException, IllegalArgumentException
     {
-        if (this.deviceTwin == null)
+        if (this.twin == null)
         {
             throw new IOException("Start twin before using it");
         }
@@ -404,58 +275,7 @@ public class InternalClient
             throw new IllegalArgumentException("Version cannot be null.");
         }
 
-        this.deviceTwin.updateReportedProperties(reportedProperties, version);
-    }
-
-    /**
-     * Subscribes to device methods
-     *
-     * @param deviceMethodCallback Callback on which device methods shall be invoked. Cannot be {@code null}.
-     * @param deviceMethodCallbackContext Context for device method callback. Can be {@code null}.
-     * @param deviceMethodStatusCallback Callback for providing IotHub status for device methods. Cannot be {@code null}.
-     * @param deviceMethodStatusCallbackContext Context for device method status callback. Can be {@code null}.
-     *
-     * @throws IOException if called when client is not opened.
-     * @throws IllegalArgumentException if either callback are null.
-     */
-    public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext,
-                                        IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext)
-            throws IOException
-    {
-        if (!this.deviceIO.isOpen())
-        {
-            throw new IOException("Open the client connection before using it.");
-        }
-
-        if (deviceMethodCallback == null || deviceMethodStatusCallback == null)
-        {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-
-        if (this.deviceMethod == null)
-        {
-            this.deviceMethod = new DeviceMethod(this.deviceIO, this.config, deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
-        }
-
-        this.deviceMethod.subscribeToDeviceMethod(deviceMethodCallback, deviceMethodCallbackContext);
-    }
-
-    /**
-     * Registers a callback to be executed whenever the connection to the device is lost or established.
-     * @deprecated as of release 1.10.0 by {@link #registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)}
-     * @param callback the callback to be called.
-     * @param callbackContext a context to be passed to the callback. Can be
-     * {@code null} if no callback is provided.
-     */
-    @Deprecated
-    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
-    {
-        if (null == callback)
-        {
-            throw new IllegalArgumentException("Callback object cannot be null");
-        }
-
-        this.deviceIO.registerConnectionStateCallback(callback, callbackContext);
+        this.twin.updateReportedProperties(reportedProperties, version);
     }
 
     /**
@@ -594,6 +414,171 @@ public class InternalClient
                 }
             }
         }
+    }
+
+    /**
+     * Starts the device twin.
+     *
+     * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
+     * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     *
+     * @throws IllegalArgumentException if the callback is {@code null}
+     * @throws UnsupportedOperationException if called more than once on the same device
+     * @throws IOException if called when client is not opened
+     */
+    void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
+                                 PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+            throws IOException, IllegalArgumentException, UnsupportedOperationException
+    {
+        if (!this.deviceIO.isOpen())
+        {
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        if (twinStatusCallback == null || genericPropertyCallBack == null)
+        {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+        if (this.twin == null)
+        {
+            twin = new DeviceTwin(
+                    this.deviceIO,
+                    this.config,
+                    twinStatusCallback,
+                    twinStatusCallbackContext,
+                    genericPropertyCallBack,
+                    genericPropertyCallBackContext);
+
+            twin.getDeviceTwin();
+        }
+        else
+        {
+            throw new UnsupportedOperationException("You have already initialised twin");
+        }
+    }
+
+    /**
+     * Starts the device twin.
+     *
+     * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
+     * @param genericPropertyCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     *
+     * @throws IllegalArgumentException if the callback is {@code null}
+     * @throws UnsupportedOperationException if called more than once on the same device
+     * @throws IOException if called when client is not opened
+     */
+    void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
+                                 TwinPropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+            throws IOException, IllegalArgumentException, UnsupportedOperationException
+    {
+        if (!this.deviceIO.isOpen())
+        {
+            //Codes_SRS_INTERNALCLIENT_34_081: [If device io has not been opened yet, this function shall throw an IOException.]
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        if (twinStatusCallback == null || genericPropertyCallBack == null)
+        {
+            //Codes_SRS_INTERNALCLIENT_34_082: [If either callback is null, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+        if (this.twin == null)
+        {
+            //Codes_SRS_INTERNALCLIENT_34_084: [This function shall initialize a DeviceTwin object and invoke getDeviceTwin on it.]
+            twin = new DeviceTwin(this.deviceIO, this.config, twinStatusCallback, twinStatusCallbackContext,
+                    genericPropertyCallBack, genericPropertyCallBackContext);
+            twin.getDeviceTwin();
+        }
+        else
+        {
+            //Codes_SRS_INTERNALCLIENT_34_083: [If either callback is null, this function shall throw an IllegalArgumentException.]
+            throw new UnsupportedOperationException("You have already initialised twin");
+        }
+    }
+
+    /**
+     * Get the current desired properties for this client
+     * @throws IOException if the iot hub cannot be reached
+     * @throws IOException if the twin has not been initialized yet
+     * @throws IOException if the client has not been opened yet
+     */
+    void getTwinInternal() throws IOException
+    {
+        if (this.twin == null)
+        {
+            //Codes_SRS_INTERNALCLIENT_21_040: [If the client has not started twin before calling this method, the function shall throw an IOException.]
+            throw new IOException("Start twin before using it");
+        }
+
+        if (!this.deviceIO.isOpen())
+        {
+
+            //Codes_SRS_INTERNALCLIENT_21_041: [If the client has not been open, the function shall throw an IOException.]
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        //Codes_SRS_INTERNALCLIENT_21_042: [The function shall get all desired properties by calling getDeviceTwin.]
+        this.twin.getDeviceTwin();
+    }
+
+    /**
+     * Sets the message callback.
+     *
+     * @param callback the message callback. Can be {@code null}.
+     * @param context the context to be passed to the callback. Can be {@code null}.
+     *
+     * @throws IllegalArgumentException if the callback is {@code null} but a context is
+     * passed in.
+     * @throws IllegalStateException if the callback is set after the client is
+     * closed.
+     */
+    void setMessageCallbackInternal(MessageCallback callback, Object context)
+    {
+        if (callback == null && context != null)
+        {
+            /* Codes_SRS_INTERNALCLIENT_11_014: [If the callback is null but the context is non-null, the function shall throw an IllegalArgumentException.] */
+            throw new IllegalArgumentException("Cannot give non-null context for a null callback.");
+        }
+
+        /* Codes_SRS_INTERNALCLIENT_11_013: [The function shall set the message callback, with its associated context.] */
+        this.config.setMessageCallback(callback, context);
+    }
+
+    /**
+     * Subscribes to methods
+     *
+     * @param methodCallback Callback on which methods shall be invoked. Cannot be {@code null}.
+     * @param methodCallbackContext Context for method callback. Can be {@code null}.
+     * @param methodStatusCallback Callback for providing IotHub status for methods. Cannot be {@code null}.
+     * @param methodStatusCallbackContext Context for method status callback. Can be {@code null}.
+     *
+     * @throws IOException if called when client is not opened.
+     * @throws IllegalArgumentException if either callback are null.
+     */
+    void subscribeToMethodsInternal(DeviceMethodCallback methodCallback, Object methodCallbackContext,
+                                              IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
+            throws IOException
+    {
+        if (!this.deviceIO.isOpen())
+        {
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        if (methodCallback == null || methodStatusCallback == null)
+        {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+
+        if (this.method == null)
+        {
+            this.method = new DeviceMethod(this.deviceIO, this.config, methodStatusCallback, methodStatusCallbackContext);
+        }
+
+        this.method.subscribeToDeviceMethod(methodCallback, methodCallbackContext);
     }
 
     /**
