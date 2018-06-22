@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
         <artifactId>iot-device-samples</artifactId>
-        <version>1.11.1</version>
+        <version>1.12.0</version>
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
