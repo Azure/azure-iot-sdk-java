@@ -24,8 +24,14 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
+import static junit.framework.TestCase.fail;
+
 public class ExportImportIT
 {
+    private static final long IMPORT_EXPORT_TEST_TIMEOUT = 3 * 60 * 1000; //3 minutes
+    private static final long IMPORT_JOB_TIMEOUT = 1 * 60 * 1000; //1 minute
+    private static final long EXPORT_JOB_TIMEOUT = 1 * 60 * 1000; //1 minute
+
     private static String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String storageAccountConnectionStringEnvVarName = "STORAGE_ACCOUNT_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
@@ -107,7 +113,7 @@ public class ExportImportIT
         }
     }
 
-    @Test
+    @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT)
     public void export_import_e2e() throws Exception
     {
         //Creating the list of devices to be created, then deleted
@@ -163,6 +169,7 @@ public class ExportImportIT
 
         JobProperties.JobStatus jobStatus;
 
+        long startTime = System.currentTimeMillis();
         while (true)
         {
             exportJob = registryManager.getJob(exportJob.getJobId());
@@ -171,6 +178,12 @@ public class ExportImportIT
             {
                 break;
             }
+
+            if (System.currentTimeMillis() - startTime > EXPORT_JOB_TIMEOUT)
+            {
+                fail("Timed out waiting for the export job to complete");
+            }
+
             Thread.sleep(100);
         }
 
@@ -236,6 +249,7 @@ public class ExportImportIT
         JobProperties importJob = registryManager.importDevices(getContainerSasUri(importContainer), getContainerSasUri(importContainer));
 
         // Waiting for the import job to complete
+        long startTime = System.currentTimeMillis();
         while (true)
         {
             importJob = registryManager.getJob(importJob.getJobId());
@@ -244,6 +258,12 @@ public class ExportImportIT
             {
                 break;
             }
+
+            if (System.currentTimeMillis() - startTime > IMPORT_JOB_TIMEOUT)
+            {
+                fail("Timed out waiting for the import job to complete");
+            }
+
             Thread.sleep(100);
         }
 
