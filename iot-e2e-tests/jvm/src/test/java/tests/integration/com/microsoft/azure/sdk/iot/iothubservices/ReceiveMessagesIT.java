@@ -108,8 +108,6 @@ public class ReceiveMessagesIT
         return Arrays.asList(
                 new Object[][]
                 {
-                    //TODO need service to fix mqtt topic string bug before these tests can be re-enabled for MQTT/MQTT_WS
-
                     //sas token
                     {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), HTTPS), HTTPS, device, SAS},
                     {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT), MQTT, device, SAS},
