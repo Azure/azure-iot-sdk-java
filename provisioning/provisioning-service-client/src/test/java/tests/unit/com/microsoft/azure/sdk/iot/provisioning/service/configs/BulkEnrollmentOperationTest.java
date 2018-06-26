@@ -35,7 +35,10 @@ public class BulkEnrollmentOperationTest
                     "          }\n" +
                     "        },\n" +
                     "        \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
-                    "        \"provisioningStatus\": \"enabled\"\n" +
+                    "        \"provisioningStatus\": \"enabled\",\n" +
+                    "        \"capabilities\": {\n" +
+                    "           \"iotEdge\": false\n" +
+                    "         }\n" +
                     "      }";
 
     private static final String VALID_JSON_ENROLLMENT_2 =
@@ -49,7 +52,10 @@ public class BulkEnrollmentOperationTest
                     "          }\n" +
                     "        },\n" +
                     "        \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
-                    "        \"provisioningStatus\": \"disabled\"\n" +
+                    "        \"provisioningStatus\": \"disabled\",\n" +
+                    "        \"capabilities\": {\n" +
+                    "           \"iotEdge\": false\n" +
+                    "         }\n" +
                     "      }";
 
     private static final String VALID_JSON_BULK =

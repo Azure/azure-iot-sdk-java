@@ -616,7 +616,11 @@ public class IndividualEnrollmentTest
                 "    }\n" +
                 "  },\n" +
                 "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
-                "  \"provisioningStatus\": \"enabled\"\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"capabilities\":" +
+                "    {" +
+                "        \"iotEdge\":false" +
+                "    }" +
                 "}";
 
         // act
@@ -665,7 +669,10 @@ public class IndividualEnrollmentTest
                 "    }\n" +
                 "  }," +
                 "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
-                "  \"provisioningStatus\": \"enabled\"\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"capabilities\": {\n" +
+                "    \"iotEdge\": false\n" +
+                "  }\n" +
                 "}";
 
         // act
@@ -714,7 +721,10 @@ public class IndividualEnrollmentTest
                 "    }\n" +
                 "  }," +
                 "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
-                "  \"provisioningStatus\": \"enabled\"\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"capabilities\": {\n" +
+                "    \"iotEdge\": false\n" +
+                "  }\n" +
                 "}";
 
         // act

@@ -11,7 +11,7 @@ public class DeviceCapabilities
     private static final String IOT_EDGE_NAME = "iotEdge";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(IOT_EDGE_NAME)
-    protected Boolean iotEdge;
+    protected Boolean iotEdge = false;
 
     /**
      * Setter for iotEdge Boolean

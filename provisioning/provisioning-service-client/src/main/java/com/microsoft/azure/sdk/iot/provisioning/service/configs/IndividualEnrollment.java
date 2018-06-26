@@ -145,7 +145,7 @@ public class IndividualEnrollment extends Serializable
     private static final String DEVICE_CAPABILITIES_TAG = "capabilities";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(DEVICE_CAPABILITIES_TAG)
-    private DeviceCapabilities capabilities;
+    private DeviceCapabilities capabilities = new DeviceCapabilities();
 
     /**
      * CONSTRUCTOR

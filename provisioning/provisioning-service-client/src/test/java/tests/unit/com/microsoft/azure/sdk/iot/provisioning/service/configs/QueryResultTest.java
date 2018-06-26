@@ -36,7 +36,8 @@ public class QueryResultTest
             "      \"iotHubHostName\": \"ContosoIotHub.azure-devices.net\",\n" +
             "      \"provisioningStatus\": \"enabled\",\n" +
             "      \"createdDateTimeUtc\": \"2017-09-19T15:45:53.3981876Z\",\n" +
-            "      \"lastUpdatedDateTimeUtc\": \"2017-09-19T15:45:53.3981876Z\"\n" +
+            "      \"lastUpdatedDateTimeUtc\": \"2017-09-19T15:45:53.3981876Z\",\n" +
+            "      \"capabilities\": {\n" + "        \"iotEdge\": false\n" + "      }" +
             "    }";
     private static final String VALID_ENROLLMENT_2 =
             "    {\n" +
