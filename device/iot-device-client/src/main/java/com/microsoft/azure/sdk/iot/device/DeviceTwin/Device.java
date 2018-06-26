@@ -20,6 +20,11 @@ abstract public class Device implements PropertyCallBack<String, Object>
         return reportedProp;
     }
 
+    /**
+     * Save the provided property. If there is a saved property with the same key as the key in the provided reportedProp, the old value will
+     * be overwritten by the new value
+     * @param reportedProp the key and value to save as a reported property
+     */
     public void setReportedProp(Property reportedProp)
     {
         if (reportedProp == null)
@@ -33,6 +38,21 @@ abstract public class Device implements PropertyCallBack<String, Object>
         **Codes_SRS_DEVICE_25_002: [**The function shall add the new property to the map.**]**
         **Codes_SRS_DEVICE_25_003: [**If the already existing property is altered and added then the this method shall replace the old one.**]**
          */
+        Property duplicateProperty = null;
+        for (Property property : this.reportedProp)
+        {
+            if (property.getKey().equalsIgnoreCase(reportedProp.getKey()))
+            {
+                //to avoid duplicate keys, the old value will be overridden
+                duplicateProperty = property;
+            }
+        }
+
+        if (duplicateProperty != null)
+        {
+            this.reportedProp.remove(duplicateProperty);
+        }
+
         this.reportedProp.add(reportedProp);
     }
 

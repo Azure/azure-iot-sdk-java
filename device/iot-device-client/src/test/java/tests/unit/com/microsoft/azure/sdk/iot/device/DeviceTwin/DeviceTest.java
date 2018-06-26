@@ -119,15 +119,15 @@ public class DeviceTest
         testDev.setReportedProp(test);
         test.setValue("RepValue2");
 
-        //act
-        testDev.setReportedProp(test);
+        Property test2 = new Property("RepProp1", "RepValue2");
 
+        //act
+        testDev.setReportedProp(test2);
 
         //assert
         HashSet<Property> testRepProp = testDev.getReportedProp();
-        assertTrue(testRepProp.contains(test));
+        assertEquals("RepValue2", testRepProp.iterator().next().getValue().toString());
         assertTrue(testRepProp.size() == 1);
-
     }
 
     /*
