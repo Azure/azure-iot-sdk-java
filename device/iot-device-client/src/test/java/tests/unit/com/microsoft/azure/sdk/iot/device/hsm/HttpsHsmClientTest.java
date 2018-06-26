@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.hsm.*;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.ErrorResponse;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
+import com.microsoft.azure.sdk.iot.device.hsm.parser.TrustBundleResponse;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
@@ -17,10 +18,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.junit.Test;
 
 import java.io.*;
@@ -68,6 +66,9 @@ public class HttpsHsmClientTest
 
     @Mocked
     OutputStream mockedOutputStream;
+
+    @Mocked
+    TrustBundleResponse mockedTrustBundleResponse;
 
     private static final String expectedBaseUrl = "some.base.url";
     private static final String expectedApiVersion = "1.2.3";
@@ -268,4 +269,112 @@ public class HttpsHsmClientTest
         };
     }
 
+    // Tests_SRS_HSMHTTPCLIENT_34_007: [If the provided api version is null or empty, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void getTrustBundleThrowsForNullApiVersion() throws URISyntaxException, TransportException, MalformedURLException, HsmException, UnsupportedEncodingException
+    {
+        //arrange
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
+
+        //act
+        client.getTrustBundle(null);
+    }
+
+    // Tests_SRS_HSMHTTPCLIENT_34_008: [This function shall build an http request with the url in the format
+    // <base url>/trust-bundle?api-version=<url encoded api version>.]
+    // Tests_SRS_HSMHTTPCLIENT_34_009: [This function shall send a GET http request to the built url.]
+    // Tests_SRS_HSMHTTPCLIENT_34_010: [If the response from the http request is 200, this function shall return the trust bundle response.]
+    @Test
+    public void getTrustBundleSuccess() throws URISyntaxException, TransportException, MalformedURLException, HsmException, UnsupportedEncodingException
+    {
+        //arrange
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
+        final String expectedUrl = expectedBaseUrl + "/trust-bundle?api-version=" + expectedApiVersion;
+
+        //assert
+        new StrictExpectations()
+        {
+            {
+                new URL(expectedUrl);
+                result = mockedURL;
+
+                new HttpsRequest(mockedURL, HttpsMethod.GET, null, anyString);
+                result = mockedHttpsRequest;
+
+                mockedHttpsRequest.send();
+                result = mockedHttpsResponse;
+                times = 1;
+
+                mockedHttpsResponse.getStatus();
+                result = 200;
+
+                mockedHttpsResponse.getBody();
+                result = "some trust bundle".getBytes();
+
+                new TrustBundleResponse("some trust bundle");
+                result = mockedTrustBundleResponse;
+            }
+        };
+
+        //act
+        client.getTrustBundle(expectedApiVersion);
+    }
+
+    // Tests_SRS_HSMHTTPCLIENT_34_011: [If the response from the http request is not 200, this function shall throw an HSMException.]
+    @Test
+    public void getTrustBundleThrowsIfResponseNot200() throws URISyntaxException, TransportException, MalformedURLException, HsmException, UnsupportedEncodingException
+    {
+        //arrange
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
+        final String expectedUrl = expectedBaseUrl + "/trust-bundle?api-version=" + expectedApiVersion;
+        final int expectedStatusCode = 102;
+        final String expectedErrorMessage = "The protons are out of control!";
+        //assert
+        new StrictExpectations()
+        {
+            {
+                new URL(expectedUrl);
+                result = mockedURL;
+
+                new HttpsRequest(mockedURL, HttpsMethod.GET, null, anyString);
+                result = mockedHttpsRequest;
+
+                mockedHttpsRequest.send();
+                result = mockedHttpsResponse;
+                times = 1;
+
+                mockedHttpsResponse.getStatus();
+                result = expectedStatusCode;
+
+                mockedHttpsResponse.getBody();
+                result = "some trust bundle".getBytes();
+
+                ErrorResponse.fromJson("some trust bundle");
+                result = mockedErrorResponse;
+
+                mockedErrorResponse.getMessage();
+                result = expectedErrorMessage;
+            }
+        };
+
+        boolean correctExceptionEncountered = false;
+
+        //act
+        try
+        {
+            client.getTrustBundle(expectedApiVersion);
+        }
+        catch (HsmException e)
+        {
+            assertTrue(e.getMessage().contains(""+expectedStatusCode));
+            assertTrue(e.getMessage().contains(expectedErrorMessage));
+            correctExceptionEncountered = true;
+        }
+        catch (Exception e)
+        {
+            fail("Unexpected exception encountered");
+        }
+
+        assertTrue("expected hsm exception, but no exception encountered", correctExceptionEncountered);
+    }
 }

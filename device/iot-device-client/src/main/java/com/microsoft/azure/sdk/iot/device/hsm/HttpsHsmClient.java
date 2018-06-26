@@ -5,10 +5,12 @@
 
 package com.microsoft.azure.sdk.iot.device.hsm;
 
+import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.ErrorResponse;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
+import com.microsoft.azure.sdk.iot.device.hsm.parser.TrustBundleResponse;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
@@ -96,6 +98,48 @@ public class HttpsHsmClient
             default:
                 // Codes_SRS_HSMHTTPCLIENT_34_005: [If the response from the http call is not 200, this function shall throw an HsmException.]
                 throw new HsmException("HttpsHsmClient received status code " + response.getStatus() + " from provided uri. Error Message: " + ErrorResponse.fromJson(responseBody).getMessage());
+        }
+    }
+
+    /**
+     * Retrieve a trust bundle from an hsm
+     * @param apiVersion the api version to use
+     * @return the trust bundle response from the hsm, contains the certificates to be trusted
+     * @throws UnsupportedEncodingException if UTF-8 encoding is not supported
+     * @throws TransportException if the HSM cannot be reached
+     * @throws MalformedURLException if a proper URL cannot be constructed due to the provided api version
+     * @throws HsmException if the hsm rejects the request for any reason
+     */
+    public TrustBundleResponse getTrustBundle(String apiVersion) throws UnsupportedEncodingException, TransportException, MalformedURLException, HsmException
+    {
+        if (apiVersion == null || apiVersion.isEmpty())
+        {
+            // Codes_SRS_HSMHTTPCLIENT_34_007: [If the provided api version is null or empty, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("api version cannot be null or empty");
+        }
+
+        // Codes_SRS_HSMHTTPCLIENT_34_008: [This function shall build an http request with the url in the format
+        // <base url>/trust-bundle?api-version=<url encoded api version>.]
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(baseUrl != null ? baseUrl.replaceFirst("/*$", "") : "");
+        urlBuilder.append("/trust-bundle?");
+        urlBuilder.append("api-version=").append(URLEncoder.encode(apiVersion, "UTF-8"));
+
+        // Codes_SRS_HSMHTTPCLIENT_34_009: [This function shall send a GET http request to the built url.]
+        HttpsRequest request = new HttpsRequest(new URL(urlBuilder.toString()), HttpsMethod.GET, null, TransportUtils.USER_AGENT_STRING);
+        HttpsResponse response = request.send();
+
+        int statusCode = response.getStatus();
+        if (statusCode == 200)
+        {
+            // Codes_SRS_HSMHTTPCLIENT_34_010: [If the response from the http request is 200, this function shall return the trust bundle response.]
+            return new TrustBundleResponse(new String(response.getBody()));
+        }
+        else
+        {
+            // Codes_SRS_HSMHTTPCLIENT_34_011: [If the response from the http request is not 200, this function shall throw an HSMException.]
+            ErrorResponse errorResponse = ErrorResponse.fromJson(new String(response.getBody()));
+            throw new HsmException("Received error from hsm with status code " + statusCode + " and message " + errorResponse.getMessage());
         }
     }
 

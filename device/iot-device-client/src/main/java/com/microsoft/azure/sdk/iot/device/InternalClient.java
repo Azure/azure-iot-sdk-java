@@ -431,6 +431,7 @@ public class InternalClient
     void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
                                  PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
+
     {
         if (!this.deviceIO.isOpen())
         {
@@ -470,6 +471,7 @@ public class InternalClient
      * @throws IllegalArgumentException if the callback is {@code null}
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IOException if called when client is not opened
+     * @throws IllegalArgumentException if either callback is null
      */
     void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
                                  TwinPropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)

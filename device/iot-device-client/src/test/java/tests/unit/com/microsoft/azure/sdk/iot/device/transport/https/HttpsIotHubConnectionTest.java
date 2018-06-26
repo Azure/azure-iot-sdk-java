@@ -396,7 +396,7 @@ public class HttpsIotHubConnectionTest
         conn.sendMessage(mockedMessage);
     }
 
-    // Tests_SRS_HTTPSIOTHUBCONNECTION_21_041: [The function shall send a request to the URL https://[iotHubHostname]/devices/[deviceId]/[path]?api-version=2016-02-03.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_21_041: [The function shall send a request to the URL https://[iotHubHostname]/[httpsPath]?api-version=2016-02-03.]
     @Test
     public void sendHttpsMessageHasCorrectUrl(
             @Mocked final IotHubUri mockUri) throws IOException, TransportException
@@ -404,7 +404,6 @@ public class HttpsIotHubConnectionTest
         final String iotHubHostname = "test.iothub";
         final String deviceId = "test-device-id";
         final String eventUri = "test-event-uri";
-        final String uriPath = "/files";
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         new NonStrictExpectations()
         {
@@ -413,17 +412,13 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                new IotHubUri(iotHubHostname, deviceId, uriPath, null);
-                result = mockUri;
-                mockUri.toString();
-                result = eventUri;
             }
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, eventUri);
 
-        final String expectedUrl = "https://" + eventUri;
+        final String expectedUrl = "https://" + iotHubHostname + eventUri + "?" + IotHubUri.API_VERSION;
         new Verifications()
         {
             {
@@ -613,14 +608,11 @@ public class HttpsIotHubConnectionTest
     @Test
     public void sendHttpsMessageSetsIotHubToToPath(@Mocked final IotHubUri mockUri) throws IOException, TransportException
     {
-        final String uriPath = "/files";
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final String path = "test-path";
         new NonStrictExpectations()
         {
             {
-                new IotHubUri((String)any, (String)any, uriPath, null);
-                result = mockUri;
                 new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
                 result = mockRequest;
                 mockUri.getPath();
@@ -629,7 +621,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, path);
 
         new Verifications()
         {
@@ -650,8 +642,6 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                new IotHubUri((String)any, (String)any, uriPath, null);
-                result = mockUri;
                 new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
                 result = mockRequest;
                 mockMsg.getContentType();

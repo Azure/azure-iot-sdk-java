@@ -118,8 +118,9 @@ public final class DeviceClient extends InternalClient implements Closeable
      * {@code SharedAccessKey} or if the IoT hub hostname does not conform to
      * RFC 3986 or if the provided {@code connString} is for an x509 authenticated device
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
+     * @throws UnsupportedOperationException if the connection string belongs to a module rather than a device
      */
-    public DeviceClient(String connString, TransportClient transportClient) throws URISyntaxException, IllegalArgumentException
+    public DeviceClient(String connString, TransportClient transportClient) throws URISyntaxException, IllegalArgumentException, UnsupportedOperationException
     {
         // Codes_SRS_DEVICECLIENT_12_009: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
         this.config = new DeviceClientConfig(new IotHubConnectionString(connString));
@@ -271,7 +272,7 @@ public final class DeviceClient extends InternalClient implements Closeable
         this.transportClient = null;
     }
 
-    private void commonConstructorVerifications()
+    private void commonConstructorVerifications() throws UnsupportedOperationException
     {
         if (this.getConfig().getModuleId() != null && !this.getConfig().getModuleId().isEmpty())
         {
@@ -394,7 +395,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @throws UnsupportedOperationException if this method is called when using x509 authentication
      */
     public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
-                                  IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException, IOException
+                                  IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException, IOException, UnsupportedOperationException
     {
         if (callback == null)
         {

@@ -149,12 +149,9 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         synchronized (HTTPS_CONNECTION_LOCK)
         {
             String iotHubHostname = this.config.getIotHubHostname();
-            String deviceId = this.config.getDeviceId();
-            String moduleId = this.config.getModuleId();
 
-            // Codes_SRS_HTTPSIOTHUBCONNECTION_21_041: [The function shall send a request to the URL https://[iotHubHostname]/devices/[deviceId]/[path]?api-version=2016-02-03.]
-            IotHubUri iotHubUri = new IotHubUri(iotHubHostname, deviceId, httpsPath, moduleId);
-            URL messageUrl = this.buildUrlFromString(HTTPS_HEAD_TAG + iotHubUri.toString());
+            // Codes_SRS_HTTPSIOTHUBCONNECTION_21_041: [The function shall send a request to the URL https://[iotHubHostname]/[httpsPath]?api-version=2016-02-03.]
+            URL messageUrl = this.buildUrlFromString(HTTPS_HEAD_TAG + iotHubHostname + httpsPath + "?" + IotHubUri.API_VERSION);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_042: [The function shall send a `httpsMethod` request.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_043: [The function shall set the request body to the message body.]
@@ -166,8 +163,8 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                 request.setHeaderField(property.getName(), property.getValue());
             }
 
-            // Codes_SRS_HTTPSIOTHUBCONNECTION_21_048: [The function shall set the header field 'iothub-to' to be '/devices/[deviceId]/[path]'.]
-            request.setHeaderField(HTTPS_PROPERTY_IOTHUB_TO_TAG, iotHubUri.getPath())
+            // Codes_SRS_HTTPSIOTHUBCONNECTION_21_048: [The function shall set the header field 'iothub-to' to be '[https path]'.]
+            request.setHeaderField(HTTPS_PROPERTY_IOTHUB_TO_TAG, httpsPath)
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_21_049: [The function shall set the header field 'content-type' to be the message content type.]
                     .setHeaderField(HTTPS_PROPERTY_CONTENT_TYPE_TAG, httpsMessage.getContentType());
 

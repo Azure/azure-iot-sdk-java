@@ -3,14 +3,20 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.ResponseMessage;
+import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
+import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportManager;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
 
 /**
  * Implementation of the transport manager for https.
@@ -19,6 +25,13 @@ public class HttpsTransportManager implements IotHubTransportManager
 {
     DeviceClientConfig config;
     HttpsIotHubConnection httpsIotHubConnection;
+
+    private static final String MODULE_ID = "x-ms-edge-moduleId";
+    private final static String ModuleMethodUriFormat = "/twins/%s/modules/%s/methods";
+    private final static String DeviceMethodUriFormat = "/twins/%s/methods";
+
+    private static final String PATH_NOTIFICATIONS_STRING = "/files/notifications";
+    private static final String PATH_FILES_STRING = "/files";
 
     /**
      * Constructor
@@ -67,6 +80,26 @@ public class HttpsTransportManager implements IotHubTransportManager
     {
         //Codes_SRS_HTTPSTRANSPORTMANAGER_21_006: [The close shall destroy the transport connection `HttpsIotHubConnection`.]
         this.httpsIotHubConnection = null;
+    }
+
+    public ResponseMessage sendFileUploadMessage(IotHubTransportMessage message) throws IOException
+    {
+        //Codes_SRS_HTTPSTRANSPORTMANAGER_34_028 [This function shall set the uri path of the provided message to the
+        // format devices/<deviceid>/modules/<moduleid>/files if a moduleId is present or
+        // devices/<deviceid>/modules/<moduleid>/files otherwise, and then send it.]
+        String uri = new IotHubUri("", this.config.getDeviceId(), PATH_FILES_STRING, this.config.getModuleId()).toStringWithoutApiVersion();
+        message.setUriPath(uri);
+        return this.send(message);
+    }
+
+    public ResponseMessage sendFileUploadNotification(IotHubTransportMessage message) throws IOException
+    {
+        //Codes_SRS_HTTPSTRANSPORTMANAGER_34_029 [This function shall set the uri path of the provided message to the
+        // format devices/<deviceid>/modules/<moduleid>/files/notifications if a moduleId is present or
+        // devices/<deviceid>/modules/<moduleid>/files/notifications otherwise, and then send it.]
+        String uri = new IotHubUri("", this.config.getDeviceId(), PATH_NOTIFICATIONS_STRING, this.config.getModuleId()).toStringWithoutApiVersion();
+        message.setUriPath(uri);
+        return this.send(message);
     }
 
     /**
@@ -139,5 +172,93 @@ public class HttpsTransportManager implements IotHubTransportManager
             //Wrapping this as IOException to avoid breaking changes.
             throw new IOException(e);
         }
+    }
+
+    /**
+     * Invoke a direct method to the provided uri
+     * @param methodRequest the method request to make
+     * @param deviceId the device id of the device the moduleId belongs to
+     * @param moduleId the module id of the module to invoke the method on
+     * @return the result of that request
+     * @throws IOException if the IotHub cannot be reached
+     */
+    public MethodResult invokeMethod(MethodRequest methodRequest, String deviceId, String moduleId) throws IOException, URISyntaxException, TransportException
+    {
+        URI uri;
+        if (moduleId == null || moduleId.isEmpty())
+        {
+            //Codes_SRS_HTTPSTRANSPORTMANAGER_34_017: [If a moduleId is not provided, this function shall call invokeMethod with the provided request and
+            // a uri in the format twins/<device id>/methods?api-version=<api_version>.]
+            uri = getDeviceMethodUri(deviceId);
+        }
+        else
+        {
+            //Codes_SRS_HTTPSTRANSPORTMANAGER_34_018: [If a moduleId is provided, this function shall call invokeMethod with the provided request and
+            // a uri in the format twins/<device id>/modules/<module id>/methods?api-version=<api_version>.]
+            uri = getModuleMethodUri(deviceId, moduleId);
+        }
+
+        return this.invokeMethod(methodRequest, uri);
+    }
+
+    /**
+     * Invoke a direct method to the provided uri
+     * @param methodRequest the method request to make
+     * @param uri the path to send the request to
+     * @return the result of that request
+     * @throws IOException if the IotHub cannot be reached
+     */
+    private MethodResult invokeMethod(MethodRequest methodRequest, URI uri) throws IOException, TransportException
+    {
+        if (methodRequest == null)
+        {
+            //Codes_SRS_HTTPSTRANSPORTMANAGER_34_019: [If the provided method request is null, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("direct method request cannot be null");
+        }
+
+        if (uri == null || uri.toString().isEmpty())
+        {
+            //Codes_SRS_HTTPSTRANSPORTMANAGER_34_020: [If the provided uri is null or empty, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("uri cannot be null or be an empty path");
+        }
+
+        //Codes_SRS_HTTPSTRANSPORTMANAGER_34_021: [This function shall set the methodrequest json as the body of the http message.]
+        IotHubTransportMessage message = new IotHubTransportMessage(methodRequest.toJson());
+
+        //Codes_SRS_HTTPSTRANSPORTMANAGER_34_022: [This function shall set the http method to POST.]
+        message.setIotHubMethod(IotHubMethod.POST);
+
+        //Codes_SRS_HTTPSTRANSPORTMANAGER_34_023: [This function shall set the http message's uri path to the provided uri path.]
+        message.setUriPath(uri.toString());
+
+        //Codes_SRS_HTTPSTRANSPORTMANAGER_34_024 [This function shall set a custom property of 'x-ms-edge-moduleId' to the value of <device id>/<module id> of the sending module/device.]
+        message.setProperty(MODULE_ID, this.config.getDeviceId() + "/" + this.config.getModuleId());
+
+        //Codes_SRS_HTTPSTRANSPORTMANAGER_34_025 [This function shall send the built message.]
+        ResponseMessage responseMessage = this.send(message);
+
+        if (responseMessage.getStatus() != IotHubStatusCode.OK && responseMessage.getStatus() != IotHubStatusCode.OK_EMPTY)
+        {
+            //Codes_SRS_HTTPSTRANSPORTMANAGER_34_026 [If the http response contains an error code, this function shall throw the associated exception.]
+            IotHubServiceException exception = IotHubStatusCode.getConnectionStatusException(responseMessage.getStatus(), new String(responseMessage.getBytes()));
+            throw exception;
+        }
+
+        //Codes_SRS_HTTPSTRANSPORTMANAGER_34_027 [If the http response doesn't contain an error code, this function return a method result with the response message body as the method result body.]
+        String resultJson = new String(responseMessage.getBytes());
+        return new MethodResult(resultJson);
+    }
+
+    private static URI getDeviceMethodUri(String deviceId) throws UnsupportedEncodingException, URISyntaxException
+    {
+        deviceId = URLEncoder.encode(deviceId, "UTF-8");
+        return new URI(String.format(DeviceMethodUriFormat, deviceId));
+    }
+
+    private static URI getModuleMethodUri(String deviceId, String moduleId) throws UnsupportedEncodingException, URISyntaxException
+    {
+        deviceId = URLEncoder.encode(deviceId, "UTF-8");
+        moduleId = URLEncoder.encode(moduleId, "UTF-8");
+        return new URI(String.format(ModuleMethodUriFormat, deviceId, moduleId));
     }
 }

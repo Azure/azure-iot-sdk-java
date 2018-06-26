@@ -26,6 +26,7 @@
         <module>send-event-x509</module>
         <module>send-receive-x509-sample</module>
         <module>transportclient-sample</module>
+        <module>module-invoke-method-sample</module>
     </modules>
     <dependencies>
         <dependency>

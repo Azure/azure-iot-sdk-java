@@ -35,6 +35,23 @@ public class IotHubUriTest
         assertThat(testUriStr, is(expectedUriStr));
     }
 
+    // Tests_SRS_IOTHUBURI_11_010: [The string representation of the IoT Hub URI without api version shall be
+    // constructed with the format '[iotHubHostname]/[IoT Hub path]'.]
+    @Test
+    public void toStringWithoutApiVersionSuccess()
+    {
+        final String iotHubHostname = "sample.iothubhostname";
+        final String deviceId = "sample-deviceid";
+        final String iotHubMethodPath = "/sample-path";
+
+        IotHubUri uri = new IotHubUri(iotHubHostname, deviceId, iotHubMethodPath, null);
+        String testUriStr = uri.toStringWithoutApiVersion();
+
+        final String expectedUriStr =
+                "sample.iothubhostname/devices/sample-deviceid/sample-path";
+        assertThat(testUriStr, is(expectedUriStr));
+    }
+
     // Tests_SRS_IOTHUBURI_11_015: [The constructor shall URL-encode the device ID.]
     @Test
     public void shortConstructorUrlEncodesDeviceId()

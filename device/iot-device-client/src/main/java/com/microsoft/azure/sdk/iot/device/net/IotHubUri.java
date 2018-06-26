@@ -26,7 +26,7 @@ public final class IotHubUri
     private static final String PATH_FORMAT_WITH_MODULEID = "/devices/%s/modules/%s/%s";
 
     /** The API version will be passed as a param in the URI. */
-    private static final String API_VERSION = "api-version=" + TransportUtils.IOTHUB_API_VERSION;
+    public static final String API_VERSION = "api-version=" + TransportUtils.IOTHUB_API_VERSION;
 
     /** The charset used when URL-encoding the IoT Hub name and device ID. */
     private static final Charset IOTHUB_URL_ENCODING_CHARSET =
@@ -122,6 +122,13 @@ public final class IotHubUri
     {
         // Codes_SRS_IOTHUBURI_11_001: [The string representation of the IoT Hub URI shall be constructed with the format '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]?api-version=2016-02-03(&[queryFragment]) '.]
         return this.uri;
+    }
+
+    public String toStringWithoutApiVersion()
+    {
+        // Codes_SRS_IOTHUBURI_11_010: [The string representation of the IoT Hub URI without api version shall be
+        // constructed with the format '[iotHubHostname]/[IoT Hub path]'.]
+        return this.hostname + this.path;
     }
 
     /**

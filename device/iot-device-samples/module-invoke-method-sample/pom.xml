@@ -1,9 +1,8 @@
-<!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
-<project>
+<!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.samples.device</groupId>
-    <artifactId>module-method-sample</artifactId>
-    <name>Device Method Sample</name>
+    <artifactId>module-invoke-method-sample</artifactId>
+    <name>Invoke Method Using Module Sample</name>
     <developers>
         <developer>
             <id>microsoft</id>
@@ -35,7 +34,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.DeviceMethodSample</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.ModuleInvokeMethodSample</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

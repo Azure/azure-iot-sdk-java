@@ -3,23 +3,23 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.IotHubMethod;
-import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.ResponseMessage;
+import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
+import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
+import com.microsoft.azure.sdk.iot.device.exceptions.HubOrDeviceIdNotFoundException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static org.junit.Assert.*;
 
@@ -43,6 +43,11 @@ public class HttpsTransportManagerTest
     private ResponseMessage mockResponseMessage;
     @Mocked
     private IotHubTransportMessage mockedTransportMessage;
+    @Mocked
+    private MethodRequest mockedMethodRequest;
+    @Mocked
+    private MethodResult mockedMethodResult;
+
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_001: [The constructor shall store the device client configuration `config`.] */
     @Test
@@ -416,5 +421,318 @@ public class HttpsTransportManagerTest
 
         // act
         Deencapsulation.invoke(httpsTransportManager, "receive");
+    }
+
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_017: [This function shall call invokeMethod with the provided request and
+    // a uri in the format twins/<device id>/modules/<module id>/methods?api-version=<api_version>.]
+    @Test
+    public void invokeMethodOnModuleSuccess() throws TransportException, IOException, URISyntaxException
+    {
+        //arrange
+        final HttpsTransportManager transportManager = new HttpsTransportManager(mockConfig);
+        final String expectedDeviceId = "myDevice";
+        final String expectedModuleId = "myModule";
+        final String expectedSenderDeviceId = "mySenderDevice";
+        final String expectedSenderModuleId = "mySenderModule";
+        final String expectedMethodRequestJson = "someJson";
+        final String expectedResponseBody = "some body";
+
+        //assert
+        new Expectations(HttpsTransportManager.class)
+        {
+            {
+                mockedMethodRequest.toJson();
+                result = expectedMethodRequestJson;
+
+                new IotHubTransportMessage(expectedMethodRequestJson);
+                result = mockedTransportMessage;
+
+                mockedTransportMessage.setIotHubMethod(IotHubMethod.POST);
+
+                mockedTransportMessage.setUriPath("/twins/" + expectedDeviceId + "/modules/" + expectedModuleId +"/methods");
+
+                mockConfig.getDeviceId();
+                result = expectedSenderDeviceId;
+
+                mockConfig.getModuleId();
+                result = expectedSenderModuleId;
+
+                mockedTransportMessage.setProperty(Deencapsulation.getField(HttpsTransportManager.class, "MODULE_ID").toString(), expectedSenderDeviceId + "/" + expectedSenderModuleId);
+
+                transportManager.send(mockedTransportMessage);
+                result = mockResponseMessage;
+
+                mockResponseMessage.getStatus();
+                result = IotHubStatusCode.OK_EMPTY;
+
+                mockResponseMessage.getBytes();
+                result = expectedResponseBody.getBytes();
+
+                new MethodResult(expectedResponseBody);
+            }
+        };
+
+        //act
+        transportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, expectedModuleId);
+    }
+
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_018: [If a moduleId is provided, this function shall call invokeMethod with the provided request and
+    // a uri in the format twins/<device id>/modules/<module id>/methods?api-version=<api_version>.]
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_021: [This function shall set the methodrequest json as the body of the http message.]
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_022: [This function shall set the http method to POST.]
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_023: [This function shall set the http message's uri path to the provided uri path.]
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_024 [This function shall set a custom property of 'x-ms-edge-moduleId' to the value of <device id>/<module id> of the sending module/device.]
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_025 [This function shall send the built message.]
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_027 [If the http response doesn't contain an error code, this function return a method result with the response message body as the method result body.]
+    @Test
+    public void invokeMethodOnDeviceSuccess() throws TransportException, IOException, URISyntaxException
+    {
+        //arrange
+        final HttpsTransportManager transportManager = new HttpsTransportManager(mockConfig);
+        final String expectedDeviceId = "myDevice";
+        final String expectedModuleId = "myModule";
+        final String expectedSenderDeviceId = "mySenderDevice";
+        final String expectedSenderModuleId = "mySenderModule";
+        final String expectedMethodRequestJson = "someJson";
+        final String expectedResponseBody = "some body";
+
+        //assert
+        new Expectations(HttpsTransportManager.class)
+        {
+            {
+                mockedMethodRequest.toJson();
+                result = expectedMethodRequestJson;
+
+                new IotHubTransportMessage(expectedMethodRequestJson);
+                result = mockedTransportMessage;
+
+                mockedTransportMessage.setIotHubMethod(IotHubMethod.POST);
+
+                mockedTransportMessage.setUriPath("/twins/" + expectedDeviceId + "/methods");
+
+                mockConfig.getDeviceId();
+                result = expectedSenderDeviceId;
+
+                mockConfig.getModuleId();
+                result = expectedSenderModuleId;
+
+                mockedTransportMessage.setProperty(Deencapsulation.getField(HttpsTransportManager.class, "MODULE_ID").toString(), expectedSenderDeviceId + "/" + expectedSenderModuleId);
+
+                transportManager.send(mockedTransportMessage);
+                result = mockResponseMessage;
+
+                mockResponseMessage.getStatus();
+                result = IotHubStatusCode.OK_EMPTY;
+
+                mockResponseMessage.getBytes();
+                result = expectedResponseBody.getBytes();
+
+                new MethodResult(expectedResponseBody);
+            }
+        };
+
+        //act
+        transportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, "");
+    }
+
+
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_019: [If the provided method request is null, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void invokeMethodThrowsForNullRequest() throws TransportException, IOException, URISyntaxException
+    {
+        //arrange
+        final HttpsTransportManager transportManager = new HttpsTransportManager(mockConfig);
+        final String expectedDeviceId = "myDevice";
+
+        //act
+        transportManager.invokeMethod(null, expectedDeviceId, "");
+    }
+
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_020: [If the provided uri is null or empty, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void invokeMethodThrowsForNullUri() throws TransportException, IOException, URISyntaxException
+    {
+        //arrange
+        final HttpsTransportManager transportManager = new HttpsTransportManager(mockConfig);
+        final String expectedDeviceId = "myDevice";
+
+        //act
+        Deencapsulation.invoke(transportManager, "invokeMethod", new Class[] {MethodRequest.class, URI.class}, mockedMethodRequest, (URI) null);
+    }
+
+
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_026 [If the http response contains an error code, this function shall throw the associated exception.]
+    @Test (expected = HubOrDeviceIdNotFoundException.class)
+    public void invokeMethodOnDeviceThrowsIfIotHubRespondsWithErrorCode() throws TransportException, IOException, URISyntaxException
+    {
+        //arrange
+        final HttpsTransportManager transportManager = new HttpsTransportManager(mockConfig);
+        final String expectedDeviceId = "myDevice";
+        final String expectedSenderDeviceId = "mySenderDevice";
+        final String expectedSenderModuleId = "mySenderModule";
+        final String expectedMethodRequestJson = "someJson";
+        final String expectedResponseBody = "some body";
+
+        //assert
+        new Expectations(HttpsTransportManager.class)
+        {
+            {
+                mockedMethodRequest.toJson();
+                result = expectedMethodRequestJson;
+
+                new IotHubTransportMessage(expectedMethodRequestJson);
+                result = mockedTransportMessage;
+
+                mockedTransportMessage.setIotHubMethod(IotHubMethod.POST);
+
+                mockedTransportMessage.setUriPath("/twins/" + expectedDeviceId + "/methods");
+
+                mockConfig.getDeviceId();
+                result = expectedSenderDeviceId;
+
+                mockConfig.getModuleId();
+                result = expectedSenderModuleId;
+
+                mockedTransportMessage.setProperty(Deencapsulation.getField(HttpsTransportManager.class, "MODULE_ID").toString(), expectedSenderDeviceId + "/" + expectedSenderModuleId);
+
+                transportManager.send(mockedTransportMessage);
+                result = mockResponseMessage;
+
+                mockResponseMessage.getStatus();
+                result = IotHubStatusCode.HUB_OR_DEVICE_ID_NOT_FOUND;
+
+                mockResponseMessage.getBytes();
+                result = expectedResponseBody.getBytes();
+            }
+        };
+
+        //act
+        transportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, "");
+    }
+
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_028 [This function shall set the uri path of the provided message to the
+    // format devices/<deviceid>/modules/<moduleid>/files if a moduleId is present or
+    // devices/<deviceid>/modules/<moduleid>/files otherwise, and then send it.]
+    @Test
+    public void sendFileUploadMessageSuccessWithModule() throws TransportException, IOException, URISyntaxException
+    {
+        //arrange
+        final HttpsTransportManager transportManager = new HttpsTransportManager(mockConfig);
+        final String expectedDeviceId = "myDevice";
+        final String expectedModuleId = "myModule";
+
+        //assert
+        new Expectations(HttpsTransportManager.class)
+        {
+            {
+                mockConfig.getDeviceId();
+                result = expectedDeviceId;
+
+                mockConfig.getModuleId();
+                result = expectedModuleId;
+
+                mockedTransportMessage.setUriPath("/devices/" + expectedDeviceId + "/modules/" + expectedModuleId + "/files");
+
+                transportManager.send(mockedTransportMessage);
+                result = mockResponseMessage;
+            }
+        };
+
+        //act
+        transportManager.sendFileUploadMessage(mockedTransportMessage);
+    }
+
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_028 [This function shall set the uri path of the provided message to the
+    // format devices/<deviceid>/modules/<moduleid>/files if a moduleId is present or
+    // devices/<deviceid>/modules/<moduleid>/files otherwise, and then send it.]
+    @Test
+    public void sendFileUploadMessageSuccessWithoutModule() throws TransportException, IOException, URISyntaxException
+    {
+        //arrange
+        final HttpsTransportManager transportManager = new HttpsTransportManager(mockConfig);
+        final String expectedDeviceId = "myDevice";
+
+        //assert
+        new Expectations(HttpsTransportManager.class)
+        {
+            {
+                mockConfig.getDeviceId();
+                result = expectedDeviceId;
+
+                mockConfig.getModuleId();
+                result = "";
+
+                mockedTransportMessage.setUriPath("/devices/" + expectedDeviceId + "/files");
+
+                transportManager.send(mockedTransportMessage);
+                result = mockResponseMessage;
+            }
+        };
+
+        //act
+        transportManager.sendFileUploadMessage(mockedTransportMessage);
+    }
+
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_029 [This function shall set the uri path of the provided message to the
+    // format devices/<deviceid>/modules/<moduleid>/files/notifications if a moduleId is present or
+    // devices/<deviceid>/modules/<moduleid>/files/notifications otherwise, and then send it.]
+    @Test
+    public void sendFileUploadNotificationMessageSuccessWithModule() throws TransportException, IOException, URISyntaxException
+    {
+        //arrange
+        final HttpsTransportManager transportManager = new HttpsTransportManager(mockConfig);
+        final String expectedDeviceId = "myDevice";
+        final String expectedModuleId = "myModule";
+
+        //assert
+        new Expectations(HttpsTransportManager.class)
+        {
+            {
+                mockConfig.getDeviceId();
+                result = expectedDeviceId;
+
+                mockConfig.getModuleId();
+                result = expectedModuleId;
+
+                mockedTransportMessage.setUriPath("/devices/" + expectedDeviceId + "/modules/" + expectedModuleId + "/files/notifications");
+
+                transportManager.send(mockedTransportMessage);
+                result = mockResponseMessage;
+            }
+        };
+
+        //act
+        transportManager.sendFileUploadNotification(mockedTransportMessage);
+    }
+
+    //Tests_SRS_HTTPSTRANSPORTMANAGER_34_029 [This function shall set the uri path of the provided message to the
+    // format devices/<deviceid>/modules/<moduleid>/files/notifications if a moduleId is present or
+    // devices/<deviceid>/modules/<moduleid>/files/notifications otherwise, and then send it.]
+    @Test
+    public void sendFileUploadNotificationMessageSuccessWithoutModule() throws TransportException, IOException, URISyntaxException
+    {
+        //arrange
+        final HttpsTransportManager transportManager = new HttpsTransportManager(mockConfig);
+        final String expectedDeviceId = "myDevice";
+
+        //assert
+        new Expectations(HttpsTransportManager.class)
+        {
+            {
+                mockConfig.getDeviceId();
+                result = expectedDeviceId;
+
+                mockConfig.getModuleId();
+                result = "";
+
+                mockedTransportMessage.setUriPath("/devices/" + expectedDeviceId + "/files/notifications");
+
+                transportManager.send(mockedTransportMessage);
+                result = mockResponseMessage;
+            }
+        };
+
+        //act
+        transportManager.sendFileUploadNotification(mockedTransportMessage);
     }
 }

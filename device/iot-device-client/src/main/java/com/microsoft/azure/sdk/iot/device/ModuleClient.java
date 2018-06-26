@@ -11,10 +11,16 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
+import com.microsoft.azure.sdk.iot.device.edge.HttpsHsmTrustBundleProvider;
+import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
+import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
+import com.microsoft.azure.sdk.iot.device.edge.TrustBundleProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 import com.microsoft.azure.sdk.iot.device.hsm.HttpHsmSignatureProvider;
 import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -46,10 +52,10 @@ public class ModuleClient extends InternalClient
     private static final String ModuleGenerationIdVariableName = "IOTEDGE_MODULEGENERATIONID";
     private static final String AuthSchemeVariableName = "IOTEDGE_AUTHSCHEME";
     private static final String SasTokenAuthScheme = "SasToken";
-
     private static final String EdgehubConnectionstringVariableName = "EdgeHubConnectionString";
     private static final String IothubConnectionstringVariableName = "IotHubConnectionString";
-    
+    private static final String EdgeCaCertificateFileVariableName = "EdgeModuleCACertificateFile";
+
     /**
      * Constructor for a ModuleClient instance.
      * @param connectionString The connection string for the edge module to connect to. Must be in format
@@ -67,7 +73,7 @@ public class ModuleClient extends InternalClient
      * @throws IllegalArgumentException if the provided connection string is null or empty, or if the provided protocol is null
      * @throws URISyntaxException if the connection string cannot be parsed for a valid hostname
      */
-    public ModuleClient(String connectionString, IotHubClientProtocol protocol) throws URISyntaxException, IllegalArgumentException, UnsupportedOperationException, ModuleClientException
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol) throws ModuleClientException, IllegalArgumentException, UnsupportedOperationException, URISyntaxException
     {
         //Codes_SRS_MODULECLIENT_34_006: [This function shall invoke the super constructor.]
         super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
@@ -99,7 +105,7 @@ public class ModuleClient extends InternalClient
      * @param isPrivateKeyPath 'false' if the privateKey argument is a path to the PEM, and 'true' if it is the PEM string itself,
      * @throws URISyntaxException If the connString cannot be parsed
      */
-    public ModuleClient(String connectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws URISyntaxException
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws ModuleClientException, URISyntaxException
     {
         super(new IotHubConnectionString(connectionString), protocol, publicKeyCertificate, isCertificatePath, privateKey, isPrivateKeyPath, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
 
@@ -139,20 +145,32 @@ public class ModuleClient extends InternalClient
         // First try to create from connection string and if env variable for connection string is not found try to create from edgedUri
         if (connectionString != null)
         {
+            //Codes_SRS_MODULECLIENT_34_020: [If an edgehub or iothub connection string is present, this function shall create a module client instance using that connection string and the provided protocol.]
+            ModuleClient moduleClient = null;
             try
             {
-                //Codes_SRS_MODULECLIENT_34_020: [If an edgehub or iothub connection string is present, this function shall create a module client instance using that connection string and the provided protocol.]
-                return new ModuleClient(connectionString, protocol);
+                moduleClient = new ModuleClient(connectionString, protocol);
             }
             catch (URISyntaxException e)
             {
-                throw new ModuleClientException(e);
+                throw new ModuleClientException("Could not create module client", e);
             }
+
+            //Check for a different default cert to be used
+            String alternativeDefaultTrustedCert = envVariables.get(EdgeCaCertificateFileVariableName);
+            if (alternativeDefaultTrustedCert != null && !alternativeDefaultTrustedCert.isEmpty())
+            {
+                //Codes_SRS_MODULECLIENT_34_031: [If an alternative default trusted cert is saved in the environment
+                // variables, this function shall set that trusted cert in the created module client.]
+                moduleClient.setOption_SetCertificatePath(alternativeDefaultTrustedCert);
+            }
+
+            return moduleClient;
         }
         else
         {
             //Codes_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
-            // hostname, authScheme, gatewayHostname, and apiVersion. If any of these other than apiVersion or gatewayHostname is missing,
+            // hostname, authScheme, gatewayHostname, and generationId. If any of these other than gatewayHostname is missing,
             // this function shall throw a ModuleClientException.]
             String edgedUri = envVariables.get(IotEdgedUriVariableName);
             String deviceId = envVariables.get(DeviceIdVariableName);
@@ -214,10 +232,20 @@ public class ModuleClient extends InternalClient
                 // and the default time for tokens to live and the default sas token buffer time.]
                 IotHubAuthenticationProvider iotHubAuthenticationProvider = IotHubSasTokenHsmAuthenticationProvider.create(signatureProvider, deviceId, moduleId, hostname, gatewayHostname, generationId, DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS, DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE);
 
-                //Codes_SRS_MODULECLIENT_34_018: [This function return a new ModuleClient instance built from the created authentication provider and the provided protocol.]
-                return new ModuleClient(iotHubAuthenticationProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+                //Codes_SRS_MODULECLIENT_34_018: [This function shall return a new ModuleClient instance built from the created authentication provider and the provided protocol.]
+                ModuleClient moduleClient = new ModuleClient(iotHubAuthenticationProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+
+                if (gatewayHostname != null && !gatewayHostname.isEmpty())
+                {
+                    //Codes_SRS_MODULECLIENT_34_032: [This function shall retrieve the trust bundle from the hsm and set them in the module client.]
+                    TrustBundleProvider trustBundleProvider = new HttpsHsmTrustBundleProvider();
+                    String trustCertificates = trustBundleProvider.getTrustBundleCerts(edgedUri, DEFAULT_API_VERSION);
+                    moduleClient.setTrustedCertificates(trustCertificates);
+                }
+
+                return moduleClient;
             }
-            catch (IOException | TransportException e)
+            catch (IOException | TransportException | HsmException | URISyntaxException e)
             {
                 throw new ModuleClientException(e);
             }
@@ -252,6 +280,73 @@ public class ModuleClient extends InternalClient
 
         //Codes_SRS_MODULECLIENT_34_003: [This function shall invoke super.sendEventAsync(message, callback, callbackContext).]
         super.sendEventAsync(message, callback, callbackContext);
+    }
+
+    /**
+     * Invoke a method on a device
+     * @param deviceId the device to invoke a method on
+     * @param methodRequest the request containing the method to invoke on the device
+     * @return the result of the method call
+     * @throws ModuleClientException if the method cannot be invoked
+     * @throws IllegalArgumentException if deviceid is null or empty
+     */
+    public MethodResult invokeMethod(String deviceId, MethodRequest methodRequest) throws ModuleClientException, IllegalArgumentException
+    {
+        if (deviceId == null || deviceId.isEmpty())
+        {
+            //Codes_SRS_MODULECLIENT_34_039: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("DeviceId cannot be null or empty");
+        }
+
+        try
+        {
+            //Codes_SRS_MODULECLIENT_34_033: [This function shall create an HttpsTransportManager and use it to invoke the method on the device.]
+            HttpsTransportManager httpsTransportManager = new HttpsTransportManager(this.config);
+            httpsTransportManager.open();
+            return httpsTransportManager.invokeMethod(methodRequest, deviceId, "");
+        }
+        catch (URISyntaxException | IOException | TransportException e)
+        {
+            //Codes_SRS_MODULECLIENT_34_034: [If this function encounters an exception, it shall throw a moduleClientException with that exception nested.]
+            throw new ModuleClientException("Could not invoke method", e);
+        }
+    }
+
+    /**
+     * Invoke a method on a module
+     * @param deviceId the device the module belongs to
+     * @param moduleId the module to invoke the method on
+     * @param methodRequest the request containing the method to invoke on the device
+     * @return the result of the method call
+     * @throws ModuleClientException if the method cannot be invoked
+     * @throws IllegalArgumentException if deviceid is null or empty, or if moduleid is null or empty
+     */
+    public MethodResult invokeMethod(String deviceId, String moduleId, MethodRequest methodRequest) throws ModuleClientException, IllegalArgumentException
+    {
+        if (deviceId == null || deviceId.isEmpty())
+        {
+            //Codes_SRS_MODULECLIENT_34_037: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("DeviceId cannot be null or empty");
+        }
+
+        if (moduleId == null || moduleId.isEmpty())
+        {
+            //Codes_SRS_MODULECLIENT_34_038: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("DeviceId cannot be null or empty");
+        }
+
+        try
+        {
+            //Codes_SRS_MODULECLIENT_34_035: [This function shall create an HttpsTransportManager and use it to invoke the method on the module.]
+            HttpsTransportManager httpsTransportManager = new HttpsTransportManager(this.config);
+            httpsTransportManager.open();
+            return httpsTransportManager.invokeMethod(methodRequest, deviceId, moduleId);
+        }
+        catch (URISyntaxException | IOException | TransportException e)
+        {
+            //Codes_SRS_MODULECLIENT_34_036: [If this function encounters an exception, it shall throw a moduleClientException with that exception nested.]
+            throw new ModuleClientException("Could not invoke method", e);
+        }
     }
 
     /**

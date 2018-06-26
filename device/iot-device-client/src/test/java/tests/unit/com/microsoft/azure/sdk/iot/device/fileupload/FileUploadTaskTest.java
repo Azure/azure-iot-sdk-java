@@ -344,30 +344,6 @@ public class FileUploadTaskTest
         };
     }
 
-    /* Tests_SRS_FILEUPLOADTASK_21_009: [The run shall set the message URI path as `/files`.] */
-    @Test
-    public void runSetFilesURI() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
-    {
-        // arrange
-        expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
-                VALID_REQUEST_JSON, VALID_RESPONSE_JSON, VALID_NOTIFICATION_JSON);
-        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
-                new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
-                VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
-
-        // act
-        Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockMessageRequest, "setUriPath", "/files");
-                times = 1;
-            }
-        };
-    }
-
     /* Tests_SRS_FILEUPLOADTASK_21_010: [The run shall open the connection with the iothub, using the httpsTransportManager.] */
     /* Tests_SRS_FILEUPLOADTASK_21_026: [The run shall open the connection with the iothub, using the httpsTransportManager.] */
     @Test
@@ -411,7 +387,7 @@ public class FileUploadTaskTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockHttpsTransportManager, "send", mockMessageRequest);
+                mockHttpsTransportManager.sendFileUploadMessage(mockMessageRequest);
                 times = 1;
             }
         };
@@ -621,30 +597,6 @@ public class FileUploadTaskTest
         };
     }
 
-    /* Tests_SRS_FILEUPLOADTASK_21_025: [The run shall set the message URI path as `/files/notifications`.] */
-    @Test
-    public void runSetNotificationsURI() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
-    {
-        // arrange
-        expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
-                VALID_REQUEST_JSON, VALID_RESPONSE_JSON, VALID_NOTIFICATION_JSON);
-        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
-                new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
-                VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
-
-        // act
-        Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockMessageNotification, "setUriPath", "/files/notifications");
-                times = 1;
-            }
-        };
-    }
-
     /* Tests_SRS_FILEUPLOADTASK_21_027: [The run shall send the blob request message to the iothub, using the httpsTransportManager.] */
     @Test
     public void runSendNotificationToIothub() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
@@ -663,7 +615,7 @@ public class FileUploadTaskTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockHttpsTransportManager, "send", mockMessageNotification);
+                mockHttpsTransportManager.sendFileUploadNotification(mockMessageNotification);
                 times = 1;
             }
         };
@@ -775,7 +727,7 @@ public class FileUploadTaskTest
                 result = VALID_REQUEST_JSON;
                 new IotHubTransportMessage(VALID_REQUEST_JSON);
                 result = mockMessageRequest;
-                mockHttpsTransportManager.send(mockMessageRequest);
+                mockHttpsTransportManager.sendFileUploadMessage(mockMessageRequest);
                 result = new IOException();
             }
         };
@@ -791,7 +743,7 @@ public class FileUploadTaskTest
         new Verifications()
         {
             {
-                mockHttpsTransportManager.send(mockMessageRequest);
+                mockHttpsTransportManager.sendFileUploadMessage(mockMessageRequest);
                 times = 1;
                 mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
                 times = 1;
@@ -1216,7 +1168,7 @@ public class FileUploadTaskTest
                 result = VALID_NOTIFICATION_JSON;
                 new IotHubTransportMessage(VALID_NOTIFICATION_JSON);
                 result = mockMessageNotification;
-                mockHttpsTransportManager.send(mockMessageNotification);
+                mockHttpsTransportManager.sendFileUploadNotification(mockMessageNotification);
                 result = new IOException();
             }
         };
@@ -1232,7 +1184,7 @@ public class FileUploadTaskTest
         new Verifications()
         {
             {
-                mockHttpsTransportManager.send(mockMessageNotification);
+                mockHttpsTransportManager.sendFileUploadNotification(mockMessageNotification);
                 times = 1;
                 mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
                 times = 1;

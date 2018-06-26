@@ -7,11 +7,16 @@ package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.hsm.HttpHsmSignatureProvider;
-import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
+import com.microsoft.azure.sdk.iot.device.edge.HttpsHsmTrustBundleProvider;
+import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
+import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
+import com.microsoft.azure.sdk.iot.device.hsm.HttpHsmSignatureProvider;
+import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import mockit.*;
 import org.junit.Test;
 
@@ -22,6 +27,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
 /**
@@ -60,6 +66,15 @@ public class ModuleClientTest
 
     @Mocked
     URL mockedURL;
+
+    @Mocked
+    MethodResult mockedMethodResult;
+
+    @Mocked
+    MethodRequest mockedMethodRequest;
+
+    @Mocked
+    HttpsTransportManager mockedHttpsTransportManager;
 
     private void baseExpectations() throws URISyntaxException
     {
@@ -514,9 +529,10 @@ public class ModuleClientTest
     //Tests_SRS_MODULECLIENT_34_017: [This function shall create an authentication provider using the created
     // signature provider, and the environment variables for deviceid, moduleid, hostname, gatewayhostname,
     // and the default time for tokens to live and the default sas token buffer time.]
-    //Tests_SRS_MODULECLIENT_34_018: [This function return a new ModuleClient instance built from the created authentication provider and the provided protocol.]
+    //Tests_SRS_MODULECLIENT_34_018: [This function shall return a new ModuleClient instance built from the created authentication provider and the provided protocol.]
+    //Tests_SRS_MODULECLIENT_34_032: [This function shall retrieve the trust bundle from the hsm and set them in the module client.]
     @Test
-    public void signatureProvider(final @Mocked System mockedSystem, @Mocked InternalClient internalClient) throws ModuleClientException, NoSuchAlgorithmException, IOException, TransportException, URISyntaxException
+    public void signatureProvider(final @Mocked System mockedSystem, @Mocked final InternalClient internalClient, @Mocked final HttpsHsmTrustBundleProvider mockedHttpsHsmTrustBundleProvider) throws ModuleClientException, NoSuchAlgorithmException, IOException, TransportException, URISyntaxException, HsmException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -528,6 +544,7 @@ public class ModuleClientTest
         final String expectedDeviceId = "1234";
         final String expectedModuleId = "5678";
         String expectedAuthScheme = Deencapsulation.getField(ModuleClient.class, "SasTokenAuthScheme");
+        final String expectedTrustedCerts = "some string of trusted certs";
 
         final Map<String, String> mockedSystemVariables = new HashMap<>();
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
@@ -550,6 +567,12 @@ public class ModuleClientTest
 
                 IotHubSasTokenHsmAuthenticationProvider.create(mockedHttpHsmSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedGenerationId, anyInt, anyInt);
                 result = mockedModuleAuthenticationWithHsm;
+
+                new HttpsHsmTrustBundleProvider();
+                result = mockedHttpsHsmTrustBundleProvider;
+
+                mockedHttpsHsmTrustBundleProvider.getTrustBundleCerts(expectedIotEdgedUri, expectedApiVersion);
+                result = expectedTrustedCerts;
             }
         };
 
@@ -652,6 +675,8 @@ public class ModuleClientTest
 
     //Tests_SRS_MODULECLIENT_34_013: [This function shall check for a saved edgehub connection string.]
     //Tests_SRS_MODULECLIENT_34_020: [If an edgehub or iothub connection string is present, this function shall create a module client instance using that connection string and the provided protocol.]
+    //Tests_SRS_MODULECLIENT_34_031: [If an alternative default trusted cert is saved in the environment
+    // variables, this function shall set that trusted cert in the created module client.]
     @Test
     public void createFromEnvironmentChecksForEnvVarOfEdgeHub(final @Mocked System mockedSystem) throws ModuleClientException, URISyntaxException
     {
@@ -659,10 +684,12 @@ public class ModuleClientTest
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final String expectedEdgeHubConnectionString = "edgehubConnString";
         final String expectedIotHubConnectionString = "iothubConnString";
+        final String expectedTrustedCert = "some trusted cert";
 
         final Map<String, String> mockedSystemVariables = new HashMap<>();
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "EdgehubConnectionstringVariableName").toString(), expectedEdgeHubConnectionString);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IothubConnectionstringVariableName").toString(), expectedIotHubConnectionString);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "EdgeCaCertificateFileVariableName").toString(), expectedTrustedCert);
 
         //assert
         new Expectations()
@@ -684,6 +711,15 @@ public class ModuleClientTest
 
         //act
         ModuleClient.createFromEnvironment(protocol);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceClientConfig.getAuthenticationProvider().setPathToIotHubTrustedCert(expectedTrustedCert);
+                times = 1;
+            }
+        };
     }
 
     //Tests_SRS_MODULECLIENT_34_019: [If no edgehub connection string is present, this function shall check for a saved iothub connection string.]
@@ -720,5 +756,201 @@ public class ModuleClientTest
 
         //act
         ModuleClient.createFromEnvironment(protocol);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_033: [This function shall create an HttpsTransportManager and use it to invoke the method on the device.]
+    @Test
+    public void invokeMethodOnDeviceSuccess() throws URISyntaxException, ModuleClientException, IOException, TransportException
+    {
+        //arrange
+        baseExpectations();
+        ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
+        final String expectedDeviceId = "someDevice";
+
+        new NonStrictExpectations()
+        {
+            {
+                new HttpsTransportManager((DeviceClientConfig) any);
+                result = mockedHttpsTransportManager;
+
+                mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, "");
+                result = mockedMethodResult;
+            }
+        };
+
+        //act
+        MethodResult actualResult = client.invokeMethod(expectedDeviceId, mockedMethodRequest);
+
+        //assert
+        assertEquals(mockedMethodResult, actualResult);
+        new Verifications()
+        {
+            {
+                mockedHttpsTransportManager.open();
+                times = 1;
+
+                mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, "");
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MODULECLIENT_34_034: [If this function encounters an exception, it shall throw a moduleClientException with that exception nested.]
+    @Test (expected = ModuleClientException.class)
+    public void invokeMethodOnDeviceWrapsExceptions() throws URISyntaxException, ModuleClientException, IOException, TransportException
+    {
+        //arrange
+        baseExpectations();
+        ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
+        final String expectedDeviceId = "someDevice";
+
+        new NonStrictExpectations()
+        {
+            {
+                new HttpsTransportManager((DeviceClientConfig) any);
+                result = mockedHttpsTransportManager;
+
+                mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, "");
+                result = new IOException();
+            }
+        };
+
+        //act
+        client.invokeMethod(expectedDeviceId, mockedMethodRequest);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_035: [This function shall create an HttpsTransportManager and use it to invoke the method on the module.]
+    @Test
+    public void invokeMethodOnModuleSuccess() throws URISyntaxException, ModuleClientException, IOException, TransportException
+    {
+        //arrange
+        baseExpectations();
+        ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
+        final String expectedDeviceId = "someDevice";
+        final String expectedModuleId = "someModule";
+
+        new NonStrictExpectations()
+        {
+            {
+                new HttpsTransportManager((DeviceClientConfig) any);
+                result = mockedHttpsTransportManager;
+
+                mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, expectedModuleId);
+                result = mockedMethodResult;
+            }
+        };
+
+        //act
+        MethodResult actualResult = client.invokeMethod(expectedDeviceId, expectedModuleId, mockedMethodRequest);
+
+        //assert
+        assertEquals(mockedMethodResult, actualResult);
+        new Verifications()
+        {
+            {
+                mockedHttpsTransportManager.open();
+                times = 1;
+
+                mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, expectedModuleId);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MODULECLIENT_34_036: [If this function encounters an exception, it shall throw a moduleClientException with that exception nested.]
+    @Test (expected = ModuleClientException.class)
+    public void invokeMethodOnModuleWrapsExceptions() throws URISyntaxException, ModuleClientException, IOException, TransportException
+    {
+        //arrange
+        baseExpectations();
+        ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
+        final String expectedDeviceId = "someDevice";
+        final String expectedModuleId = "someModule";
+
+        new NonStrictExpectations()
+        {
+            {
+                new HttpsTransportManager((DeviceClientConfig) any);
+                result = mockedHttpsTransportManager;
+
+                mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, expectedModuleId);
+                result = new IOException();
+            }
+        };
+
+        //act
+        client.invokeMethod(expectedDeviceId, expectedModuleId, mockedMethodRequest);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_037: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void invokeMethodOnDeviceThrowsForNullDeviceId() throws URISyntaxException, ModuleClientException
+    {
+        //arrange
+        baseExpectations();
+        ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
+
+        //act
+        client.invokeMethod(null, mockedMethodRequest);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_037: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void invokeMethodOnDeviceThrowsForEmptyDeviceId() throws URISyntaxException, ModuleClientException
+    {
+        //arrange
+        baseExpectations();
+        ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
+
+        //act
+        client.invokeMethod("", mockedMethodRequest);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_038: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void invokeMethodOnModuleThrowsForNullDeviceId() throws URISyntaxException, ModuleClientException
+    {
+        //arrange
+        baseExpectations();
+        ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
+
+        //act
+        client.invokeMethod(null, "someValidModule", mockedMethodRequest);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_038: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void invokeMethodOnModuleThrowsForEmptyDeviceId() throws URISyntaxException, ModuleClientException
+    {
+        //arrange
+        baseExpectations();
+        ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
+
+        //act
+        client.invokeMethod("", "someValidModule", mockedMethodRequest);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_039: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void invokeMethodOnModuleThrowsForNullModuleId() throws URISyntaxException, ModuleClientException
+    {
+        //arrange
+        baseExpectations();
+        ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
+
+        //act
+        client.invokeMethod("someValidDevice", null, mockedMethodRequest);
+    }
+
+    //Tests_SRS_MODULECLIENT_34_039: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void invokeMethodOnModuleThrowsForEmptyModuleId() throws URISyntaxException, ModuleClientException
+    {
+        //arrange
+        baseExpectations();
+        ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
+
+        //act
+        client.invokeMethod("someValidDevice", "", mockedMethodRequest);
     }
 }

@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadRequestParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadResponseParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadStatusParser;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.storage.StorageException;
@@ -49,8 +50,6 @@ import java.nio.charset.StandardCharsets;
 public final class FileUploadTask implements Runnable
 {
     private static final Charset DEFAULT_IOTHUB_MESSAGE_CHARSET = StandardCharsets.UTF_8;
-    private static final String PATH_NOTIFICATIONS_STRING = "/files/notifications";
-    private static final String PATH_FILES_STRING = "/files";
     private static final String HTTPS_URL_STRING = "https://";
     private static final String PATH_SEPARATOR_STRING = "/";
     private static final String UTF_8_STRING = "UTF-8";
@@ -215,8 +214,6 @@ public final class FileUploadTask implements Runnable
         IotHubTransportMessage message = new IotHubTransportMessage(fileUploadRequestParser.toJson());
         /* Codes_SRS_FILEUPLOADTASK_21_008: [The run shall set the message method as `POST`.] */
         message.setIotHubMethod(IotHubMethod.POST);
-        /* Codes_SRS_FILEUPLOADTASK_21_009: [The run shall set the message URI path as `/files`.] */
-        message.setUriPath(PATH_FILES_STRING);
 
         ResponseMessage responseMessage;
         synchronized (FILE_UPLOAD_LOCK)
@@ -224,7 +221,7 @@ public final class FileUploadTask implements Runnable
             /* Codes_SRS_FILEUPLOADTASK_21_010: [The run shall open the connection with the iothub, using the httpsTransportManager.] */
             httpsTransportManager.open();
             /* Codes_SRS_FILEUPLOADTASK_21_011: [The run shall send the blob request message to the iothub, using the httpsTransportManager.] */
-            responseMessage = httpsTransportManager.send(message);
+            responseMessage = httpsTransportManager.sendFileUploadMessage(message);
             /* Codes_SRS_FILEUPLOADTASK_21_012: [The run shall close the connection with the iothub, using the httpsTransportManager.] */
             httpsTransportManager.close();
         }
@@ -254,8 +251,6 @@ public final class FileUploadTask implements Runnable
             IotHubTransportMessage message = new IotHubTransportMessage(fileUploadStatusParser.toJson());
             /* Codes_SRS_FILEUPLOADTASK_21_024: [The run shall set the message method as `POST`.] */
             message.setIotHubMethod(IotHubMethod.POST);
-            /* Codes_SRS_FILEUPLOADTASK_21_025: [The run shall set the message URI path as `/files/notifications`.] */
-            message.setUriPath(PATH_NOTIFICATIONS_STRING);
 
             ResponseMessage responseMessage;
             synchronized (FILE_UPLOAD_LOCK)
@@ -263,7 +258,7 @@ public final class FileUploadTask implements Runnable
             /* Codes_SRS_FILEUPLOADTASK_21_026: [The run shall open the connection with the iothub, using the httpsTransportManager.] */
                 httpsTransportManager.open();
             /* Codes_SRS_FILEUPLOADTASK_21_027: [The run shall send the blob request message to the iothub, using the httpsTransportManager.] */
-                responseMessage = httpsTransportManager.send(message);
+                responseMessage = httpsTransportManager.sendFileUploadNotification(message);
             /* Codes_SRS_FILEUPLOADTASK_21_028: [The run shall close the connection with the iothub, using the httpsTransportManager.] */
                 httpsTransportManager.close();
             }
