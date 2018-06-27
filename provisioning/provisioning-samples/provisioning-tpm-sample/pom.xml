@@ -33,7 +33,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-device-client</artifactId>
-            <version>1.12.0</version>
+            <version>1.13.0</version>
         </dependency>
     </dependencies>
     <build>
