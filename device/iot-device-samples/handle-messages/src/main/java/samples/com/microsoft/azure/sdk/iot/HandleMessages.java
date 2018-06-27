@@ -3,10 +3,8 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
-import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -98,6 +96,40 @@ public class HandleMessages
         }
     }
 
+    protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
+    {
+        @Override
+        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        {
+            System.out.println();
+            System.out.println("CONNECTION STATUS UPDATE: " + status);
+            System.out.println("CONNECTION STATUS REASON: " + statusChangeReason);
+            System.out.println("CONNECTION STATUS THROWABLE: " + (throwable == null ? "null" : throwable.getMessage()));
+            System.out.println();
+
+            if (throwable != null)
+            {
+                throwable.printStackTrace();
+            }
+
+            if (status == IotHubConnectionStatus.DISCONNECTED)
+            {
+                //connection was lost, and is not being re-established. Look at provided exception for
+                // how to resolve this issue. Cannot send messages until this issue is resolved, and you manually
+                // re-open the device client
+            }
+            else if (status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
+            {
+                //connection was lost, but is being re-established. Can still send messages, but they won't
+                // be sent until the connection is re-established
+            }
+            else if (status == IotHubConnectionStatus.CONNECTED)
+            {
+                //Connection was successfully re-established. Can send messages.
+            }
+        }
+    }
+
     /**
      * Receives requests from an IoT Hub. Default protocol is to use
      * MQTT transport.
@@ -184,6 +216,8 @@ public class HandleMessages
         }
 
         System.out.println("Successfully set message callback.");
+
+        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         client.open();
 

@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -14,7 +15,6 @@ import java.util.List;
 /** Sends a number of event messages to an IoT Hub. */
 public class SendEvent
 {
-
     private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
     private  static List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
 
@@ -29,6 +29,40 @@ public class SendEvent
             if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
             {
                 failedMessageListOnClose.add(msg.getMessageId());
+            }
+        }
+    }
+
+    protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
+    {
+        @Override
+        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        {
+            System.out.println();
+            System.out.println("CONNECTION STATUS UPDATE: " + status);
+            System.out.println("CONNECTION STATUS REASON: " + statusChangeReason);
+            System.out.println("CONNECTION STATUS THROWABLE: " + (throwable == null ? "null" : throwable.getMessage()));
+            System.out.println();
+
+            if (throwable != null)
+            {
+                throwable.printStackTrace();
+            }
+
+            if (status == IotHubConnectionStatus.DISCONNECTED)
+            {
+                //connection was lost, and is not being re-established. Look at provided exception for
+                // how to resolve this issue. Cannot send messages until this issue is resolved, and you manually
+                // re-open the device client
+            }
+            else if (status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
+            {
+                //connection was lost, but is being re-established. Can still send messages, but they won't
+                // be sent until the connection is re-established
+            }
+            else if (status == IotHubConnectionStatus.CONNECTED)
+            {
+                //Connection was successfully re-established. Can send messages.
             }
         }
     }
@@ -144,6 +178,8 @@ public class SendEvent
         client.setOption("SetSASTokenExpiryTime", time);
         System.out.println("Updated token expiry time to " + time);
 
+        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+
         client.open();
 
         System.out.println("Opened connection to IoT Hub.");
@@ -176,7 +212,6 @@ public class SendEvent
             {
                 e.printStackTrace(); // Trace the exception
             }
-
         }
 
         System.out.println("Wait for " + D2C_MESSAGE_TIMEOUT / 1000 + " second(s) for response from the IoT Hub...");
@@ -194,7 +229,7 @@ public class SendEvent
 
         // close the connection
         System.out.println("Closing");
-        //client.closeNow();
+        client.closeNow();
 
         if (!failedMessageListOnClose.isEmpty())
         {
@@ -202,6 +237,5 @@ public class SendEvent
         }
 
         System.out.println("Shutting down...");
-
     }
 }
