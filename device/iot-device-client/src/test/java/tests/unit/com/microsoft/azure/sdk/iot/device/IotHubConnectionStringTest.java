@@ -29,7 +29,7 @@ public class IotHubConnectionStringTest
     private static final String EXPIRED_SHARED_ACCESS_TOKEN = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=0";
     private static final String IOTHUB_CONNECTION_STRING_CLASS = "com.microsoft.azure.sdk.iot.device.IotHubConnectionString";
     private static final String VALID_MODULEID = "moduleId";
-    private static final String VALID_GATEWAYHOSTNAME = ".gateway.com";
+    private static final String VALID_GATEWAYHOSTNAME = "edgeHubHostName";
 
     private void assertConnectionString(Object iotHubConnectionString, String expectedHostName,
                                         String expectedDeviceId, String expectedSharedAccessKey, String expectedSharedAccessToken)
@@ -75,7 +75,6 @@ public class IotHubConnectionStringTest
 
     // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_040: [The constructor shall save the module id as the value of 'ModuleId' in the connection string.]
     // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_041: [The constructor shall save the gateway host name as the value of 'GatewayHostName' in the connection string.]
-    // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_042: [If the gateway host name is specified in the connection string, the constructor shall save the gateway host name as the host name.]
     // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_043: [The getGatewayHostName shall return the stored gateway host name.]
     @Test
     public void ConstructorSavesModuleIdAndGatewayHostname() throws URISyntaxException
@@ -90,7 +89,7 @@ public class IotHubConnectionStringTest
 
         //assert
         assertEquals(VALID_MODULEID, connectionString.getModuleId());
-        assertEquals(VALID_GATEWAYHOSTNAME, connectionString.getHostName());
+        assertEquals(VALID_HOSTNAME, connectionString.getHostName());
         assertEquals(VALID_GATEWAYHOSTNAME, connectionString.getGatewayHostName());
     }
 

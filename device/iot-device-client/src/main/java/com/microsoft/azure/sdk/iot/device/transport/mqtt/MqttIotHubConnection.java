@@ -150,17 +150,22 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
                 this.iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/" + API_VERSION + "&" + clientUserAgentIdentifier;
 
-                if (this.config.isUseWebsocket())
+                String host = this.config.getGatewayHostname();
+                if (host == null || host == "")
+                {
+                    host = this.config.getIotHubHostname();
+                }
+                 if (this.config.isUseWebsocket())
                 {
                     //Codes_SRS_MQTTIOTHUBCONNECTION_25_018: [The function shall establish an MQTT WS connection with a server uri as wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true if websocket was enabled.]
-                    final String wsServerUri = WS_SSL_PREFIX + this.config.getIotHubHostname() + WEBSOCKET_RAW_PATH + WEBSOCKET_QUERY ;
+                    final String wsServerUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH + WEBSOCKET_QUERY ;
                     mqttConnection = new MqttConnection(wsServerUri,
                             clientId, this.iotHubUserName, this.iotHubUserPassword, sslContext);
                 }
                 else
                 {
                     //Codes_SRS_MQTTIOTHUBCONNECTION_25_019: [The function shall establish an MQTT connection with a server uri as ssl://<hostName>:8883 if websocket was not enabled.]
-                    final String serverUri = SSL_PREFIX + this.config.getIotHubHostname() + SSL_PORT_SUFFIX;
+                    final String serverUri = SSL_PREFIX + host + SSL_PORT_SUFFIX;
                     mqttConnection = new MqttConnection(serverUri,
                             clientId, this.iotHubUserName, this.iotHubUserPassword, sslContext);
                 }

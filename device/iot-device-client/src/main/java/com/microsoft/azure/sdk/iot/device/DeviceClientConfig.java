@@ -352,6 +352,15 @@ public final class DeviceClientConfig
     }
 
     /**
+     * Getter for the Gateway host name.
+     * @return the name of the gateway host
+     */
+    public String getGatewayHostname() 
+    {
+        return this.authenticationProvider.getGatewayHostname();
+    }
+
+    /**
      * Getter for the device ID.
      *
      * @return the device ID.

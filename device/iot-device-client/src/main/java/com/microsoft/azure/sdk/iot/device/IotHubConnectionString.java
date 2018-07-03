@@ -115,12 +115,6 @@ public class IotHubConnectionString
             }
         }
 
-        if (this.gatewayHostName != null)
-        {
-            // Codes_SRS_IOTHUB_CONNECTIONSTRING_34_042: [If the gateway host name is specified in the connection string, the constructor shall save the gateway host name as the host name.]
-            this.hostName = this.gatewayHostName;
-        }
-
         /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_017: [If the connection string is not valid, the constructor shall throw an IllegalArgumentException.] */
         this.isUsingX509 = connectionString.contains(X509_ENABLED_ATTRIBUTE);
         validateTerms(this.hostName, this.deviceId, this.sharedAccessKey, this.sharedAccessToken, this.isUsingX509);

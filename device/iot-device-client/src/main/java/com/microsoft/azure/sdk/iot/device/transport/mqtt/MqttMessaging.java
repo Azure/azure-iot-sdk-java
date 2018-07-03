@@ -37,8 +37,8 @@ public class MqttMessaging extends Mqtt
         {
             //Codes_SRS_MqttMessaging_34_031: [The constructor construct publishTopic and subscribeTopic from deviceId and moduleId.]
             this.publishTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/events/";
-            this.subscribeTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/devicebound/#";
-            this.parseTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/devicebound/";
+            this.subscribeTopic = "devices/" + deviceId + "/modules/" + moduleId +"/inputs/#";
+            this.parseTopic = "devices/" + deviceId + "/modules/" + moduleId +"/inputs/";
         }
     }
 

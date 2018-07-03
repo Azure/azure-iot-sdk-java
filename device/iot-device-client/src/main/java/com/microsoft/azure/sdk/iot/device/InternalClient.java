@@ -611,7 +611,7 @@ public class InternalClient
         }
     }
 
-    void setTrustedCertificates(String certificates)
+    public void setTrustedCertificates(String certificates)
     {
         this.config.getAuthenticationProvider().setIotHubTrustedCert(certificates);
     }
