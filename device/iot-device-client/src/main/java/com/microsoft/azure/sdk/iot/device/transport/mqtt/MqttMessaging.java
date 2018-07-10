@@ -164,6 +164,20 @@ public class MqttMessaging extends Mqtt
             separatorNeeded = true;
         }
 
+        if (message.getConnectionModuleId() != null)
+        {
+            if (separatorNeeded)
+            {
+                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+            }
+
+            stringBuilder.append(CONNECTION_MODULE_ID);
+            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+            stringBuilder.append(message.getConnectionDeviceId());
+
+            separatorNeeded = true;
+        }
+
         for (MessageProperty property : message.getProperties())
         {
             if (separatorNeeded)
