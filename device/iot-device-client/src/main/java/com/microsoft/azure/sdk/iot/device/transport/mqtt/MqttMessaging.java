@@ -11,6 +11,8 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 
 public class MqttMessaging extends Mqtt
 {
+    private String deviceId;
+    private String moduleId;
     private String subscribeTopic;
     private String publishTopic;
     private String parseTopic;
@@ -40,6 +42,9 @@ public class MqttMessaging extends Mqtt
             this.subscribeTopic = "devices/" + deviceId + "/modules/" + moduleId +"/inputs/#";
             this.parseTopic = "devices/" + deviceId + "/modules/" + moduleId +"/inputs/";
         }
+
+        this.deviceId = deviceId;
+        this.moduleId = moduleId;
     }
 
     public void start() throws TransportException
@@ -160,6 +165,10 @@ public class MqttMessaging extends Mqtt
             separatorNeeded = true;
         }
 
+        if (this.moduleId != null && this.moduleId != "")
+        {
+            stringBuilder.append("/");
+        }
         String messagePublishTopic = stringBuilder.toString();
 
         //Codes_SRS_MqttMessaging_25_024: [send method shall publish a message to the IOT Hub on the publish topic by calling method publish().]
