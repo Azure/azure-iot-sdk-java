@@ -150,6 +150,20 @@ public class MqttMessaging extends Mqtt
             separatorNeeded = true;
         }
 
+        if (message.getConnectionDeviceId() != null)
+        {
+            if (separatorNeeded)
+            {
+                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+            }
+
+            stringBuilder.append(CONNECTION_DEVICE_ID);
+            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+            stringBuilder.append(message.getConnectionDeviceId());
+
+            separatorNeeded = true;
+        }
+
         for (MessageProperty property : message.getProperties())
         {
             if (separatorNeeded)
@@ -165,7 +179,7 @@ public class MqttMessaging extends Mqtt
             separatorNeeded = true;
         }
 
-        if (this.moduleId != null && this.moduleId != "")
+        if (this.moduleId != null && !this.moduleId.isEmpty())
         {
             stringBuilder.append("/");
         }

@@ -51,7 +51,7 @@ public class ModuleClient extends InternalClient
     private static final String ModuleIdVariableName = "IOTEDGE_MODULEID";
     private static final String ModuleGenerationIdVariableName = "IOTEDGE_MODULEGENERATIONID";
     private static final String AuthSchemeVariableName = "IOTEDGE_AUTHSCHEME";
-    private static final String SasTokenAuthScheme = "SasToken";
+    private static final String SasTokenAuthScheme = "sasToken";
     private static final String EdgehubConnectionstringVariableName = "EdgeHubConnectionString";
     private static final String IothubConnectionstringVariableName = "IotHubConnectionString";
     private static final String EdgeCaCertificateFileVariableName = "EdgeModuleCACertificateFile";
@@ -194,6 +194,7 @@ public class ModuleClient extends InternalClient
             {
                 throw new ModuleClientException("Environment variable " + ModuleIdVariableName + " is required.");
             }
+
             if (hostname == null)
             {
                 throw new ModuleClientException("Environment variable " + IotHubHostnameVariableName + " is required.");
@@ -209,7 +210,7 @@ public class ModuleClient extends InternalClient
                 throw new ModuleClientException("Environment variable " + ModuleGenerationIdVariableName + " is required");
             }
 
-            if (!authScheme.equals(SasTokenAuthScheme))
+            if (!authScheme.equalsIgnoreCase(SasTokenAuthScheme))
             {
                 //Codes_SRS_MODULECLIENT_34_030: [If the auth scheme environment variable is not "SasToken", this function shall throw a moduleClientException.]
                 throw new ModuleClientException("Unsupported authentication scheme. Supported scheme is " + SasTokenAuthScheme + ".");
@@ -408,7 +409,7 @@ public class ModuleClient extends InternalClient
      * @throws IllegalArgumentException if either callback are null.
      */
     public void subscribeToMethod(DeviceMethodCallback methodCallback, Object methodCallbackContext,
-                                        IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
+                                  IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
             throws IOException, IllegalArgumentException
     {
         this.subscribeToMethodsInternal(methodCallback, methodCallbackContext, methodStatusCallback, methodStatusCallbackContext);

@@ -17,6 +17,8 @@ public final class MessageProperty {
     public static final Set<String> RESERVED_PROPERTY_NAMES;
 
     public static final String OUTPUT_NAME_PROPERTY = "iothub-outputname";
+    public static final String CONNECTION_DEVICE_ID = "iothub-connection-device-id";
+    public static final String CONNECTION_MODULE_ID = "iothub-connection-module-id";
 
     static {
         HashSet<String> reservedPropertyNames = new HashSet<>();
@@ -41,6 +43,8 @@ public final class MessageProperty {
         reservedPropertyNames.add("connectionModuleId");
         reservedPropertyNames.add(OUTPUT_NAME_PROPERTY);
         reservedPropertyNames.add("iothub-inputname");
+        reservedPropertyNames.add(CONNECTION_DEVICE_ID);
+        reservedPropertyNames.add(CONNECTION_MODULE_ID);
 
         RESERVED_PROPERTY_NAMES = Collections.unmodifiableSet(reservedPropertyNames);
     }

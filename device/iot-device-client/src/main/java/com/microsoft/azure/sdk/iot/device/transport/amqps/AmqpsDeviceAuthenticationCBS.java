@@ -79,6 +79,8 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_004: [The constructor shall add API version key and API version value to the amqpProperties.*]
         this.amqpProperties.put(Symbol.getSymbol(API_VERSION_KEY), TransportUtils.IOTHUB_API_VERSION);
 
+        this.amqpProperties.put(Symbol.getSymbol(MessageProperty.CONNECTION_DEVICE_ID), deviceClientConfig.getDeviceId());
+
         this.logger = new CustomLogger(this.getClass());
     }
 
@@ -203,7 +205,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         SslDomain domain = null;
         try
         {
-            domain = makeDomain(this.deviceClientConfig.getSasTokenAuthentication().getSSLContext());
+            domain = makeDomain(this.deviceClientConfig.getAuthenticationProvider().getSSLContext());
         }
         catch (IOException e)
         {
@@ -286,7 +288,13 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         userProperties.put(OPERATION_KEY, OPERATION_VALUE);
         userProperties.put(TYPE_KEY, TYPE_VALUE);
 
-        userProperties.put(NAME_KEY, deviceClientConfig.getIotHubHostname() + DEVICES_PATH + deviceClientConfig.getDeviceId());
+        String host = deviceClientConfig.getGatewayHostname();
+        if (host == null || host.isEmpty())
+        {
+            host = deviceClientConfig.getIotHubHostname();
+        }
+
+        userProperties.put(NAME_KEY, host + DEVICES_PATH + deviceClientConfig.getDeviceId());
         ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
         outgoingMessage.setApplicationProperties(applicationProperties);
 

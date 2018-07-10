@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
+import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Properties;
@@ -19,6 +20,8 @@ import java.util.Map;
 
 public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
 {
+    private static final String CORRELATION_ID_KEY = "com.microsoft:channel-correlation-id";
+
     private static final String SENDER_LINK_ENDPOINT_PATH = "/devices/%s/messages/events";
     private static final String RECEIVER_LINK_ENDPOINT_PATH = "/devices/%s/messages/devicebound";
 
@@ -59,6 +62,8 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
             // Codes_SRS_AMQPSDEVICETELEMETRY_34_036: [If a moduleId is present, the constructor shall insert the given deviceId and moduleId argument to the sender and receiver link address.]
             this.senderLinkAddress = String.format(senderLinkEndpointPath, this.deviceClientConfig.getDeviceId(), moduleId);
             this.receiverLinkAddress = String.format(receiverLinkEndpointPath, this.deviceClientConfig.getDeviceId(), moduleId);
+
+            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(this.deviceClientConfig.getDeviceId() + "/" + moduleId));
         }
         else
         {
@@ -74,6 +79,8 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
             // Codes_SRS_AMQPSDEVICETELEMETRY_12_005: [The constructor shall insert the given deviceId argument to the sender and receiver link address.]
             this.senderLinkAddress = String.format(senderLinkEndpointPath, this.deviceClientConfig.getDeviceId());
             this.receiverLinkAddress = String.format(receiverLinkEndpointPath, this.deviceClientConfig.getDeviceId());
+
+            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(this.deviceClientConfig.getDeviceId()));
         }
     }
 
@@ -335,6 +342,16 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
         {
             // Codes_SRS_AMQPSDEVICETELEMETRY_34_051: [This function shall set the message's saved outputname in the application properties of the new proton message.]
             userProperties.put(MessageProperty.OUTPUT_NAME_PROPERTY, message.getOutputName());
+        }
+
+        if (message.getConnectionDeviceId() != null)
+        {
+            userProperties.put(MessageProperty.CONNECTION_DEVICE_ID, message.getConnectionDeviceId());
+        }
+
+        if (message.getConnectionModuleId() != null)
+        {
+            userProperties.put(MessageProperty.CONNECTION_MODULE_ID, message.getConnectionModuleId());
         }
 
         ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);

@@ -26,6 +26,7 @@ import java.util.UUID;
 public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
 {
     private static final String CORRELATION_ID_KEY = "com.microsoft:channel-correlation-id";
+    private static final String CORRELATION_ID_KEY_PREFIX = "methods:";
 
     private static final String APPLICATION_PROPERTY_KEY_IOTHUB_METHOD_NAME = "IoThub-methodname";
     private static final String APPLICATION_PROPERTY_KEY_IOTHUB_STATUS = "IoThub-status";
@@ -57,12 +58,12 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
         if (moduleId != null && !moduleId.isEmpty())
         {
             // Codes_SRS_AMQPSDEVICEMETHODS_34_037: [If a moduleId is present, the constructor shall add correlation ID key and <deviceId>/<moduleId> value to the amqpProperties.]
-            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(this.deviceClientConfig.getDeviceId() + "/" + moduleId));
+            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(CORRELATION_ID_KEY_PREFIX +  UUID.randomUUID().toString()));
         }
         else
         {
             // Codes_SRS_AMQPSDEVICEMETHODS_12_007: [The constructor shall add correlation ID key and deviceId value to the amqpProperties.]
-            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(this.deviceClientConfig.getDeviceId()));
+            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(CORRELATION_ID_KEY_PREFIX +  UUID.randomUUID().toString()));
         }
 
         // Codes_SRS_AMQPSDEVICEMETHODS_12_006: [The constructor shall add API version key and API version value to the amqpProperties.]
@@ -282,8 +283,6 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
                         iotHubTransportMessage.setProperty(entry.getKey(), entry.getValue().toString());
                     }
                 }
-
-
             }
         }
         // Codes_SRS_AMQPSDEVICEMETHODS_12_046: [The function shall set the device operation type to DEVICE_OPERATION_METHOD_RECEIVE_REQUEST on IotHubTransportMessage.]
@@ -343,6 +342,16 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
         if (deviceMethodMessage.getStatus() != null)
         {
             userProperties.put(APPLICATION_PROPERTY_KEY_IOTHUB_STATUS, Integer.parseInt(deviceMethodMessage.getStatus()));
+        }
+
+        if (message.getConnectionDeviceId() != null)
+        {
+            userProperties.put(MessageProperty.CONNECTION_DEVICE_ID, message.getConnectionDeviceId());
+        }
+
+        if (message.getConnectionModuleId() != null)
+        {
+            userProperties.put(MessageProperty.CONNECTION_MODULE_ID, message.getConnectionModuleId());
         }
 
         ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);

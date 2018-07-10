@@ -94,7 +94,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             throw new IllegalArgumentException("The DeviceClientConfig cannot be null.");
         }
-        if(config.getIotHubHostname() == null || config.getIotHubHostname().length() == 0)
+        if (config.getIotHubHostname() == null || config.getIotHubHostname().length() == 0)
         {
             throw new IllegalArgumentException("hostName cannot be null or empty.");
         }
@@ -102,7 +102,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             throw new IllegalArgumentException("deviceID cannot be null or empty.");
         }
-        if(config.getIotHubName() == null || config.getIotHubName().length() == 0)
+        if (config.getIotHubName() == null || config.getIotHubName().length() == 0)
         {
             throw new IllegalArgumentException("hubName cannot be null or empty.");
         }
@@ -114,11 +114,11 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.useWebSockets = this.deviceClientConfig.isUseWebsocket();
         if (useWebSockets)
         {
-            this.hostName = String.format("%s:%d", this.deviceClientConfig.getIotHubHostname(), AMQP_WEB_SOCKET_PORT);
+            this.hostName = String.format("%s:%d", this.chooseHostname(), AMQP_WEB_SOCKET_PORT);
         }
         else
         {
-            this.hostName = String.format("%s:%d", this.deviceClientConfig.getIotHubHostname(), AMQP_PORT);
+            this.hostName = String.format("%s:%d", this.chooseHostname(), AMQP_PORT);
         }
 
         this.closeLatch = new CountDownLatch(1);
@@ -200,6 +200,11 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_12_057: [The function shall call the connection to authenticate.]
                 this.authenticate();
+
+                while (!this.amqpsSessionManager.isAuthenticationOpened())
+                {
+                    Thread.sleep(1000);
+                }
 
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_12_058: [The function shall call the connection to open device client links.]
                 this.openLinks();
@@ -428,11 +433,11 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_033: [The event handler shall set the current handler to handle the connection events.]
         if(this.useWebSockets)
         {
-            event.getReactor().connectionToHost(this.deviceClientConfig.getIotHubHostname(), AMQP_WEB_SOCKET_PORT, this);
+            event.getReactor().connectionToHost(this.chooseHostname(), AMQP_WEB_SOCKET_PORT, this);
         }
         else
         {
-            event.getReactor().connectionToHost(this.deviceClientConfig.getIotHubHostname(), AMQP_PORT, this);
+            event.getReactor().connectionToHost(this.chooseHostname(), AMQP_PORT, this);
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
@@ -1071,5 +1076,16 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             this.listener.onConnectionLost(this.connectionLossCause, this.connectionId);
             return null;
         }
+    }
+
+    private String chooseHostname()
+    {
+        String gatewayHostname = this.deviceClientConfig.getGatewayHostname();
+        if (gatewayHostname != null && !gatewayHostname.isEmpty())
+        {
+            return gatewayHostname;
+        }
+
+        return this.deviceClientConfig.getIotHubHostname();
     }
 }

@@ -151,7 +151,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 this.iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/" + API_VERSION + "&" + clientUserAgentIdentifier;
 
                 String host = this.config.getGatewayHostname();
-                if (host == null || host == "")
+                if (host == null || host.isEmpty())
                 {
                     host = this.config.getIotHubHostname();
                 }

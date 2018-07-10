@@ -78,7 +78,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         {
             HttpsMessage httpsMessage = HttpsSingleMessage.parseHttpsMessage(message);
 
-            String iotHubHostname = this.config.getIotHubHostname();
+            String iotHubHostname = getHostName();
             String deviceId = this.config.getDeviceId();
             String moduleId = this.config.getModuleId();
 
@@ -148,7 +148,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     {
         synchronized (HTTPS_CONNECTION_LOCK)
         {
-            String iotHubHostname = this.config.getIotHubHostname();
+            String iotHubHostname = getHostName();
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_041: [The function shall send a request to the URL https://[iotHubHostname]/[httpsPath]?api-version=2016-02-03.]
             URL messageUrl = this.buildUrlFromString(HTTPS_HEAD_TAG + iotHubHostname + httpsPath + "?" + IotHubUri.API_VERSION);
@@ -196,7 +196,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         synchronized (HTTPS_CONNECTION_LOCK)
         {
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_013: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03'.]
-            IotHubMessageUri messageUri = new IotHubMessageUri(this.config.getIotHubHostname(), this.config.getDeviceId(), this.config.getModuleId());
+            IotHubMessageUri messageUri = new IotHubMessageUri(getHostName(), this.config.getDeviceId(), this.config.getModuleId());
             URL messageUrl = this.buildUrlFromString(HTTPS_HEAD_TAG + messageUri.toString());
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_014: [The function shall send a GET request.]
@@ -306,7 +306,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                         + "result before a message is received or if the result was already sent");
             }
 
-            String iotHubHostname = this.config.getIotHubHostname();
+            String iotHubHostname = getHostName();
             String deviceId = this.config.getDeviceId();
 
             String resultUri = HTTPS_HEAD_TAG;
@@ -445,5 +445,16 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         {
             throw new TransportException(e);
         }
+    }
+
+    private String getHostName()
+    {
+        String hostname = this.config.getGatewayHostname();
+        if (hostname == null || hostname.isEmpty())
+        {
+            hostname = this.config.getIotHubHostname();
+        }
+
+        return hostname;
     }
 }

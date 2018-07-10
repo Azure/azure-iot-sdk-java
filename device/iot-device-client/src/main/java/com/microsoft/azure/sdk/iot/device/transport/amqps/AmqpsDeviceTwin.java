@@ -429,6 +429,16 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
             userProperties.put(MessageProperty.OUTPUT_NAME_PROPERTY, message.getOutputName());
         }
 
+        if (message.getConnectionDeviceId() != null)
+        {
+            userProperties.put(MessageProperty.CONNECTION_DEVICE_ID, message.getConnectionDeviceId());
+        }
+
+        if (message.getConnectionModuleId() != null)
+        {
+            userProperties.put(MessageProperty.CONNECTION_MODULE_ID, message.getConnectionModuleId());
+        }
+
         ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
         outgoingMessage.setApplicationProperties(applicationProperties);
 
