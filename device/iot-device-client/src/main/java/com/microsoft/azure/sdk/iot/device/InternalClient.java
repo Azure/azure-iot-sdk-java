@@ -17,8 +17,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Set;
 
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 
 public class InternalClient
 {
@@ -721,6 +720,12 @@ public class InternalClient
         if (protocol == null)
         {
             throw new IllegalArgumentException("Protocol cannot be null.");
+        }
+
+        String gatewayHostName = connectionString.getGatewayHostName();
+        if (gatewayHostName != null && !gatewayHostName.isEmpty() && !(protocol == MQTT || protocol == MQTT_WS))
+        {
+            throw new UnsupportedOperationException("Communication with edgehub only supported by MQTT/MQTT_WS");
         }
     }
 }
