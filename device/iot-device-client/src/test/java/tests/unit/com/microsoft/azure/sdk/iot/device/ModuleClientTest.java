@@ -758,6 +758,7 @@ public class ModuleClientTest
         ModuleClient.createFromEnvironment(protocol);
     }
 
+    /* Ignore these tests until invokeMethod is re-enabled
     //Tests_SRS_MODULECLIENT_34_033: [This function shall create an HttpsTransportManager and use it to invoke the method on the device.]
     @Test
     public void invokeMethodOnDeviceSuccess() throws URISyntaxException, ModuleClientException, IOException, TransportException
@@ -953,4 +954,5 @@ public class ModuleClientTest
         //act
         client.invokeMethod("someValidDevice", "", mockedMethodRequest);
     }
+    */
 }

@@ -357,6 +357,7 @@ public final class DeviceClientConfig
      */
     public String getGatewayHostname() 
     {
+        // Codes_SRS_DEVICECLIENTCONFIG_34_057: [The function shall return the gateway hostname, or null if this connection string does not contain a gateway hostname.]
         return this.authenticationProvider.getGatewayHostname();
     }
 

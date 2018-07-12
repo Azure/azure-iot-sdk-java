@@ -57,7 +57,7 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
         String moduleId = this.deviceClientConfig.getModuleId();
         if (moduleId != null && !moduleId.isEmpty())
         {
-            // Codes_SRS_AMQPSDEVICEMETHODS_34_037: [If a moduleId is present, the constructor shall add correlation ID key and <deviceId>/<moduleId> value to the amqpProperties.]
+            // Codes_SRS_AMQPSDEVICEMETHODS_34_037: [If a moduleId is present, the constructor shall add correlation ID key and a UUID value to the amqpProperties.]
             this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(CORRELATION_ID_KEY_PREFIX +  UUID.randomUUID().toString()));
         }
         else

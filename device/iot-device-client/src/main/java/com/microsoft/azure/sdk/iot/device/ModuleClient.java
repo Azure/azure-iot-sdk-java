@@ -121,7 +121,7 @@ public class ModuleClient extends InternalClient
      */
     public static ModuleClient createFromEnvironment() throws ModuleClientException
     {
-        return createFromEnvironment(IotHubClientProtocol.MQTT);
+        return createFromEnvironment(IotHubClientProtocol.AMQPS);
     }
 
     /**

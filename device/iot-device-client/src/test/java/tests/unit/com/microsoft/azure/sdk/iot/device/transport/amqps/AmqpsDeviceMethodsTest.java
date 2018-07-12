@@ -208,7 +208,7 @@ public class AmqpsDeviceMethodsTest
     // Tests_SRS_AMQPSDEVICEMETHODS_34_034: [If a moduleId is present, the constructor shall set the sender and receiver endpoint path to IoTHub specific values for module communication.]
     // Tests_SRS_AMQPSDEVICEMETHODS_34_035: [If a moduleId is present, the constructor shall concatenate a sender specific prefix including the moduleId to the sender link tag's current value.]
     // Tests_SRS_AMQPSDEVICEMETHODS_34_036: [If a moduleId is present, the constructor shall insert the given deviceId and moduleId argument to the sender and receiver link address.]
-    // Tests_SRS_AMQPSDEVICEMETHODS_34_037: [If a moduleId is present, the constructor shall add correlation ID key and <deviceId>/<moduleId> value to the amqpProperties.]
+    // Tests_SRS_AMQPSDEVICEMETHODS_34_037: [If a moduleId is present, the constructor shall add correlation ID key and a UUID value to the amqpProperties.]
     @Test
     public void constructorInitializesAllMembersWithModuleId(
             @Mocked final UUID mockUUID
@@ -274,7 +274,7 @@ public class AmqpsDeviceMethodsTest
 
         assertTrue(amqpsProperties.containsKey(Symbol.getSymbol(API_VERSION_KEY)));
         assertTrue(amqpsProperties.containsKey(Symbol.getSymbol(CORRELATION_ID_KEY)));
-        assertTrue(amqpsProperties.get(Symbol.getSymbol(CORRELATION_ID_KEY)).toString().contains(deviceId + "/" + moduleId));
+        assertTrue(amqpsProperties.get(Symbol.getSymbol(CORRELATION_ID_KEY)).toString().equals("methods:" + uuidStr));
     }
     
     // Tests_SRS_AMQPSDEVICEMETHODS_12_010: [The function shall call the super function if the MessageType is DEVICE_METHODS, and return with it's return value.]

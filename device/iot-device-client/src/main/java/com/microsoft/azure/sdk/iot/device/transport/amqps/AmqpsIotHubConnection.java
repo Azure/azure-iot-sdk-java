@@ -201,11 +201,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_12_057: [The function shall call the connection to authenticate.]
                 this.authenticate();
 
-                while (!this.amqpsSessionManager.isAuthenticationOpened())
-                {
-                    Thread.sleep(1000);
-                }
-
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_12_058: [The function shall call the connection to open device client links.]
                 this.openLinks();
 
@@ -712,7 +707,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public void onLinkRemoteClose(Event event)
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
-
+        
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
         TransportException transportException = new TransportException("Unknown transport exception occurred");

@@ -79,6 +79,29 @@ public class DeviceClientConfigTest
         assertThat(testIotHubHostname, is(expectedIotHubHostname));
     }
 
+    // Tests_SRS_DEVICECLIENTCONFIG_34_057: [The function shall return the gateway hostname, or null if this connection string does not contain a gateway hostname.]
+    @Test
+    public void getGatewayHostnameReturnsGatewayHostname()
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        new NonStrictExpectations()
+        {
+            {
+                mockSasTokenSoftwareAuthentication.getGatewayHostname();
+                result = iotHubHostname;
+            }
+        };
+
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockSasTokenSoftwareAuthentication);
+
+        //act
+        String testIotHubHostname = config.getGatewayHostname();
+
+        //assert
+        final String expectedIotHubHostname = iotHubHostname;
+        assertThat(testIotHubHostname, is(expectedIotHubHostname));
+    }
+
     // Tests_SRS_DEVICECLIENTCONFIG_11_007: [The function shall return the IoT Hub name given in the constructor,
     // where the IoT Hub name is embedded in the IoT Hub hostname as follows: [IoT Hub name].[valid HTML chars]+.]
     @Test

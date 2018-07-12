@@ -69,9 +69,9 @@ public class MqttMessagingTest
         String actualPublishTopic = Deencapsulation.getField(testMqttMessaging, "publishTopic");
         assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId +"/messages/events/", actualPublishTopic);
         String actualSubscribeTopic = Deencapsulation.getField(testMqttMessaging, "subscribeTopic");
-        assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId +"/messages/devicebound/#", actualSubscribeTopic);
+        assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId +"/inputs/#", actualSubscribeTopic);
         String actualParseTopic = Deencapsulation.getField(testMqttMessaging, "parseTopic");
-        assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId +"/messages/devicebound/", actualParseTopic);
+        assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId +"/inputs/", actualParseTopic);
     }
 
     /*
