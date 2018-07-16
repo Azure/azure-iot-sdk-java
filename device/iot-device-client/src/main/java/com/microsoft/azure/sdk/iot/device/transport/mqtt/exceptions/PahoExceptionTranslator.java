@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.net.NoRouteToHostException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
 import static org.eclipse.paho.client.mqttv3.MqttException.*;
@@ -28,9 +29,12 @@ public class PahoExceptionTranslator
                 // for this connection loss is in the mqttException cause
                 if (pahoException.getCause() instanceof UnknownHostException
                         || pahoException.getCause() instanceof NoRouteToHostException
-                        || pahoException.getCause() instanceof InterruptedException)
+                        || pahoException.getCause() instanceof InterruptedException
+                        || pahoException.getCause() instanceof SocketTimeoutException)
                 {
-                    //Codes_SRS_PahoExceptionTranslator_34_139: [When deriving the TransportException from the provided MqttException, this function shall map all client exceptions with underlying UnknownHostException or InterruptedException to a retryable ProtocolException.]
+                    // Codes_SRS_PahoExceptionTranslator_34_139: [When deriving the TransportException from the provided
+                    // MqttException, this function shall map all client exceptions with underlying UnknownHostException
+                    // or InterruptedException or SocketTimeoutException to a retryable ProtocolException.]
                     ProtocolException connectionException = new ProtocolException(errorMessage, pahoException);
                     connectionException.setRetryable(true);
                     return connectionException;
