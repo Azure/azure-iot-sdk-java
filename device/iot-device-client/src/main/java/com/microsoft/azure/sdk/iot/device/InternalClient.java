@@ -24,6 +24,7 @@ public class InternalClient
     static final String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
     static final String SET_SEND_INTERVAL = "SetSendInterval";
     static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
+	static final String SET_CERTIFICATE_AUTHORITY = "SetCertificateAuthority";
     static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
 
     DeviceClientConfig config;
@@ -398,6 +399,19 @@ public class InternalClient
                         {
                             throw new IllegalArgumentException("optionName is unknown = " + optionName + " for " + this.deviceIO.getProtocol().toString());
                         }
+                    }
+
+                    break;
+                }
+                case SET_CERTIFICATE_AUTHORITY:
+                {
+                    if ((this.deviceIO != null) && (this.deviceIO.isOpen()))
+                    {
+                        throw new IllegalStateException("setOption " + SET_CERTIFICATE_PATH + " only works when the transport is closed");
+                    }
+                    else
+                    {
+                        setTrustedCertificates((String)value);
                     }
 
                     break;
