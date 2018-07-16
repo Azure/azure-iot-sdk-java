@@ -188,7 +188,17 @@ public final class DeviceClient extends InternalClient implements Closeable
      *
      * @param connString the connection string for the x509 device to connect as (format: "HostName=...;DeviceId=...;x509=true")
      * @param protocol the protocol to use when communicating with IotHub
-     * @param publicKeyCertificate the PEM formatted public key certificate or the path to a PEM formatted public key certificate file
+     * @param publicKeyCertificate the PEM formatted public key certificate or the path to a PEM formatted public key certificate file.
+     *                             Append if there is any intermediate or chained certificates to the end of the public certificate file in the following format:
+     *                             -----BEGIN CERTIFICATE-----
+     *                             (Primary SSL certificate)
+     *                             -----END CERTIFICATE-----
+     *                             ----BEGIN CERTIFICATE-----
+     *                             (Intermediate certificate)
+     *                             -----END CERTIFICATE-----
+     *                             -----BEGIN CERTIFICATE-----
+     *                             (Root certificate)
+     *                             -----END CERTIFICATE-----
      * @param isCertificatePath if the provided publicKeyCertificate is a path to a file containing the PEM formatted public key certificate
      * @param privateKey the PEM formatted private key or the path to a PEM formatted private key file
      * @param isPrivateKeyPath if the provided privateKey is a path to a file containing the PEM formatted private key
