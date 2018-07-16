@@ -24,6 +24,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.UUID;
 
 public class IotHubSSLContext
@@ -184,8 +186,16 @@ public class IotHubSSLContext
             throws KeyManagementException, IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException
     {
         Key privateKey = IotHubSSLContext.parsePrivateKey(privateKeyString);
-        X509Certificate certPairWithPublic = IotHubSSLContext.parsePublicKeyCertificate(publicKeyCertificateString);
+        Collection<X509Certificate> certChain = IotHubSSLContext.parsePublicKeyCertificate(publicKeyCertificateString);
 
+        int numCerts = certChain.size();
+        X509Certificate[] certs = new X509Certificate[numCerts];
+        int i = 0;
+
+        for (X509Certificate c : certChain)
+        {
+            certs[i++] = c;
+        }
 
         //Codes_SRS_IOTHUBSSLCONTEXT_34_018: [This constructor shall generate a temporary password to protect the created keystore holding the private key.]
         char[] temporaryPassword = generateTemporaryPassword();
@@ -193,8 +203,8 @@ public class IotHubSSLContext
         //Codes_SRS_IOTHUBSSLCONTEXT_34_020: [The constructor shall create a keystore containing the public key certificate and the private key.]
         KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
         keystore.load(null);
-        keystore.setCertificateEntry(CERTIFICATE_ALIAS, certPairWithPublic);
-        keystore.setKeyEntry(PRIVATE_KEY_ALIAS, privateKey, temporaryPassword, new java.security.cert.Certificate[] {certPairWithPublic});
+        keystore.setCertificateEntry(CERTIFICATE_ALIAS, certs[0]);
+        keystore.setKeyEntry(PRIVATE_KEY_ALIAS, privateKey, temporaryPassword, certs);
 
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         kmf.init(keystore, temporaryPassword);
@@ -286,16 +296,49 @@ public class IotHubSSLContext
         }
     }
 
-    private static X509Certificate parsePublicKeyCertificate(String publicKeyCertificateString) throws CertificateException
+    private static Collection<X509Certificate> parsePublicKeyCertificate(String publicKeyCertificateString) throws CertificateException
     {
         try
         {
-            // Codes_SRS_IOTHUBSSLCONTEXT_34_033: [This function shall return an X509Certificate instance created by the provided PEM formatted publicKeyCertificateString.]
+            Collection<X509Certificate> certChain = new ArrayList<>();
+
+            // Codes_SRS_IOTHUBSSLCONTEXT_34_033: [This function shall return the X509Certificate cert chain specified by the PEM formatted publicKeyCertificateString.]
             Security.addProvider(new BouncyCastleProvider());
-            PemReader publicKeyCertificateReader = new PemReader(new StringReader(publicKeyCertificateString));
-            PemObject possiblePublicKeyCertificate = publicKeyCertificateReader.readPemObject();
+
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-            return (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(possiblePublicKeyCertificate.getContent()));
+            final PemReader publicKeyCertificateReader = new PemReader(new StringReader(publicKeyCertificateString));
+
+            try
+            {
+                PemObject possiblePublicKeyCertificate;
+                while (((possiblePublicKeyCertificate = publicKeyCertificateReader.readPemObject()) != null))
+                {
+                    byte[] content = possiblePublicKeyCertificate.getContent();
+                    if (content.length > 0)
+                    {
+                        final ByteArrayInputStream bais = new ByteArrayInputStream(content);
+
+                        while (bais.available() > 0)
+                        {
+                            final Certificate cert = certFactory.generateCertificate(bais);
+                            if (cert instanceof X509Certificate)
+                            {
+                                certChain.add((X509Certificate) cert);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+            finally
+            {
+                publicKeyCertificateReader.close();
+            }
+
+            return certChain;
         }
         catch (Exception e)
         {
