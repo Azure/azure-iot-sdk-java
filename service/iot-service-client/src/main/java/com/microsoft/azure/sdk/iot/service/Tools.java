@@ -212,7 +212,7 @@ public class Tools
         // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_022: [The function shall do nothing if the input StringBuilder is null]
         if (strBuilder != null)
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_023: [The function shall append the input StringBuilder string using the following format: “name”:”value” if isQuoted is false]
+            // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_023: [The function shall append the input StringBuilder string using the following format: "name":"value" if isQuoted is false]
             strBuilder.append("\"");
 
             if (Tools.isNullOrEmpty(name))
@@ -229,7 +229,7 @@ public class Tools
             }
             else
             {
-                // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_024: [The function shall append the input StringBuilder string using the following format: “name”:””value”” if isQuoted is true]
+                // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_024: [The function shall append the input StringBuilder string using the following format: "name":""value"" if isQuoted is true]
                 if (isQuoted)
                 {
                     strBuilder.append("\"");
@@ -242,7 +242,7 @@ public class Tools
                     strBuilder.append("\"");
                 }
             }
-            // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_024: [The function shall append the input StringBuilder string with trailing “,” character isLast is false]
+            // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_024: [The function shall append the input StringBuilder string with trailing "," character isLast is false]
             if (!isLast)
             {
                 strBuilder.append(",");

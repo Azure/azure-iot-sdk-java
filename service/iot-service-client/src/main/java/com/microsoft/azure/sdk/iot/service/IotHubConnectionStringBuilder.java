@@ -137,13 +137,13 @@ public class IotHubConnectionStringBuilder
      */
     protected static String parseIotHubName(IotHubConnectionString iotHubConnectionString)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_013: [The function shall return the substring of the host name until the first “.” character]
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_013: [The function shall return the substring of the host name until the first "." character]
         Integer index = iotHubConnectionString.hostName.indexOf(IotHubConnectionString.HOST_NAME_SEPARATOR);
         if (index >= 0)
         {
             return iotHubConnectionString.hostName.substring(0, index);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_014: [The function shall return empty string if “.” character was not found]
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_014: [The function shall return empty string if "." character was not found]
         else
         {
             return "";
