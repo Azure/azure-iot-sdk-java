@@ -64,6 +64,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private boolean reconnectionScheduled = false;
 
     private ExecutorService executorService;
+    private ScheduledExecutorService scheduledExecutorService;
 
     private CountDownLatch openLatch;
     private CountDownLatch closeLatch;
@@ -305,7 +306,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
      *
      * @throws TransportException if it failed closing the iothub connection.
      */
-    public void close() throws TransportException
+    public void close(boolean isReconnecting) throws TransportException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -351,6 +352,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 throw new TransportException("Waited too long for the connection to close.", e);
             }
             logger.LogInfo("Shutdown of executor service completed, method name is %s ", logger.getMethodName());
+        }
+
+        if (this.scheduledExecutorService != null && !isReconnecting)
+        {
+            this.scheduledExecutorService.shutdownNow();
+            this.scheduledExecutorService = null;
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
@@ -1039,11 +1046,15 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
      */
     private void scheduleReconnection(Throwable throwable)
     {
+        if (scheduledExecutorService == null)
+        {
+            scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        }
+
         if (!reconnectionScheduled)
         {
             reconnectionScheduled = true;
-            ScheduledExecutorService reconnectThread = Executors.newScheduledThreadPool(1);
-            reconnectThread.schedule(new ReconnectionTask(throwable, this.listener, this.connectionId), 0, TimeUnit.MILLISECONDS);
+            scheduledExecutorService.schedule(new ReconnectionTask(throwable, this.listener, this.connectionId), 0, TimeUnit.MILLISECONDS);
         }
     }
 

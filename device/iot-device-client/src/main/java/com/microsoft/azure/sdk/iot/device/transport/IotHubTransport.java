@@ -311,7 +311,7 @@ public class IotHubTransport implements IotHubListener
         this.taskScheduler.shutdown();
 
         //Codes_SRS_IOTHUBTRANSPORT_34_024: [This function shall close the connection.]
-        this.iotHubTransportConnection.close();
+        this.iotHubTransportConnection.close(false);
 
         //Codes_SRS_IOTHUBTRANSPORT_34_025: [This function shall invoke updateStatus with status DISCONNECTED and the
         // supplied reason and cause.]
@@ -756,7 +756,7 @@ public class IotHubTransport implements IotHubListener
         try
         {
             //Codes_SRS_IOTHUBTRANSPORT_34_061: [This function shall close the saved connection, and then invoke openConnection and return null.]
-            this.iotHubTransportConnection.close();
+            this.iotHubTransportConnection.close(true);
             this.openConnection();
         }
         catch (TransportException newTransportException)

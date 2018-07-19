@@ -554,7 +554,7 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
-        connection.close();
+        connection.close(false);
 
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.DISCONNECTED;
         IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
@@ -622,7 +622,7 @@ public class MqttIotHubConnectionTest
         //act
         try
         {
-            connection.close();
+            connection.close(false);
         }
         catch (TransportException e)
         {
@@ -642,7 +642,7 @@ public class MqttIotHubConnectionTest
         baseExpectations();
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
-        connection.close();
+        connection.close(false);
 
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.DISCONNECTED;
         IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
@@ -671,8 +671,8 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue);
-        connection.close();
-        connection.close();
+        connection.close(false);
+        connection.close(false);
 
         new Verifications()
         {
@@ -827,7 +827,7 @@ public class MqttIotHubConnectionTest
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
 
         connection.open(mockedQueue);
-        connection.close();
+        connection.close(false);
         connection.sendMessage(mockedMessage);
     }
 

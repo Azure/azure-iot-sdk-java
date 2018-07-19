@@ -121,6 +121,9 @@ public class AmqpsIotHubConnectionTest {
     protected ExecutorService mockExecutorService;
 
     @Mocked
+    protected ScheduledExecutorService mockScheduledExecutorService;
+
+    @Mocked
     protected Delivery mockDelivery;
 
     @Mocked
@@ -861,7 +864,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        connection.close();
+        connection.close(false);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to DISCONNECTED.]
@@ -892,8 +895,9 @@ public class AmqpsIotHubConnectionTest {
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Deencapsulation.setField(connection, "connection", mockConnection);
         Deencapsulation.setField(connection, "executorService", mockExecutorService);
+        Deencapsulation.setField(connection, "scheduledExecutorService", mockScheduledExecutorService);
 
-        connection.close();
+        connection.close(false);
 
         IotHubConnectionStatus actualState = Deencapsulation.getField(connection, "state");
         assertEquals(IotHubConnectionStatus.DISCONNECTED, actualState);
@@ -904,6 +908,8 @@ public class AmqpsIotHubConnectionTest {
                 mockConnection.close();
                 times = 1;
                 mockExecutorService.shutdown();
+                times = 1;
+                mockScheduledExecutorService.shutdownNow();
                 times = 1;
             }
         };
@@ -931,7 +937,7 @@ public class AmqpsIotHubConnectionTest {
         Deencapsulation.setField(connection, "connection", mockConnection);
         Deencapsulation.setField(connection, "executorService", mockExecutorService);
 
-        connection.close();
+        connection.close(false);
 
         IotHubConnectionStatus actualState = Deencapsulation.getField(connection, "state");
         assertEquals(IotHubConnectionStatus.DISCONNECTED, actualState);
@@ -946,6 +952,8 @@ public class AmqpsIotHubConnectionTest {
                 mockExecutorService.shutdown();
                 times = 1;
                 mockExecutorService.shutdownNow();
+                times = 1;
+                mockScheduledExecutorService.shutdownNow();
                 times = 1;
             }
         };

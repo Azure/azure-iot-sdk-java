@@ -208,7 +208,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      * Closes the connection. After the connection is closed, it is no longer usable.
      * If the connection is already closed, the function shall do nothing.
      */
-    public void close() throws TransportException
+    public void close(boolean isReconnecting) throws TransportException
     {
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_007: [If the MQTT session is closed, the function shall do nothing.]
         if (this.state == IotHubConnectionStatus.DISCONNECTED)
