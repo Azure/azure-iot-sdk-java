@@ -2003,7 +2003,7 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
-        new NonStrictExpectations()
+        new NonStrictExpectations(connection)
         {
             {
                 mockEvent.getTransport();
@@ -2014,6 +2014,7 @@ public class AmqpsIotHubConnectionTest {
                 result = mockedSymbol;
                 mockedSymbol.toString();
                 result = AmqpLinkRedirectException.errorCode;
+                Deencapsulation.invoke(connection, "scheduleReconnection", new Class[] {Throwable.class}, (Throwable) any);
             }
         };
 
@@ -2024,7 +2025,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(AmqpsIotHubConnection.ReconnectionTask.class, new Class[] {Throwable.class, IotHubListener.class, String.class}, any, mockedIotHubListener, connection.getConnectionId());
+                Deencapsulation.invoke(connection, "scheduleReconnection", new Class[] {Throwable.class}, (Throwable) any);
                 times = 1;
             }
         };

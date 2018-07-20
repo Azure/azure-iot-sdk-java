@@ -28,6 +28,7 @@ import static org.junit.Assert.*;
 /**
  * Integration E2E test for Job Client on the service client.
  */
+@Ignore //ignoring these tests until icm bug 77555728 is resolved
 public class JobClientIT
 {
     private static String iotHubConnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
@@ -93,7 +94,7 @@ public class JobClientIT
         throw new IotHubException("queryDeviceJob do not find the job");
     }
 
-    @BeforeClass
+    //@BeforeClass
     public static void setUp() throws NoSuchAlgorithmException, IotHubException, IOException, URISyntaxException, InterruptedException
     {
         Map<String, String> env = System.getenv();
@@ -121,7 +122,7 @@ public class JobClientIT
         }
     }
 
-    @Before
+    //@Before
     public void cleanToStart() throws IOException, IotHubException
     {
         for (DeviceTestManager device:devices)
@@ -130,7 +131,7 @@ public class JobClientIT
         }
     }
 
-    @AfterClass
+    //@AfterClass
     public static void tearDown() throws Exception
     {
         for (DeviceTestManager device:devices)
@@ -144,6 +145,7 @@ public class JobClientIT
         }
     }
 
+    @Ignore
     @Test
     public void scheduleUpdateTwinSucceed() throws IOException, IotHubException, InterruptedException
     {
@@ -233,6 +235,7 @@ public class JobClientIT
         }
     }
 
+    @Ignore
     @Test
     public void scheduleDeviceMethodSucceed() throws IOException, IotHubException, InterruptedException
     {
@@ -311,6 +314,7 @@ public class JobClientIT
         assertEquals(0, deviceTestManger.getStatusError());
     }
 
+    @Ignore
     @Test
     public void mixScheduleInFutureSucceed() throws IOException, IotHubException, InterruptedException
     {
@@ -436,6 +440,7 @@ public class JobClientIT
         assertEquals(0, deviceTestManger.getStatusError());
     }
 
+    @Ignore
     @Test
     public void cancelScheduleDeviceMethodSucceed() throws IOException, IotHubException, InterruptedException
     {
