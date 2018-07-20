@@ -274,7 +274,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     }
 
     @Override
-    public void close()
+    public void close(boolean isReconnecting)
     {
         //Dummy call
     }

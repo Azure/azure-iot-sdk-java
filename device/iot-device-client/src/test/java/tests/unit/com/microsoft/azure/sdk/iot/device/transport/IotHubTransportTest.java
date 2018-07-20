@@ -645,7 +645,7 @@ public class IotHubTransportTest
                 Deencapsulation.invoke(transport, "invokeCallbacks");
                 times = 1;
 
-                mockedIotHubTransportConnection.close();
+                mockedIotHubTransportConnection.close(false);
                 times = 1;
 
                 Deencapsulation.invoke(transport, "updateStatus",
@@ -690,7 +690,7 @@ public class IotHubTransportTest
                 Deencapsulation.invoke(transport, "invokeCallbacks");
                 times = 0;
 
-                mockedIotHubTransportConnection.close();
+                mockedIotHubTransportConnection.close(false);
                 times = 0;
 
                 Deencapsulation.invoke(transport, "updateStatus",
@@ -1589,7 +1589,7 @@ public class IotHubTransportTest
         {
             {
                 //open and close happen with no exception
-                mockedIotHubTransportConnection.close();
+                mockedIotHubTransportConnection.close(true);
                 Deencapsulation.invoke(transport, "openConnection");
             }
         };
@@ -1614,7 +1614,7 @@ public class IotHubTransportTest
         {
             {
                 //open and close happen with no exception
-                mockedIotHubTransportConnection.close();
+                mockedIotHubTransportConnection.close(true);
                 result = mockedTransportException;
 
                 Deencapsulation.invoke(transport, "checkForUnauthorizedException", mockedTransportException);
