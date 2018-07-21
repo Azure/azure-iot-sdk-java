@@ -10,7 +10,7 @@ import java.util.concurrent.CompletableFuture;
 /**
 * A receiver is a class abstracting the methods to receive messages,
 * in order to use it for multiple endpoints, e.g. feedback endpoint,
-* “alerts” (i.e. D2C).
+* "alerts" (i.e. D2C).
 */
 public abstract class Receiver
 {
