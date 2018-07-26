@@ -9,12 +9,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.common.ErrorInjectionHelper;
 import com.microsoft.azure.sdk.iot.common.MessageAndResult;
-import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.common.iothubservices.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -29,7 +29,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -83,7 +82,7 @@ public class DeviceTwinIT
 
     // States of SDK
     private static RegistryManager registryManager;
-    private static DeviceClient deviceClient;
+    private static InternalClient internalClient;
     private static RawTwinQuery scRawTwinQueryClient;
     private static DeviceTwin sCDeviceTwin;
     private static DeviceState deviceUnderTest = null;
@@ -126,6 +125,7 @@ public class DeviceTwinIT
     class DeviceState
     {
         com.microsoft.azure.sdk.iot.service.Device sCDeviceForRegistryManager;
+        com.microsoft.azure.sdk.iot.service.Module sCModuleForRegistryManager;
         DeviceTwinDevice sCDeviceForTwin;
         DeviceExtension dCDeviceForTwin;
         OnProperty dCOnProperty = new OnProperty();
@@ -207,7 +207,7 @@ public class DeviceTwinIT
         }
     }
 
-    private void addMultipleDevices(int numberOfDevices) throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    private void addMultipleDevices(int numberOfDevices) throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         devicesUnderTest = new DeviceState[numberOfDevices];
 
@@ -216,7 +216,9 @@ public class DeviceTwinIT
             devicesUnderTest[i] = new DeviceState();
             String id = "java-device-twin-e2e-test-" + this.testInstance.protocol.toString() + UUID.randomUUID().toString();
             devicesUnderTest[i].sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(id, null, null);
+            devicesUnderTest[i].sCModuleForRegistryManager = com.microsoft.azure.sdk.iot.service.Module.createFromId(id, "module", null);
             devicesUnderTest[i].sCDeviceForRegistryManager = registryManager.addDevice(devicesUnderTest[i].sCDeviceForRegistryManager);
+            devicesUnderTest[i].sCModuleForRegistryManager = registryManager.addModule(devicesUnderTest[i].sCModuleForRegistryManager);
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
             setUpTwin(devicesUnderTest[i]);
         }
@@ -232,35 +234,70 @@ public class DeviceTwinIT
         }
     }
 
-    private void setUpTwin(DeviceState deviceState) throws IOException, URISyntaxException, IotHubException, InterruptedException
+    private void setUpTwin(DeviceState deviceState) throws IOException, URISyntaxException, IotHubException, InterruptedException, ModuleClientException
     {
         // set up twin on DeviceClient
-        if (deviceClient == null)
+        if (internalClient == null)
         {
             deviceState.dCDeviceForTwin = new DeviceExtension();
             if (this.testInstance.authenticationType == SAS)
             {
-                deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager),
-                        this.testInstance.protocol);
+                if (this.testInstance.moduleId == null)
+                {
+                    internalClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager),
+                            this.testInstance.protocol);
+                }
+                else
+                {
+                    internalClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager) + ";ModuleId=" + this.testInstance.moduleId,
+                            this.testInstance.protocol);
+                }
             }
             else if (this.testInstance.authenticationType == SELF_SIGNED)
             {
-                deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceUnderTest.sCDeviceForRegistryManager),
-                        this.testInstance.protocol,
-                        publicKeyCert,
-                        false,
-                        privateKey,
-                        false);
+                if (this.testInstance.moduleId == null)
+                {
+                    internalClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceUnderTest.sCDeviceForRegistryManager),
+                            this.testInstance.protocol,
+                            publicKeyCert,
+                            false,
+                            privateKey,
+                            false);
+                }
+                else
+                {
+                    internalClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager) + ";ModuleId=" + this.testInstance.moduleId,
+                            this.testInstance.protocol,
+                            publicKeyCert,
+                            false,
+                            privateKey,
+                            false);
+                }
             }
-            IotHubServicesCommon.openDeviceClientWithRetry(deviceClient);
-            deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
+            IotHubServicesCommon.openClientWithRetry(internalClient);
+            if (internalClient instanceof DeviceClient)
+            {
+                ((DeviceClient) internalClient).startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
+            }
+            else
+            {
+                ((ModuleClient) internalClient).startTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
+            }
             deviceState.deviceTwinStatus = STATUS.SUCCESS;
         }
 
         // set up twin on ServiceClient
         if (sCDeviceTwin != null)
         {
-            deviceState.sCDeviceForTwin = new DeviceTwinDevice(deviceState.sCDeviceForRegistryManager.getDeviceId());
+            if (testInstance.moduleId == null)
+            {
+                deviceState.sCDeviceForTwin = new DeviceTwinDevice(deviceState.sCDeviceForRegistryManager.getDeviceId());
+            }
+            else
+            {
+                deviceState.sCDeviceForTwin = new DeviceTwinDevice(deviceState.sCDeviceForRegistryManager.getDeviceId(), deviceState.sCModuleForRegistryManager.getId());
+            }
+
             sCDeviceTwin.getTwin(deviceState.sCDeviceForTwin);
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
         }
@@ -277,15 +314,15 @@ public class DeviceTwinIT
         {
             deviceState.dCDeviceForTwin.clean();
         }
-        if (deviceClient != null)
+        if (internalClient != null)
         {
-            deviceClient.closeNow();
-            deviceClient = null;
+            internalClient.closeNow();
+            internalClient = null;
         }
     }
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{1} with {2} auth")
+    @Parameterized.Parameters(name = "{2} with {3} auth using {4}")
     public static Collection setUp() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
@@ -306,26 +343,36 @@ public class DeviceTwinIT
         String deviceIdMqttX509 = "java-device-client-e2e-test-mqtt-X509".concat("-" + uuid);
         String deviceIdAmqpsX509 = "java-device-client-e2e-test-amqps-X509".concat("-" + uuid);
 
+        String moduleIdAmqps = "java-device-client-e2e-test-amqps-module".concat("-" + uuid);
+        String moduleIdAmqpsWs = "java-device-client-e2e-test-amqpsws-module".concat("-" + uuid);
+        String moduleIdMqtt = "java-device-client-e2e-test-mqtt-module".concat("-" + uuid);
+        String moduleIdMqttWs = "java-device-client-e2e-test-mqttws-module".concat("-" + uuid);
+
         return Arrays.asList(
             new Object[][]
                 {
-                    //sas token
-                    {deviceIdAmqps, AMQPS, SAS},
-                    {deviceIdAmqpsWs, AMQPS_WS, SAS},
-                    {deviceIdMqtt, MQTT, SAS},
-                    {deviceIdMqttWs,  MQTT_WS, SAS},
+                    //sas token, device client
+                    {deviceIdAmqps, null, AMQPS, SAS, "DeviceClient"},
+                    {deviceIdAmqpsWs, null, AMQPS_WS, SAS, "DeviceClient"},
+                    {deviceIdMqtt, null, MQTT, SAS, "DeviceClient"},
+                    {deviceIdMqttWs,  null, MQTT_WS, SAS, "DeviceClient"},
 
-                    //x509
-                    {deviceIdAmqpsX509, AMQPS, SELF_SIGNED},
-                    {deviceIdMqttX509, MQTT, SELF_SIGNED}
+                    //x509, device client
+                    {deviceIdAmqpsX509, null, AMQPS, SELF_SIGNED, "DeviceClient"},
+                    {deviceIdMqttX509, null, MQTT, SELF_SIGNED, "DeviceClient"},
+
+                    //sas token, module client
+                    {deviceIdAmqps, moduleIdAmqps, AMQPS, SAS, "ModuleClient"},
+                    {deviceIdAmqpsWs, moduleIdAmqpsWs, AMQPS_WS, SAS, "ModuleClient"},
+                    {deviceIdMqtt, moduleIdMqtt, MQTT, SAS, "ModuleClient"},
+                    {deviceIdMqttWs,  moduleIdMqttWs, MQTT_WS, SAS, "ModuleClient"}
                }
         );
     }
 
-    public DeviceTwinIT(String deviceId, IotHubClientProtocol protocol, AuthenticationType authenticationType)
+    public DeviceTwinIT(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType)
     {
-        super();
-        this.testInstance = new DeviceTwinIT.DeviceTwinITRunner(deviceId, protocol, authenticationType);
+        this.testInstance = new DeviceTwinIT.DeviceTwinITRunner(deviceId, moduleId, protocol, authenticationType, clientType);
     }
 
     private class DeviceTwinITRunner
@@ -333,22 +380,29 @@ public class DeviceTwinIT
         private String deviceId;
         private IotHubClientProtocol protocol;
         private AuthenticationType authenticationType;
+        private String moduleId;
 
-        public DeviceTwinITRunner(String deviceId, IotHubClientProtocol protocol, AuthenticationType authenticationType)
+        public DeviceTwinITRunner(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType)
         {
             this.deviceId = deviceId;
             this.protocol = protocol;
             this.authenticationType = authenticationType;
+            this.moduleId = moduleId;
         }
     }
 
     @Before
-    public void setUpNewDevice() throws IOException, IotHubException, NoSuchAlgorithmException, URISyntaxException, InterruptedException, GeneralSecurityException
+    public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException
     {
         deviceUnderTest = new DeviceState();
         if (this.testInstance.authenticationType == SAS)
         {
             deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(this.testInstance.deviceId, null, null);
+
+            if (this.testInstance.moduleId != null)
+            {
+                deviceUnderTest.sCModuleForRegistryManager = com.microsoft.azure.sdk.iot.service.Module.createFromId(this.testInstance.deviceId, this.testInstance.moduleId, null);
+            }
         }
         else if (this.testInstance.authenticationType == SELF_SIGNED)
         {
@@ -356,14 +410,22 @@ public class DeviceTwinIT
             deviceUnderTest.sCDeviceForRegistryManager.setThumbprint(x509Thumbprint, x509Thumbprint);
         }
         deviceUnderTest.sCDeviceForRegistryManager = registryManager.addDevice(deviceUnderTest.sCDeviceForRegistryManager);
+
+        if (deviceUnderTest.sCModuleForRegistryManager != null)
+        {
+            registryManager.addModule(deviceUnderTest.sCModuleForRegistryManager);
+        }
+
         setUpTwin(deviceUnderTest);
     }
 
     @After
-    public void tearDownNewDevice() throws IOException, IotHubException
+    public void tearDownNewDeviceAndModule() throws IOException, IotHubException
     {
         tearDownTwin(deviceUnderTest);
+
         registryManager.removeDevice(deviceUnderTest.sCDeviceForRegistryManager.getDeviceId());
+
         try
         {
             Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
@@ -384,7 +446,7 @@ public class DeviceTwinIT
 
         registryManager = null;
         sCDeviceTwin = null;
-        deviceClient = null;
+        internalClient = null;
     }
 
     private int readReportedProperties(DeviceState deviceState, String startsWithKey, String startsWithValue) throws IOException, IotHubException, InterruptedException
@@ -410,7 +472,7 @@ public class DeviceTwinIT
         // Act
         // send max_prop RP all at once
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(numOfProp);
-        deviceClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         // Assert
@@ -444,7 +506,7 @@ public class DeviceTwinIT
                     try
                     {
                         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
-                        deviceClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+                        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
                     }
                     catch (IOException e)
                     {
@@ -476,7 +538,7 @@ public class DeviceTwinIT
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
-            deviceClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+            internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
             assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
         }
@@ -493,13 +555,13 @@ public class DeviceTwinIT
         // arrange
         // send max_prop RP all at once
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
-        deviceClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         // act
         // Update RP
         deviceUnderTest.dCDeviceForTwin.updateAllExistingReportedProperties();
-        deviceClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         // assert
@@ -519,7 +581,7 @@ public class DeviceTwinIT
 
         // send max_prop RP all at once
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
-        deviceClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         // act
@@ -535,7 +597,7 @@ public class DeviceTwinIT
                     try
                     {
                         deviceUnderTest.dCDeviceForTwin.updateExistingReportedProperty(index);
-                        deviceClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+                        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
                     }
                     catch (IOException e)
                     {
@@ -567,7 +629,7 @@ public class DeviceTwinIT
         // arrange
         // send max_prop RP all at once
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
-        deviceClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         // act
@@ -575,7 +637,7 @@ public class DeviceTwinIT
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             deviceUnderTest.dCDeviceForTwin.updateExistingReportedProperty(i);
-            deviceClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+            internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
         }
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
@@ -601,7 +663,7 @@ public class DeviceTwinIT
         }
 
         // act
-        deviceClient.subscribeToDesiredProperties(deviceUnderTest.dCDeviceForTwin.getDesiredProp());
+        internalClient.subscribeToDesiredProperties(deviceUnderTest.dCDeviceForTwin.getDesiredProp());
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         Set<Pair> desiredProperties = new HashSet<>();
@@ -645,7 +707,7 @@ public class DeviceTwinIT
         }
 
         // act
-        deviceClient.subscribeToTwinDesiredProperties(desiredPropertiesCB);
+        internalClient.subscribeToTwinDesiredProperties(desiredPropertiesCB);
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         Set<Pair> desiredProperties = new HashSet<>();
@@ -680,7 +742,7 @@ public class DeviceTwinIT
             deviceUnderTest.dCDeviceForTwin.propertyStateList.add(propertyState);
             desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>(deviceUnderTest.dCOnProperty, propertyState));
         }
-        deviceClient.subscribeToTwinDesiredProperties(desiredPropertiesCB);
+        internalClient.subscribeToTwinDesiredProperties(desiredPropertiesCB);
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         Set<Pair> desiredProperties = new HashSet<>();
@@ -699,7 +761,15 @@ public class DeviceTwinIT
         }
 
         // act
-        deviceClient.getDeviceTwin();
+        if (internalClient instanceof DeviceClient)
+        {
+            ((DeviceClient)internalClient).getDeviceTwin();
+        }
+        else
+        {
+            ((ModuleClient)internalClient).getTwin();
+        }
+
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         // assert
@@ -729,7 +799,7 @@ public class DeviceTwinIT
         }
 
         // act
-        deviceClient.subscribeToDesiredProperties(deviceUnderTest.dCDeviceForTwin.getDesiredProp());
+        internalClient.subscribeToDesiredProperties(deviceUnderTest.dCDeviceForTwin.getDesiredProp());
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
@@ -785,7 +855,7 @@ public class DeviceTwinIT
         }
 
         // act
-        deviceClient.subscribeToDesiredProperties(deviceUnderTest.dCDeviceForTwin.getDesiredProp());
+        internalClient.subscribeToDesiredProperties(deviceUnderTest.dCDeviceForTwin.getDesiredProp());
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
@@ -807,7 +877,7 @@ public class DeviceTwinIT
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testAddTagUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    public void testAddTagUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
 
@@ -838,7 +908,7 @@ public class DeviceTwinIT
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testUpdateTagUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    public void testUpdateTagUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
 
@@ -904,7 +974,7 @@ public class DeviceTwinIT
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testUpdateDesiredUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    public void testUpdateDesiredUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
 
@@ -972,7 +1042,7 @@ public class DeviceTwinIT
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testGetTwinUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    public void testGetTwinUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
 
@@ -1036,7 +1106,7 @@ public class DeviceTwinIT
     }
 
     @Test
-    public void testRawQueryTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    public void testRawQueryTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
         Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
@@ -1070,7 +1140,7 @@ public class DeviceTwinIT
     }
 
     @Test
-    public void testRawQueryMultipleInParallelTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    public void testRawQueryMultipleInParallelTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
         final Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
@@ -1176,7 +1246,7 @@ public class DeviceTwinIT
     }
 
     @Test
-    public void testQueryTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    public void testQueryTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
 
@@ -1211,7 +1281,7 @@ public class DeviceTwinIT
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void testQueryTwinWithContinuationToken() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    public void testQueryTwinWithContinuationToken() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(PAGE_SIZE + 1);
 
@@ -1222,7 +1292,17 @@ public class DeviceTwinIT
 
         // Query multiple devices having same property
         final String where = "is_defined(properties.desired." + queryProperty + ")";
-        SqlQuery sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, where, null);
+
+        SqlQuery sqlQuery;
+        if (this.testInstance.moduleId != null)
+        {
+            sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.MODULES, where, null);
+        }
+        else
+        {
+            sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, where, null);
+        }
+
         Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
         QueryCollection twinQueryCollection = sCDeviceTwin.queryTwinCollection(sqlQuery.getQuery(), PAGE_SIZE);
 
@@ -1286,7 +1366,7 @@ public class DeviceTwinIT
     }
 
     @Test
-    public void testMultipleQueryTwinInParallel() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException
+    public void testMultipleQueryTwinInParallel() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
 
@@ -2014,7 +2094,7 @@ public class DeviceTwinIT
             }
         };
 
-        this.deviceClient.registerConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
+        this.internalClient.registerConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
     }
 
     private void errorInjectionSendReportedPropertiesFlow(Message errorInjectionMessage) throws Exception
@@ -2027,8 +2107,7 @@ public class DeviceTwinIT
         // Act
         errorInjectionMessage.setExpiryTime(100);
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
-        IotHubServicesCommon.sendMessageAndWaitForResponse(
-                deviceClient,
+        IotHubServicesCommon.sendMessageAndWaitForResponse(internalClient,
                 errorInjectionMsgAndRet,
                 RETRY_MILLISECONDS,
                 SEND_TIMEOUT_MILLISECONDS,
@@ -2038,7 +2117,7 @@ public class DeviceTwinIT
         IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
         // add one new reported property
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
-        deviceClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         assertEquals(STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
@@ -2057,8 +2136,7 @@ public class DeviceTwinIT
         // Act
         errorInjectionMessage.setExpiryTime(100);
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
-        IotHubServicesCommon.sendMessageAndWaitForResponse(
-                deviceClient,
+        IotHubServicesCommon.sendMessageAndWaitForResponse(internalClient,
                 errorInjectionMsgAndRet,
                 RETRY_MILLISECONDS,
                 SEND_TIMEOUT_MILLISECONDS,
@@ -2092,8 +2170,7 @@ public class DeviceTwinIT
         // Act
         errorInjectionMessage.setExpiryTime(100);
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
-        IotHubServicesCommon.sendMessageAndWaitForResponse(
-                deviceClient,
+        IotHubServicesCommon.sendMessageAndWaitForResponse(internalClient,
                 errorInjectionMsgAndRet,
                 RETRY_MILLISECONDS,
                 SEND_TIMEOUT_MILLISECONDS,
@@ -2107,7 +2184,15 @@ public class DeviceTwinIT
             propertyState.propertyNewVersion = -1;
         }
 
-        deviceClient.getDeviceTwin();
+        if (internalClient instanceof DeviceClient)
+        {
+            ((DeviceClient)internalClient).getDeviceTwin();
+        }
+        else
+        {
+            ((ModuleClient)internalClient).getTwin();
+        }
+
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);

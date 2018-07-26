@@ -10,11 +10,10 @@ import com.microsoft.azure.sdk.iot.common.EventCallback;
 import com.microsoft.azure.sdk.iot.common.Success;
 import com.microsoft.azure.sdk.iot.common.iothubservices.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
@@ -59,8 +58,12 @@ public class ReceiveMessagesIT
     private static String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
     private static RegistryManager registryManager;
+
     private static Device device;
     private static Device deviceX509;
+
+    private static Module module;
+    private static Module moduleX509;
 
     private static ServiceClient serviceClient;
 
@@ -75,8 +78,8 @@ public class ReceiveMessagesIT
     private ReceiveMessagesITRunner testInstance;
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{1} with {3} auth")
-    public static Collection inputs() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException
+    @Parameterized.Parameters(name = "{1} with {3} auth using {4}")
+    public static Collection inputs() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         X509Cert cert = new X509Cert(0, false, "TestLeaf", "TestRoot");
@@ -87,15 +90,30 @@ public class ReceiveMessagesIT
         String uuid = UUID.randomUUID().toString();
 
         String deviceId = "java-device-client-e2e-test-receive-messages".concat("-" + uuid);
-        String x509DeviceId = "java-device-client-e2e-test-receive-messages-x509".concat("-" + uuid);
+        String deviceIdX509 = "java-device-client-e2e-test-receive-messages-x509".concat("-" + uuid);
+        String moduleId = "java-module-client-e2e-test-send-messages".concat("-" + uuid);
+        String moduleIdX509 = "java-module-client-e2e-test-send-messages-X509".concat("-" + uuid);
 
         device = Device.createFromId(deviceId, null, null);
-        deviceX509 = Device.createDevice(x509DeviceId, SELF_SIGNED);
+        deviceX509 = Device.createDevice(deviceIdX509, SELF_SIGNED);
+
+        module = Module.createFromId(deviceId, moduleId, null);
+        moduleX509 = Module.createModule(deviceIdX509, moduleIdX509, SELF_SIGNED);
 
         deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+
+        module = Module.createFromId(deviceId, moduleId, null);
+        moduleX509 = Module.createModule(deviceIdX509, moduleIdX509, SELF_SIGNED);
+
+        deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
 
         registryManager.addDevice(device);
         registryManager.addDevice(deviceX509);
+
+        registryManager.addModule(module);
+        registryManager.addModule(moduleX509);
 
         messageProperties = new HashMap<>(3);
         messageProperties.put("name1", "value1");
@@ -109,38 +127,52 @@ public class ReceiveMessagesIT
                 new Object[][]
                 {
                     //sas token
-                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), HTTPS), HTTPS, device, SAS},
-                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT), MQTT, device, SAS},
-                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT_WS), MQTT_WS, device, SAS},
-                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS), AMQPS, device, SAS},
-                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), HTTPS), HTTPS, device, null, SAS, "DeviceClient"},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT), MQTT, device, null, SAS, "DeviceClient"},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT_WS), MQTT_WS, device, null, SAS, "DeviceClient"},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS), AMQPS, device, null, SAS, "DeviceClient"},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, null, SAS, "DeviceClient"},
 
                     //x509
-                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), HTTPS, publicKeyCert, false, privateKey, false), HTTPS, deviceX509, SELF_SIGNED},
-                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), MQTT, publicKeyCert, false, privateKey, false), MQTT, deviceX509, SELF_SIGNED},
-                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceX509, SELF_SIGNED}
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), HTTPS, publicKeyCert, false, privateKey, false), HTTPS, deviceX509, null, SELF_SIGNED, "DeviceClient"},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), MQTT, publicKeyCert, false, privateKey, false), MQTT, deviceX509, null, SELF_SIGNED, "DeviceClient"},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceX509, null, SELF_SIGNED, "DeviceClient"},
+
+                    //sas token module client
+                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), MQTT), MQTT, device, module, SAS, "ModuleClient"},
+                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), MQTT_WS), MQTT_WS, device, module, SAS, "ModuleClient"},
+                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), AMQPS), AMQPS, device, module, SAS, "ModuleClient"},
+                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), AMQPS_WS), AMQPS_WS, device, module, SAS, "ModuleClient"},
+
+                    //x509 module client
+                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), MQTT, publicKeyCert, false, privateKey, false), MQTT, deviceX509, moduleX509, SELF_SIGNED, "ModuleClient"},
+                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceX509, moduleX509, SELF_SIGNED, "ModuleClient"},
                 }
         );
     }
 
-    public ReceiveMessagesIT(DeviceClient deviceClient, IotHubClientProtocol protocol, Device device, AuthenticationType authenticationType)
+    public ReceiveMessagesIT(InternalClient client, IotHubClientProtocol protocol, Device device, Module module, AuthenticationType authenticationType, String clientType)
     {
-        this.testInstance = new ReceiveMessagesITRunner(deviceClient, protocol, device, authenticationType);
+        this.testInstance = new ReceiveMessagesITRunner(client, protocol, device, module, authenticationType, clientType);
     }
 
     private class ReceiveMessagesITRunner
     {
-        private DeviceClient deviceClient;
+        private InternalClient client;
         private IotHubClientProtocol protocol;
         private Device device;
+        private Module module;
         private AuthenticationType authenticationType;
+        private String clientType;
 
-        public ReceiveMessagesITRunner(DeviceClient deviceClient, IotHubClientProtocol protocol, Device device, AuthenticationType authenticationType)
+        public ReceiveMessagesITRunner(InternalClient client, IotHubClientProtocol protocol, Device device, Module module, AuthenticationType authenticationType, String clientType)
         {
-            this.deviceClient = deviceClient;
+            this.client = client;
             this.protocol = protocol;
             this.device = device;
+            this.module = module;
             this.authenticationType = authenticationType;
+            this.clientType = clientType;
         }
     }
 
@@ -175,10 +207,10 @@ public class ReceiveMessagesIT
     {
         if (testInstance.protocol == HTTPS)
         {
-            testInstance.deviceClient.setOption(SET_MINIMUM_POLLING_INTERVAL, ONE_SECOND_POLLING_INTERVAL);
+            testInstance.client.setOption(SET_MINIMUM_POLLING_INTERVAL, ONE_SECOND_POLLING_INTERVAL);
         }
 
-        IotHubServicesCommon.openDeviceClientWithRetry(testInstance.deviceClient);
+        IotHubServicesCommon.openClientWithRetry(testInstance.client);
 
         com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
 
@@ -188,13 +220,29 @@ public class ReceiveMessagesIT
         }
 
         Success messageReceived = new Success();
-        testInstance.deviceClient.setMessageCallback(callback, messageReceived);
 
-        sendMessageToDevice(testInstance.device.getDeviceId(), testInstance.protocol.toString());
+        if (testInstance.client instanceof DeviceClient)
+        {
+            ((DeviceClient) testInstance.client).setMessageCallback(callback, messageReceived);
+        }
+        else if (testInstance.client instanceof ModuleClient)
+        {
+            ((ModuleClient) testInstance.client).setMessageCallback(callback, messageReceived);
+        }
+
+        if (testInstance.client instanceof DeviceClient)
+        {
+            sendMessageToDevice(testInstance.device.getDeviceId(), testInstance.protocol.toString());
+        }
+        else if (testInstance.client instanceof ModuleClient)
+        {
+            sendMessageToModule(testInstance.device.getDeviceId(), testInstance.module.getId(), testInstance.protocol.toString());
+        }
+
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
 
         Thread.sleep(200);
-        testInstance.deviceClient.closeNow();
+        testInstance.client.closeNow();
     }
 
     @Test (timeout = DEFAULT_TEST_TIMEOUT)
@@ -414,11 +462,19 @@ public class ReceiveMessagesIT
         List<CompletableFuture<Void>> futureList = new ArrayList<>();
 
         // set device to receive back to back different commands using AMQPS protocol
-        IotHubServicesCommon.openDeviceClientWithRetry(testInstance.deviceClient);
+        IotHubServicesCommon.openClientWithRetry(testInstance.client);
 
         // set call back for device client for receiving message
         com.microsoft.azure.sdk.iot.device.MessageCallback callBackOnRx = new MessageCallbackForBackToBackC2DMessages();
-        testInstance.deviceClient.setMessageCallback(callBackOnRx, null);
+
+        if (testInstance.client instanceof DeviceClient)
+        {
+            ((DeviceClient) testInstance.client).setMessageCallback(callBackOnRx, null);
+        }
+        else if (testInstance.client instanceof ModuleClient)
+        {
+            ((ModuleClient) testInstance.client).setMessageCallback(callBackOnRx, null);
+        }
 
         // send back to back unique commands from service client using sendAsync operation.
         for (int i = 0; i < MAX_COMMANDS_TO_SEND; i++)
@@ -451,14 +507,14 @@ public class ReceiveMessagesIT
 
         // Now wait for messages to be received in the device client
         waitForBackToBackC2DMessagesToBeReceived();
-        testInstance.deviceClient.closeNow(); //close the device client connection
+        testInstance.client.closeNow(); //close the device client connection
         assertTrue(testInstance.protocol + ", " + testInstance.authenticationType + ": Received messages don't match up with sent messages", messageIdListStoredOnReceive.containsAll(messageIdListStoredOnC2DSend)); // check if the received list is same as the actual list that was created on sending the messages
     }
 
     private void errorInjectionTestFlow(Message errorInjectionMessage) throws IOException, IotHubException, InterruptedException
     {
         final ArrayList<IotHubConnectionStatus> connectionStatusUpdates = new ArrayList<>();
-        testInstance.deviceClient.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback()
+        testInstance.client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback()
         {
             @Override
             public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
@@ -467,7 +523,7 @@ public class ReceiveMessagesIT
             }
         }, null);
 
-        IotHubServicesCommon.openDeviceClientWithRetry(testInstance.deviceClient);
+        IotHubServicesCommon.openClientWithRetry(testInstance.client);
 
         com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
 
@@ -477,23 +533,38 @@ public class ReceiveMessagesIT
         }
 
         Success messageReceived = new Success();
-        testInstance.deviceClient.setMessageCallback(callback, messageReceived);
+        if (testInstance.client instanceof DeviceClient)
+        {
+            ((DeviceClient) testInstance.client).setMessageCallback(callback, messageReceived);
+        }
+        else if (testInstance.client instanceof ModuleClient)
+        {
+            ((ModuleClient) testInstance.client).setMessageCallback(callback, messageReceived);
+        }
 
         //error injection message is not guaranteed to be ack'd by service so it may be re-sent. By setting expiry time,
         // we ensure that error injection message isn't resent to service too many times. The message will still likely
         // be sent 3 or 4 times causing 3 or 4 disconnections, but the test should recover anyways.
         errorInjectionMessage.setExpiryTime(200);
-        testInstance.deviceClient.sendEventAsync(errorInjectionMessage, new EventCallback(null), null);
+        testInstance.client.sendEventAsync(errorInjectionMessage, new EventCallback(null), null);
 
         //wait to send the message because we want to ensure that the tcp connection drop happens beforehand and we
         // want the connection to be re-established before sending anything from service client
         IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT);
 
-        sendMessageToDevice(testInstance.device.getDeviceId(), testInstance.protocol.toString());
+        if (testInstance.client instanceof DeviceClient)
+        {
+            sendMessageToDevice(testInstance.device.getDeviceId(), testInstance.protocol.toString());
+        }
+        else if (testInstance.client instanceof ModuleClient)
+        {
+            sendMessageToModule(testInstance.device.getDeviceId(), testInstance.module.getId(), testInstance.protocol.toString());
+        }
+
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
 
         Thread.sleep(200);
-        testInstance.deviceClient.closeNow();
+        testInstance.client.closeNow();
 
         assertTrue(testInstance.protocol + ", " + testInstance.authenticationType + ": Error Injection message did not cause service to drop TCP connection", connectionStatusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING));
     }
@@ -580,6 +651,17 @@ public class ReceiveMessagesIT
         serviceMessage.setProperties(messageProperties);
         serviceClient.open();
         serviceClient.send(deviceId, serviceMessage);
+    }
+
+    private void sendMessageToModule(String deviceId, String moduleId, String protocolName) throws IotHubException, IOException
+    {
+        String messageString = "Java service e2e test message to be received over " + protocolName + " protocol";
+        com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(messageString);
+        serviceMessage.setCorrelationId(expectedCorrelationId);
+        serviceMessage.setMessageId(expectedMessageId);
+        serviceMessage.setProperties(messageProperties);
+        serviceClient.open();
+        serviceClient.send(deviceId, moduleId, serviceMessage);
     }
 
     private void waitForMessageToBeReceived(Success messageReceived, String protocolName)

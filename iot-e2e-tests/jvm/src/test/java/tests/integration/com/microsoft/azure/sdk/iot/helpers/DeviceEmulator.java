@@ -7,13 +7,10 @@ package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.common.MessageAndResult;
 import com.microsoft.azure.sdk.iot.common.iothubservices.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -21,8 +18,6 @@ import java.net.URISyntaxException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-
-import static junit.framework.TestCase.fail;
 
 /**
  * Implement a fake device to the end to end test.
@@ -42,7 +37,7 @@ public class DeviceEmulator  implements Runnable
 
     private enum LIGHTS{ ON, OFF, DISABLED }
 
-    private DeviceClient deviceClient;
+    private InternalClient client;
     private DeviceStatus deviceStatus = new DeviceStatus();
     private ConcurrentMap<String, ConcurrentLinkedQueue<Object>> twinChanges = new ConcurrentHashMap<>();
     private Boolean stopDevice = false;
@@ -59,34 +54,13 @@ public class DeviceEmulator  implements Runnable
      * Creates a new instance of the device emulator, and connect it to the IoTHub using the provided connectionString
      * and protocol.
      *
-     * @param connectionString is the string that identify the device in the IoTHub
-     * @param protocol is the desired protocol for the transport layer (HTTPS, AMQPS, MQTT, or AMQPS_WS)
      * @throws URISyntaxException if the DeviceClient cannot resolve the URI.
      * @throws IOException if the DeviceClient cannot open the connection with the IoTHub.
      * @throws InterruptedException if the thread had issue to wait for the open connection.
      */
-    DeviceEmulator(String connectionString, IotHubClientProtocol protocol) throws URISyntaxException, IOException, InterruptedException
+    DeviceEmulator(InternalClient client) throws URISyntaxException, IOException, InterruptedException
     {
-        this.deviceClient = new DeviceClient(connectionString, protocol);
-        clearStatistics();
-        IotHubServicesCommon.openDeviceClientWithRetry(deviceClient);
-    }
-
-    /**
-     * CONSTRUCTOR
-     * Creates a new instance of the device emulator, and connect it to the IoTHub using the provided connectionString, protocol, and x509 keys.
-     *
-     * @param connectionString is the string that identify the device in the IoTHub
-     * @param protocol is the desired protocol for the transport layer (HTTPS, AMQPS, MQTT, or AMQPS_WS)
-     * @throws URISyntaxException if the DeviceClient cannot resolve the URI.
-     * @throws IOException if the DeviceClient cannot open the connection with the IoTHub.
-     * @throws InterruptedException if the thread had issue to wait for the open connection.
-     */
-    DeviceEmulator(String connectionString, IotHubClientProtocol protocol, String publicKeyCert, String privateKey) throws URISyntaxException, IOException, InterruptedException
-    {
-        this.deviceClient = new DeviceClient(connectionString, protocol, publicKeyCert, false, privateKey, false);
-        clearStatistics();
-        IotHubServicesCommon.openDeviceClientWithRetry(deviceClient);
+        this.client = client;
     }
 
     @Override
@@ -107,19 +81,43 @@ public class DeviceEmulator  implements Runnable
         }
     }
 
+    void start()
+    {
+        try
+        {
+            if (this.client != null)
+            {
+                this.client.closeNow();
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        clearStatistics();
+
+        if (this.client != null)
+        {
+            IotHubServicesCommon.openClientWithRetry(this.client);
+        }
+    }
+
     /**
      * Ends the DeviceClient connection and destroy the thread.
      * @throws IOException if the DeviceClient cannot close the connection with the IoTHub.
      */
     void stop() throws IOException
     {
-        deviceClient.close();
+        if (this.client != null)
+        {
+            this.client.closeNow();
+        }
         stopDevice = true;
     }
 
     /**
      * Enable device method on this device using the local callbacks.
-     * @throws IOException if the deviceClient failed to subscribe on the device method.
+     * @throws IOException if the client failed to subscribe on the device method.
      */
     void enableDeviceMethod() throws IOException
     {
@@ -137,7 +135,7 @@ public class DeviceEmulator  implements Runnable
      *                                   DeviceStatusCallback.
      * @param deviceMethodStatusCallbackContext is the context for the deviceMethodStatusCallback.Only used if the
      *                                    deviceMethodStatusCallback is not null.
-     * @throws IOException if the deviceClient failed to subscribe on the device method.
+     * @throws IOException if the client failed to subscribe on the device method.
      */
     void enableDeviceMethod(
             DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext,
@@ -166,9 +164,18 @@ public class DeviceEmulator  implements Runnable
             this.deviceMethodStatusCallbackContext = deviceMethodStatusCallbackContext;
         }
 
-        deviceClient.subscribeToDeviceMethod(
-                this.deviceMethodCallback, this.deviceMethodCallbackContext,
-                this.deviceMethodStatusCallback, this.deviceMethodStatusCallbackContext);
+        if (client instanceof DeviceClient)
+        {
+            ((DeviceClient)client).subscribeToDeviceMethod(
+                    this.deviceMethodCallback, this.deviceMethodCallbackContext,
+                    this.deviceMethodStatusCallback, this.deviceMethodStatusCallbackContext);
+        }
+        else if (client instanceof ModuleClient)
+        {
+            ((ModuleClient)client).subscribeToMethod(
+                    this.deviceMethodCallback, this.deviceMethodCallbackContext,
+                    this.deviceMethodStatusCallback, this.deviceMethodStatusCallbackContext);
+        }
     }
 
     /**
@@ -212,17 +219,24 @@ public class DeviceEmulator  implements Runnable
             propertyCallBackContext = twinChanges;
         }
 
-        deviceClient.startDeviceTwin(deviceTwinStatusCallBack, deviceTwinStatusCallbackContext, deviceTwin, propertyCallBackContext);
+        if (client instanceof DeviceClient)
+        {
+            ((DeviceClient)client).startDeviceTwin(deviceTwinStatusCallBack, deviceTwinStatusCallbackContext, deviceTwin, propertyCallBackContext);
+        }
+        else if (client instanceof ModuleClient)
+        {
+            ((ModuleClient)client).startTwin(deviceTwinStatusCallBack, deviceTwinStatusCallbackContext, deviceTwin, propertyCallBackContext);
+        }
 
         if(mustSubscribeToDesiredProperties)
         {
-            deviceClient.subscribeToDesiredProperties(null);
+            client.subscribeToDesiredProperties(null);
         }
     }
 
     public void sendMessageAndWaitForResponse(MessageAndResult messageAndResult, int RETRY_MILLISECONDS, int SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
     {
-        IotHubServicesCommon.sendMessageAndWaitForResponse(this.deviceClient, messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
+        IotHubServicesCommon.sendMessageAndWaitForResponse(this.client, messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
     }
 
     /**
@@ -259,7 +273,7 @@ public class DeviceEmulator  implements Runnable
         return deviceStatus.statusError;
     }
 
-    DeviceClient getDeviceClient() {return deviceClient;}
+    InternalClient getClient() {return client;}
 
     private class DeviceStatus
     {
@@ -278,9 +292,11 @@ public class DeviceEmulator  implements Runnable
                 case OK:
                 case OK_EMPTY:
                     deviceStatus.statusOk++;
+                    System.out.println("status ok received");
                     break;
                 default:
                     deviceStatus.statusError++;
+                    System.out.println("status error received");
                     break;
             }
         }

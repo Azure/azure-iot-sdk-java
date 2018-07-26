@@ -23,6 +23,7 @@ public class SqlQuery
     public enum FromType
     {
         DEVICES("devices"),
+        MODULES("devices.modules"),
         JOBS("devices.jobs");
 
         private final String type;

@@ -8,11 +8,11 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 import com.microsoft.azure.sdk.iot.common.ErrorInjectionHelper;
 import com.microsoft.azure.sdk.iot.common.MessageAndResult;
 import com.microsoft.azure.sdk.iot.common.iothubservices.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
-import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
@@ -39,7 +39,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.*;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static org.junit.Assert.*;
 
 /**
@@ -57,20 +58,17 @@ public class DeviceMethodIT
     private static DeviceMethod methodServiceClient;
     private static RegistryManager registryManager;
 
-    //private static final int MAX_DEVICES = 1;
+    private static Device device;
+    private static Module module;
 
-    private static final String DEVICE_ID_NAME = "E2EJavaMethodMqtt";
+    private static Device deviceX509;
+    private static Module moduleX509;
 
     private static final Long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(200);
     private static final Long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toSeconds(5);
     private static final String PAYLOAD_STRING = "This is a valid payload";
 
-    private static DeviceTestManager deviceTestManagerAmqps;
-    private static DeviceTestManager deviceTestManagerMqtt;
-    private static DeviceTestManager deviceTestManagerAmqpsWs;
-    private static DeviceTestManager deviceTestManagerMqttWs;
-    private static DeviceTestManager x509deviceTestManagerMqtt;
-    private static DeviceTestManager x509deviceTestManagerAmqps;
+    private static ArrayList<DeviceTestManager> deviceTestManagers;
 
     private static final int NUMBER_INVOKES_PARALLEL = 10;
     private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
@@ -85,8 +83,8 @@ public class DeviceMethodIT
     private static final long ERROR_INJECTION_EXECUTION_TIMEOUT = 2* 60 * 1000; // 2 minute
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{1} with {2} auth")
-    public static Collection inputs() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, InterruptedException
+    @Parameterized.Parameters(name = "{1} with {2} auth using {3}")
+    public static Collection inputs() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, InterruptedException, ModuleClientException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         X509Cert cert = new X509Cert(0, false, "TestLeaf", "TestRoot");
@@ -98,40 +96,86 @@ public class DeviceMethodIT
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
         String uuid = UUID.randomUUID().toString();
-        deviceTestManagerAmqps = new DeviceTestManager(registryManager, "java-device-client-e2e-test-amqps".concat("-" + uuid), IotHubClientProtocol.AMQPS);
-        deviceTestManagerAmqpsWs = new DeviceTestManager(registryManager, "java-device-client-e2e-test-amqpsws".concat("-" + uuid), AMQPS_WS);
-        deviceTestManagerMqtt = new DeviceTestManager(registryManager, "java-device-client-e2e-test-mqtt".concat("-" + uuid), IotHubClientProtocol.MQTT);
-        deviceTestManagerMqttWs = new DeviceTestManager(registryManager,"java-device-client-e2e-test-mqttws".concat("-" + uuid),IotHubClientProtocol.MQTT_WS);
-        x509deviceTestManagerAmqps = new DeviceTestManager(registryManager,
-                "java-device-client-e2e-test-amqps-x509".concat("-" + uuid),
-                IotHubClientProtocol.AMQPS,
-                publicKeyCert,
-                privateKey,
-                x509Thumbprint);
-        x509deviceTestManagerMqtt = new DeviceTestManager(registryManager,
-                "java-device-client-e2e-test-mqtt-x509".concat("-" + uuid),
-                IotHubClientProtocol.MQTT,
-                publicKeyCert,
-                privateKey,
-                x509Thumbprint);
+        deviceTestManagers = new ArrayList<>();
 
-        return Arrays.asList(
-            new Object[][]
+        String TEST_UUID = UUID.randomUUID().toString();
+
+        /* Create unique device name */
+        String deviceId = "java-method-e2e-test-device".concat("-" + TEST_UUID);
+        String moduleId = "java-method-e2e-test-module".concat("-" + TEST_UUID);
+        String deviceX509Id = "java-method-e2e-test-device-x509".concat("-" + TEST_UUID);
+        String moduleX509Id = "java-method-e2e-test-module-x509".concat("-" + TEST_UUID);
+
+        /* Create device on the service */
+        device = Device.createFromId(deviceId, null, null);
+        module = Module.createFromId(deviceId, moduleId, null);
+
+        deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
+        deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        moduleX509 = Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
+        moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+
+        Collection<Object[]> inputs = new ArrayList<>();
+
+        /* Add devices to the IoTHub */
+        device = registryManager.addDevice(device);
+        module = registryManager.addModule(module);
+        deviceX509 = registryManager.addDevice(deviceX509);
+        moduleX509 = registryManager.addModule(moduleX509);
+
+        for (IotHubClientProtocol protocol : IotHubClientProtocol.values())
+        {
+            if (protocol != HTTPS)
             {
-                {deviceTestManagerAmqps, IotHubClientProtocol.AMQPS, AuthenticationType.SAS},
-                {deviceTestManagerAmqpsWs, AMQPS_WS, AuthenticationType.SAS},
-                {deviceTestManagerMqtt, IotHubClientProtocol.MQTT, AuthenticationType.SAS},
-                {deviceTestManagerMqttWs, IotHubClientProtocol.MQTT_WS, AuthenticationType.SAS},
-                {x509deviceTestManagerAmqps, IotHubClientProtocol.AMQPS, AuthenticationType.SELF_SIGNED},
-                {x509deviceTestManagerMqtt, IotHubClientProtocol.MQTT, AuthenticationType.SELF_SIGNED},
+                //sas device client
+                DeviceClient deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(device), protocol);
+                DeviceTestManager deviceClientSasTestManager = new DeviceTestManager(deviceClient);
+                deviceTestManagers.add(deviceClientSasTestManager);
+                inputs.add(makeSubArray(deviceClientSasTestManager, protocol, SAS, "DeviceClient", device, null));
+
+                //sas module client
+                ModuleClient moduleClient = new ModuleClient(registryManager.getDeviceConnectionString(device) + ";ModuleId=" + module.getId(), protocol);
+                DeviceTestManager moduleClientSasTestManager = new DeviceTestManager(moduleClient);
+                deviceTestManagers.add(moduleClientSasTestManager);
+                inputs.add(makeSubArray(moduleClientSasTestManager, protocol, SAS, "ModuleClient", device, module));
+
+
+                if (protocol != MQTT_WS && protocol != AMQPS_WS)
+                {
+                    //x509 device client
+                    DeviceClient deviceClientX509 = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, publicKeyCert, false, privateKey, false);
+                    DeviceTestManager deviceClientX509TestManager = new DeviceTestManager(deviceClientX509);
+                    deviceTestManagers.add(deviceClientX509TestManager);
+                    inputs.add(makeSubArray(deviceClientX509TestManager, protocol, SELF_SIGNED, "DeviceClient", deviceX509, null));
+
+                    //x509 module client
+                    ModuleClient moduleClientX509 = new ModuleClient(registryManager.getDeviceConnectionString(deviceX509) + ";ModuleId=" + moduleX509.getId(), protocol, publicKeyCert, false, privateKey, false);
+                    DeviceTestManager moduleClientX509TestManager = new DeviceTestManager(moduleClientX509);
+                    deviceTestManagers.add(moduleClientX509TestManager);
+                    inputs.add(makeSubArray(moduleClientX509TestManager, protocol, SELF_SIGNED, "ModuleClient", deviceX509, moduleX509));
+                }
             }
-        );
+        }
+
+        return inputs;
     }
 
-    public DeviceMethodIT(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType)
+    private static Object[] makeSubArray(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, Device device, Module module)
+    {
+        Object[] inputSubArray = new Object[6];
+        inputSubArray[0] = deviceTestManager;
+        inputSubArray[1] = protocol;
+        inputSubArray[2] = authenticationType;
+        inputSubArray[3] = clientType;
+        inputSubArray[4] = device;
+        inputSubArray[5] = module;
+        return inputSubArray;
+    }
+
+    public DeviceMethodIT(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, Device device, Module module)
     {
         super();
-        this.testInstance = new DeviceMethodITRunner(deviceTestManager, protocol, authenticationType);
+        this.testInstance = new DeviceMethodITRunner(deviceTestManager, protocol, authenticationType, clientType, device, module);
     }
 
     private class DeviceMethodITRunner
@@ -139,19 +183,48 @@ public class DeviceMethodIT
         private DeviceTestManager deviceTestManager;
         private IotHubClientProtocol protocol;
         private AuthenticationType authenticationType;
+        private String clientType;
+        private Device device;
+        private Module module;
 
-        public DeviceMethodITRunner(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType)
+        public DeviceMethodITRunner(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, Device device, Module module)
         {
             this.deviceTestManager = deviceTestManager;
             this.protocol = protocol;
             this.authenticationType = authenticationType;
+            this.clientType = clientType;
+            this.device = device;
+            this.module = module;
         }
     }
 
     @Before
     public void cleanToStart()
     {
+        try
+        {
+            this.testInstance.deviceTestManager.stop();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+
         this.testInstance.deviceTestManager.clearDevice();
+
+        try
+        {
+            this.testInstance.deviceTestManager.start();
+        }
+        catch (IOException | InterruptedException e)
+        {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
     @After
@@ -159,9 +232,10 @@ public class DeviceMethodIT
     {
         try
         {
+            this.testInstance.deviceTestManager.stop();
             Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
         }
-        catch (InterruptedException e)
+        catch (Exception e)
         {
             throw new RuntimeException(e);
         }
@@ -170,17 +244,18 @@ public class DeviceMethodIT
     protected static class RunnableInvoke implements Runnable
     {
         private String deviceId;
+        private String moduleId;
         private String testName;
         private CountDownLatch latch;
         private MethodResult result = null;
         private DeviceMethod methodServiceClient;
-
         private Exception exception = null;
 
-        RunnableInvoke(DeviceMethod methodServiceClient, String deviceId, String testName, CountDownLatch latch)
+        RunnableInvoke(DeviceMethod methodServiceClient, String deviceId, String moduleId, String testName, CountDownLatch latch)
         {
             this.methodServiceClient = methodServiceClient;
             this.deviceId = deviceId;
+            this.moduleId = moduleId;
             this.testName = testName;
             this.latch = latch;
         }
@@ -194,7 +269,15 @@ public class DeviceMethodIT
             // Act
             try
             {
-                result = methodServiceClient.invoke(deviceId, DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, testName);
+                if (moduleId != null)
+                {
+                    result = methodServiceClient.invoke(deviceId, moduleId, DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, testName);
+
+                }
+                else
+                {
+                    result = methodServiceClient.invoke(deviceId, DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, testName);
+                }
             }
             catch (Exception e)
             {
@@ -223,34 +306,12 @@ public class DeviceMethodIT
     @AfterClass
     public static void tearDown() throws Exception
     {
-        if (deviceTestManagerAmqps != null)
+        for (DeviceTestManager deviceTestManager : deviceTestManagers)
         {
-            deviceTestManagerAmqps.stop();
-        }
-
-        if (deviceTestManagerAmqpsWs != null)
-        {
-            deviceTestManagerAmqpsWs.stop();
-        }
-
-        if (deviceTestManagerMqtt != null)
-        {
-            deviceTestManagerMqtt.stop();
-        }
-
-        if (deviceTestManagerMqttWs != null)
-        {
-            deviceTestManagerMqttWs.stop();
-        }
-
-        if (x509deviceTestManagerAmqps != null)
-        {
-            x509deviceTestManagerAmqps.stop();
-        }
-
-        if (x509deviceTestManagerMqtt != null)
-        {
-            x509deviceTestManagerMqtt.stop();
+            if (deviceTestManager != null)
+            {
+                deviceTestManager.stop();
+            }
         }
 
         registryManager.close();
@@ -263,7 +324,16 @@ public class DeviceMethodIT
         DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
 
         // Act
-        MethodResult result = methodServiceClient.invoke(deviceTestManger.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        MethodResult result;
+        if (testInstance.module != null)
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), testInstance.module.getId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        }
+        else
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        }
+
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
@@ -277,13 +347,20 @@ public class DeviceMethodIT
     public void invokeMethodInvokeParallelSucceed() throws Exception
     {
         // Arrange
-        DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
         CountDownLatch cdl = new CountDownLatch(NUMBER_INVOKES_PARALLEL);
         List<RunnableInvoke> runs = new LinkedList<>();
 
         for (int i = 0; i < NUMBER_INVOKES_PARALLEL; i++)
         {
-            RunnableInvoke runnableInvoke = new RunnableInvoke(methodServiceClient, deviceTestManger.getDeviceId(), "Thread" + i, cdl);
+            RunnableInvoke runnableInvoke;
+            if (testInstance.module != null)
+            {
+                runnableInvoke = new RunnableInvoke(methodServiceClient, testInstance.device.getDeviceId(), testInstance.module.getId(),"Thread" + i, cdl);
+            }
+            else
+            {
+                runnableInvoke = new RunnableInvoke(methodServiceClient, testInstance.device.getDeviceId(), null,"Thread" + i, cdl);
+            }
             new Thread(runnableInvoke).start();
             runs.add(runnableInvoke);
         }
@@ -306,7 +383,16 @@ public class DeviceMethodIT
         DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
 
         // Act
-        MethodResult result = methodServiceClient.invoke(deviceTestManger.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, null, null, PAYLOAD_STRING);
+        MethodResult result;
+        if (testInstance.module != null)
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), testInstance.module.getId(), DeviceEmulator.METHOD_LOOPBACK, null, null, PAYLOAD_STRING);
+        }
+        else
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, null, null, PAYLOAD_STRING);
+        }
+
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
@@ -323,7 +409,15 @@ public class DeviceMethodIT
         DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
 
         // Act
-        MethodResult result = methodServiceClient.invoke(deviceTestManger.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+        MethodResult result;
+        if (testInstance.module != null)
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), testInstance.module.getId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+        }
+        else
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+        }
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
@@ -340,7 +434,15 @@ public class DeviceMethodIT
         DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
 
         // Act
-        MethodResult result = methodServiceClient.invoke(deviceTestManger.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
+        MethodResult result;
+        if (testInstance.module != null)
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), testInstance.module.getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
+        }
+        else
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
+        }
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
@@ -357,7 +459,15 @@ public class DeviceMethodIT
         DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
 
         // Act
-        MethodResult result = methodServiceClient.invoke(deviceTestManger.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        MethodResult result;
+        if (testInstance.module != null)
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), testInstance.module.getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        }
+        else
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        }
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
@@ -374,7 +484,15 @@ public class DeviceMethodIT
         DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
 
         // Act
-        MethodResult result = methodServiceClient.invoke(deviceTestManger.getDeviceId(), DeviceEmulator.METHOD_UNKNOWN, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        MethodResult result;
+        if (testInstance.module != null)
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), testInstance.module.getId(), DeviceEmulator.METHOD_UNKNOWN, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        }
+        else
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), DeviceEmulator.METHOD_UNKNOWN, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        }
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
@@ -392,7 +510,14 @@ public class DeviceMethodIT
 
         try
         {
-            methodServiceClient.invoke(deviceTestManger.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
+            if (testInstance.module != null)
+            {
+                methodServiceClient.invoke(testInstance.device.getDeviceId(), testInstance.module.getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
+            }
+            else
+            {
+                methodServiceClient.invoke(testInstance.device.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
+            }
             assert true;
         }
         catch(IotHubGatewayTimeoutException expected)
@@ -401,7 +526,15 @@ public class DeviceMethodIT
         }
 
         // Act
-        MethodResult result = methodServiceClient.invoke(deviceTestManger.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
+        MethodResult result;
+        if (testInstance.module != null)
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), testInstance.module.getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
+        }
+        else
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
+        }
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
@@ -418,7 +551,15 @@ public class DeviceMethodIT
         DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
 
         // Act
-        MethodResult result = methodServiceClient.invoke(deviceTestManger.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, null, CONNECTION_TIMEOUT, "100");
+        MethodResult result;
+        if (testInstance.module != null)
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), testInstance.module.getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, null, CONNECTION_TIMEOUT, "100");
+        }
+        else
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, null, CONNECTION_TIMEOUT, "100");
+        }
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
@@ -435,7 +576,15 @@ public class DeviceMethodIT
         DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
 
         // Act
-        MethodResult result = methodServiceClient.invoke(deviceTestManger.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, null, "100");
+        MethodResult result;
+        if (testInstance.module != null)
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), testInstance.module.getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, null, "100");
+        }
+        else
+        {
+            result = methodServiceClient.invoke(testInstance.device.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, null, "100");
+        }
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
@@ -449,19 +598,28 @@ public class DeviceMethodIT
     public void invokeMethodResponseTimeoutFailed() throws Exception
     {
         // Arrange
-        DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
-
         // Act
-        MethodResult result = methodServiceClient.invoke(deviceTestManger.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
+        if (testInstance.module != null)
+        {
+            methodServiceClient.invoke(testInstance.device.getDeviceId(), testInstance.module.getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
+        }
+        else
+        {
+            methodServiceClient.invoke(testInstance.device.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
+        }
     }
 
     @Test (expected = IotHubNotFoundException.class)
     public void invokeMethodUnknownDeviceFailed() throws Exception
     {
-        // Arrange
-
-        // Act
-        MethodResult result = methodServiceClient.invoke("UnknownDevice", DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        if (testInstance.module != null)
+        {
+            methodServiceClient.invoke(testInstance.device.getDeviceId(), "someModuleThatDoesNotExistOnADeviceThatDoesExist", DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        }
+        else
+        {
+            methodServiceClient.invoke("someDeviceThatDoesNotExist", DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        }
     }
 
     @Test
@@ -473,15 +631,18 @@ public class DeviceMethodIT
         // Act
         try
         {
-            MethodResult result = methodServiceClient.invoke(deviceTestManger.getDeviceId(), DeviceEmulator.METHOD_RESET, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
-            if (testInstance.authenticationType == AuthenticationType.SELF_SIGNED)
+            MethodResult result;
+            if (testInstance.module != null)
             {
-                deviceTestManger.restartDevice(publicKeyCert, privateKey);
+                methodServiceClient.invoke(testInstance.device.getDeviceId(), testInstance.module.getId(), DeviceEmulator.METHOD_RESET, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+                deviceTestManger.restartDevice(registryManager.getDeviceConnectionString(testInstance.device) + ";ModuleId=" + testInstance.module.getId(), testInstance.protocol, publicKeyCert, privateKey);
             }
             else
             {
-                deviceTestManger.restartDevice(null, null);
+                methodServiceClient.invoke(testInstance.device.getDeviceId(), DeviceEmulator.METHOD_RESET, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+                deviceTestManger.restartDevice(registryManager.getDeviceConnectionString(testInstance.device), testInstance.protocol, publicKeyCert, privateKey);
             }
+
             throw new Exception("Reset device do not affect the method invoke on the service");
         }
         catch (IotHubNotFoundException expected)
@@ -489,13 +650,13 @@ public class DeviceMethodIT
             // Don't do anything, expected throw.
         }
 
-        if (testInstance.authenticationType == AuthenticationType.SELF_SIGNED)
+        if (testInstance.module != null)
         {
-            deviceTestManger.restartDevice(publicKeyCert, privateKey);
+            deviceTestManger.restartDevice(registryManager.getDeviceConnectionString(testInstance.device) + ";ModuleId=" + testInstance.module.getId(), testInstance.protocol, publicKeyCert, privateKey);
         }
         else
         {
-            deviceTestManger.restartDevice(null, null);
+            deviceTestManger.restartDevice(registryManager.getDeviceConnectionString(testInstance.device), testInstance.protocol, publicKeyCert, privateKey);
         }
     }
 
@@ -721,7 +882,7 @@ public class DeviceMethodIT
             }
         };
 
-        this.testInstance.deviceTestManager.getDeviceClient().registerConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
+        this.testInstance.deviceTestManager.client.registerConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
     }
 
     private void errorInjectionTestFlow(Message errorInjectionMessage) throws Exception

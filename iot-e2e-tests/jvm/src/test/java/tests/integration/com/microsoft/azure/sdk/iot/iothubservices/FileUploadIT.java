@@ -215,7 +215,7 @@ public class FileUploadIT
     private void setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException
     {
         deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, scDevice), protocol);
-        IotHubServicesCommon.openDeviceClientWithRetry(deviceClient);
+        IotHubServicesCommon.openClientWithRetry(deviceClient);
     }
 
     private void tearDownDeviceClient() throws IOException

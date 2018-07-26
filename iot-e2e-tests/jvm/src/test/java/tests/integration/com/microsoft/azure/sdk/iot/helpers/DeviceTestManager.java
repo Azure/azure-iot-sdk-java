@@ -6,17 +6,11 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.common.MessageAndResult;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
@@ -29,90 +23,22 @@ public class DeviceTestManager
     private static final int STOP_DEVICE_TIMEOUT_IN_MILLISECONDS = 10000;
     private static final int SECOND_IN_MILLISECONDS = 1000;
 
-    private static final String DEVICE_NAME_UUID = UUID.randomUUID().toString();
-
-    /* deviceOnServiceClient is the device definition on the service `End`. */
-    private Device deviceOnServiceClient;
+    public InternalClient client;
 
     /* deviceEmulator is the device definition on the device `End`. */
     private DeviceEmulator deviceEmulator;
     private Thread deviceThread;
 
-    /* Device connection string. */
-    private String connectionString;
-    private RegistryManager registryManager;
-
-    /* Device protocol */
-    private IotHubClientProtocol protocol;
-
-    public DeviceTestManager(RegistryManager registryManager,
-                             String deviceName,
-                             IotHubClientProtocol protocol)
-            throws NoSuchAlgorithmException, IotHubException, IOException, URISyntaxException, InterruptedException
+    public DeviceTestManager(InternalClient client)
+            throws IOException, URISyntaxException, InterruptedException
     {
-        /* Create unique device name */
-        String deviceId = deviceName.concat("-" + DEVICE_NAME_UUID);
-
-        /* Create device on the service */
-        deviceOnServiceClient = Device.createFromId(deviceId, null, null);
-
-        /* Add device to the IoTHub */
-        this.registryManager = registryManager;
-        deviceOnServiceClient = registryManager.addDevice(deviceOnServiceClient);
+        this.client = client;
 
         /* Create a emulator for the device client, and connect it to the IoTHub */
-        this.connectionString = registryManager.getDeviceConnectionString(deviceOnServiceClient);
-        this.protocol = protocol;
-        deviceEmulator = new DeviceEmulator(this.connectionString, this.protocol);
-
-        /* Enable DeviceMethod on the device client using the callbacks from the DeviceEmulator */
-        deviceEmulator.enableDeviceMethod();
-
-        /* Enable DeviceTwin on the device client using the callbacks from the DeviceEmulator */
-        deviceEmulator.enableDeviceTwin();
+        deviceEmulator = new DeviceEmulator(client);
 
         deviceThread = new Thread(deviceEmulator);
         deviceThread.start();
-
-        /* Wait until the device complete the connection with the IoTHub. */
-        waitIotHub(1, OPEN_CONNECTION_TIMEOUT_IN_SECONDS);
-    }
-
-    public DeviceTestManager(RegistryManager registryManager,
-                             String deviceName,
-                             IotHubClientProtocol protocol,
-                             String publicKeyCert,
-                             String privateKey,
-                             String x509Thumbprint)
-            throws NoSuchAlgorithmException, IotHubException, IOException, URISyntaxException, InterruptedException
-    {
-        /* Create unique device name */
-        String deviceId = deviceName.concat("-" + DEVICE_NAME_UUID);
-
-        /* Create device on the service */
-        deviceOnServiceClient = Device.createDevice(deviceId, AuthenticationType.SELF_SIGNED);
-        deviceOnServiceClient.setThumbprint(x509Thumbprint, x509Thumbprint);
-
-        /* Add device to the IoTHub */
-        this.registryManager = registryManager;
-        deviceOnServiceClient = registryManager.addDevice(deviceOnServiceClient);
-
-        /* Create a emulator for the device client, and connect it to the IoTHub */
-        this.connectionString = registryManager.getDeviceConnectionString(deviceOnServiceClient);
-        this.protocol = protocol;
-        deviceEmulator = new DeviceEmulator(this.connectionString, this.protocol, publicKeyCert, privateKey);
-
-        /* Enable DeviceMethod on the device client using the callbacks from the DeviceEmulator */
-        deviceEmulator.enableDeviceMethod();
-
-        /* Enable DeviceTwin on the device client using the callbacks from the DeviceEmulator */
-        deviceEmulator.enableDeviceTwin();
-
-        deviceThread = new Thread(deviceEmulator);
-        deviceThread.start();
-
-        /* Wait until the device complete the connection with the IoTHub. */
-        waitIotHub(1, OPEN_CONNECTION_TIMEOUT_IN_SECONDS);
     }
 
     public void waitIotHub(int numberOfEvents, long timeoutInSeconds) throws InterruptedException, IOException
@@ -133,20 +59,28 @@ public class DeviceTestManager
         this.deviceEmulator.clearStatistics();
     }
 
-    public String getDeviceId()
+    public void start() throws IOException, InterruptedException
     {
-        return this.deviceOnServiceClient.getDeviceId();
+        this.deviceEmulator.start();
+
+        /* Enable DeviceMethod on the device client using the callbacks from the DeviceEmulator */
+        deviceEmulator.enableDeviceMethod();
+
+        /* Enable DeviceTwin on the device client using the callbacks from the DeviceEmulator */
+        deviceEmulator.enableDeviceTwin();
+
+        /* Wait until the device complete the connection with the IoTHub. */
+        //waitIotHub(1, OPEN_CONNECTION_TIMEOUT_IN_SECONDS);
     }
 
-    public void stop() throws IOException, IotHubException, InterruptedException
+    public void stop() throws IOException, InterruptedException
     {
         deviceEmulator.stop();
         int stopDeviceTimeoutInMilliseconds = STOP_DEVICE_TIMEOUT_IN_MILLISECONDS;
         deviceThread.join(stopDeviceTimeoutInMilliseconds);
-        registryManager.removeDevice(deviceOnServiceClient.getDeviceId());
     }
 
-    public void restartDevice(String publicKeyCert, String privateKey) throws InterruptedException, IOException, URISyntaxException
+    public void restartDevice(String connectionString, IotHubClientProtocol protocol, String publicCert, String privateKey) throws InterruptedException, IOException, URISyntaxException, ModuleClientException
     {
         if(deviceThread.getState() == Thread.State.RUNNABLE)
         {
@@ -154,15 +88,33 @@ public class DeviceTestManager
         }
         deviceThread.join(STOP_DEVICE_TIMEOUT_IN_MILLISECONDS);
 
+        if (this.client instanceof DeviceClient)
+        {
+            if (this.client.getConfig().getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
+            {
+                this.client = new DeviceClient(connectionString, protocol);
+            }
+            else
+            {
+                this.client = new DeviceClient(connectionString, protocol, publicCert, false, privateKey, false);
+            }
+        }
+        else if (this.client instanceof ModuleClient)
+        {
+            if (this.client.getConfig().getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
+            {
+                this.client = new ModuleClient(connectionString, protocol);
+            }
+            else
+            {
+                this.client = new ModuleClient(connectionString, protocol, publicCert, false, privateKey, false);
+            }
+        }
+
         /* Create a emulator for the device client, and connect it to the IoTHub */
-        if (publicKeyCert != null && privateKey != null)
-        {
-            deviceEmulator = new DeviceEmulator(connectionString, protocol, publicKeyCert, privateKey);
-        }
-        else
-        {
-            deviceEmulator = new DeviceEmulator(connectionString, protocol);
-        }
+        deviceEmulator = new DeviceEmulator(this.client);
+
+        deviceEmulator.start();
 
         /* Enable DeviceMethod on the device client using the callbacks from the DeviceEmulator */
         deviceEmulator.enableDeviceMethod();
@@ -174,7 +126,7 @@ public class DeviceTestManager
         deviceThread.start();
 
         /* Wait until the device complete the connection with the IoTHub. */
-        waitIotHub(1, OPEN_CONNECTION_TIMEOUT_IN_SECONDS);
+        //waitIotHub(1, OPEN_CONNECTION_TIMEOUT_IN_SECONDS);
     }
 
     public int getStatusOk()
@@ -192,14 +144,8 @@ public class DeviceTestManager
         return deviceEmulator.getTwinChanges();
     }
 
-    public DeviceClient getDeviceClient()
-    {
-        return deviceEmulator.getDeviceClient();
-    }
-
     public void sendMessageAndWaitForResponse(MessageAndResult messageAndResult, int RETRY_MILLISECONDS, int SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
     {
         deviceEmulator.sendMessageAndWaitForResponse(messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
     }
-
 }

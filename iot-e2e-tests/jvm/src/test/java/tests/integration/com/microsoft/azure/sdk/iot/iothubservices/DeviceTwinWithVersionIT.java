@@ -180,7 +180,7 @@ public class DeviceTwinWithVersionIT
     private void createDevice(IotHubClientProtocol protocol) throws IOException, URISyntaxException
     {
         testDevice.deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceForRegistryManager), protocol);
-        IotHubServicesCommon.openDeviceClientWithRetry(testDevice.deviceClient);
+        IotHubServicesCommon.openClientWithRetry(testDevice.deviceClient);
         testDevice.deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), testDevice, new DeviceTwinPropertyCallback(), testDevice);
     }
 

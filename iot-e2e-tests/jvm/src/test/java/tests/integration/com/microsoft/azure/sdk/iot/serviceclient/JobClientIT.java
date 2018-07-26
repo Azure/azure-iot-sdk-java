@@ -6,6 +6,8 @@
 package tests.integration.com.microsoft.azure.sdk.iot.serviceclient;
 
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -51,6 +53,7 @@ public class JobClientIT
     private static int newTemperature = 70;
 
     private static List<DeviceTestManager> devices = new LinkedList<>();
+    private static Device testDevice;
 
     private static final int MAX_NUMBER_JOBS = 3;
     private static final long MAX_EXECUTION_TIME_IN_MS = 100;
@@ -116,9 +119,11 @@ public class JobClientIT
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
+        String uuid = UUID.randomUUID().toString();
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            devices.add(new DeviceTestManager(registryManager, DEVICE_ID_NAME.concat("-" + i), IotHubClientProtocol.MQTT));
+            testDevice = registryManager.addDevice(Device.createFromId(DEVICE_ID_NAME.concat("-" + i + "-" + uuid), DeviceStatus.Enabled, null));
+            devices.add(new DeviceTestManager(null));
         }
     }
 
@@ -153,7 +158,7 @@ public class JobClientIT
         ExecutorService executor = Executors.newFixedThreadPool(MAX_NUMBER_JOBS);
 
         DeviceTestManager deviceTestManger = devices.get(0);
-        final String deviceId = deviceTestManger.getDeviceId();
+        final String deviceId = testDevice.getDeviceId();
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
         final ConcurrentMap<String, Exception> jobExceptions = new ConcurrentHashMap<>();
         final ConcurrentMap<String, JobResult> jobResults = new ConcurrentHashMap<>();
@@ -243,7 +248,7 @@ public class JobClientIT
         ExecutorService executor = Executors.newFixedThreadPool(MAX_NUMBER_JOBS);
 
         DeviceTestManager deviceTestManger = devices.get(0);
-        final String deviceId = deviceTestManger.getDeviceId();
+        final String deviceId = testDevice.getDeviceId();
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
 
         final ConcurrentMap<String, Exception> jobExceptions = new ConcurrentHashMap<>();
@@ -322,7 +327,7 @@ public class JobClientIT
         ExecutorService executor = Executors.newFixedThreadPool(MAX_NUMBER_JOBS);
 
         DeviceTestManager deviceTestManger = devices.get(0);
-        final String deviceId = deviceTestManger.getDeviceId();
+        final String deviceId = testDevice.getDeviceId();
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
 
         final Date future = new Date(new Date().getTime() + 10000L); // 10 seconds in the future.
@@ -448,7 +453,7 @@ public class JobClientIT
         ExecutorService executor = Executors.newFixedThreadPool(MAX_NUMBER_JOBS);
 
         DeviceTestManager deviceTestManger = devices.get(0);
-        final String deviceId = deviceTestManger.getDeviceId();
+        final String deviceId = testDevice.getDeviceId();
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
 
         final Date future = new Date(new Date().getTime() + 180000L); // 3 minutes in the future.

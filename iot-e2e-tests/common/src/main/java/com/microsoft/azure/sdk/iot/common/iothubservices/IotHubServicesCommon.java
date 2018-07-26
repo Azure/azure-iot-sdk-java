@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.Assert;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +31,7 @@ public class IotHubServicesCommon
     /*
      * method to send message over given DeviceClient
      */
-    public static void sendMessages(DeviceClient client,
+    public static void sendMessages(InternalClient client,
                                     IotHubClientProtocol protocol,
                                     List<MessageAndResult> messagesToSend,
                                     final long RETRY_MILLISECONDS,
@@ -40,7 +39,7 @@ public class IotHubServicesCommon
                                     long interMessageDelay,
                                     List<IotHubConnectionStatus> statusUpdates) throws IOException, InterruptedException
     {
-        openDeviceClientWithRetry(client);
+        openClientWithRetry(client);
 
         for (int i = 0; i < messagesToSend.size(); ++i)
         {
@@ -77,7 +76,7 @@ public class IotHubServicesCommon
         client.closeNow();
     }
 
-    public static void sendMessagesExpectingConnectionStatusChangeUpdate(DeviceClient client,
+    public static void sendMessagesExpectingConnectionStatusChangeUpdate(InternalClient client,
                                                                          IotHubClientProtocol protocol,
                                                                          List<MessageAndResult> messagesToSend,
                                                                          final long RETRY_MILLISECONDS,
@@ -193,7 +192,7 @@ public class IotHubServicesCommon
         }
     }
 
-    public static void sendExpiredMessageExpectingMessageExpiredCallback(DeviceClient deviceClient,
+    public static void sendExpiredMessageExpectingMessageExpiredCallback(InternalClient client,
                                                                          IotHubClientProtocol protocol,
                                                                          final long RETRY_MILLISECONDS,
                                                                          final long SEND_TIMEOUT_MILLISECONDS,
@@ -205,8 +204,8 @@ public class IotHubServicesCommon
             expiredMessage.setAbsoluteExpiryTime(1); //setting this to 0 causes the message to never expire
             Success messageSentExpiredCallback = new Success();
 
-            openDeviceClientWithRetry(deviceClient);
-            deviceClient.sendEventAsync(expiredMessage, new EventCallback(IotHubStatusCode.MESSAGE_EXPIRED), messageSentExpiredCallback);
+            openClientWithRetry(client);
+            client.sendEventAsync(expiredMessage, new EventCallback(IotHubStatusCode.MESSAGE_EXPIRED), messageSentExpiredCallback);
 
             long startTime = System.currentTimeMillis();
             while (!messageSentExpiredCallback.wasCallbackFired())
@@ -218,7 +217,7 @@ public class IotHubServicesCommon
                 }
             }
 
-            deviceClient.closeNow();
+            client.closeNow();
 
             if (messageSentExpiredCallback.getCallbackStatusCode() != IotHubStatusCode.MESSAGE_EXPIRED)
             {
@@ -227,12 +226,12 @@ public class IotHubServicesCommon
         }
         catch (Exception e)
         {
-            deviceClient.closeNow();
+            client.closeNow();
             Assert.fail("Sending expired message over " + protocol + " protocol failed: Exception encountered while sending message and waiting for MESSAGE_EXPIRED callback: " + e.getMessage());
         }
     }
 
-    public static void sendMessagesExpectingUnrecoverableConnectionLossAndTimeout(DeviceClient client,
+    public static void sendMessagesExpectingUnrecoverableConnectionLossAndTimeout(InternalClient client,
                                                                                   IotHubClientProtocol protocol,
                                                                                   Message errorInjectionMessage,
                                                                                   AuthenticationType authType) throws IOException, InterruptedException
@@ -246,7 +245,7 @@ public class IotHubServicesCommon
             }
         }, new Object());
 
-        openDeviceClientWithRetry(client);
+        openClientWithRetry(client);
 
         client.sendEventAsync(errorInjectionMessage, new EventCallback(null), new Success());
 
@@ -267,7 +266,7 @@ public class IotHubServicesCommon
         client.closeNow();
     }
 
-    public static void sendMessageAndWaitForResponse(DeviceClient client, MessageAndResult messageAndResult, long RETRY_MILLISECONDS, long SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
+    public static void sendMessageAndWaitForResponse(InternalClient client, MessageAndResult messageAndResult, long RETRY_MILLISECONDS, long SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
     {
         try
         {
@@ -311,7 +310,7 @@ public class IotHubServicesCommon
         return false;
     }
 
-    public static void openDeviceClientWithRetry(DeviceClient client)
+    public static void openClientWithRetry(InternalClient client)
     {
         boolean clientOpenSucceeded = false;
         long startTime = System.currentTimeMillis();
@@ -319,7 +318,7 @@ public class IotHubServicesCommon
         {
             if (System.currentTimeMillis() - startTime > OPEN_RETRY_TIMEOUT)
             {
-                Assert.fail("Timed out trying to open the device client");
+                Assert.fail("Timed out trying to open the client");
             }
 
             try
