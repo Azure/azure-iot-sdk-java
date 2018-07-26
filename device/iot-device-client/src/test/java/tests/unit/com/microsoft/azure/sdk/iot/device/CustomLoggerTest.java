@@ -7,13 +7,14 @@ import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Unit tests for CustomLogger. */
 @Ignore
@@ -67,9 +68,9 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
-                Logger.getLogger((Class)any);
+                LogManager.getLogger((Class)any);
                 result = mockLogger;
-                mockLogger.isEnabledFor(Level.INFO);
+                mockLogger.isInfoEnabled();
                 result = true;
             }
         };
@@ -94,9 +95,9 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
-                Logger.getLogger((Class)any);
+                LogManager.getLogger((Class)any);
                 result = mockLogger;
-                mockLogger.isEnabledFor(Level.DEBUG);
+                mockLogger.isDebugEnabled();
                 result = true;
             }
         };
@@ -121,9 +122,9 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
-                Logger.getLogger((Class)any);
+                LogManager.getLogger((Class)any);
                 result = mockLogger;
-                mockLogger.isEnabledFor(Level.TRACE);
+                mockLogger.isTraceEnabled();
                 result = true;
             }
         };
@@ -148,9 +149,9 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
-                Logger.getLogger((Class)any);
+                LogManager.getLogger((Class)any);
                 result = mockLogger;
-                mockLogger.isEnabledFor(Level.WARN);
+                mockLogger.isWarnEnabled();
                 result = true;
             }
         };
@@ -175,9 +176,9 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
            {
-               Logger.getLogger((Class)any);
+               LogManager.getLogger((Class)any);
                result = mockLogger;
-                mockLogger.isEnabledFor(Level.FATAL);
+                mockLogger.isFatalEnabled();
                 result = true;
             }
         };
@@ -202,9 +203,9 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
-                Logger.getLogger((Class)any);
+                LogManager.getLogger((Class)any);
                 result = mockLogger;
-                mockLogger.isEnabledFor(Level.ERROR);
+                mockLogger.isErrorEnabled();
                 result = true;
             }
         };
@@ -221,9 +222,9 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
-                Logger.getLogger((Class)any);
+                LogManager.getLogger((Class)any);
                 result = mockLogger;
-                mockLogger.isEnabledFor(Level.ERROR);
+                mockLogger.isErrorEnabled();
                 result = true;
             }
         };
