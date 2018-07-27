@@ -24,6 +24,7 @@ import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
+import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
 
@@ -43,7 +44,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
-public class DeviceTwinIT
+public class DeviceTwinIT extends MethodNameLoggingIntegrationTest
 {
     // Max time to wait to see it on Hub
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 200; // 0.2 sec

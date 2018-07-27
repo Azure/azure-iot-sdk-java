@@ -20,6 +20,7 @@ import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
+import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
 
@@ -38,7 +39,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 @RunWith(Parameterized.class)
-public class ReceiveMessagesIT
+public class ReceiveMessagesIT extends MethodNameLoggingIntegrationTest
 {
     private static final long DEFAULT_TEST_TIMEOUT = 3 * 60 * 1000;
     public static Map<String, String> messageProperties = new HashMap<>(3);

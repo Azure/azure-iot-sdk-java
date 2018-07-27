@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
+import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -33,7 +34,7 @@ import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothubservices.FileUploadIT.STATUS.FAILURE;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothubservices.FileUploadIT.STATUS.SUCCESS;
 
-public class FileUploadIT
+public class FileUploadIT extends MethodNameLoggingIntegrationTest
 {
     // Max time to wait to see it on Hub
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 10000; // 10 sec

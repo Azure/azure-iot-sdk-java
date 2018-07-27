@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
+import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
 
@@ -48,7 +49,7 @@ import static junit.framework.TestCase.fail;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenGenerator.generateSasTokenForIotDevice;
 
 @RunWith(Parameterized.class)
-public class SendMessagesIT
+public class SendMessagesIT extends MethodNameLoggingIntegrationTest
 {
     //How much devices the multithreaded test will create in parallel.
     private static final Integer MAX_DEVICE_PARALLEL = 3;

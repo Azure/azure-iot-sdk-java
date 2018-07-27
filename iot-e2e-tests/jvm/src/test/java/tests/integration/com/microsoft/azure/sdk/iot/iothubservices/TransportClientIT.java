@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
+import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.ByteArrayInputStream;
@@ -43,7 +44,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.iothubservices.Trans
 
 //Ignoring these tests as they frequently fail. Needs investigations
 @Ignore
-public class TransportClientIT
+public class TransportClientIT extends MethodNameLoggingIntegrationTest
 {
     //how many devices to test multiplexing with
     private static final int MAX_DEVICE_MULTIPLEX = 3;

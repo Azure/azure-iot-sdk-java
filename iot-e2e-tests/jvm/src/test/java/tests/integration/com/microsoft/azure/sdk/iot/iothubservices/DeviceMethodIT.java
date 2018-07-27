@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
@@ -47,7 +48,7 @@ import static org.junit.Assert.*;
  * Integration E2E test for Device Method on the service client.
  */
 @RunWith(Parameterized.class)
-public class DeviceMethodIT
+public class DeviceMethodIT extends MethodNameLoggingIntegrationTest
 {
     private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
@@ -224,6 +225,10 @@ public class DeviceMethodIT
         {
             e.printStackTrace();
             fail(e.getMessage());
+        }
+        catch (UnsupportedOperationException e)
+        {
+            //Only thrown when twin was already initialized. Safe to ignore
         }
     }
 

@@ -19,6 +19,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
+import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class DeviceTwinWithVersionIT
+public class DeviceTwinWithVersionIT extends MethodNameLoggingIntegrationTest
 {
     private static final long BREATHE_TIME = 100; // 0.1 sec
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 1000; // 1 sec
