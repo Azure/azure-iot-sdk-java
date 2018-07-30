@@ -198,7 +198,7 @@ public class Helpers
                 }
             }
 
-            for (TwinCollection.Entry entry : expected.entrySet())
+            for (Map.Entry entry : expected.entrySet())
             {
                 String key = (String)entry.getKey();
                 Object actualValue = actual.get(key);

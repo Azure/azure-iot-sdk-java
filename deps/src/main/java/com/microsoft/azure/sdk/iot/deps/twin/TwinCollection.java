@@ -96,7 +96,7 @@ import java.util.Map;
 public class TwinCollection extends HashMap<String, Object>
 {
     // By definition, Twin maps cannot contain more than 5 levels.
-    private static final int MAX_TWIN_LEVEL = 5;
+    private static final int MAX_TWIN_LEVEL = 6;
 
     // the Twin collection version
     private static final String VERSION_TAG = "$version";
@@ -152,7 +152,7 @@ public class TwinCollection extends HashMap<String, Object>
             /* SRS_TWIN_COLLECTION_21_027: [The constructor shall copy the version and metadata from the provided TwinCollection.] */
             this.version = collection.getVersion();
             this.twinMetadata = collection.getTwinMetadata();
-            for (TwinCollection.Entry entry: collection.entrySet())
+            for (Map.Entry<String, Object> entry: collection.entrySet())
             {
                 if(entry.getValue() instanceof TwinCollection)
                 {
@@ -191,7 +191,7 @@ public class TwinCollection extends HashMap<String, Object>
         }
 
         /* SRS_TWIN_COLLECTION_21_005: [The putAll shall copy all entries in the provided Map to the TwinCollection.] */
-        for(Entry<? extends String, ?> entry: map.entrySet())
+        for(Map.Entry<? extends String, ?> entry: map.entrySet())
         {
             this.put(entry.getKey(), entry.getValue());
         }
@@ -288,7 +288,7 @@ public class TwinCollection extends HashMap<String, Object>
         Map<? extends String, Object> metadata = null;
 
         /* SRS_TWIN_COLLECTION_21_011: [The constructor shall convert the provided rawCollection in a valid TwinCollection.] */
-        for (Entry<? extends String, Object> entry: rawCollection.entrySet())
+        for (Map.Entry<? extends String, Object> entry: rawCollection.entrySet())
         {
             /* SRS_TWIN_COLLECTION_21_012: [If the entity contain the key `$version`, the constructor shall set the version with the value of this entity.] */
             if(entry.getKey().equals(VERSION_TAG))
@@ -325,7 +325,7 @@ public class TwinCollection extends HashMap<String, Object>
     {
         String lastUpdated = null;
         Integer lastUpdatedVersion = null;
-        for(Entry<? extends String, Object> entry: metadata.entrySet())
+        for(Map.Entry<? extends String, Object> entry: metadata.entrySet())
         {
             String key = entry.getKey();
             if(key.equals(TwinMetadata.LAST_UPDATE_TAG))
@@ -417,7 +417,7 @@ public class TwinCollection extends HashMap<String, Object>
             jsonMetadata.addProperty(TwinMetadata.LAST_UPDATE_VERSION_TAG, this.twinMetadata.getLastUpdatedVersion());
         }
 
-        for(Entry<String, TwinMetadata> entry: this.metadataMap.entrySet())
+        for(Map.Entry<String, TwinMetadata> entry: this.metadataMap.entrySet())
         {
             if(entry.getValue() != null)
             {
