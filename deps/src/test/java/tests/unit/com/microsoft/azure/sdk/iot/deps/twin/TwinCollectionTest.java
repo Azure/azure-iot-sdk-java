@@ -328,7 +328,12 @@ public class TwinCollectionTest
                                                 put("Inner4", new TwinCollection()
                                                 {
                                                     {
-                                                        put("Inner5", "FinalInnerValue");
+                                                    	put("Inner5", new TwinCollection()
+                                                        {
+                                                    		{
+                                                    			put("Inner6", "FinalInnerValue");
+                                                    		}
+                                                        });
                                                     }
                                                 });
                                             }
@@ -827,7 +832,12 @@ public class TwinCollectionTest
                                                 put("Inner4", new TwinCollection()
                                                 {
                                                     {
-                                                        put("Inner5", "FinalInnerValue");
+                                                    	put("Inner5", new TwinCollection() 
+                                                    	{
+                                                    		{
+                                                    			put("Inner6", "FinalInnerValue");
+                                                    		}
+                                                    	});
                                                     }
                                                 });
                                             }
