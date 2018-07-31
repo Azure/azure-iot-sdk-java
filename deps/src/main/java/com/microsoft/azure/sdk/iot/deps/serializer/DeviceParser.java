@@ -282,7 +282,7 @@ public class DeviceParser
     public String geteTag()
     {
         //Codes_SRS_DEVICE_PARSER_34_014: [This method shall return the value of this object's ETag.]
-        return eTag;
+        return "\"" + eTag + "\"";
     }
 
     /**
