@@ -513,7 +513,7 @@ public class RegistryManager
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_084: [The function shall call provide device object's etag as with etag of device to be removed]
-        removeDeviceOperation(device.getDeviceId(), "\"" + device.geteTag() + "\"");
+        removeDeviceOperation(device.getDeviceId(), device.geteTag());
     }
 
     /**
