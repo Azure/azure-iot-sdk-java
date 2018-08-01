@@ -176,7 +176,7 @@ public class DeviceParserTest
         assertEquals(AuthenticationTypeParser.CERTIFICATE_AUTHORITY, parser.getAuthenticationParser().getType());
         assertEquals(deviceId, parser.getDeviceId());
         assertEquals(generationId, parser.getGenerationId());
-        assertEquals(ETag, parser.geteTag());
+        assertEquals("\"" + ETag + "\"", parser.geteTag());
         assertEquals(status, parser.getStatus());
         assertEquals(statusReason, parser.getStatusReason());
         assertEquals(connectionState, parser.getConnectionState());
@@ -311,7 +311,7 @@ public class DeviceParserTest
         assertEquals(connectionState, parser.getConnectionState());
         assertEquals(connectionStateUpdatedTime, parser.getConnectionStateUpdatedTime());
         assertEquals(deviceId, parser.getDeviceId());
-        assertEquals(eTag, parser.geteTag());
+        assertEquals("\"" + eTag + "\"", parser.geteTag());
         assertEquals(generationId, parser.getGenerationId());
         assertEquals(lastActivityTime, parser.getLastActivityTime());
         assertEquals(status, parser.getStatus());
