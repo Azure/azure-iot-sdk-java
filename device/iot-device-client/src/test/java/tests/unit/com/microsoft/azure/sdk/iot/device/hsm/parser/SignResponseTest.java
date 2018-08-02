@@ -18,12 +18,12 @@ public class SignResponseTest
     public void getDigestWorks()
     {
         //arrange
-        byte[] expectedDigest = "some digest".getBytes();
+        String expectedDigest = "some digest";
         SignResponse response = new SignResponse();
         Deencapsulation.setField(response, "digest", expectedDigest);
 
         //act
-        byte[] actualDigest = response.getDigest();
+        String actualDigest = response.getDigest();
 
         //assert
         assertEquals(expectedDigest, actualDigest);

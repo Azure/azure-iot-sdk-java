@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
 import javax.crypto.Mac;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 
 /**
@@ -75,7 +76,7 @@ public class HttpHsmSignatureProvider implements SignatureProvider
             throw new IllegalArgumentException("Data cannot be null or empty");
         }
 
-        // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_006: [This function shall create a signRequest for the hsm http client to sign, and shall return the base64 encoded result of that signing.]
+        // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_006: [This function shall create a signRequest for the hsm http client to sign, and shall return the utf-8 encoded result of that signing.]
         SignRequest signRequest = new SignRequest();
         signRequest.setAlgo(defaultSignRequestAlgo);
         signRequest.setData(data.getBytes(ENCODING_CHARSET));
@@ -83,6 +84,6 @@ public class HttpHsmSignatureProvider implements SignatureProvider
 
         SignResponse response = this.httpClient.sign(this.apiVersion, keyName, signRequest, generationId);
 
-        return Base64.encodeBase64StringLocal(response.getDigest());
+        return URLEncoder.encode(response.getDigest(), ENCODING_CHARSET);
     }
 }

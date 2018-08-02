@@ -18,6 +18,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.NoRouteToHostException;
 import java.net.URL;
 import java.util.HashMap;
@@ -35,6 +36,8 @@ public class HttpsConnectionTest
     URL mockUrl;
     @Mocked
     HttpsURLConnection mockUrlConn;
+    @Mocked
+    HttpURLConnection mockHttpURLConnection;
 
     // Tests_SRS_HTTPSCONNECTION_11_001: [The constructor shall open a connection to the given URL.]
     @Test
@@ -106,7 +109,7 @@ public class HttpsConnectionTest
         };
     }
 
-    // Tests_SRS_HTTPSCONNECTION_11_022: [If the URI given does not use the HTTPS protocol, the constructor shall throw an IllegalArgumentException.]
+    // Tests_SRS_HTTPSCONNECTION_11_022: [If the URI given does not use the HTTPS or HTTP protocol, the constructor shall throw an IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
     public void constructorRejectsNonHttpsUrl() throws IOException, TransportException
     {
@@ -115,7 +118,7 @@ public class HttpsConnectionTest
         {
             {
                 mockUrl.getProtocol();
-                result = "http";
+                result = "unix";
                 mockUrl.openConnection();
                 result = mockUrlConn;
                 mockUrlConn.getRequestMethod();
@@ -233,8 +236,7 @@ public class HttpsConnectionTest
         new Verifications()
         {
             {
-                ((HttpsURLConnection) mockUrl.openConnection())
-                        .setRequestMethod(httpsMethod.name());
+                mockUrlConn.setRequestMethod(httpsMethod.name());
             }
         };
     }
@@ -356,6 +358,31 @@ public class HttpsConnectionTest
             }
         };
     }
+
+    //Tests_SRS_HTTPSCONNECTION_34_026: [If this object uses HTTP, this function shall throw an UnsupportedOperationException.]
+    @Test (expected = UnsupportedOperationException.class)
+    public void setSSLContextThrowsIfHttp(@Mocked final SSLContext mockedContext) throws IOException, TransportException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        final String field = "test-field";
+        final String value = "test-value";
+        final int timeout = 1;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "http";
+                mockUrl.openConnection();
+                result = mockHttpURLConnection;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+            }
+        };
+        final HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+
+        Deencapsulation.invoke(conn, "setSSLContext", mockedContext);
+    }
+
 
     //Tests_SRS_HTTPSCONNECTION_25_025: [The function shall throw IllegalArgumentException if the context is null value.**]**
     @Test (expected = IllegalArgumentException.class)
@@ -787,105 +814,6 @@ public class HttpsConnectionTest
         conn.connect();
 
         conn.getResponseHeaders();
-    }
-
-    //Tests_SRS_HTTPSCONNECTION_34_028: [The function shall return the saved url.]
-    @Test
-    public void getUrlReturnsSavedUrl() throws IOException, TransportException
-    {
-        //arrange
-        final HttpsMethod httpsMethod = HttpsMethod.POST;
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "https";
-                mockUrl.openConnection();
-                result = mockUrlConn;
-                mockUrlConn.getRequestMethod();
-                result = httpsMethod.name();
-                mockUrlConn.getURL();
-                result = mockUrl;
-            }
-        };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
-
-        //act
-        URL actual = Deencapsulation.invoke(conn, "getRequestUrl");
-
-        //assert
-        assertEquals(mockUrl, actual);
-    }
-
-    //Tests_SRS_HTTPSCONNECTION_34_029: [The function shall return the request method.]
-    @Test
-    public void getMethodReturnsSavedMethod() throws IOException, TransportException
-    {
-        //arrange
-        final HttpsMethod httpsMethod = HttpsMethod.POST;
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "https";
-                mockUrl.openConnection();
-                result = mockUrlConn;
-                mockUrlConn.getRequestMethod();
-                result = httpsMethod.name();
-                mockUrlConn.getURL();
-                result = mockUrl;
-            }
-        };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
-
-        //act
-        String actual = Deencapsulation.invoke(conn, "getHttpMethod");
-
-        //assert
-        assertEquals(httpsMethod.name(), actual);
-    }
-
-    //Tests_SRS_HTTPSCONNECTION_34_030: [The function shall return all the request headers in the format "<key>: <value1>; <value2>\n <key>: <value1>\n...".]
-    @Test
-    public void getHeadersReturnsHeaders() throws IOException, TransportException
-    {
-        //arrange
-        final HttpsMethod httpsMethod = HttpsMethod.POST;
-        final Map<String, List<String>> expectedHeaders = new HashMap<>();
-        List<String> values1 = new LinkedList<>();
-        values1.add("someValue1");
-        values1.add("someValue2");
-        expectedHeaders.put("key1", values1);
-
-        List<String> values2 = new LinkedList<>();
-        values2.add("someValue1");
-        expectedHeaders.put("key2", values2);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "https";
-                mockUrl.openConnection();
-                result = mockUrlConn;
-                mockUrlConn.getRequestMethod();
-                result = httpsMethod.name();
-                mockUrlConn.getURL();
-                result = mockUrl;
-
-                mockUrlConn.getRequestProperties();
-                result = expectedHeaders;
-            }
-        };
-        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
-
-        String expectedString = "key1: someValue1; someValue2\r\n" + "key2: someValue1\r\n";
-
-        //act
-        String actual = Deencapsulation.invoke(conn, "getRequestHeaders");
-
-        //assert
-        assertEquals(expectedString, actual);
     }
 
     //Tests_SRS_HTTPSCONNECTION_34_031: [The function shall return the saved body.]

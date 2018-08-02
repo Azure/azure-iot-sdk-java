@@ -17,7 +17,7 @@ import java.io.IOException;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 
-public class ModuleAuthenticationWithTokenRefreshTest
+public class IotHubSasTokenWithRefreshAuthenticationProviderTest
 {
     private class IotHubImplSasTokenWithRefreshAuthenticationProvider extends IotHubSasTokenWithRefreshAuthenticationProvider
     {

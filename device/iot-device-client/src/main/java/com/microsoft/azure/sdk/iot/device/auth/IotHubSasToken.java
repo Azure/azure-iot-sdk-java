@@ -110,6 +110,38 @@ public final class IotHubSasToken
     }
 
     /**
+     * Creates a shared access token from the provided audience, signature and expiry time
+     * @param audience the audience of the token
+     * @param signature the signature of the token
+     * @param expiry when the token will expire, in seconds since the epoch
+     * @return the shared access token string
+     */
+    public static String buildSharedAccessToken(String audience, String signature, long expiry)
+    {
+        if (audience == null || audience.isEmpty() || signature == null || signature.isEmpty())
+        {
+            // Codes_SRS_IOTHUBSASTOKEN_34_015: [If the provided audience or signature is null or empty, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("neither audience nor signature can be null or empty");
+        }
+
+        if (expiry < 0)
+        {
+            // Codes_SRS_IOTHUBSASTOKEN_34_014: [If the provided expiry time is less than 0, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("expiry time must be a non-negative integer");
+        }
+
+        // Codes_SRS_IOTHUBSASTOKEN_34_013: [This function shall return a string in the format "SharedAccessSignature sr=<audience>&sig=<signature>&se=<expiry>".]
+        return String.format("%s %s=%s&%s=%s&%s=%d",
+                SharedAccessSignature,
+                ResourceURIFieldKey,
+                audience,
+                SignatureFieldKey,
+                signature,
+                ExpiryTimeFieldKey,
+                expiry);
+    }
+
+    /**
      * Returns the string representation of the SAS token.
      *
      * @return the string representation of the SAS token.

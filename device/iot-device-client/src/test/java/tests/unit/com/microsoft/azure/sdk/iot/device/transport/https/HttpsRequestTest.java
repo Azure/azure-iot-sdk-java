@@ -15,13 +15,9 @@ import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.net.NoRouteToHostException;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -31,11 +27,9 @@ import static org.junit.Assert.assertTrue;
 /** Unit tests for HttpsRequest. */
 public class HttpsRequestTest
 {
-    @Mocked URL mockUrl;
-
     // Tests_SRS_HTTPSREQUEST_11_001: [The function shall open a connection with the given URL as the endpoint.]
     @Test
-    public void constructorOpensConnection(@Mocked final HttpsConnection mockConn) throws TransportException
+    public void constructorOpensConnection(@Mocked final HttpsConnection mockConn, final @Mocked URL mockUrl) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -47,8 +41,9 @@ public class HttpsRequestTest
             }
         };
 
-        new HttpsRequest(mockUrl, httpsMethod, body, "");
+        HttpsRequest request = new HttpsRequest(mockUrl, httpsMethod, body, "");
 
+        request.send();
         new Verifications()
         {
             {
@@ -59,7 +54,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_002: [The function shall write the body to the connection.]
     @Test
-    public void constructorWritesBodyToConnection(@Mocked final HttpsConnection mockConn) throws TransportException
+    public void constructorWritesBodyToConnection(@Mocked final HttpsConnection mockConn, final @Mocked URL mockUrl) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] body = { 1, 2, 3 };
@@ -71,7 +66,9 @@ public class HttpsRequestTest
             }
         };
 
-        new HttpsRequest(mockUrl, httpsMethod, body, "");
+        HttpsRequest request = new HttpsRequest(mockUrl, httpsMethod, body, "");
+
+        request.send();
 
         final byte[] expectedBody = body;
         new Verifications()
@@ -85,7 +82,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_004: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
     @Test
-    public void constructorSetsHttpsMethodCorrectly(@Mocked final HttpsConnection mockConn) throws TransportException
+    public void constructorSetsHttpsMethodCorrectly(@Mocked final HttpsConnection mockConn, final @Mocked URL mockUrl) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -97,7 +94,8 @@ public class HttpsRequestTest
             }
         };
 
-        new HttpsRequest(mockUrl, httpsMethod, body, "");
+        HttpsRequest request = new HttpsRequest(mockUrl, httpsMethod, body, "");
+        request.send();
 
         new Verifications()
         {
@@ -107,28 +105,9 @@ public class HttpsRequestTest
         };
     }
 
-    // Tests_SRS_HTTPSREQUEST_11_005: [If an IOException occurs in setting up the HTTPS connection, the function shall throw a TransportException.]
-    @Test(expected = TransportException.class)
-    public void constructorThrowsIoExceptionIfCannotSetupConnection(@Mocked final HttpsConnection mockConn) throws TransportException
-    {
-        final HttpsMethod httpsMethod = HttpsMethod.GET;
-        final byte[] body = new byte[0];
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "https";
-                new HttpsConnection(mockUrl, httpsMethod);
-                result = new TransportException();
-            }
-        };
-
-        new HttpsRequest(mockUrl, httpsMethod, body, "");
-    }
-
     // Tests_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
     @Test
-    public void sendHasCorrectHttpsMethod() throws TransportException
+    public void sendHasCorrectHttpsMethod(final @Mocked URL mockUrl) throws TransportException
     {
         final HttpsMethod expectedMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -206,7 +185,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
     @Test
-    public void sendSetsHeaderFieldsCorrectly() throws TransportException
+    public void sendSetsHeaderFieldsCorrectly(final @Mocked URL mockUrl) throws TransportException
     {
         final HttpsMethod expectedMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -294,7 +273,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
     @Test
-    public void sendWritesBodyToOutputStream() throws TransportException
+    public void sendWritesBodyToOutputStream(final @Mocked URL mockUrl) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final byte[] expectedBody = { 1, 2, 3 };
@@ -371,7 +350,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
     @Test
-    public void sendReadsStatusCode(@Mocked final HttpsConnection mockConn) throws TransportException
+    public void sendReadsStatusCode(@Mocked final HttpsConnection mockConn, final @Mocked URL mockUrl) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -397,7 +376,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body (if 200 status code), header fields, and error reason (if any).]
     @Test
-    public void sendReturnsBody(@Mocked final HttpsConnection mockConn) throws TransportException
+    public void sendReturnsBody(@Mocked final HttpsConnection mockConn, final @Mocked URL mockUrl) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] requestBody = new byte[0];
@@ -425,7 +404,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
     @Test
-    public void sendReturnsHeaderFields(@Mocked final HttpsConnection mockConn) throws TransportException
+    public void sendReturnsHeaderFields(@Mocked final HttpsConnection mockConn, final @Mocked URL mockUrl) throws TransportException
     {
         final Map<String, List<String>> headerFields = new HashMap<>();
         final String field = "test-field";
@@ -458,7 +437,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_013: [The function shall set the header field with the given name to the given value.]
     @Test
-    public void setHeaderFieldSetsHeaderField(@Mocked final HttpsConnection mockConn) throws TransportException
+    public void setHeaderFieldSetsHeaderField(@Mocked final HttpsConnection mockConn, final @Mocked URL mockUrl) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final byte[] body = new byte[0];
@@ -467,6 +446,9 @@ public class HttpsRequestTest
         new NonStrictExpectations()
         {
             {
+                new HttpsConnection((URL) any, httpsMethod);
+                result = mockConn;
+
                 mockUrl.getProtocol();
                 result = "https";
             }
@@ -475,7 +457,7 @@ public class HttpsRequestTest
         HttpsRequest request =
                 new HttpsRequest(mockUrl, httpsMethod, body, "");
         request.setHeaderField(field, value);
-
+        request.send();
         new Verifications()
         {
             {
@@ -486,7 +468,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_014: [The function shall set the read timeout for the request to the given value.]
     @Test
-    public void setReadTimeoutSetsReadTimeout(@Mocked final HttpsConnection mockConn) throws TransportException
+    public void setReadTimeoutSetsReadTimeout(@Mocked final HttpsConnection mockConn, final @Mocked URL mockUrl) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final byte[] body = new byte[0];
@@ -494,6 +476,9 @@ public class HttpsRequestTest
         new NonStrictExpectations()
         {
             {
+                new HttpsConnection(mockUrl, httpsMethod);
+                result = mockConn;
+
                 mockUrl.getProtocol();
                 result = "https";
             }
@@ -504,6 +489,8 @@ public class HttpsRequestTest
         request.setReadTimeoutMillis(readTimeout);
 
         final int expectedReadTimeout = readTimeout;
+
+        request.send();
         new Verifications()
         {
             {
@@ -515,7 +502,8 @@ public class HttpsRequestTest
     //Tests_SRS_HTTPSREQUEST_25_016: [The function shall set the SSL context for the IotHub.]
     @Test
     public void setSSLContextSetsSSLContext(@Mocked final HttpsConnection mockConn,
-                                            @Mocked final SSLContext mockedContext) throws TransportException
+                                            @Mocked final SSLContext mockedContext,
+                                            final @Mocked URL mockUrl) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final byte[] body = new byte[0];
@@ -531,6 +519,8 @@ public class HttpsRequestTest
                 new HttpsRequest(mockUrl, httpsMethod, body, "");
         request.setSSLContext(mockedContext);
 
+        request.send();
+
         new Verifications()
         {
             {
@@ -541,7 +531,7 @@ public class HttpsRequestTest
 
     //Tests_SRS_HTTPSREQUEST_25_015: [The function shall throw IllegalArgumentException if argument is null.]
     @Test (expected = IllegalArgumentException.class)
-    public void setSSLContextThrowsOnNull(@Mocked final HttpsConnection mockConn) throws TransportException
+    public void setSSLContextThrowsOnNull(@Mocked final HttpsConnection mockConn, final @Mocked URL mockUrl) throws TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final byte[] body = new byte[0];
@@ -559,34 +549,24 @@ public class HttpsRequestTest
     }
 
     // Tests_SRS_HTTPSREQUEST_34_020: [The function shall return the request headers saved in this object's connection instance.]
-    // Tests_SRS_HTTPSREQUEST_34_019: [The function shall return the http method saved in this object's connection instance.]
-    // Tests_SRS_HTTPSREQUEST_34_018: [The function shall return the request url saved in this object's connection instance.]
     // Tests_SRS_HTTPSREQUEST_34_017: [The function shall return the body saved in this object's connection instance.]
     @Test
-    public void gettersWork(@Mocked final HttpsConnection mockConn) throws TransportException
+    public void gettersWork(@Mocked final HttpsConnection mockConn, final @Mocked URL mockUrl) throws TransportException
     {
         //arrange
         HttpsRequest request = new HttpsRequest(mockUrl, HttpsMethod.POST, "some body".getBytes(), "some user agent string");
 
-        Deencapsulation.setField(request, "connection", mockConn);
-
-        final String expectedRequestHeaders = "some header string";
+        final String expectedRequestHeaders = "User-Agent: some user agent string\r\n";
         final String expectedMethod = "POST";
         final byte[] expectedBody = "some body".getBytes();
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockConn, "getRequestUrl");
-                result = mockUrl;
-
-                Deencapsulation.invoke(mockConn, "getHttpMethod");
-                result = expectedMethod;
+                new HttpsConnection((URL) any, HttpsMethod.POST);
+                result = mockConn;
 
                 Deencapsulation.invoke(mockConn, "getBody");
                 result = expectedBody;
-
-                Deencapsulation.invoke(mockConn, "getRequestHeaders");
-                result = expectedRequestHeaders;
             }
         };
 
@@ -595,11 +575,32 @@ public class HttpsRequestTest
         String actualMethod = request.getHttpMethod();
         byte[] actualBody = request.getBody();
         URL actualURL = request.getRequestUrl();
+        request.send();
 
         //assert
         assertEquals(expectedMethod, actualMethod);
         assertEquals(expectedRequestHeaders, actualRequestHeaders);
         assertEquals(mockUrl, actualURL);
         Assert.assertArrayEquals(expectedBody, actualBody);
+    }
+
+    // Tests_SRS_HTTPSREQUEST_34_031: [The function shall save the provided arguments to be used when the http connection is built during the call to send().]
+    @Test
+    public void constructorSavesFields() throws MalformedURLException, TransportException
+    {
+        //arrange
+        URL url = new URL("http://www.microsoft.com");
+        HttpsMethod method = HttpsMethod.POST;
+        byte[] body = new byte[2];
+        String userAgentString = "user agent";
+
+        //act
+        HttpsRequest request = new HttpsRequest(url, method, body, userAgentString);
+
+        //assert
+        assertEquals(url, Deencapsulation.getField(request, "url"));
+        assertEquals(method, Deencapsulation.getField(request, "method"));
+        assertTrue(Arrays.equals(body, (byte[]) Deencapsulation.getField(request, "body")));
+        assertEquals(userAgentString, ((Map<String, List<String>>)Deencapsulation.getField(request, "headers")).get("User-Agent").get(0));
     }
 }

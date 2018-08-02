@@ -23,11 +23,23 @@ public class TrustBundleResponse
      * Constructor that deserializes from json
      * @param json the json representation of the TrustBundleResponse
      */
-    public TrustBundleResponse(String json)
+    public static TrustBundleResponse fromJson(String json)
     {
         //Codes_SRS_TRUSTBUNDLERESPONSE_34_003: [This constructor shall create a new TrustBundleResponse from json.]
         TrustBundleResponse response = new GsonBuilder().create().fromJson(json, TrustBundleResponse.class);
-        this.certificates = response.certificates;
+
+        if (response == null || response.certificates == null || response.certificates.isEmpty())
+        {
+            //Codes_SRS_TRUSTBUNDLERESPONSE_34_002: [If the provided json does not contain any certificates, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("The provided json did not contain any certificates");
+        }
+
+        return response;
+    }
+
+    public TrustBundleResponse()
+    {
+        //empty constructor for gson to use
     }
 
     /**
