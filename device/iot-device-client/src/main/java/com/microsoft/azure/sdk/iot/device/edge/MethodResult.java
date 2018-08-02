@@ -19,7 +19,7 @@ public class MethodResult
     private static final String PAYLOAD_KEY_NAME = "payload";
     @Expose(serialize = false, deserialize = true)
     @SerializedName(PAYLOAD_KEY_NAME)
-    private String payload;
+    private Object payload;
 
     public MethodResult(String json)
     {
@@ -36,9 +36,25 @@ public class MethodResult
         return this.status;
     }
 
+    public Object getPayloadObject()
+    {
+        return this.payload;
+    }
+
     public String getPayload()
     {
         // Codes_SRS_DIRECTMETHODRESULT_34_002: [This function shall return the saved status.]
-        return this.payload;
+        if (this.payload instanceof String)
+        {
+            return (String) this.payload;
+        }
+        else if (this.payload instanceof byte[])
+        {
+            return new String((byte[]) this.payload);
+        }
+        else
+        {
+            return this.payload.toString();
+        }
     }
 }

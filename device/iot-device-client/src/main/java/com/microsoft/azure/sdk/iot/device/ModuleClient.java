@@ -275,8 +275,7 @@ public class ModuleClient extends InternalClient
             throw new IllegalArgumentException("outputName cannot be null or empty");
         }
 
-        //Codes_SRS_MODULECLIENT_34_002: [This function shall set the provided message with the provided outputName, device id, and module id properties.]
-        this.setModuleProperties(message);
+        //Codes_SRS_MODULECLIENT_34_002: [This function shall set the provided message with the provided outputName.]
         message.setOutputName(outputName);
 
         //Codes_SRS_MODULECLIENT_34_003: [This function shall invoke super.sendEventAsync(message, callback, callbackContext).]
@@ -293,9 +292,6 @@ public class ModuleClient extends InternalClient
      */
     public MethodResult invokeMethod(String deviceId, MethodRequest methodRequest) throws ModuleClientException, IllegalArgumentException
     {
-        throw new UnsupportedOperationException("InvokeMethod is not supported currently");
-
-        /*
         if (deviceId == null || deviceId.isEmpty())
         {
             //Codes_SRS_MODULECLIENT_34_039: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
@@ -314,7 +310,6 @@ public class ModuleClient extends InternalClient
             //Codes_SRS_MODULECLIENT_34_034: [If this function encounters an exception, it shall throw a moduleClientException with that exception nested.]
             throw new ModuleClientException("Could not invoke method", e);
         }
-        */
     }
 
     /**
@@ -328,8 +323,6 @@ public class ModuleClient extends InternalClient
      */
     public MethodResult invokeMethod(String deviceId, String moduleId, MethodRequest methodRequest) throws ModuleClientException, IllegalArgumentException
     {
-        throw new UnsupportedOperationException("InvokeMethod is not supported currently");
-        /*
         if (deviceId == null || deviceId.isEmpty())
         {
             //Codes_SRS_MODULECLIENT_34_037: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
@@ -354,7 +347,6 @@ public class ModuleClient extends InternalClient
             //Codes_SRS_MODULECLIENT_34_036: [If this function encounters an exception, it shall throw a moduleClientException with that exception nested.]
             throw new ModuleClientException("Could not invoke method", e);
         }
-        */
     }
 
     /**
@@ -469,16 +461,6 @@ public class ModuleClient extends InternalClient
         //Codes_SRS_MODULECLIENT_34_012: [This function shall save the provided callback with context in config tied to the provided inputName.]
         this.config.setMessageCallback(inputName, callback, context);
         return this;
-    }
-
-    private void setModuleProperties(Message message)
-    {
-        String deviceId = this.getConfig().getDeviceId();
-        String moduleId = this.getConfig().getModuleId();
-
-        message.setUserId(deviceId + "/" + moduleId);
-        message.setConnectionModuleId(moduleId);
-        message.setConnectionDeviceId(deviceId);
     }
 
     private static long getReceivePeriod(IotHubClientProtocol protocol)

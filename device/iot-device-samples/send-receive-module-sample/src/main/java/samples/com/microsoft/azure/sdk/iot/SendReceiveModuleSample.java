@@ -24,7 +24,7 @@ public class SendReceiveModuleSample
             + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n";
 
     private static String SAMPLE_USAGE_WITH_WRONG_ARGS = "Expected 2 or 3 arguments but received: %d.\n" + SAMPLE_USAGE;
-    private static String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
+    private static String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'mqtt_ws', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
 
     private  static final int D2C_MESSAGE_TIMEOUT = 5000; // 5 seconds
     private  static List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
@@ -213,19 +213,19 @@ public class SendReceiveModuleSample
         else
         {
             String protocolStr = args[2];
-            if (protocolStr.equals("amqps"))
+            if (protocolStr.equalsIgnoreCase("amqps"))
             {
                 protocol = IotHubClientProtocol.AMQPS;
             }
-            else if (protocolStr.equals("mqtt"))
+            else if (protocolStr.equalsIgnoreCase("mqtt"))
             {
                 protocol = IotHubClientProtocol.MQTT;
             }
-            else if (protocolStr.equals("amqps_ws"))
+            else if (protocolStr.equalsIgnoreCase("amqps_ws"))
             {
                 protocol = IotHubClientProtocol.AMQPS_WS;
             }
-            else if (protocolStr.equals("mqtt_ws"))
+            else if (protocolStr.equalsIgnoreCase("mqtt_ws"))
             {
                 protocol = IotHubClientProtocol.MQTT_WS;
             }

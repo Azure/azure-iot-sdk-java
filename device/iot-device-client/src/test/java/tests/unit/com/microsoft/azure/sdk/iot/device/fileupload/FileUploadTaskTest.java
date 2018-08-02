@@ -104,7 +104,7 @@ public class FileUploadTaskTest
                 result = requestJson;
                 new IotHubTransportMessage(requestJson);
                 result = mockMessageRequest;
-                mockHttpsTransportManager.send(mockMessageRequest);
+                mockHttpsTransportManager.send(mockMessageRequest, (Map) any);
                 result = mockResponseMessage;
             }
         };
@@ -166,7 +166,7 @@ public class FileUploadTaskTest
                 result = notificationJson;
                 new IotHubTransportMessage(notificationJson);
                 result = mockMessageNotification;
-                mockHttpsTransportManager.send(mockMessageNotification);
+                mockHttpsTransportManager.send(mockMessageNotification, (Map) any);
                 result = mockResponseMessage;
             }
         };
@@ -183,7 +183,7 @@ public class FileUploadTaskTest
                 result = notificationJson;
                 new IotHubTransportMessage(notificationJson);
                 result = mockMessageNotification;
-                mockHttpsTransportManager.send(mockMessageNotification);
+                mockHttpsTransportManager.send(mockMessageNotification, (Map) any);
                 result = mockResponseMessage;
             }
         };

@@ -38,6 +38,9 @@ import static junit.framework.TestCase.assertNotNull;
 public class ModuleClientTest
 {
     @Mocked
+    CustomLogger mockedCustomLogger;
+
+    @Mocked
     DeviceClientConfig mockedDeviceClientConfig;
 
     @Mocked
@@ -199,16 +202,6 @@ public class ModuleClientTest
         final String expectedDeviceId = "1234";
         final String expectedModuleId = "5678";
         Deencapsulation.setField(client, "config", mockedDeviceClientConfig);
-        new NonStrictExpectations()
-        {
-            {
-                mockedDeviceClientConfig.getDeviceId();
-                result = expectedDeviceId;
-
-                mockedDeviceClientConfig.getModuleId();
-                result = expectedModuleId;
-            }
-        };
 
         //act
         client.sendEventAsync(mockedMessage, mockedIotHubEventCallback, new Object(), expectedOutputName);
@@ -218,12 +211,6 @@ public class ModuleClientTest
         {
             {
                 mockedMessage.setOutputName(expectedOutputName);
-                times = 1;
-
-                mockedMessage.setConnectionDeviceId(expectedDeviceId);
-                times = 1;
-
-                mockedMessage.setConnectionModuleId(expectedModuleId);
                 times = 1;
 
                 mockedDeviceIO.sendEventAsync(mockedMessage, mockedIotHubEventCallback, any, anyString);
@@ -758,7 +745,6 @@ public class ModuleClientTest
         ModuleClient.createFromEnvironment(protocol);
     }
 
-    /* Ignore these tests until invokeMethod is re-enabled
     //Tests_SRS_MODULECLIENT_34_033: [This function shall create an HttpsTransportManager and use it to invoke the method on the device.]
     @Test
     public void invokeMethodOnDeviceSuccess() throws URISyntaxException, ModuleClientException, IOException, TransportException
@@ -954,5 +940,4 @@ public class ModuleClientTest
         //act
         client.invokeMethod("someValidDevice", "", mockedMethodRequest);
     }
-    */
 }

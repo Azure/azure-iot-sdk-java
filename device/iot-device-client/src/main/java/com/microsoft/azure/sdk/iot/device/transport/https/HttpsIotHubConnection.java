@@ -144,7 +144,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
      *
      * @throws TransportException if the IoT Hub could not be reached.
      */
-    public ResponseMessage sendHttpsMessage(HttpsMessage httpsMessage, HttpsMethod httpsMethod, String httpsPath) throws TransportException
+    public ResponseMessage sendHttpsMessage(HttpsMessage httpsMessage, HttpsMethod httpsMethod, String httpsPath, Map<String, String> additionalHeaders) throws TransportException
     {
         synchronized (HTTPS_CONNECTION_LOCK)
         {
@@ -167,6 +167,12 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             request.setHeaderField(HTTPS_PROPERTY_IOTHUB_TO_TAG, httpsPath)
                     // Codes_SRS_HTTPSIOTHUBCONNECTION_21_049: [The function shall set the header field 'content-type' to be the message content type.]
                     .setHeaderField(HTTPS_PROPERTY_CONTENT_TYPE_TAG, httpsMessage.getContentType());
+
+            // Codes_SRS_HTTPSIOTHUBCONNECTION_34_072: [The function shall set the additional header fields provided.]
+            for (String additionalHeaderKey : additionalHeaders.keySet())
+            {
+                request.setHeaderField(additionalHeaderKey, additionalHeaders.get(additionalHeaderKey));
+            }
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_34_056: [This function shall retrieve a sas token from its config to use in the https request header.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_21_047: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]

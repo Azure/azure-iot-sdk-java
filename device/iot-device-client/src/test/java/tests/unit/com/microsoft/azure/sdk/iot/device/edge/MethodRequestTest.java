@@ -10,6 +10,7 @@ import mockit.Deencapsulation;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class MethodRequestTest
 {
@@ -24,8 +25,8 @@ public class MethodRequestTest
         MethodRequest request = new MethodRequest(expectedMethodName, expectedPayload);
 
         //assert
-        assertEquals(0, Deencapsulation.getField(request, "responseTimeoutInSeconds"));
-        assertEquals(0, Deencapsulation.getField(request, "connectionTimeoutInSeconds"));
+        assertNull(Deencapsulation.getField(request, "responseTimeoutInSeconds"));
+        assertNull(Deencapsulation.getField(request, "connectionTimeoutInSeconds"));
     }
 
     // Tests_SRS_DIRECTMETHODREQUEST_34_002: [If the provided methodName is null or empty, this function shall throw an IllegalArgumentException.]

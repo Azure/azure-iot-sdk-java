@@ -173,7 +173,7 @@ public class MqttMessaging extends Mqtt
 
             stringBuilder.append(CONNECTION_MODULE_ID);
             stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-            stringBuilder.append(message.getConnectionDeviceId());
+            stringBuilder.append(message.getConnectionModuleId());
 
             separatorNeeded = true;
         }

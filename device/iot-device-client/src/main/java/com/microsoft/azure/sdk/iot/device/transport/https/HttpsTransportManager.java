@@ -17,6 +17,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implementation of the transport manager for https.
@@ -89,7 +91,7 @@ public class HttpsTransportManager implements IotHubTransportManager
         // devices/<deviceid>/modules/<moduleid>/files otherwise, and then send it.]
         String uri = new IotHubUri("", this.config.getDeviceId(), PATH_FILES_STRING, this.config.getModuleId()).toStringWithoutApiVersion();
         message.setUriPath(uri);
-        return this.send(message);
+        return this.send(message, new HashMap<String, String>());
     }
 
     public ResponseMessage sendFileUploadNotification(IotHubTransportMessage message) throws IOException
@@ -99,7 +101,7 @@ public class HttpsTransportManager implements IotHubTransportManager
         // devices/<deviceid>/modules/<moduleid>/files/notifications otherwise, and then send it.]
         String uri = new IotHubUri("", this.config.getDeviceId(), PATH_NOTIFICATIONS_STRING, this.config.getModuleId()).toStringWithoutApiVersion();
         message.setUriPath(uri);
-        return this.send(message);
+        return this.send(message, new HashMap<String, String>());
     }
 
     /**
@@ -111,7 +113,7 @@ public class HttpsTransportManager implements IotHubTransportManager
      * @throws IOException if the IotHub communication failed.
      * @throws IllegalArgumentException if the provided message is null, or invalid.
      */
-    public ResponseMessage send(IotHubTransportMessage message) throws IOException, IllegalArgumentException
+    public ResponseMessage send(IotHubTransportMessage message, Map<String, String> additionalHeaders) throws IOException, IllegalArgumentException
     {
         //Codes_SRS_HTTPSTRANSPORTMANAGER_21_007: [The send shall create a new instance of the `HttpMessage`, by parsing the Message with `parseHttpsJsonMessage` from `HttpsSingleMessage`.]
         //Codes_SRS_HTTPSTRANSPORTMANAGER_21_008: [If send failed to parse the message, it shall bypass the exception.]
@@ -145,7 +147,7 @@ public class HttpsTransportManager implements IotHubTransportManager
         //Codes_SRS_HTTPSTRANSPORTMANAGER_21_014: [If `sendHttpsMessage` failed, the send shall bypass the exception.]
         try
         {
-            return this.httpsIotHubConnection.sendHttpsMessage(httpsMessage, httpsMethod, httpsPath);
+            return this.httpsIotHubConnection.sendHttpsMessage(httpsMessage, httpsMethod, httpsPath, additionalHeaders);
         }
         catch (TransportException e)
         {
@@ -232,10 +234,11 @@ public class HttpsTransportManager implements IotHubTransportManager
         message.setUriPath(uri.toString());
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_024 [This function shall set a custom property of 'x-ms-edge-moduleId' to the value of <device id>/<module id> of the sending module/device.]
-        message.setProperty(MODULE_ID, this.config.getDeviceId() + "/" + this.config.getModuleId());
+        Map<String, String> additionalHeaders = new HashMap<>();
+        additionalHeaders.put(MODULE_ID, this.config.getDeviceId() + "/" + this.config.getModuleId());
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_025 [This function shall send the built message.]
-        ResponseMessage responseMessage = this.send(message);
+        ResponseMessage responseMessage = this.send(message, additionalHeaders);
 
         if (responseMessage.getStatus() != IotHubStatusCode.OK && responseMessage.getStatus() != IotHubStatusCode.OK_EMPTY)
         {
