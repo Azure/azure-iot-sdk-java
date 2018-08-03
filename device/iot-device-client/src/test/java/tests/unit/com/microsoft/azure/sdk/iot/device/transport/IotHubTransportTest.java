@@ -656,51 +656,6 @@ public class IotHubTransportTest
         };
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_020: [If this object's connection status is DISCONNECTED, this function shall do nothing.]
-    @Test
-    public void closeWhenDisconnectedDoesNothing() throws DeviceClientException
-    {
-        //arrange
-        final Queue<IotHubTransportPacket> waitingPacketsQueue = new ConcurrentLinkedQueue<>();
-        final Map<String, IotHubTransportPacket> inProgressPackets = new ConcurrentHashMap<>();
-        final Queue<IotHubTransportPacket> callbackPacketsQueue = new ConcurrentLinkedQueue<>();
-        final IotHubTransport transport = new IotHubTransport(mockedConfig);
-        Deencapsulation.setField(transport, "connectionStatus", DISCONNECTED);
-        Deencapsulation.setField(transport, "waitingPacketsQueue", waitingPacketsQueue);
-        Deencapsulation.setField(transport, "inProgressPackets", inProgressPackets);
-        Deencapsulation.setField(transport, "callbackPacketsQueue", callbackPacketsQueue);
-        Deencapsulation.setField(transport, "taskScheduler", mockedScheduledExecutorService);
-        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedIotHubTransportConnection);
-
-        new Expectations(IotHubTransport.class)
-        {
-            {
-                mockedPacket.setStatus(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE);
-                times = 0;
-            }
-        };
-
-        //act
-        transport.close(RETRY_EXPIRED, mockedTransportException);
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(transport, "invokeCallbacks");
-                times = 0;
-
-                mockedIotHubTransportConnection.close(false);
-                times = 0;
-
-                Deencapsulation.invoke(transport, "updateStatus",
-                        new Class[] {IotHubConnectionStatus.class, IotHubConnectionStatusChangeReason.class, Throwable.class},
-                        DISCONNECTED, RETRY_EXPIRED, mockedTransportException);
-                times = 0;
-            }
-        };
-    }
-
     //Tests_SRS_IOTHUBTRANSPORT_34_032: [If the provided exception is not a TransportException, this function shall return COMMUNICATION_ERROR.]
     @Test
     public void exceptionToStatusChangeReasonWithNonTransportException()

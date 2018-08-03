@@ -296,22 +296,21 @@ public class IotHubTransport implements IotHubListener
             throw new IllegalArgumentException("reason cannot be null");
         }
 
-        if (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED)
-        {
-            //Codes_SRS_IOTHUBTRANSPORT_34_020: [If this object's connection status is DISCONNECTED, this function
-            // shall do nothing.]
-            return;
-        }
-
         this.cancelPendingPackets();
 
         //Codes_SRS_IOTHUBTRANSPORT_34_023: [This function shall invoke all callbacks.]
         this.invokeCallbacks();
 
-        this.taskScheduler.shutdown();
+        if (this.taskScheduler != null)
+        {
+            this.taskScheduler.shutdown();
+        }
 
         //Codes_SRS_IOTHUBTRANSPORT_34_024: [This function shall close the connection.]
-        this.iotHubTransportConnection.close(false);
+        if (this.iotHubTransportConnection != null)
+        {
+            this.iotHubTransportConnection.close(false);
+        }
 
         //Codes_SRS_IOTHUBTRANSPORT_34_025: [This function shall invoke updateStatus with status DISCONNECTED and the
         // supplied reason and cause.]

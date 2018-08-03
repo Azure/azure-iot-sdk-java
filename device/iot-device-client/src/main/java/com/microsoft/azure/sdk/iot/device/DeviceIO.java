@@ -217,15 +217,12 @@ public final class DeviceIO
      */
     public void close() throws IOException
     {
-        /* Codes_SRS_DEVICE_IO_21_020: [If the client is already closed, the close shall do nothing.] */
-        if (this.state == IotHubClientState.CLOSED)
-        {
-            return;
-        }
-
         /* Codes_SRS_DEVICE_IO_21_017: [The close shall finish all ongoing tasks.] */
         /* Codes_SRS_DEVICE_IO_21_018: [The close shall cancel all recurring tasks.] */
-        this.taskScheduler.shutdown();
+        if (taskScheduler != null)
+        {
+            this.taskScheduler.shutdown();
+        }
 
         /* Codes_SRS_DEVICE_IO_21_019: [The close shall close the transport.] */
         try
