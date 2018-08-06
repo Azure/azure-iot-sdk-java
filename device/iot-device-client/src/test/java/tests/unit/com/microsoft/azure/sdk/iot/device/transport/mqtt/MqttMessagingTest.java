@@ -53,8 +53,6 @@ public class MqttMessagingTest
         assertNotNull(actualPublishTopic);
         String actualSubscribeTopic = Deencapsulation.getField(testMqttMessaging, "subscribeTopic");
         assertNotNull(actualSubscribeTopic);
-        String actualParseTopic = Deencapsulation.getField(testMqttMessaging, "parseTopic");
-        assertNotNull(actualParseTopic);
     }
 
     //Tests_SRS_MqttMessaging_34_031: [The constructor construct publishTopic and subscribeTopic from deviceId and moduleId.]
@@ -69,9 +67,7 @@ public class MqttMessagingTest
         String actualPublishTopic = Deencapsulation.getField(testMqttMessaging, "publishTopic");
         assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId +"/messages/events/", actualPublishTopic);
         String actualSubscribeTopic = Deencapsulation.getField(testMqttMessaging, "subscribeTopic");
-        assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId +"/inputs/#", actualSubscribeTopic);
-        String actualParseTopic = Deencapsulation.getField(testMqttMessaging, "parseTopic");
-        assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId +"/inputs/", actualParseTopic);
+        assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId + "/", actualSubscribeTopic);
     }
 
     /*

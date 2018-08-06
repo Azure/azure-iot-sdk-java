@@ -11,11 +11,9 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 
 public class MqttMessaging extends Mqtt
 {
-    private String deviceId;
     private String moduleId;
     private String subscribeTopic;
     private String publishTopic;
-    private String parseTopic;
 
     public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId, String moduleId) throws TransportException
     {
@@ -33,17 +31,14 @@ public class MqttMessaging extends Mqtt
             //Codes_SRS_MqttMessaging_25_003: [The constructor construct publishTopic and subscribeTopic from deviceId.]
             this.publishTopic = "devices/" + deviceId + "/messages/events/";
             this.subscribeTopic = "devices/" + deviceId + "/messages/devicebound/#";
-            this.parseTopic = "devices/" + deviceId + "/messages/devicebound/";
         }
         else
         {
             //Codes_SRS_MqttMessaging_34_031: [The constructor construct publishTopic and subscribeTopic from deviceId and moduleId.]
             this.publishTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/events/";
-            this.subscribeTopic = "devices/" + deviceId + "/modules/" + moduleId +"/inputs/#";
-            this.parseTopic = "devices/" + deviceId + "/modules/" + moduleId +"/inputs/";
+            this.subscribeTopic = "devices/" + deviceId + "/modules/" + moduleId +"/";
         }
 
-        this.deviceId = deviceId;
         this.moduleId = moduleId;
     }
 
