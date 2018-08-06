@@ -30,6 +30,7 @@ abstract public class Mqtt implements MqttCallback
     private MqttMessageListener messageListener;
     ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
     Object mqttLock;
+    Object publishLock;
 
     private static Map<Integer, Message> unacknowledgedSentMessages = new ConcurrentHashMap<>();
 
@@ -83,6 +84,7 @@ abstract public class Mqtt implements MqttCallback
         this.mqttConnection = mqttConnection;
         this.allReceivedMessages = mqttConnection.getAllReceivedMessages();
         this.mqttLock = mqttConnection.getMqttLock();
+        this.publishLock = new Object();
         this.userSpecifiedSASTokenExpiredOnRetry = false;
         this.listener = listener;
         this.messageListener = messageListener;
@@ -215,9 +217,12 @@ abstract public class Mqtt implements MqttCallback
 
                 mqttMessage.setQos(MqttConnection.QOS);
 
-                //Codes_SRS_Mqtt_25_014: [The function shall publish message payload on the publishTopic specified to the IoT Hub given in the configuration.]
-                IMqttDeliveryToken publishToken = this.mqttConnection.getMqttAsyncClient().publish(publishTopic, mqttMessage);
-                this.unacknowledgedSentMessages.put(publishToken.getMessageId(), message);
+                synchronized (this.publishLock)
+                {
+                    //Codes_SRS_Mqtt_25_014: [The function shall publish message payload on the publishTopic specified to the IoT Hub given in the configuration.]
+                    IMqttDeliveryToken publishToken = this.mqttConnection.getMqttAsyncClient().publish(publishTopic, mqttMessage);
+                    this.unacknowledgedSentMessages.put(publishToken.getMessageId(), message);
+                }
             }
             catch (MqttException e)
             {
@@ -375,31 +380,33 @@ abstract public class Mqtt implements MqttCallback
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
     {
-        if (this.listener != null)
+        synchronized (this.publishLock)
         {
-            if (this.unacknowledgedSentMessages.containsKey(iMqttDeliveryToken.getMessageId()))
+            if (this.listener != null)
             {
-                Message deliveredMessage = this.unacknowledgedSentMessages.get(iMqttDeliveryToken.getMessageId());
-
-                if (deliveredMessage instanceof IotHubTransportMessage)
+                if (this.unacknowledgedSentMessages.containsKey(iMqttDeliveryToken.getMessageId()))
                 {
-                    DeviceOperations deviceOperation = ((IotHubTransportMessage) deliveredMessage).getDeviceOperationType();
-                    if (deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
-                            || deviceOperation == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
-                            || deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
+                    Message deliveredMessage = this.unacknowledgedSentMessages.get(iMqttDeliveryToken.getMessageId());
+
+                    if (deliveredMessage instanceof IotHubTransportMessage)
                     {
-                        //Codes_SRS_Mqtt_34_056: [If the acknowledged message is of type
-                        // DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST, DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST,
-                        // or DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST, this function shall not notify the saved
-                        // listener that the message was sent.]
-                        //no need to alert the IotHubTransport layer about these messages as they are not tracked in the inProgressQueue
-                        return;
-
+                        DeviceOperations deviceOperation = ((IotHubTransportMessage) deliveredMessage).getDeviceOperationType();
+                        if (deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
+                                || deviceOperation == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
+                                || deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
+                        {
+                            //Codes_SRS_Mqtt_34_056: [If the acknowledged message is of type
+                            // DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST, DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST,
+                            // or DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST, this function shall not notify the saved
+                            // listener that the message was sent.]
+                            //no need to alert the IotHubTransport layer about these messages as they are not tracked in the inProgressQueue
+                            return;
+                        }
                     }
-                }
 
-                //Codes_SRS_Mqtt_34_042: [If this object has a saved listener, that listener shall be notified of the successfully delivered message.]
-                this.listener.onMessageSent(this.unacknowledgedSentMessages.get(iMqttDeliveryToken.getMessageId()), null);
+                    //Codes_SRS_Mqtt_34_042: [If this object has a saved listener, that listener shall be notified of the successfully delivered message.]
+                    this.listener.onMessageSent(this.unacknowledgedSentMessages.get(iMqttDeliveryToken.getMessageId()), null);
+                }
             }
         }
     }
