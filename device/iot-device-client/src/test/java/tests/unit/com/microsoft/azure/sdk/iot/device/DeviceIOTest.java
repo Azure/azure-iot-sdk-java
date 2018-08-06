@@ -442,7 +442,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "close");
     }
 
-    /* Tests_SRS_DEVICE_IO_21_020: [If the client is already closed, the closeNow shall do nothing.] */
+    /* Tests_SRS_DEVICE_IO_21_021: [The closeNow shall set the `state` as `CLOSE`.] */
     @Test
     public void closeDoesNothingOnUnopenedClientSuccess()
     {
@@ -456,7 +456,7 @@ public class DeviceIOTest
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
-    /* Tests_SRS_DEVICE_IO_21_020: [If the client is already closed, the closeNow shall do nothing.] */
+    /* Tests_SRS_DEVICE_IO_21_021: [The closeNow shall set the `state` as `CLOSE`.] */
     @Test
     public void closeDoesNothingOnClosedClientSuccess()
             throws IOException
