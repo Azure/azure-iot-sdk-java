@@ -79,7 +79,7 @@ public class ReceiveMessagesIT extends MethodNameLoggingIntegrationTest
     private ReceiveMessagesITRunner testInstance;
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{1} with {3} auth using {4}")
+    @Parameterized.Parameters(name = "{1} with {4} auth using {5}")
     public static Collection inputs() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
