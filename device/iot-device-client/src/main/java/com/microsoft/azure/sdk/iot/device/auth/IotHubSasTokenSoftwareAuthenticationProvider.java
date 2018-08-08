@@ -28,6 +28,8 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      * @param moduleId the module id. May be null if not using a module
      * @param deviceKey the device key for the device. Must be null if the provided sharedAccessToken is not
      * @param sharedAccessToken the sas token string for accessing the device. Must be null if the provided deviceKey is not.
+     * @param tokenValidSecs the number of seconds that the token will be valid for
+     * @param timeBufferPercentage the percent of the sas token's life that will be exhausted before renewal is attempted
      * @throws SecurityException if the provided sas token has expired
      */
     public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken, int tokenValidSecs, int timeBufferPercentage) throws SecurityException

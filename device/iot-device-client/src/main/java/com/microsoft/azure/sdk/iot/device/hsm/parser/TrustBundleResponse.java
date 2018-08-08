@@ -22,6 +22,7 @@ public class TrustBundleResponse
     /**
      * Constructor that deserializes from json
      * @param json the json representation of the TrustBundleResponse
+     * @return  the created trustBundleResponse instance
      */
     public static TrustBundleResponse fromJson(String json)
     {
@@ -37,9 +38,11 @@ public class TrustBundleResponse
         return response;
     }
 
+    /**
+     * Empty constructor, only for gson. Don't delete
+     */
     public TrustBundleResponse()
     {
-        //empty constructor for gson to use
     }
 
     /**

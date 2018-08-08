@@ -26,9 +26,12 @@ public class HttpsRequestResponseSerializer
 
     /**
      * Serialize the provided request
+     *
      * @param httpsRequest the request to be serialized
+     * @param path the path for the request to invoke on (e.g. /trust-bundle)
+     * @param queryString the full querystring associated with the http request. Should not include the '?' character at the beginning
+     * @param host the host that the request is being made to
      * @return the serialized request
-     * @throws UnsupportedEncodingException if UTF-8 encoding is not supported
      * @throws IllegalArgumentException if the provided httpsRequest is null or has a null request url
      */
     public static byte[] serializeRequest(HttpsRequest httpsRequest, String path, String queryString, String host) throws IllegalArgumentException

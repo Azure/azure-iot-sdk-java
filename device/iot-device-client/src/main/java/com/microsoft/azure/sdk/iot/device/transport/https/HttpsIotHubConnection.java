@@ -139,7 +139,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
      * @param httpsMessage the message to send.
      * @param httpsMethod the https method (GET, POST, PUT, DELETE).
      * @param httpsPath the path that will be added at the end of the URI with `/`.
-     *
+     * @param additionalHeaders any extra headers to be included in the http request
      * @return the ResponseMessage including status code and payload from sending message.
      *
      * @throws TransportException if the IoT Hub could not be reached.

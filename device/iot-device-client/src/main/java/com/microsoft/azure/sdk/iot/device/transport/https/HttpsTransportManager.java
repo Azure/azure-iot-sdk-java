@@ -183,6 +183,8 @@ public class HttpsTransportManager implements IotHubTransportManager
      * @param moduleId the module id of the module to invoke the method on
      * @return the result of that request
      * @throws IOException if the IotHub cannot be reached
+     * @throws URISyntaxException if the provided deviceId and/or moduleId cannot be encoded correctly
+     * @throws TransportException if any issues occur when sending the http request to its target
      */
     public MethodResult invokeMethod(MethodRequest methodRequest, String deviceId, String moduleId) throws IOException, URISyntaxException, TransportException
     {

@@ -45,6 +45,7 @@ public interface IotHubTransportManager
      * with the status and message.
      *
      * @param message is the message to send.
+     * @param additionalHeaders any extra headers to include
      * @return the response from IoT Hub, including status and message.
      * @throws IOException if an error occurs in sending a message.
      */

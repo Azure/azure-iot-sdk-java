@@ -104,6 +104,7 @@ public class ModuleClient extends InternalClient
      * @param privateKey The PEM formatted string for the private key or the system path to the file containing the PEM.
      * @param isPrivateKeyPath 'false' if the privateKey argument is a path to the PEM, and 'true' if it is the PEM string itself,
      * @throws URISyntaxException If the connString cannot be parsed
+     * @throws ModuleClientException if any other exception occurs while building the module client
      */
     public ModuleClient(String connectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws ModuleClientException, URISyntaxException
     {

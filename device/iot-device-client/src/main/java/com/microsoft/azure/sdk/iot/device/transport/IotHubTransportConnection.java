@@ -39,6 +39,7 @@ public interface IotHubTransportConnection
 
     /**
      * Closes the transport connection.
+     * @param isReconnecting if the caller is in the process of reconnecting or not
      * @throws TransportException If any exceptions are encountered while closing.
      */
     void close(boolean isReconnecting) throws TransportException;

@@ -33,8 +33,6 @@ public class HttpsRequest
      * @param body the request body. Must be an array of size 0 if the request
      * method is GET or DELETE.
      * @param userAgentString the user agent string to attach to all http communications
-     * @throws TransportException if an Exception occurs in setting up the HTTPS
-     * connection.
      */
     public HttpsRequest(URL url, HttpsMethod method, byte[] body, String userAgentString)
     {
