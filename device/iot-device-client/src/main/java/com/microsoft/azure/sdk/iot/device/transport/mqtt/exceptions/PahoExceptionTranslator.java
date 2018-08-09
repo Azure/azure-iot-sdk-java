@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.net.NoRouteToHostException;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
@@ -30,7 +31,8 @@ public class PahoExceptionTranslator
                 if (pahoException.getCause() instanceof UnknownHostException
                         || pahoException.getCause() instanceof NoRouteToHostException
                         || pahoException.getCause() instanceof InterruptedException
-                        || pahoException.getCause() instanceof SocketTimeoutException)
+                        || pahoException.getCause() instanceof SocketTimeoutException
+                        || pahoException.getCause() instanceof SocketException)
                 {
                     // Codes_SRS_PahoExceptionTranslator_34_139: [When deriving the TransportException from the provided
                     // MqttException, this function shall map all client exceptions with underlying UnknownHostException
