@@ -24,6 +24,11 @@ public class ErrorResponse
         return new GsonBuilder().create().fromJson(json, ErrorResponse.class);
     }
 
+    public ErrorResponse()
+    {
+        //empty constructor for gson
+    }
+
     /**
      * Get the message
      * @return the message

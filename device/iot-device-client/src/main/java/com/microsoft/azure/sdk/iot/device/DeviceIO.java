@@ -288,7 +288,8 @@ public final class DeviceIO
         // Codes_SRS_DEVICE_IO_12_001: [The function shall set the deviceId on the message if the deviceId parameter is not null.]
         if (deviceId != null)
         {
-            message.setConnectionDeviceId(deviceId);
+            //TODO re-enable later, including unit test. Disabled due to edgehub bug
+            //message.setConnectionDeviceId(deviceId);
         }
 
         logger.LogInfo("Message with messageid %s along with callback and callbackcontext is added to the queue, method name is %s ", message.getMessageId(), logger.getMethodName());

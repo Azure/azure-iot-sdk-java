@@ -21,6 +21,7 @@ import org.junit.Test;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -416,7 +417,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.sendHttpsMessage(mockMsg, httpsMethod, eventUri);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, eventUri, new HashMap<String, String>());
 
         final String expectedUrl = "https://" + iotHubHostname + eventUri + "?" + IotHubUri.API_VERSION;
         new Verifications()
@@ -436,7 +437,7 @@ public class HttpsIotHubConnectionTest
         final String uriPath = "/files";
         final HttpsMethod httpsMethod = HttpsMethod.POST;
 
-        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath, new HashMap<String, String>());
 
         new Verifications()
         {
@@ -463,7 +464,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath, new HashMap<String, String>());
 
         final byte[] expectedBody = body;
         new Verifications()
@@ -498,7 +499,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath, new HashMap<String, String>());
 
         final String expectedPropertyName = propertyName;
         final String expectedPropertyValue = propertyValue;
@@ -527,7 +528,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath, new HashMap<String, String>());
 
         final int expectedReadTimeoutMillis = readTimeoutMillis;
         new Verifications()
@@ -556,7 +557,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath, new HashMap<String, String>());
 
         new Verifications()
         {
@@ -592,7 +593,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath, new HashMap<String, String>());
 
         final String expectedTokenStr = tokenStr;
         new Verifications()
@@ -621,12 +622,56 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.sendHttpsMessage(mockMsg, httpsMethod, path);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, path, new HashMap<String, String>());
 
         new Verifications()
         {
             {
                 mockRequest.setHeaderField(withMatch("(?i)iothub-to"), path);
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_34_072: [The function shall set the additional header fields provided.]
+    @Test
+    public void sendHttpsMessageSetsAdditionalHeaders(@Mocked final IotHubUri mockUri) throws IOException, TransportException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        final String path = "test-path";
+        new NonStrictExpectations()
+        {
+            {
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
+                result = mockRequest;
+                mockUri.getPath();
+                result = path;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+
+        final String expectedKey1 = "key1";
+        final String expectedValue1 = "value1";
+        final String expectedKey2 = "key2";
+        final String expectedValue2 = "value2";
+
+
+        Map additionalHeaders = new HashMap<String, String>();
+        additionalHeaders.put(expectedKey1, expectedValue1);
+        additionalHeaders.put(expectedKey2, expectedValue2);
+
+        //act
+        conn.sendHttpsMessage(mockMsg, httpsMethod, path, additionalHeaders);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockRequest.setHeaderField(expectedKey1, expectedValue1);
+                times = 1;
+
+                mockRequest.setHeaderField(expectedKey2, expectedValue2);
                 times = 1;
             }
         };
@@ -650,7 +695,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath, new HashMap<String, String>());
 
         final String expectedContentType = contentType;
         new Verifications()
@@ -694,7 +739,7 @@ public class HttpsIotHubConnectionTest
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
 
-        ResponseMessage testResponse = conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath);
+        ResponseMessage testResponse = conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath, new HashMap<String, String>());
 
         assertEquals(mockStatus, testResponse.getStatus());
         assertEquals(body, testResponse.getBytes());
@@ -1615,7 +1660,7 @@ public class HttpsIotHubConnectionTest
         HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
 
         //act
-        connection.sendHttpsMessage(mockMsg, HttpsMethod.GET, "somepath");
+        connection.sendHttpsMessage(mockMsg, HttpsMethod.GET, "somepath", new HashMap<String, String>());
 
         //assert
         new Verifications()
@@ -1699,7 +1744,7 @@ public class HttpsIotHubConnectionTest
         };
 
         //act
-        conn.sendHttpsMessage(mockMsg, expectedMethod, uriPath);
+        conn.sendHttpsMessage(mockMsg, expectedMethod, uriPath, new HashMap<String, String>());
 
         //assert
         new Verifications()

@@ -99,7 +99,7 @@ public class ModuleInvokeMethodSample
             }
 
             System.out.println("Received response status: " + result.getStatus());
-            System.out.println("Received response payload: " + result.getPayload());
+            System.out.println("Received response payload: " + result.getPayloadObject());
         }
         catch (ModuleClientException e)
         {

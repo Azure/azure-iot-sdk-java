@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.*;
 import mockit.*;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -22,6 +23,9 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST;
+import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
+import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
 import static org.junit.Assert.*;
 
 /**
@@ -1303,6 +1307,123 @@ public class MqttTest
                 mockedIotHubListener.onMessageSent(expectedMessage, null);
                 times = 1;
                 mockedIotHubListener.onMessageSent(otherMessage, null);
+                times = 0;
+            }
+        };
+    }
+
+    //Tests_SRS_Mqtt_34_056: [If the acknowledged message is of type
+    // DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST, DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST,
+    // or DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST, this function shall not notify the saved
+    // listener that the message was sent.]
+    @Test
+    public void deliveryCompleteDoesNotNotifyListenerIfSubscribeToDesiredProperties() throws TransportException
+    {
+        //arrange
+        final int expectedMessageId = 13;
+        baseConstructorExpectations();
+        final Message otherMessage = new Message();
+        final IotHubTransportMessage expectedMessage = new IotHubTransportMessage("some body");
+        expectedMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST);
+        Mqtt mockMqtt = instantiateMqtt(true, mockedIotHubListener);
+        Map<Integer, Message> unacknowledgedMessages = new HashMap<>();
+        unacknowledgedMessages.put(12, otherMessage);
+        unacknowledgedMessages.put(expectedMessageId, expectedMessage);
+        Deencapsulation.setField(mockMqtt, "unacknowledgedSentMessages", unacknowledgedMessages);
+        new NonStrictExpectations()
+        {
+            {
+                mockMqttDeliveryToken.getMessageId();
+                result = expectedMessageId;
+            }
+        };
+
+        //act
+        mockMqtt.deliveryComplete(mockMqttDeliveryToken);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedIotHubListener.onMessageSent(expectedMessage, null);
+                times = 0;
+            }
+        };
+    }
+
+    //Tests_SRS_Mqtt_34_056: [If the acknowledged message is of type
+    // DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST, DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST,
+    // or DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST, this function shall not notify the saved
+    // listener that the message was sent.]
+    @Test
+    public void deliveryCompleteDoesNotNotifyListenerIfSubscribeToMethods() throws TransportException
+    {
+        //arrange
+        final int expectedMessageId = 13;
+        baseConstructorExpectations();
+        final Message otherMessage = new Message();
+        final IotHubTransportMessage expectedMessage = new IotHubTransportMessage("some body");
+        expectedMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
+        Mqtt mockMqtt = instantiateMqtt(true, mockedIotHubListener);
+        Map<Integer, Message> unacknowledgedMessages = new HashMap<>();
+        unacknowledgedMessages.put(12, otherMessage);
+        unacknowledgedMessages.put(expectedMessageId, expectedMessage);
+        Deencapsulation.setField(mockMqtt, "unacknowledgedSentMessages", unacknowledgedMessages);
+        new NonStrictExpectations()
+        {
+            {
+                mockMqttDeliveryToken.getMessageId();
+                result = expectedMessageId;
+            }
+        };
+
+        //act
+        mockMqtt.deliveryComplete(mockMqttDeliveryToken);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedIotHubListener.onMessageSent(expectedMessage, null);
+                times = 0;
+            }
+        };
+    }
+
+    //Tests_SRS_Mqtt_34_056: [If the acknowledged message is of type
+    // DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST, DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST,
+    // or DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST, this function shall not notify the saved
+    // listener that the message was sent.]
+    @Test
+    public void deliveryCompleteDoesNotNotifyListenerIfUnsubscribeToDesiredProperties() throws TransportException
+    {
+        //arrange
+        final int expectedMessageId = 13;
+        baseConstructorExpectations();
+        final Message otherMessage = new Message();
+        final IotHubTransportMessage expectedMessage = new IotHubTransportMessage("some body");
+        expectedMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST);
+        Mqtt mockMqtt = instantiateMqtt(true, mockedIotHubListener);
+        Map<Integer, Message> unacknowledgedMessages = new HashMap<>();
+        unacknowledgedMessages.put(12, otherMessage);
+        unacknowledgedMessages.put(expectedMessageId, expectedMessage);
+        Deencapsulation.setField(mockMqtt, "unacknowledgedSentMessages", unacknowledgedMessages);
+        new NonStrictExpectations()
+        {
+            {
+                mockMqttDeliveryToken.getMessageId();
+                result = expectedMessageId;
+            }
+        };
+
+        //act
+        mockMqtt.deliveryComplete(mockMqttDeliveryToken);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedIotHubListener.onMessageSent(expectedMessage, null);
                 times = 0;
             }
         };

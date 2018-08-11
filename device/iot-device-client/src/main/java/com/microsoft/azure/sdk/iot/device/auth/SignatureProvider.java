@@ -25,6 +25,7 @@ public interface SignatureProvider
      * @throws IOException If the http client cannot reach the signing party
      * @throws TransportException If the http client cannot reach the signing party
      * @throws URISyntaxException If the url for the signing party cannot be parsed
+     * @throws HsmException if the hsm raises an exception
      */
     String sign(String keyName, String data, String generationId) throws IOException, TransportException, URISyntaxException, HsmException;
 }

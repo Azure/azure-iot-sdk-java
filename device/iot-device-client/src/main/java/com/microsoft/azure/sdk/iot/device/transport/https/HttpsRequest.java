@@ -6,8 +6,9 @@ package com.microsoft.azure.sdk.iot.device.transport.https;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 import javax.net.ssl.SSLContext;
-import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,8 +17,12 @@ import java.util.Map;
  */
 public class HttpsRequest
 {
-    /** The underlying HTTPS connection stream. */
-    private final HttpsConnection connection;
+    private byte[] body;
+    private HttpsMethod method;
+    private URL url;
+    private Map<String, List<String>> headers;
+    private int connectionTimeout;
+    private SSLContext sslContext;
 
     /**
      * Constructor. Takes a URL as an argument and returns an HTTPS request that
@@ -28,25 +33,35 @@ public class HttpsRequest
      * @param body the request body. Must be an array of size 0 if the request
      * method is GET or DELETE.
      * @param userAgentString the user agent string to attach to all http communications
-     * @throws TransportException if an Exception occurs in setting up the HTTPS
-     * connection.
-     * @throws TransportException if the endpoint given does not use the
-     * HTTPS protocol.
      */
-    public HttpsRequest(URL url, HttpsMethod method, byte[] body, String userAgentString) throws TransportException
+    public HttpsRequest(URL url, HttpsMethod method, byte[] body, String userAgentString)
     {
-        // Codes_SRS_HTTPSREQUEST_11_005: [If an IOException occurs in setting up the HTTPS connection, the function shall throw a TransportException.]
-        // Codes_SRS_HTTPSREQUEST_11_001: [The function shall open a connection with the given URL as the endpoint.]
-        // Codes_SRS_HTTPSREQUEST_11_004: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
-        this.connection = new HttpsConnection(url, method);
+        // Codes_SRS_HTTPSREQUEST_34_031: [The function shall save the provided arguments to be used when the http connection is built during the call to send().]
+        this.url = url;
+        this.method = method;
+        this.body = body;
+        headers = new HashMap<>();
+
+        List<String> hostHeaderValues = new ArrayList<>();
+        if (url.getHost() != null && !url.getHost().isEmpty())
+        {
+            String host = url.getHost();
+            if (url.getPort() != -1)
+            {
+                host += ":" + url.getPort();
+            }
+            hostHeaderValues.add(host);
+
+            headers.put("Host", hostHeaderValues);
+        }
 
         if (userAgentString != null && !userAgentString.isEmpty())
         {
-            this.connection.setRequestHeader("User-Agent", userAgentString);
+            List<String> headerValues = new ArrayList<>();
+            headerValues.add(userAgentString);
+            headers.put("User-Agent", headerValues);
         }
 
-        // Codes_SRS_HTTPSREQUEST_11_002: [The function shall write the body to the connection.]
-        this.connection.writeOutput(body);
     }
 
     /**
@@ -59,20 +74,43 @@ public class HttpsRequest
      */
     public HttpsResponse send() throws TransportException
     {
+        HttpsConnection connection = new HttpsConnection(url, method);
+
+        for (String headerKey : headers.keySet())
+        {
+            for (String headerValue : this.headers.get(headerKey))
+            {
+                connection.setRequestHeader(headerKey, headerValue);
+            }
+        }
+
+        connection.writeOutput(this.body);
+
+        if (this.sslContext != null)
+        {
+            connection.setSSLContext(this.sslContext);
+        }
+
+
+        if (this.connectionTimeout != 0)
+        {
+            connection.setReadTimeoutMillis(this.connectionTimeout);
+        }
+
         int responseStatus = -1;
         byte[] responseBody = new byte[0];
         byte[] errorReason = new byte[0];
         Map<String, List<String>> headerFields;
 
         // Codes_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
-        this.connection.connect();
+        connection.connect();
 
-        responseStatus = this.connection.getResponseStatus();
-        headerFields = this.connection.getResponseHeaders();
+        responseStatus = connection.getResponseStatus();
+        headerFields = connection.getResponseHeaders();
 
         if (responseStatus == 200)
         {
-            responseBody = this.connection.readInput();
+            responseBody = connection.readInput();
         }
 
         // Codes_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body (if 200 status code), header fields, and error reason (if any).]
@@ -90,7 +128,17 @@ public class HttpsRequest
     public HttpsRequest setHeaderField(String field, String value)
     {
         // Codes_SRS_HTTPSREQUEST_11_013: [The function shall set the header field with the given name to the given value.]
-        this.connection.setRequestHeader(field, value);
+        if (this.headers.containsKey(field))
+        {
+            this.headers.get(field).add(value);
+        }
+        else
+        {
+            List<String> headerValues = new ArrayList<>();
+            headerValues.add(value);
+            this.headers.put(field, headerValues);
+        }
+
         return this;
     }
 
@@ -106,7 +154,7 @@ public class HttpsRequest
     public HttpsRequest setReadTimeoutMillis(int timeout)
     {
         // Codes_SRS_HTTPSREQUEST_11_014: [The function shall set the read timeout for the request to the given value.]
-        this.connection.setReadTimeoutMillis(timeout);
+        this.connectionTimeout = timeout;
         return this;
     }
 
@@ -123,38 +171,55 @@ public class HttpsRequest
             //Codes_SRS_HTTPSREQUEST_25_015: [The function shall throw IllegalArgumentException if argument is null .]
             throw new IllegalArgumentException("Context cannot be null");
         }
-        //Codes_SRS_HTTPSREQUEST_25_016: [The function shall set the SSL context for the IotHub.]
-        this.connection.setSSLContext(sslContext);
+
+        this.sslContext = sslContext;
+
         return this;
     }
 
     public byte[] getBody()
     {
         // Codes_SRS_HTTPSREQUEST_34_017: [The function shall return the body saved in this object's connection instance.]
-        return this.connection.getBody();
+        return this.body;
     }
 
     public URL getRequestUrl()
     {
         // Codes_SRS_HTTPSREQUEST_34_018: [The function shall return the request url saved in this object's connection instance.]
-        return this.connection.getRequestUrl();
+        return this.url;
     }
 
     public String getHttpMethod()
     {
         // Codes_SRS_HTTPSREQUEST_34_019: [The function shall return the http method saved in this object's connection instance.]
-        return this.connection.getHttpMethod();
+        return this.method.toString();
     }
 
     public String getRequestHeaders()
     {
-        // Codes_SRS_HTTPSREQUEST_34_020: [The function shall return the request headers saved in this object's connection instance.]
-        return this.connection.getRequestHeaders();
+        String headerString = "";
+
+        for (String key : this.headers.keySet())
+        {
+            headerString += (key);
+            headerString += ": ";
+
+            for (String value : this.headers.get(key))
+            {
+                headerString += value;
+                headerString += "; ";
+            }
+            headerString = headerString.substring(0, headerString.length() - 2);
+
+            headerString += "\r\n";
+        }
+
+        //Codes_SRS_HTTPSCONNECTION_34_030: [The function shall return all the request headers in the format "<key>: <value1>; <value2>\r\n <key>: <value1>\r\n...".]
+        return headerString;
     }
 
     @SuppressWarnings("unused")
     protected HttpsRequest()
     {
-        this.connection = null;
     }
 }

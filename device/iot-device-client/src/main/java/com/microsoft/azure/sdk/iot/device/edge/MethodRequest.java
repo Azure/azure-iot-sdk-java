@@ -22,12 +22,12 @@ public class MethodRequest
     private static final String RESPONSE_TIMEOUT_KEY_NAME = "responseTimeoutInSeconds";
     @Expose(serialize = true, deserialize = false)
     @SerializedName(RESPONSE_TIMEOUT_KEY_NAME)
-    private int responseTimeoutInSeconds;
+    private Integer responseTimeoutInSeconds; //Integer, not int because Integer is nullable, so json won't include this field if it is left as the default value
 
     private static final String CONNECT_TIMEOUT_KEY_NAME = "connectTimeoutInSeconds";
     @Expose(serialize = true, deserialize = false)
     @SerializedName(CONNECT_TIMEOUT_KEY_NAME)
-    private int connectionTimeoutInSeconds;
+    private Integer connectionTimeoutInSeconds; //Integer, not int because Integer is nullable, so json won't include this field if it is left as the default value
 
     private static final String PAYLOAD_KEY_NAME = "payload";
     @Expose(serialize = true, deserialize = false)
@@ -43,7 +43,7 @@ public class MethodRequest
     public MethodRequest(String methodName, String payload) throws IllegalArgumentException
     {
         // Codes_SRS_DIRECTMETHODREQUEST_34_001: [This constructor shall invoke the overloaded constructor with default values of responseTimeout=0 and connectionTimeout=0.]
-        this(methodName, payload, 0, 0);
+        this(methodName, payload, null, null);
     }
 
     /**
@@ -54,7 +54,7 @@ public class MethodRequest
      * @param connectionTimeout the timeout in seconds for the connection to be established
      * @throws IllegalArgumentException if the provided methodName is null or empty
      */
-    public MethodRequest(String methodName, String payload, int responseTimeout, int connectionTimeout) throws IllegalArgumentException
+    public MethodRequest(String methodName, String payload, Integer responseTimeout, Integer connectionTimeout) throws IllegalArgumentException
     {
         if (methodName == null || methodName.isEmpty())
         {

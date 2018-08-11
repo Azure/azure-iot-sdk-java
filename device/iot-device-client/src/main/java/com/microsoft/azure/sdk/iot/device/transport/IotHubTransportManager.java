@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.ResponseMessage;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * An interface for an simple and synchronous IoT Hub transport.
@@ -44,10 +45,11 @@ public interface IotHubTransportManager
      * with the status and message.
      *
      * @param message is the message to send.
+     * @param additionalHeaders any extra headers to include
      * @return the response from IoT Hub, including status and message.
      * @throws IOException if an error occurs in sending a message.
      */
-    ResponseMessage send(IotHubTransportMessage message) throws IOException;
+    ResponseMessage send(IotHubTransportMessage message, Map<String, String> additionalHeaders) throws IOException;
 
     /**
      * Synchronously receive message from the IoT Hub.

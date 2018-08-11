@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 
 import static junit.framework.TestCase.assertEquals;
@@ -70,6 +71,9 @@ public class HttpsHsmClientTest
     @Mocked
     TrustBundleResponse mockedTrustBundleResponse;
 
+    @Mocked
+    URLStreamHandlerFactory mockedURLStreamHandlerFactory;
+
     private static final String expectedBaseUrl = "some.base.url";
     private static final String expectedApiVersion = "1.2.3";
     private static final String expectedName = "someModuleName";
@@ -82,22 +86,62 @@ public class HttpsHsmClientTest
 
     // Tests_SRS_HSMHTTPCLIENT_34_001: [This constructor shall save the provided baseUrl.]
     @Test
-    public void constructorSavesBaseUrl() throws TransportException, UnsupportedEncodingException, MalformedURLException, URISyntaxException
+    public void constructorSavesBaseUrl(@Mocked final URI mockedURI) throws TransportException, UnsupportedEncodingException, MalformedURLException, URISyntaxException
     {
         //act
+        new NonStrictExpectations()
+        {
+            {
+                new URI(expectedBaseUrl);
+                result = mockedURI;
+
+                mockedURI.getScheme();
+                result = expectedSchemeHttps;
+            }
+        };
         HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
 
         //assert
         assertEquals(expectedBaseUrl, Deencapsulation.getField(client, "baseUrl"));
     }
 
+    // Tests_SRS_HSMHTTPCLIENT_34_012: [If the provided baseUrl uses the unix scheme, this constructor shall set
+    // a stub url stream handler factory to handle that unix scheme.]
+    @Test
+    public void constructorWithUnixScheme(@Mocked final URI mockedURI) throws TransportException, UnsupportedEncodingException, MalformedURLException, URISyntaxException
+    {
+        //act
+        new NonStrictExpectations()
+        {
+            {
+                new URI(expectedBaseUrl);
+                result = mockedURI;
+
+                mockedURI.getScheme();
+                result = expectedSchemeUnix;
+
+                URL.setURLStreamHandlerFactory((URLStreamHandlerFactory) any);
+            }
+        };
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
+
+        //assert
+        assertEquals(expectedBaseUrl, Deencapsulation.getField(client, "baseUrl"));
+        new Verifications()
+        {
+            {
+                URL.setURLStreamHandlerFactory((URLStreamHandlerFactory) any);
+                times = 1;
+            }
+        };
+    }
 
     // Tests_SRS_HSMHTTPCLIENT_34_002: [This function shall build an http request with the url in the format
     // <base url>/modules/<url encoded name>/genid/<url encoded gen id>/sign?api-version=<url encoded api version>.]
     // Tests_SRS_HSMHTTPCLIENT_34_003: [This function shall build an http request with headers ContentType and Accept with value application/json.]
     // Tests_SRS_HSMHTTPCLIENT_34_004: [If the response from the http call is 200, this function shall return the SignResponse built from the response body json.]
     @Test
-    public void signSuccess() throws IOException, TransportException, URISyntaxException, HsmException
+    public void signSuccess(final @Mocked URI mockedURI) throws IOException, TransportException, URISyntaxException, HsmException
     {
         //arrange
         final String expectedUrl = expectedBaseUrl + "/modules/" + URLEncoder.encode(expectedName, "UTF-8") + "/genid/" + URLEncoder.encode(expectedGenId, "UTF-8") + "/sign?api-version=" + URLEncoder.encode(expectedApiVersion, "UTF-8");
@@ -106,10 +150,16 @@ public class HttpsHsmClientTest
         new NonStrictExpectations()
         {
             {
+                new URI(expectedBaseUrl);
+                result = mockedURI;
+
+                mockedURI.getScheme();
+                result = expectedSchemeHttps;
+
                 mockedSignRequest.toJson();
                 result = expectedJson;
 
-                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(), TransportUtils.USER_AGENT_STRING);
+                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(), anyString);
                 result = mockedHttpsRequest;
 
                 mockedHttpsRequest.send();
@@ -124,7 +174,6 @@ public class HttpsHsmClientTest
         };
 
         HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
-        Deencapsulation.setField(client, "scheme", expectedSchemeHttps);
 
         //act
         client.sign(expectedApiVersion, expectedName, mockedSignRequest, expectedGenId);
@@ -133,7 +182,7 @@ public class HttpsHsmClientTest
         new Verifications()
         {
             {
-                mockedHttpsRequest.setHeaderField("ContentType", "application/json");
+                mockedHttpsRequest.setHeaderField("Content-Type", "application/json");
                 times = 1;
 
                 mockedHttpsRequest.setHeaderField("Accept", "application/json");
@@ -150,7 +199,7 @@ public class HttpsHsmClientTest
 
     // Tests_SRS_HSMHTTPCLIENT_34_006: [If the scheme of the provided url is Unix, this function shall send the http request using unix domain sockets.]
     @Test
-    public void signSuccessWithUnix() throws IOException, TransportException, URISyntaxException, HsmException
+    public void signSuccessWithUnix(@Mocked final URI mockedURI) throws IOException, TransportException, URISyntaxException, HsmException
     {
         //arrange
         final String expectedJson = "some json";
@@ -159,24 +208,32 @@ public class HttpsHsmClientTest
         new NonStrictExpectations()
         {
             {
+                new URI(expectedBaseUrl);
+                result = mockedURI;
+
+                mockedURI.getScheme();
+                result = expectedSchemeUnix;
+
                 mockedSignRequest.toJson();
                 result = expectedJson;
 
-                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(), TransportUtils.USER_AGENT_STRING);
+                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(), anyString);
                 result = mockedHttpsRequest;
 
-                HttpsRequestResponseSerializer.serializeRequest(mockedHttpsRequest);
+                HttpsRequestResponseSerializer.serializeRequest(mockedHttpsRequest, anyString, anyString, anyString);
                 result = expectedMetaData;
 
                 mockedHttpsRequest.getBody();
                 result = expectedBody;
-
 
                 new UnixSocketAddress(anyString);
                 result = mockedUnixSocketAddress;
 
                 UnixSocketChannel.open(mockedUnixSocketAddress);
                 result = mockedUnixSocketChannel;
+
+                mockedUnixSocketChannel.read((ByteBuffer) any);
+                result = -1;
 
                 Channels.newOutputStream(mockedUnixSocketChannel);
                 result = mockedOutputStream;
@@ -199,7 +256,7 @@ public class HttpsHsmClientTest
         new Verifications()
         {
             {
-                HttpsRequestResponseSerializer.serializeRequest(mockedHttpsRequest);
+                HttpsRequestResponseSerializer.serializeRequest(mockedHttpsRequest, anyString, anyString, anyString);
                 times = 1;
 
                 HttpsRequestResponseSerializer.deserializeResponse((BufferedReader) any);
@@ -213,7 +270,7 @@ public class HttpsHsmClientTest
 
     // Tests_SRS_HSMHTTPCLIENT_34_005: [If the response from the http call is not 200, this function shall throw an HsmException.]
     @Test
-    public void signThrowsIfResponseIsNot200() throws UnsupportedEncodingException, MalformedURLException, TransportException, URISyntaxException
+    public void signThrowsIfResponseIsNot200(@Mocked final URI mockedURI) throws UnsupportedEncodingException, MalformedURLException, TransportException, URISyntaxException
     {
         //arrange
         final String expectedUrl = expectedBaseUrl + "/modules/" + URLEncoder.encode(expectedName, "UTF-8") + "/sign?api-version=" + URLEncoder.encode(expectedApiVersion, "UTF-8");
@@ -222,10 +279,16 @@ public class HttpsHsmClientTest
         new NonStrictExpectations()
         {
             {
+                new URI(expectedUrl);
+                result = mockedURI;
+
+                mockedURI.getScheme();
+                result = expectedSchemeHttps;
+
                 mockedSignRequest.toJson();
                 result = expectedJson;
 
-                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(), TransportUtils.USER_AGENT_STRING);
+                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(), anyString);
                 result = mockedHttpsRequest;
 
                 mockedHttpsRequest.send();
@@ -240,7 +303,6 @@ public class HttpsHsmClientTest
         };
 
         HttpsHsmClient client = new HttpsHsmClient(expectedUrl);
-        Deencapsulation.setField(client, "scheme", expectedSchemeHttps);
 
         boolean transportExceptionThrown = false;
 
@@ -271,9 +333,19 @@ public class HttpsHsmClientTest
 
     // Tests_SRS_HSMHTTPCLIENT_34_007: [If the provided api version is null or empty, this function shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
-    public void getTrustBundleThrowsForNullApiVersion() throws URISyntaxException, TransportException, MalformedURLException, HsmException, UnsupportedEncodingException
+    public void getTrustBundleThrowsForNullApiVersion(final @Mocked URI mockedURI) throws URISyntaxException, TransportException, IOException, HsmException
     {
         //arrange
+        new NonStrictExpectations()
+        {
+            {
+                new URI(expectedBaseUrl);
+                result = mockedURI;
+
+                mockedURI.getScheme();
+                result = expectedSchemeHttps;
+            }
+        };
         HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
 
         //act
@@ -285,16 +357,21 @@ public class HttpsHsmClientTest
     // Tests_SRS_HSMHTTPCLIENT_34_009: [This function shall send a GET http request to the built url.]
     // Tests_SRS_HSMHTTPCLIENT_34_010: [If the response from the http request is 200, this function shall return the trust bundle response.]
     @Test
-    public void getTrustBundleSuccess() throws URISyntaxException, TransportException, MalformedURLException, HsmException, UnsupportedEncodingException
+    public void getTrustBundleSuccess(final @Mocked URI mockedURI) throws URISyntaxException, TransportException, IOException, HsmException
     {
         //arrange
-        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
         final String expectedUrl = expectedBaseUrl + "/trust-bundle?api-version=" + expectedApiVersion;
 
         //assert
-        new StrictExpectations()
+        new Expectations()
         {
             {
+                new URI(expectedBaseUrl);
+                result = mockedURI;
+
+                mockedURI.getScheme();
+                result = expectedSchemeHttps;
+
                 new URL(expectedUrl);
                 result = mockedURL;
 
@@ -311,10 +388,12 @@ public class HttpsHsmClientTest
                 mockedHttpsResponse.getBody();
                 result = "some trust bundle".getBytes();
 
-                new TrustBundleResponse("some trust bundle");
+                TrustBundleResponse.fromJson("some trust bundle");
                 result = mockedTrustBundleResponse;
             }
         };
+
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
 
         //act
         client.getTrustBundle(expectedApiVersion);
@@ -322,17 +401,21 @@ public class HttpsHsmClientTest
 
     // Tests_SRS_HSMHTTPCLIENT_34_011: [If the response from the http request is not 200, this function shall throw an HSMException.]
     @Test
-    public void getTrustBundleThrowsIfResponseNot200() throws URISyntaxException, TransportException, MalformedURLException, HsmException, UnsupportedEncodingException
+    public void getTrustBundleThrowsIfResponseNot200(final @Mocked URI mockedURI) throws URISyntaxException, TransportException, MalformedURLException, HsmException, UnsupportedEncodingException
     {
-        //arrange
-        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
+        //assert
         final String expectedUrl = expectedBaseUrl + "/trust-bundle?api-version=" + expectedApiVersion;
         final int expectedStatusCode = 102;
         final String expectedErrorMessage = "The protons are out of control!";
-        //assert
-        new StrictExpectations()
+        new Expectations()
         {
             {
+                new URI(expectedBaseUrl);
+                result = mockedURI;
+
+                mockedURI.getScheme();
+                result = expectedSchemeHttps;
+
                 new URL(expectedUrl);
                 result = mockedURL;
 
@@ -356,6 +439,8 @@ public class HttpsHsmClientTest
                 result = expectedErrorMessage;
             }
         };
+
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
 
         boolean correctExceptionEncountered = false;
 

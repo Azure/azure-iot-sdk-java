@@ -22,6 +22,7 @@ import org.junit.Test;
 import javax.crypto.Mac;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 
 import static junit.framework.TestCase.assertEquals;
@@ -101,13 +102,15 @@ public class HttpHsmSignatureProviderTest
         HttpHsmSignatureProvider httpHsmSignatureProvider = new HttpHsmSignatureProvider(expectedProviderUri, null);
     }
 
-    // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_006: [This function shall create a signRequest for the hsm http client to sign, and shall return the base64 encoded result of that signing.]
+    // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_006: [This function shall create a signRequest for the hsm http client to sign, and shall return the utf-8 encoded result of that signing.]
     @Test
-    public void signSuccess() throws NoSuchAlgorithmException, TransportException, IOException, URISyntaxException, HsmException
+    public void signSuccess(@Mocked URLEncoder mockedURLEncoder) throws NoSuchAlgorithmException, TransportException, IOException, URISyntaxException, HsmException
     {
         //arrange
         final String keyName = "keyName";
         final String data = "some data";
+        final String expectedDigest = "some digest";
+        final String expectedDigestEncoded = "some encoded digest";
         new NonStrictExpectations()
         {
             {
@@ -119,15 +122,22 @@ public class HttpHsmSignatureProviderTest
 
                 mockedHttpsHsmClient.sign(expectedApiVersion, keyName, mockedSignRequest, expectedGenId);
                 result = mockedSignResponse;
+
+                mockedSignResponse.getDigest();
+                result = expectedDigest;
+
+                URLEncoder.encode(expectedDigest, "UTF-8");
+                result = expectedDigestEncoded;
             }
         };
 
         final HttpHsmSignatureProvider signatureProvider = new HttpHsmSignatureProvider(expectedProviderUri, expectedApiVersion);
 
         //act
-        signatureProvider.sign(keyName, data, expectedGenId);
+        String actualDigest = signatureProvider.sign(keyName, data, expectedGenId);
 
         //assert
+        assertEquals(expectedDigestEncoded, actualDigest);
         new Verifications()
         {
             {
@@ -135,7 +145,7 @@ public class HttpHsmSignatureProviderTest
                 mockedSignRequest.setKeyId("primary");
                 mockedSignRequest.setAlgo((Mac) Deencapsulation.getField(signatureProvider, "defaultSignRequestAlgo"));
                 mockedHttpsHsmClient.sign(expectedApiVersion, keyName, mockedSignRequest, expectedGenId);
-                Base64.encodeBase64StringLocal(mockedSignResponse.getDigest());
+                mockedSignResponse.getDigest();
             }
         };
     }

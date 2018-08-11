@@ -11,9 +11,6 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -25,18 +22,19 @@ public class HttpsRequestResponseSerializer
     private static final String ProtocolVersionSeparator = "/";
     private static final String Protocol = "HTTP";
     private static final String HeaderSeparator = ":";
-    private static final String ContentLengthHeaderName = "content-length";
     private static final String VERSION = "1.1";
 
     /**
      * Serialize the provided request
+     *
      * @param httpsRequest the request to be serialized
+     * @param path the path for the request to invoke on (e.g. /trust-bundle)
+     * @param queryString the full querystring associated with the http request. Should not include the '?' character at the beginning
+     * @param host the host that the request is being made to
      * @return the serialized request
-     * @throws UnsupportedEncodingException if UTF-8 encoding is not supported
-     * @throws URISyntaxException if the request's url cannot be parsed
      * @throws IllegalArgumentException if the provided httpsRequest is null or has a null request url
      */
-    public static byte[] serializeRequest(HttpsRequest httpsRequest) throws UnsupportedEncodingException, URISyntaxException, IllegalArgumentException
+    public static byte[] serializeRequest(HttpsRequest httpsRequest, String path, String queryString, String host) throws IllegalArgumentException
     {
         if (httpsRequest == null)
         {
@@ -50,6 +48,16 @@ public class HttpsRequestResponseSerializer
             throw new IllegalArgumentException("Request uri of the request cannot be null");
         }
 
+        if (path == null || path.isEmpty())
+        {
+            throw new IllegalArgumentException("path cannot be null or empty");
+        }
+
+        if (host == null || host.isEmpty())
+        {
+            throw new IllegalArgumentException("host cannot be null or empty");
+        }
+        
         // Codes_SRS_HTTPREQUESTRESPONSESERIALIZER_34_003: [This function shall serialize the provided httpsRequest into the form:
         // POST /modules/<moduleName>/sign?api-version=2018-06-28 HTTP/1.1
         // Host: localhost:8081
@@ -57,21 +65,20 @@ public class HttpsRequestResponseSerializer
         // <header>: <value>
         // <header>: <value1>; <value2>
         // .]
-        String updatedHost = preProcessRequest(httpsRequest);
-        URI requestUri = new URI(httpsRequest.getRequestUrl().toString());
-        requestUri = new URI(requestUri.getScheme(), requestUri.getUserInfo(), updatedHost, requestUri.getPort(), requestUri.getPath(), requestUri.getQuery(), requestUri.getFragment());
+
+        httpsRequest.setHeaderField("Connection", "close");
+
+        String updatedPath = preProcessRequestPath(path);
 
         StringBuilder builder = new StringBuilder();
         builder.append(httpsRequest.getHttpMethod());
         builder.append(SP);
 
-        if (requestUri.getQuery() != null && !requestUri.getQuery().isEmpty())
+        builder.append(updatedPath);
+
+        if (queryString != null && !queryString.isEmpty())
         {
-            builder.append(requestUri.isAbsolute() ? requestUri.getPath() + "?" + requestUri.getQuery() : URLEncoder.encode(requestUri.toString(), "UTF-8"));
-        }
-        else
-        {
-            builder.append(requestUri.isAbsolute() ? requestUri.getPath() : URLEncoder.encode(requestUri.toString(), "UTF-8"));
+            builder.append("?" + queryString);
         }
 
         builder.append(SP);
@@ -80,18 +87,14 @@ public class HttpsRequestResponseSerializer
         builder.append(CR);
         builder.append(LF);
 
-        // Headers
-        if (requestUri.getHost() != null && !requestUri.getHost().isEmpty())
-        {
-            builder.append("Host: " + requestUri.getHost() + "\r\n");
-        }
+        builder.append("Host: " + host + "\r\n");
 
         if (httpsRequest.getRequestHeaders() != null && !httpsRequest.getRequestHeaders().isEmpty())
         {
             builder.append(httpsRequest.getRequestHeaders());
         }
 
-        if (httpsRequest.getBody() != null)
+        if (httpsRequest.getBody() != null && httpsRequest.getBody().length != 0)
         {
             builder.append("Content-Length: " + httpsRequest.getBody().length + "\r\n");
         }
@@ -169,18 +172,10 @@ public class HttpsRequestResponseSerializer
         return new HttpsResponse(statusCode, body, headerFields, errorReason);
     }
 
-    private static String preProcessRequest(HttpsRequest httpsRequest)
+    private static String preProcessRequestPath(String path)
     {
-        httpsRequest.setHeaderField("Connection", "close");
-
-        String hostname = httpsRequest.getRequestUrl().getHost();
-        if (hostname == null || hostname.isEmpty())
-        {
-            String dnsSafeHostName = httpsRequest.getRequestUrl().toString().replace("[", "").replace("]", "");
-            return dnsSafeHostName + ":" + httpsRequest.getRequestUrl().getPort();
-        }
-
-        return hostname;
+        String dnsSafePath = path.replace("[", "").replace("]", "");
+        return dnsSafePath;
     }
 
     private static Map<String, List<String>> readHeaderFields(BufferedReader bufferedReader) throws IOException

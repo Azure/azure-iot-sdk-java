@@ -20,6 +20,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -156,7 +158,7 @@ public class HttpsTransportManagerTest
                 result = IotHubMethod.POST;
                 mockTransportMsg.getUriPath();
                 result = uriPath;
-                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any);
+                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any, (Map) any);
                 result = mockResponseMessage;
             }
         };
@@ -164,7 +166,7 @@ public class HttpsTransportManagerTest
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
-        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class}, mockTransportMsg);
+        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
 
         // assert
         new Verifications()
@@ -196,7 +198,7 @@ public class HttpsTransportManagerTest
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
-        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class}, mockTransportMsg);
+        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
     }
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_009: [If the IotHubMethod is `GET`, the send shall set the httpsMethod as `GET`.] */
@@ -217,7 +219,7 @@ public class HttpsTransportManagerTest
                 result = IotHubMethod.GET;
                 mockTransportMsg.getUriPath();
                 result = uriPath;
-                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any);
+                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any, (Map) any);
                 result = mockResponseMessage;
             }
         };
@@ -225,13 +227,13 @@ public class HttpsTransportManagerTest
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
-        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class}, mockTransportMsg);
+        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
 
         // assert
         new Verifications()
         {
             {
-                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, HttpsMethod.GET, (String)any);
+                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, HttpsMethod.GET, (String)any, (Map) any);
                 times = 1;
             }
         };
@@ -255,7 +257,7 @@ public class HttpsTransportManagerTest
                 result = IotHubMethod.POST;
                 mockTransportMsg.getUriPath();
                 result = uriPath;
-                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any);
+                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any, (Map) any);
                 result = mockResponseMessage;
             }
         };
@@ -263,13 +265,13 @@ public class HttpsTransportManagerTest
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
-        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class}, mockTransportMsg);
+        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
 
         // assert
         new Verifications()
         {
             {
-                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, HttpsMethod.POST, (String)any);
+                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, HttpsMethod.POST, (String)any, (Map) any);
                 times = 1;
             }
         };
@@ -297,7 +299,7 @@ public class HttpsTransportManagerTest
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
-        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class}, mockTransportMsg);
+        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
     }
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_012: [The send shall set the httpsPath with the uriPath in the message.] */
@@ -319,7 +321,7 @@ public class HttpsTransportManagerTest
                 result = IotHubMethod.POST;
                 mockTransportMsg.getUriPath();
                 result = uriPath;
-                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any);
+                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any, (Map) any);
                 result = mockResponseMessage;
             }
         };
@@ -327,13 +329,13 @@ public class HttpsTransportManagerTest
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
-        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class}, mockTransportMsg);
+        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
 
         // assert
         new Verifications()
         {
             {
-                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, HttpsMethod.POST, uriPath);
+                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, HttpsMethod.POST, uriPath, (Map) any);
                 times = 1;
             }
         };
@@ -357,7 +359,7 @@ public class HttpsTransportManagerTest
                 result = IotHubMethod.POST;
                 mockTransportMsg.getUriPath();
                 result = uriPath;
-                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any);
+                httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any, (Map) any);
                 result = new IOException();
             }
         };
@@ -365,7 +367,7 @@ public class HttpsTransportManagerTest
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
-        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class}, mockTransportMsg);
+        Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
     }
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_015: [The receive shall receive and bypass message from `HttpsIotHubConnection`, by calling `receiveMessage`.] */
@@ -457,9 +459,7 @@ public class HttpsTransportManagerTest
                 mockConfig.getModuleId();
                 result = expectedSenderModuleId;
 
-                mockedTransportMessage.setProperty(Deencapsulation.getField(HttpsTransportManager.class, "MODULE_ID").toString(), expectedSenderDeviceId + "/" + expectedSenderModuleId);
-
-                transportManager.send(mockedTransportMessage);
+                transportManager.send(mockedTransportMessage, (Map) any);
                 result = mockResponseMessage;
 
                 mockResponseMessage.getStatus();
@@ -516,9 +516,7 @@ public class HttpsTransportManagerTest
                 mockConfig.getModuleId();
                 result = expectedSenderModuleId;
 
-                mockedTransportMessage.setProperty(Deencapsulation.getField(HttpsTransportManager.class, "MODULE_ID").toString(), expectedSenderDeviceId + "/" + expectedSenderModuleId);
-
-                transportManager.send(mockedTransportMessage);
+                transportManager.send(mockedTransportMessage, (Map) any);
                 result = mockResponseMessage;
 
                 mockResponseMessage.getStatus();
@@ -593,9 +591,7 @@ public class HttpsTransportManagerTest
                 mockConfig.getModuleId();
                 result = expectedSenderModuleId;
 
-                mockedTransportMessage.setProperty(Deencapsulation.getField(HttpsTransportManager.class, "MODULE_ID").toString(), expectedSenderDeviceId + "/" + expectedSenderModuleId);
-
-                transportManager.send(mockedTransportMessage);
+                transportManager.send(mockedTransportMessage, (Map) any);
                 result = mockResponseMessage;
 
                 mockResponseMessage.getStatus();
@@ -633,7 +629,7 @@ public class HttpsTransportManagerTest
 
                 mockedTransportMessage.setUriPath("/devices/" + expectedDeviceId + "/modules/" + expectedModuleId + "/files");
 
-                transportManager.send(mockedTransportMessage);
+                transportManager.send(mockedTransportMessage, (Map) any);
                 result = mockResponseMessage;
             }
         };
@@ -664,7 +660,7 @@ public class HttpsTransportManagerTest
 
                 mockedTransportMessage.setUriPath("/devices/" + expectedDeviceId + "/files");
 
-                transportManager.send(mockedTransportMessage);
+                transportManager.send(mockedTransportMessage, (Map) any);
                 result = mockResponseMessage;
             }
         };
@@ -696,7 +692,7 @@ public class HttpsTransportManagerTest
 
                 mockedTransportMessage.setUriPath("/devices/" + expectedDeviceId + "/modules/" + expectedModuleId + "/files/notifications");
 
-                transportManager.send(mockedTransportMessage);
+                transportManager.send(mockedTransportMessage, (Map) any);
                 result = mockResponseMessage;
             }
         };
@@ -727,7 +723,7 @@ public class HttpsTransportManagerTest
 
                 mockedTransportMessage.setUriPath("/devices/" + expectedDeviceId + "/files/notifications");
 
-                transportManager.send(mockedTransportMessage);
+                transportManager.send(mockedTransportMessage, (Map) any);
                 result = mockResponseMessage;
             }
         };

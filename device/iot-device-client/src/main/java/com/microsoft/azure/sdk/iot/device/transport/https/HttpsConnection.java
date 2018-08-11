@@ -12,6 +12,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.NoRouteToHostException;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -36,11 +37,11 @@ import java.util.Map;
  */
 public class HttpsConnection
 {
-    /** The underlying HTTPS connection. */
-    private final HttpsURLConnection connection;
+    /** The underlying HTTP/HTTPS connection. */
+    private final HttpURLConnection connection;
 
     /**
-     * The body. {@link HttpsURLConnection} silently calls connect() when the output
+     * The body. {@link HttpURLConnection} silently calls connect() when the output
      * stream is written to. We buffer the body and defer writing to the output
      * stream until {@link #connect()} is called.
      */
@@ -49,10 +50,10 @@ public class HttpsConnection
     private URL url;
 
     /**
-     * Constructor. Opens a connection to the given URL.
+     * Constructor. Opens a connection to the given URL. Can be HTTPS or HTTP
      *
-     * @param url the URL for the HTTPS connection.
-     * @param method the HTTPS method (i.e. GET).
+     * @param url the URL for the HTTP/HTTPS connection.
+     * @param method the HTTP method (i.e. GET).
      *
      * @throws TransportException if the connection could not be opened.
      */
@@ -60,12 +61,12 @@ public class HttpsConnection
     {
         this.url = url;
 
-        // Codes_SRS_HTTPSCONNECTION_11_022: [If the URI given does not use the HTTPS protocol, the constructor shall throw an IllegalArgumentException.]
+        // Codes_SRS_HTTPSCONNECTION_11_022: [If the URI given does not use the HTTPS or HTTP protocol, the constructor shall throw an IllegalArgumentException.]
         String protocol = url.getProtocol();
-        if (!protocol.equalsIgnoreCase("HTTPS"))
+        if (!protocol.equalsIgnoreCase("HTTPS") && !protocol.equalsIgnoreCase("HTTP"))
         {
             String errMsg = String.format("Expected URL that uses protocol "
-                            + "HTTPS but received one that uses "
+                            + "HTTPS or HTTP but received one that uses "
                             + "protocol '%s'.%n",
                     protocol);
             throw new IllegalArgumentException(errMsg);
@@ -76,7 +77,7 @@ public class HttpsConnection
         try
         {
             // Codes_SRS_HTTPSCONNECTION_11_001: [The constructor shall open a connection to the given URL.]
-            this.connection = (HttpsURLConnection) url.openConnection();
+            this.connection = (HttpURLConnection) url.openConnection();
             // Codes_SRS_HTTPSCONNECTION_11_021: [The constructor shall set the HTTPS method to the given method.]
             this.connection.setRequestMethod(method.name());
         }
@@ -348,8 +349,16 @@ public class HttpsConnection
             //Codes_SRS_HTTPSCONNECTION_25_025: [The function shall throw IllegalArgumentException if the context is null value.]
             throw new IllegalArgumentException("SSL context cannot be null");
         }
-        //Codes_SRS_HTTPSCONNECTION_25_024: [The function shall set the the SSL context with the given value.]
-        this.connection.setSSLSocketFactory(sslContext.getSocketFactory());
+        if (this.connection instanceof HttpsURLConnection)
+        {
+            //Codes_SRS_HTTPSCONNECTION_25_024: [The function shall set the the SSL context with the given value.]
+            ((HttpsURLConnection)this.connection).setSSLSocketFactory(sslContext.getSocketFactory());
+        }
+        else
+        {
+            //Codes_SRS_HTTPSCONNECTION_34_026: [If this object uses HTTP, this function shall throw an UnsupportedOperationException.]
+            throw new UnsupportedOperationException("HTTP connections do not support using ssl socket factory");
+        }
     }
 
     @SuppressWarnings("unused")
@@ -370,45 +379,13 @@ public class HttpsConnection
         return transportException;
     }
 
+    /**
+     * Get the body being used in the http connection
+     * @return the body being used in the http connection
+     */
     byte[] getBody()
     {
         //Codes_SRS_HTTPSCONNECTION_34_031: [The function shall return the saved body.]
         return this.body;
-    }
-
-    URL getRequestUrl()
-    {
-        //Codes_SRS_HTTPSCONNECTION_34_028: [The function shall return the saved url.]
-        return this.url;
-    }
-
-    String getHttpMethod()
-    {
-        //Codes_SRS_HTTPSCONNECTION_34_029: [The function shall return the request method.]
-        return this.connection.getRequestMethod();
-    }
-
-    String getRequestHeaders()
-    {
-        String headerString = "";
-        Map<String, List<String>> headerFields = this.connection.getRequestProperties();
-
-        for (String key : headerFields.keySet())
-        {
-            headerString += (key);
-            headerString += ": ";
-
-            for (String value : headerFields.get(key))
-            {
-                headerString += value;
-                headerString += "; ";
-            }
-            headerString = headerString.substring(0, headerString.length() - 2);
-
-            headerString += "\r\n";
-        }
-
-        //Codes_SRS_HTTPSCONNECTION_34_030: [The function shall return all the request headers in the format "<key>: <value1>; <value2>\r\n <key>: <value1>\r\n...".]
-        return headerString;
     }
 }

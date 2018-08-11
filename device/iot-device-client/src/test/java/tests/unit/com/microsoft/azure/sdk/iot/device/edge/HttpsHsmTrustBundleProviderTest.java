@@ -14,6 +14,7 @@ import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -35,7 +36,7 @@ public class HttpsHsmTrustBundleProviderTest
     // Tests_SRS_TRUSTBUNDLEPROVIDER_34_001: [This function shall create an HttpsHsmClient using the provided provider uri.]
     // Tests_SRS_TRUSTBUNDLEPROVIDER_34_002: [This function shall invoke getTrustBundle on the HttpsHsmClient and return the resulting certificates.]
     @Test
-    public void getTrustBundleCertsSuccess() throws TransportException, MalformedURLException, UnsupportedEncodingException, HsmException, URISyntaxException
+    public void getTrustBundleCertsSuccess() throws TransportException, IOException, HsmException, URISyntaxException
     {
         //arrange
         final String expectedCertificatesString = "some collection of certificates";

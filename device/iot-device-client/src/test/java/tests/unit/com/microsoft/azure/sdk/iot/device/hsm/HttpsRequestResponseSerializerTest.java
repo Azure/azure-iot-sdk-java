@@ -5,8 +5,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.hsm;
 
-import com.microsoft.azure.sdk.iot.device.hsm.HttpsRequestResponseSerializer;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.hsm.HttpsRequestResponseSerializer;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
 
 public class HttpsRequestResponseSerializerTest
 {
@@ -89,21 +88,6 @@ public class HttpsRequestResponseSerializerTest
                 mockedHttpsRequest.getRequestUrl();
                 result = mockedURL;
 
-                new URI(anyString);
-                result = mockedURI;
-
-                new URI(anyString, anyString, anyString, anyInt, anyString, anyString, anyString);
-                result = mockedURI;
-
-                mockedURI.isAbsolute();
-                result = true;
-
-                mockedURI.getQuery();
-                result = "api-version=2018-06-28";
-
-                mockedURI.toString();
-                result = "/modules/testModule/sign?api-version=2018-06-28";
-
                 mockedHttpsRequest.getRequestHeaders();
                 result = "Connection: close\r\n" + "Content-Type: application/json\r\n";
 
@@ -121,7 +105,7 @@ public class HttpsRequestResponseSerializerTest
         request.setHeaderField("content-length", "5");
 
         //act
-        byte[] httpsRequestData = HttpsRequestResponseSerializer.serializeRequest(request);
+        byte[] httpsRequestData = HttpsRequestResponseSerializer.serializeRequest(request, "/modules/testModule/sign", "api-version=2018-06-28",  "localhost:8081");
 
         //assert
         String httpsRequestString = new String(httpsRequestData);
@@ -145,21 +129,6 @@ public class HttpsRequestResponseSerializerTest
                 mockedHttpsRequest.getRequestUrl();
                 result = mockedURL;
 
-                new URI(anyString);
-                result = mockedURI;
-
-                new URI(anyString, anyString, anyString, anyInt, anyString, anyString, anyString);
-                result = mockedURI;
-
-                mockedURI.getQuery();
-                result = null;
-
-                mockedURI.isAbsolute();
-                result = true;
-
-                mockedURI.toString();
-                result = "/modules/testModule/sign?api-version=2018-06-28";
-
                 mockedHttpsRequest.getRequestHeaders();
                 result = "Connection: close\r\n" + "Content-Type: application/json\r\n";
 
@@ -177,7 +146,7 @@ public class HttpsRequestResponseSerializerTest
         request.setHeaderField("content-length", "5");
 
         //act
-        byte[] httpsRequestData = HttpsRequestResponseSerializer.serializeRequest(request);
+        byte[] httpsRequestData = HttpsRequestResponseSerializer.serializeRequest(request, "/modules/testModule/sign", "",  "localhost:8081");
 
         //assert
         String httpsRequestString = new String(httpsRequestData);
@@ -189,7 +158,7 @@ public class HttpsRequestResponseSerializerTest
     public void serializeThrowsForNullRequest() throws UnsupportedEncodingException, URISyntaxException
     {
         //act
-        HttpsRequestResponseSerializer.serializeRequest(null);
+        HttpsRequestResponseSerializer.serializeRequest(null, "modules/testModule/sign", "api-version=2018-06-28",  "");
     }
 
     // Tests_SRS_HTTPREQUESTRESPONSESERIALIZER_34_002: [If the provided request's url is null, this function shall throw an IllegalArgumentException.]
@@ -205,7 +174,7 @@ public class HttpsRequestResponseSerializerTest
         };
 
         //act
-        HttpsRequestResponseSerializer.serializeRequest(mockedHttpsRequest);
+        HttpsRequestResponseSerializer.serializeRequest(mockedHttpsRequest, "modules/testModule/sign", "api-version=2018-06-28",  "");
     }
 
     // Tests_SRS_HTTPREQUESTRESPONSESERIALIZER_34_004: [If the provided bufferedReader is null, this function shall throw an IllegalArgumentException.]
@@ -239,11 +208,11 @@ public class HttpsRequestResponseSerializerTest
         expectedHeaders.put("header1", values1);
         expectedHeaders.put("header2", values2);
         String stringToDeserialize =
-            "HTTP/1.1 203 OK\r\n" +
-            "header1:value1\r\n" +
-            "header2:value2\r\n" +
-            "\r\n" +
-            new String(expectedBodyWithNewLine);
+                "HTTP/1.1 203 OK\r\n" +
+                        "header1:value1\r\n" +
+                        "header2:value2\r\n" +
+                        "\r\n" +
+                        new String(expectedBodyWithNewLine);
 
 
         new NonStrictExpectations()

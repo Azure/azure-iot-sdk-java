@@ -8,18 +8,21 @@ package com.microsoft.azure.sdk.iot.device.hsm.parser;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.stream.JsonToken;
+
+import javax.json.Json;
 
 public class SignResponse
 {
     private static final String DIGEST_NAME = "digest";
-    @Expose(serialize = false, deserialize = true)
+    @Expose(serialize = true, deserialize = true)
     @SerializedName(DIGEST_NAME)
-    private byte[] digest;
+    public String digest;
 
-    public byte[] getDigest()
+    public String getDigest()
     {
         // Codes_SRS_HTTPHSMSIGNRESPONSE_34_001: [This function shall return the saved digest.]
-        return digest;
+        return this.digest;
     }
 
     //empty constructor for Gson to use

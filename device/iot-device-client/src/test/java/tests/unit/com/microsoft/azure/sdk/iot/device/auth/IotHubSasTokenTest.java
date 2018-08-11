@@ -535,4 +535,58 @@ public class IotHubSasTokenTest
         assertEquals(iotHubConnectionString.getSharedAccessToken(), actualSasToken);
     }
 
+    // Tests_SRS_IOTHUBSASTOKEN_34_013: [This function shall return a string in the format "SharedAccessSignature sr=<audience>&sig=<signature>&se=<expiry>".]
+    @Test
+    public void buildSharedAccessTokenSuccess()
+    {
+        //arrange
+        final String audience = "someAudience";
+        final String signature = "someSignature";
+        final long expiryTime = 1234;
+        final String expectedSharedAccessToken = "SharedAccessSignature sr=someAudience&sig=someSignature&se=1234";
+
+        //act
+        String actualSharedAccessToken = IotHubSasToken.buildSharedAccessToken(audience, signature, expiryTime);
+
+        //assert
+        assertEquals(expectedSharedAccessToken, actualSharedAccessToken);
+    }
+
+    // Tests_SRS_IOTHUBSASTOKEN_34_014: [If the provided expiry time is less than 0, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void buildSharedAccessTokenThrowsForNullAudience()
+    {
+        //arrange
+        final String signature = "someSignature";
+        final long expiryTime = 1234;
+
+        //act
+        String actualSharedAccessToken = IotHubSasToken.buildSharedAccessToken(null, signature, expiryTime);
+    }
+
+    // Tests_SRS_IOTHUBSASTOKEN_34_014: [If the provided expiry time is less than 0, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void buildSharedAccessTokenThrowsForNullSignature()
+    {
+        //arrange
+        final String audience = "someAudience";
+        final long expiryTime = 1234;
+
+        //act
+        String actualSharedAccessToken = IotHubSasToken.buildSharedAccessToken(audience, null, expiryTime);
+    }
+
+    // Tests_SRS_IOTHUBSASTOKEN_34_015: [If the provided audience or signature is null or empty, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void buildSharedAccessTokenThrowsForNegativeExpiryTime()
+    {
+        //arrange
+        final String audience = "someAudience";
+        final String signature = "someSignature";
+        final long expiryTime = -20;
+
+        //act
+        String actualSharedAccessToken = IotHubSasToken.buildSharedAccessToken(null, signature, expiryTime);
+    }
+
 }

@@ -6,12 +6,11 @@
 package com.microsoft.azure.sdk.iot.device.edge;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.hsm.parser.TrustBundleResponse;
 import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 import com.microsoft.azure.sdk.iot.device.hsm.HttpsHsmClient;
+import com.microsoft.azure.sdk.iot.device.hsm.parser.TrustBundleResponse;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URISyntaxException;
 
 /**
@@ -25,13 +24,12 @@ public class HttpsHsmTrustBundleProvider implements TrustBundleProvider
      * @param providerUri the provider uri of the HSM to communicate with
      * @param apiVersion the api version to use
      * @return the raw string containing all of the certificates to be trusted. May be one certificate or many certificates
-     * @throws URISyntaxException If the providerUri is badly formatted
-     * @throws TransportException if the HSM cannot be reached
-     * @throws MalformedURLException if the providerUri is badly formatted
-     * @throws HsmException if the HSM rejects the request for the trustbundle
-     * @throws UnsupportedEncodingException if utf-8 is not supported
+     * @throws URISyntaxException if the providerUri cannot be parsed as a uri
+     * @throws TransportException if the hsm cannot be reacheed
+     * @throws IOException if the hsm cannot be reached
+     * @throws HsmException if the hsm cannot give the trust bundle
      */
-    public String getTrustBundleCerts(String providerUri, String apiVersion) throws URISyntaxException, TransportException, MalformedURLException, HsmException, UnsupportedEncodingException
+    public String getTrustBundleCerts(String providerUri, String apiVersion) throws URISyntaxException, TransportException, IOException, HsmException
     {
         // Codes_SRS_TRUSTBUNDLEPROVIDER_34_001: [This function shall create an HttpsHsmClient using the provided provider uri.]
         HttpsHsmClient httpsHsmClient = new HttpsHsmClient(providerUri);

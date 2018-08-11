@@ -10,7 +10,7 @@ public class TransportUtils
     public static String IOTHUB_API_VERSION = "2018-06-30";
 
     private static final String JAVA_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.iot-device-client";
-    private static final String CLIENT_VERSION = "1.13.1";
+    private static final String CLIENT_VERSION = "1.13.2";
 
     private static String JAVA_RUNTIME = System.getProperty("java.version");
     private static String OPERATING_SYSTEM = System.getProperty("os.name");
