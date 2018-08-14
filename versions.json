@@ -1,7 +1,7 @@
 {
-    "device": "1.13.1",
-    "service": "1.14.0",
-    "deps": "0.6.1",
+    "device": "1.13.3",
+    "service": "1.14.1",
+    "deps": "0.6.2",
     "securityProvider": "1.1.0",
     "tpmEmulator": "1.1.0",
     "tpmHsm": "1.1.0",
@@ -11,5 +11,5 @@
     "provisioning": "1.4.0",
     "provisioningDevice": "1.3.1",
     "provisioningService": "1.3.1",
-    "java": "0.19.0"
+    "java": "0.19.3"
 }
