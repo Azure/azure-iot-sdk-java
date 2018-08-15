@@ -5,17 +5,18 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
-import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 
 public class MqttMessaging extends Mqtt
 {
     private String moduleId;
-    private String subscribeTopic;
+    private String eventsSubscribeTopic;
+    private String inputsSubscribeTopic;
     private String publishTopic;
+    private boolean isEdgeHub;
 
-    public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId, String moduleId) throws TransportException
+    public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId, String moduleId, boolean isEdgeHub) throws TransportException
     {
         //Codes_SRS_MqttMessaging_25_002: [The constructor shall use the configuration to instantiate super class and passing the parameters.]
         super(mqttConnection, listener, messageListener, connectionId);
@@ -28,26 +29,39 @@ public class MqttMessaging extends Mqtt
 
         if (moduleId == null || moduleId.isEmpty())
         {
-            //Codes_SRS_MqttMessaging_25_003: [The constructor construct publishTopic and subscribeTopic from deviceId.]
+            //Codes_SRS_MqttMessaging_25_003: [The constructor construct publishTopic and eventsSubscribeTopic from deviceId.]
             this.publishTopic = "devices/" + deviceId + "/messages/events/";
-            this.subscribeTopic = "devices/" + deviceId + "/messages/devicebound/#";
+            this.eventsSubscribeTopic = "devices/" + deviceId + "/messages/devicebound/#";
+            this.inputsSubscribeTopic = null;
         }
         else
         {
-            //Codes_SRS_MqttMessaging_34_031: [The constructor construct publishTopic and subscribeTopic from deviceId and moduleId.]
+            //Codes_SRS_MqttMessaging_34_031: [The constructor construct publishTopic and eventsSubscribeTopic from deviceId and moduleId.]
             this.publishTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/events/";
-            this.subscribeTopic = "devices/" + deviceId + "/modules/" + moduleId +"/";
+            this.eventsSubscribeTopic = "devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
+            this.inputsSubscribeTopic = "devices/" + deviceId + "/modules/" + moduleId +"/inputs/#";
         }
 
         this.moduleId = moduleId;
+        this.isEdgeHub = isEdgeHub;
     }
 
     public void start() throws TransportException
     {
         //Codes_SRS_MqttMessaging_25_020: [start method shall be call connect to establish a connection to IOT Hub with the given configuration.]
-        //Codes_SRS_MqttMessaging_25_021: [start method shall subscribe to messaging subscribe topic once connected.]
         this.connect();
-        this.subscribe(subscribeTopic);
+
+        if (!this.isEdgeHub)
+        {
+            //Codes_SRS_MqttMessaging_34_035: [start method shall subscribe to the cloud to device events if not communicating to an edgeHub.]
+            this.subscribe(this.eventsSubscribeTopic);
+        }
+
+        if (this.moduleId != null && !this.moduleId.isEmpty())
+        {
+            //Codes_SRS_MqttMessaging_34_036: [start method shall subscribe to the inputs channel if communicating as a module.]
+            this.subscribe(this.inputsSubscribeTopic);
+        }
     }
 
     public void stop() throws TransportException
@@ -196,12 +210,5 @@ public class MqttMessaging extends Mqtt
 
         //Codes_SRS_MqttMessaging_25_024: [send method shall publish a message to the IOT Hub on the publish topic by calling method publish().]
         this.publish(messagePublishTopic, message);
-    }
-
-    private void throwTelemetryTransportException(Exception e) throws TransportException
-    {
-        TransportException transportException = new TransportException(e);
-        transportException.setIotHubService(TransportException.IotHubService.TELEMETRY);
-        throw transportException;
     }
 }

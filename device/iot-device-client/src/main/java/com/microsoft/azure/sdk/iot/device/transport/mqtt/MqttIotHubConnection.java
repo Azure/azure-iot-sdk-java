@@ -171,7 +171,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 }
 
                 //Codes_SRS_MQTTIOTHUBCONNECTION_34_030: [This function shall instantiate this object's MqttMessaging object with this object as the listener.]
-                this.deviceMessaging = new MqttMessaging(mqttConnection, this.config.getDeviceId(), this.listener, this, this.connectionId, this.config.getModuleId());
+                this.deviceMessaging = new MqttMessaging(mqttConnection, this.config.getDeviceId(), this.listener, this, this.connectionId, this.config.getModuleId(), this.config.getGatewayHostname() != null);
                 this.mqttConnection.setMqttCallback(this.deviceMessaging);
                 this.deviceMethod = new MqttDeviceMethod(mqttConnection, this.connectionId);
                 this.deviceTwin = new MqttDeviceTwin(mqttConnection, this.connectionId);
