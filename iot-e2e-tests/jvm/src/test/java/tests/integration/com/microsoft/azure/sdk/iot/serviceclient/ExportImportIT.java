@@ -6,6 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.serviceclient;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.storage.CloudStorageAccount;
@@ -129,6 +130,8 @@ public class ExportImportIT
             deviceToAdd.setId(deviceId);
             deviceToAdd.setAuthentication(authentication);
             deviceToAdd.setStatus(DeviceStatus.Enabled);
+            TwinCollection tags = new TwinCollection(); tags.put("test01", "firstvalue");
+            deviceToAdd.setTags(tags);
 
             devicesForImport.add(deviceToAdd);
         }

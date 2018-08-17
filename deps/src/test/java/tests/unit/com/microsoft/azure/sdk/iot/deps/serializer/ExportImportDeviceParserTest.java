@@ -4,12 +4,15 @@
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.*;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+
 import org.junit.Test;
 
 import java.security.NoSuchAlgorithmException;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -169,6 +172,58 @@ public class ExportImportDeviceParserTest
         assertEquals(expectedSecondaryKey, parser.getAuthentication().getSymmetricKey().getSecondaryKey());
         assertEquals(AuthenticationTypeParser.SAS, parser.getAuthentication().getType());
     }
+    
+    @Test
+    public void fromJsonWithTags()
+    {
+        //arrange
+        String expectedPrimaryKey = "000000000000000000000000";
+        String expectedSecondaryKey = "000000000000000000000000";
+        String json = "{\n" +
+                "  \"id\": \"test\",\n" +
+                "  \"eTag\": \"MA==\",\n" +
+                "  \"status\": \"enabled\",\n" +
+                "  \"authentication\": {\n" +
+                "    \"symmetricKey\": {\n" +
+                "      \"primaryKey\": \"" + expectedPrimaryKey + "\",\n" +
+                "      \"secondaryKey\": \"" + expectedSecondaryKey + "\"\n" +
+                "    },\n" +
+                "    \"x509Thumbprint\": {\n" +
+                "      \"primaryThumbprint\": null,\n" +
+                "      \"secondaryThumbprint\": null\n" +
+                "    },\n" +
+                "    \"type\": \"" + SAS_JSON_VALUE + "\"\n" +
+                "  },\n" +
+                "  \"twinETag\": \"AAAAAAAAAAE=\",\n" +
+                "  \"tags\": { \"test01\" : \"firstvalue\", \"test02\" : \"secondvalue\"},\n" +
+                "  \"properties\": {\n" +
+                "    \"desired\": {\n" +
+                "      \"$metadata\": {\n" +
+                "        \"$lastUpdated\": \"0001-01-01T00:00:00Z\"\n" +
+                "      },\n" +
+                "      \"$version\": 1\n" +
+                "    },\n" +
+                "    \"reported\": {\n" +
+                "      \"$metadata\": {\n" +
+                "        \"$lastUpdated\": \"2017-07-26T21:44:15.80668Z\"\n" +
+                "      },\n" +
+                "      \"$version\": 1\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        //act
+        ExportImportDeviceParser parser = new ExportImportDeviceParser(json);
+
+        //assert
+        assertEquals(expectedPrimaryKey, parser.getAuthentication().getSymmetricKey().getPrimaryKey());
+        assertEquals(expectedSecondaryKey, parser.getAuthentication().getSymmetricKey().getSecondaryKey());
+        assertEquals(AuthenticationTypeParser.SAS, parser.getAuthentication().getType());
+        assertNotNull(parser.getTags());
+        assertEquals("firstvalue", parser.getTags().get("test01"));
+        assertEquals("secondvalue", parser.getTags().get("test02"));
+    }   
+    
 
     //Tests_SRS_EXPORTIMPORTDEVICE_PARSER_34_001: [The parser shall save the ExportImportDeviceParser's authentication to the returned json representation]
     @Test
@@ -225,6 +280,27 @@ public class ExportImportDeviceParserTest
         // assert
         assertEquals(expectedJson, serializedDevice);
     }
+    
+    @Test
+    public void toJsonForTaggedDevice() throws NoSuchAlgorithmException
+    {
+        // arrange
+        ExportImportDeviceParser parser = new ExportImportDeviceParser();
+        parser.setAuthentication(new AuthenticationParser());
+        parser.getAuthentication().setType(AuthenticationTypeParser.SAS);
+        parser.getAuthentication().setSymmetricKey(new SymmetricKeyParser("", ""));
+        TwinCollection tags = new TwinCollection();
+        tags.put("test01", "firstvalue"); tags.put("test02", "secondvalue");
+        parser.setTags(tags);
+
+        String expectedJson = "{\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"\",\"secondaryKey\":\"\"},\"type\":\"" + SAS_JSON_VALUE + "\"},\"tags\":{\"test01\":\"firstvalue\",\"test02\":\"secondvalue\"}}";
+
+        // act
+        String serializedDevice = parser.toJson();
+
+        // assert
+        assertEquals(expectedJson, serializedDevice);
+    }    
 
     //Tests_SRS_EXPORTIMPORTDEVICE_PARSER_34_023: [This method shall set the value of this object's AuthenticationParser equal to the provided value.]
     //Tests_SRS_EXPORTIMPORTDEVICE_PARSER_34_012: [This method shall return the value of this object's AuthenticationParser.]

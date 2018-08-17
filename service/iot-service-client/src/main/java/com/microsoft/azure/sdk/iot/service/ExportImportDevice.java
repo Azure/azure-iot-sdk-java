@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.*;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 
@@ -22,6 +23,9 @@ public class ExportImportDevice
     private DeviceStatus status;
     private String statusReason;
     private AuthenticationMechanism authentication;
+    private TwinCollection tags = null;
+    private TwinCollection reportedProperties = null;
+    private TwinCollection desiredProperties = null;
 
     /**
      * Default constructor for an ExportImportDevice object. Randomly generates a device ID and uses a randomly generated shared access signature for authentication
@@ -179,6 +183,48 @@ public class ExportImportDevice
         this.authentication = authentication;
     }
 
+	/**
+	 * @return the tags
+	 */
+	public TwinCollection getTags() {
+		return tags;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(TwinCollection tags) {
+		this.tags = tags;
+	}
+
+	/**
+	 * @return the reportedProperties
+	 */
+	public TwinCollection getReportedProperties() {
+		return reportedProperties;
+	}
+
+	/**
+	 * @param reportedProperties the reportedProperties to set
+	 */
+	public void setReportedProperties(TwinCollection reportedProperties) {
+		this.reportedProperties = reportedProperties;
+	}
+
+	/**
+	 * @return the desiredProperties
+	 */
+	public TwinCollection getDesiredProperties() {
+		return desiredProperties;
+	}
+
+	/**
+	 * @param desiredProperties the desiredProperties to set
+	 */
+	public void setDesiredProperties(TwinCollection desiredProperties) {
+		this.desiredProperties = desiredProperties;
+	}    
+    
     @Override
     public boolean equals(Object other)
     {
@@ -353,6 +399,8 @@ public class ExportImportDevice
                 }
             }
         }
+        
+        parser.setTags(this.tags);
 
         return parser;
     }

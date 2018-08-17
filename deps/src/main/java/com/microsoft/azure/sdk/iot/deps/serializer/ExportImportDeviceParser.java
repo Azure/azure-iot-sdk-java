@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 
 public class ExportImportDeviceParser
 {
@@ -39,6 +40,11 @@ public class ExportImportDeviceParser
     @Expose(serialize = true, deserialize = true)
     @SerializedName(AUTHENTICATION_NAME)
     private AuthenticationParser authentication;
+    
+    private static final String TAGS_NAME = "tags";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(TAGS_NAME)
+    private TwinCollection tags;
 
     private static Gson gson = new Gson();
 
@@ -55,7 +61,6 @@ public class ExportImportDeviceParser
     /**
      * Empty constructor: Used only to keep GSON happy.
      */
-    @SuppressWarnings("unused")
     public ExportImportDeviceParser()
     {
     }
@@ -103,6 +108,7 @@ public class ExportImportDeviceParser
         this.eTag = deviceParser.eTag;
         this.statusReason = deviceParser.statusReason;
         this.status = deviceParser.status;
+        this.tags = deviceParser.tags;
     }
 
     /**
@@ -248,4 +254,18 @@ public class ExportImportDeviceParser
         //Codes_SRS_EXPORTIMPORTDEVICE_PARSER_34_023: [This method shall set the value of this object's AuthenticationParser equal to the provided value.]
         this.authentication = authentication;
     }
+
+	/**
+	 * @return the tags
+	 */
+	public TwinCollection getTags() {
+		return tags;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(TwinCollection tags) {
+		this.tags = tags;
+	}
 }
