@@ -3,8 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CustomLogger {
 
@@ -13,7 +13,7 @@ public class CustomLogger {
 
     public CustomLogger(Class<?> clazz)
     {
-        logger = LogManager.getLogger(clazz);
+        logger = LoggerFactory.getLogger(clazz);
     }
 
     public void LogInfo(String message, Object...params)
@@ -56,11 +56,16 @@ public class CustomLogger {
         }
     }
 
+    /**
+     * @param message
+     * @param params
+     * @deprecated Since the switch from Log4j to slf4j there is no fatal log level anymore. Mapped to error level
+     */
     public void LogFatal(String message, Object...params)
     {
-        if(logger.isFatalEnabled())
+        if(logger.isErrorEnabled())
         {
-            logger.fatal(String.format(message, params));
+            logger.error(String.format(message, params));
         }
     }
 
@@ -76,7 +81,7 @@ public class CustomLogger {
     {
         if(logger.isErrorEnabled())
         {
-            logger.error(exception);
+            logger.error(exception.toString());
         }
     }
 
