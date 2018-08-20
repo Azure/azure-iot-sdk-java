@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationContentParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.DeviceParser;
 import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
