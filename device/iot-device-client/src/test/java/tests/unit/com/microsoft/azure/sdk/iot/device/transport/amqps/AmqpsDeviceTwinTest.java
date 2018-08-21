@@ -1504,7 +1504,6 @@ public class AmqpsDeviceTwinTest
     ) throws IOException
     {
         //arrange
-        String deviceId = "deviceId";
         final String messageId = "messageId";
         final String correlationId = "correlationId";
 
@@ -1523,11 +1522,6 @@ public class AmqpsDeviceTwinTest
                 times = 2;
                 result = messageId;
                 mockIotHubTransportMessage.getCorrelationId();
-                result = "some correlation id";
-                times = 3;
-                mockIotHubTransportMessage.getOutputName();
-                times = 2;
-                result = "Some outputname";
                 result = correlationId;
             }
         };
@@ -1542,7 +1536,7 @@ public class AmqpsDeviceTwinTest
                 mockProperties.setMessageId(any);
                 times = 1;
                 mockProperties.setCorrelationId(any);
-                times = 1;
+                times = 2;
                 mockCorrelationIdList.put(anyString, (DeviceOperations) any);
                 times = 1;
                 mockMessageImpl.setProperties(mockProperties);

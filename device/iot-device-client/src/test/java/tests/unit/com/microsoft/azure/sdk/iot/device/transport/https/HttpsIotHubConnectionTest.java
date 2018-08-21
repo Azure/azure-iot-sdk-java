@@ -316,6 +316,46 @@ public class HttpsIotHubConnectionTest
         };
     }
 
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_34_073: [If the provided message has a content encoding, this function shall set the request header to include that value with the key "iothub-contentencoding".]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_34_074: [If the provided message has a content type, this function shall set the request header to include that value with the key "iothub-contenttype".]
+    @Test
+    public void sendEventSetsIotHubContentTypeAndEncoding(@Mocked final IotHubEventUri mockUri) throws TransportException
+    {
+        final String contentType = "application/json";
+        final String contentEncoding = "utf-8";
+        new NonStrictExpectations()
+        {
+            {
+                new IotHubEventUri((String)any, (String)any, null);
+                result = mockUri;
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
+                result = mockRequest;
+                mockUri.getPath();
+                result = "some path";
+                mockedMessage.getContentType();
+                result = contentType;
+                mockedMessage.getContentEncoding();
+                result = contentEncoding;
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.setListener(mockedListener);
+
+        //act
+        conn.sendMessage(mockedMessage);
+
+        new Verifications()
+        {
+            {
+                mockRequest.setHeaderField(MessageProperty.IOTHUB_CONTENT_TYPE, contentType);
+                mockRequest.setHeaderField(MessageProperty.IOTHUB_CONTENT_ENCODING, contentEncoding);
+            }
+        };
+    }
+
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_009: [The function shall set the header field 'content-type' to be the message content type.]
     @Test
     public void sendEventSetsContentTypeCorrectly(@Mocked final IotHubEventUri mockUri) throws TransportException

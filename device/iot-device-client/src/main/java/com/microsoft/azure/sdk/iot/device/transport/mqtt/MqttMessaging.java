@@ -8,6 +8,10 @@ import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 public class MqttMessaging extends Mqtt
 {
     private String moduleId;
@@ -89,126 +93,71 @@ public class MqttMessaging extends Mqtt
 
         boolean separatorNeeded = false;
 
-        if (message.getMessageId() != null)
-        {
-            //Codes_SRS_MqttMessaging_21_027: [send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.]
-            stringBuilder.append(MESSAGE_ID);
-            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-            stringBuilder.append(message.getMessageId());
-
-            separatorNeeded = true;
-        }
-
-        if (message.getCorrelationId() != null)
-        {
-            if (separatorNeeded)
-            {
-                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
-            }
-
-            //Codes_SRS_MqttMessaging_34_028: [If the message has a correlationId, this method shall append that correlationid to publishTopic before publishing using the key name `$.cid`.]
-            stringBuilder.append(CORRELATION_ID);
-            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-            stringBuilder.append(message.getCorrelationId());
-
-            separatorNeeded = true;
-        }
-
-        if (message.getUserId() != null)
-        {
-            if (separatorNeeded)
-            {
-                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
-            }
-
-            //Codes_SRS_MqttMessaging_34_030: [If the message has a UserId, this method shall append that userId to publishTopic before publishing using the key name `$.uid`.]
-            stringBuilder.append(USER_ID);
-            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-            stringBuilder.append(message.getUserId());
-
-            separatorNeeded = true;
-        }
-
-        if (message.getTo() != null)
-        {
-            if (separatorNeeded)
-            {
-                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
-            }
-
-            //Codes_SRS_MqttMessaging_34_029: [If the message has a To, this method shall append that To to publishTopic before publishing using the key name `$.to`.]
-            stringBuilder.append(TO);
-            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-            stringBuilder.append(message.getTo());
-
-            separatorNeeded = true;
-        }
-
-        if (message.getOutputName() != null)
-        {
-            if (separatorNeeded)
-            {
-                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
-            }
-
-            //Codes_SRS_MqttMessaging_34_032: [If the message has a OutputName, this method shall append that To to publishTopic before publishing using the key name `$.on`.]
-            stringBuilder.append(OUTPUT_NAME);
-            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-            stringBuilder.append(message.getOutputName());
-
-            separatorNeeded = true;
-        }
-
-        if (message.getConnectionDeviceId() != null)
-        {
-            if (separatorNeeded)
-            {
-                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
-            }
-
-            stringBuilder.append(CONNECTION_DEVICE_ID);
-            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-            stringBuilder.append(message.getConnectionDeviceId());
-
-            separatorNeeded = true;
-        }
-
-        if (message.getConnectionModuleId() != null)
-        {
-            if (separatorNeeded)
-            {
-                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
-            }
-
-            stringBuilder.append(CONNECTION_MODULE_ID);
-            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-            stringBuilder.append(message.getConnectionModuleId());
-
-            separatorNeeded = true;
-        }
+        //Codes_SRS_MqttMessaging_34_029: [If the message has a To, this method shall append that To to publishTopic before publishing using the key name `$.to`.]
+        //Codes_SRS_MqttMessaging_34_030: [If the message has a UserId, this method shall append that userId to publishTopic before publishing using the key name `$.uid`.]
+        //Codes_SRS_MqttMessaging_34_028: [If the message has a correlationId, this method shall append that correlationid to publishTopic before publishing using the key name `$.cid`.]
+        //Codes_SRS_MqttMessaging_21_027: [send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.]
+        //Codes_SRS_MqttMessaging_34_026: [This method shall append each custom property's name and value to the publishTopic before publishing.]
+        //Codes_SRS_MqttMessaging_34_032: [If the message has a OutputName, this method shall append that to publishTopic before publishing using the key name `$.on`.]
+        //Codes_SRS_MqttMessaging_34_032: [If the message has a content type, this method shall append that to publishTopic before publishing using the key name `$.ct`.]
+        //Codes_SRS_MqttMessaging_34_032: [If the message has a content encoding, this method shall append that to publishTopic before publishing using the key name `$.ce`.]
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, MESSAGE_ID, message.getMessageId());
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CORRELATION_ID, message.getCorrelationId());
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, USER_ID, message.getUserId());
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, TO, message.getTo());
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, OUTPUT_NAME, message.getOutputName());
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONNECTION_DEVICE_ID, message.getConnectionDeviceId());
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONNECTION_MODULE_ID, message.getConnectionModuleId());
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONTENT_ENCODING, message.getContentEncoding());
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONTENT_TYPE, message.getContentType());
 
         for (MessageProperty property : message.getProperties())
         {
-            if (separatorNeeded)
-            {
-                stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
-            }
-
-            //Codes_SRS_MqttMessaging_34_026: [This method shall append each custom property's name and value to the publishTopic before publishing.]
-            stringBuilder.append(property.getName());
-            stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-            stringBuilder.append(property.getValue());
-
-            separatorNeeded = true;
+            separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, property.getName(), property.getValue());
         }
 
         if (this.moduleId != null && !this.moduleId.isEmpty())
         {
             stringBuilder.append("/");
         }
+
         String messagePublishTopic = stringBuilder.toString();
 
         //Codes_SRS_MqttMessaging_25_024: [send method shall publish a message to the IOT Hub on the publish topic by calling method publish().]
         this.publish(messagePublishTopic, message);
+    }
+
+    /**
+     * Appends the property to the provided stringbuilder if the property value is not null.
+     * @param stringBuilder the builder to build upon
+     * @param separatorNeeded if a seperator should precede the new property
+     * @param propertyKey the mqtt topic string property key
+     * @param propertyValue the property value (message id, correlation id, etc.)
+     * @return true if a separator will be needed for any later properties appended on
+     */
+    private boolean appendPropertyIfPresent(StringBuilder stringBuilder, boolean separatorNeeded, String propertyKey, String propertyValue) throws TransportException
+    {
+        try
+        {
+            if (propertyValue != null && !propertyValue.isEmpty())
+            {
+                if (separatorNeeded)
+                {
+                    stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+                }
+
+                stringBuilder.append(propertyKey);
+                stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+                stringBuilder.append(URLEncoder.encode(propertyValue, StandardCharsets.UTF_8.name()));
+
+                return true;
+            }
+
+            return separatorNeeded;
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new TransportException("Could not utf-8 encode the mqtt property", e);
+        }
     }
 }

@@ -98,6 +98,18 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                         property.getValue());
             }
 
+            if (message.getContentEncoding() != null)
+            {
+                // Codes_SRS_HTTPSIOTHUBCONNECTION_34_073: [If the provided message has a content encoding, this function shall set the request header to include that value with the key "iothub-contentencoding".]
+                request.setHeaderField(MessageProperty.IOTHUB_CONTENT_ENCODING, message.getContentEncoding());
+            }
+
+            if (message.getContentType() != null)
+            {
+                // Codes_SRS_HTTPSIOTHUBCONNECTION_34_074: [If the provided message has a content type, this function shall set the request header to include that value with the key "iothub-contenttype".]
+                request.setHeaderField(MessageProperty.IOTHUB_CONTENT_TYPE, message.getContentType());
+            }
+
             Map<String, String> systemProperties = httpsMessage.getSystemProperties();
             for (String systemProperty : systemProperties.keySet())
             {

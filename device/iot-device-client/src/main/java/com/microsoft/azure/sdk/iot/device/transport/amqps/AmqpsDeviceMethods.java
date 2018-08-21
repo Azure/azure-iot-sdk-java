@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import org.apache.qpid.proton.Proton;
@@ -22,6 +23,8 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
 
 public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
 {
@@ -184,7 +187,7 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
      * @return the converted message
      */
     @Override
-    protected AmqpsConvertToProtonReturnValue convertToProton(Message message)
+    protected AmqpsConvertToProtonReturnValue convertToProton(Message message) throws TransportException
     {
         if (message.getMessageType() == MessageType.DEVICE_METHODS)
         {
@@ -206,87 +209,34 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
      * Converts an AMQPS message to a corresponding IoT Hub message.
      *
      * @param protonMsg the AMQPS message.
-     *
+     * @throws TransportException if the conversion fails
      * @return the corresponding IoT Hub message.
      */
     @Override
-    protected Message protonMessageToIoTHubMessage(MessageImpl protonMsg)
+    protected IotHubTransportMessage protonMessageToIoTHubMessage(MessageImpl protonMsg) throws TransportException
     {
-        byte[] msgBody;
+        IotHubTransportMessage iotHubTransportMessage = super.protonMessageToIoTHubMessage(protonMsg);
+        iotHubTransportMessage.setMessageType(MessageType.DEVICE_METHODS);
 
-        Data d = (Data) protonMsg.getBody();
-        if (d != null)
-        {
-            // Codes_SRS_AMQPSDEVICEMETHODS_12_018: [The function shall shall create a new buffer for message body and copy the proton message body to it.]
-            Binary b = d.getValue();
-            msgBody = new byte[b.getLength()];
-            ByteBuffer buffer = b.asByteBuffer();
-            buffer.get(msgBody);
-        }
-        else
-        {
-            // Codes_SRS_AMQPSDEVICEMETHODS_12_017: [The function shall create a new empty buffer for message body if the proton message body is null.]
-            msgBody = new byte[0];
-        }
-
-        // Codes_SRS_AMQPSDEVICEMETHODS_12_019: [The function shall create a new IotHubTransportMessage using the Proton message body and set the message type to DEVICE_METHODS.]
-        IotHubTransportMessage iotHubTransportMessage = new IotHubTransportMessage(msgBody, MessageType.DEVICE_METHODS);
-
-        // Codes_SRS_AMQPSDEVICEMETHODS_12_025: [The function shall copy the correlationId, messageId, To and userId properties to the IotHubTransportMessage properties.]
-        Properties properties = protonMsg.getProperties();
-        if (properties != null)
-        {
-            if (properties.getCorrelationId() != null)
-            {
-                iotHubTransportMessage.setRequestId(properties.getCorrelationId().toString());
-            }
-
-            if (properties.getMessageId() != null)
-            {
-                iotHubTransportMessage.setMessageId(properties.getMessageId().toString());
-            }
-
-            if (properties.getTo() != null)
-            {
-                iotHubTransportMessage.setProperty(AMQPS_APP_PROPERTY_PREFIX + TO_KEY, properties.getTo());
-            }
-
-            if (properties.getUserId() != null)
-            {
-                iotHubTransportMessage.setProperty(AMQPS_APP_PROPERTY_PREFIX + USER_ID_KEY, properties.getUserId().toString());
-            }
-        }
+        // Codes_SRS_AMQPSDEVICEMETHODS_12_046: [The function shall set the device operation type to DEVICE_OPERATION_METHOD_RECEIVE_REQUEST on IotHubTransportMessage.]
+        iotHubTransportMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
         // Codes_SRS_AMQPSDEVICEMETHODS_12_025: [The function shall copy the method name from Proton application properties and set IotHubTransportMessage method name with it.]
         // Codes_SRS_AMQPSDEVICEMETHODS_12_026: [The function shall copy the Proton application properties to IotHubTransportMessage properties excluding the reserved property names.]
-        if (protonMsg.getApplicationProperties() != null)
+        if (protonMsg.getApplicationProperties() != null && protonMsg.getApplicationProperties().getValue() != null)
         {
             Map<String, Object> applicationProperties = protonMsg.getApplicationProperties().getValue();
-            for (Map.Entry<String, Object> entry : applicationProperties.entrySet())
-            {
-                String propertyKey = entry.getKey();
 
-                if (propertyKey.equals(APPLICATION_PROPERTY_KEY_IOTHUB_METHOD_NAME))
-                {
-                    iotHubTransportMessage.setMethodName(entry.getValue().toString());
-                }
-                else
-                {
-                    if (propertyKey.equals(INPUT_NAME_PROPERTY_KEY))
-                    {
-                        // Codes_SRS_AMQPSDEVICETELEMETRY_34_052: [If the amqp message contains an application property of
-                        // "x-opt-input-name", this function shall assign its value to the IotHub message's input name.]
-                        iotHubTransportMessage.setInputName(entry.getValue().toString());
-                    }
-                    else if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(propertyKey))
-                    {
-                        iotHubTransportMessage.setProperty(entry.getKey(), entry.getValue().toString());
-                    }
-                }
+            if (applicationProperties.containsKey(APPLICATION_PROPERTY_KEY_IOTHUB_METHOD_NAME))
+            {
+                iotHubTransportMessage.setMethodName(applicationProperties.get(APPLICATION_PROPERTY_KEY_IOTHUB_METHOD_NAME).toString());
             }
         }
-        // Codes_SRS_AMQPSDEVICEMETHODS_12_046: [The function shall set the device operation type to DEVICE_OPERATION_METHOD_RECEIVE_REQUEST on IotHubTransportMessage.]
-        iotHubTransportMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
+
+        if (protonMsg.getProperties() != null && protonMsg.getProperties().getCorrelationId() != null)
+        {
+            iotHubTransportMessage.setRequestId(protonMsg.getProperties().getCorrelationId().toString());
+        }
 
         return iotHubTransportMessage;
     }
@@ -294,21 +244,24 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
     /**
      * Creates a proton message from the IoTHub message.
      * @param message the IoTHub input message.
+     * @throws TransportException if the conversion fails
      * @return the proton message.
      */
     @Override
-    protected MessageImpl iotHubMessageToProtonMessage(com.microsoft.azure.sdk.iot.device.Message message)
+    protected MessageImpl iotHubMessageToProtonMessage(Message message) throws TransportException
     {
+        MessageImpl protonMessage = super.iotHubMessageToProtonMessage(message);
         IotHubTransportMessage deviceMethodMessage = (IotHubTransportMessage)message;
 
-        // Codes_SRS_AMQPSDEVICETELEMETRY_12_015: [The function shall create a new Proton message using the IoTHubMessage body.]
-        MessageImpl outgoingMessage = (MessageImpl) Proton.message();
-
         // Codes_SRS_AMQPSDEVICEMETHODS_12_031: [The function shall copy the correlationId, messageId properties to the Proton message properties.]
-        Properties properties = new Properties();
-        if (deviceMethodMessage.getMessageId() != null)
+        Properties properties;
+        if (protonMessage.getProperties() != null)
         {
-            properties.setMessageId(deviceMethodMessage.getMessageId());
+            properties = protonMessage.getProperties();
+        }
+        else
+        {
+            properties = new Properties();
         }
 
         if (deviceMethodMessage.getRequestId() != null)
@@ -316,51 +269,26 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
             properties.setCorrelationId(UUID.fromString(deviceMethodMessage.getRequestId()));
         }
 
-        outgoingMessage.setProperties(properties);
-
-        // Codes_SRS_AMQPSDEVICEMETHODS_12_032: [The function shall copy the user properties to Proton message application properties excluding the reserved property names.]
-        int propertiesLength = deviceMethodMessage.getProperties().length;
-        Map<String, Object> userProperties = new HashMap<>();
-        if (propertiesLength > 0)
-        {
-            for(MessageProperty messageProperty : deviceMethodMessage.getProperties())
-            {
-                if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(messageProperty.getName()))
-                {
-                    userProperties.put(messageProperty.getName(), messageProperty.getValue());
-                }
-            }
-        }
-
-        if (message.getOutputName() != null)
-        {
-            // Codes_SRS_AMQPSDEVICEMETHODS_34_051: [The function shall set the proton message outputname application property to the value of IoTHubTransportMessage outputName field.]
-            userProperties.put(MessageProperty.OUTPUT_NAME_PROPERTY, message.getOutputName());
-        }
+        protonMessage.setProperties(properties);
 
         // Codes_SRS_AMQPSDEVICEMETHODS_12_033: [The function shall set the proton message status field to the value of IoTHubTransportMessage status field.]
+        Map<String, Object> userProperties = new HashMap<>();
         if (deviceMethodMessage.getStatus() != null)
         {
             userProperties.put(APPLICATION_PROPERTY_KEY_IOTHUB_STATUS, Integer.parseInt(deviceMethodMessage.getStatus()));
         }
 
-        if (message.getConnectionDeviceId() != null)
+        Map<String, Object> applicationPropertiesMap = new HashMap<>();
+        if (protonMessage.getApplicationProperties() != null && protonMessage.getApplicationProperties().getValue() != null)
         {
-            userProperties.put(MessageProperty.CONNECTION_DEVICE_ID, message.getConnectionDeviceId());
-        }
-
-        if (message.getConnectionModuleId() != null)
-        {
-            userProperties.put(MessageProperty.CONNECTION_MODULE_ID, message.getConnectionModuleId());
+            applicationPropertiesMap = protonMessage.getApplicationProperties().getValue();
+            userProperties.putAll(applicationPropertiesMap);
         }
 
         ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
-        outgoingMessage.setApplicationProperties(applicationProperties);
+        protonMessage.setApplicationProperties(applicationProperties);
 
         // Codes_SRS_AMQPSDEVICEMETHODS_12_040: [The function shall set the proton message body using the IotHubTransportMessage body.]
-        Binary binary = new Binary(deviceMethodMessage.getBytes());
-        Section section = new Data(binary);
-        outgoingMessage.setBody(section);
-        return outgoingMessage;
+        return protonMessage;
     }
 }
