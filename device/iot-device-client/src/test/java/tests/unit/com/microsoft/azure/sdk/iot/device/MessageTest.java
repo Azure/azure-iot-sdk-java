@@ -290,9 +290,9 @@ public class MessageTest
         msg.setAbsoluteExpiryTime(-1L);
     }
 
-    // Codes_SRS_MESSAGE_34_051: [The function shall set the message's connection device id to the provided value.]
-    // Codes_SRS_MESSAGE_34_052: [The function shall set the message's connection module id to the provided value.]
-    // Codes_SRS_MESSAGE_34_053: [The function shall set the message's output name to the provided value.]
+    // Tests_SRS_MESSAGE_34_051: [The function shall set the message's connection device id to the provided value.]
+    // Tests_SRS_MESSAGE_34_052: [The function shall set the message's connection module id to the provided value.]
+    // Tests_SRS_MESSAGE_34_053: [The function shall set the message's output name to the provided value.]
     // Tests_SRS_MESSAGE_34_047: [The function shall set the message's expiry time.]
     // Tests_SRS_MESSAGE_34_048: [The function shall set the message's message type.]
     // Tests_SRS_MESSAGE_34_046: [The function shall set the message's correlation ID to the provided value.]
@@ -305,11 +305,15 @@ public class MessageTest
     // Tests_SRS_MESSAGE_34_037: [The function shall return the message's user ID.]
     // Tests_SRS_MESSAGE_34_041: [The function shall return the message's To value.]
     // Tests_SRS_MESSAGE_12_001: [The function shall return the message's iotHubConnectionString object.]
-    // Codes_SRS_MESSAGE_34_054: [The function shall return the message's connection device id value.]
-    // Codes_SRS_MESSAGE_34_055: [The function shall return the message's connection module id value.]
-    // Codes_SRS_MESSAGE_34_056: [The function shall return the message's input name value.]
-    // Codes_SRS_MESSAGE_34_057: [The function shall return the message's output name value.]
+    // Tests_SRS_MESSAGE_34_054: [The function shall return the message's connection device id value.]
+    // Tests_SRS_MESSAGE_34_055: [The function shall return the message's connection module id value.]
+    // Tests_SRS_MESSAGE_34_056: [The function shall return the message's input name value.]
+    // Tests_SRS_MESSAGE_34_057: [The function shall return the message's output name value.]
     // Tests_SRS_MESSAGE_12_002: [The function shall set the message's iotHubConnectionString object to the provided value.]
+    // Tests_SRS_MESSAGE_34_059: [The function shall return the message's content type.]
+    // Tests_SRS_MESSAGE_34_060: [The function shall save the provided content type.]
+    // Tests_SRS_MESSAGE_34_061: [The function shall return the message's content encoding.]
+    // Tests_SRS_MESSAGE_34_062: [The function shall save the provided content encoding.]
     @Test
     public void testPropertyGettersAndSetters()
     {
@@ -326,6 +330,8 @@ public class MessageTest
         final String connectionModuleId = "connectionModuleId";
         final String inputName = "inputName";
         final String outputName = "outputName";
+        final String contentType = "json";
+        final String contentEncoding = "utf-8";
         final String sharedAccessToken = null;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
@@ -345,6 +351,8 @@ public class MessageTest
         msg.setConnectionModuleId(connectionModuleId);
         msg.setOutputName(outputName);
         msg.setInputName(inputName);
+        msg.setContentEncoding(contentEncoding);
+        msg.setContentType(contentType);
 
         //assert
         assertEquals(type, msg.getMessageType());
@@ -356,6 +364,8 @@ public class MessageTest
         assertEquals(connectionModuleId, msg.getConnectionModuleId());
         assertEquals(inputName, msg.getInputName());
         assertEquals(outputName, msg.getOutputName());
+        assertEquals(contentEncoding, msg.getContentEncoding());
+        assertEquals(contentType, msg.getContentType());
 
         assertNull(msg.getTo());
         assertNull(msg.getDeliveryAcknowledgement());

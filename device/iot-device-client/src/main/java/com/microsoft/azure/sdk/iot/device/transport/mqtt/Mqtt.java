@@ -16,6 +16,7 @@ import org.eclipse.paho.client.mqttv3.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,6 +56,8 @@ abstract public class Mqtt implements MqttCallback
     final static String OUTPUT_NAME = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".on";
     final static String CONNECTION_DEVICE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cdid";
     final static String CONNECTION_MODULE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cmid";
+    final static String CONTENT_TYPE = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ct";
+    final static String CONTENT_ENCODING = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ce";
 
     private final static String IOTHUB_ACK = "iothub-ack";
 
@@ -498,6 +501,7 @@ abstract public class Mqtt implements MqttCallback
                 }
 
                 //Some properties are reserved system properties and must be saved in the message differently
+                //Codes_SRS_Mqtt_34_057: [This function shall parse the messageId, correlationId, outputname, content encoding and content type from the provided property string]
                 switch (key)
                 {
                     case TO:
@@ -517,6 +521,12 @@ abstract public class Mqtt implements MqttCallback
                         break;
                     case OUTPUT_NAME:
                         message.setOutputName(value);
+                        break;
+                    case CONTENT_ENCODING:
+                        message.setContentEncoding(value);
+                        break;
+                    case CONTENT_TYPE:
+                        message.setContentType(value);
                         break;
                     case ABSOLUTE_EXPIRY_TIME:
                         //do nothing
