@@ -4,28 +4,29 @@
  */
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.MessageType;
-import com.microsoft.azure.sdk.iot.device.ProductInfo;
+import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
+import org.apache.qpid.proton.Proton;
+import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
-import org.apache.qpid.proton.amqp.messaging.Source;
-import org.apache.qpid.proton.amqp.messaging.Target;
+import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 import org.junit.Test;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.*;
 
 /**
@@ -871,38 +872,6 @@ public class AmqpsDeviceOperationsTest
     }
 
     /*
-    **Test_SRS_AMQPSDEVICEOPERATIONS_12_041: [**The prototype function shall return null.**]**
-    */
-    @Test
-    public void protonMessageToIoTHubMessage()
-    {
-        //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig, "", "", "", "", "", "");
-
-        //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "protonMessageToIoTHubMessage", mockMessageImpl);
-
-        //assert
-        assertTrue(amqpsConvertFromProtonReturnValue == null);
-    }
-
-    /*
-    **Test_SRS_AMQPSDEVICEOPERATIONS_12_042: [**The prototype function shall return null.**]**
-    */
-    @Test
-    public void iotHubMessageToProtonMessage()
-    {
-        //arrange
-        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig, "", "", "", "", "", "");
-
-        //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "iotHubMessageToProtonMessage", mockMessage);
-
-        //assert
-        assertTrue(amqpsConvertFromProtonReturnValue == null);
-    }
-
-    /*
     **Tests_SRS_AMQPSDEVICEOPERATIONS_12_027: [**The getter shall return with the value of the amqpProperties.**]**
      */
     @Test
@@ -986,5 +955,205 @@ public class AmqpsDeviceOperationsTest
 
         //assert
         assertTrue(receiverLinkAddress.equals("xxx"));
+    }
+
+    //Tests_SRS_AMQPSDEVICEOPERATION_34_015: [The function shall create a new Proton message using the IoTHubMessage body.]
+    //Tests_SRS_AMQPSDEVICEOPERATION_34_016: [The function shall copy the correlationId, messageId, content type and content encoding properties to the Proton message properties.]
+    //Tests_SRS_AMQPSDEVICEOPERATION_34_017: [The function shall copy the user properties to Proton message application properties excluding the reserved property names.]
+    //Tests_SRS_AMQPSDEVICEOPERATION_34_051: [This function shall set the message's saved outputname in the application properties of the new proton message.]
+    @Test
+    public void convertToProtonSuccess(
+            @Mocked final Message mockMessage,
+            @Mocked final MessageImpl mockProtonMessage,
+            @Mocked final Proton mockProton
+    )
+    {
+        //arrange
+        final String correlationId = "1234";
+        final String messageId = "5678";
+        final String contentType = "some content type";
+        final String contentEncoding = "some content encoding";
+        final String connectionDeviceId = "some connection device id";
+        final String connectionModuleId = "some connection module id";
+        final MessageProperty[] iotHubMessageProperties = new MessageProperty[]
+                {
+                        new MessageProperty("key1", "value1"),
+                        new MessageProperty("key2", "value2")
+                };
+        final Map<String, Object> userProperties = new HashMap<>(2);
+        userProperties.put(iotHubMessageProperties[0].getName(), iotHubMessageProperties[0].getValue());
+        userProperties.put(iotHubMessageProperties[1].getName(), iotHubMessageProperties[1].getValue());
+
+        AmqpsDeviceOperations amqpsDeviceOperation = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig, "some string", "some string", "some string", "some string", "some string", "some string");
+        new NonStrictExpectations()
+        {
+            {
+                Proton.message();
+                result = mockProtonMessage;
+
+                mockMessage.getMessageType();
+                result = MessageType.DEVICE_TELEMETRY;
+                mockMessage.getMessageId();
+                result = messageId;
+                times = 2;
+                mockMessage.getCorrelationId();
+                result = correlationId;
+                times = 2;
+                mockMessage.getContentEncoding();
+                result = contentEncoding;
+                times = 2;
+                mockMessage.getContentType();
+                result = contentType;
+                times = 2;
+                mockMessage.getConnectionModuleId();
+                result = connectionModuleId;
+                times = 2;
+                mockMessage.getConnectionDeviceId();
+                result = connectionDeviceId;
+                times = 2;
+                mockMessage.getProperties();
+                result = iotHubMessageProperties;
+
+                new ApplicationProperties(userProperties);
+            }
+        };
+
+        //act
+        MessageImpl protonMessage = Deencapsulation.invoke(amqpsDeviceOperation, "iotHubMessageToProtonMessage", mockMessage);
+
+        //assert
+        assertTrue(protonMessage != null);
+    }
+
+    // Tests_SRS_AMQPSDEVICEOPERATION_34_025: [The function shall create a new empty buffer for message body if the proton message body is null.]
+    @Test
+    public void convertFromProtonEmptyBodySuccess(
+            @Mocked final AmqpsMessage mockAmqpsMessage,
+            @Mocked final DeviceClientConfig mockDeviceClientConfig
+    )
+    {
+        //arrange
+        String deviceId = "deviceId";
+        byte[] bytes = new byte[1];
+        final Object messageContext = "context";
+
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig, "some string", "some string", "some string", "some string", "some string", "some string");
+        Deencapsulation.invoke(amqpsDeviceOperations, "openLinks", mockSession);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockAmqpsMessage.getAmqpsMessageType();
+                result = MessageType.DEVICE_TELEMETRY;
+                mockAmqpsMessage.getMessageAnnotations();
+                result = null;
+                mockAmqpsMessage.getProperties();
+                result = null;
+                mockAmqpsMessage.getBody();
+                result = null;
+            }
+        };
+
+        //act
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsDeviceOperations, "protonMessageToIoTHubMessage", mockAmqpsMessage);
+
+        //assert
+        assertNotNull(actualMessage);
+        assertEquals(0, actualMessage.getBytes().length);
+    }
+
+    //Tests_SRS_AMQPSDEVICEOPERATION_34_009: [The function shall create a new IoTHubMessage using the Proton message body.]
+    //Tests_SRS_AMQPSDEVICEOPERATION_34_010: [The function shall copy the correlationId, messageId, To, userId, contenty type, and content encoding properties to the IotHubMessage properties.]
+    //Tests_SRS_AMQPSDEVICEOPERATION_34_011: [The function shall copy the Proton application properties to IoTHubMessage properties excluding the reserved property names.]
+    //Tests_SRS_AMQPSDEVICEOPERATION_34_052: [If the amqp message contains an application property of "x-opt-input-name", this function shall assign its value to the IotHub message's input name.]
+    //Tests_SRS_AMQPSDEVICEOPERATION_34_053: [If the amqp message contains an application property for the connection device id, this function shall assign its value to the IotHub message's connection device id.]
+    //Tests_SRS_AMQPSDEVICEOPERATION_34_054: [If the amqp message contains an application property for the connection module id, this function shall assign its value to the IotHub message's connection module id.]
+    @Test
+    public void convertFromProtonSuccessWithBody(
+            @Mocked final MessageImpl mockProtonMessage,
+            @Mocked final Properties properties,
+            @Mocked final MessageCallback mockMessageCallback,
+            @Mocked final AmqpsMessage mockAmqpsMessage,
+            @Mocked final Data mockData,
+            @Mocked final Symbol mockSymbol,
+            @Mocked final Symbol mockSymbol2
+    )
+    {
+        //arrange
+        final String correlationId = "1234";
+        final String messageId = "5678";
+        final Binary userId = new Binary("user1".getBytes());
+        final String to = "devices/deviceID/messages/devicebound/";
+        final Date absoluteExpiryTime = new Date(Long.MAX_VALUE);
+        final String customPropertyKey = "appProp";
+        final String customPropertyValue = "appValue";
+        final String contentType = "application/json";
+        final String contentEncoding = "utf-8";
+        final String toKey = "to";
+        final String userIdKey = "userId";
+        final String inputNameValue = "someInputName";
+        final String connectionModuleId = "someModuleId";
+        final String connectionDeviceId = "someDeviceId";
+        final Map<String, Object> applicationPropertiesMap = new HashMap();
+        applicationPropertiesMap.put(customPropertyKey, customPropertyValue);
+        applicationPropertiesMap.put(MessageProperty.CONNECTION_MODULE_ID, connectionModuleId);
+        applicationPropertiesMap.put(MessageProperty.CONNECTION_DEVICE_ID, connectionDeviceId);
+
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig, "some string", "some string", "some string", "some string", "some string", "some string");
+        Deencapsulation.invoke(amqpsDeviceOperations, "openLinks", mockSession);
+        final String AMQPS_APP_PROPERTY_PREFIX = Deencapsulation.getField(amqpsDeviceOperations, "AMQPS_APP_PROPERTY_PREFIX");
+
+        new NonStrictExpectations()
+        {
+            {
+                mockAmqpsMessage.getAmqpsMessageType();
+                result = MessageType.DEVICE_TELEMETRY;
+                mockAmqpsMessage.getBody();
+                result = mockData;
+                mockAmqpsMessage.getApplicationProperties().getValue();
+                result = applicationPropertiesMap;
+                properties.getMessageId();
+                result = messageId;
+                properties.getCorrelationId();
+                result = correlationId;
+                properties.getTo();
+                result = to;
+                properties.getContentEncoding();
+                result = mockSymbol;
+                mockSymbol.toString();
+                result = contentEncoding;
+                properties.getContentType();
+                result = mockSymbol2;
+                mockSymbol2.toString();
+                result = contentType;
+                properties.getUserId();
+                result = userId;
+                properties.getAbsoluteExpiryTime();
+                result = absoluteExpiryTime;
+                mockDeviceClientConfig.getDeviceTelemetryMessageCallback(inputNameValue);
+                result = mockMessageCallback;
+                mockDeviceClientConfig.getDeviceTelemetryMessageContext(inputNameValue);
+                result = "myContext";
+            }
+        };
+
+        //act
+        final IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsDeviceOperations, "protonMessageToIoTHubMessage", mockAmqpsMessage);
+
+        //assert
+        new Verifications()
+        {
+            {
+                actualMessage.setCorrelationId(correlationId);
+                actualMessage.setMessageId(messageId);
+                actualMessage.setConnectionModuleId(connectionModuleId);
+                actualMessage.setConnectionDeviceId(connectionDeviceId);
+                actualMessage.setContentType(contentType);
+                actualMessage.setContentEncoding(contentEncoding);
+                actualMessage.setProperty(customPropertyKey, customPropertyValue);
+                actualMessage.setProperty(AMQPS_APP_PROPERTY_PREFIX + toKey, to);
+                actualMessage.setProperty(AMQPS_APP_PROPERTY_PREFIX + userIdKey, userId.toString());
+            }
+        };
     }
 }

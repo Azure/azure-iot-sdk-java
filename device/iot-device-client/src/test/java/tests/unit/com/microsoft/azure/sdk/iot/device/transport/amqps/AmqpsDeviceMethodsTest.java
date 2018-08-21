@@ -25,6 +25,7 @@ import org.apache.qpid.proton.message.impl.MessageImpl;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -761,9 +762,7 @@ public class AmqpsDeviceMethodsTest
     // Tests_SRS_AMQPSDEVICEMETHODS_12_025: [The function shall copy the method name from Proton application properties and set IotHubTransportMessage method name with it.]
     @Test
     public void convertFromProtonApplicationPropertiesMethodName(
-            @Mocked final Map<String, String> mockMapStringString,
             @Mocked final ApplicationProperties mockApplicationProperties,
-            @Mocked final Map.Entry<String, String> mockStringStringEntry,
             @Mocked final DeviceClientConfig mockDeviceClientConfig
     )
     {
@@ -783,17 +782,14 @@ public class AmqpsDeviceMethodsTest
         amqpsMessage.setProperties(null);
         amqpsMessage.setApplicationProperties(mockApplicationProperties);
 
+        final Map<String, Object> applicationPropertiesMap = new HashMap<>();
+        applicationPropertiesMap.put(propertyKey, propertyValue);
+
         new NonStrictExpectations()
         {
             {
                 mockApplicationProperties.getValue();
-                result = mockMapStringString;
-                mockMapStringString.entrySet();
-                result = mockStringStringEntry;
-                mockStringStringEntry.getKey();
-                result = propertyKey;
-                mockStringStringEntry.getValue();
-                result = propertyValue;
+                result = applicationPropertiesMap;
 
                 mockDeviceClientConfig.getDeviceMethodsMessageCallback();
                 result = mockMessageCallback;
@@ -932,7 +928,7 @@ public class AmqpsDeviceMethodsTest
                 mockProperties.setCorrelationId(any);
                 times = 1;
                 mockMessageImpl.setProperties(mockProperties);
-                times = 1;
+                times = 2;
             }
         };
 
@@ -999,7 +995,7 @@ public class AmqpsDeviceMethodsTest
         {
             {
                 mockMessageImpl.setApplicationProperties(mockApplicationProperties);
-                times = 1;
+                times = 2;
             }
         };
 
@@ -1072,7 +1068,7 @@ public class AmqpsDeviceMethodsTest
         {
             {
                 mockMessageImpl.setApplicationProperties(mockApplicationProperties);
-                times = 1;
+                times = 2;
             }
         };
 
@@ -1095,7 +1091,6 @@ public class AmqpsDeviceMethodsTest
         String deviceId = "deviceId";
         final String messageId = "messageId";
         final String correlationId = "correlationId";
-        final String outputName = "outputName";
         final MessageProperty[] properties = new MessageProperty[1];
         properties[0] = mockMessageProperty;
         final String propertyKey = "testPropertyKey";
@@ -1125,10 +1120,6 @@ public class AmqpsDeviceMethodsTest
                 mockIotHubTransportMessage.getCorrelationId();
                 result = null;
 
-                mockIotHubTransportMessage.getOutputName();
-                times = 2;
-                result = outputName;
-
                 new ApplicationProperties((Map) any);
                 result = mockApplicationProperties;
 
@@ -1148,7 +1139,7 @@ public class AmqpsDeviceMethodsTest
         {
             {
                 mockMessageImpl.setApplicationProperties(mockApplicationProperties);
-                times = 1;
+                times = 2;
             }
         };
 
