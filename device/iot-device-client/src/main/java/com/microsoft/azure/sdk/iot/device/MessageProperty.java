@@ -20,6 +20,10 @@ public final class MessageProperty {
     public static final String CONNECTION_DEVICE_ID = "iothub-connection-device-id";
     public static final String CONNECTION_MODULE_ID = "iothub-connection-module-id";
 
+    //iot hub level content type and encoding. Not to be confused with transport level content type and encoding
+    public static final String IOTHUB_CONTENT_ENCODING = "iothub-contentencoding";
+    public static final String IOTHUB_CONTENT_TYPE = "iothub-contenttype";
+
     static {
         HashSet<String> reservedPropertyNames = new HashSet<>();
         reservedPropertyNames.add("iothub-enqueuedtime");
@@ -36,7 +40,9 @@ public final class MessageProperty {
         reservedPropertyNames.add("iothub-userid");
         reservedPropertyNames.add("iothub-to");
         reservedPropertyNames.add("iothub-content-type");
+        reservedPropertyNames.add(IOTHUB_CONTENT_TYPE);
         reservedPropertyNames.add("iothub-content-encoding");
+        reservedPropertyNames.add(IOTHUB_CONTENT_ENCODING);
         reservedPropertyNames.add("iothub-absolute-expiry-time");
         reservedPropertyNames.add("IoThub-methodname");
         reservedPropertyNames.add("connectionDeviceId");

@@ -26,7 +26,8 @@ public final class HttpsSingleMessage implements HttpsMessage
     protected static final String MESSAGE_ID_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "messageid";
     protected static final String TO_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "to";
     protected static final String USER_ID_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "userid";
-
+    protected static final String CONTENT_ENCODING_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "contentencoding";
+    protected static final String CONTENT_TYPE_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "contenttype";
 
     private byte[] body;
     private boolean base64Encoded;
@@ -119,6 +120,16 @@ public final class HttpsSingleMessage implements HttpsMessage
             sysProperties.put(TO_KEY, message.getTo());
         }
 
+        if (message.getContentEncoding() != null)
+        {
+            sysProperties.put(CONTENT_ENCODING_KEY, message.getContentEncoding());
+        }
+
+        if (message.getContentType() != null)
+        {
+            sysProperties.put(CONTENT_TYPE_KEY, message.getContentType());
+        }
+
         httpsMsg.systemProperties = new HashMap<>(sysProperties);
     }
 
@@ -193,6 +204,16 @@ public final class HttpsSingleMessage implements HttpsMessage
         if (this.systemProperties.containsKey(CORRELATION_ID_KEY))
         {
             msg.setCorrelationId(this.systemProperties.get(CORRELATION_ID_KEY));
+        }
+
+        if (this.systemProperties.containsKey(CONTENT_TYPE_KEY))
+        {
+            msg.setContentType(this.systemProperties.get(CONTENT_TYPE_KEY));
+        }
+
+        if (this.systemProperties.containsKey(CONTENT_ENCODING_KEY))
+        {
+            msg.setContentEncoding(this.systemProperties.get(CONTENT_ENCODING_KEY));
         }
 
         if (this.systemProperties.containsKey(TO_KEY))

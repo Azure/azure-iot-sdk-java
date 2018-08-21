@@ -347,6 +347,10 @@ public class HttpsSingleMessageTest
         final String useridValue = "3456";
         final String toName = HTTPS_SYSTEM_PROPERTY_PREFIX + "to";
         final String toValue = "device4";
+        final String contentEncodingName = HTTPS_SYSTEM_PROPERTY_PREFIX + "contentencoding";
+        final String contentEncodingValue = "test_contentencoding-value";
+        final String contentTypeName = HTTPS_SYSTEM_PROPERTY_PREFIX + "contenttype";
+        final String contentTypeValue = "test_contenttype-value";
         final String propertyName = "test-property-name";
         final String propertyValue = "test-property-value";
         new NonStrictExpectations()
@@ -368,6 +372,10 @@ public class HttpsSingleMessageTest
                 result = useridValue;
                 mockMsg.getTo();
                 result = toValue;
+                mockMsg.getContentType();
+                result = contentTypeValue;
+                mockMsg.getContentEncoding();
+                result = contentEncodingValue;
             }
         };
 
@@ -379,6 +387,8 @@ public class HttpsSingleMessageTest
         assertTrue(systemPropertyAssignedCorrectly(httpsSingleMessage.getSystemProperties(), correlationidName, correlationidValue));
         assertTrue(systemPropertyAssignedCorrectly(httpsSingleMessage.getSystemProperties(), useridName, useridValue));
         assertTrue(systemPropertyAssignedCorrectly(httpsSingleMessage.getSystemProperties(), toName, toValue));
+        assertTrue(systemPropertyAssignedCorrectly(httpsSingleMessage.getSystemProperties(), contentTypeName, contentTypeValue));
+        assertTrue(systemPropertyAssignedCorrectly(httpsSingleMessage.getSystemProperties(), contentEncodingName, contentEncodingValue));
     }
 
     // Tests_SRS_HTTPSSINGLEMESSAGE_11_005: [The parsed HttpsSingleMessage shall not be Base64-encoded.]
