@@ -1472,7 +1472,7 @@ public class AmqpsIotHubConnectionTest {
                 mockInProgressMessages.remove(anyInt);
                 result = mockedTransportMessage;
 
-                Deencapsulation.newInstance(AmqpConnectionThrottledException.class);
+                Deencapsulation.newInstance(AmqpConnectionThrottledException.class, anyString);
                 result = mockedTransportException;
             }
         };

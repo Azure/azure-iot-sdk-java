@@ -46,32 +46,32 @@ public class AmqpsExceptionTranslatorTest
     public void getConnectionStatusExceptionFromAMQPExceptionCodeReturnsExpectedMappings()
     {
         //assert
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpConnectionForcedException.errorCode) instanceof AmqpConnectionForcedException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpUnauthorizedAccessException.errorCode) instanceof AmqpUnauthorizedAccessException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpConnectionFramingErrorException.errorCode) instanceof AmqpConnectionFramingErrorException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpNotFoundException.errorCode) instanceof AmqpNotFoundException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpResourceDeletedException.errorCode) instanceof AmqpResourceDeletedException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpResourceLockedException.errorCode) instanceof AmqpResourceLockedException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpConnectionRedirectException.errorCode) instanceof AmqpConnectionRedirectException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpDecodeErrorException.errorCode) instanceof AmqpDecodeErrorException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkDetachForcedException.errorCode) instanceof AmqpLinkDetachForcedException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpSessionErrantLinkException.errorCode) instanceof AmqpSessionErrantLinkException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpFrameSizeTooSmallException.errorCode) instanceof AmqpFrameSizeTooSmallException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpSessionHandleInUseException.errorCode) instanceof AmqpSessionHandleInUseException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpIllegalStateException.errorCode) instanceof AmqpIllegalStateException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpInternalErrorException.errorCode) instanceof AmqpInternalErrorException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpInvalidFieldException.errorCode) instanceof AmqpInvalidFieldException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpSessionWindowViolationException.errorCode) instanceof AmqpSessionWindowViolationException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpSessionUnattachedHandleException.errorCode) instanceof AmqpSessionUnattachedHandleException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkTransferLimitExceededException.errorCode) instanceof AmqpLinkTransferLimitExceededException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpResourceLimitExceededException.errorCode) instanceof AmqpResourceLimitExceededException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpPreconditionFailedException.errorCode) instanceof AmqpPreconditionFailedException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpNotImplementedException.errorCode) instanceof AmqpNotImplementedException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpNotAllowedException.errorCode) instanceof AmqpNotAllowedException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkMessageSizeExceededException.errorCode) instanceof AmqpLinkMessageSizeExceededException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkStolenException.errorCode) instanceof AmqpLinkStolenException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkRedirectException.errorCode) instanceof AmqpLinkRedirectException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpConnectionThrottledException.errorCode) instanceof AmqpConnectionThrottledException);
-        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", "Not a protocol standard error code") instanceof ProtocolException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpConnectionForcedException.errorCode, "") instanceof AmqpConnectionForcedException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpUnauthorizedAccessException.errorCode, "") instanceof AmqpUnauthorizedAccessException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpConnectionFramingErrorException.errorCode, "") instanceof AmqpConnectionFramingErrorException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpNotFoundException.errorCode, "") instanceof AmqpNotFoundException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpResourceDeletedException.errorCode, "") instanceof AmqpResourceDeletedException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpResourceLockedException.errorCode, "") instanceof AmqpResourceLockedException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpConnectionRedirectException.errorCode, "") instanceof AmqpConnectionRedirectException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpDecodeErrorException.errorCode, "") instanceof AmqpDecodeErrorException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkDetachForcedException.errorCode, "") instanceof AmqpLinkDetachForcedException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpSessionErrantLinkException.errorCode, "") instanceof AmqpSessionErrantLinkException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpFrameSizeTooSmallException.errorCode, "") instanceof AmqpFrameSizeTooSmallException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpSessionHandleInUseException.errorCode, "") instanceof AmqpSessionHandleInUseException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpIllegalStateException.errorCode, "") instanceof AmqpIllegalStateException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpInternalErrorException.errorCode, "") instanceof AmqpInternalErrorException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpInvalidFieldException.errorCode, "") instanceof AmqpInvalidFieldException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpSessionWindowViolationException.errorCode, "") instanceof AmqpSessionWindowViolationException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpSessionUnattachedHandleException.errorCode, "") instanceof AmqpSessionUnattachedHandleException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkTransferLimitExceededException.errorCode, "") instanceof AmqpLinkTransferLimitExceededException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpResourceLimitExceededException.errorCode, "") instanceof AmqpResourceLimitExceededException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpPreconditionFailedException.errorCode, "") instanceof AmqpPreconditionFailedException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpNotImplementedException.errorCode, "") instanceof AmqpNotImplementedException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpNotAllowedException.errorCode, "") instanceof AmqpNotAllowedException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkMessageSizeExceededException.errorCode, "") instanceof AmqpLinkMessageSizeExceededException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkStolenException.errorCode, "") instanceof AmqpLinkStolenException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkRedirectException.errorCode, "") instanceof AmqpLinkRedirectException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpConnectionThrottledException.errorCode, "") instanceof AmqpConnectionThrottledException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", "Not a protocol standard error code", "") instanceof ProtocolException);
     }
 }

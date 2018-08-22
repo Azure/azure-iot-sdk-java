@@ -606,7 +606,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                         {
                             // Codes_SRS_AMQPSIOTHUBCONNECTION_28_001: [If the acknowledgement sent from the service is "Rejected", this function shall map the error condition if it exists to amqp exceptions.]
                             String errorCode = errorCondition.getCondition().toString();
-                            transportException = AmqpsExceptionTranslator.convertToAmqpException(errorCode);
+                            transportException = AmqpsExceptionTranslator.convertToAmqpException(errorCode, errorCondition.getDescription());
                         }
                         else
                         {
@@ -717,17 +717,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
-        TransportException transportException = new TransportException("Unknown transport exception occurred");
-        transportException.setRetryable(true);
-        if (event.getSender() != null && event.getSender().getRemoteCondition() != null && event.getSender().getRemoteCondition().getCondition() != null)
-        {
-            //Codes_SRS_AMQPSIOTHUBCONNECTION_34_061 [If the provided event object's transport holds a remote error condition object, this function shall report the associated TransportException to this object's listeners.]
-            String errorCode = event.getSender().getRemoteCondition().getCondition().toString();
-            transportException = AmqpsExceptionTranslator.convertToAmqpException(errorCode);
-        }
+        //Codes_SRS_AMQPSIOTHUBCONNECTION_34_061 [If the provided event object's transport holds a remote error condition object, this function shall report the associated TransportException to this object's listeners.]
+        this.savedException = getTransportExceptionFromEvent(event);
 
-        this.scheduleReconnection(transportException);
-        this.savedException = transportException;
+        this.scheduleReconnection(this.savedException);
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
@@ -743,17 +736,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
-        TransportException transportException = new TransportException("Unknown transport exception occurred");
-        transportException.setRetryable(true);
-        if (event.getTransport() != null && event.getTransport().getCondition() != null && event.getTransport().getCondition().getCondition() != null)
-        {
-            //Codes_SRS_AMQPSIOTHUBCONNECTION_34_060 [If the provided event object's transport holds an error condition object, this function shall report the associated TransportException to this object's listeners.]
-            String errorCode = event.getTransport().getCondition().getCondition().toString();
-            transportException = AmqpsExceptionTranslator.convertToAmqpException(errorCode);
-        }
+        //Codes_SRS_AMQPSIOTHUBCONNECTION_34_060 [If the provided event object's transport holds an error condition object, this function shall report the associated TransportException to this object's listeners.]
+        this.savedException = getTransportExceptionFromEvent(event);
 
-        this.savedException = transportException;
-        this.scheduleReconnection(transportException);
+        this.scheduleReconnection(this.savedException);
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
@@ -1093,5 +1079,30 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         return this.deviceClientConfig.getIotHubHostname();
+    }
+
+    /**
+     * Derive the transport exception from the provided event, defaulting to a generic, retryable TransportException
+     * @param event the event context
+     * @return the transport exception derived from the provided event
+     */
+    private TransportException getTransportExceptionFromEvent(Event event)
+    {
+        TransportException transportException = new TransportException("Unknown transport exception occurred");
+        transportException.setRetryable(true);
+        if (event.getSender() != null && event.getSender().getRemoteCondition() != null && event.getSender().getRemoteCondition().getCondition() != null)
+        {
+            String amqpErrorType = event.getSender().getRemoteCondition().getCondition().toString();
+
+            String errorDescription = "";
+            if (event.getSender().getRemoteCondition().getDescription() != null)
+            {
+                errorDescription = event.getSender().getRemoteCondition().getDescription();
+            }
+
+            transportException = AmqpsExceptionTranslator.convertToAmqpException(amqpErrorType, errorDescription);
+        }
+
+        return transportException;
     }
 }
