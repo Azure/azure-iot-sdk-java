@@ -640,6 +640,38 @@ public class AmqpSendHandlerTest
 
     }
 
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_032: [This function shall close the transport tail]
+    @Test
+    public void onConnectionRemoteCloseClosesTransportTail(@Mocked final Event mockEvent, @Mocked final Transport mockTransport)
+    {
+        // arrange
+        String hostName = "aaa";
+        String userName = "bbb";
+        String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
+
+        new Expectations()
+        {
+            {
+                mockEvent.getTransport();
+                result = mockTransport;
+            }
+        };
+
+        // act
+        amqpSendHandler.onConnectionRemoteClose(mockEvent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockTransport.close_tail();
+                times = 1;
+            }
+        };
+    }
+
     private void createProtonObjects()
     {
         String exceptionMessage = "Not expected function called";

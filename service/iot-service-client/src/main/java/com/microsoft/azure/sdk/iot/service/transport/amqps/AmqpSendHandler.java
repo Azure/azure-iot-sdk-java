@@ -349,7 +349,13 @@ public class AmqpSendHandler extends BaseHandler
             snd.getSession().getConnection().close();
             isConnected = false;
         }
+    }
 
+    @Override
+    public void onConnectionRemoteClose(Event event)
+    {
+        // Code_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_032: [This function shall close the transport tail]
+        event.getTransport().close_tail();
     }
 
     public void sendComplete() throws IotHubException, IOException
