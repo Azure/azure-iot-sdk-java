@@ -355,7 +355,7 @@ public class DeviceTwinTest
 
     /*
      **Tests_SRS_DEVICETWIN_25_011: [**The method shall serialize the properties using the TwinCollection.**]**
-     **Tests_SRS_DEVICETWIN_25_012: [**The method shall create a device twin message with the serialized payload if not null to be sent IotHub.**]**
+     **Tests_SRS_DEVICETWIN_25_012: [**The method shall create a device twin message with the serialized payload if not null to be sent IotHub and shall include the connection device id of the sending device.**]**
      **Tests_SRS_DEVICETWIN_25_013: [**This method shall set the message type as DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST by calling setDeviceOperationType.**]**
      **Tests_SRS_DEVICETWIN_25_014: [**This method shall set the request id for the message by calling setRequestId .**]**
      **Tests_SRS_DEVICETWIN_25_015: [**This method shall send the message to the lower transport layers by calling sendEventAsync.**]**
@@ -369,6 +369,7 @@ public class DeviceTwinTest
         final String prop2 = "prop2";
         final String val1 = "val1";
         final int val2 = 100;
+        final String expectedDeviceId = "1234";
 
         final HashSet<Property> reportedProp = new HashSet<Property>()
         {
@@ -383,6 +384,9 @@ public class DeviceTwinTest
         new NonStrictExpectations()
         {
             {
+                mockedConfig.getDeviceId();
+                result = expectedDeviceId;
+
                 new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
                 result = mockedDeviceTwinMessage;
             }
@@ -404,6 +408,8 @@ public class DeviceTwinTest
                 mockedDeviceTwinMessage.setVersion((String)any);
                 times = 0;
                 mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null, anyString);
+                times = 1;
+                mockedDeviceTwinMessage.setConnectionDeviceId(expectedDeviceId);
                 times = 1;
             }
         };

@@ -464,6 +464,41 @@ public class InternalClientTest
         };
     }
 
+    //Tests_SRS_INTERNALCLIENT_34_045: [This function shall set the provided message's connection device id to the config's saved device id.]
+    @Test
+    public void sendEventAsyncSetsConnectionDeviceId(
+            @Mocked final Message mockMessage,
+            @Mocked final IotHubEventCallback mockCallback)
+            throws IOException, URISyntaxException
+    {
+        //arrange
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        final Map<String, Object> context = new HashMap<>();
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        Deencapsulation.setField(client, "config", mockConfig);
+        Deencapsulation.invoke(client, "open");
+        final String expectedDeviceId = "some device";
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getDeviceId();
+                result = expectedDeviceId;
+            }
+        };
+
+        // act
+        Deencapsulation.invoke(client, "sendEventAsync", mockMessage, mockCallback, context);
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockMessage.setConnectionDeviceId(expectedDeviceId);
+                times = 1;
+            }
+        };
+    }
+
     /* Tests_SRS_INTERNALCLIENT_21_011: [If starting to send via deviceIO is not successful, the sendEventAsync shall bypass the threw exception.] */
     // Tests_SRS_INTERNALCLIENT_12_001: [The function shall call deviceIO.sendEventAsync with the client's config parameter to enable multiplexing.]
     @Test

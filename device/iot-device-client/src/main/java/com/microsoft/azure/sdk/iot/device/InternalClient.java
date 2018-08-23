@@ -162,6 +162,9 @@ public class InternalClient
      */
     public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext)
     {
+        //Codes_SRS_INTERNALCLIENT_34_045: [This function shall set the provided message's connection device id to the config's saved device id.]
+        message.setConnectionDeviceId(this.config.getDeviceId());
+
         //Codes_SRS_INTERNALCLIENT_21_010: [The sendEventAsync shall asynchronously send the message using the deviceIO connection.]
         deviceIO.sendEventAsync(message, callback, callbackContext, this.config.getDeviceId());
     }

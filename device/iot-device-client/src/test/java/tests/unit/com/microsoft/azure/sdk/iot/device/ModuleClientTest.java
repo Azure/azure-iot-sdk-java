@@ -193,14 +193,12 @@ public class ModuleClientTest
     //Tests_SRS_MODULECLIENT_34_002: [This function shall set the provided message with the provided outputName, device id, and module id properties.]
     //Tests_SRS_MODULECLIENT_34_003: [This function shall invoke super.sendEventAsync(message, callback, callbackContext).]
     @Test
-    public void sendEventAsyncSuccess() throws URISyntaxException, ModuleClientException
+    public void sendEventAsyncToOutputSuccess() throws URISyntaxException, ModuleClientException
     {
         //arrange
         baseExpectations();
         ModuleClient client = new ModuleClient("some connection string", IotHubClientProtocol.MQTT);
         final String expectedOutputName = "some output name";
-        final String expectedDeviceId = "1234";
-        final String expectedModuleId = "5678";
         Deencapsulation.setField(client, "config", mockedDeviceClientConfig);
 
         //act
@@ -214,6 +212,45 @@ public class ModuleClientTest
                 times = 1;
 
                 mockedDeviceIO.sendEventAsync(mockedMessage, mockedIotHubEventCallback, any, anyString);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_MODULECLIENT_34_040: [This function shall set the message's connection moduleId to the config's saved module id.]
+    //Tests_SRS_MODULECLIENT_34_041: [This function shall invoke super.sendEventAsync(message, callback, callbackContext).]
+    @Test
+    public void sendEventAsyncSuccess() throws URISyntaxException, ModuleClientException
+    {
+        //arrange
+        baseExpectations();
+        ModuleClient client = new ModuleClient("some connection string", IotHubClientProtocol.MQTT);
+        final String expectedDeviceId = "1234";
+        final String expectedModuleId = "5678";
+        Deencapsulation.setField(client, "config", mockedDeviceClientConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedDeviceClientConfig.getDeviceId();
+                result = expectedDeviceId;
+
+                mockedDeviceClientConfig.getModuleId();
+                result = expectedModuleId;
+            }
+        };
+
+        //act
+        client.sendEventAsync(mockedMessage, mockedIotHubEventCallback, new Object());
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedMessage.setConnectionDeviceId(expectedDeviceId);
+                mockedMessage.setConnectionModuleId(expectedModuleId);
+
+                mockedDeviceIO.sendEventAsync(mockedMessage, mockedIotHubEventCallback, any, expectedDeviceId);
                 times = 1;
             }
         };

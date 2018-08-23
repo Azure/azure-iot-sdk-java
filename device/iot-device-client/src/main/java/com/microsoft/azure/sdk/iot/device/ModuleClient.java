@@ -279,20 +279,17 @@ public class ModuleClient extends InternalClient
         //Codes_SRS_MODULECLIENT_34_002: [This function shall set the provided message with the provided outputName.]
         message.setOutputName(outputName);
 
-        //TODO Edgehub has bug that has trouble when these are included. They should be uncommented after that bug is fixed.
-        //message.setConnectionModuleId(this.config.getModuleId());
-        //message.setConnectionDeviceId(this.config.getDeviceId());
-
         //Codes_SRS_MODULECLIENT_34_003: [This function shall invoke super.sendEventAsync(message, callback, callbackContext).]
-        super.sendEventAsync(message, callback, callbackContext);
+        this.sendEventAsync(message, callback, callbackContext);
     }
 
     @Override
     public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException
     {
-        //TODO Edgehub has bug that has trouble when these are included. They should be uncommented after that bug is fixed.
-        //message.setConnectionModuleId(this.config.getModuleId());
-        //message.setConnectionDeviceId(this.config.getDeviceId());
+        //Codes_SRS_MODULECLIENT_34_040: [This function shall set the message's connection moduleId to the config's saved module id.]
+        message.setConnectionModuleId(this.config.getModuleId());
+
+        //Codes_SRS_MODULECLIENT_34_041: [This function shall invoke super.sendEventAsync(message, callback, callbackContext).]
         super.sendEventAsync(message, callback, callbackContext);
     }
 

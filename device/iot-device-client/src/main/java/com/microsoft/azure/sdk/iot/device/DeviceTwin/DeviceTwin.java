@@ -351,9 +351,10 @@ public class DeviceTwin
         }
 
         /*
-         **Codes_SRS_DEVICETWIN_25_012: [**The method shall create a device twin message with the serialized payload if not null to be sent IotHub.**]**
+         **Codes_SRS_DEVICETWIN_25_012: [**The method shall create a device twin message with the serialized payload if not null to be sent IotHub and shall include the connection device id of the sending device.**]**
          */
         IotHubTransportMessage updateReportedPropertiesRequest = new IotHubTransportMessage(serializedReportedProperties.getBytes(), MessageType.DEVICE_TWIN);
+        updateReportedPropertiesRequest.setConnectionDeviceId(this.config.getDeviceId());
 
         /*
          **Codes_SRS_DEVICETWIN_25_014: [**This method shall set the request id for the message by calling setRequestId .**]**

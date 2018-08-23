@@ -81,6 +81,9 @@ public final class DeviceMethod
                                      */
                                     responseMessage.setRequestId(methodMessage.getRequestId());
 
+                                    // Codes_SRS_DEVICEMETHOD_34_016: [The device method message sent to IotHub shall have the sending device's id set as the connection device id.]
+                                    responseMessage.setConnectionDeviceId(this.nestedConfig.getDeviceId());
+
                                     /*
                                     **Codes_SRS_DEVICEMETHOD_25_013: [**The device method message sent to IotHub shall have the status provided by the user as the message status.**]**
                                      */
@@ -203,11 +206,12 @@ public final class DeviceMethod
         if (!isSubscribed)
         {
             /*
-            **Codes_SRS_DEVICEMETHOD_25_005: [**If not already subscribed then this method shall create a device method message with empty payload and set its type as DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST.**]**
+            **Codes_SRS_DEVICEMETHOD_25_005: [**If not already subscribed then this method shall create a device method message with empty payload and set its type as DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST, and set it's connection id to the sending device's id.**]**
             **Codes_SRS_DEVICEMETHOD_25_006: [**If not already subscribed then this method shall send the message using sendEventAsync.**]**
              */
             IotHubTransportMessage subscribeMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
             subscribeMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
+            subscribeMessage.setConnectionDeviceId(this.config.getDeviceId());
             this.deviceIO.sendEventAsync(subscribeMessage, new deviceMethodRequestMessageCallback(), null, this.config.getDeviceId());
         }
 
