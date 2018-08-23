@@ -34,10 +34,6 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
 
     protected IotHubSasToken sasToken;
 
-    protected String hostname;
-    protected String deviceId;
-    protected String moduleId;
-
     public abstract boolean canRefreshToken();
     public abstract String getRenewedSasToken() throws IOException, TransportException;
 

@@ -120,13 +120,13 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
             {
                 System.currentTimeMillis();
                 result = 0;
-                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class}, null, null, expectedDeviceKey, null, null, expectedExpiryTime);
+                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class}, expectedHostname, expectedDeviceId, expectedDeviceKey, null, expectedModuleId, expectedExpiryTime);
                 result = mockSasToken;
                 Deencapsulation.invoke(mockSasToken, "isExpired");
                 result = true;
                 System.currentTimeMillis();
                 result = 0;
-                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class}, null, null, expectedDeviceKey, null, null, expectedExpiryTime);
+                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class}, expectedHostname, expectedDeviceId, expectedDeviceKey, null, expectedModuleId, expectedExpiryTime);
                 result = mockSasToken;
             }
         };
@@ -140,7 +140,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class}, null, null, expectedDeviceKey, null, null, expectedExpiryTime);
+                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class}, expectedHostname, expectedDeviceId, expectedDeviceKey, null, expectedModuleId, expectedExpiryTime);
                 times = 1;
             }
         };
