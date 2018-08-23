@@ -1383,6 +1383,12 @@ public class AmqpsIotHubConnectionTest {
                 mockEvent.getLink();
                 result = mockLink;
 
+                mockLink.getSource();
+                result = mockSource;
+
+                mockSource.getAddress();
+                result = "notACBSLink";
+
                 mockLink.getName();
                 result = receiverLinkName;
 
@@ -1444,6 +1450,12 @@ public class AmqpsIotHubConnectionTest {
 
                 mockEvent.getLink();
                 result = mockLink;
+
+                mockLink.getSource();
+                result = mockSource;
+
+                mockSource.getAddress();
+                result = "notACBSLink";
 
                 mockLink.getName();
                 result = receiverLinkName;
@@ -1523,6 +1535,12 @@ public class AmqpsIotHubConnectionTest {
                 mockEvent.getLink();
                 result = mockLink;
 
+                mockLink.getSource();
+                result = mockSource;
+
+                mockSource.getAddress();
+                result = "notACBSLink";
+
                 mockLink.getName();
                 result = receiverLinkName;
 
@@ -1594,6 +1612,12 @@ public class AmqpsIotHubConnectionTest {
                 mockEvent.getLink();
                 result = mockLink;
 
+                mockLink.getSource();
+                result = mockSource;
+
+                mockSource.getAddress();
+                result = "notACBSLink";
+
                 mockLink.getName();
                 result = receiverLinkName;
 
@@ -1662,6 +1686,12 @@ public class AmqpsIotHubConnectionTest {
                 mockEvent.getLink();
                 result = mockLink;
 
+                mockLink.getSource();
+                result = mockSource;
+
+                mockSource.getAddress();
+                result = "notACBSLink";
+
                 mockLink.getName();
                 result = receiverLinkName;
 
@@ -1729,6 +1759,12 @@ public class AmqpsIotHubConnectionTest {
 
                 mockEvent.getLink();
                 result = mockLink;
+
+                mockLink.getSource();
+                result = mockSource;
+
+                mockSource.getAddress();
+                result = "notACBSLink";
 
                 mockLink.getName();
                 result = receiverLinkName;

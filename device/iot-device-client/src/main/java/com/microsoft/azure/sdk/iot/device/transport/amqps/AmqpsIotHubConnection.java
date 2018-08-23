@@ -591,44 +591,53 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 logger.LogInfo("Is state of remote Delivery COMPLETE ? %s, method name is %s ", state, logger.getMethodName());
                 logger.LogInfo("Inform listener that a message has been sent to IoT Hub along with remote state, method name is %s ", logger.getMethodName());
 
-                if (this.inProgressMessages.containsKey(d.hashCode()))
+                if (!event.getLink().getSource().getAddress().equalsIgnoreCase(AmqpsDeviceAuthenticationCBS.RECEIVER_LINK_ENDPOINT_PATH))
                 {
-                    if (remoteState instanceof Accepted)
+                    if (this.inProgressMessages.containsKey(d.hashCode()))
                     {
-                        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_064: [If the acknowledgement sent from the service is "Accepted", this function shall notify its listener that the message was successfully sent.]
-                        this.listener.onMessageSent(inProgressMessages.remove(d.hashCode()), null);
-                    }
-                    else if (remoteState instanceof Rejected)
-                    {
-                        TransportException transportException;
-                        ErrorCondition errorCondition = ((Rejected) remoteState).getError();
-                        if (errorCondition !=  null && errorCondition.getCondition() != null)
+                        if (remoteState instanceof Accepted)
                         {
-                            // Codes_SRS_AMQPSIOTHUBCONNECTION_28_001: [If the acknowledgement sent from the service is "Rejected", this function shall map the error condition if it exists to amqp exceptions.]
-                            String errorCode = errorCondition.getCondition().toString();
-                            transportException = AmqpsExceptionTranslator.convertToAmqpException(errorCode, errorCondition.getDescription());
+                            // Codes_SRS_AMQPSIOTHUBCONNECTION_34_064: [If the acknowledgement sent from the service is "Accepted", this function shall notify its listener that the message was successfully sent.]
+                            this.listener.onMessageSent(inProgressMessages.remove(d.hashCode()), null);
                         }
-                        else
+                        else if (remoteState instanceof Rejected)
                         {
-                            // Codes_SRS_AMQPSIOTHUBCONNECTION_34_065: [If the acknowledgement sent from the service is "Rejected", this function shall notify its listener that the sent message was rejected and that it should not be retried.]
-                            transportException = new TransportException("IotHub rejected the message");
+                            TransportException transportException;
+                            ErrorCondition errorCondition = ((Rejected) remoteState).getError();
+                            if (errorCondition !=  null && errorCondition.getCondition() != null)
+                            {
+                                // Codes_SRS_AMQPSIOTHUBCONNECTION_28_001: [If the acknowledgement sent from the service is "Rejected", this function shall map the error condition if it exists to amqp exceptions.]
+                                String errorCode = errorCondition.getCondition().toString();
+                                String errorDescription = "";
+                                if (errorCondition.getDescription() != null)
+                                {
+                                    errorDescription = errorCondition.getDescription();
+                                }
+
+                                transportException = AmqpsExceptionTranslator.convertToAmqpException(errorCode, errorDescription);
+                            }
+                            else
+                            {
+                                // Codes_SRS_AMQPSIOTHUBCONNECTION_34_065: [If the acknowledgement sent from the service is "Rejected", this function shall notify its listener that the sent message was rejected and that it should not be retried.]
+                                transportException = new TransportException("IotHub rejected the message");
+                            }
+
+                            this.listener.onMessageSent(inProgressMessages.remove(d.hashCode()), transportException);
+
                         }
-
-                        this.listener.onMessageSent(inProgressMessages.remove(d.hashCode()), transportException);
-
+                        else if (remoteState instanceof Modified || remoteState instanceof Released || remoteState instanceof Received)
+                        {
+                            // Codes_SRS_AMQPSIOTHUBCONNECTION_34_066: [If the acknowledgement sent from the service is "Modified", "Released", or "Received", this function shall notify its listener that the sent message needs to be retried.]
+                            TransportException transportException = new TransportException("IotHub responded to message " +
+                                    "with Modified, Received or Released; message needs to be re-delivered");
+                            transportException.setRetryable(true);
+                            this.listener.onMessageSent(inProgressMessages.remove(d.hashCode()), transportException);
+                        }
                     }
-                    else if (remoteState instanceof Modified || remoteState instanceof Released || remoteState instanceof Received)
+                    else
                     {
-                        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_066: [If the acknowledgement sent from the service is "Modified", "Released", or "Received", this function shall notify its listener that the sent message needs to be retried.]
-                        TransportException transportException = new TransportException("IotHub responded to message " +
-                                "with Modified, Received or Released; message needs to be re-delivered");
-                        transportException.setRetryable(true);
-                        this.listener.onMessageSent(inProgressMessages.remove(d.hashCode()), transportException);
+                        this.listener.onMessageReceived(null, new TransportException("Received response from service about a message that this client did not send"));
                     }
-                }
-                else
-                {
-                    this.listener.onMessageReceived(null, new TransportException("Received response from service about a message that this client did not send"));
                 }
 
                 // release the delivery object which created in sendMessage().

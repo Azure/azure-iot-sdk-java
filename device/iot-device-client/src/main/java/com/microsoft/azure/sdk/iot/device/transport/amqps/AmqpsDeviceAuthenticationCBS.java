@@ -23,8 +23,8 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
 {
     private String PROP_KEY_STATUS_CODE = "status-code";
 
-    private final String SENDER_LINK_ENDPOINT_PATH = "$cbs";
-    private final String RECEIVER_LINK_ENDPOINT_PATH = "$cbs";
+    public static final String SENDER_LINK_ENDPOINT_PATH = "$cbs";
+    public static final String RECEIVER_LINK_ENDPOINT_PATH = "$cbs";
 
     private final String SENDER_LINK_TAG_PREFIX = "cbs-sender-";
     private final String RECEIVER_LINK_TAG_PREFIX = "cbs-receiver-";
