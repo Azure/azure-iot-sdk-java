@@ -7,19 +7,19 @@ import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 /** Unit tests for CustomLogger. */
-@Ignore
 public class CustomLoggerTest
 {
+    @Mocked
+    LoggerFactory mockedLoggerFactory;
+
     // Tests_SRS_CUSTOMERLOGGER_25_001: [The constructor shall create the logger instance.]
     @Test
     public void constructorCreatesLogger()
@@ -68,7 +68,7 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
-                LogManager.getLogger((Class)any);
+                LoggerFactory.getLogger((Class)any);
                 result = mockLogger;
                 mockLogger.isInfoEnabled();
                 result = true;
@@ -95,7 +95,7 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
-                LogManager.getLogger((Class)any);
+                LoggerFactory.getLogger((Class)any);
                 result = mockLogger;
                 mockLogger.isDebugEnabled();
                 result = true;
@@ -122,7 +122,7 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
-                LogManager.getLogger((Class)any);
+                LoggerFactory.getLogger((Class)any);
                 result = mockLogger;
                 mockLogger.isTraceEnabled();
                 result = true;
@@ -149,7 +149,7 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
-                LogManager.getLogger((Class)any);
+                LoggerFactory.getLogger((Class)any);
                 result = mockLogger;
                 mockLogger.isWarnEnabled();
                 result = true;
@@ -176,10 +176,10 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
            {
-               LogManager.getLogger((Class)any);
+               LoggerFactory.getLogger((Class)any);
                result = mockLogger;
-                mockLogger.isFatalEnabled();
-                result = true;
+               mockLogger.isErrorEnabled();
+               result = true;
             }
         };
 
@@ -188,7 +188,7 @@ public class CustomLoggerTest
         new Verifications()
         {
             {
-                mockLogger.fatal(anyString);
+                mockLogger.error(anyString);
                 times = 1; 
             }
         };
@@ -203,7 +203,7 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
-                LogManager.getLogger((Class)any);
+                LoggerFactory.getLogger((Class)any);
                 result = mockLogger;
                 mockLogger.isErrorEnabled();
                 result = true;
@@ -222,7 +222,7 @@ public class CustomLoggerTest
         new NonStrictExpectations()
         {
             {
-                LogManager.getLogger((Class)any);
+                LoggerFactory.getLogger((Class)any);
                 result = mockLogger;
                 mockLogger.isErrorEnabled();
                 result = true;
@@ -233,7 +233,7 @@ public class CustomLoggerTest
         new Verifications()
         {
             {
-                mockLogger.error(any);
+                mockLogger.error(anyString);
                 times = 1; 
             }
         };

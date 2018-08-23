@@ -42,7 +42,7 @@ public final class DeviceMethod
                     /*
                     **Codes_SRS_DEVICEMETHOD_25_009: [**If the received message is not of type DeviceMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Abandon **]**
                      */
-                    logger.LogFatal("Unexpected message type received");
+                    logger.LogError("Unexpected message type received");
                     deviceMethodStatusCallback.execute(iotHubStatus, deviceMethodStatusCallbackContext);
                     return IotHubMessageResult.ABANDON;
                 }
@@ -117,7 +117,7 @@ public final class DeviceMethod
                         break;
 
                     default:
-                        logger.LogFatal("Received unknown type message for device methods");
+                        logger.LogError("Received unknown type message for device methods");
                         break;
                 }
 
