@@ -538,8 +538,9 @@ public final class DeviceClient extends InternalClient implements Closeable
      *      - <b>SetSASTokenExpiryTime</b> - this option is applicable for HTTP/
      *         AMQP/MQTT. This option specifies the interval in seconds after which
      *         SASToken expires. If the transport is already open then setting this
-     *         option will restart the transport with the updated expiry time. The
-     *         value is expected to be of type {@code long}.
+     *         option will restart the transport with the updated expiry time, and
+     *         will use that expiry time length for all subsequently generated sas tokens.
+     *         The value is expected to be of type {@code long}.
      *
      * @param optionName the option name to modify
      * @param value an object of the appropriate type for the option's value
@@ -666,11 +667,11 @@ public final class DeviceClient extends InternalClient implements Closeable
                 {
                     try
                     {
-                    /* Codes_SRS_DEVICECLIENT_25_024: [**"SetSASTokenExpiryTime" shall restart the transport
-                     *                                  1. If the device currently uses device key and
-                     *                                  2. If transport is already open
-                     *                                 after updating expiry time
-                    */
+                        /* Codes_SRS_DEVICECLIENT_25_024: [**"SetSASTokenExpiryTime" shall restart the transport
+                         *                                  1. If the device currently uses device key and
+                         *                                  2. If transport is already open
+                         *                                 after updating expiry time
+                        */
                         if (this.getConfig().getSasTokenAuthentication().canRefreshToken())
                         {
                             if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)

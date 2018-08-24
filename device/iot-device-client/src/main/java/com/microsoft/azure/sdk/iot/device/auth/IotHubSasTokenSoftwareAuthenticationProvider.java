@@ -77,6 +77,17 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
     }
 
     @Override
+    public void setTokenValidSecs(long tokenValidSecs)
+    {
+        super.setTokenValidSecs(tokenValidSecs);
+
+        if (this.deviceKey != null)
+        {
+            this.sasToken = new IotHubSasToken(this.hostname, this.deviceId, this.deviceKey, null, this.moduleId, getExpiryTimeInSeconds());
+        }
+    }
+
+    @Override
     public boolean canRefreshToken()
     {
         // Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_017: [This function shall return true if a deviceKey is present.]

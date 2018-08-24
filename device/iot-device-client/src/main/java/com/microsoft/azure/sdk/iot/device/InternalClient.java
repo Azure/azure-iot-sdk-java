@@ -334,6 +334,31 @@ public class InternalClient
         return this.config;
     }
 
+    /**
+     * Sets a runtime option identified by parameter {@code optionName}
+     * to {@code value}.
+     *
+     * The options that can be set via this API are:
+     *	    - <b>SetMinimumPollingInterval</b> - this option is applicable only
+     *	      when the transport configured with this client is HTTP. This
+     *	      option specifies the interval in milliseconds between calls to
+     *	      the service checking for availability of new messages. The value
+     *	      is expected to be of type {@code long}.
+     *	    - <b>SetCertificatePath</b> - this option is applicable only
+     *	      when the transport configured with this client is AMQP. This
+     *	      option specifies the path to the certificate used to verify peer.
+     *	      The value is expected to be of type {@code String}.
+     *      - <b>SetSASTokenExpiryTime</b> - this option is applicable for HTTP/
+     *         AMQP/MQTT. This option specifies the interval in seconds after which
+     *         SASToken expires. If the transport is already open then setting this
+     *         option will restart the transport with the updated expiry time, and
+     *         will use that expiry time length for all subsequently generated sas tokens.
+     *         The value is expected to be of type {@code long}.
+     *
+     * @param optionName the option name to modify
+     * @param value an object of the appropriate type for the option's value
+     * @throws IllegalArgumentException if the provided optionName is null
+     */
     public void setOption(String optionName, Object value)
     {
         if (optionName == null)
