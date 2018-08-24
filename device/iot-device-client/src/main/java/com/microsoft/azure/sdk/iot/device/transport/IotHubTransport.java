@@ -471,16 +471,15 @@ public class IotHubTransport implements IotHubListener
     /**
      * Registers a callback to be executed whenever the connection status to the IoT Hub has changed.
      *
-     * @param callback the callback to be called.
-     * @param callbackContext a context to be passed to the callback. Can be
-     * {@code null} if no callback is provided.
+     * @param callback the callback to be called. Can be null if callbackContext is not null
+     * @param callbackContext a context to be passed to the callback. Can be {@code null}.
      */
     public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
     {
-        if (callback == null)
+        if (callbackContext != null && callback == null)
         {
-            //Codes_SRS_IOTHUBTRANSPORT_34_051: [If the provided callback is null, this function shall throw an IllegalArgumentException.]
-            throw new IllegalArgumentException("Callback cannot be null");
+            //Codes_SRS_IOTHUBTRANSPORT_34_051: [If the provided callback is null but the context is not, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("Callback cannot be null if callback context is null");
         }
 
         //Codes_SRS_IOTHUBTRANSPORT_34_052: [This function shall save the provided callback and context.]

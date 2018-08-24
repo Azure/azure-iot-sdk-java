@@ -1347,7 +1347,7 @@ public class IotHubTransportTest
         assertEquals(context, Deencapsulation.getField(transport, "stateCallbackContext"));
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_051: [If the provided callback is null, this function shall throw an IllegalArgumentException.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_051: [If the provided callback is null but the context is not, this function shall throw an IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
     public void registerConnectionStatusChangeCallbackThrowsForNullCallback()
     {
@@ -1356,6 +1356,25 @@ public class IotHubTransportTest
 
         //act
         transport.registerConnectionStatusChangeCallback(null, new Object());
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_34_051: [If the provided callback is null but the context is not, this function shall throw an IllegalArgumentException.]
+    @Test
+    public void registerConnectionStatusChangeCallbackDoesNotThrowForNullCallbackIfContextIsAlsoNull()
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        transport.registerConnectionStatusChangeCallback(mockedIotHubConnectionStatusChangeCallback, new Object());
+        assertNotNull(Deencapsulation.getField(transport, "connectionStatusChangeCallback"));
+        assertNotNull(Deencapsulation.getField(transport, "connectionStatusChangeCallbackContext"));
+
+        //act
+        transport.registerConnectionStatusChangeCallback(null, null);
+
+        //assert
+        assertNull(Deencapsulation.getField(transport, "connectionStatusChangeCallback"));
+        assertNull(Deencapsulation.getField(transport, "connectionStatusChangeCallbackContext"));
+
     }
 
     //Tests_SRS_IOTHUBTRANSPORT_34_052: [This function shall save the provided callback and context.]

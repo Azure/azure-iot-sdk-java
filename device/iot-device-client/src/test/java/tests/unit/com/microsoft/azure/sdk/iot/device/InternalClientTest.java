@@ -1403,17 +1403,6 @@ public class InternalClientTest
         assertNull(Deencapsulation.getField(client, "deviceIO"));
     }
 
-    //Tests_SRS_INTERNALCLIENT_34_068: [If the callback is null the method shall throw an IllegalArgument exception.]
-    @Test (expected = IllegalArgumentException.class)
-    public void registerConnectionStatusChangeCallbackThrowsForNullCallback() throws URISyntaxException
-    {
-        //arrange
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, IotHubClientProtocol.AMQPS, SEND_PERIOD, RECEIVE_PERIOD);
-
-        //act
-        Deencapsulation.invoke(client, "registerConnectionStatusChangeCallback", new Class[] {IotHubConnectionStatusChangeCallback.class, Object.class}, null, new Object());
-    }
-
     //Tests_SRS_INTERNALCLIENT_34_069: [This function shall register the provided callback and context with its device IO instance.]
     @Test
     public void registerConnectionStatusChangeCallbackRegistersCallbackWithDeviceIO()

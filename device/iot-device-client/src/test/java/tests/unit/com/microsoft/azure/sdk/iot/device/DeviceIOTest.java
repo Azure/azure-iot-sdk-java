@@ -954,4 +954,24 @@ public class DeviceIOTest
             }
         };
     }
+
+    //Tests_SRS_DEVICE_IO_34_020: [This function shall register the callback with the transport.]
+    @Test
+    public void registerConnectionStatusChangeCallbackSuccess(@Mocked final IotHubConnectionStatusChangeCallback mockedStateCB)
+    {
+        //arrange
+        final Object deviceIO = newDeviceIO();
+
+        //act
+        Deencapsulation.invoke(deviceIO, "registerConnectionStatusChangeCallback", mockedStateCB, Object.class);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedTransport.registerConnectionStatusChangeCallback(mockedStateCB, null);
+                times = 1;
+            }
+        };
+    }
 }

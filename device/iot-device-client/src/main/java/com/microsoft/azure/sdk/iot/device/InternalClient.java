@@ -283,19 +283,13 @@ public class InternalClient
      * with a status and a reason why the device's status changed. When the callback is fired, the provided context will
      * be provided alongside the status and reason.
      *
-     * @param callback The callback to be fired when the connection status of the device changes
-     * @param callbackContext a context to be passed to the callback. Can be
-     * {@code null} if no callback is provided.
+     * @param callback The callback to be fired when the connection status of the device changes. Can be null to
+     *                 unset this listener as long as the provided callbackContext is also null.
+     * @param callbackContext a context to be passed to the callback. Can be {@code null}.
      * @throws IllegalArgumentException if provided callback is null
      */
     public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) throws IllegalArgumentException
     {
-        if (callback == null)
-        {
-            //Codes_SRS_INTERNALCLIENT_34_068: [If the callback is null the method shall throw an IllegalArgument exception.]
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-
         //Codes_SRS_INTERNALCLIENT_34_069: [This function shall register the provided callback and context with its device IO instance.]
         this.deviceIO.registerConnectionStatusChangeCallback(callback, callbackContext);
     }
