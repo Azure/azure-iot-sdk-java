@@ -38,8 +38,8 @@ public class PropertyTest
     {
         //act
         Property testProp = Deencapsulation.newInstance(Property.class,
-                new Class[]{String.class, Object.class, Integer.class, boolean.class},
-                "TestProp", 1, null, false);
+                new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
+                "TestProp", 1, null, false, null, null);
 
         //assert
         assertNotNull(testProp);
@@ -187,26 +187,33 @@ public class PropertyTest
     }
 
     /*
-     **Codes_SRS_Property_21_007: [**The constructor shall store the provided version and metadata.**]**
-     **Codes_SRS_Property_21_008: [**The function shall return the value for this property.**]**
-     **Codes_SRS_Property_21_012: [**The function shall return the stored isReported.**]**
+     **Tests_SRS_Property_21_007: [**The constructor shall store the provided version and metadata.**]**
+     **Tests_SRS_Property_21_008: [**The function shall return the value for this property.**]**
+     **Tests_SRS_Property_21_012: [**The function shall return the stored isReported.**]**
      */
+    //Tests_SRS_Property_34_013: [The function shall return the stored lastUpdated.]
+    //Tests_SRS_Property_34_014: [The function shall return the stored lastUpdatedVersion.]
     @Test
     public void constructorWithMetadataSetsMetadata()
     {
+        //arrange
+        final Date expectedLastUpdate = new Date();
+        final Integer expectedLastUpdatedVersion = 123;
+        
         //act
-        Date now = new Date();
         Property testProp = Deencapsulation.newInstance(Property.class,
-                new Class[]{String.class, Object.class, Integer.class, boolean.class},
-                "TestProp", 1, 5, true);
+                new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
+                "TestProp", 1, 5, true, expectedLastUpdate, expectedLastUpdatedVersion);
 
         //assert
         assertNotNull(testProp);
         assertEquals((int)testProp.getVersion(), 5);
         assertEquals(true, testProp.getIsReported());
+        assertEquals(expectedLastUpdatedVersion, testProp.getLastUpdatedVersion());
+        assertEquals(expectedLastUpdate, testProp.getLastUpdated());
     }
 
-    /* Codes_SRS_Property_21_011: [The toString shall return a String with the information in this class in a pretty print JSON.] */
+    /* Tests_SRS_Property_21_011: [The toString shall return a String with the information in this class in a pretty print JSON.] */
     @Test
     public void toStringSucceed()
     {

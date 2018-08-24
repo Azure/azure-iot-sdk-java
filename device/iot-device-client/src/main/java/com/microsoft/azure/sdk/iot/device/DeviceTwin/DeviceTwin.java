@@ -208,7 +208,9 @@ public class DeviceTwin
         return new Property(
                 key, value,
                 propertyVersion,
-                isReported);
+                isReported,
+                lastUpdated,
+                lastUpdatedVersion);
     }
 
     /*

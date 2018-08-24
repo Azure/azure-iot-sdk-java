@@ -1014,8 +1014,8 @@ public class DeviceTwinTest
             {
                 Deencapsulation.newInstance(
                         Property.class,
-                        new Class[]{String.class, Object.class, Integer.class, boolean.class},
-                        prop1, val2, version, false);
+                        new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
+                        prop1, val2, version, false, null, null);
                 result = mockedProperty;
                 times = 1;
             }
@@ -1058,8 +1058,8 @@ public class DeviceTwinTest
             {
                 Deencapsulation.newInstance(
                         Property.class,
-                        new Class[]{String.class, Object.class, Integer.class, boolean.class},
-                        prop1, val2, version, true);
+                        new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
+                        prop1, val2, version, true, null, null);
                 result = mockedProperty;
                 times = 1;
             }
@@ -1113,13 +1113,13 @@ public class DeviceTwinTest
             {
                 Deencapsulation.newInstance(
                         Property.class,
-                        new Class[]{String.class, Object.class, Integer.class, boolean.class},
-                        desiredProp1, desiredValue2, desiredVersion,false);
+                        new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
+                        desiredProp1, desiredValue2, desiredVersion,false, null, null);
                 times = 1;
                 Deencapsulation.newInstance(
                         Property.class,
-                        new Class[]{String.class, Object.class, Integer.class, boolean.class},
-                        reportedProp1, reportedVal2, reportedVersion, true);
+                        new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
+                        reportedProp1, reportedVal2, reportedVersion, true, null, null);
                 times = 1;
                 mockedGenericTwinPropertyCB.TwinPropertyCallBack((Property)any, null);
                 times = 2;
@@ -1186,13 +1186,13 @@ public class DeviceTwinTest
             {
                 Deencapsulation.newInstance(
                         Property.class,
-                        new Class[]{String.class, Object.class, Integer.class, boolean.class},
-                        desiredProp1, desiredValue2, desiredVersion, false);
+                        new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
+                        desiredProp1, desiredValue2, desiredVersion, false, (Date) any, lastUpdatedVersion);
                 times = 1;
                 Deencapsulation.newInstance(
                         Property.class,
-                        new Class[]{String.class, Object.class, Integer.class, boolean.class},
-                        reportedProp1, reportedVal2, reportedVersion, true);
+                        new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
+                        reportedProp1, reportedVal2, reportedVersion, true, (Date) any, lastUpdatedVersion);
                 times = 1;
                 mockedGenericTwinPropertyCB.TwinPropertyCallBack((Property)any, null);
                 times = 2;

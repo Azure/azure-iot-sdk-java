@@ -10,6 +10,8 @@ public class Property
     private Pair<String, Object> property = null;
     private Integer version = null;
     private boolean isReported = false;
+    private Date lastUpdated;
+    private Integer lastUpdatedVersion;
 
     public Property(String key, Object value)
     {
@@ -34,7 +36,7 @@ public class Property
         this.property = new Pair<>(key, value);
     }
 
-    protected Property(String key, Object value, Integer version, boolean isReported)
+    protected Property(String key, Object value, Integer version, boolean isReported, Date lastUpdated, Integer lastUpdatedVersion)
     {
         this(key, value);
 
@@ -43,6 +45,8 @@ public class Property
          */
         this.version = version;
         this.isReported = isReported;
+        this.lastUpdated = lastUpdated;
+        this.lastUpdatedVersion = lastUpdatedVersion;
     }
 
     public String getKey()
@@ -83,6 +87,18 @@ public class Property
          **Codes_SRS_Property_21_012: [**The function shall return the stored isReported.**]**
          */
         return this.isReported;
+    }
+
+    public Date getLastUpdated()
+    {
+        //Codes_SRS_Property_34_013: [The function shall return the stored lastUpdated.]
+        return this.lastUpdated;
+    }
+
+    public Integer getLastUpdatedVersion()
+    {
+        //Codes_SRS_Property_34_014: [The function shall return the stored lastUpdatedVersion.]
+        return this.lastUpdatedVersion;
     }
 
     /**
