@@ -13,6 +13,9 @@
             <name>Microsoft</name>
         </developer>
     </developers>
+    <properties>
+        <maven.javadoc.version>3.0.1</maven.javadoc.version>
+    </properties>
     <modules>
         <module>device</module>
         <module>service</module>
