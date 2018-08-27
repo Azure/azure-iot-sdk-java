@@ -17,7 +17,8 @@ import java.util.*;
  * The query iterator.
  *
  * <p> The {@code Query} iterator is the result of the query factory for
- * <table summary="Query factories">
+ * <table>
+ *     <caption>Query factories</caption>
  *     <tr>
  *         <td><b>IndividualEnrollment:</b></td>
  *         <td>{@link ProvisioningServiceClient#createIndividualEnrollmentQuery(QuerySpecification, int)}</td>
@@ -78,7 +79,8 @@ public class Query implements Iterator
      * INTERNAL CONSTRUCTOR
      *
      * <p> Use one of the factories to create a new query.
-     * <table summary="Query factories">
+     * <table>
+     *     <caption>Query factories</caption>
      *     <tr>
      *         <td><b>IndividualEnrollment:</b></td>
      *         <td>{@link ProvisioningServiceClient#createIndividualEnrollmentQuery(QuerySpecification, int)}</td>
