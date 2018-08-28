@@ -337,7 +337,7 @@ public class IotHubServicesCommon
         System.out.println("Successfully opened connection!");
     }
 
-    public static void openTransportClientWithRetry(TransportClient client)
+    public static void openTransportClientWithRetry(TransportClient client) throws InterruptedException
     {
         boolean clientOpenSucceeded = false;
         long startTime = System.currentTimeMillis();
@@ -358,6 +358,17 @@ public class IotHubServicesCommon
                 //ignore and try again
                 System.out.println("Encountered exception while opening transport client, retrying...");
                 e.printStackTrace();
+
+                try
+                {
+                    client.closeNow();
+                }
+                catch (IOException ioException)
+                {
+                    System.out.println("Failed to close client");
+                    ioException.printStackTrace();
+                }
+                Thread.sleep(200);
             }
         }
 

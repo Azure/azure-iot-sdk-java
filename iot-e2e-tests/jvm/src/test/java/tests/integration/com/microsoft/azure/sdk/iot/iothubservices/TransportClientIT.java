@@ -43,7 +43,6 @@ import static tests.integration.com.microsoft.azure.sdk.iot.iothubservices.Trans
 import static tests.integration.com.microsoft.azure.sdk.iot.iothubservices.TransportClientIT.STATUS.SUCCESS;
 
 //Ignoring these tests as they frequently fail. Needs investigations
-@Ignore
 public class TransportClientIT extends MethodNameLoggingIntegrationTest
 {
     //how many devices to test multiplexing with
@@ -182,7 +181,7 @@ public class TransportClientIT extends MethodNameLoggingIntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void sendMessagesOverAmqps() throws URISyntaxException, IOException
+    public void sendMessagesOverAmqps() throws URISyntaxException, IOException, InterruptedException
     {
         TransportClient transportClient = new TransportClient(AMQPS);
         ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
@@ -203,7 +202,7 @@ public class TransportClientIT extends MethodNameLoggingIntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void sendMessagesOverAmqpsWs() throws URISyntaxException, IOException
+    public void sendMessagesOverAmqpsWs() throws URISyntaxException, IOException, InterruptedException
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
         ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
@@ -279,10 +278,8 @@ public class TransportClientIT extends MethodNameLoggingIntegrationTest
         transportClient.closeNow();
     }
 
-    //Always times out?
-    @Ignore
     @Test
-    public void sendMessagesOverAmqpsMultithreaded() throws InterruptedException, URISyntaxException
+    public void sendMessagesOverAmqpsMultithreaded() throws InterruptedException, URISyntaxException, IOException
     {
         TransportClient transportClient = new TransportClient(AMQPS);
         ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
@@ -308,12 +305,12 @@ public class TransportClientIT extends MethodNameLoggingIntegrationTest
         {
             Assert.fail("Sending message over AMQP protocol in parallel failed");
         }
+
+        transportClient.closeNow();
     }
 
-    //Always times out?
-    @Ignore
     @Test
-    public void sendMessagesOverAmqpsWsMultithreaded() throws InterruptedException, URISyntaxException
+    public void sendMessagesOverAmqpsWsMultithreaded() throws InterruptedException, URISyntaxException, IOException
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
         ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
@@ -340,6 +337,8 @@ public class TransportClientIT extends MethodNameLoggingIntegrationTest
         {
             Assert.fail("Sending message over AMQP protocol in parallel failed");
         }
+
+        transportClient.closeNow();
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -635,7 +634,7 @@ public class TransportClientIT extends MethodNameLoggingIntegrationTest
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
     public void testTwin() throws IOException, InterruptedException, IotHubException, URISyntaxException
     {
-        setUpTwin();
+        TransportClient transportClient = setUpTwin();
 
         ExecutorService executor = Executors.newFixedThreadPool(MAX_PROPERTIES_TO_TEST);
 
@@ -695,7 +694,7 @@ public class TransportClientIT extends MethodNameLoggingIntegrationTest
             // verify if they are received by SC
             Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
             int actualReportedPropFound = readReportedProperties(devicesUnderTest.get(i), PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
-            assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
+            assertEquals("Missing reported properties on the " + (i+1) + " device out of " + MAX_DEVICE_MULTIPLEX, MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
         }
 
         // send max_prop RP one at a time in parallel
@@ -742,7 +741,7 @@ public class TransportClientIT extends MethodNameLoggingIntegrationTest
         }
 
         System.out.println("Tearing down twin status...");
-        tearDownTwin();
+        tearDownTwin(transportClient);
     }
     
     private void verifyNotification(FileUploadNotification fileUploadNotification, FileUploadState fileUploadState) throws IOException
@@ -1138,7 +1137,7 @@ public class TransportClientIT extends MethodNameLoggingIntegrationTest
         }
     }
 
-    private void setUpTwin() throws IOException, IotHubException, InterruptedException, URISyntaxException
+    private TransportClient setUpTwin() throws IOException, IotHubException, InterruptedException, URISyntaxException
     {
         sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
 
@@ -1171,10 +1170,13 @@ public class TransportClientIT extends MethodNameLoggingIntegrationTest
             sCDeviceTwin.getTwin(devicesUnderTest.get(i).sCDeviceForTwin);
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
         }
+
+        return transportClient;
     }
 
-    private void tearDownTwin()
+    private void tearDownTwin(TransportClient transportClient) throws IOException
     {
+        transportClient.closeNow();
         sCDeviceTwin = null;
     }
 
