@@ -95,7 +95,6 @@ public class ServiceClientIT
         registryManager.close();
     }
 
-    @Ignore
     @Test
     public void service_client_e2e_amqps_ws() throws Exception
     {

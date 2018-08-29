@@ -194,6 +194,10 @@ public class ReceiveMessagesIT extends MethodNameLoggingIntegrationTest
     @After
     public void delayTests()
     {
+        //since these lists are recycled between multiple tests, they need to be cleared between each test
+        messageIdListStoredOnC2DSend.clear();
+        messageIdListStoredOnReceive.clear();
+
         try
         {
             Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
@@ -449,8 +453,6 @@ public class ReceiveMessagesIT extends MethodNameLoggingIntegrationTest
         this.errorInjectionTestFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    //Test times out very frequently
-    @Ignore
     @Test
     public void receiveBackToBackUniqueC2DCommandsOverAmqpsUsingSendAsync() throws Exception
     {
@@ -491,8 +493,16 @@ public class ReceiveMessagesIT extends MethodNameLoggingIntegrationTest
             messageIdListStoredOnC2DSend.add(Integer.toString(i));
 
             // send the message. Service client uses AMQPS protocol
-            CompletableFuture<Void> future = serviceClient.sendAsync(testInstance.device.getDeviceId(), serviceMessage);
-            futureList.add(future);
+            CompletableFuture<Void> future;
+            if (testInstance.client instanceof DeviceClient)
+            {
+                future = serviceClient.sendAsync(testInstance.device.getDeviceId(), serviceMessage);
+                futureList.add(future);
+            }
+            else if (testInstance.client instanceof ModuleClient)
+            {
+                serviceClient.send(testInstance.device.getDeviceId(), testInstance.module.getId(), serviceMessage);
+            }
         }
 
         for (CompletableFuture<Void> future : futureList)
@@ -511,6 +521,7 @@ public class ReceiveMessagesIT extends MethodNameLoggingIntegrationTest
         waitForBackToBackC2DMessagesToBeReceived();
         testInstance.client.closeNow(); //close the device client connection
         assertTrue(testInstance.protocol + ", " + testInstance.authenticationType + ": Received messages don't match up with sent messages", messageIdListStoredOnReceive.containsAll(messageIdListStoredOnC2DSend)); // check if the received list is same as the actual list that was created on sending the messages
+        messageIdListStoredOnReceive.clear();
     }
 
     private void errorInjectionTestFlow(Message errorInjectionMessage) throws IOException, IotHubException, InterruptedException
@@ -696,12 +707,14 @@ public class ReceiveMessagesIT extends MethodNameLoggingIntegrationTest
     {
         try
         {
-            long startTime = 0;
+            long startTime = System.currentTimeMillis();
         
             // check if all messages are received.
             while (messageIdListStoredOnReceive.size() != MAX_COMMANDS_TO_SEND)
             {
                 Thread.sleep(100);
+
+                System.out.println(messageIdListStoredOnReceive.size());
 
                 if (System.currentTimeMillis() - startTime > RECEIVE_TIMEOUT)
                 {
