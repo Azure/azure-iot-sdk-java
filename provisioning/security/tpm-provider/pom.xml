@@ -9,7 +9,7 @@
     <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
     <artifactId>tpm-provider</artifactId>
     <name>Provisioning Security TPM Provider</name>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <packaging>jar</packaging>
     <description>The Microsoft Azure IoT Provisioning Security TPM provider for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
             <artifactId>security-provider</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
