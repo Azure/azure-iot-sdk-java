@@ -17,10 +17,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionForcedException;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpLinkRedirectException;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpSessionWindowViolationException;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.*;
 import mockit.*;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
@@ -575,7 +572,7 @@ public class AmqpsIotHubConnectionTest {
         }
     }
 
-    // Codes_SRS_AMQPSIOTHUBCONNECTION_34_062: [If, after attempting to open the connection, this
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_062: [If, after attempting to open the connection, this
     // object has a saved exception, this function shall throw that saved exception.]
     @Test (expected = AmqpConnectionForcedException.class)
     public void openThrowsSavedExceptionsIfAnyExceptionsSavedDuringOpen() throws TransportException, InterruptedException
@@ -869,7 +866,7 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to DISCONNECTED.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall closeNow the AmqpsSessionManager and the AMQP connection.]
-    // Codes_SRS_AMQPSIOTHUBCONNECTION_34_014: [If this object's proton reactor is not null, this function shall stop the Proton reactor.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_014: [If this object's proton reactor is not null, this function shall stop the Proton reactor.]
     @Test
     public void closeClosesAllProtonVariablesAndStopsProtonReactor() throws TransportException
     {
@@ -2481,7 +2478,362 @@ public class AmqpsIotHubConnectionTest {
         Assert.assertEquals(expectedConnectionId, actualConnectionId);
     }
 
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_081: [If an exception can be found in the sender, this function shall return a the mapped amqp exception derived from that exception.]
+    @Test
+    public void getErrorFromEventOutOfSender(final @Mocked ErrorCondition mockedErrorCondition, @Mocked final AmqpConnectionFramingErrorException mockedAmqpConnectionFramingErrorException) throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        final String expectedError = AmqpConnectionFramingErrorException.errorCode;
+        final String expectedErrorDescription = "sender error description";
+        new NonStrictExpectations()
+        {
+            {
+                mockEvent.getSender();
+                result = mockSender;
+                mockEvent.getReceiver();
+                result = null;
+                mockEvent.getTransport();
+                result = null;
+                mockEvent.getSession();
+                result = null;
+                mockEvent.getConnection();
+                result = null;
+                mockEvent.getLink();
+                result = null;
 
+                mockSender.getRemoteCondition();
+                result = mockedErrorCondition;
+
+                mockedErrorCondition.getCondition();
+                result = mockedSymbol;
+
+                mockedSymbol.toString();
+                result = expectedError;
+
+                mockedErrorCondition.getDescription();
+                result = expectedErrorDescription;
+
+                new AmqpConnectionFramingErrorException(expectedErrorDescription);
+                result = mockedAmqpConnectionFramingErrorException;
+
+                mockedAmqpConnectionFramingErrorException.getMessage();
+                result = expectedErrorDescription;
+            }
+        };
+
+        //act
+        TransportException actualException = Deencapsulation.invoke(connection, "getTransportExceptionFromEvent", mockEvent);
+
+        //assert
+        assertTrue(actualException instanceof AmqpConnectionFramingErrorException);
+        assertEquals(expectedErrorDescription, actualException.getMessage());
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_082: [If an exception can be found in the receiver, this function shall return a the mapped amqp exception derived from that exception.]
+    @Test
+    public void getErrorFromEventOutOfReceiver(final @Mocked ErrorCondition mockedErrorCondition, @Mocked final AmqpConnectionFramingErrorException mockedAmqpConnectionFramingErrorException) throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        final String expectedError = AmqpConnectionFramingErrorException.errorCode;
+        final String expectedErrorDescription = "sender error description";
+        new NonStrictExpectations()
+        {
+            {
+                mockEvent.getSender();
+                result = null;
+                mockEvent.getReceiver();
+                result = mockReceiver;
+                mockEvent.getTransport();
+                result = null;
+                mockEvent.getSession();
+                result = null;
+                mockEvent.getConnection();
+                result = null;
+                mockEvent.getLink();
+                result = null;
+
+                mockReceiver.getRemoteCondition();
+                result = mockedErrorCondition;
+
+                mockedErrorCondition.getCondition();
+                result = mockedSymbol;
+
+                mockedSymbol.toString();
+                result = expectedError;
+
+                mockedErrorCondition.getDescription();
+                result = expectedErrorDescription;
+
+                new AmqpConnectionFramingErrorException(expectedErrorDescription);
+                result = mockedAmqpConnectionFramingErrorException;
+
+                mockedAmqpConnectionFramingErrorException.getMessage();
+                result = expectedErrorDescription;
+            }
+        };
+
+        //act
+        TransportException actualException = Deencapsulation.invoke(connection, "getTransportExceptionFromEvent", mockEvent);
+
+        //assert
+        assertTrue(actualException instanceof AmqpConnectionFramingErrorException);
+        assertEquals(expectedErrorDescription, actualException.getMessage());
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_086: [If an exception can be found in the transport, this function shall return a the mapped amqp exception derived from that exception.]
+    @Test
+    public void getErrorFromEventOutOfTransport(final @Mocked ErrorCondition mockedErrorCondition, @Mocked final AmqpConnectionFramingErrorException mockedAmqpConnectionFramingErrorException) throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        final String expectedError = AmqpConnectionFramingErrorException.errorCode;
+        final String expectedErrorDescription = "sender error description";
+        new NonStrictExpectations()
+        {
+            {
+                mockEvent.getSender();
+                result = null;
+                mockEvent.getReceiver();
+                result = null;
+                mockEvent.getTransport();
+                result = mockTransport;
+                mockEvent.getSession();
+                result = null;
+                mockEvent.getConnection();
+                result = null;
+                mockEvent.getLink();
+                result = null;
+
+                mockTransport.getRemoteCondition();
+                result = mockedErrorCondition;
+
+                mockedErrorCondition.getCondition();
+                result = mockedSymbol;
+
+                mockedSymbol.toString();
+                result = expectedError;
+
+                mockedErrorCondition.getDescription();
+                result = expectedErrorDescription;
+
+                new AmqpConnectionFramingErrorException(expectedErrorDescription);
+                result = mockedAmqpConnectionFramingErrorException;
+
+                mockedAmqpConnectionFramingErrorException.getMessage();
+                result = expectedErrorDescription;
+            }
+        };
+
+        //act
+        TransportException actualException = Deencapsulation.invoke(connection, "getTransportExceptionFromEvent", mockEvent);
+
+        //assert
+        assertTrue(actualException instanceof AmqpConnectionFramingErrorException);
+        assertEquals(expectedErrorDescription, actualException.getMessage());
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_083: [If an exception can be found in the session, this function shall return a the mapped amqp exception derived from that exception.]
+    @Test
+    public void getErrorFromEventOutOfSession(final @Mocked ErrorCondition mockedErrorCondition, @Mocked final AmqpConnectionFramingErrorException mockedAmqpConnectionFramingErrorException) throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        final String expectedError = AmqpConnectionFramingErrorException.errorCode;
+        final String expectedErrorDescription = "sender error description";
+        new NonStrictExpectations()
+        {
+            {
+                mockEvent.getSender();
+                result = null;
+                mockEvent.getReceiver();
+                result = null;
+                mockEvent.getTransport();
+                result = null;
+                mockEvent.getSession();
+                result = mockSession;
+                mockEvent.getConnection();
+                result = null;
+                mockEvent.getLink();
+                result = null;
+
+                mockSession.getRemoteCondition();
+                result = mockedErrorCondition;
+
+                mockedErrorCondition.getCondition();
+                result = mockedSymbol;
+
+                mockedSymbol.toString();
+                result = expectedError;
+
+                mockedErrorCondition.getDescription();
+                result = expectedErrorDescription;
+
+                new AmqpConnectionFramingErrorException(expectedErrorDescription);
+                result = mockedAmqpConnectionFramingErrorException;
+
+                mockedAmqpConnectionFramingErrorException.getMessage();
+                result = expectedErrorDescription;
+            }
+        };
+
+        //act
+        TransportException actualException = Deencapsulation.invoke(connection, "getTransportExceptionFromEvent", mockEvent);
+
+        //assert
+        assertTrue(actualException instanceof AmqpConnectionFramingErrorException);
+        assertEquals(expectedErrorDescription, actualException.getMessage());
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_084: [If an exception can be found in the connection, this function shall return a the mapped amqp exception derived from that exception.]
+    @Test
+    public void getErrorFromEventOutOfConnection(final @Mocked ErrorCondition mockedErrorCondition, @Mocked final AmqpConnectionFramingErrorException mockedAmqpConnectionFramingErrorException) throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        final String expectedError = AmqpConnectionFramingErrorException.errorCode;
+        final String expectedErrorDescription = "sender error description";
+        new NonStrictExpectations()
+        {
+            {
+                mockEvent.getSender();
+                result = null;
+                mockEvent.getReceiver();
+                result = null;
+                mockEvent.getTransport();
+                result = null;
+                mockEvent.getSession();
+                result = null;
+                mockEvent.getConnection();
+                result = mockConnection;
+                mockEvent.getLink();
+                result = null;
+
+                mockConnection.getRemoteCondition();
+                result = mockedErrorCondition;
+
+                mockedErrorCondition.getCondition();
+                result = mockedSymbol;
+
+                mockedSymbol.toString();
+                result = expectedError;
+
+                mockedErrorCondition.getDescription();
+                result = expectedErrorDescription;
+
+                new AmqpConnectionFramingErrorException(expectedErrorDescription);
+                result = mockedAmqpConnectionFramingErrorException;
+
+                mockedAmqpConnectionFramingErrorException.getMessage();
+                result = expectedErrorDescription;
+            }
+        };
+
+        //act
+        TransportException actualException = Deencapsulation.invoke(connection, "getTransportExceptionFromEvent", mockEvent);
+
+        //assert
+        assertTrue(actualException instanceof AmqpConnectionFramingErrorException);
+        assertEquals(expectedErrorDescription, actualException.getMessage());
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_085: [If an exception can be found in the link, this function shall return a the mapped amqp exception derived from that exception.]
+    @Test
+    public void getErrorFromEventOutOfLink(final @Mocked ErrorCondition mockedErrorCondition, @Mocked final AmqpConnectionFramingErrorException mockedAmqpConnectionFramingErrorException) throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        final String expectedError = AmqpConnectionFramingErrorException.errorCode;
+        final String expectedErrorDescription = "sender error description";
+        new NonStrictExpectations()
+        {
+            {
+                mockEvent.getSender();
+                result = null;
+                mockEvent.getReceiver();
+                result = null;
+                mockEvent.getTransport();
+                result = null;
+                mockEvent.getSession();
+                result = null;
+                mockEvent.getConnection();
+                result = null;
+                mockEvent.getLink();
+                result = mockLink;
+
+                mockLink.getRemoteCondition();
+                result = mockedErrorCondition;
+
+                mockedErrorCondition.getCondition();
+                result = mockedSymbol;
+
+                mockedSymbol.toString();
+                result = expectedError;
+
+                mockedErrorCondition.getDescription();
+                result = expectedErrorDescription;
+
+                new AmqpConnectionFramingErrorException(expectedErrorDescription);
+                result = mockedAmqpConnectionFramingErrorException;
+
+                mockedAmqpConnectionFramingErrorException.getMessage();
+                result = expectedErrorDescription;
+            }
+        };
+
+        //act
+        TransportException actualException = Deencapsulation.invoke(connection, "getTransportExceptionFromEvent", mockEvent);
+
+        //assert
+        assertTrue(actualException instanceof AmqpConnectionFramingErrorException);
+        assertEquals(expectedErrorDescription, actualException.getMessage());
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_34_080: [If no exception can be found in the sender, receiver, session, connection, link, or transport, this function shall return a generic TransportException.]
+    @Test
+    public void getErrorFromEventDefault(final @Mocked ErrorCondition mockedErrorCondition, @Mocked final AmqpConnectionFramingErrorException mockedAmqpConnectionFramingErrorException) throws TransportException
+    {
+        //arrange
+        baseExpectations();
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        new NonStrictExpectations()
+        {
+            {
+                mockEvent.getSender();
+                result = null;
+                mockEvent.getReceiver();
+                result = null;
+                mockEvent.getTransport();
+                result = null;
+                mockEvent.getSession();
+                result = null;
+                mockEvent.getConnection();
+                result = null;
+                mockEvent.getLink();
+                result = null;
+
+                new TransportException("Unknown transport exception occurred");
+                result = mockedTransportException;
+
+                mockedTransportException.getMessage();
+                result = "Unknown transport exception occurred";
+            }
+        };
+
+        //act
+        TransportException actualException = Deencapsulation.invoke(connection, "getTransportExceptionFromEvent", mockEvent);
+
+        //assert
+        assertEquals("Unknown transport exception occurred", actualException.getMessage());
+    }
+    
     private void baseExpectations()
     {
         new NonStrictExpectations() {
