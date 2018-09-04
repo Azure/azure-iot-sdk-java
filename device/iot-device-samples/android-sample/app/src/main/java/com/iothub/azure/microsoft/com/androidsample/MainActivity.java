@@ -1,26 +1,57 @@
 package com.iothub.azure.microsoft.com.androidsample;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends AppCompatActivity {
 
+    private enum LIGHTS{ ON, OFF, DISABLED };
+    private enum CAMERA{ DETECTED_BURGLAR, SAFELY_WORKING };
+    private static final int MAX_EVENTS_TO_REPORT = 5;
+
     private final String connString = "[device connection string]";
     private final String deviceId = "MyAndroidDevice";
+
     private double temperature;
     private double humidity;
+
+    private DeviceClient client;
+
+    IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+    Context appContext;
+
+    private static String publicKeyCertificateString = "";
+
+    //PEM encoded representation of the private key
+    private static String privateKeyString = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -29,98 +60,260 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         try {
-            SendMessage();
+            InitClient();
         } catch (Exception e2)
         {
             System.out.println("Exception while opening IoTHub connection: " + e2.toString());
+
         }
     }
 
-    private void SendMessage() throws URISyntaxException, IOException
-    {
-        // Comment/uncomment from lines below to use HTTPS or MQTT protocol
-        // IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
-        IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+    private static final int METHOD_SUCCESS = 200;
+    private static final int METHOD_NOT_DEFINED = 404;
 
-        DeviceClient client = new DeviceClient(connString, protocol);
+    private static int method_command(Object command)
+    {
+        System.out.println("invoking command on this device");
+        // Insert code to invoke command here
+        return METHOD_SUCCESS;
+    }
+
+    private static int method_default(Object data)
+    {
+        System.out.println("invoking default method for this device");
+        // Insert device specific code here
+        return METHOD_NOT_DEFINED;
+    }
+
+    protected static class DeviceMethodStatusCallBack implements IotHubEventCallback
+    {
+        public void execute(IotHubStatusCode status, Object context)
+        {
+            System.out.println("IoT Hub responded to device method operation with status " + status.name());
+        }
+    }
+
+    protected static class SampleDeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
+    {
+        @Override
+        public DeviceMethodData call(String methodName, Object methodData, Object context)
+        {
+            DeviceMethodData deviceMethodData ;
+            switch (methodName)
+            {
+                case "command" :
+                {
+                    int status = method_command(methodData);
+
+                    deviceMethodData = new DeviceMethodData(status, "executed " + methodName);
+                    break;
+                }
+                default:
+                {
+                    int status = method_default(methodData);
+                    deviceMethodData = new DeviceMethodData(status, "executed " + methodName);
+                }
+            }
+
+            return deviceMethodData;
+        }
+    }
+
+    private static AtomicBoolean Succeed = new AtomicBoolean(false);
+
+    protected static class DeviceTwinStatusCallBack implements IotHubEventCallback
+    {
+        @Override
+        public void execute(IotHubStatusCode status, Object context)
+        {
+            if((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY))
+            {
+                Succeed.set(true);
+            }
+            else
+            {
+                Succeed.set(false);
+            }
+            System.out.println("IoT Hub responded to device twin operation with status " + status.name());
+        }
+    }
+
+    protected static class onProperty implements TwinPropertyCallBack
+    {
+        @Override
+        public void TwinPropertyCallBack(Property property, Object context)
+        {
+            System.out.println(
+                    "onProperty callback for " + (property.getIsReported()?"reported": "desired") +
+                            " property " + property.getKey() +
+                            " to " + property.getValue() +
+                            ", Properties version:" + property.getVersion());
+        }
+    }
+
+    private void InitClient() throws URISyntaxException, IOException
+    {
+        client = new DeviceClient(connString, protocol);
+        //client = new DeviceClient(connString, protocol, publicKeyCertificateString, false, privateKeyString, false);
 
         try
         {
             client.open();
-        } catch (Exception e2)
-        {
-            System.err.println("Exception while opening IoTHub connection: " + e2.toString());
-        }
-
-        for (int i = 0; i < 5; ++i)
-        {
-            temperature = 20.0 + Math.random() * 10;
-            humidity = 30.0 + Math.random() * 20;
-
-            String msgStr = "{\"deviceId\":\"" + deviceId + "\",\"messageId\":" + i + ",\"temperature\":" + temperature + ",\"humidity\":" + humidity + "}";
-            try
+            if (protocol == IotHubClientProtocol.MQTT)
             {
-                Message msg = new Message(msgStr);
-                msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
-                msg.setMessageId(java.util.UUID.randomUUID().toString());
-                System.out.println(msgStr);
-                EventCallback eventCallback = new EventCallback();
-                client.sendEventAsync(msg, eventCallback, i);
-            } catch (Exception e)
+                MessageCallbackMqtt callback = new MessageCallbackMqtt();
+                Counter counter = new Counter(0);
+                client.setMessageCallback(callback, counter);
+            } else
             {
-                System.err.println("Exception while sending event: " + e.getMessage());
+                MessageCallback callback = new MessageCallback();
+                Counter counter = new Counter(0);
+                client.setMessageCallback(callback, counter);
             }
-            try
-            {
-                Thread.sleep(2000);
-            } catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
-        }
+            client.subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+            Succeed.set(false);
+            client.startDeviceTwin(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
 
-        client.closeNow();
+            do
+            {
+                Thread.sleep(1000);
+            }
+            while(!Succeed.get());
+
+            Map<Property, Pair<TwinPropertyCallBack, Object>> desiredProperties = new HashMap<Property, Pair<TwinPropertyCallBack, Object>>()
+            {
+                {
+                    put(new Property("HomeTemp(F)", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
+                    put(new Property("LivingRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
+                    put(new Property("BedroomRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
+                    put(new Property("HomeSecurityCamera", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
+                }
+            };
+
+            client.subscribeToTwinDesiredProperties(desiredProperties);
+
+            System.out.println("Subscribe to Desired properties on device Twin...");
+        }
+        catch (Exception e2)
+        {
+            System.err.println("Exception while opening IoTHub connection: " + e2.getMessage());
+            client.closeNow();
+            System.out.println("Shutting down...");
+        }
     }
 
-    public void btnReceiveOnClick(View v) throws URISyntaxException, IOException
+    public void btnGetTwinOnClick(View v) throws URISyntaxException, IOException
     {
-        Button button = (Button) v;
+        System.out.println("Get device Twin...");
+        client.getDeviceTwin(); // For each desired property in the Service, the SDK will call the appropriate callback with the value and version.
+    }
 
-        // Comment/uncomment from lines below to use HTTPS or MQTT protocol
-        // IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
-        IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
-
-        DeviceClient client = new DeviceClient(connString, protocol);
-
-        if (protocol == IotHubClientProtocol.MQTT)
-        {
-            MessageCallbackMqtt callback = new MessageCallbackMqtt();
-            Counter counter = new Counter(0);
-            client.setMessageCallback(callback, counter);
-        } else
+    public void btnUpdateReportedOnClick(View v) throws URISyntaxException, IOException
+    {
+            System.out.println("Update reported properties...");
+            Set<Property> reportProperties = new HashSet<Property>()
             {
-            MessageCallback callback = new MessageCallback();
-            Counter counter = new Counter(0);
-            client.setMessageCallback(callback, counter);
+                {
+                    add(new Property("HomeTemp(F)", 70));
+                    add(new Property("LivingRoomLights", LIGHTS.ON));
+                    add(new Property("BedroomRoomLights", LIGHTS.OFF));
+                }
+            };
+            client.sendReportedProperties(reportProperties);
+
+        for(int i = 0; i < MAX_EVENTS_TO_REPORT; i++)
+        {
+
+            if (Math.random() % MAX_EVENTS_TO_REPORT == 3)
+            {
+                client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.DETECTED_BURGLAR)); }});
+            }
+            else
+            {
+                client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING)); }});
+            }
+            if(i == MAX_EVENTS_TO_REPORT-1)
+            {
+                client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("BedroomRoomLights", null)); }});
+            }
+            System.out.println("Updating reported properties..");
         }
+
+        System.out.println("Waiting for Desired properties");
+    }
+
+    public void btnSendOnClick(View v) throws URISyntaxException, IOException
+    {
+        temperature = 20.0 + Math.random() * 10;
+        humidity = 30.0 + Math.random() * 20;
+
+        String msgStr = "{\"deviceId\":\"" + deviceId + "\",\"temperature\":" + temperature + ",\"humidity\":" + humidity + "}";
+        try
+        {
+            Message msg = new Message(msgStr);
+            msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
+            msg.setMessageId(java.util.UUID.randomUUID().toString());
+            System.out.println(msgStr);
+            EventCallback eventCallback = new EventCallback();
+            client.sendEventAsync(msg, eventCallback, 1);
+        }
+        catch (Exception e)
+        {
+            System.err.println("Exception while sending event: " + e.getMessage());
+        }
+    }
+
+    public void btnFileUploadOnClick(View v) throws URISyntaxException, IOException
+    {
+        EditText text = (EditText)findViewById(R.id.editTextFileName);
+        String fullFileName = text.getText().toString();
 
         try
         {
-            client.open();
-        } catch (Exception e2)
-        {
-            System.out.println("Exception while opening IoTHub connection: " + e2.toString());
-        }
+            Context context = getApplicationContext();
 
-        try
-        {
-            Thread.sleep(2000);
-        } catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
+            File directory = context.getFilesDir();
+            File file = new File(directory, fullFileName);
+            file.createNewFile();
+            if(file.isDirectory())
+            {
+                throw new IllegalArgumentException(fullFileName + " is a directory, please provide a single file name, or use the FileUploadSample to upload directories.");
+            }
+            else
+            {
+                client.uploadToBlobAsync(file.getName(), new FileInputStream(file), file.length(), new FileUploadStatusCallBack(), null);
+            }
 
+            System.out.println("File upload started with success");
+
+            System.out.println("Waiting for file upload callback with the status...");
+        }
+        catch (Exception e)
+        {
+            System.err.println("Exception while sending event: " + e.getMessage());
+        }
+    }
+
+    protected static class FileUploadStatusCallBack implements IotHubEventCallback
+    {
+        public void execute(IotHubStatusCode status, Object context)
+        {
+            System.out.println("IoT Hub responded to file upload operation with status " + status.name());
+        }
+    }
+
+    private void stopClient() throws URISyntaxException, IOException
+    {
+        String OPERATING_SYSTEM = System.getProperty("os.name");
         client.closeNow();
+        System.out.println("Shutting down..." + OPERATING_SYSTEM);
+        android.os.Process.killProcess(android.os.Process.myPid());
+        System.exit(1);
+    }
+
+    public void btnStopOnClick(View v) throws URISyntaxException, IOException
+    {
+        stopClient();
     }
 
     // Our MQTT doesn't support abandon/reject, so we will only display the messaged received
