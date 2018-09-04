@@ -24,7 +24,7 @@ public class AmqpsSessionDeviceOperation
 
     private Integer openLock = new Integer(1);
 
-    private long tokenRenewalPeriodInMillisecSecs = 4000; //45*60*100;
+    private long tokenRenewalPeriodInMilliseconds = 4000; //4 seconds;
 
     private ScheduledExecutorService taskSchedulerTokenRenewal;
     private AmqpsDeviceAuthenticationCBSTokenRenewalTask tokenRenewalTask = null;
@@ -159,8 +159,11 @@ public class AmqpsSessionDeviceOperation
         if ((this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN) &&
                 (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED))
         {
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_052: [The function shall restart the scheduler with the calculated renewal period if the authentication type is CBS.]
-            if (scheduleRenewalThread())
+            if (this.deviceClientConfig.getSasTokenAuthentication().isRenewalNecessary())
+            {
+                logger.LogDebug("Sas token cannot be renewed automatically, so amqp connection will be unauthorized soon, method: %s", logger.getMethodName());
+            }
+            else
             {
                 // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_051: [The function start the authentication with the new token.]
                 authenticate();
@@ -512,23 +515,18 @@ public class AmqpsSessionDeviceOperation
      *
      * @return true is the renewal is successful
      */
-    private Boolean scheduleRenewalThread()
+    private void scheduleRenewalThread()
     {
-        long renewalPeriod = calculateRenewalTimeInMilliSecs(this.deviceClientConfig.getSasTokenAuthentication().getTokenValidSecs());
+        long renewalPeriod = calculateRenewalTimeInMilliseconds(this.deviceClientConfig.getSasTokenAuthentication().getTokenValidSecs());
         if (renewalPeriod > 0)
         {
+            this.tokenRenewalPeriodInMilliseconds = renewalPeriod;
+
+
             shutDownScheduler();
-            if (this.taskSchedulerTokenRenewal == null)
-            {
-                this.taskSchedulerTokenRenewal = Executors.newScheduledThreadPool(1);
-            }
-
-            this.tokenRenewalPeriodInMillisecSecs = renewalPeriod;
-            this.taskSchedulerTokenRenewal.scheduleAtFixedRate(this.tokenRenewalTask, 0, tokenRenewalPeriodInMillisecSecs, TimeUnit.MILLISECONDS);
-
-            return true;
+            this.taskSchedulerTokenRenewal = Executors.newScheduledThreadPool(1);
+            this.taskSchedulerTokenRenewal.scheduleAtFixedRate(this.tokenRenewalTask, 0, this.tokenRenewalPeriodInMilliseconds, TimeUnit.MILLISECONDS);
         }
-        return false;
     }
 
     /**
@@ -570,7 +568,7 @@ public class AmqpsSessionDeviceOperation
      * @return 75% of the given time
      * @throws IllegalArgumentException if validInSecs is less than 0
      */
-    private long calculateRenewalTimeInMilliSecs(long validInSecs) throws IllegalArgumentException
+    private long calculateRenewalTimeInMilliseconds(long validInSecs) throws IllegalArgumentException
     {
         if (validInSecs < 0)
         {

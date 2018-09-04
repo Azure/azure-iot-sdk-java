@@ -190,7 +190,7 @@ public class AmqpsSessionDeviceOperationTest
         DeviceClientConfig actualDeviceClientConfig = Deencapsulation.getField(amqpsSessionDeviceOperation, "deviceClientConfig");
         AmqpsDeviceAuthentication actualAmqpsDeviceAuthentication = Deencapsulation.getField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication");
         AmqpsDeviceAuthenticationState authenticatorState = Deencapsulation.getField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState");
-        long actualRenewalPeriod = Deencapsulation.getField(amqpsSessionDeviceOperation, "tokenRenewalPeriodInMillisecSecs");
+        long actualRenewalPeriod = Deencapsulation.getField(amqpsSessionDeviceOperation, "tokenRenewalPeriodInMilliseconds");
 
         assertEquals(mockDeviceClientConfig, actualDeviceClientConfig);
         assertEquals(mockAmqpsDeviceAuthenticationCBS, actualAmqpsDeviceAuthentication);
@@ -307,7 +307,6 @@ public class AmqpsSessionDeviceOperationTest
     }
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_051: [The function start the authentication with the new token.]
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_052: [The function shall restart the scheduler with the calculated renewal period if the authentication type is CBS. ]
     @Test
     public void renewTokenSuccess() throws IllegalArgumentException, TransportException
     {
@@ -341,55 +340,8 @@ public class AmqpsSessionDeviceOperationTest
         new Verifications()
         {
             {
-                mockScheduledExecutorService.shutdownNow();
+                Deencapsulation.invoke(mockAmqpsDeviceAuthentication ,"authenticate", new Class[] {DeviceClientConfig.class, UUID.class}, (DeviceClientConfig) any, (UUID) any);
                 times = 1;
-                mockScheduledExecutorService.scheduleAtFixedRate((AmqpsDeviceAuthenticationCBSTokenRenewalTask)any, 0, expectedRenewalTimeMillisecs, TimeUnit.MILLISECONDS);
-                times = 1;
-            }
-        };
-    }
-
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_051: [The function start the authentication with the new token.]
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_052: [The function shall restart the scheduler with the calculated renewal period if the authentication type is CBS. ]
-    @Test (expected = IllegalArgumentException.class)
-    public void renewTokenCalculationNegative() throws IllegalArgumentException, TransportException
-    {
-        // arrange
-        final long tokenValidSecs = 3600;
-        final long expectedRenewalTimeMillisecs = 2700 * 1000;
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "taskSchedulerTokenRenewal", mockScheduledExecutorService);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockDeviceClientConfig.getSasTokenAuthentication();
-                result = mockIotHubSasTokenAuthenticationProvider;
-                mockIotHubSasTokenAuthenticationProvider.getTokenValidSecs();
-                result = -1;
-            }
-        };
-
-        // act
-        amqpsSessionDeviceOperation.renewToken();
-
-        // assert
-        AmqpsDeviceAuthenticationState authenticatorState = Deencapsulation.getField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState");
-
-        assertEquals(AmqpsDeviceAuthenticationState.AUTHENTICATED, authenticatorState);
-
-        new Verifications()
-        {
-            {
-                mockScheduledExecutorService.shutdownNow();
-                times = 0;
-                mockExecutors.newScheduledThreadPool(1);
-                times = 0;
-                mockScheduledExecutorService.scheduleAtFixedRate((AmqpsDeviceAuthenticationCBSTokenRenewalTask)any, 0, expectedRenewalTimeMillisecs, TimeUnit.MILLISECONDS);
-                times = 0;
             }
         };
     }
