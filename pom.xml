@@ -19,6 +19,7 @@
         <module>deps</module>
         <module>iot-e2e-tests</module>
         <module>provisioning</module>
+        <module>edge-e2e</module>
     </modules>
     <build>
         <plugins>
