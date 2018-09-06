@@ -1,5 +1,6 @@
 package io.swagger.server.api.verticle;
 
+import glue.ModuleGlue;
 import io.swagger.server.api.model.Certificate;
 import io.swagger.server.api.model.ConnectResponse;
 import io.swagger.server.api.model.MethodRequestResponse;

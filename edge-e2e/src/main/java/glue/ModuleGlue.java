@@ -1,4 +1,4 @@
-package io.swagger.server.api.verticle;
+package glue;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;

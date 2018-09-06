@@ -1,8 +1,10 @@
 package io.swagger.server.api.verticle;
 
+import glue.ServiceGlue;
 import io.swagger.server.api.model.ConnectResponse;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+
 
 public class ServiceApiImpl implements ServiceApi
 {

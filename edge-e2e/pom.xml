@@ -1,113 +1,80 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>io.swagger</groupId>
-	<artifactId>swagger-java-vertx-server</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
+    <groupId>com.microsoft.azure.sdk.iot</groupId>
+	<artifactId>iot-edge-e2e-wrapper</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>IoT SDK Edge E2E wrappers</name>
 
-		<name>IoT SDK Device &amp; Client REST API</name>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>1.8</java.version>
-		<junit.version>4.12</junit.version>
-		<vertx.version>3.5.1</vertx.version>
-		<maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
-		<maven-jar-plugin.version>3.1.0</maven-jar-plugin.version>
-		<vertx-swagger-router.version>1.6.0</vertx-swagger-router.version>
-		<maven-shade-plugin.version>2.3</maven-shade-plugin.version>
-		<jackson-datatype-jsr310.version>2.7.4</jackson-datatype-jsr310.version>
-		<iot-device-client.version>1.13.1</iot-device-client.version>
-		<iot-service-client.version>1.14.0</iot-service-client.version>
-	</properties>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+        </dependency>
 
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-unit</artifactId>
+            <version>3.5.1</version>
+        </dependency>
 
-		<dependency>
-				<groupId>io.vertx</groupId>
-				<artifactId>vertx-unit</artifactId>
-				<version>${vertx.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>com.github.phiz71</groupId>
+            <artifactId>vertx-swagger-router</artifactId>
+            <version>1.6.0</version>
+        </dependency>
 
-		<dependency>
-				<groupId>com.github.phiz71</groupId>
-				<artifactId>vertx-swagger-router</artifactId>
-				<version>${vertx-swagger-router.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.7.4</version>
+        </dependency>
 
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jsr310</artifactId>
-			<version>${jackson-datatype-jsr310.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-device-client</artifactId>
+            <version>1.14.0</version>
+        </dependency>
 
-		<dependency>
-			<groupId>com.microsoft.azure.sdk.iot</groupId>
-			<artifactId>iot-device-client</artifactId>
-			<version>${iot-device-client.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.microsoft.azure.sdk.iot</groupId>
-			<artifactId>iot-service-client</artifactId>
-			<version>${iot-service-client.version}</version>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-service-client</artifactId>
+            <version>1.15.0</version>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin.version}</version>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-				</configuration>
-			</plugin>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.microsoft.azure.sdk.iot.e2e.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>${maven-shade-plugin.version}</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-								<filters>
-									<filter>
-											<artifact>*:*</artifact>
-											<excludes>
-													<exclude>META-INF/*.SF</exclude>
-													<exclude>META-INF/*.DSA</exclude>
-													<exclude>META-INF/*.RSA</exclude>
-											</excludes>
-									</filter>
-							</filters>
-							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<manifestEntries>
-										<Main-Class>io.vertx.core.Starter</Main-Class>
-										<Main-Verticle>io.swagger.server.api.MainApiVerticle</Main-Verticle>
-									</manifestEntries>
-								</transformer>
-							</transformers>
-							<artifactSet />
-							<outputFile>${project.build.directory}/${project.artifactId}-${project.version}-fat.jar</outputFile>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 </project>

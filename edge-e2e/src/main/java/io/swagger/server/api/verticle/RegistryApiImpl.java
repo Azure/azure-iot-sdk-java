@@ -1,5 +1,6 @@
 package io.swagger.server.api.verticle;
 
+import glue.RegistryGlue;
 import io.swagger.server.api.model.ConnectResponse;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;

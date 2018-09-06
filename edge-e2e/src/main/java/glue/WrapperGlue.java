@@ -1,5 +1,8 @@
-package io.swagger.server.api.verticle;
+package glue;
 
+import io.swagger.server.api.verticle.ModuleApiImpl;
+import io.swagger.server.api.verticle.RegistryApiImpl;
+import io.swagger.server.api.verticle.ServiceApiImpl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
