@@ -197,7 +197,9 @@ public class DeviceTwin
      *
      * @param device The device with a valid id for which desired properties is to be updated.
      * @throws UnsupportedOperationException This exception is always thrown.
+     * @deprecated Use updateTwin() to update desired properties
      */
+    @Deprecated
     public void updateDesiredProperties(DeviceTwinDevice device) throws UnsupportedOperationException
     {
         // Currently this is not supported by service - Please use Update twin to update desired properties
