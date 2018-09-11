@@ -19,10 +19,10 @@ import java.util.TimeZone;
  */
 public class JobsParser
 {
-    private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-    private static final String TIMEZONE = "UTC";
-    private static final String SCHEDULE_DEVICE_METHOD = "scheduleDeviceMethod";
-    private static final String SCHEDULE_UPDATE_TWIN = "scheduleUpdateTwin";
+    private transient static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    private transient static final String TIMEZONE = "UTC";
+    private transient static final String SCHEDULE_DEVICE_METHOD = "scheduleDeviceMethod";
+    private transient static final String SCHEDULE_UPDATE_TWIN = "scheduleUpdateTwin";
 
     // Job identifier
     private static final String JOBID_TAG = "jobId";
@@ -237,7 +237,7 @@ public class JobsParser
      * Empty constructor: Used only to keep GSON happy.
      */
     @SuppressWarnings("unused")
-    protected JobsParser()
+    JobsParser()
     {
     }
 }

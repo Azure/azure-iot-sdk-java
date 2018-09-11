@@ -146,7 +146,7 @@ public class FileUploadResponseParser
      * Empty constructor: Used only to keep GSON happy.
      */
     @SuppressWarnings("unused")
-    protected FileUploadResponseParser()
+    FileUploadResponseParser()
     {
     }
 }

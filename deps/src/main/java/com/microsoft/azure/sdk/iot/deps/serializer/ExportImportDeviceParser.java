@@ -46,7 +46,7 @@ public class ExportImportDeviceParser
     @SerializedName(TAGS_NAME)
     private TwinCollection tags;
 
-    private static Gson gson = new Gson();
+    private transient static Gson gson = new Gson();
 
     /**
      * Converts this into json and returns it

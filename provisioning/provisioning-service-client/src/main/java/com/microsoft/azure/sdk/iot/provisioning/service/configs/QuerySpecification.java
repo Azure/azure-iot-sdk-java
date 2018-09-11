@@ -92,7 +92,7 @@ public class QuerySpecification extends Serializable
      * </p>
      */
     @SuppressWarnings("unused")
-    protected QuerySpecification()
+    QuerySpecification()
     {
         /* SRS_QUERY_SPECIFICATION_21_005: [The QuerySpecification shall provide an empty constructor to make GSON happy.] */
     }

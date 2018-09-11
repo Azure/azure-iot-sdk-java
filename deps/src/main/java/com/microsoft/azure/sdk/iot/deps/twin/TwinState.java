@@ -391,7 +391,7 @@ public class TwinState extends RegisterManager
      * </p>
      */
     @SuppressWarnings("unused")
-    protected TwinState()
+    TwinState()
     {
         /* SRS_TWIN_STATE_21_023: [The TwinState shall provide an empty constructor to make GSON happy.] */
     }

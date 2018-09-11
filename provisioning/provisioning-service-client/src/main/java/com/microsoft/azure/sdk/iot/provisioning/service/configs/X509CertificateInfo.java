@@ -67,16 +67,14 @@ public class X509CertificateInfo
     @Expose(serialize = true, deserialize = true)
     @SerializedName(NO_BEFORE_UTC_TAG)
     private String notBeforeUtc = null;
-    @Expose(serialize = false, deserialize = false)
-    private Date notBeforeUtcDate;
+    private transient Date notBeforeUtcDate;
 
     // the no after date and time
     private static final String NO_AFTER_UTC_TAG = "notAfterUtc";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(NO_AFTER_UTC_TAG)
     private String notAfterUtc = null;
-    @Expose(serialize = false, deserialize = false)
-    private Date notAfterUtcDate;
+    private transient Date notAfterUtcDate;
 
     // the serial number of the X509 certificate
     private static final String SERIAL_NUMBER_TAG = "serialNumber";

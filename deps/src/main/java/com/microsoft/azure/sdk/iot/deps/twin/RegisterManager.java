@@ -235,7 +235,7 @@ public class RegisterManager
      * </p>
      */
     @SuppressWarnings("unused")
-    protected RegisterManager()
+    RegisterManager()
     {
         /* Codes_SRS_REGISTER_MANAGER_21_007: [The RegisterManager shall provide an empty constructor to make GSON happy.] */
     }

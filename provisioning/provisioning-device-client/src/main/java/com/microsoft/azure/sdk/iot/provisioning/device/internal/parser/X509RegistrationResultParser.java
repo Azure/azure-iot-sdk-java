@@ -15,6 +15,11 @@ import com.google.gson.annotations.SerializedName;
  */
 public class X509RegistrationResultParser
 {
+    //empty constructor for Gson
+    X509RegistrationResultParser()
+    {
+    }
+
     /**
      * Class representing X509CertificateInfo
      * https://docs.microsoft.com/en-us/rest/api/iot-dps/RuntimeRegistration/RegisterDevice#definitions_x509certificateinfo
@@ -52,6 +57,11 @@ public class X509RegistrationResultParser
         private static final String VERSION = "version";
         @SerializedName(VERSION)
         private String version;
+
+        //empty constructor for Gson
+        X509CertificateInfo()
+        {
+        }
 
         /**
          * Getter for the Subject Name

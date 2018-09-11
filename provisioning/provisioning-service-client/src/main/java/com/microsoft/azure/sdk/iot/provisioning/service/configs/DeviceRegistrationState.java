@@ -53,16 +53,14 @@ public class DeviceRegistrationState
     @Expose(serialize = true, deserialize = true)
     @SerializedName(CREATED_DATETIME_UTC_TAG)
     private String createdDateTimeUtc = null;
-    @Expose(serialize = false, deserialize = false)
-    private Date createdDateTimeUtcDate;
+    private transient Date createdDateTimeUtcDate;
 
     // last update date and time
     private static final String LAST_UPDATED_DATETIME_UTC_TAG = "lastUpdatedDateTimeUtc";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(LAST_UPDATED_DATETIME_UTC_TAG)
     private String lastUpdatedDateTimeUtc = null;
-    @Expose(serialize = false, deserialize = false)
-    private Date lastUpdatedDateTimeUtcDate;
+    private transient Date lastUpdatedDateTimeUtcDate;
 
     // assigned hub
     private static final String ASSIGNED_HUB_TAG = "assignedHub";
@@ -296,7 +294,7 @@ public class DeviceRegistrationState
      * </p>
      */
     @SuppressWarnings("unused")
-    protected DeviceRegistrationState()
+    DeviceRegistrationState()
     {
         /* SRS_DEVICE_REGISTRATION_STATE_21_030: [The DeviceRegistrationState shall provide an empty constructor to make GSON happy.] */
     }

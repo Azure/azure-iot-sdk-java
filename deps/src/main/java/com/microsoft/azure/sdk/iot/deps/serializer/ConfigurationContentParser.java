@@ -22,7 +22,7 @@ public class ConfigurationContentParser
     @SerializedName(DEVICE_CONTENT_NAME)
     private Map<String, Object> deviceContent;
 
-    private static Gson gson = new Gson();
+    private transient static Gson gson = new Gson();
 
     /**
      * Empty constructor: Used only to keep GSON happy.

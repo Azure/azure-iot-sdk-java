@@ -223,7 +223,7 @@ public class TwinState
      * </p>
      */
     @SuppressWarnings("unused")
-    protected TwinState()
+    TwinState()
     {
         /* SRS_TWIN_STATE_21_010: [The TwinState shall provide an empty constructor to make GSON happy.] */
     }

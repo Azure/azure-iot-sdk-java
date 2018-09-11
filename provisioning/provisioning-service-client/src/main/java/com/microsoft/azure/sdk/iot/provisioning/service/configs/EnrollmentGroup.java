@@ -123,16 +123,14 @@ public class EnrollmentGroup extends Serializable
     @Expose(serialize = true, deserialize = true)
     @SerializedName(CREATED_DATETIME_UTC_TAG)
     private String createdDateTimeUtc = null;
-    @Expose(serialize = false, deserialize = false)
-    private Date createdDateTimeUtcDate;
+    private transient Date createdDateTimeUtcDate;
 
     // the datetime this resource was last updated
     private static final String LAST_UPDATED_DATETIME_UTC_TAG = "lastUpdatedDateTimeUtc";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(LAST_UPDATED_DATETIME_UTC_TAG)
     private String lastUpdatedDateTimeUtc = null;
-    @Expose(serialize = false, deserialize = false)
-    private Date lastUpdatedDateTimeUtcDate;
+    private transient Date lastUpdatedDateTimeUtcDate;
 
     // the eTag
     private static final String ETAG_TAG = "etag";
@@ -606,7 +604,7 @@ public class EnrollmentGroup extends Serializable
      * </p>
      */
     @SuppressWarnings("unused")
-    protected EnrollmentGroup()
+    EnrollmentGroup()
     {
         /* SRS_ENROLLMENT_GROUP_21_038: [The EnrollmentGroup shall provide an empty constructor to make GSON happy.] */
     }

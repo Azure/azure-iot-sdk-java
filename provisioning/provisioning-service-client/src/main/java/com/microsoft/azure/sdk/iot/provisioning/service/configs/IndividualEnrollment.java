@@ -135,8 +135,7 @@ public class IndividualEnrollment extends Serializable
     @Expose(serialize = true, deserialize = true)
     @SerializedName(LAST_UPDATED_DATETIME_UTC_TAG)
     private String lastUpdatedDateTimeUtc = null;
-    @Expose(serialize = false, deserialize = false)
-    private Date lastUpdatedDateTimeUtcDate;
+    private transient Date lastUpdatedDateTimeUtcDate;
 
     // the eTag
     private static final String ETAG_TAG = "etag";
@@ -672,7 +671,7 @@ public class IndividualEnrollment extends Serializable
      * </p>
      */
     @SuppressWarnings("unused")
-    protected IndividualEnrollment()
+    IndividualEnrollment()
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_049: [The IndividualEnrollment shall provide an empty constructor to make GSON happy.] */
     }

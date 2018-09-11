@@ -36,6 +36,11 @@ public class DeviceRegistrationParser
         }
     }
 
+    //empty constructor for Gson
+    DeviceRegistrationParser()
+    {
+    }
+
     /**
      * Constructor for Device Registration for X509 flow
      * @param registrationId Registration Id to be sent to the service. Cannot be a {@code null} or empty value.

@@ -31,6 +31,7 @@ public class RegistrationOperationStatusParser
     @SerializedName(REGISTRATION_STATE)
     private DeviceRegistrationResultParser registrationState;
 
+    //empty constructor for Gson
     private RegistrationOperationStatusParser()
     {
     }

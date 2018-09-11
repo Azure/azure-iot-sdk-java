@@ -22,6 +22,11 @@ public class TpmRegistrationResultParser
     @SerializedName(AUTHENTICATION_KEY)
     private String authenticationKey;
 
+    //empty constructor for Gson
+    TpmRegistrationResultParser()
+    {
+    }
+
     /**
      * Getter for the Authentication Key
      * @return Getter for the Authentication Key

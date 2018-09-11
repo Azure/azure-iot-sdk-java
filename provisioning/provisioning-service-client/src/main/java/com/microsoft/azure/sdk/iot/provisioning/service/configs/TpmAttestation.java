@@ -130,7 +130,7 @@ public class TpmAttestation extends Attestation
      * </p>
      */
     @SuppressWarnings("unused")
-    protected TpmAttestation()
+    TpmAttestation()
     {
         /* SRS_TPM_ATTESTATION_21_010: [The TpmAttestation shall provide an empty constructor to make GSON happy.] */
     }

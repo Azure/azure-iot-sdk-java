@@ -105,7 +105,7 @@ public class BulkEnrollmentOperationError
      * </p>
      */
     @SuppressWarnings("unused")
-    protected BulkEnrollmentOperationError()
+    BulkEnrollmentOperationError()
     {
         /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_007: [The BulkEnrollmentOperationResult shall provide an empty constructor to make GSON happy.] */
     }

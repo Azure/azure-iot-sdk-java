@@ -56,7 +56,7 @@ public class FileUploadRequestParser
      * Empty constructor: Used only to keep GSON happy.
      */
     @SuppressWarnings("unused")
-    protected FileUploadRequestParser()
+    FileUploadRequestParser()
     {
     }
 }

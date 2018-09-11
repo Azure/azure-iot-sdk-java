@@ -74,7 +74,7 @@ public class ConfigurationParser
     @SerializedName(E_TAG_NAME)
     private String eTag;
 
-    private static Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
+    private transient static Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
 
     /**
      * Empty constructor: Used only to keep GSON happy.

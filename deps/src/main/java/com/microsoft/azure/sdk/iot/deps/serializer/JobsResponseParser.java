@@ -41,6 +41,7 @@ public class JobsResponseParser
     private static final String CREATETIME_TAG = "createdTime";
     @SerializedName(CREATETIME_TAG)
     private String createdTime;
+
     // Scheduled job start time in UTC for Query Response.
     private static final String CREATE_TIME_UTC_TAG = "createdDateTimeUtc";
     @SerializedName(CREATE_TIME_UTC_TAG)
@@ -53,6 +54,7 @@ public class JobsResponseParser
     private static final String STARTTIME_TAG = "startTime";
     @SerializedName(STARTTIME_TAG)
     private String startTime;
+
     // System generated start time in UTC for Query Response.
     private static final String START_TIME_UTC_TAG = "startTimeUtc";
     @SerializedName(START_TIME_UTC_TAG)
@@ -66,6 +68,7 @@ public class JobsResponseParser
     private static final String ENDTIME_TAG = "endTime";
     @SerializedName(ENDTIME_TAG)
     private String endTime;
+
     // System generated end time in UTC for Query Response.
     // Represents the time the job stopped processing.
     private static final String END_TIME_UTC_TAG = "endTimeUtc";
@@ -80,6 +83,7 @@ public class JobsResponseParser
     private static final String LAST_UPDATED_TIME_UTC_TAG = "lastUpdatedDateTimeUtc";
     @SerializedName(LAST_UPDATED_TIME_UTC_TAG)
     private String lastUpdatedTime;
+
     @Expose(serialize = false, deserialize = true)
     private Date lastUpdatedTimeDate;
 

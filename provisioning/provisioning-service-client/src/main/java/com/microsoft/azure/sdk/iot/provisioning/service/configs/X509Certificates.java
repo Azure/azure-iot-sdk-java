@@ -202,7 +202,7 @@ public class X509Certificates
      * </p>
      */
     @SuppressWarnings("unused")
-    protected X509Certificates()
+    X509Certificates()
     {
         /* SRS_X509_CERTIFICATES_21_009: [The X509Certificates shall provide an empty constructor to make GSON happy.] */
     }

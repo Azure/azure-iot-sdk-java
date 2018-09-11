@@ -354,7 +354,7 @@ public class X509Attestation extends Attestation
      * </p>
      */
     @SuppressWarnings("unused")
-    protected X509Attestation()
+    X509Attestation()
     {
         /* SRS_X509_ATTESTATION_21_023: [The X509Attestation shall provide an empty constructor to make GSON happy.] */
     }

@@ -61,6 +61,11 @@ public class DeviceRegistrationResultParser
     @SerializedName(X509)
     private X509RegistrationResultParser x509;
 
+    //empty constructor for Gson
+    DeviceRegistrationResultParser()
+    {
+    }
+
     /**
      * Getter for Registration Id
      * @return Getter for Registration Id

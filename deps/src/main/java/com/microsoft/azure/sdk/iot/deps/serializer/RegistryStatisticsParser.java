@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class RegistryStatisticsParser
 {
-    private static Gson gson = new Gson();
+    private transient static Gson gson = new Gson();
 
     private static final String TOTAL_DEVICE_COUNT_NAME = "totalDeviceCount";
     @Expose(serialize = true, deserialize = true)

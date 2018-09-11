@@ -12,7 +12,7 @@ import java.util.Date;
 
 public class JobPropertiesParser
 {
-    private static Gson gson = new Gson();
+    private transient static Gson gson = new Gson();
 
     private static final String JOB_ID_NAME = "jobId";
     @Expose(serialize = true, deserialize = true)

@@ -258,7 +258,7 @@ public class TwinProperties
      * </p>
      */
     @SuppressWarnings("unused")
-    protected TwinProperties()
+    TwinProperties()
     {
         /* SRS_TWIN_PROPERTIES_21_012: [The TwinProperties shall provide an empty constructor to make GSON happy.] */
     }

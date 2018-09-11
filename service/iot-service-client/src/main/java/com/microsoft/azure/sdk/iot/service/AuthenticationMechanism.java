@@ -16,6 +16,11 @@ public class AuthenticationMechanism
     @SerializedName("symmetricKey")
     private SymmetricKey SymmetricKey;
 
+    //empty constructor for Gson
+    AuthenticationMechanism()
+    {
+    }
+
     /**
      * Getter for symmetric key.
      * @return The symmetric key.

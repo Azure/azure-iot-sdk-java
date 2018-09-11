@@ -115,7 +115,7 @@ public class X509CAReferences
      * </p>
      */
     @SuppressWarnings("unused")
-    protected X509CAReferences()
+    X509CAReferences()
     {
         /* SRS_X509_CAREFERENCE_21_007: [The X509CAReferences shall provide an empty constructor to make GSON happy.] */
     }

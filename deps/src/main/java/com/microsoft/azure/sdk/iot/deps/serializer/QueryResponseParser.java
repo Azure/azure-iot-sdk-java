@@ -15,7 +15,7 @@ import java.util.List;
 
 public class QueryResponseParser
 {
-    private Gson gson;
+    private transient Gson gson;
     private JsonObject[] jsonItems = null;
 
     /**
@@ -67,7 +67,7 @@ public class QueryResponseParser
      * Empty constructor: Used only to keep GSON happy.
      */
     @SuppressWarnings("unused")
-    protected QueryResponseParser()
+    QueryResponseParser()
     {
     }
 }

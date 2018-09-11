@@ -51,7 +51,7 @@ public class QueryRequestParser
      * Empty constructor: Used only to keep GSON happy.
      */
     @SuppressWarnings("unused")
-    protected QueryRequestParser()
+    QueryRequestParser()
     {
     }
 }

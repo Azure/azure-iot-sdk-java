@@ -44,7 +44,7 @@ public class FileUploadNotificationParser
     @SerializedName(LAST_UPDATED_TIME_TAG)
     private String lastUpdatedTime = null;
 
-    private Date lastUpdatedTimeDate;
+    private transient Date lastUpdatedTimeDate;
 
     private static final String BLOB_SIZE_IN_BYTES_TAG = "blobSizeInBytes";
     @Expose(serialize = true, deserialize = true)
@@ -56,7 +56,7 @@ public class FileUploadNotificationParser
     @SerializedName(ENQUEUED_TIME_UTC_TAG)
     private String enqueuedTimeUtc = null;
 
-    private Date enqueuedTimeUtcDate;
+    private transient Date enqueuedTimeUtcDate;
 
     /**
      * CONSTRUCTOR
@@ -182,7 +182,7 @@ public class FileUploadNotificationParser
      * Empty constructor: Used only to keep GSON happy.
      */
     @SuppressWarnings("unused")
-    protected FileUploadNotificationParser()
+    FileUploadNotificationParser()
     {
     }
 }

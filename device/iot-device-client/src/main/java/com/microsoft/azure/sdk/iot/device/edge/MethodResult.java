@@ -21,6 +21,12 @@ public class MethodResult
     @SerializedName(PAYLOAD_KEY_NAME)
     private Object payload;
 
+    //empty constructor for gson
+    MethodResult()
+    {
+
+    }
+
     public MethodResult(String json)
     {
         // Codes_SRS_DIRECTMETHODRESULT_34_003: [This constructor shall retrieve the payload and status from the provided json.]

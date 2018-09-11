@@ -168,7 +168,7 @@ public class X509CertificateWithInfo
      * </p>
      */
     @SuppressWarnings("unused")
-    protected X509CertificateWithInfo()
+    X509CertificateWithInfo()
     {
         /* SRS_X509_CERTIFICATE_WITH_INFO_21_008: [The X509CertificateWithInfo shall provide an empty constructor to make GSON happy.] */
     }

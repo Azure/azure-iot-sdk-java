@@ -117,7 +117,7 @@ public final class AttestationMechanism
      * </p>
      */
     @SuppressWarnings("unused")
-    protected AttestationMechanism()
+    AttestationMechanism()
     {
         /* SRS_ATTESTATION_MECHANISM_21_013: [The AttestationMechanism shall provide an empty constructor to make GSON happy.] */
         this.type = AttestationMechanismType.NONE;
