@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
@@ -43,7 +44,7 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
     private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB + 50000; // 50 secs
 
     // Max time to flush iothub notification from previous failing tests
-    private static final long MAX_MILLISECS_TIMEOUT_FLUSH_NOTIFICATION = 10000; // 10 secs
+    private static final long MAX_MILLISECS_TIMEOUT_FLUSH_NOTIFICATION = 15000; // 15 secs
 
     //Max devices to test
     private static final Integer MAX_FILES_TO_UPLOAD = 5;
@@ -54,7 +55,6 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
 
     private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
-    private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
     // States of SDK
     private static RegistryManager registryManager;
@@ -138,24 +138,25 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
         assertFalse(iotHubConnectionString.isEmpty());
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-        String deviceId = "java-file-upload-e2e-test".concat(UUID.randomUUID().toString());
-        scDevice = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, null, null);
-        scDevice = registryManager.addDevice(scDevice);
 
         serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
         assertNotNull(fileUploadNotificationReceiver);
+    }
+
+    @Before
+    public void setUpFileUploadState() throws Exception
+    {
+        String deviceId = "java-file-upload-e2e-test".concat(UUID.randomUUID().toString());
+        scDevice = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, null, null);
+        scDevice = registryManager.addDevice(scDevice);
 
         // flush pending notifications before every test to prevent random test failures
         // because of notifications received from other failed test
         fileUploadNotificationReceiver.open();
         fileUploadNotificationReceiver.receive(MAX_MILLISECS_TIMEOUT_FLUSH_NOTIFICATION);
         fileUploadNotificationReceiver.close();
-    }
 
-    @Before
-    public void setUpFileUploadState() throws Exception
-    {
         // Start receiver for a test
         fileUploadNotificationReceiver.open();
         fileUploadState = new FileUploadState[MAX_FILES_TO_UPLOAD];
@@ -181,16 +182,17 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
     @After
     public void tearDownFileUploadState() throws Exception
     {
-        fileUploadState = null;
-        messageStates = null;
         try
         {
-            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
+            registryManager.removeDevice(scDevice);
         }
-        catch (InterruptedException e)
+        catch (IotHubNotFoundException | IOException e)
         {
-            throw new RuntimeException(e);
+            //device was likely never added. Can ignore
         }
+
+        fileUploadState = null;
+        messageStates = null;
     }
 
     @AfterClass
@@ -204,7 +206,6 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
 
         if (registryManager != null)
         {
-            registryManager.removeDevice(scDevice.getDeviceId());
             registryManager.close();
             registryManager = null;
         }
@@ -227,8 +228,6 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
 
     private void verifyNotification(FileUploadNotification fileUploadNotification, FileUploadState fileUploadState) throws IOException
     {
-        assertEquals("Received notification for a different device not belonging to this test", scDevice.getDeviceId(), fileUploadNotification.getDeviceId());
-
         assertTrue("File upload notification blob size not equal to expected file length", fileUploadNotification.getBlobSizeInBytes() == fileUploadState.fileLength);
 
         URL u = new URL(fileUploadNotification.getBlobUri());
@@ -256,11 +255,10 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
         // act
         deviceClient.uploadToBlobAsync(fileUploadState[0].blobName, fileUploadState[0].fileInputStream, fileUploadState[0].fileLength, new FileUploadCallback(), fileUploadState[0]);
 
-        // assert
-        FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        assertNotNull(fileUploadNotification);
-        verifyNotification(fileUploadNotification, fileUploadState[0]);
+        FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
 
+        // assert
+        verifyNotification(fileUploadNotification, fileUploadState[0]);
         assertTrue(fileUploadState[0].isCallBackTriggered);
         assertEquals(fileUploadState[0].fileUploadStatus, SUCCESS);
         tearDownDeviceClient();
@@ -274,9 +272,9 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
 
         // act
         deviceClient.uploadToBlobAsync(fileUploadState[MAX_FILES_TO_UPLOAD - 1].blobName, fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileInputStream, fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileLength, new FileUploadCallback(), fileUploadState[MAX_FILES_TO_UPLOAD - 1]);
+        FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
 
         // assert
-        FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
         assertNotNull(fileUploadNotification);
         verifyNotification(fileUploadNotification, fileUploadState[MAX_FILES_TO_UPLOAD - 1]);
         assertTrue(fileUploadState[MAX_FILES_TO_UPLOAD - 1].isCallBackTriggered);
@@ -295,10 +293,9 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
         for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
         {
             deviceClient.uploadToBlobAsync(fileUploadState[i].blobName, fileUploadState[i].fileInputStream, fileUploadState[i].fileLength, new FileUploadCallback(), fileUploadState[i]);
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
 
             // assert
-            FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-            assertNotNull(fileUploadNotification);
             verifyNotification(fileUploadNotification, fileUploadState[i]);
             assertTrue(fileUploadState[i].isCallBackTriggered);
             assertEquals(fileUploadState[i].fileUploadStatus, SUCCESS);
@@ -339,9 +336,9 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
                 }
             });
 
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
+
             // assert
-            FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-            assertNotNull(fileUploadNotification);
             verifyNotification(fileUploadNotification, fileUploadState[i]);
             assertTrue(fileUploadState[i].isCallBackTriggered);
             assertEquals(fileUploadState[i].fileUploadStatus, SUCCESS);
@@ -397,11 +394,11 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
                 }
             });
 
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
 
             // assert
-            FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-            assertNotNull(fileUploadNotification);
             verifyNotification(fileUploadNotification, fileUploadState[i]);
+
             assertTrue(fileUploadState[i].isCallBackTriggered);
             assertEquals(fileUploadState[i].fileUploadStatus, SUCCESS);
             assertEquals(messageStates[i].messageStatus, SUCCESS);
@@ -419,6 +416,20 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
         }
 
         tearDownDeviceClient();
+    }
+
+    private FileUploadNotification getFileUploadNotificationForThisDevice() throws IOException, InterruptedException
+    {
+        FileUploadNotification fileUploadNotification;
+        do
+        {
+            fileUploadNotification = fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+            assertNotNull(fileUploadNotification);
+
+            //ignore any file upload notifications received that are not about this device
+        } while (!fileUploadNotification.getDeviceId().equals(scDevice.getDeviceId()));
+
+        return fileUploadNotification;
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -457,9 +468,9 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
                 }
             });
 
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
+
             // assert
-            FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-            assertNotNull(fileUploadNotification);
             verifyNotification(fileUploadNotification, fileUploadState[i]);
             assertTrue(fileUploadState[i].isCallBackTriggered);
             assertEquals(fileUploadState[i].fileUploadStatus, SUCCESS);
@@ -516,9 +527,9 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
                 }
             });
 
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
+
             // assert
-            FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-            assertNotNull(fileUploadNotification);
             verifyNotification(fileUploadNotification, fileUploadState[i]);
             assertTrue(fileUploadState[i].isCallBackTriggered);
             assertEquals(fileUploadState[i].fileUploadStatus, SUCCESS);
@@ -575,9 +586,9 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
                 }
             });
 
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
+
             // assert
-            FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-            assertNotNull(fileUploadNotification);
             verifyNotification(fileUploadNotification, fileUploadState[i]);
             assertTrue(fileUploadState[i].isCallBackTriggered);
             assertEquals(fileUploadState[i].fileUploadStatus, SUCCESS);
