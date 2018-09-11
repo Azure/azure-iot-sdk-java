@@ -7,6 +7,7 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ProvisioningErrorParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
@@ -113,7 +114,18 @@ public class StatusTask implements Callable
             }
             if (responseData.getResponseData() != null && responseData.getContractState() == ContractState.DPS_REGISTRATION_RECEIVED)
             {
-                return RegistrationOperationStatusParser.createFromJson(new String(responseData.getResponseData()));
+                String jsonBody = new String(responseData.getResponseData());
+                try
+                {
+                    return RegistrationOperationStatusParser.createFromJson(jsonBody);
+                }
+                catch (IllegalArgumentException e)
+                {
+                    //SRS_StatusTask_34_007: [ If the response data cannot be parsed into a RegistrationOperationStatusParser,
+                    // this function shall parse it into a ProvisioningErrorParser and throw a ProvisioningDeviceClientException with the parsed message. ]
+                    ProvisioningErrorParser provisioningErrorParser = ProvisioningErrorParser.createFromJson(jsonBody);
+                    throw new ProvisioningDeviceClientException(provisioningErrorParser.getExceptionMessage());
+                }
             }
             else
             {

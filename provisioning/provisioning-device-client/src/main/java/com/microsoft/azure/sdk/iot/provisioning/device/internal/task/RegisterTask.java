@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPath
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientAuthenticationException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ProvisioningErrorParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
@@ -134,7 +135,18 @@ public class RegisterTask implements Callable
 
             if (dpsRegistrationData.getResponseData() != null && dpsRegistrationData.getContractState() == DPS_REGISTRATION_RECEIVED)
             {
-                return RegistrationOperationStatusParser.createFromJson(new String(dpsRegistrationData.getResponseData()));
+                String jsonBody = new String(dpsRegistrationData.getResponseData());
+                try
+                {
+                    return RegistrationOperationStatusParser.createFromJson(jsonBody);
+                }
+                catch (IllegalArgumentException e)
+                {
+                    //SRS_StatusTask_34_010: [ If the response data cannot be parsed into a RegistrationOperationStatusParser,
+                    // this function shall parse it into a ProvisioningErrorParser and throw a ProvisioningDeviceClientException with the parsed message. ]
+                    ProvisioningErrorParser provisioningErrorParser = ProvisioningErrorParser.createFromJson(jsonBody);
+                    throw new ProvisioningDeviceClientException(provisioningErrorParser.getExceptionMessage());
+                }
             }
             else
             {
@@ -212,7 +224,17 @@ public class RegisterTask implements Callable
                     responseDataForSasTokenAuth.getContractState() == DPS_REGISTRATION_RECEIVED)
             {
                 this.authorization.setSasToken(sasToken);
-                return RegistrationOperationStatusParser.createFromJson(new String(responseDataForSasTokenAuth.getResponseData()));
+
+                String jsonBody = new String(responseDataForSasTokenAuth.getResponseData());
+                try
+                {
+                    return RegistrationOperationStatusParser.createFromJson(jsonBody);
+                }
+                catch (IllegalArgumentException e)
+                {
+                    ProvisioningErrorParser provisioningErrorParser = ProvisioningErrorParser.createFromJson(jsonBody);
+                    throw new ProvisioningDeviceClientException(provisioningErrorParser.getExceptionMessage());
+                }
             }
             else
             {

@@ -8,12 +8,14 @@
 package tests.unit.com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
+import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClient;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ProvisioningErrorParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.TpmRegistrationResultParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.Authorization;
@@ -81,7 +83,7 @@ public class RegisterTaskTest
     @Mocked
     RequestData mockedRequestData;
 
-    //SRS_RegisterTask_25_001: [ Constructor shall save provisioningDeviceClientConfig , securityProvider, provisioningDeviceClientContract and authorization.]
+    //Tests_SRS_RegisterTask_25_001: [ Constructor shall save provisioningDeviceClientConfig , securityProvider, provisioningDeviceClientContract and authorization.]
     @Test
     public void constructorSucceeds() throws ProvisioningDeviceClientException
     {
@@ -98,7 +100,7 @@ public class RegisterTaskTest
         assertNotNull(Deencapsulation.getField(registerTask, "responseCallback"));
     }
 
-    //SRS_RegisterTask_25_002: [ Constructor throw ProvisioningDeviceClientException if provisioningDeviceClientConfig , securityProvider, authorization or provisioningDeviceClientContract is null.]
+    //Tests_SRS_RegisterTask_25_002: [ Constructor throw ProvisioningDeviceClientException if provisioningDeviceClientConfig , securityProvider, authorization or provisioningDeviceClientContract is null.]
     @Test (expected = ProvisioningDeviceClientException.class)
     public void constructorThrowsOnNullConfig() throws ProvisioningDeviceClientException
     {
@@ -147,7 +149,7 @@ public class RegisterTaskTest
                                                                 mockedProvisioningDeviceClientContract, null);
     }
 
-    //SRS_RegisterTask_25_006: [ If the provided security client is for X509 then, this method shall trigger authenticateWithProvisioningService on the contract API and wait for response and return it. ]
+    //Tests_SRS_RegisterTask_25_006: [ If the provided security client is for X509 then, this method shall trigger authenticateWithProvisioningService on the contract API and wait for response and return it. ]
     @Test
     public void authenticateWithX509Succeeds() throws Exception
     {
@@ -200,7 +202,7 @@ public class RegisterTaskTest
     }
 
 
-    //SRS_RegisterTask_25_003: [ If the provided security client is for X509 then, this method shall throw ProvisioningDeviceClientException if registration id is null. ]
+    //Tests_SRS_RegisterTask_25_003: [ If the provided security client is for X509 then, this method shall throw ProvisioningDeviceClientException if registration id is null. ]
     @Test (expected = ProvisioningDeviceClientException.class)
     public void authenticateWithX509ThrowsOnNullRegId() throws Exception
     {
@@ -221,7 +223,7 @@ public class RegisterTaskTest
 
     }
 
-    //SRS_RegisterTask_25_004: [ If the provided security client is for X509 then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
+    //Tests_SRS_RegisterTask_25_004: [ If the provided security client is for X509 then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
     @Test (expected = ProvisioningDeviceSecurityException.class)
     public void authenticateWithX509ThrowsOnNullSSLContext() throws Exception
     {
@@ -245,7 +247,7 @@ public class RegisterTaskTest
         registerTask.call();
     }
 
-    //SRS_RegisterTask_25_007: [ If the provided security client is for X509 then, this method shall throw ProvisioningDeviceClientException if null response is received. ]
+    //Tests_SRS_RegisterTask_25_007: [ If the provided security client is for X509 then, this method shall throw ProvisioningDeviceClientException if null response is received. ]
     @Test (expected = ProvisioningDeviceTransportException.class)
     public void authenticateWithX509ThrowsOnAuthenticateWithDPSFail() throws Exception
     {
@@ -403,7 +405,7 @@ public class RegisterTaskTest
         };
     }
 
-    //SRS_RegisterTask_25_008: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if registration id or endorsement key or storage root key are null. ]
+    //Tests_SRS_RegisterTask_25_008: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if registration id or endorsement key or storage root key are null. ]
     @Test (expected = ProvisioningDeviceClientException.class)
     public void authenticateWithSasTokenNonceThrowsOnNullRegId() throws Exception
     {
@@ -467,7 +469,7 @@ public class RegisterTaskTest
         registerTask.call();
     }
 
-    //SRS_RegisterTask_25_009: [ If the provided security client is for Key then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
+    //Tests_SRS_RegisterTask_25_009: [ If the provided security client is for Key then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
     @Test (expected = ProvisioningDeviceSecurityException.class)
     public void authenticateWithSasTokenNonceThrowsOnNullSSLContext() throws Exception
     {
@@ -495,7 +497,7 @@ public class RegisterTaskTest
         registerTask.call();
     }
 
-    //SRS_RegisterTask_25_011: [ If the provided security client is for Key then, this method shall trigger requestNonceForTPM on the contract API and wait for Authentication Key and decode it from Base64. Also this method shall pass the exception back to the user if it fails. ]
+    //Tests_SRS_RegisterTask_25_011: [ If the provided security client is for Key then, this method shall trigger requestNonceForTPM on the contract API and wait for Authentication Key and decode it from Base64. Also this method shall pass the exception back to the user if it fails. ]
     @Test (expected = ProvisioningDeviceHubException.class)
     public void authenticateWithSasTokenNonceThrowsOnRequestNonceFail() throws Exception
     {
@@ -526,7 +528,7 @@ public class RegisterTaskTest
         registerTask.call();
     }
 
-    //SRS_RegisterTask_25_012: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if null response is received. ]
+    //Tests_SRS_RegisterTask_25_012: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if null response is received. ]
     @Test (expected = ProvisioningDeviceClientException.class)
     public void authenticateWithSasTokenNonceThrowsIfNoResponseReceivedInMaxTimeForNonce() throws Exception
     {
@@ -611,7 +613,7 @@ public class RegisterTaskTest
         registerTask.call();
     }
 
-    //SRS_RegisterTask_25_013: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if Authentication Key received is null. ]
+    //Tests_SRS_RegisterTask_25_013: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if Authentication Key received is null. ]
     @Test (expected = ProvisioningDeviceClientAuthenticationException.class)
     public void authenticateWithSasTokenThrowsOnNullAuthKey() throws Exception
     {
@@ -643,7 +645,7 @@ public class RegisterTaskTest
         registerTask.call();
     }
 
-    //SRS_RegisterTask_25_018: [ If the provided security client is for Key then, this method shall import the Base 64 encoded Authentication Key into the HSM using the security client and pass the exception to the user on failure. ]
+    //Tests_SRS_RegisterTask_25_018: [ If the provided security client is for Key then, this method shall import the Base 64 encoded Authentication Key into the HSM using the security client and pass the exception to the user on failure. ]
     @Test (expected = ProvisioningDeviceClientException.class)
     public void authenticateWithSasTokenThrowsImportKeyFailure() throws Exception
     {
@@ -904,7 +906,7 @@ public class RegisterTaskTest
 
     }
 
-    //SRS_RegisterTask_25_016: [ If the provided security client is for Key then, this method shall trigger authenticateWithProvisioningService on the contract API using the sasToken generated and wait for response and return it. ]
+    //Tests_SRS_RegisterTask_25_016: [ If the provided security client is for Key then, this method shall trigger authenticateWithProvisioningService on the contract API using the sasToken generated and wait for response and return it. ]
     @Test (expected = ProvisioningDeviceTransportException.class)
     public void authenticateWithSasTokenThrowsOnAuthenticateWithDPSFail() throws Exception
     {
@@ -945,7 +947,7 @@ public class RegisterTaskTest
         registerTask.call();
     }
 
-    //SRS_RegisterTask_25_017: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if null response to authenticateWithProvisioningService is received. ]
+    //Tests_SRS_RegisterTask_25_017: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if null response to authenticateWithProvisioningService is received. ]
     @Test (expected = ProvisioningDeviceClientAuthenticationException.class)
     public void authenticateWithSasTokenThrowsIfNoResponseReceivedInMaxTime() throws Exception
     {
@@ -1006,5 +1008,101 @@ public class RegisterTaskTest
         };
         //act
         registerTask.call();
+    }
+
+    //Tests_SRS_StatusTask_34_010: [ If the response data cannot be parsed into a RegistrationOperationStatusParser,
+    // this function shall parse it into a ProvisioningErrorParser and throw a ProvisioningDeviceClientException with the parsed message. ]
+    @Test (expected = ProvisioningDeviceClientException.class)
+    public void authenticateWithX509FallsBackToErrorParserIfRegistrationOperationStatusParsingFails(@Mocked final ProvisioningErrorParser mockedProvisioningErrorParser) throws Exception
+    {
+        //arrange
+        RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
+                mockedDpsSecurityProviderX509, mockedProvisioningDeviceClientContract,
+                mockedAuthorization);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedDpsSecurityProviderX509.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedDeviceRegistrationParser.toJson();
+                result = "testJson";
+                mockedDpsSecurityProviderX509.getSSLContext();
+                result = mockedSslContext;
+                Deencapsulation.invoke(mockedResponseData, "getResponseData");
+                result = "NonNullValue".getBytes();
+                Deencapsulation.invoke(mockedResponseData, "getContractState");
+                result = DPS_REGISTRATION_RECEIVED;
+                RegistrationOperationStatusParser.createFromJson("NonNullValue");
+                result = new IllegalArgumentException("this is an error");
+                ProvisioningErrorParser.createFromJson("NonNullValue");
+                result = mockedProvisioningErrorParser;
+                mockedProvisioningErrorParser.getExceptionMessage();
+                result = "some new exception";
+            }
+        };
+        //act
+        registerTask.call();
+
+        //assert
+        new Verifications()
+        {
+            {
+                ProvisioningErrorParser.createFromJson("NonNullValue");
+                times = 1;
+
+                mockedProvisioningErrorParser.getExceptionMessage();
+                times = 1;
+            }
+        };
+    }
+
+    @Test (expected = ProvisioningDeviceClientException.class)
+    public void authenticateWithSasTokenFallsBackToErrorParserIfRegistrationOperationStatusParsingFails(@Mocked final ProvisioningErrorParser mockedProvisioningErrorParser) throws Exception
+    {
+        //arrange
+        RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
+                mockedSecurityProviderTpm, mockedProvisioningDeviceClientContract,
+                mockedAuthorization);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedSecurityProviderTpm.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedSecurityProviderTpm.getEndorsementKey();
+                result = TEST_EK.getBytes();
+                mockedSecurityProviderTpm.getStorageRootKey();
+                result = TEST_SRK.getBytes();
+                mockedDeviceRegistrationParser.toJson();
+                result = "testJson";
+                mockedSecurityProviderTpm.getSSLContext();
+                result = mockedSslContext;
+                Deencapsulation.invoke(mockedResponseData, "getResponseData");
+                result = "NonNullValue".getBytes();
+                Deencapsulation.invoke(mockedResponseData, "getContractState");
+                result = DPS_REGISTRATION_RECEIVED;
+                RegistrationOperationStatusParser.createFromJson("NonNullValue");
+                result = new IllegalArgumentException("this is an error");
+                ProvisioningErrorParser.createFromJson("NonNullValue");
+                result = mockedProvisioningErrorParser;
+                mockedProvisioningErrorParser.getExceptionMessage();
+                result = "some new exception";
+            }
+        };
+        //act
+        registerTask.call();
+
+        //assert
+        new Verifications()
+        {
+            {
+                ProvisioningErrorParser.createFromJson("NonNullValue");
+                times = 1;
+
+                mockedProvisioningErrorParser.getExceptionMessage();
+                times = 1;
+            }
+        };
     }
 }

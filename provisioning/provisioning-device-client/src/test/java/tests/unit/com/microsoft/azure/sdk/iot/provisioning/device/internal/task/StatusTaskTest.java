@@ -7,6 +7,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ProvisioningErrorParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -66,7 +67,7 @@ public class StatusTaskTest
     @Mocked
     RequestData mockedRequestData;
 
-    //SRS_StatusTask_25_001: [ Constructor shall save operationId , dpsSecurityProvider, provisioningDeviceClientContract and authorization. ]
+    //Tests_SRS_StatusTask_25_001: [ Constructor shall save operationId , dpsSecurityProvider, provisioningDeviceClientContract and authorization. ]
     @Test
     public void constructorSucceeds() throws ProvisioningDeviceClientException
     {
@@ -84,7 +85,7 @@ public class StatusTaskTest
         assertEquals(TEST_OPERATION_ID, Deencapsulation.getField(statusTask, "operationId"));
     }
 
-    //SRS_StatusTask_25_002: [ Constructor shall throw ProvisioningDeviceClientException if operationId , dpsSecurityProvider, authorization or provisioningDeviceClientContract is null. ]
+    //Tests_SRS_StatusTask_25_002: [ Constructor shall throw ProvisioningDeviceClientException if operationId , dpsSecurityProvider, authorization or provisioningDeviceClientContract is null. ]
     @Test (expected = ProvisioningDeviceClientException.class)
     public void constructorThrowsOnNullSecurityProvider() throws ProvisioningDeviceClientException
     {
@@ -178,7 +179,7 @@ public class StatusTaskTest
         };
     }
 
-    //SRS_StatusTask_25_003: [ This method shall throw ProvisioningDeviceClientException if registration id is null or empty. ]
+    //Tests_SRS_StatusTask_25_003: [ This method shall throw ProvisioningDeviceClientException if registration id is null or empty. ]
     @Test (expected = ProvisioningDeviceSecurityException.class)
     public void getRegistrationStatusThrowsOnNullRegId() throws Exception
     {
@@ -221,7 +222,7 @@ public class StatusTaskTest
         statusTask.call();
     }
 
-    //SRS_StatusTask_25_004: [ This method shall retrieve the SSL context from Authorization and throw ProvisioningDeviceClientException if it is null. ]
+    //Tests_SRS_StatusTask_25_004: [ This method shall retrieve the SSL context from Authorization and throw ProvisioningDeviceClientException if it is null. ]
     @Test (expected = ProvisioningDeviceSecurityException.class)
     public void getRegistrationStatusThrowsOnNullSslContext() throws Exception
     {
@@ -245,7 +246,7 @@ public class StatusTaskTest
         statusTask.call();
     }
 
-    //SRS_StatusTask_25_005: [ This method shall trigger getRegistrationState on the contract API and wait for response and return it. ]
+    //Tests_SRS_StatusTask_25_005: [ This method shall trigger getRegistrationState on the contract API and wait for response and return it. ]
     @Test (expected = IOException.class)
     public void getRegistrationStatusThrowsOnContractGetStatusFails() throws Exception
     {
@@ -272,7 +273,7 @@ public class StatusTaskTest
         statusTask.call();
     }
 
-    //SRS_StatusTask_25_006: [ This method shall throw ProvisioningDeviceClientException if null response or no response is received in maximum time of 90 seconds. ]
+    //Tests_SRS_StatusTask_25_006: [ This method shall throw ProvisioningDeviceClientException if null response or no response is received in maximum time of 90 seconds. ]
     @Test (expected = ProvisioningDeviceClientException.class)
     public void getRegistrationStatusThrowsIfNoResponseReceivedInMaxTime() throws Exception
     {
@@ -348,5 +349,46 @@ public class StatusTaskTest
 
         //act
         statusTask.call();
+    }
+
+    //Tests_SRS_StatusTask_34_007: [ If the response data cannot be parsed into a RegistrationOperationStatusParser,
+    // this function shall parse it into a ProvisioningErrorParser and throw a ProvisioningDeviceClientException with the parsed message. ]
+    @Test (expected = ProvisioningDeviceClientException.class)
+    public void getRegistrationStatusFallsBackToErrorParserIfRegistrationOperationStatusParsingFails(@Mocked final ProvisioningErrorParser mockedProvisioningErrorParser) throws Exception
+    {
+        //arrange
+        StatusTask statusTask = Deencapsulation.newInstance(StatusTask.class, new Class[] {SecurityProvider.class,
+                        ProvisioningDeviceClientContract.class, String.class,
+                        Authorization.class},
+                mockedSecurityProvider, mockedProvisioningDeviceClientContract,
+                TEST_OPERATION_ID, mockedAuthorization);
+        new NonStrictExpectations()
+        {
+            {
+                mockedSecurityProvider.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                Deencapsulation.invoke(mockedAuthorization, "getSslContext");
+                result = mockedSslContext;
+                Deencapsulation.invoke(mockedResponseData, "getResponseData");
+                result = "NonNullValue".getBytes();
+                Deencapsulation.invoke(mockedResponseData, "getContractState");
+                result = DPS_REGISTRATION_RECEIVED;
+                RegistrationOperationStatusParser.createFromJson(anyString);
+                result = new IllegalArgumentException("Some illegal argumentException");
+                ProvisioningErrorParser.createFromJson(anyString);
+                result = mockedProvisioningErrorParser;
+            }
+        };
+
+        //act
+        statusTask.call();
+        //assert
+        new Verifications()
+        {
+            {
+                mockedProvisioningErrorParser.getExceptionMessage();
+                times = 1;
+            }
+        };
     }
 }
