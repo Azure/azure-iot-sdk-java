@@ -17,6 +17,7 @@ import org.junit.*;
 import org.junit.experimental.ParallelComputer;
 import org.junit.runner.JUnitCore;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -66,14 +67,11 @@ public class LongHaulIT
         @BeforeClass
         public static void setUp() throws Exception
         {
+            iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+
             Map<String, String> env = System.getenv();
             for (String envName : env.keySet())
             {
-                if (envName.equals(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME))
-                {
-                    iotHubConnectionString = env.get(envName);
-                }
-
                 if (envName.equals(longHaulDurationEnvVarName))
                 {
                     try

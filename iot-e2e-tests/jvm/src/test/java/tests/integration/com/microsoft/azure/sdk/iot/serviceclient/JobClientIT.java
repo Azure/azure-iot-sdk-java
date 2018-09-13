@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -33,7 +34,7 @@ import static org.junit.Assert.*;
 @Ignore //ignoring these tests until icm bug 77555728 is resolved
 public class JobClientIT
 {
-    private static String iotHubConnectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
+    private static String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
     private static JobClient jobClient;
     private static RegistryManager registryManager;
@@ -100,20 +101,7 @@ public class JobClientIT
     //@BeforeClass
     public static void setUp() throws NoSuchAlgorithmException, IotHubException, IOException, URISyntaxException, InterruptedException
     {
-        Map<String, String> env = System.getenv();
-        for (String envName : env.keySet())
-        {
-            if (envName.equals(iotHubConnectionStringEnvVarName.toString()))
-            {
-                iotHubConnectionString = env.get(envName);
-                break;
-            }
-        }
-
-        if ((iotHubConnectionString == null) || iotHubConnectionString.isEmpty())
-        {
-            throw new IllegalArgumentException("Environment variable is not set: " + iotHubConnectionStringEnvVarName);
-        }
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
 
         jobClient = JobClient.createFromConnectionString(iotHubConnectionString);
 

@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -125,17 +126,7 @@ public class FileUploadIT extends MethodNameLoggingIntegrationTest
     @BeforeClass
     public static void setUp() throws IOException, NoSuchAlgorithmException, IotHubException, InterruptedException
     {
-        Map<String, String> env = System.getenv();
-        for (String envName : env.keySet())
-        {
-            if (envName.equals(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME))
-            {
-                iotHubConnectionString = env.get(envName);
-            }
-        }
-
-        assertNotNull(iotHubConnectionString);
-        assertFalse(iotHubConnectionString.isEmpty());
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 

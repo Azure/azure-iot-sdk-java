@@ -14,6 +14,7 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.*;
 import mockit.Deencapsulation;
 import org.junit.*;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -48,25 +49,8 @@ public class ExportImportIT
     @BeforeClass
     public static void setUp() throws URISyntaxException, InvalidKeyException, StorageException, IOException
     {
-        Map<String, String> env = System.getenv();
-
-        if (env.containsKey(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME))
-        {
-            iotHubConnectionString = env.get(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        }
-        else
-        {
-            throw new IllegalArgumentException("Environment variable is not set: " + IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        }
-
-        if (env.containsKey(storageAccountConnectionStringEnvVarName))
-        {
-            storageAccountConnectionString = env.get(storageAccountConnectionStringEnvVarName);
-        }
-        else
-        {
-            throw new IllegalArgumentException("Environment variable is not set: " + storageAccountConnectionStringEnvVarName);
-        }
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        storageAccountConnectionString = Tools.retrieveEnvironmentVariableValue(storageAccountConnectionStringEnvVarName);
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         String uuid = UUID.randomUUID().toString();

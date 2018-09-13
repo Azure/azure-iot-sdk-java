@@ -8,11 +8,9 @@ package tests.integration.com.microsoft.azure.sdk.iot.serviceclient;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -20,22 +18,15 @@ import static org.junit.Assert.assertEquals;
 
 public class ServiceClientIT
 {
-    private static String connectionStringEnvVarName = "IOTHUB_CONNECTION_STRING";
-    private static String connectionString = "";
+    private static String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
+    private static String iotHubConnectionString = "";
     private static String deviceId = "java-service-client-e2e-test";
     private static String content = "abcdefghijklmnopqrstuvwxyz1234567890";
 
     @Before
     public void setUp()
     {
-        Map<String, String> env = System.getenv();
-        for (String envName : env.keySet())
-        {
-            if (envName.equals(connectionStringEnvVarName.toString()))
-            {
-                connectionString = env.get(envName);
-            }
-        }
+        iotHubConnectionString = tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
 
         String uuid = UUID.randomUUID().toString();
         deviceId = deviceId.concat("-" + uuid);
@@ -46,15 +37,10 @@ public class ServiceClientIT
     {
         IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
 
-        if (Tools.isNullOrEmpty(connectionString))
-        {
-            throw new IllegalArgumentException("Environment variable is not set: " + connectionStringEnvVarName);
-        }
-
         // Arrange
 
         // We remove and recreate the device for a clean start
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
         try
         {
@@ -72,7 +58,7 @@ public class ServiceClientIT
         // Act
 
         // Create service client
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, protocol);
+        ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, protocol);
         CompletableFuture<Void> futureOpen = serviceClient.openAsync();
         futureOpen.get();
 
@@ -100,15 +86,10 @@ public class ServiceClientIT
     {
         IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS_WS;
 
-        if (Tools.isNullOrEmpty(connectionString))
-        {
-            throw new IllegalArgumentException("Environment variable is not set: " + connectionStringEnvVarName);
-        }
-
         // Arrange
 
         // We remove and recreate the device for a clean start
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
         try
         {
@@ -125,7 +106,7 @@ public class ServiceClientIT
         // Act
 
         // Create service client
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, protocol);
+        ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, protocol);
         CompletableFuture<Void> futureOpen = serviceClient.openAsync();
         futureOpen.get();
 

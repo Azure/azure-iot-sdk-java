@@ -12,7 +12,11 @@ public class Tools
         String environmentVariableValue = System.getenv().get(environmentVariableName);
         if ((environmentVariableValue == null) || environmentVariableValue.isEmpty())
         {
-            throw new IllegalArgumentException("Environment variable is not set: " + environmentVariableName);
+            environmentVariableValue = System.getProperty(environmentVariableName);
+            if (environmentVariableValue == null || environmentVariableValue.isEmpty())
+            {
+                throw new IllegalArgumentException("Environment variable is not set: " + environmentVariableName);
+            }
         }
 
         return environmentVariableValue;

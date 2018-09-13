@@ -15,6 +15,7 @@ import com.microsoft.azure.storage.StorageException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -41,15 +42,7 @@ public class RegistryManagerIT
     @BeforeClass
     public static void setUp() throws URISyntaxException, InvalidKeyException, StorageException, IOException
     {
-        if (System.getenv().containsKey(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME))
-        {
-            iotHubConnectionString = System.getenv().get(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        }
-        else
-        {
-            throw new IllegalArgumentException("Environment variable is not set: " + IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        }
-
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         deviceId = deviceId.concat("-" + UUID.randomUUID());
     }
