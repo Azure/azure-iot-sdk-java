@@ -37,6 +37,9 @@ import java.nio.charset.StandardCharsets;
  */
 public final class DeviceClient extends InternalClient implements Closeable
 {
+
+    //I'm a message!
+
     /**
      * @deprecated as of release 1.2.27 this value is deprecated and will not be replaced.
      * The hostname attribute name in a connection string.
