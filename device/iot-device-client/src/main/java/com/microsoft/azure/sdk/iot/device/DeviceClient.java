@@ -80,6 +80,8 @@ public final class DeviceClient extends InternalClient implements Closeable
     @Deprecated
     public static long SEND_PERIOD_MILLIS = 10L;
 
+    //I'm a different message!
+
     /**
      * @deprecated as of release 1.2.27 these value is deprecated and replaced by
      * {@link #setOption(String, Object)} <b>SetMinimumPollingInterval</b> to change it.
