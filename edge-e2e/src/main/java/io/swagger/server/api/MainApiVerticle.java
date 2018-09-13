@@ -69,6 +69,12 @@ public class MainApiVerticle extends AbstractVerticle {
         });
 
         /*
+        //
+        // We will most likely never implement this verticle because it doesn't add value.
+        // however, it still needs to exist in the swagger (so we can use the node implementation),
+        // so it ends up in the generated code.  It should probably be removed from the swagger, but
+        // that's a bigger change.
+        //
         vertx.deployVerticle("io.swagger.server.api.verticle.EventhubApiVerticle", res -> {
             if (res.succeeded()) {
                 LOGGER.info("EventhubApiVerticle : Deployed");
