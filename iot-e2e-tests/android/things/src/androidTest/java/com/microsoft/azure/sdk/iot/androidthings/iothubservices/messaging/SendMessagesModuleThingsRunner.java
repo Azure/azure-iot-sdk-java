@@ -37,7 +37,7 @@ public class SendMessagesModuleThingsRunner extends SendMessagesTests
     @Rule
     public Rerun count = new Rerun(3);
 
-    public SendMessagesModuleThingsRunner(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public SendMessagesModuleThingsRunner(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(client, protocol, identity, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }

@@ -39,7 +39,7 @@ public class DeviceMethodErrInjModuleThingsRunner extends DeviceMethodErrInjTest
     @Rule
     public Rerun count = new Rerun(3);
 
-    public DeviceMethodErrInjModuleThingsRunner(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DeviceMethodErrInjModuleThingsRunner(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceTestManager, protocol, authenticationType, clientType, identity, publicKeyCert, privateKey, x509Thumbprint);
     }
