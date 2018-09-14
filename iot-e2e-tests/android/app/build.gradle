@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 27
 
     defaultConfig {
         applicationId "com.iothub.azure.microsoft.com.androidsample"
         minSdkVersion 24
-        targetSdkVersion 25
+        targetSdkVersion 27
         multiDexEnabled true
         versionCode 1
         versionName "1.0"
@@ -46,7 +46,7 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:25.4.0'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:multidex:1.0.3'
     implementation ('com.microsoft.azure.sdk.iot:iot-e2e-common:0.20.0'){
         exclude module: 'junit'
@@ -59,10 +59,4 @@ dependencies {
 repositories {
     mavenLocal()
     mavenCentral()
-}
-
-dependencies {
-    // Remote binary dependency
-    //compile 'com.microsoft.azure.sdk.iot:iot-device-client:1.1.25'
-    ///compile 'com.microsoft.azure.sdk.iot:iot-service-client:1.8.24'
 }
