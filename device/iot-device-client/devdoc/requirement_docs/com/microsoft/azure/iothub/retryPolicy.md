@@ -25,7 +25,7 @@ You can also look deeper for protocol specific exceptions. For example, if you w
 
 Depending on the type of error the SDK may try a less aggressive retry policy, or not retry at all and let the user decide what to do.
 
-# How does the SDK deals with these errors?
+# How does the SDK deal with these errors?
 
 Depending on the error type and the retry policy that has been configured, the SDK may or may not retry operations that could not be completed because of an error. The following sections describe the constructs used in the SDK to make this decision, the default behavior, and how to alter it.
 
