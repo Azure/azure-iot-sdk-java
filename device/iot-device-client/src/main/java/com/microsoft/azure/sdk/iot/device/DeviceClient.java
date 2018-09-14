@@ -602,6 +602,19 @@ public final class DeviceClient extends InternalClient implements Closeable
                 }
                 break;
             }
+            // Codes_SRS_DEVICECLIENT_34_043: ["SetCertificateAuthority" - set the certificate to verify peer.]
+            case SET_CERTIFICATE_AUTHORITY:
+            {
+                if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
+                {
+                    if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.OPENED)
+                    {
+                        // Codes_SRS_DEVICECLIENT_34_042: [If this function is called with the SET_CERTIFICATE_AUTHORITY option, and is using an open transport client, this function shall throw an IllegalStateException]
+                        throw new IllegalStateException("setOption " + SET_CERTIFICATE_PATH + " only works when the transport is closed");
+                    }
+                }
+                break;
+            }
             //Codes_SRS_DEVICECLIENT_25_021: ["SetSASTokenExpiryTime" - Time in secs to specify SAS Token Expiry time.]
             case SET_SAS_TOKEN_EXPIRY_TIME:
             {

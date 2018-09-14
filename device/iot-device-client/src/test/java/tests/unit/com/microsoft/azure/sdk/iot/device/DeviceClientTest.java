@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 
+import static com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType.SINGLE_CLIENT;
+import static com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType.USE_TRANSPORTCLIENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -93,7 +95,7 @@ public class DeviceClientTest
                 times = 1;
 
                 IoTHubConnectionType ioTHubConnectionType = Deencapsulation.getField(client, "ioTHubConnectionType");
-                assertEquals(IoTHubConnectionType.USE_TRANSPORTCLIENT, ioTHubConnectionType);
+                assertEquals(USE_TRANSPORTCLIENT, ioTHubConnectionType);
 
                 DeviceIO deviceIO = Deencapsulation.getField(client, "deviceIO");
                 assertNull(deviceIO);
@@ -139,7 +141,7 @@ public class DeviceClientTest
                 times = 1;
 
                 IoTHubConnectionType ioTHubConnectionType = Deencapsulation.getField(client, "ioTHubConnectionType");
-                assertEquals(IoTHubConnectionType.SINGLE_CLIENT, ioTHubConnectionType);
+                assertEquals(SINGLE_CLIENT, ioTHubConnectionType);
 
                 TransportClient transportClient = Deencapsulation.getField(client, "transportClient");
                 assertNull(transportClient);
@@ -180,7 +182,7 @@ public class DeviceClientTest
                 times = 1;
 
                 IoTHubConnectionType ioTHubConnectionType = Deencapsulation.getField(client, "ioTHubConnectionType");
-                assertEquals(IoTHubConnectionType.SINGLE_CLIENT, ioTHubConnectionType);
+                assertEquals(SINGLE_CLIENT, ioTHubConnectionType);
 
                 TransportClient transportClient = Deencapsulation.getField(client, "transportClient");
                 assertNull(transportClient);
@@ -1941,6 +1943,70 @@ public class DeviceClientTest
         // assert
         assertNull(Deencapsulation.getField(client, "config"));
         assertNull(Deencapsulation.getField(client, "deviceIO"));
+    }
+
+    // Tests_SRS_DEVICECLIENT_34_042: [If this function is called with the SET_CERTIFICATE_AUTHORITY option, and is using an open transport client, this function shall throw an IllegalStateException]
+    @Test (expected = IllegalStateException.class)
+    public void setCertificateAuthorityThrowsIfOpenTransportClient()
+    {
+        //arrange
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "transportClient", mockTransportClient);
+        Deencapsulation.setField(client, "ioTHubConnectionType", USE_TRANSPORTCLIENT);
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockTransportClient, "getTransportClientState");
+                result = TransportClient.TransportClientState.OPENED;
+            }
+        };
+
+        //act
+        client.setOption("SetCertificateAuthority", "asdf");
+
+        //assert
+
+    }
+
+    // Tests_SRS_DEVICECLIENT_34_043: ["SetCertificateAuthority" - set the certificate to verify peer.]
+    @Test
+    public void setCertificateAuthoritySucceeds()
+    {
+        //arrange
+        final String expectedCert = "some cert";
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "transportClient", mockTransportClient);
+        Deencapsulation.setField(client, "ioTHubConnectionType", SINGLE_CLIENT);
+        Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+
+        new NonStrictExpectations()
+        {
+            {
+                mockDeviceIO.isOpen();
+                result = false;
+
+                mockConfig.getProtocol();
+                result = IotHubClientProtocol.MQTT;
+
+                mockConfig.getAuthenticationProvider();
+                result = mockIotHubAuthenticationProvider;
+            }
+        };
+
+        //act
+        client.setOption("SetCertificateAuthority", expectedCert);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockIotHubAuthenticationProvider.setIotHubTrustedCert(expectedCert);
+                times = 1;
+            }
+        };
     }
 
     private void deviceClientInstanceExpectation(final IotHubClientProtocol protocol)

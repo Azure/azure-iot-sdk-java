@@ -5,7 +5,6 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.serviceclient;
 
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
@@ -16,9 +15,9 @@ import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import org.junit.*;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.DeviceEmulator;
+import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

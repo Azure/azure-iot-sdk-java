@@ -5,69 +5,45 @@
 
 package com.microsoft.azure.sdk.iot.android;
 
-import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.os.Bundle;
+import android.support.test.InstrumentationRegistry;
+
 import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.common.TestConstants;
+import com.microsoft.azure.sdk.iot.device.InternalClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.Message;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.android.helper.Tools;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
+import java.util.Collection;
 
-@MediumTest
-@RunWith(AndroidJUnit4.class)
-public class SendMessagesIT
+@RunWith(Parameterized.class)
+public class SendMessagesIT extends SendMessagesCommon
 {
-
-    public SendMessagesIT()
+    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
+    @Parameterized.Parameters(name = "{1} with {3} auth using {4}")
+    public static Collection inputs() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
+        Bundle bundle = InstrumentationRegistry.getArguments();
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME, bundle);
+        privateKey = Tools.retrieveEnvironmentVariableValue("IOTHUB_E2E_X509_PRIVATE_KEY_BASE64", bundle);
+        publicKeyCert = Tools.retrieveEnvironmentVariableValue("IOTHUB_E2E_X509_CERT_BASE64", bundle);
+        x509Thumbprint = Tools.retrieveEnvironmentVariableValue("IOTHUB_E2E_X509_THUMBPRINT", bundle);
+
+        return SendMessagesCommon.inputsCommon();
     }
 
-    //How much messages each device will send to the hub for each connection.
-    private static final Integer NUM_MESSAGES_PER_CONNECTION = 10;
-
-    // How much to wait until a message makes it to the server, in milliseconds
-    private static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
-
-    //How many milliseconds between retry
-    private static final Integer RETRY_MILLISECONDS = 100;
-
-    //Device Connection String
-    private String connString = "";
-
-    @Test
-    public void SendMessagesOverAmqps() throws Exception
+    public SendMessagesIT(InternalClient client, IotHubClientProtocol protocol, Device device, AuthenticationType authenticationType, String clientType)
     {
-        DeviceClient client = new DeviceClient(connString, IotHubClientProtocol.AMQPS);
-        SendMessagesCommon.SendMessage(client, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        super(client, protocol, device, authenticationType, clientType);
     }
-
-    @Test
-    @Ignore
-    public void SendMessagesOverAmqps_multithreaded() throws Exception
-    {
-        Assert.fail("Multithreaded messages over AMQPS protocol not suported");
-    }
-
-    @Test
-    public void SendMessagesOverMqtt() throws Exception
-    {
-        String messageString = "Java client e2e test message over Mqtt protocol";
-        Message msg = new Message(messageString);
-        DeviceClient client = new DeviceClient(connString, IotHubClientProtocol.MQTT);
-        SendMessagesCommon.SendMessage(client, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-    }
-
-    @Test
-    public void SendMessagesOverHttps() throws Exception
-    {
-        String messageString = "Java client e2e test message over Https protocol";
-        Message msg = new Message(messageString);
-        DeviceClient client = new DeviceClient(connString, IotHubClientProtocol.HTTPS);
-        SendMessagesCommon.SendMessage(client, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
-    }
-
 }

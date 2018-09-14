@@ -5,12 +5,12 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.serviceclient;
 
+import com.microsoft.azure.sdk.iot.common.iothubservices.MethodNameLoggingIntegrationTest;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -20,7 +20,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.*;
-import static tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools.retrieveEnvironmentVariableValue;
+import static com.microsoft.azure.sdk.iot.common.helpers.Tools.retrieveEnvironmentVariableValue;
 
 @RunWith(Parameterized.class)
 public class ServiceClientIT extends MethodNameLoggingIntegrationTest

@@ -59,12 +59,18 @@ Path to certificate is an **optional** argument and would be needed in case you 
 1. Sample has dependency on the remote library `iot-device-client`. It is currently set to use the latest version of the library. If you want to choose a different version, please update `device\iot-device-samples\android-sample\app\build.gradle` file to point to the version you want to use. For list of available versions search [Maven Repository][maven-repository]
 
 ## Logging 
-Java client SDK uses Apache [Log4j][log4j-logging] Java logging framework. To enable **logging** in the Azure IoT Java client SDK via your application, you can set [log4j.properties][log4j-properties] to the appropriate values of your choice. 
-As an example, **sample** log4j.properties file is located at iot-device-samples\send-receive-sample\src\main\resources.
+The java device client SDK uses the Apache [SLF4J][SLF4J-logging] logging facade. To enable logging in
+your application, you will need to include a logging implementation dependency in your application to consume
+this SDK's logging facade. An example of this can be found in the device client's "send receive sample" folder
+
+In that folder, you will find the pom file declares a dependency on slf4j-simple which is a simple, non-configurable
+example of one such consumer of the logging facade. When using this logger in particular, you will get all logs above
+and including INFO level printed to your console. There are other possible consumers of SLF4J, and it is well documented
+on their [website][SLF4J-logging]
 
 [devbox-setup]: ../../doc/java-devbox-setup.md
 [lnk-setup-iot-hub]: https://aka.ms/howtocreateazureiothub
 [lnk-manage-iot-hub]: https://aka.ms/manageiothub
 [android-studio]: https://developer.android.com/studio/index.html
-[log4j-logging]: https://logging.apache.org/log4j/1.2/index.html
+[SLF4J-logging]: https://www.slf4j.org/
 [log4j-properties]: https://logging.apache.org/log4j/1.2/manual.html

@@ -1,4 +1,6 @@
 # Microsoft Azure IoT SDKs for Java
+[![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/java/Java%20Nightly%20Build%20Canary)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=39)
+
 This repository contains the following:
 * **Azure IoT Hub device SDK for Java**: connect client devices to Azure IoT Hub (supports Java 7+)
 * **Azure IoT Hub service SDK for Java**: enables developing back-end applications for Azure IoT (supports Java 8+)

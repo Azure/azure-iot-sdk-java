@@ -14,7 +14,7 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.*;
 import mockit.Deencapsulation;
 import org.junit.*;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
