@@ -158,7 +158,6 @@ public class IotHubSSLContextTest
         //arrange
         final String publicKeyCert = "someCert";
         final String privateKey = "someKey";
-        final String temporaryPassword = "00000000-0000-0000-0000-000000000000";
 
         final Collection<X509Certificate> testCertChain = new ArrayList<>();
         testCertChain.add(mockedX509Certificate);
@@ -174,9 +173,6 @@ public class IotHubSSLContextTest
 
                 KeyManagerFactory.getInstance("SunX509");
                 result = mockKeyManagerFactory;
-
-                mockUUID.randomUUID();
-                result = UUID.fromString(temporaryPassword);
 
                 Deencapsulation.newInstance(IotHubCertificateManager.class);
                 result = mockedCertificateManager;
@@ -287,7 +283,6 @@ public class IotHubSSLContextTest
         //arrange
         final String publicKeyCert = "someCert";
         final String privateKey = "someKey";
-        final String temporaryPassword = "00000000-0000-0000-0000-000000000000";
         final String iotHubTrustedCert = "some trusted cert";
 
         final Collection<X509Certificate> testCertChain = new ArrayList<>();
@@ -307,9 +302,6 @@ public class IotHubSSLContextTest
 
                 KeyManagerFactory.getInstance("SunX509");
                 result = mockKeyManagerFactory;
-
-                mockUUID.randomUUID();
-                result = UUID.fromString(temporaryPassword);
 
                 Deencapsulation.newInstance(IotHubCertificateManager.class);
                 result = mockedCertificateManager;
@@ -362,7 +354,6 @@ public class IotHubSSLContextTest
         //arrange
         final String publicKeyCert = "someCert";
         final String privateKey = "someKey";
-        final String temporaryPassword = "00000000-0000-0000-0000-000000000000";
         final String iotHubTrustedCertPath = "some trusted cert path";
 
         final Collection<X509Certificate> testCertChain = new ArrayList<>();
@@ -382,9 +373,6 @@ public class IotHubSSLContextTest
 
                 KeyManagerFactory.getInstance("SunX509");
                 result = mockKeyManagerFactory;
-
-                mockUUID.randomUUID();
-                result = UUID.fromString(temporaryPassword);
 
                 Deencapsulation.newInstance(IotHubCertificateManager.class);
                 result = mockedCertificateManager;

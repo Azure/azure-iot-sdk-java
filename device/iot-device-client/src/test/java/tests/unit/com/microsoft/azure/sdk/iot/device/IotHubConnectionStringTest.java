@@ -24,9 +24,9 @@ public class IotHubConnectionStringTest
     private static final String VALID_HUBNAME = "iothub";
     private static final String VALID_HOSTNAME = VALID_HUBNAME + ".device.com";
     private static final String VALID_DEVICEID = "testdevice";
-    private static final String VALID_SHARED_ACCESS_KEY = "key+adjkl234j52=";
-    private static final String VALID_SHARED_ACCESS_TOKEN = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + Long.MAX_VALUE;
-    private static final String EXPIRED_SHARED_ACCESS_TOKEN = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=0";
+    private static final String VALID_SHARED_ACCESS_KEY = "blah";
+    private static final String VALID_SHARED_ACCESS_TOKEN = "SharedAccessSignature sr=balh&sig=blah2&se=" + Long.MAX_VALUE;
+    private static final String EXPIRED_SHARED_ACCESS_TOKEN = "SharedAccessSignature sr=blah&sig=blah2&se=0";
     private static final String IOTHUB_CONNECTION_STRING_CLASS = "com.microsoft.azure.sdk.iot.device.IotHubConnectionString";
     private static final String VALID_MODULEID = "moduleId";
     private static final String VALID_GATEWAYHOSTNAME = "edgeHubHostName";

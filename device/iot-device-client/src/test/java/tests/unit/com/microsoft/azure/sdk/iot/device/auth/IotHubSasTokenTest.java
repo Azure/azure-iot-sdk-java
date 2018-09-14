@@ -203,7 +203,7 @@ public class IotHubSasTokenTest
     @Test
     public void setValidSASTokenCorrectly() throws URISyntaxException
     {
-        String sastoken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + Long.MAX_VALUE;
+        String sastoken = "SharedAccessSignature sr=blah&sig=blah&se=" + Long.MAX_VALUE;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},
@@ -228,7 +228,7 @@ public class IotHubSasTokenTest
     @Test(expected = IllegalArgumentException.class)
     public void doesNotSetInvalidSASToken() throws URISyntaxException
     {
-        String sastoken = "SharedAccessSignature sr =sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig =S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se =" + Long.MAX_VALUE;
+        String sastoken = "SharedAccessSignature sr=blah&sig=blah&se=" + Long.MAX_VALUE;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},
@@ -250,7 +250,7 @@ public class IotHubSasTokenTest
     @Test(expected = IllegalArgumentException.class)
     public void doesNotSetSASTokenWithoutSe() throws URISyntaxException
     {
-        String sastoken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d";
+        String sastoken = "SharedAccessSignature sr=blah&sig=blah";
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},
@@ -272,7 +272,7 @@ public class IotHubSasTokenTest
     @Test(expected = IllegalArgumentException.class)
     public void doesNotSetSASTokenWithoutSr() throws URISyntaxException
     {
-        String sastoken = "SharedAccessSignature sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + Long.MAX_VALUE;
+        String sastoken = "SharedAccessSignature sig=blah&se=" + Long.MAX_VALUE;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},
@@ -294,7 +294,7 @@ public class IotHubSasTokenTest
     @Test(expected = IllegalArgumentException.class)
     public void doesNotSetSASTokenWithoutSig() throws URISyntaxException
     {
-        String sastoken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&se=" + Long.MAX_VALUE;;
+        String sastoken = "SharedAccessSignature sr=srValue&se=" + Long.MAX_VALUE;;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},
@@ -317,7 +317,7 @@ public class IotHubSasTokenTest
     {
         //This expiryTime does not expire for a few billion years
         Long expiredExpiryTime = 0L;
-        final String sasTokenExpired = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + expiredExpiryTime;
+        final String sasTokenExpired = "SharedAccessSignature sr=srValue&sig=sigValue&se=" + expiredExpiryTime;
 
         new NonStrictExpectations()
         {
@@ -342,7 +342,7 @@ public class IotHubSasTokenTest
     {
         //This expiryTime does not expire for a few billion years
         Long expiryTime = Long.MAX_VALUE;
-        final String sasTokenNotExpired = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + expiryTime;
+        final String sasTokenNotExpired = "SharedAccessSignature sr=srValue&sig=sigValue&se=" + expiryTime;
 
         new NonStrictExpectations()
         {
@@ -367,7 +367,7 @@ public class IotHubSasTokenTest
     {
         //Typical order of fields in SAS token is sr=<>&sig=<>&se=<>, however these should be able to be reorganized freely
         //This test tries se=<>&sr=<>&sig=<>
-        String sastoken = "SharedAccessSignature se=" + Long.MAX_VALUE + "&sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d";
+        String sastoken = "SharedAccessSignature se=" + Long.MAX_VALUE + "&sr=srValue&sig=sigValue";
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},
@@ -393,7 +393,7 @@ public class IotHubSasTokenTest
     {
         //Typical order of fields in SAS token is sr=<>&sig=<>&se=<>, however these should be able to be reorganized freely
         //This test tries se=<>&sig=<>&sr=<>
-        String sastoken = "SharedAccessSignature se=" + Long.MAX_VALUE + "&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID";
+        String sastoken = "SharedAccessSignature se=" + Long.MAX_VALUE + "&sig=sigValue&sr=srValue";
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},
@@ -417,7 +417,7 @@ public class IotHubSasTokenTest
     public void emptyExpiryTimeFieldValueThrowsIllegalArgumentException()
     {
         String expiryTime = "";
-        String sastoken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + expiryTime;
+        String sastoken = "SharedAccessSignature sr=srValue&sig=sigValue&se=" + expiryTime;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},
@@ -438,7 +438,7 @@ public class IotHubSasTokenTest
     public void emptySignatureFieldValueThrowsIllegalArgumentException()
     {
         Long expiryTime = Long.MAX_VALUE;
-        String sastoken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=&se=" + expiryTime;
+        String sastoken = "SharedAccessSignature sr=srValue&sig=&se=" + expiryTime;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},
@@ -459,7 +459,7 @@ public class IotHubSasTokenTest
     public void emptyResourceURIFieldValueThrowsIllegalArgumentException()
     {
         Long expiryTime = Long.MAX_VALUE;
-        String sastoken = "SharedAccessSignature sr=&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + expiryTime;
+        String sastoken = "SharedAccessSignature sr=&sig=sigValue&se=" + expiryTime;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},
@@ -481,7 +481,7 @@ public class IotHubSasTokenTest
     public void getSasTokenReturnsSavedSasToken()
     {
         //arrange
-        String sastoken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + Long.MAX_VALUE;
+        String sastoken = "SharedAccessSignature sr=srValue&sig=sigValue&se=" + Long.MAX_VALUE;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},
@@ -511,7 +511,7 @@ public class IotHubSasTokenTest
     public void constructorThrowsIfNoKeyOrTokenPresent()
     {
         //arrange
-        String sastoken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=" + Long.MAX_VALUE;
+        String sastoken = "SharedAccessSignature sr=srValue&sig=sigValue&se=" + Long.MAX_VALUE;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},

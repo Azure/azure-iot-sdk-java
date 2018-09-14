@@ -910,8 +910,7 @@ public class DeviceClientTest
                 result = true;
             }
         };
-        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
-                + "SharedAccessSignature=SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=1469813873";
+        final String connString = "some string";
         final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
 
         DeviceClient client = new DeviceClient(connString, protocol);

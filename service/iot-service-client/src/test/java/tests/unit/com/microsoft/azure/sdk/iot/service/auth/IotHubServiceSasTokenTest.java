@@ -54,7 +54,6 @@ public class IotHubServiceSasTokenTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        String expectedToken = "SharedAccessSignature sr=hostname.b.c.d&sig=M%2FT5oCM8WWs%2B%2FMv7okAVmfrzVM%2FGUyA7EIp%2FfKo8BeQ%3D&se=1474065852&skn=ACCESSKEYNAME";
 
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
 
@@ -95,7 +94,6 @@ public class IotHubServiceSasTokenTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        String expectedToken = "SharedAccessSignature sr=hostname.b.c.d&sig=M%2FT5oCM8WWs%2B%2FMv7okAVmfrzVM%2FGUyA7EIp%2FfKo8BeQ%3D&se=1474065852&skn=ACCESSKEYNAME";
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
 
         // Act
@@ -118,9 +116,8 @@ public class IotHubServiceSasTokenTest
         String hostName = "HOSTNAME." + iotHubName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
+        String sharedAccessKey = "key";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        String expectedToken = "SharedAccessSignature sr=hostname.b.c.d&sig=M%2FT5oCM8WWs%2B%2FMv7okAVmfrzVM%2FGUyA7EIp%2FfKo8BeQ%3D&se=1474065852&skn=ACCESSKEYNAME";
 
         // Act
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);

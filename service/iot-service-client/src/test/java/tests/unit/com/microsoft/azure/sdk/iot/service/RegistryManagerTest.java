@@ -71,16 +71,16 @@ public class RegistryManagerTest
             "Disabled\",\"statusReason\":null,\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"" +
             "lastActivityTime\":\"0000-00-00T00:00:00+00:00\",\"cloudToDeviceMessageCount\":0,\n" +
             "\"authentication\":\n" +
-            "{\"symmetricKey\":{\"primaryKey\":\"L1jehoyM+E2gQ5/x446tv9trVrQ2/AoS0BsXUnw3vgE=\",\"" +
-            "secondaryKey\":\"JyJdmx4UnIj3KX1HAkTSguDEEDiz2VW4TmbjdY0+vaw=\"}}}";
+            "{\"symmetricKey\":{\"primaryKey\":\"firstKey\",\"" +
+            "secondaryKey\":\"secondKey\"}}}";
 
     final String moduleJson = "{\"deviceId\":\"mockdevice\", \"moduleId\":\"mockmodule\", \"generationId\":\"635864360921156105\",\"etag\":\"MA==\",\"" +
             "connectionState\":\"Disconnected\",\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"status\":\"" +
             "Disabled\",\"statusReason\":null,\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"" +
             "lastActivityTime\":\"0000-00-00T00:00:00+00:00\",\"cloudToDeviceMessageCount\":0,\n" +
             "\"authentication\":\n" +
-            "{\"symmetricKey\":{\"primaryKey\":\"L1jehoyM+E2gQ5/x446tv9trVrQ2/AoS0BsXUnw3vgE=\",\"" +
-            "secondaryKey\":\"JyJdmx4UnIj3KX1HAkTSguDEEDiz2VW4TmbjdY0+vaw=\", \"managedBy\":\"xxx\"}}}";
+            "{\"symmetricKey\":{\"primaryKey\":\"firstKey\",\"" +
+            "secondaryKey\":\"secondKey\", \"managedBy\":\"xxx\"}}}";
 
     final String configJson = "{\"id\":\"mockconfig\",\"schemaVersion\":\"1.0\",\"etag\":\"MQ==\",\"" +
             "labels\":{\"App\":\"label2\"},\"content\":{\"modulesContent\":{}, \"deviceContent\":{\"properties.desired.settings1\": {\"c\":3,\"d\":4}}}," +
