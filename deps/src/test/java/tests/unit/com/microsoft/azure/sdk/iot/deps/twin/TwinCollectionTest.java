@@ -311,28 +311,32 @@ public class TwinCollectionTest
         {
             {
                 put(VALID_KEY_NAME, VALID_VALUE_NAME);
-                put("MaxSpeed", new TwinCollection()
-                {
+                //added the properties -> reported levels that were missing
+                put("properties", new TwinCollection() {
                     {
-                        put("Value", 500.0);
-                        put("NewValue", 300.0);
-                        put("Inner1", new TwinCollection()
-                        {
+                        put("reported", new TwinCollection(){
                             {
-                                put("Inner2", new TwinCollection()
-                                {
+                                put("MaxSpeed", new TwinCollection() {
                                     {
-                                        put("Inner3", new TwinCollection()
-                                        {
+                                        put("Value", 500.0);
+                                        put("NewValue", 300.0);
+                                        put("Inner1", new TwinCollection() {
                                             {
-                                                put("Inner4", new TwinCollection()
-                                                {
+                                                put("Inner2", new TwinCollection() {
                                                     {
-                                                    	put("Inner5", new TwinCollection()
-                                                        {
-                                                    		{
-                                                    			put("Inner6", "FinalInnerValue");
-                                                    		}
+                                                        put("Inner3", new TwinCollection() {
+                                                            {
+                                                                put("Inner4", new TwinCollection() {
+                                                                    {
+                                                                        put("Inner5", new TwinCollection()
+                                                                        {
+                                                                            {
+                                                                                put("Inner6", "FinalInnerValue");
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                });
+                                                            }
                                                         });
                                                     }
                                                 });
@@ -492,24 +496,28 @@ public class TwinCollectionTest
         {
             {
                 put(VALID_KEY_NAME, VALID_VALUE_NAME);
-                put("MaxSpeed", new TwinCollection()
-                {
+                //added the properties -> reported levels that were missing
+                put("properties", new TwinCollection() {
                     {
-                        put("Value", 500.0);
-                        put("NewValue", 300.0);
-                        put("Inner1", new TwinCollection()
-                        {
+                        put("reported", new TwinCollection(){
                             {
-                                put("Inner2", new TwinCollection()
-                                {
+                                put("MaxSpeed", new TwinCollection() {
                                     {
-                                        put("Inner3", new TwinCollection()
-                                        {
+                                        put("Value", 500.0);
+                                        put("NewValue", 300.0);
+                                        put("Inner1", new TwinCollection() {
                                             {
-                                                put("Inner4", new TwinCollection()
-                                                {
+                                                put("Inner2", new TwinCollection() {
                                                     {
-                                                        put("Inner5", "FinalInnerValue");
+                                                        put("Inner3", new TwinCollection() {
+                                                            {
+                                                                put("Inner4", new TwinCollection() {
+                                                                    {
+                                                                        put("Inner5", "FinalInnerValue");
+                                                                    }
+                                                                });
+                                                            }
+                                                        });
                                                     }
                                                 });
                                             }
@@ -815,29 +823,33 @@ public class TwinCollectionTest
         {
             {
                 put(VALID_KEY_NAME, VALID_VALUE_NAME);
-                put("MaxSpeed", new TwinCollection()
-                {
+                //added the properties -> reported levels that were missing
+                put("properties", new TwinCollection() {
                     {
-                        put("Value", 500.0);
-                        put("NewValue", 300.0);
-                        put("Inner1", new TwinCollection()
-                        {
+                        put("reported", new TwinCollection(){
                             {
-                                put("Inner2", new TwinCollection()
-                                {
+                                put("MaxSpeed", new TwinCollection() {
                                     {
-                                        put("Inner3", new TwinCollection()
-                                        {
+                                        put("Value", 500.0);
+                                        put("NewValue", 300.0);
+                                        put("Inner1", new TwinCollection() {
                                             {
-                                                put("Inner4", new TwinCollection()
-                                                {
+                                                put("Inner2", new TwinCollection() {
                                                     {
-                                                    	put("Inner5", new TwinCollection() 
-                                                    	{
-                                                    		{
-                                                    			put("Inner6", "FinalInnerValue");
-                                                    		}
-                                                    	});
+                                                        put("Inner3", new TwinCollection() {
+                                                            {
+                                                                put("Inner4", new TwinCollection() {
+                                                                    {
+                                                                        put("Inner5", new TwinCollection()
+                                                                        {
+                                                                            {
+                                                                                put("Inner6", "FinalInnerValue");
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                });
+                                                            }
+                                                        });
                                                     }
                                                 });
                                             }
