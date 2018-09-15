@@ -3,7 +3,7 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package tests.integration.com.microsoft.azure.sdk.iot;
+package com.microsoft.azure.sdk.iot.common.iothubservices;
 
 import org.junit.Rule;
 import org.junit.rules.TestRule;

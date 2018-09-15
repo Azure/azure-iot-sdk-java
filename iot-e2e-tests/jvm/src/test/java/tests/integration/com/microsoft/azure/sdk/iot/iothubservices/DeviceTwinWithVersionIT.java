@@ -18,8 +18,8 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
-import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
-import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.DeviceConnectionString;
+import com.microsoft.azure.sdk.iot.common.iothubservices.MethodNameLoggingIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;

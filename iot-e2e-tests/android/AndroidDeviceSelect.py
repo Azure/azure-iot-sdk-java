@@ -31,7 +31,6 @@ def waitForDeviceToComeOnline():
         deviceBootCOmpleted = os.popen("adb shell getprop sys.boot_completed").read()
 
 def writeToFile(deviceName):
-    #os.popen("echo " + deviceName + ">device_udid.txt").read()
     os.popen("setx ANDROID_DEVICE_NAME "+deviceName).read()
 
 def getDeviceList():

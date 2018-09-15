@@ -5,12 +5,12 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.serviceclient;
 
+import com.microsoft.azure.sdk.iot.common.iothubservices.MethodNameLoggingIntegrationTest;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
 
 import java.io.IOException;
 import java.util.Arrays;

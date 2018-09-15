@@ -7,73 +7,43 @@ package com.microsoft.azure.sdk.iot.android;
 
 import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.util.Log;
-import android.support.test.runner.AndroidJUnit4;
 
-import com.microsoft.azure.sdk.iot.common.ErrorInjectionHelper;
-import com.microsoft.azure.sdk.iot.common.MessageAndResult;
-import com.microsoft.azure.sdk.iot.common.iothubservices.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
+import com.microsoft.azure.sdk.iot.common.TestConstants;
+import com.microsoft.azure.sdk.iot.device.InternalClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.service.ServiceClient;
+import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.android.helper.Tools;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
+import java.util.Collection;
 
-@RunWith(AndroidJUnit4.class)
-public class SendMessagesIT
+@RunWith(Parameterized.class)
+public class SendMessagesIT extends SendMessagesCommon
 {
-
-    public SendMessagesIT()
-    {
-    }
-
-    //How much messages each device will send to the hub for each connection.
-    private static final List<MessageAndResult> NORMAL_MESSAGES_TO_SEND = new ArrayList<>();
-
-    //How much messages each device will send to the hub for each connection.
-    private static final Integer NUM_MESSAGES_PER_CONNECTION = 6;
-
-
-    /**
-     * Each error injection test will take a list of messages to send. In that list, there will be an error injection message in the middle
-     */
-    private static void buildMessageLists()
-    {
-        MessageAndResult normalMessageAndExpectedResult = new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY);
-        for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; i++)
-        {
-            NORMAL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY));
-        }
-    }
-
-    // How much to wait until a message makes it to the server, in milliseconds
-    private static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
-
-    //How many milliseconds between retry
-    private static final Integer RETRY_MILLISECONDS = 100;
-
-    //Device Connection String
-    private String connString;
-
-    private static String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
-
-    @Test
-    public void SendMessagesOverAmqps() throws Exception
+    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
+    @Parameterized.Parameters(name = "{1} with {3} auth using {4}")
+    public static Collection inputs() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         Bundle bundle = InstrumentationRegistry.getArguments();
-        connString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME, bundle);
-        DeviceClient client = new DeviceClient(connString, IotHubClientProtocol.AMQPS);
-        IotHubServicesCommon.sendMessages(client, IotHubClientProtocol.AMQPS, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0 , null);
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME, bundle);
+        privateKey = Tools.retrieveEnvironmentVariableValue("IOTHUB_E2E_X509_PRIVATE_KEY_BASE64", bundle);
+        publicKeyCert = Tools.retrieveEnvironmentVariableValue("IOTHUB_E2E_X509_CERT_BASE64", bundle);
+        x509Thumbprint = Tools.retrieveEnvironmentVariableValue("IOTHUB_E2E_X509_THUMBPRINT", bundle);
+
+        return SendMessagesCommon.inputsCommon();
+    }
+
+    public SendMessagesIT(InternalClient client, IotHubClientProtocol protocol, Device device, AuthenticationType authenticationType, String clientType)
+    {
+        super(client, protocol, device, authenticationType, clientType);
     }
 }

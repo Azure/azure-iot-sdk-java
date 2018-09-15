@@ -20,5 +20,5 @@ ECHO installing test apk on device
 call adb -s %ANDROID_DEVICE_NAME% install -r -g  app\build\outputs\apk\androidTest\debug\app-debug-androidTest.apk
 @REM -- Starting Android Tests --
 ECHO starting android tests
-python runInsrumentationTests.py %ANDROID_DEVICE_NAME%
+python runInstrumentationTests.py %ANDROID_DEVICE_NAME%
 )

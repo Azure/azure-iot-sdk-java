@@ -4,7 +4,7 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        applicationId "com.iothub.azure.microsoft.com.androidsample"
+        applicationId "com.iothub.azure.microsoft.com.androide2e"
         minSdkVersion 24
         targetSdkVersion 27
         multiDexEnabled true
@@ -18,7 +18,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
-            debuggable true
+            debuggable false
         }
     }
 

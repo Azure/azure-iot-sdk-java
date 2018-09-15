@@ -5,7 +5,7 @@
  *
  */
 
-package tests.integration.com.microsoft.azure.sdk.iot.helpers;
+package com.microsoft.azure.sdk.iot.common;
 
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import sun.security.tools.keytool.CertAndKeyGen;

@@ -23,10 +23,10 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.DeviceConnectionString;
-import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.DeviceConnectionString;
+import com.microsoft.azure.sdk.iot.common.iothubservices.MethodNameLoggingIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
+import com.microsoft.azure.sdk.iot.common.X509Cert;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

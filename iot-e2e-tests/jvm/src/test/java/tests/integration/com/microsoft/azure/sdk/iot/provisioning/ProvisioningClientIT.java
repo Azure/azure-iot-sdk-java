@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
+import com.microsoft.azure.sdk.iot.common.X509Cert;
 
 import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
