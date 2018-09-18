@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
 
 /*
     Unit tests for Device Twin
-    Coverage : 94% method, 80% line
+    Coverage : 94% method, 97% line
  */
 public class DeviceTwinTest
 {
@@ -949,7 +949,7 @@ public class DeviceTwinTest
 
     //Tests_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinState and provide the response on DeviceTwinDevice.]
     @Test
-    public void nextRetrievesCorrectly() throws IotHubException, IOException
+    public void nextRetrievesCorrectlyWithoutModuleId() throws IotHubException, IOException
     {
         //arrange
         final Integer version = 15;
@@ -975,6 +975,8 @@ public class DeviceTwinTest
                 result = expectedString;
                 mockedTwinState.getDeviceId();
                 result = "testDeviceID";
+                mockedTwinState.getModuleId();
+                result = null;
                 mockedTwinState.getVersion();
                 result = version;
                 mockedTwinState.getETag();
@@ -1011,6 +1013,77 @@ public class DeviceTwinTest
         assetEqualSetAndMap(result.getTags(), (Map)tags);
         assetEqualSetAndMap(result.getDesiredProperties(), (Map)dp);
         assetEqualSetAndMap(result.getReportedProperties(), (Map)rp);
+        assertNull(result.getModuleId());
+    }
+
+    //Tests_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinState and provide the response on DeviceTwinDevice.]
+    @Test
+    public void nextRetrievesCorrectlyWithModuleId() throws IotHubException, IOException
+    {
+        //arrange
+        final String expectedModuleId = "someModuleId";
+        final Integer version = 15;
+        final String etag = "validEtag";
+        final String connectionString = "testString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        final String expectedString = "testJsonAsNext";
+        TwinCollection tags = new TwinCollection();
+        tags.put("tagsKey", "tagsValue");
+        TwinCollection rp = new TwinCollection();
+        rp.put("rpKey", "rpValue");
+        TwinCollection dp = new TwinCollection();
+        dp.put("dpKey", "dpValue");
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
+                result = mockedQuery;
+                Deencapsulation.invoke(mockedQuery, "hasNext");
+                result = true;
+                Deencapsulation.invoke(mockedQuery, "next");
+                result = expectedString;
+                mockedTwinState.getDeviceId();
+                result = "testDeviceID";
+                mockedTwinState.getModuleId();
+                result = expectedModuleId;
+                mockedTwinState.getVersion();
+                result = version;
+                mockedTwinState.getETag();
+                result = etag;
+                mockedTwinState.getTags();
+                result = tags;
+                mockedTwinState.getDesiredProperty();
+                result = dp;
+                mockedTwinState.getReportedProperty();
+                result = rp;
+            }
+        };
+
+        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
+
+        //act
+        DeviceTwinDevice result = testTwin.getNextDeviceTwin(testQuery);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                times = 1;
+            }
+        };
+
+        assertNotNull(result.getTags());
+        assertNotNull(result.getReportedProperties());
+        assertNotNull(result.getDesiredProperties());
+
+        assertEquals(version, result.getVersion());
+        assertEquals(etag, result.getETag());
+        assetEqualSetAndMap(result.getTags(), (Map)tags);
+        assetEqualSetAndMap(result.getDesiredProperties(), (Map)dp);
+        assetEqualSetAndMap(result.getReportedProperties(), (Map)rp);
+        assertEquals(expectedModuleId, result.getModuleId());
     }
 
     @Test (expected = IllegalArgumentException.class)

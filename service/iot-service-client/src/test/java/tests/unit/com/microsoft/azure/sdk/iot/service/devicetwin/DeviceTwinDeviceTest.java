@@ -1074,6 +1074,7 @@ public class DeviceTwinDeviceTest
     public void toStringReturnsAllNoETag()
     {
         //arrange
+        final String expectedModuleId = "someModuleId";
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
 
         Set<Pair> testDesProp = new HashSet<>();
@@ -1085,6 +1086,8 @@ public class DeviceTwinDeviceTest
         testTags.add(new Pair("testTag1", "tagObject1"));
         testTags.add(new Pair("testTag2", "tagObject2"));
         testDevice.setTags(testTags);
+
+        Deencapsulation.setField(testDevice, "moduleId", expectedModuleId);
 
         //act
         String testDeviceString = testDevice.toString();
@@ -1099,6 +1102,7 @@ public class DeviceTwinDeviceTest
         assertTrue(testDeviceString.contains("tagObject1"));
         assertTrue(testDeviceString.contains("testTag2"));
         assertTrue(testDeviceString.contains("tagObject2"));
+        assertTrue(testDeviceString.contains(expectedModuleId));
     }
 
     @Test
@@ -1260,4 +1264,18 @@ public class DeviceTwinDeviceTest
         assertTrue(testDeviceString.length() == 0);
     }
 
+    // Tests_SRS_DEVICETWINDEVICE_34_040: [This method shall save the provided moduleId.]
+    @Test
+    public void setModuleIdSets()
+    {
+        //arrange
+        final String expectedModuleId = "someModuleId";
+        DeviceTwinDevice testDeviceTwinDevice = new DeviceTwinDevice();
+
+        //act
+        Deencapsulation.invoke(testDeviceTwinDevice, "setModuleId", expectedModuleId);
+
+        //assert
+        assertEquals(expectedModuleId, Deencapsulation.getField(testDeviceTwinDevice, "moduleId"));
+    }
 }

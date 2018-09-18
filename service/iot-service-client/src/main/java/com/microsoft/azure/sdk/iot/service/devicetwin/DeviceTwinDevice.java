@@ -282,6 +282,16 @@ public class DeviceTwinDevice
     }
 
     /**
+     * Sets the module id of this object
+     * @param moduleId the module id of this object. Allowed to be null or empty
+     */
+    void setModuleId(String moduleId)
+    {
+        // Codes_SRS_DEVICETWINDEVICE_34_040: [This method shall save the provided moduleId.]
+        this.moduleId = moduleId;
+    }
+
+    /**
      * Clear desired properties set so far
      */
     public void clearDesiredProperties()
@@ -492,11 +502,15 @@ public class DeviceTwinDevice
     public String toString()
     {
         /*
-        **Codes_SRS_DEVICETWINDEVICE_25_015: [** This method shall append device id, etag, version, tags, desired and reported properties to string (if present) and return **]**
+        **Codes_SRS_DEVICETWINDEVICE_25_015: [** This method shall append device id, module id, etag, version, tags, desired and reported properties to string (if present) and return **]**
          */
         StringBuilder thisDevice = new StringBuilder();
 
         thisDevice.append("Device ID: " + this.getDeviceId() + "\n");
+        if (this.moduleId != null && !this.moduleId.isEmpty())
+        {
+            thisDevice.append("Module ID: " + this.getModuleId() + "\n");
+        }
         if(this.getETag() != null)
         {
             thisDevice.append("ETag: " + this.getETag() + "\n");
