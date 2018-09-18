@@ -224,7 +224,7 @@ public class AmqpSendTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_006: [The function shall create a binary message with the given content with deviceId only if moduleId is null]
     @Test
-    public void send_creates_ProtonMessage() throws Exception
+    public void send_creates_ProtonMessage(@Mocked AmqpSendHandler mockAmqpSendHandler) throws Exception
     {
         // Arrange
         String hostName = "aaa";
@@ -252,7 +252,7 @@ public class AmqpSendTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_001: [The event handler shall create a Proton message with the given content]
     @Test
-    public void sendToModule_creates_ProtonMessage() throws Exception
+    public void sendToModule_creates_ProtonMessage(@Mocked AmqpSendHandler mockAmqpSendHandler) throws Exception
     {
         // Arrange
         String hostName = "aaa";
@@ -282,7 +282,7 @@ public class AmqpSendTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_002: [The event handler shall initialize the Proton reactor object]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_003: [The event handler shall start the Proton reactor object]
     @Test
-    public void sendToModule_initializes_Reactor() throws Exception
+    public void sendToModule_initializes_Reactor(@Mocked AmqpSendHandler mockAmqpSendHandler) throws Exception
     {
         // Arrange
         String hostName = "aaa";

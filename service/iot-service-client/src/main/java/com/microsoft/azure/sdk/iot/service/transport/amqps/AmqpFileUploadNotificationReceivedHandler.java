@@ -51,6 +51,8 @@ public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
 
     private Exception savedException;
 
+    private boolean connectionWasOpened = false;
+
     /**
      * Constructor to set up connection parameters and initialize
      * handshaker and flow controller for transport
@@ -235,6 +237,13 @@ public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
         }
     }
 
+    @Override
+    public void onLinkRemoteOpen(Event event)
+    {
+        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_022: [This function shall set the variable 'connectionWasOpened' to true]
+        this.connectionWasOpened = true;
+    }
+
     /**
      * If an exception was encountered while opening the AMQP connection, this function shall throw that saved exception
      * @throws IOException if an exception was encountered while openinging the AMQP connection. The encountered
@@ -242,9 +251,15 @@ public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
      */
     void receiveComplete() throws IOException
     {
+        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_023: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
         if (this.savedException != null)
         {
             throw new IOException("Connection failed to be established", this.savedException);
+        }
+
+        if (!this.connectionWasOpened)
+        {
+            throw new IOException("Connection failed to open");
         }
     }
 }

@@ -7,6 +7,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedEvent;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceivedHandler;
 import mockit.Deencapsulation;
@@ -32,10 +33,13 @@ import org.apache.qpid.proton.reactor.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.net.ssl.SSLHandshakeException;
+import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /** Unit tests for AmqpFileUploadNotificationReceivedHandler */
 @RunWith(JMockit.class)
@@ -349,6 +353,60 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
         };
         // Act
         Deencapsulation.invoke(amqpReceiveHandler, "onLinkInit", event);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_022: [This function shall set the variable 'connectionWasOpened' to true]
+    @Test
+    public void onLinkRemoteOpenedFlagsConnectionWasOpened()
+    {
+        // Arrange
+        String hostName = "aaa";
+        String userName = "bbb";
+        String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler = Deencapsulation.newInstance(AmqpFileUploadNotificationReceivedHandler.class, hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent);
+
+        // Act
+        amqpReceiveHandler.onLinkRemoteOpen(null);
+
+        // Assert
+        assertTrue(Deencapsulation.getField(amqpReceiveHandler, "connectionWasOpened"));
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_023: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
+    @Test (expected = IOException.class)
+    public void receiveCompleteChecksForSavedException() throws IOException, IotHubException
+    {
+        // Arrange
+        String hostName = "aaa";
+        String userName = "bbb";
+        String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler = Deencapsulation.newInstance(AmqpFileUploadNotificationReceivedHandler.class, hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent);
+
+        Deencapsulation.setField(amqpReceiveHandler, "connectionWasOpened", true);
+        Deencapsulation.setField(amqpReceiveHandler, "savedException", new SSLHandshakeException("some nonsense exception"));
+
+        // Act
+        Deencapsulation.invoke(amqpReceiveHandler, "receiveComplete");
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_023: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
+    @Test (expected = IOException.class)
+    public void receiveCompleteChecksThatConnectionWasOpened() throws IOException, IotHubException
+    {
+        // Arrange
+        String hostName = "aaa";
+        String userName = "bbb";
+        String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler = Deencapsulation.newInstance(AmqpFileUploadNotificationReceivedHandler.class, hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent);
+
+        Deencapsulation.setField(amqpReceiveHandler, "connectionWasOpened", false);
+        Deencapsulation.setField(amqpReceiveHandler, "savedException", null);
+
+        // Act
+        Deencapsulation.invoke(amqpReceiveHandler, "receiveComplete");
     }
 
     private void createProtonObjects()

@@ -56,7 +56,9 @@ public class AmqpSendHandler extends BaseHandler
     protected final String webSocketHostName;
 
     private boolean isConnected = false;
-    private boolean isConnectionError = false;
+    private Exception savedException = null;
+    private boolean connectionWasOpened = false;
+
     /**
      * Constructor to set up connection parameters and initialize handshaker for transport
      *
@@ -185,7 +187,7 @@ public class AmqpSendHandler extends BaseHandler
         }
         catch (Exception e)
         {
-            this.isConnectionError = true;
+            this.savedException = e;
         }
 
         domain.init(mode);
@@ -265,7 +267,7 @@ public class AmqpSendHandler extends BaseHandler
     public void onTransportError(Event event)
     {
         isConnected = false;
-        isConnectionError = true;
+        savedException = new IOException("A Transport error occurred");
     }
 
     /**
@@ -323,6 +325,13 @@ public class AmqpSendHandler extends BaseHandler
     }
 
     @Override
+    public void onLinkRemoteOpen(Event event)
+    {
+        //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_033: [This function shall set the variable 'connectionWasOpened' to true]
+        connectionWasOpened = true;
+    }
+
+    @Override
     public void onDelivery(Event event)
     {
         //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_023: [ The event handler shall get the Delivery from the event only if the event type is DELIVERY **]**
@@ -360,11 +369,18 @@ public class AmqpSendHandler extends BaseHandler
 
     public void sendComplete() throws IotHubException, IOException
     {
-        //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_029: [ The event handler shall check the status queue to get the response for the sent message]
-        if (isConnectionError)
+        //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_034: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
+        if (savedException != null)
         {
-            throw new IOException("Connection failed to be established");
+            throw new IOException("Connection failed to be established", savedException);
         }
+
+        if (!connectionWasOpened)
+        {
+            throw new IOException("Connection failed to open");
+        }
+
+        //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_029: [ The event handler shall check the status queue to get the response for the sent message]
         if (!sendStatusQueue.isEmpty())
         {
             //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_030: [ The event handler shall remove the response from the queue]

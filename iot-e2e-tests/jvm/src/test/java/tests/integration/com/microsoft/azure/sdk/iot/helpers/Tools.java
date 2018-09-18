@@ -21,4 +21,16 @@ public class Tools
 
         return environmentVariableValue;
     }
+
+    /**
+     * Checks if the provided exception contains a certain type of exception in its cause chain
+     * @param possibleExceptionCause the type of exception to be searched for
+     * @param exceptionToSearch the exception to search the stacktrace of
+     * @return if any variant of the possibleExceptionCause is found at any depth of the exception cause chain
+     */
+    public static boolean isCause(Class<? extends Throwable> possibleExceptionCause, Throwable exceptionToSearch)
+    {
+        return possibleExceptionCause.isInstance(exceptionToSearch) || (exceptionToSearch != null && isCause(possibleExceptionCause, exceptionToSearch.getCause()));
+    }
+
 }

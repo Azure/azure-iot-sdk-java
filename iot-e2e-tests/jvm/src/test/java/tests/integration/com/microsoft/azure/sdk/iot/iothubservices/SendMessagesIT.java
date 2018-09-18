@@ -32,6 +32,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegratio
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509Cert;
 
+import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
@@ -45,6 +46,7 @@ import static com.microsoft.azure.sdk.iot.common.iothubservices.IotHubServicesCo
 import static com.microsoft.azure.sdk.iot.common.iothubservices.IotHubServicesCommon.sendMessagesExpectingUnrecoverableConnectionLossAndTimeout;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.*;
+import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenGenerator.generateSasTokenForIotDevice;
 
@@ -806,6 +808,66 @@ public class SendMessagesIT extends MethodNameLoggingIntegrationTest
 
         //reset back to default
         testInstance.client.setRetryPolicy(new ExponentialBackoffWithJitter());
+    }
+
+    @Test
+    public void deviceClientVerifiesRemoteServerCertificate() throws URISyntaxException, IOException, InterruptedException
+    {
+
+        String connectionStringToUntrustwortyDevice = Tools.retrieveEnvironmentVariableValue("IOTHUB_DEVICE_CONN_STRING_INVALIDCERT");
+        DeviceClient client = new DeviceClient(connectionStringToUntrustwortyDevice, testInstance.protocol);
+
+        //HTTP has a separate test because it's open call won't trigger any exception
+        if (testInstance.protocol != HTTPS)
+        {
+            boolean expectedExceptionThrown = false;
+
+            try
+            {
+                client.open();
+            }
+            catch (Exception e)
+            {
+                if (testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS)
+                {
+                    if (Tools.isCause(SSLHandshakeException.class, e))
+                    {
+                        expectedExceptionThrown = true;
+                    }
+                    else
+                    {
+                        fail("expected SSLHandshakeException, but got " + e.getCause().getCause().getCause().getClass());
+                    }
+                }
+                else //AMQPS or AMQPS_WS
+                {
+                    //no way to verify that thrown exception was due to SSLHandshakeException since Proton-j only logs that exception instead of throwing.
+                    expectedExceptionThrown = true;
+                }
+            }
+
+            assertTrue("Expected SSLHandshakeException, but no exception was thrown", expectedExceptionThrown);
+        }
+        else
+        {
+            deviceClientVerifiesRemoteServerCertificateHttp(client);
+        }
+    }
+
+
+    private void deviceClientVerifiesRemoteServerCertificateHttp(DeviceClient client) throws URISyntaxException, IOException, InterruptedException
+    {
+        client.open();
+        Success success = new Success();
+        client.sendEventAsync(new Message("asdf"), new EventCallback(IotHubStatusCode.ERROR), success);
+        while (!success.wasCallbackFired())
+        {
+            Thread.sleep(200);
+        }
+
+        assertTrue("Expected message callback of ERROR, but got " + success.getCallbackStatusCode(), success.getResult());
+
+        client.closeNow();
     }
 
     private void errorInjectionTestFlowNoDisconnect(Message errorInjectionMessage, IotHubStatusCode expectedStatus, boolean noRetry) throws IOException, IotHubException, URISyntaxException, InterruptedException

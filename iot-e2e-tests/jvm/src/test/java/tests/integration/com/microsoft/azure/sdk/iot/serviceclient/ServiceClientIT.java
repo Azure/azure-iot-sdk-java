@@ -7,36 +7,75 @@ package tests.integration.com.microsoft.azure.sdk.iot.serviceclient;
 
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import tests.integration.com.microsoft.azure.sdk.iot.MethodNameLoggingIntegrationTest;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools.retrieveEnvironmentVariableValue;
 
-public class ServiceClientIT
+@RunWith(Parameterized.class)
+public class ServiceClientIT extends MethodNameLoggingIntegrationTest
 {
     private static String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
+    private static String invalidCertificateServerConnectionString = "";
     private static String deviceId = "java-service-client-e2e-test";
     private static String content = "abcdefghijklmnopqrstuvwxyz1234567890";
 
-    @Before
-    public void setUp()
+    //connection string to server with untrustworthy certificates. Service should throw an exception when connecting to it
+    private static String UNTRUSTWORTHY_IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONN_STRING_INVALIDCERT";
+
+    public ServiceClientIT(IotHubServiceClientProtocol protocol)
     {
-        iotHubConnectionString = tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        this.testInstance = new ServiceClientITRunner(protocol);
+    }
+
+    private class ServiceClientITRunner
+    {
+        private IotHubServiceClientProtocol protocol;
+
+        public ServiceClientITRunner(IotHubServiceClientProtocol protocol)
+        {
+            this.protocol = protocol;
+        }
+    }
+
+    private ServiceClientITRunner testInstance;
+
+    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection inputs()
+    {
+        iotHubConnectionString = retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        invalidCertificateServerConnectionString = retrieveEnvironmentVariableValue(UNTRUSTWORTHY_IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
 
         String uuid = UUID.randomUUID().toString();
         deviceId = deviceId.concat("-" + uuid);
+
+
+        List inputs = Arrays.asList(
+                new Object[][]
+                        {
+                                {IotHubServiceClientProtocol.AMQPS},
+                                {IotHubServiceClientProtocol.AMQPS_WS}
+                        }
+        );
+
+        return inputs;
     }
 
     @Test
-    public void service_client_e2e_ampqs() throws Exception
+    public void cloudToDeviceTelemetry() throws Exception
     {
-        IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
-
         // Arrange
 
         // We remove and recreate the device for a clean start
@@ -44,6 +83,7 @@ public class ServiceClientIT
 
         try
         {
+            // We remove and recreate the device for a clean start
             registryManager.removeDevice(deviceId);
         }
         catch (IOException|IotHubException e)
@@ -58,7 +98,7 @@ public class ServiceClientIT
         // Act
 
         // Create service client
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, protocol);
+        ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, testInstance.protocol);
         CompletableFuture<Void> futureOpen = serviceClient.openAsync();
         futureOpen.get();
 
@@ -82,50 +122,78 @@ public class ServiceClientIT
     }
 
     @Test
-    public void service_client_e2e_amqps_ws() throws Exception
+    public void serviceClientValidatesRemoteCertificateWhenSendingTelemetry() throws IOException
     {
-        IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS_WS;
+        boolean expectedExceptionWasCaught = false;
 
-        // Arrange
-
-        // We remove and recreate the device for a clean start
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        ServiceClient serviceClient = ServiceClient.createFromConnectionString(invalidCertificateServerConnectionString, testInstance.protocol);
 
         try
         {
-            registryManager.removeDevice(deviceId);
-        } catch (IOException|IotHubException e)
+            serviceClient.open();
+            serviceClient.send(deviceId, new Message("some message"));
+        }
+        catch (IOException e)
         {
+            expectedExceptionWasCaught = true;
+        }
+        catch (Exception e)
+        {
+            fail("Expected IOException, but received: " + e.getMessage());
         }
 
-        Device deviceAdded = Device.createFromId(deviceId, null, null);
-        registryManager.addDevice(deviceAdded);
+        assertTrue("Expected an exception due to service presenting invalid certificate", expectedExceptionWasCaught);
+    }
 
-        Device deviceGetBefore = registryManager.getDevice(deviceId);
+    @Test
+    public void serviceClientValidatesRemoteCertificateWhenGettingFeedbackReceiver() throws IOException
+    {
+        boolean expectedExceptionWasCaught = false;
 
-        // Act
+        ServiceClient serviceClient = ServiceClient.createFromConnectionString(invalidCertificateServerConnectionString, testInstance.protocol);
 
-        // Create service client
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, protocol);
-        CompletableFuture<Void> futureOpen = serviceClient.openAsync();
-        futureOpen.get();
+        try
+        {
+            serviceClient.open();
+            FeedbackReceiver receiver = serviceClient.getFeedbackReceiver();
+            receiver.open();
+            receiver.receive(1000);
+        }
+        catch (IOException e)
+        {
+            expectedExceptionWasCaught = true;
+        }
+        catch (Exception e)
+        {
+            fail("Expected IOException, but received: " + e.getMessage());
+        }
 
-        Message message = new Message(content.getBytes());
+        assertTrue("Expected an exception due to service presenting invalid certificate", expectedExceptionWasCaught);
+    }
 
-        CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, message);
-        completableFuture.get();
+    @Test
+    public void serviceClientValidatesRemoteCertificateWhenGettingFileUploadFeedbackReceiver() throws IOException
+    {
+        boolean expectedExceptionWasCaught = false;
 
-        Device deviceGetAfter = registryManager.getDevice(deviceId);
-        CompletableFuture<Void> futureClose = serviceClient.closeAsync();
-        futureClose.get();
+        ServiceClient serviceClient = ServiceClient.createFromConnectionString(invalidCertificateServerConnectionString, testInstance.protocol);
 
-        registryManager.removeDevice(deviceId);
+        try
+        {
+            serviceClient.open();
+            FileUploadNotificationReceiver receiver = serviceClient.getFileUploadNotificationReceiver();
+            receiver.open();
+            receiver.receive(1000);
+        }
+        catch (IOException e)
+        {
+            expectedExceptionWasCaught = true;
+        }
+        catch (Exception e)
+        {
+            fail("Expected IOException, but received: " + e.getMessage());
+        }
 
-        // Assert
-        assertEquals(deviceGetBefore.getDeviceId(), deviceGetAfter.getDeviceId());
-        assertEquals(0, deviceGetBefore.getCloudToDeviceMessageCount());
-        assertEquals(1, deviceGetAfter.getCloudToDeviceMessageCount());
-
-        registryManager.close();
+        assertTrue("Expected an exception due to service presenting invalid certificate", expectedExceptionWasCaught);
     }
 }

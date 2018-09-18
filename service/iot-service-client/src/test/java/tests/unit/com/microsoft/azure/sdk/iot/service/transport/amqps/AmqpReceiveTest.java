@@ -7,6 +7,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.FeedbackBatchMessage;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedHandler;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpReceive;
 import mockit.Deencapsulation;
 import mockit.Expectations;
@@ -87,7 +88,7 @@ public class AmqpReceiveTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_006: [The function shall start the Proton reactor object]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_008: [The function shall stop and free the Proton reactor object ]
     @Test
-    public void receive_with_timout_zero_call_flow_ok() throws IOException, InterruptedException
+    public void receive_with_timout_zero_call_flow_ok(@Mocked AmqpFeedbackReceivedHandler mockAmqpFeedbackReceivedHandler) throws IOException, InterruptedException
     {
         // Arrange
         String hostName = "aaa";
@@ -117,7 +118,7 @@ public class AmqpReceiveTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_006: [The function shall start the Proton reactor object]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_008: [The function shall stop and free the Proton reactor object ]
     @Test
-    public void receiveWithTimout_non_zero_call_ok() throws IOException, InterruptedException
+    public void receiveWithTimout_non_zero_call_ok(@Mocked AmqpFeedbackReceivedHandler mockAmqpFeedbackReceivedHandler) throws IOException, InterruptedException
     {
         // Arrange
         String hostName = "aaa";

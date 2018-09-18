@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadNotificationParser;
 import com.microsoft.azure.sdk.iot.service.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceive;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceivedHandler;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
@@ -93,7 +94,7 @@ public class AmqpFileUploadNotificationReceiveTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_006: [The function shall start the Proton reactor object]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_008: [The function shall stop and free the Proton reactor object ]
     @Test
-    public void receiveWithTimoutZeroCallFlowOk() throws IOException, InterruptedException
+    public void receiveWithTimoutZeroCallFlowOk(@Mocked AmqpFileUploadNotificationReceivedHandler mockAmqpFileUploadNotificationReceivedHandler) throws IOException, InterruptedException
     {
         // Arrange
         final String hostName = "aaa";
@@ -123,7 +124,7 @@ public class AmqpFileUploadNotificationReceiveTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_006: [The function shall start the Proton reactor object]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_008: [The function shall stop and free the Proton reactor object ]
     @Test
-    public void receiveWithTimeoutNonZeroCallOk() throws IOException, InterruptedException
+    public void receiveWithTimeoutNonZeroCallOk(@Mocked AmqpFileUploadNotificationReceivedHandler mockAmqpFileUploadNotificationReceivedHandler) throws IOException, InterruptedException
     {
         // Arrange
         final String hostName = "aaa";

@@ -21,10 +21,7 @@ import org.apache.qpid.proton.reactor.ReactorOptions;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class AmqpsConnection extends BaseHandler
 {
@@ -59,7 +56,7 @@ public class AmqpsConnection extends BaseHandler
 
     private AmqpListener msgListener;
 
-    private final ObjectLock openLock;
+    private CountDownLatch openLatch;
     private final ObjectLock closeLock;
 
     private SSLContext sslContext;
@@ -94,7 +91,7 @@ public class AmqpsConnection extends BaseHandler
             this.saslListener = new SaslListenerImpl(saslHandler);
         }
 
-        this.openLock = new ObjectLock();
+        this.openLatch = new CountDownLatch(1);
         this.closeLock  = new ObjectLock();
 
         this.sslContext = sslContext;
@@ -167,10 +164,7 @@ public class AmqpsConnection extends BaseHandler
 
             try
             {
-                synchronized (openLock)
-                {
-                    openLock.waitLock(MAX_WAIT_TO_OPEN_CLOSE_CONNECTION);
-                }
+                openLatch.await(MAX_WAIT_TO_OPEN_CLOSE_CONNECTION, TimeUnit.MILLISECONDS);
             }
             catch (InterruptedException e)
             {
@@ -179,6 +173,12 @@ public class AmqpsConnection extends BaseHandler
                 throw new IOException("Waited too long for the connection to open.");
             }
         }
+
+        if (!this.isOpen)
+        {
+            throw new IOException("Failed to open the connection");
+        }
+
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
@@ -189,6 +189,9 @@ public class AmqpsConnection extends BaseHandler
     public void openAmqpAsync()
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
+
+        this.openLatch = new CountDownLatch(1);
+
         if (executorService == null)
         {
             executorService = Executors.newFixedThreadPool(THREAD_POOL_MAX_NUMBER);
@@ -412,10 +415,7 @@ public class AmqpsConnection extends BaseHandler
             {
                 msgListener.connectionEstablished();
 
-                synchronized (openLock)
-                {
-                    openLock.notifyLock();
-                }
+                openLatch.countDown();
             }
         }
         logger.LogDebug("Exited from method %s", logger.getMethodName());
@@ -547,6 +547,12 @@ public class AmqpsConnection extends BaseHandler
         logger.LogDebug("Entered in method %s", logger.getMethodName());
         this.isOpen = false;
         logger.LogDebug("Exited from method %s", logger.getMethodName());
+    }
+
+    @Override
+    public void onTransportHeadClosed(Event event)
+    {
+        this.openLatch.countDown();
     }
 
     /**
