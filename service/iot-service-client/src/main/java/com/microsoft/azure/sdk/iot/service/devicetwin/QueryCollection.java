@@ -35,7 +35,9 @@ public class QueryCollection
     private IotHubConnectionString iotHubConnectionString;
     private URL url;
     private HttpMethod httpMethod;
-    private long timeout;
+    //private long timeout;
+    private long connectTimeoutInMs;
+    private long responseTimeoutInMs;
 
     private boolean isInitialQuery;
 
@@ -48,11 +50,12 @@ public class QueryCollection
      * @param iotHubConnectionString the connection string to connect with to query against
      * @param url the url to query against
      * @param httpMethod the http method to call with the query
-     * @param timeout timeout until the request expires
+     * @param connectTimeoutInMs  connect timeout in milliseconds
+     * @param responseTimeoutInMs  response timeout in milliseconds
      * @throws IllegalArgumentException if page size is 0 or negative, or if the query type is null or unknown, of if the query string is null or empty,
      *  or if the provided connection string is null, or if the provided url is null, or if the provided http method is null
      */
-    protected QueryCollection(String query, int pageSize, QueryType requestQueryType, IotHubConnectionString iotHubConnectionString, URL url, HttpMethod httpMethod, long timeout)
+    protected QueryCollection(String query, int pageSize, QueryType requestQueryType, IotHubConnectionString iotHubConnectionString, URL url, HttpMethod httpMethod, long connectTimeoutInMs, long  responseTimeoutInMs)
     {
         //Codes_SRS_QUERYCOLLECTION_34_037: [If the provided connection string, url, or http method is null, this function shall throw an IllegalArgumentException.]
         //Codes_SRS_QUERYCOLLECTION_34_004: [If the provided QueryType is null or UNKNOWN, an IllegalArgumentException shall be thrown.]
@@ -69,7 +72,8 @@ public class QueryCollection
         this.iotHubConnectionString = iotHubConnectionString;
         this.responseContinuationToken = null;
         this.httpMethod = httpMethod;
-        this.timeout = timeout;
+        this.connectTimeoutInMs = connectTimeoutInMs;
+        this.responseTimeoutInMs = responseTimeoutInMs;
         this.url = url;
         this.responseQueryType = QueryType.UNKNOWN;
 
@@ -87,11 +91,12 @@ public class QueryCollection
      * @param iotHubConnectionString the connection string to connect with to query against
      * @param url the url to query against
      * @param httpMethod the http method to call with the query
-     * @param timeout timeout until the request expires
+     * @param connectTimeoutInMs  connect timeout in milliseconds
+     * @param responseTimeoutInMs  response timeout in milliseconds
      * @throws IllegalArgumentException if page size is 0 or negative, or if the query type is null or unknown,
      *  or if the provided connection string is null, or if the provided url is null, or if the provided http method is null
      */
-    protected QueryCollection(int pageSize, QueryType requestQueryType, IotHubConnectionString iotHubConnectionString, URL url, HttpMethod httpMethod, long timeout)
+    protected QueryCollection(int pageSize, QueryType requestQueryType, IotHubConnectionString iotHubConnectionString, URL url, HttpMethod httpMethod, long connectTimeoutInMs, long responseTimeoutInMs)
     {
         //Codes_SRS_QUERYCOLLECTION_34_038: [If the provided connection string, url, or http method is null, this function shall throw an IllegalArgumentException.]
         //Codes_SRS_QUERYCOLLECTION_34_003: [If the provided page size is not a positive integer, an IllegalArgumentException shall be thrown.]
@@ -107,7 +112,8 @@ public class QueryCollection
         this.responseContinuationToken = null;
         this.iotHubConnectionString = iotHubConnectionString;
         this.httpMethod = httpMethod;
-        this.timeout = timeout;
+        this.connectTimeoutInMs = connectTimeoutInMs;
+        this.responseTimeoutInMs = responseTimeoutInMs;
         this.url = url;
 
         //Codes_SRS_QUERYCOLLECTION_34_009: [The constructed QueryCollection shall not be a sql query type.]
@@ -147,7 +153,7 @@ public class QueryCollection
         }
 
         //Codes_SRS_QUERYCOLLECTION_34_017: [This function shall send an HTTPS request using DeviceOperations.]
-        HttpResponse httpResponse = DeviceOperations.request(this.iotHubConnectionString, this.url, this.httpMethod, payload, null, this.timeout);
+        HttpResponse httpResponse = DeviceOperations.request(this.iotHubConnectionString, this.url, this.httpMethod, payload, null, this.connectTimeoutInMs, this.responseTimeoutInMs);
 
         //Codes_SRS_QUERYCOLLECTION_34_018: [The method shall read the continuation token (x-ms-continuation) and response type (x-ms-item-type) from the HTTP Headers and save it.]
         handleQueryResponse(httpResponse);

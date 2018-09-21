@@ -42,7 +42,8 @@ public class Query
     private IotHubConnectionString iotHubConnectionString;
     private URL url;
     private HttpMethod httpMethod;
-    private long timeout;
+    private long connectTimeoutInMs;
+    private long responseTimeoutInMs;
 
     /**
      * Constructor for Query
@@ -121,7 +122,7 @@ public class Query
         //Codes_SRS_QUERY_25_005: [The method shall update the request continuation token and request pagesize which shall be used for processing subsequent query request.]
         this.requestContinuationToken = continuationToken;
         //Codes_SRS_QUERY_25_018: [The method shall send the query request again.]
-        sendQueryRequest(this.iotHubConnectionString, this.url, this.httpMethod, this.timeout);
+        sendQueryRequest(this.iotHubConnectionString, this.url, this.httpMethod, this.connectTimeoutInMs, this.responseTimeoutInMs);
     }
 
     /**
@@ -142,7 +143,41 @@ public class Query
         this.pageSize = pageSize;
         this.requestContinuationToken = continuationToken;
         //Codes_SRS_QUERY_25_018: [The method shall send the query request again.]
-        sendQueryRequest(this.iotHubConnectionString, this.url, this.httpMethod, this.timeout);
+        sendQueryRequest(this.iotHubConnectionString, this.url, this.httpMethod, this.connectTimeoutInMs, this.responseTimeoutInMs);
+    }
+
+    /**
+     * Sends request for the query to the IotHub with default connect and response timeouts
+     * @param iotHubConnectionString Hub Connection String
+     * @param url URL to Query on
+     * @param method HTTP Method for the requesting a query
+     * @return QueryResponse object which holds the response Iterator
+     * @throws IOException If any of the input parameters are not valid
+     * @throws IotHubException If HTTP response other then status ok is received
+     */
+    public QueryResponse sendQueryRequest(IotHubConnectionString iotHubConnectionString,
+                                          URL url,
+                                          HttpMethod method) throws IOException, IotHubException
+    {
+      return sendQueryRequest(iotHubConnectionString, url, method, DeviceOperations.DEFAULT_CONNECT_TIMEOUT_MS, DeviceOperations.DEFAULT_RESPONSE_TIMEOUT_MS);
+    }
+
+    /**
+     * Sends request for the query to the IotHub with default connect timeout
+     * @param iotHubConnectionString Hub Connection String
+     * @param url URL to Query on
+     * @param method HTTP Method for the requesting a query
+     * @param responseTimeoutInMs Maximum time to wait for the hub to respond
+     * @return QueryResponse object which holds the response Iterator
+     * @throws IOException If any of the input parameters are not valid
+     * @throws IotHubException If HTTP response other then status ok is received
+     */
+    public QueryResponse sendQueryRequest(IotHubConnectionString iotHubConnectionString,
+                                          URL url,
+                                          HttpMethod method,
+                                          Long responseTimeoutInMs) throws IOException, IotHubException
+    {
+        return sendQueryRequest(iotHubConnectionString, url, method, DeviceOperations.DEFAULT_CONNECT_TIMEOUT_MS, responseTimeoutInMs);
     }
 
     /**
@@ -150,7 +185,8 @@ public class Query
      * @param iotHubConnectionString Hub Connection String
      * @param url URL to Query on
      * @param method HTTP Method for the requesting a query
-     * @param timeoutInMs Maximum time to wait for the hub to respond
+     * @param connectTimeoutInMs Maximum time to wait for the hub to be connected
+     * @param responseTimeoutInMs Maximum time to wait for the hub to respond
      * @return QueryResponse object which holds the response Iterator
      * @throws IOException If any of the input parameters are not valid
      * @throws IotHubException If HTTP response other then status ok is received
@@ -158,7 +194,9 @@ public class Query
     public QueryResponse sendQueryRequest(IotHubConnectionString iotHubConnectionString,
                                    URL url,
                                    HttpMethod method,
-                                   Long timeoutInMs) throws IOException, IotHubException
+                                   Long connectTimeoutInMs,
+                                   Long responseTimeoutInMs
+                                   ) throws IOException, IotHubException
     {
         if (iotHubConnectionString == null || url == null || method == null)
         {
@@ -170,7 +208,8 @@ public class Query
         this.iotHubConnectionString = iotHubConnectionString;
         this.url = url;
         this.httpMethod = method;
-        this.timeout = timeoutInMs;
+        this.connectTimeoutInMs = connectTimeoutInMs;
+        this.responseTimeoutInMs = responseTimeoutInMs;
 
         byte[] payload = null;
         Map<String, String> queryHeaders = new HashMap<>();
@@ -196,7 +235,7 @@ public class Query
         }
 
         //Codes_SRS_QUERY_25_009: [The method shall use the provided HTTP Method and send request to IotHub with the serialized body over the provided URL.]
-        HttpResponse httpResponse = DeviceOperations.request(iotHubConnectionString, url, method, payload, null, timeoutInMs);
+        HttpResponse httpResponse = DeviceOperations.request(iotHubConnectionString, url, method, payload, null, this.connectTimeoutInMs, this.responseTimeoutInMs);
 
         this.responseContinuationToken = null;
         Map<String, String> headers = httpResponse.getHeaderFields();

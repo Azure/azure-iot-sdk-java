@@ -34,7 +34,6 @@ public class QueryTest
 {
     private static final QueryType DEFAULT_QUERY_TYPE = QueryType.TWIN;
     private static final int DEFAULT_PAGE_SIZE = 100;
-    private static final long DEFAULT_TIMEOUT = 100;
     private static final String DEFAULT_QUERY = "select * from devices";
 
     @Mocked
@@ -240,7 +239,7 @@ public class QueryTest
         final String testToken = UUID.randomUUID().toString();
         Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
         setupSendQuery(testQuery, testToken);
-        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod, DEFAULT_TIMEOUT);
+        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //act
         Deencapsulation.invoke(testQuery, "continueQuery", testToken);
@@ -273,7 +272,7 @@ public class QueryTest
         Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
 
         setupSendQuery(testQuery, testToken);
-        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod, DEFAULT_TIMEOUT);
+        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //act
         Deencapsulation.invoke(testQuery, "continueQuery", testToken, testPageSize);
@@ -294,7 +293,7 @@ public class QueryTest
         Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
 
         setupSendQuery(testQuery, testToken);
-        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod, DEFAULT_TIMEOUT);
+        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //act
         Deencapsulation.invoke(testQuery, "continueQuery", testToken, testPageSize);
@@ -337,7 +336,7 @@ public class QueryTest
         };
 
         //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest",  mockIotHubConnectionString, mockUrl, mockHttpMethod, (long)0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest",  mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //assert
         new Verifications()
@@ -378,7 +377,7 @@ public class QueryTest
         };
 
         //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest",  mockIotHubConnectionString, mockUrl, mockHttpMethod, (long)0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest",  mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //assert
         new Verifications()
@@ -421,7 +420,7 @@ public class QueryTest
         };
 
         //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest",  mockIotHubConnectionString, mockUrl, mockHttpMethod, (long)0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest",  mockIotHubConnectionString, mockUrl, mockHttpMethod);
         Deencapsulation.invoke(testQuery, "continueQuery", testToken, newPageSize);
 
         //assert
@@ -463,7 +462,7 @@ public class QueryTest
         };
 
         //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest",  mockIotHubConnectionString, mockUrl, mockHttpMethod, (long)0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest",  mockIotHubConnectionString, mockUrl, mockHttpMethod);
         Deencapsulation.invoke(testQuery, "continueQuery", String.class);
 
         //assert
@@ -508,7 +507,7 @@ public class QueryTest
         };
 
         //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //assert
         assertEquals(testResponseToken, Deencapsulation.getField(testQuery, "responseContinuationToken"));
@@ -536,7 +535,7 @@ public class QueryTest
         };
 
         //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //assert
         assertEquals(testResponseToken, Deencapsulation.getField(testQuery, "responseContinuationToken"));
@@ -561,7 +560,7 @@ public class QueryTest
         };
 
         //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //assert
         assertNull(Deencapsulation.getField(testQuery, "responseContinuationToken"));
@@ -585,7 +584,7 @@ public class QueryTest
         };
 
         //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //assert
         assertNull(Deencapsulation.getField(testQuery, "responseContinuationToken"));
@@ -610,7 +609,7 @@ public class QueryTest
         };
 
         //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod);
     }
 
     //Tests_SRS_QUERY_25_012: [If the response type is Unknown or not found then this method shall throw IOException.]
@@ -632,7 +631,7 @@ public class QueryTest
         };
 
         //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod);
     }
 
     //Tests_SRS_QUERY_25_011: [If the request type and response does not match then the method shall throw IOException.]
@@ -654,7 +653,7 @@ public class QueryTest
         };
 
         //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod);
     }
 
     //Tests_SRS_QUERY_25_019: [This method shall throw IllegalArgumentException if any of the parameters are null or empty.]
@@ -678,7 +677,7 @@ public class QueryTest
         };
 
         //act
-        testQuery.sendQueryRequest(null, mockUrl, mockHttpMethod, (long) 0);
+        testQuery.sendQueryRequest(null, mockUrl, mockHttpMethod);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -701,7 +700,7 @@ public class QueryTest
         };
 
         //act
-        testQuery.sendQueryRequest(mockIotHubConnectionString, null, mockHttpMethod, (long) 0);
+        testQuery.sendQueryRequest(mockIotHubConnectionString, null, mockHttpMethod);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -724,7 +723,7 @@ public class QueryTest
         };
 
         //act
-        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, null, (long) 0);
+        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, null);
     }
 
     //Tests_SRS_QUERY_25_014: [The method shall return the continuation token found in response to a query (which can be null).]
@@ -747,7 +746,7 @@ public class QueryTest
             }
         };
 
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //act
         String actualContinuationToken = Deencapsulation.invoke(testQuery, "getContinuationToken");
@@ -777,7 +776,7 @@ public class QueryTest
             }
         };
 
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //act
         boolean hasNext = Deencapsulation.invoke(testQuery, "hasNext");
@@ -807,7 +806,7 @@ public class QueryTest
             }
         };
 
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //act
         boolean hasNext = Deencapsulation.invoke(testQuery, "hasNext");
@@ -841,7 +840,7 @@ public class QueryTest
         // continue query setup
         setupSendQuery(testQuery, testResponseToken);
 
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //act
         boolean hasNext = Deencapsulation.invoke(testQuery, "hasNext");
@@ -888,7 +887,7 @@ public class QueryTest
             }
         };
 
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //act
         Object next = Deencapsulation.invoke(testQuery, "next");
@@ -919,7 +918,7 @@ public class QueryTest
             }
         };
 
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
+        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod);
 
         //act
         Object next = Deencapsulation.invoke(testQuery, "next");

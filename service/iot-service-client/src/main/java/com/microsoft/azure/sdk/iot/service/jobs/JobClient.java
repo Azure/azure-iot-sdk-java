@@ -25,7 +25,6 @@ import java.util.*;
  */
 public class JobClient
 {
-    private final static long USE_DEFAULT_TIMEOUT = 0L;
     private final static long MAX_TIMEOUT = Integer.MAX_VALUE - 24000;
     private final static Integer DEFAULT_PAGE_SIZE = 100;
 
@@ -122,7 +121,7 @@ public class JobClient
         /* Codes_SRS_JOBCLIENT_21_010: [The scheduleUpdateTwin shall send a PUT request to the iothub using the created uri and json.] */
         /* Codes_SRS_JOBCLIENT_21_011: [If the scheduleUpdateTwin failed to send a PUT request, it shall throw IOException.] */
         /* Codes_SRS_JOBCLIENT_21_012: [If the scheduleUpdateTwin failed to verify the iothub response, it shall throw IotHubException.] */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.PUT, json.getBytes(StandardCharsets.UTF_8), null, USE_DEFAULT_TIMEOUT);
+        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.PUT, json.getBytes(StandardCharsets.UTF_8), null);
 
         /* Codes_SRS_JOBCLIENT_21_013: [The scheduleUpdateTwin shall parse the iothub response and return it as JobResult.] */
         return new JobResult(response.getBody());
@@ -196,7 +195,7 @@ public class JobClient
         /* Codes_SRS_JOBCLIENT_21_020: [The scheduleDeviceMethod shall send a PUT request to the iothub using the created url and json.] */
         /* Codes_SRS_JOBCLIENT_21_021: [If the scheduleDeviceMethod failed to send a PUT request, it shall throw IOException.] */
         /* Codes_SRS_JOBCLIENT_21_022: [If the scheduleDeviceMethod failed to verify the iothub response, it shall throw IotHubException.] */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.PUT, json.getBytes(StandardCharsets.UTF_8), null, USE_DEFAULT_TIMEOUT);
+        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.PUT, json.getBytes(StandardCharsets.UTF_8), null);
 
         /* Codes_SRS_JOBCLIENT_21_023: [The scheduleDeviceMethod shall parse the iothub response and return it as JobResult.] */
         return new JobResult(response.getBody());
@@ -235,7 +234,7 @@ public class JobClient
         /* Codes_SRS_JOBCLIENT_21_026: [The getJob shall send a GET request to the iothub using the created url.] */
         /* Codes_SRS_JOBCLIENT_21_027: [If the getJob failed to send a GET request, it shall throw IOException.] */
         /* Codes_SRS_JOBCLIENT_21_028: [If the getJob failed to verify the iothub response, it shall throw IotHubException.] */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.GET, new byte[]{}, null, USE_DEFAULT_TIMEOUT);
+        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.GET, new byte[]{}, null);
 
         /* Codes_SRS_JOBCLIENT_21_029: [The getJob shall parse the iothub response and return it as JobResult.] */
         return new JobResult(response.getBody());
@@ -273,7 +272,7 @@ public class JobClient
         /* Codes_SRS_JOBCLIENT_21_032: [The cancelJob shall send a POST request to the iothub using the created url.] */
         /* Codes_SRS_JOBCLIENT_21_033: [If the cancelJob failed to send a POST request, it shall throw IOException.] */
         /* Codes_SRS_JOBCLIENT_21_034: [If the cancelJob failed to verify the iothub response, it shall throw IotHubException.] */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.POST, EMPTY_JSON, null, USE_DEFAULT_TIMEOUT);
+        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.POST, EMPTY_JSON, null);
 
         /* Codes_SRS_JOBCLIENT_21_035: [The cancelJob shall parse the iothub response and return it as JobResult.] */
         return new JobResult(response.getBody());
@@ -359,7 +358,7 @@ public class JobClient
         Query deviceJobQuery = new Query(sqlQuery, pageSize, QueryType.DEVICE_JOB);
 
         //Codes_SRS_JOBCLIENT_25_040: [The queryDeviceJob shall send a query request on the query object using Query URL, HTTP POST method and wait for the response by calling sendQueryRequest.]
-        deviceJobQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, MAX_TIMEOUT);
+        deviceJobQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, DeviceOperations.DEFAULT_CONNECT_TIMEOUT_MS, MAX_TIMEOUT);
         return deviceJobQuery;
     }
 
@@ -448,7 +447,7 @@ public class JobClient
         //Codes_SRS_JOBCLIENT_25_045: [The queryDeviceJob shall send a query request on the query object using Query URL, HTTP GET method and wait for the response by calling sendQueryRequest.]
         String jobTypeString = (jobType == null) ? null : jobType.toString();
         String jobStatusString = (jobStatus == null) ? null : jobStatus.toString();
-        jobResponseQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlQuery(jobTypeString, jobStatusString), HttpMethod.GET, MAX_TIMEOUT);
+        jobResponseQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlQuery(jobTypeString, jobStatusString), HttpMethod.GET, DeviceOperations.DEFAULT_CONNECT_TIMEOUT_MS ,MAX_TIMEOUT);
         return jobResponseQuery;
     }
     /**

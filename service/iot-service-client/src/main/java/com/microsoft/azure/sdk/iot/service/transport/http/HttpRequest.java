@@ -118,6 +118,21 @@ public class HttpRequest
         return this;
     }
 
+    /**
+     * Sets the connect timeout, in milliseconds, for the request. The connect
+     * timeout is the number of milliseconds the client will wait for the
+     * connection established.
+     *
+     * @param timeout The connect timeout.
+     *
+     * @return  The object itself, for fluent setting.
+     */
+    public HttpRequest setConnectTimeoutMillis(int timeout)
+    {
+        this.connection.setConnectTimeoutMillis(timeout);
+        return this;
+    }
+
     protected HttpRequest()
     {
         this.connection = null;

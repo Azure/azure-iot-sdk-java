@@ -66,6 +66,7 @@ public class QueryCollectionTest
     private static final String expectedRequestContinuationToken = "someContinuationToken";
     private static final String expectedResponseContinuationToken = "someNewContinuationToken";
 
+    private static final long connectTimeout = 60000;
     private static final long expectedTimeout = 10000;
     private static HashMap<String, String> expectedValidRequestHeaders;
     private static HashMap<String, String> expectedValidResponseHeaders;
@@ -203,7 +204,7 @@ public class QueryCollectionTest
         QueryType expectedQueryType = QueryType.JOB_RESPONSE;
 
         //act
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, expectedQuery, expectedPageSize, expectedQueryType, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class}, expectedQuery, expectedPageSize, expectedQueryType, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
 
         //assert
         String actualQuery = Deencapsulation.getField(queryCollection, "query");
@@ -213,7 +214,8 @@ public class QueryCollectionTest
         IotHubConnectionString actualConnectionString = Deencapsulation.getField(queryCollection, "iotHubConnectionString");
         HttpMethod actualHttpMethod = Deencapsulation.getField(queryCollection, "httpMethod");
         URL actualUrl = Deencapsulation.getField(queryCollection, "url");
-        long actualTimeout = Deencapsulation.getField(queryCollection, "timeout");
+        long connectTimeoutInMs = Deencapsulation.getField(queryCollection, "connectTimeoutInMs");
+        long responseTimeoutInMs = Deencapsulation.getField(queryCollection, "responseTimeoutInMs");
 
         assertEquals(expectedQuery, actualQuery);
         assertEquals(expectedPageSize, actualPageSize);
@@ -221,7 +223,8 @@ public class QueryCollectionTest
         assertTrue(actualIsSqlQuery);
         assertEquals(actualConnectionString, mockConnectionString);
         assertEquals(actualHttpMethod, mockHttpMethod);
-        assertEquals(actualTimeout, expectedTimeout);
+        assertEquals(connectTimeoutInMs, connectTimeout);
+        assertEquals(responseTimeoutInMs, expectedTimeout);
         assertEquals(actualUrl, mockUrl);
     }
 
@@ -240,7 +243,7 @@ public class QueryCollectionTest
         QueryType expectedQueryType = QueryType.JOB_RESPONSE;
 
         //act
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, expectedPageSize, expectedQueryType, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class}, expectedPageSize, expectedQueryType, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
 
         //assert
         int actualPageSize = Deencapsulation.getField(queryCollection, "pageSize");
@@ -249,14 +252,16 @@ public class QueryCollectionTest
         IotHubConnectionString actualConnectionString = Deencapsulation.getField(queryCollection, "iotHubConnectionString");
         HttpMethod actualHttpMethod = Deencapsulation.getField(queryCollection, "httpMethod");
         URL actualUrl = Deencapsulation.getField(queryCollection, "url");
-        long actualTimeout = Deencapsulation.getField(queryCollection, "timeout");
+        long connectTimeoutInMs = Deencapsulation.getField(queryCollection, "connectTimeoutInMs");
+        long responseTimeoutInMs = Deencapsulation.getField(queryCollection, "responseTimeoutInMs");
 
         assertEquals(expectedPageSize, actualPageSize);
         assertEquals(expectedQueryType, actualQueryType);
         assertFalse(actualIsSqlQuery);
         assertEquals(actualConnectionString, mockConnectionString);
         assertEquals(actualHttpMethod, mockHttpMethod);
-        assertEquals(actualTimeout, expectedTimeout);
+        assertEquals(connectTimeoutInMs, connectTimeout);
+        assertEquals(responseTimeoutInMs, expectedTimeout);
         assertEquals(actualUrl, mockUrl);
     }
 
@@ -301,7 +306,7 @@ public class QueryCollectionTest
     public void sendQueryRequestPrioritizesOptionsContinuationToken() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, expectedPageSize, QueryType.RAW, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class}, expectedPageSize, QueryType.RAW, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
         Deencapsulation.setField(queryCollection, "isSqlQuery", false);
 
         new NonStrictExpectations()
@@ -313,7 +318,7 @@ public class QueryCollectionTest
                 mockQueryOptions.getPageSize();
                 result = expectedPageSize;
 
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, (byte[]) any, anyString, expectedTimeout);
+                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, (byte[]) any, anyString, connectTimeout ,expectedTimeout);
                 result = mockHttpResponse;
 
                 mockHttpResponse.getHeaderFields();
@@ -331,7 +336,7 @@ public class QueryCollectionTest
                 DeviceOperations.setHeaders(expectedValidRequestHeaders);
                 times = 1;
 
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, expectedTimeout);
+                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, connectTimeout,expectedTimeout);
                 times = 1;
             }
         };
@@ -343,7 +348,7 @@ public class QueryCollectionTest
     public void sendQueryRequestThrowsForUnknownResponseQueryType() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, expectedPageSize, QueryType.RAW, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class}, expectedPageSize, QueryType.RAW, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
 
         new NonStrictExpectations()
         {
@@ -354,7 +359,7 @@ public class QueryCollectionTest
                 mockQueryOptions.getPageSize();
                 result = expectedPageSize;
 
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, (byte[]) any, anyString, expectedTimeout);
+                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, (byte[]) any, anyString, connectTimeout, expectedTimeout);
                 result = mockHttpResponse;
 
                 mockHttpResponse.getHeaderFields();
@@ -372,14 +377,14 @@ public class QueryCollectionTest
     public void sendQueryRequestGetsContinuationTokenFromCurrentIfOptionsHasNone() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, expectedPageSize, QueryType.RAW, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class}, expectedPageSize, QueryType.RAW, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
         Deencapsulation.setField(queryCollection, "isSqlQuery", false);
         Deencapsulation.setField(queryCollection, "responseContinuationToken", expectedRequestContinuationToken);
 
         new NonStrictExpectations()
         {
             {
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, (byte[]) any, anyString, expectedTimeout);
+                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, (byte[]) any, anyString, connectTimeout, expectedTimeout);
                 result = mockHttpResponse;
 
                 mockHttpResponse.getHeaderFields();
@@ -399,7 +404,7 @@ public class QueryCollectionTest
                 DeviceOperations.setHeaders(expectedValidRequestHeaders);
                 times = 1;
 
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, expectedTimeout);
+                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, connectTimeout, expectedTimeout);
                 times = 1;
             }
         };
@@ -413,7 +418,7 @@ public class QueryCollectionTest
         String expectedQueryString = "some query";
         String expectedQueryStringJson = "some query json";
         byte[] expectedQueryStringBytes = expectedQueryStringJson.getBytes();
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, expectedQueryString, expectedPageSize, QueryType.RAW, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class}, expectedQueryString, expectedPageSize, QueryType.RAW, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
 
         new NonStrictExpectations()
         {
@@ -430,7 +435,7 @@ public class QueryCollectionTest
                 expectedQueryStringJson.getBytes();
                 result = expectedQueryStringBytes;
 
-                DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, expectedQueryStringBytes, null, anyLong);
+                DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, expectedQueryStringBytes, null, connectTimeout, expectedTimeout);
                 result = mockHttpResponse;
 
                 mockHttpResponse.getHeaderFields();
@@ -445,7 +450,7 @@ public class QueryCollectionTest
         new Verifications()
         {
             {
-                DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, expectedQueryStringBytes, null, anyLong);
+                DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, expectedQueryStringBytes, null, connectTimeout, expectedTimeout);
                 times = 1;
             }
         };
@@ -460,7 +465,7 @@ public class QueryCollectionTest
         String expectedQueryString = "some query";
         String expectedQueryStringJson = "some query json";
         byte[] expectedQueryStringBytes = expectedQueryStringJson.getBytes();
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, expectedQueryString, expectedPageSize, QueryType.RAW, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class}, expectedQueryString, expectedPageSize, QueryType.RAW, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
 
         new NonStrictExpectations()
         {
@@ -477,7 +482,7 @@ public class QueryCollectionTest
                 expectedQueryStringJson.getBytes();
                 result = expectedQueryStringBytes;
 
-                DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, expectedQueryStringBytes, null, anyLong);
+                DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, expectedQueryStringBytes, null);
                 result = mockHttpResponse;
 
                 mockHttpResponse.getHeaderFields();
@@ -506,7 +511,7 @@ public class QueryCollectionTest
     public void sendQueryRequestThrowsForMismatchedResponseQueryType() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class}, expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
 
         new NonStrictExpectations()
         {
@@ -517,7 +522,7 @@ public class QueryCollectionTest
                 mockQueryOptions.getPageSize();
                 result = expectedPageSize;
 
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, (byte[]) any, anyString, expectedTimeout);
+                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, (byte[]) any, anyString, connectTimeout, expectedTimeout);
                 result = mockHttpResponse;
 
                 mockHttpResponse.getHeaderFields();
@@ -534,7 +539,7 @@ public class QueryCollectionTest
     public void hasNextReturnsTrueIfItIsTheInitialQuery()
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, "some query", expectedPageSize, QueryType.DEVICE_JOB, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class}, "some query", expectedPageSize, QueryType.DEVICE_JOB, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
         Deencapsulation.setField(queryCollection, "isInitialQuery", true);
 
         //act
@@ -549,7 +554,7 @@ public class QueryCollectionTest
     public void hasNextReturnsFalseIfNoContinuationToken() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, "some query", expectedPageSize, QueryType.DEVICE_JOB, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class}, "some query", expectedPageSize, QueryType.DEVICE_JOB, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
         Deencapsulation.setField(queryCollection, "responseContinuationToken", null);
         Deencapsulation.setField(queryCollection, "isInitialQuery", false);
 
@@ -565,7 +570,7 @@ public class QueryCollectionTest
     public void hasNextReturnsTrueIfContinuationTokenSaved() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, "some query", expectedPageSize, QueryType.DEVICE_JOB, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class}, "some query", expectedPageSize, QueryType.DEVICE_JOB, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
         Deencapsulation.setField(queryCollection, "responseContinuationToken", "any continuation token");
         Deencapsulation.setField(queryCollection, "isInitialQuery", false);
 
@@ -581,7 +586,7 @@ public class QueryCollectionTest
     public void nextReturnsNextSetIfItHasOne() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
 
         //only mocking one method for QueryCollection, not the whole class
         new NonStrictExpectations(queryCollection)
@@ -610,7 +615,7 @@ public class QueryCollectionTest
     public void nextReturnsNullIfItDoesNotHaveNext() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
 
         //only mocking one method for QueryCollection, not the whole class
         new NonStrictExpectations(queryCollection)
@@ -633,7 +638,7 @@ public class QueryCollectionTest
     public void nextWithOptionsReturnsNextSetIfItHasOne() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
 
         //only mocking one method for QueryCollection, not the whole class
         new NonStrictExpectations(queryCollection)
@@ -659,7 +664,7 @@ public class QueryCollectionTest
     public void nextWithOptionsReturnsNullIfItDoesNotHaveNext() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
 
         //only mocking one method for QueryCollection, not the whole class
         new NonStrictExpectations(queryCollection)
@@ -683,7 +688,7 @@ public class QueryCollectionTest
     {
         //arrange
         Integer expectedPageSize = 290;
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class, long.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, mockHttpMethod, connectTimeout, expectedTimeout);
         Deencapsulation.setField(queryCollection, "pageSize", expectedPageSize);
 
         //act
@@ -701,7 +706,7 @@ public class QueryCollectionTest
                 DeviceOperations.setHeaders(expectedValidRequestHeaders);
                 times = 1;
 
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, (byte[]) any, null, expectedTimeout);
+                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, (byte[]) any, null, connectTimeout, expectedTimeout);
                 times = 1;
             }
         };

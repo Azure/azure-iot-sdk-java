@@ -31,8 +31,34 @@ public class DeviceOperations
     private static final String ACCEPT_VALUE = "application/json";
     private static final String ACCEPT_CHARSET = "charset=utf-8";
     private static final String CONTENT_TYPE = "Content-Type";
-    private static final Integer DEFAULT_HTTP_TIMEOUT_MS = 24000;
+
+    public static final long DEFAULT_CONNECT_TIMEOUT_MS = 0;
+    public static final long DEFAULT_RESPONSE_TIMEOUT_MS = 24000;
+
     private static Map<String, String> headers = null;
+    /**
+     * Send a http request to the IoTHub using the Twin/Method standard, and return its response.
+     *
+     * @param iotHubConnectionString is the connection string for the IoTHub
+     * @param url is the Twin URL for the device ID.
+     * @param method is the HTTP method (GET, POST, DELETE, PATCH, PUT).
+     * @param payload is the array of bytes that contains the payload.
+     * @param requestId is an unique number that identify the request.
+     * @return the result of the request.
+     * @throws IotHubException This exception is thrown if the response verification failed
+     * @throws IOException This exception is thrown if the IO operation failed
+     */
+    public static HttpResponse request(
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod method,
+            byte[] payload,
+            String requestId)
+            throws IOException, IotHubException, IllegalArgumentException
+    {
+        return  request(iotHubConnectionString, url, method, payload, requestId, DEFAULT_CONNECT_TIMEOUT_MS, DEFAULT_RESPONSE_TIMEOUT_MS);
+    }
+
 
     /**
      * Send a http request to the IoTHub using the Twin/Method standard, and return its response.
@@ -42,7 +68,8 @@ public class DeviceOperations
      * @param method is the HTTP method (GET, POST, DELETE, PATCH, PUT).
      * @param payload is the array of bytes that contains the payload.
      * @param requestId is an unique number that identify the request.
-     * @param timeoutInMs is timeout in milliseconds.
+     * @param connectTimeoutInMs is connect timeout in milliseconds.
+     * @param responseTimeoutInMs is response timeout in milliseconds.
      * @return the result of the request.
      * @throws IotHubException This exception is thrown if the response verification failed
      * @throws IOException This exception is thrown if the IO operation failed
@@ -53,7 +80,8 @@ public class DeviceOperations
             HttpMethod method, 
             byte[] payload, 
             String requestId,
-            long timeoutInMs) 
+            long connectTimeoutInMs,
+            long responseTimeoutInMs)
             throws IOException, IotHubException, IllegalArgumentException
     {
         /* Codes_SRS_DEVICE_OPERATIONS_21_001: [The request shall throw IllegalArgumentException if the provided `iotHubConnectionString` is null.] */
@@ -80,10 +108,16 @@ public class DeviceOperations
             throw new IllegalArgumentException("Null payload");
         }
 
-        /* Codes_SRS_DEVICE_OPERATIONS_99_018: [The request shall throw IllegalArgumentException if the provided `timeoutInMs` exceed Integer.MAX_VALUE.] */
-        if((timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS) > Integer.MAX_VALUE) 
+        /* Codes_SRS_DEVICE_OPERATIONS_99_018: [The request shall throw IllegalArgumentException if the provided `responseTimeoutInMs` exceed Integer.MAX_VALUE.] */
+        if((responseTimeoutInMs) > Integer.MAX_VALUE)
         {
-            throw new IllegalArgumentException("HTTP Request timeout shouldn't not exceed " + timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS + " milliseconds");
+            throw new IllegalArgumentException("HTTP Request responseTimeout shouldn't not exceed " + Integer.MAX_VALUE +  " milliseconds");
+        }
+
+        /* Codes_SRS_DEVICE_OPERATIONS_99_018: [The request shall throw IllegalArgumentException if the provided `connectTimeoutInMs` exceed Integer.MAX_VALUE.] */
+        if((connectTimeoutInMs) > Integer.MAX_VALUE)
+        {
+            throw new IllegalArgumentException("HTTP Request connectTimeout shouldn't not exceed " + Integer.MAX_VALUE +  " milliseconds");
         }
 
         /* Codes_SRS_DEVICE_OPERATIONS_21_006: [The request shall create a new SASToken with the ServiceConnect rights.] */
@@ -97,9 +131,10 @@ public class DeviceOperations
         /* Codes_SRS_DEVICE_OPERATIONS_21_008: [The request shall create a new HttpRequest with the provided `url`, http `method`, and `payload`.] */
         HttpRequest request = new HttpRequest(url, method, payload);
 
-        /* Codes_SRS_DEVICE_OPERATIONS_21_009: [The request shall add to the HTTP header the sum of timeout and default timeout in milliseconds.] */
-        request.setReadTimeoutMillis((int)(timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS));
-        
+        /* issue_271: [The request can set connectTimeout and readTimeout separately] */
+        request.setConnectTimeoutMillis((int)connectTimeoutInMs);
+        request.setReadTimeoutMillis((int)responseTimeoutInMs);
+
         /* Codes_SRS_DEVICE_OPERATIONS_21_010: [The request shall add to the HTTP header an `authorization` key with the SASToken.] */
         request.setHeaderField(AUTHORIZATION, sasTokenString);
 

@@ -53,7 +53,7 @@ public class DeviceOperationsTest
     private static final String ACCEPT_VALUE = "application/json";
     private static final String ACCEPT_CHARSET = "charset=utf-8";
     private static final String CONTENT_TYPE = "Content-Type";
-    private static final Integer DEFAULT_HTTP_TIMEOUT_MS = 24000;
+    private static final Integer DEFAULT_HTTP_TIMEOUT_MS = 24000;  //default read time out
     
     private IotHubConnectionString IOT_HUB_CONNECTION_STRING;
     private String STANDARD_SASTOKEN_STRING;
@@ -77,8 +77,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
 
         //assert
     }
@@ -96,8 +95,7 @@ public class DeviceOperationsTest
                 null,
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
 
         //assert
     }
@@ -114,8 +112,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 null,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
 
         //assert
     }
@@ -132,8 +129,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 null,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
 
         //assert
     }
@@ -151,8 +147,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                null,
-                0);
+                null);
 
         //assert
         new Verifications()
@@ -164,7 +159,7 @@ public class DeviceOperationsTest
         };
     }
     
-    /* Tests_SRS_DEVICE_OPERATIONS_99_018: [The request shall throw IllegalArgumentException if the provided `timeoutInMs` plus DEFAULT_HTTP_TIMEOUT_MS exceed Integer.MAX_VALUE.] */
+    /* Tests_SRS_DEVICE_OPERATIONS_99_018: [The request shall throw IllegalArgumentException if the provided responseTimeInMs exceed Integer.MAX_VALUE.] */
     @Test (expected = IllegalArgumentException.class)
     public void requestTimeoutExceedsFailed() throws Exception
     {
@@ -177,7 +172,8 @@ public class DeviceOperationsTest
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
                 STANDARD_REQUEST_ID,
-                Integer.MAX_VALUE);
+                DeviceOperations.DEFAULT_CONNECT_TIMEOUT_MS,
+                Integer.MAX_VALUE + 100L);
 
         //assert
     }
@@ -195,8 +191,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                "",
-                0);
+                "");
 
         //assert
         new Verifications()
@@ -228,8 +223,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_007: [If the SASToken is null or empty, the request shall throw IOException.] */
@@ -251,8 +245,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_007: [If the SASToken is null or empty, the request shall throw IOException.] */
@@ -274,8 +267,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_008: [The request shall create a new HttpRequest with the provided `url`, http `method`, and `payload`.] */
@@ -304,8 +296,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                DEFAULT_HTTP_TIMEOUT_MS);
+                STANDARD_REQUEST_ID);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_009: [The request shall add to the HTTP header the sum of timeout and default timeout in milliseconds.] */
@@ -332,8 +323,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_010: [The request shall add to the HTTP header an `authorization` key with the SASToken.] */
@@ -362,8 +352,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_011: [The request shall add to the HTTP header a `Request-Id` key with a new unique string value for every request.] */
@@ -394,8 +383,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_012: [The request shall add to the HTTP header a `User-Agent` key with the client Id and service version.] */
@@ -428,8 +416,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_013: [The request shall add to the HTTP header a `Accept` key with `application/json`.] */
@@ -464,8 +451,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_014: [The request shall add to the HTTP header a `Content-Type` key with `application/json; charset=utf-8`.] */
@@ -502,8 +488,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_015: [The request shall send the created request and get the response.] */
@@ -542,8 +527,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_016: [If the resulted HttpResponseStatus represents fail, the request shall throw proper Exception by calling httpResponseVerification.] */
@@ -590,8 +574,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_017: [If the resulted status represents success, the request shall return the http response.] */
@@ -637,8 +620,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
 
         //assert
         assertEquals(response, sendResponse);
@@ -667,12 +649,9 @@ public class DeviceOperationsTest
             throws Exception
     {
         //arrange
-        final long responseTimeout = 30000; // 30 seconds
+        final long responseTimeout = 30000  + DEFAULT_HTTP_TIMEOUT_MS; // 30 seconds
         final long connectTimeout = 5000;   // 5 seconds
         
-        // Calculate total timeout in milliseconds
-        int timeoutInMs = (int)(responseTimeout + connectTimeout);
-
         final int status = 200;
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
@@ -684,7 +663,7 @@ public class DeviceOperationsTest
             {
                 iotHubServiceSasToken.toString();
                 result = STANDARD_SASTOKEN_STRING;
-                httpRequest.setReadTimeoutMillis(timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS);
+                httpRequest.setReadTimeoutMillis((int)responseTimeout);
                 result = httpRequest;
                 httpRequest.setHeaderField(AUTHORIZATION, STANDARD_SASTOKEN_STRING);
                 result = httpRequest;
@@ -709,7 +688,8 @@ public class DeviceOperationsTest
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
                 STANDARD_REQUEST_ID,
-                timeoutInMs);
+                connectTimeout,
+                responseTimeout);
 
         //assert
         assertEquals(response, sendResponse);
@@ -718,7 +698,7 @@ public class DeviceOperationsTest
             {
                 iotHubServiceSasToken.toString();
                 times = 1;
-                httpRequest.setReadTimeoutMillis(timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS);
+                httpRequest.setReadTimeoutMillis((int)responseTimeout);
                 times = 1;
                 httpRequest.setHeaderField(anyString, anyString);
                 times = 5;
@@ -746,8 +726,7 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
 
         assertNull(Deencapsulation.getField(DeviceOperations.class, "headers"));
 
@@ -776,16 +755,14 @@ public class DeviceOperationsTest
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
 
         DeviceOperations.request(
                 IOT_HUB_CONNECTION_STRING,
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+                STANDARD_REQUEST_ID);
         //assert
         new Verifications()
         {

@@ -160,6 +160,15 @@ public class HttpConnection
     }
 
     /**
+     * Sets the connect timeout in milliseconds.
+     *
+     * @param timeout The connect timeout.
+     */
+    public void setConnectTimeoutMillis(int timeout)
+    {
+        this.connection.setConnectTimeout(timeout);
+    }
+    /**
      * Saves the body to be sent with the request.
      *
      * @param body The request body.

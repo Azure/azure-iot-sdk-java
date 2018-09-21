@@ -22,7 +22,6 @@ public class DeviceTwin
 {
     private IotHubConnectionString iotHubConnectionString = null;
     private Integer requestId = 0;
-    private final long USE_DEFAULT_TIMEOUT = 0;
     private final int DEFAULT_PAGE_SIZE = 100;
 
     /**
@@ -104,7 +103,7 @@ public class DeviceTwin
          **Codes_SRS_DEVICETWIN_25_009: [** The function shall send the created request and get the response **]**
          **Codes_SRS_DEVICETWIN_25_010: [** The function shall verify the response status and throw proper Exception **]**
          */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.GET, new byte[0], String.valueOf(requestId++), USE_DEFAULT_TIMEOUT);
+        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.GET, new byte[0], String.valueOf(requestId++));
         String twin = new String(response.getBody(), StandardCharsets.UTF_8);
 
         /*
@@ -189,7 +188,7 @@ public class DeviceTwin
 
         **Codes_SRS_DEVICETWIN_25_020: [** The function shall verify the response status and throw proper Exception **]**
          */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.PATCH, twinJson.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++),0);
+        DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.PATCH, twinJson.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++));
     }
 
     /**
@@ -259,7 +258,7 @@ public class DeviceTwin
 
         //Codes_SRS_DEVICETWIN_25_049: [ The method shall build the URL for this operation by calling getUrlTwinQuery ]
         //Codes_SRS_DEVICETWIN_25_051: [ The method shall send a Query Request to IotHub as HTTP Method Post on the query Object by calling sendQueryRequest.]
-        deviceTwinQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, USE_DEFAULT_TIMEOUT);
+        deviceTwinQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, DeviceOperations.DEFAULT_CONNECT_TIMEOUT_MS, DeviceOperations.DEFAULT_RESPONSE_TIMEOUT_MS);
         return deviceTwinQuery;
     }
 
@@ -302,7 +301,7 @@ public class DeviceTwin
     public synchronized QueryCollection queryTwinCollection(String sqlQuery, Integer pageSize) throws MalformedURLException
     {
         //Codes_SRS_DEVICETWIN_34_070: [This function shall return a new QueryCollection object of type TWIN with the provided sql query and page size.]
-        return new QueryCollection(sqlQuery, pageSize, QueryType.TWIN, this.iotHubConnectionString, this.iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, USE_DEFAULT_TIMEOUT);
+        return new QueryCollection(sqlQuery, pageSize, QueryType.TWIN, this.iotHubConnectionString, this.iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, DeviceOperations.DEFAULT_CONNECT_TIMEOUT_MS, DeviceOperations.DEFAULT_RESPONSE_TIMEOUT_MS);
     }
 
     /**
