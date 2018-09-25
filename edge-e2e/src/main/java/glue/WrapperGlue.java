@@ -20,7 +20,7 @@ public class WrapperGlue
 
     public void outputMessage(Object message, Handler<AsyncResult<Void>> handler)
     {
-        System.out.println(((JsonObject)message).getString("message"));
+        System.out.println("testscript:" + ((JsonObject)message).getString("message"));
         handler.handle(Future.succeededFuture());
     }
 }

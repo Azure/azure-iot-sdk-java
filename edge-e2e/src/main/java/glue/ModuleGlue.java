@@ -154,7 +154,7 @@ public class ModuleGlue
             try
             {
                 MethodResult result = client.invokeMethod(deviceId, request);
-                handler.handle(Future.succeededFuture(result));
+                handler.handle(Future.succeededFuture(makeMethodResultThatEncodesCorrectly(result)));
             }
             catch (ModuleClientException e)
             {
@@ -169,13 +169,16 @@ public class ModuleGlue
         ModuleClient client = getClient(connectionId);
         if (client != null)
         {
+            this._deviceTwinPropertyCallback.setHandler(null);
+            this._deviceTwinStatusCallback.setHandler(null);
             try
             {
-                client.close();
+                client.closeNow();
             }
             catch (IOException e)
             {
-                // ignore it.
+                // ignore it, but keep it as an open connection so we can close it again later.
+                System.out.printf("Exception on close: %s%n", e.toString());
             }
             this._map.remove(connectionId);
         }
@@ -233,7 +236,11 @@ public class ModuleGlue
                             " property " + property.getKey() +
                             " to " + property.getValue() +
                             ", Properties version:" + property.getVersion());
-            if (this._props != null)
+            if (this._props == null)
+            {
+                System.out.println("nobody is listening for desired properties.  ignoring.");
+            }
+            else
             {
                 if (property.getIsReported())
                 {
@@ -251,6 +258,10 @@ public class ModuleGlue
 
         private void rescheduleHandler()
         {
+            if (_handler == null)
+            {
+                return;
+            }
             // call _handler 2 seconds after the last designed property change
             if (this._timer != null)
             {
@@ -266,7 +277,7 @@ public class ModuleGlue
                     _timer = null;
                     if (_handler != null && _props != null)
                     {
-                        System.out.println("calling handler");
+                        System.out.println("It's been 2 seconds since last desired property arrived.  Calling handler");
                         JsonObject twin = new JsonObject()
                         {
                             {
@@ -275,6 +286,7 @@ public class ModuleGlue
                         };
                         System.out.println(twin.toString());
                         _handler.handle(Future.succeededFuture(twin));
+                        _handler = null;
                     }
                 }
             }, 2000);
@@ -315,9 +327,9 @@ public class ModuleGlue
     private IotHubEventCallbackImpl _deviceTwinStatusCallback = new IotHubEventCallbackImpl();
 
 
-    public void enableTwin(String connectionId, Handler<AsyncResult<Void>> handler)
+    public void enableTwin(String connectionId, final Handler<AsyncResult<Void>> handler)
     {
-        ModuleClient client = getClient(connectionId);
+        final ModuleClient client = getClient(connectionId);
         if (client == null)
         {
             handler.handle(Future.failedFuture(new MainApiException(500, "invalid connection id")));
@@ -326,6 +338,7 @@ public class ModuleGlue
         {
             try
             {
+                // After we start the twin, we want to subscribe to twin properties.  This lambda will do that for us.
                 this._deviceTwinStatusCallback.setHandler(res -> {
                     System.out.printf("startTwin completed - failed = %s%n", (res.failed() ? "true" : "false"));
 
@@ -347,7 +360,7 @@ public class ModuleGlue
                         }
                         handler.handle(Future.succeededFuture());
                     }
-
+                    this._deviceTwinStatusCallback.setHandler(null);
                 });
                 System.out.println("calling startTwin");
                 client.startTwin(this._deviceTwinStatusCallback, null, this._deviceTwinPropertyCallback, null);
@@ -551,6 +564,18 @@ public class ModuleGlue
         }
     }
 
+    private JsonObject makeMethodResultThatEncodesCorrectly(MethodResult result)
+    {
+        // Our JSON encoder doesn't like the way the MethodClass implements getPayload and getPayloadObject.  It
+        // produces JSON that had both fields and the we want to return payloadObject, but we want to return it
+        // in the field called "payload".  The easiest workaroudn is to make an empty JsonObject and copy the
+        // values over manually.  I'm sure there's a better way, but this is test code.
+        JsonObject fixedObject = new JsonObject();
+        fixedObject.put("status", result.getStatus());
+        fixedObject.put("payload", result.getPayloadObject());
+        return fixedObject;
+    }
+
 
     public void invokeModuleMethod(String connectionId, String deviceId, String moduleId, Object methodInvokeParameters, Handler<AsyncResult<Object>> handler)
     {
@@ -570,7 +595,7 @@ public class ModuleGlue
             try
             {
                 MethodResult result = client.invokeMethod(deviceId, moduleId, request);
-                handler.handle(Future.succeededFuture(result));
+                handler.handle(Future.succeededFuture(makeMethodResultThatEncodesCorrectly(result)));
             }
             catch (ModuleClientException e)
             {
