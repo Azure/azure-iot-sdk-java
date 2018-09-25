@@ -2530,4 +2530,81 @@ public class InternalClientTest
             }
         };
     }
+
+    // Tests_SRS_DEVICECLIENT_34_046: [If the option is SET_CERTIFICATE_PATH, and the saved
+    // protocol is not HTTPS, this function shall save the certificate path in config.]
+    @Test
+    public void setCertificatePathWorksForMqtt()
+    {
+        setCertificatePath(IotHubClientProtocol.MQTT);
+    }
+
+    // Tests_SRS_DEVICECLIENT_34_046: [If the option is SET_CERTIFICATE_PATH, and the saved
+    // protocol is not HTTPS, this function shall save the certificate path in config.]
+    @Test
+    public void setCertificatePathWorksForMqttWs()
+    {
+        setCertificatePath(IotHubClientProtocol.MQTT_WS);
+    }
+
+    // Tests_SRS_DEVICECLIENT_34_046: [If the option is SET_CERTIFICATE_PATH, and the saved
+    // protocol is not HTTPS, this function shall save the certificate path in config.]
+    @Test
+    public void setCertificatePathWorksForAmqps()
+    {
+        setCertificatePath(IotHubClientProtocol.AMQPS);
+    }
+
+    // Tests_SRS_DEVICECLIENT_34_046: [If the option is SET_CERTIFICATE_PATH, and the saved
+    // protocol is not HTTPS, this function shall save the certificate path in config.]
+    @Test
+    public void setCertificatePathWorksForAmqpsWs()
+    {
+        setCertificatePath(IotHubClientProtocol.AMQPS_WS);
+    }
+
+    // Tests_SRS_DEVICECLIENT_34_047: [If the option is SET_CERTIFICATE_PATH, and the saved
+    // protocol is HTTPS, this function shall throw an IllegalArgumentException.]
+    @Test (expected = IllegalArgumentException.class)
+    public void setCertificatePathFailsForHttps()
+    {
+        setCertificatePath(IotHubClientProtocol.HTTPS);
+    }
+
+    private void setCertificatePath(final IotHubClientProtocol protocol)
+    {
+        //arrange
+        final String expectedCertificatePath = "some certificate path";
+
+        new NonStrictExpectations()
+        {
+            {
+                new DeviceClientConfig(mockIotHubConnectionString);
+                result = mockConfig;
+
+                Deencapsulation.newInstance(DeviceIO.class, mockConfig, SEND_PERIOD, RECEIVE_PERIOD);
+                result = mockDeviceIO;
+
+                mockDeviceIO.getProtocol();
+                result = protocol;
+
+                mockConfig.getAuthenticationProvider();
+                result = mockIotHubAuthenticationProvider;
+            }
+        };
+
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+
+        // act
+        client.setOption("SetCertificatePath", expectedCertificatePath);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockIotHubAuthenticationProvider.setPathToIotHubTrustedCert(expectedCertificatePath);
+                times = 1;
+            }
+        };
+    }
 }

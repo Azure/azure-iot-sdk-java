@@ -413,13 +413,17 @@ public class InternalClient
                     }
                     else
                     {
-                        if ((this.deviceIO.getProtocol() == AMQPS) || (this.deviceIO.getProtocol() == AMQPS_WS))
+                        if (this.deviceIO.getProtocol() != HTTPS)
                         {
+                            // Codes_SRS_DEVICECLIENT_34_046: [If the option is SET_CERTIFICATE_PATH, and the saved
+                            // protocol is not HTTPS, this function shall save the certificate path in config.]
                             setOption_SetCertificatePath(value);
                         }
                         else
                         {
-                            throw new IllegalArgumentException("optionName is unknown = " + optionName + " for " + this.deviceIO.getProtocol().toString());
+                            // Codes_SRS_DEVICECLIENT_34_047: [If the option is SET_CERTIFICATE_PATH, and the saved
+                            // protocol is HTTPS, this function shall throw an IllegalArgumentException.]
+                            throw new IllegalArgumentException("option SetCertificatePath cannot be invoked when using HTTPS protocol");
                         }
                     }
 
