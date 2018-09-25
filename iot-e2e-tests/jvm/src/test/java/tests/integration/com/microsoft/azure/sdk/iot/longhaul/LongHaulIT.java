@@ -16,7 +16,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
 import org.junit.experimental.ParallelComputer;
 import org.junit.runner.JUnitCore;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.DeviceConnectionString;
 
 import java.io.IOException;

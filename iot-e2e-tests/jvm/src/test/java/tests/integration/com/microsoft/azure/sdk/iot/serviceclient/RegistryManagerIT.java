@@ -15,7 +15,7 @@ import com.microsoft.azure.storage.StorageException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

@@ -7,7 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.X509Cert;
 import com.microsoft.azure.sdk.iot.common.TestConstants;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.iothubservices.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -17,7 +17,6 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;

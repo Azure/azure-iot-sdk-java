@@ -20,7 +20,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.*;
-import static tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools.retrieveEnvironmentVariableValue;
+import static com.microsoft.azure.sdk.iot.common.helpers.Tools.retrieveEnvironmentVariableValue;
 
 @RunWith(Parameterized.class)
 public class ServiceClientIT extends MethodNameLoggingIntegrationTest
