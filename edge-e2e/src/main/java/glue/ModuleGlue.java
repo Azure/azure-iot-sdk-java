@@ -174,13 +174,14 @@ public class ModuleGlue
             try
             {
                 client.closeNow();
+                this._map.remove(connectionId);
             }
             catch (IOException e)
             {
                 // ignore it, but keep it as an open connection so we can close it again later.
                 System.out.printf("Exception on close: %s%n", e.toString());
+                e.printStackTrace();
             }
-            this._map.remove(connectionId);
         }
     }
 
