@@ -68,14 +68,14 @@ public class SendEvent
     }
 
     /**
-     * Sends a number of messages to an IoT Hub. Default protocol is to 
+     * Sends a number of messages to an IoT or Edge Hub. Default protocol is to
      * use MQTT transport.
      *
      * @param args
-     * args[0] = IoT Hub connection string
-     * args[1] = number of requests to send
+     * args[0] = IoT Hub or Edge Hub connection string
+     * args[1] = number of messages to send
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
-     * args[3] = path to certificate to enable one-way authentication over ssl for amqps (optional, default shall be used if unspecified).
+     * args[3] = path to certificate to enable one-way authentication over ssl. (Not necessary when connecting directly to Iot Hub, but required if connecting to an Edge device using a non public root CA certificate).
      */
     public static void main(String[] args)
             throws IOException, URISyntaxException
@@ -88,10 +88,10 @@ public class SendEvent
             System.out.format(
                     "Expected 2 or 3 arguments but received: %d.\n"
                             + "The program should be called with the following args: \n"
-                            + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
+                            + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key> or HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>;GatewayHostName=<gateway> \n"
                             + "2. [number of requests to send]\n"
                             + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                            + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
+                            + "4. (optional) path to certificate to enable one-way authentication over ssl \n",
                     args.length);
             return;
         }
