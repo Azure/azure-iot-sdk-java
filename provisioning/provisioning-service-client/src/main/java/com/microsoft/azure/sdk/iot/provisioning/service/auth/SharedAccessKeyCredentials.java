@@ -7,23 +7,25 @@ import com.microsoft.rest.credentials.ServiceClientCredentials;
 
 import okhttp3.OkHttpClient.Builder;
 
-public class SharedAccessKeyCredentials implements ServiceClientCredentials{
-	
-	private String sasToken;
+public class SharedAccessKeyCredentials implements ServiceClientCredentials
+{
+    private String sasToken;
 
-	public SharedAccessKeyCredentials(String connectionString) {
-		sasToken = generateSASToken(connectionString);
-	}
-	@Override
-	public void applyCredentialsFilter(Builder clientBuilder) {
-		// TODO Auto-generated method stub
-		clientBuilder.addInterceptor(new BasicAuthInterceptor(sasToken))
-			.build();
-	}
-	
-	private String generateSASToken(String connectionString) {
-		ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
-		return new ProvisioningSasToken(provisioningConnectionString).toString();
-	}
+    public SharedAccessKeyCredentials(ProvisioningConnectionString connectionString)
+    {
+        this.sasToken = generateSASToken(connectionString);
+    }
 
+    @Override
+    public void applyCredentialsFilter(Builder clientBuilder)
+    {
+        // TODO Auto-generated method stub
+        clientBuilder.addInterceptor(new BasicAuthInterceptor(this.sasToken))
+                     .build();
+    }
+
+    private String generateSASToken(ProvisioningConnectionString connectionString)
+    {
+        return new ProvisioningSasToken(connectionString).toString();
+    }
 }
