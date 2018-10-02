@@ -63,7 +63,7 @@ public class ServiceEnrollmentGroupSample
         String enrollmentGroupId = "enrollmentgroupid-" + UUID.randomUUID();
 
         // *********************************** Create a Provisioning Service Client ************************************
-        SharedAccessKeyCredentials credentials = new SharedAccessKeyCredentials(PROVISIONING_CONNECTION_STRING);
+        ServiceClientCredentials credentials = ProvisioningServiceClientExtension.createCredentialsFromConnectionString(PROVISIONING_CONNECTION_STRING);
         RestClient simpleRestClient = new RestClient.Builder(new OkHttpClient.Builder(), new Retrofit.Builder())
         	    .withBaseUrl(DPS_BASE_URL)
         	    .withCredentials(credentials)
