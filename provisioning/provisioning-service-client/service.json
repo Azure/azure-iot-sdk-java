@@ -5,7 +5,7 @@
     "title": "ProvisioningServiceClient",
     "description": "API for service operations with the Azure IoT Hub Device Provisioning Service"
   },
-  "host": "localhost",
+  "host": "your-dps.azure-devices-provisioning.net",
   "schemes": [
     "https"
   ],
@@ -716,12 +716,8 @@
           "type": "string"
         },
         "registrationState": {
+          "$ref": "#/definitions/DeviceRegistrationState",
           "description": "Current registration status.",
-          "allOf": [
-            {
-              "$ref": "#/definitions/DeviceRegistrationState"
-            }
-          ],
           "readOnly": true
         },
         "attestation": {

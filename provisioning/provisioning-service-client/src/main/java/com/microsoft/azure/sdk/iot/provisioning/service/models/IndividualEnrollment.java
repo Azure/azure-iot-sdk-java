@@ -36,7 +36,7 @@ public class IndividualEnrollment {
      * Current registration status.
      */
     @JsonProperty(value = "registrationState", access = JsonProperty.Access.WRITE_ONLY)
-    private IndividualEnrollmentRegistrationState registrationState;
+    private DeviceRegistrationState registrationState;
 
     /**
      * Attestation method used by the device.
@@ -183,7 +183,7 @@ public class IndividualEnrollment {
      *
      * @return the registrationState value
      */
-    public IndividualEnrollmentRegistrationState registrationState() {
+    public DeviceRegistrationState registrationState() {
         return this.registrationState;
     }
 

@@ -79,7 +79,7 @@ public class ProvisioningServiceClientImpl extends ServiceClient implements Prov
      * Initializes an instance of ProvisioningServiceClient client.
      */
     public ProvisioningServiceClientImpl() {
-        this("https://localhost");
+        this("https://your-dps.azure-devices-provisioning.net");
     }
 
     /**
@@ -99,7 +99,7 @@ public class ProvisioningServiceClientImpl extends ServiceClient implements Prov
      * @param restBuilder the builder for building an Retrofit client, bundled with user configurations
      */
     public ProvisioningServiceClientImpl(OkHttpClient.Builder clientBuilder, Retrofit.Builder restBuilder) {
-        this("https://localhost", clientBuilder, restBuilder);
+        this("https://your-dps.azure-devices-provisioning.net", clientBuilder, restBuilder);
         initialize();
     }
 

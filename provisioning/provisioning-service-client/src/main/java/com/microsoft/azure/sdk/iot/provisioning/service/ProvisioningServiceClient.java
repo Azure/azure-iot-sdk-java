@@ -39,7 +39,7 @@ public interface ProvisioningServiceClient {
     /**
      * The default base URL.
      */
-    String DEFAULT_BASE_URL = "https://localhost";
+    String DEFAULT_BASE_URL = "https://your-dps.azure-devices-provisioning.net";
 
     /**
      * Gets The API version to use for the request. Supported versions include: 2018-09-01-preview.
