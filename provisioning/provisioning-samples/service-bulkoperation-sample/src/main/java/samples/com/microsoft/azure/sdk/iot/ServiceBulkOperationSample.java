@@ -3,19 +3,28 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
-import com.microsoft.azure.sdk.iot.provisioning.service.auth.SharedAccessKeyCredentials;
+import com.microsoft.azure.sdk.iot.provisioning.service.helpers.ProvisioningServiceClientHelper;
 import com.microsoft.azure.sdk.iot.provisioning.service.implementation.ProvisioningServiceClientImpl;
-import com.microsoft.azure.sdk.iot.provisioning.service.models.*;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.AttestationMechanism;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.BulkEnrollmentOperation;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.BulkEnrollmentOperationResult;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.IndividualEnrollment;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.ProvisioningServiceErrorDetailsException;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.QuerySpecification;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.TpmAttestation;
 import com.microsoft.rest.RestClient;
 import com.microsoft.rest.ServiceResponseBuilder;
+import com.microsoft.rest.credentials.ServiceClientCredentials;
 import com.microsoft.rest.serializer.JacksonAdapter;
-
-import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
-
-import java.util.*;
 
 /**
  * Create, get, query, and delete a set of individual enrollments on the Microsoft Azure IoT Hub Device
@@ -38,17 +47,19 @@ public class ServiceBulkOperationSample
 
     private static final String TPM_ATTESTATION = "tpm";
     private static final String BULK_OPERATION_CREATE = "create";
-    private static final String BULK_OPERATION__UPDATE = "update";
+    private static final String BULK_OPERATION_UPDATE = "update";
     private static final String BULK_OPERATION_DELETE = "delete";
     private static final int QUERY_PAGE_SIZE = 3;
 
     public static void main(String[] args) throws ProvisioningServiceErrorDetailsException, JsonProcessingException
     {
         System.out.println("Starting sample...");
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
         // *********************************** Create a Provisioning Service Client ************************************
-        ServiceClientCredentials credentials = ProvisioningServiceClientExtension.createCredentialsFromConnectionString(PROVISIONING_CONNECTION_STRING);
-        RestClient simpleRestClient = new RestClient.Builder(new OkHttpClient.Builder(), new Retrofit.Builder())
+        ServiceClientCredentials credentials = ProvisioningServiceClientHelper.createCredentialsFromConnectionString(PROVISIONING_CONNECTION_STRING);
+        
+        RestClient simpleRestClient = new RestClient.Builder()
         	    .withBaseUrl(DPS_BASE_URL)
         	    .withCredentials(credentials)
         	    .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
@@ -90,30 +101,28 @@ public class ServiceBulkOperationSample
             String registrationId = individualEnrollment.registrationId();
             System.out.println("\nGet the individualEnrollment information for " + registrationId + ":");
             IndividualEnrollment getResult = provisioningServiceClient.getIndividualEnrollment(registrationId);
+            System.out.println(ow.writeValueAsString(getResult));
             getResult.withDeviceId("java_device_id");
             updateEnrollments.add(getResult);
         }
         bulkEnrollmentOperation = new BulkEnrollmentOperation()
         		.withEnrollments(updateEnrollments)
-        		.withMode(BULK_OPERATION__UPDATE);
+        		.withMode(BULK_OPERATION_UPDATE);
         System.out.println("\nRun the bulk operation to update the individualEnrollments...");
         bulkOperationResult =  provisioningServiceClient.runBulkEnrollmentOperation(bulkEnrollmentOperation);
         System.out.println("Result of the Update bulk enrollment...");
         System.out.println(bulkOperationResult.isSuccessful());
 
         // ************************************ Query info of individualEnrollments ***********************************
-        /*System.out.println("\nCreate a query for individualEnrollments...");
+        System.out.println("\nCreate a query for enrollments...");
         QuerySpecification querySpecification =
-                new QuerySpecificationBuilder("*", QuerySpecificationBuilder.FromType.ENROLLMENTS)
-                        .createSqlQuery();
-        Query query = provisioningServiceClient.createIndividualEnrollmentQuery(querySpecification, QUERY_PAGE_SIZE);
-
-        while(query.hasNext())
+                new QuerySpecification().withQuery("SELECT * FROM ENROLLMENTS");
+        List<IndividualEnrollment> queryResult = provisioningServiceClient.queryIndividualEnrollments(querySpecification);
+        
+        for (IndividualEnrollment eachEnrollment : queryResult)
         {
-            System.out.println("\nQuery the next individualEnrollments...");
-            QueryResult queryResult = query.next();
-            System.out.println(queryResult);
-        }*/
+        	System.out.println(ow.writeValueAsString(eachEnrollment));
+        }
 
         // ********************************** Delete bulk of individualEnrollments ************************************
         System.out.println("\nDelete the set of individualEnrollments...");

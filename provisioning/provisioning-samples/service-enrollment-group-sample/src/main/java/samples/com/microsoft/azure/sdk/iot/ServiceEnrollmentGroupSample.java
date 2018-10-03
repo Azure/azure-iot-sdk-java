@@ -3,21 +3,26 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import java.util.List;
+import java.util.UUID;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
-import com.microsoft.azure.sdk.iot.provisioning.service.auth.SharedAccessKeyCredentials;
+import com.microsoft.azure.sdk.iot.provisioning.service.helpers.ProvisioningServiceClientHelper;
 import com.microsoft.azure.sdk.iot.provisioning.service.implementation.ProvisioningServiceClientImpl;
-import com.microsoft.azure.sdk.iot.provisioning.service.models.*;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.AttestationMechanism;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.EnrollmentGroup;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.ProvisioningServiceErrorDetailsException;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.QuerySpecification;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.X509Attestation;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.X509CertificateWithInfo;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.X509Certificates;
 import com.microsoft.rest.RestClient;
 import com.microsoft.rest.ServiceResponseBuilder;
+import com.microsoft.rest.credentials.ServiceClientCredentials;
 import com.microsoft.rest.serializer.JacksonAdapter;
-
-import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
-
-import java.util.UUID;
 
 /**
  * Create, get, query, and delete an enrollmentGroup on the Microsoft Azure IoT Hub Device Provisioning Service
@@ -63,8 +68,9 @@ public class ServiceEnrollmentGroupSample
         String enrollmentGroupId = "enrollmentgroupid-" + UUID.randomUUID();
 
         // *********************************** Create a Provisioning Service Client ************************************
-        ServiceClientCredentials credentials = ProvisioningServiceClientExtension.createCredentialsFromConnectionString(PROVISIONING_CONNECTION_STRING);
-        RestClient simpleRestClient = new RestClient.Builder(new OkHttpClient.Builder(), new Retrofit.Builder())
+        ServiceClientCredentials credentials = ProvisioningServiceClientHelper.createCredentialsFromConnectionString(PROVISIONING_CONNECTION_STRING);
+        
+        RestClient simpleRestClient = new RestClient.Builder()
         	    .withBaseUrl(DPS_BASE_URL)
         	    .withCredentials(credentials)
         	    .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
@@ -98,18 +104,15 @@ public class ServiceEnrollmentGroupSample
         System.out.println(ow.writeValueAsString(getResult));
 
         // *************************************** Query info of enrollmentGroup ***************************************
-        /*System.out.println("\nCreate a query for the enrollmentGroups...");
+        System.out.println("\nCreate a query for the enrollmentGroups...");
         QuerySpecification querySpecification =
-                new QuerySpecificationBuilder("*", QuerySpecificationBuilder.FromType.ENROLLMENT_GROUPS)
-                        .createSqlQuery();
-        Query query = provisioningServiceClient.createEnrollmentGroupQuery(querySpecification);
+                new QuerySpecification().withQuery("SELECT * FROM ENROLLMENTGROUPS");
+        List<EnrollmentGroup> queryResult = provisioningServiceClient.queryEnrollmentGroups(querySpecification);
 
-        while(query.hasNext())
+        for (EnrollmentGroup eachEnrollmentGroup : queryResult)
         {
-            System.out.println("\nQuery the next enrollmentGroups...");
-            QueryResult queryResult = query.next();
-            System.out.println(queryResult);
-        }*/
+        	System.out.println(ow.writeValueAsString(eachEnrollmentGroup));
+        }
 
         // ************************************** Delete info of enrollmentGroup ***************************************
         System.out.println("\nDelete the enrollmentGroup...");

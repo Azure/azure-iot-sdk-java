@@ -4,21 +4,27 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
-import com.microsoft.azure.sdk.iot.provisioning.service.auth.SharedAccessKeyCredentials;
+import com.microsoft.azure.sdk.iot.provisioning.service.helpers.ProvisioningServiceClientHelper;
 import com.microsoft.azure.sdk.iot.provisioning.service.implementation.ProvisioningServiceClientImpl;
-import com.microsoft.azure.sdk.iot.provisioning.service.models.*;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.AttestationMechanism;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.IndividualEnrollment;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.InitialTwin;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.InitialTwinProperties;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.ProvisioningServiceErrorDetailsException;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.QuerySpecification;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.TpmAttestation;
+import com.microsoft.azure.sdk.iot.provisioning.service.models.TwinCollection;
 import com.microsoft.rest.RestClient;
 import com.microsoft.rest.ServiceResponseBuilder;
+import com.microsoft.rest.credentials.ServiceClientCredentials;
 import com.microsoft.rest.serializer.JacksonAdapter;
-
-import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
 
 /**
  * Create, get, query, and delete an individual enrollment on the Microsoft Azure IoT Hub Device Provisioning Service
@@ -46,8 +52,8 @@ public class ServiceEnrollmentSample
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
         // *********************************** Create a Provisioning Service Client ************************************
-        ServiceClientCredentials credentials = ProvisioningServiceClientExtension.createCredentialsFromConnectionString(PROVISIONING_CONNECTION_STRING);
-        RestClient simpleRestClient = new RestClient.Builder(new OkHttpClient.Builder(), new Retrofit.Builder())
+        ServiceClientCredentials credentials = ProvisioningServiceClientHelper.createCredentialsFromConnectionString(PROVISIONING_CONNECTION_STRING);
+        RestClient simpleRestClient = new RestClient.Builder()
         	    .withBaseUrl(DPS_BASE_URL)
         	    .withCredentials(credentials)
         	    .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
@@ -109,18 +115,15 @@ public class ServiceEnrollmentSample
         System.out.println(ow.writeValueAsString(updateIndividualEnrollmentResult));
 
         // ************************************ Query info of individualEnrollment ************************************
-        /*System.out.println("\nCreate a query for enrollments...");
+        System.out.println("\nCreate a query for enrollments...");
         QuerySpecification querySpecification =
-                new QuerySpecificationBuilder("*", QuerySpecificationBuilder.FromType.ENROLLMENTS)
-                        .createSqlQuery();
-        Query query = provisioningServiceClient.createIndividualEnrollmentQuery(querySpecification);
-
-        while(query.hasNext())
+                new QuerySpecification().withQuery("SELECT * FROM ENROLLMENTS");
+        List<IndividualEnrollment> queryResult = provisioningServiceClient.queryIndividualEnrollments(querySpecification);
+        
+        for (IndividualEnrollment eachEnrollment : queryResult)
         {
-            System.out.println("\nQuery the next enrollments...");
-            QueryResult queryResult = query.next();
-            System.out.println(queryResult);
-        }*/
+        	System.out.println(ow.writeValueAsString(eachEnrollment));
+        }
 
         // *********************************** Delete info of individualEnrollment ************************************
         System.out.println("\nDelete the individualEnrollment...");
