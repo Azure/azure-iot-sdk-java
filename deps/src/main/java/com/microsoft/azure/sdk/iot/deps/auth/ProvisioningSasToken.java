@@ -3,9 +3,10 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.provisioning.service.auth;
+package com.microsoft.azure.sdk.iot.deps.auth;
 
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
+import com.microsoft.azure.sdk.iot.deps.util.Tools;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -22,6 +23,7 @@ public final class ProvisioningSasToken
 {
     private static final long TOKEN_VALID_SECS = 365*24*60*60;
     private static final long ONE_SECOND_IN_MILLISECONDS = 1000;
+    private static final long BUFFER_SECONDS = 0;
 
     /**
      * The SAS token format. The parameters to be interpolated are, in order:
@@ -43,6 +45,8 @@ public final class ProvisioningSasToken
     private final String keyName;
     /* The SAS token that grants access. */
     private final String token;
+    /* The value of SharedAccessGignature */
+    private final String sharedAccessSignature;
 
     /**
      * Constructor. Generates a SAS token that grants access to an Provisioning for
@@ -66,6 +70,7 @@ public final class ProvisioningSasToken
         this.resourceUri = provisioningConnectionString.getHostName();
         this.keyValue = provisioningConnectionString.getSharedAccessKey();
         this.keyName = provisioningConnectionString.getSharedAccessKeyName();
+        this.sharedAccessSignature = provisioningConnectionString.getSharedAccessSignature();
         this.expiryTime = buildExpiresOn();
         this.token =  buildToken();
     }
@@ -77,38 +82,45 @@ public final class ProvisioningSasToken
      */
     private String buildToken()
     {
-        String targetUri;
-        try
+    	if (!Tools.isNullOrEmpty(this.sharedAccessSignature))
         {
-            // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_002: [The constructor shall create a target uri from the url encoded host name)]
-            targetUri = URLEncoder.encode(this.resourceUri.toLowerCase(), String.valueOf(StandardCharsets.UTF_8));
-            // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_003: [The constructor shall create a string to sign by concatenating the target uri and the expiry time string (one year)]
-            String toSign = targetUri + "\n" + this.expiryTime;
-
-            // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_004: [The constructor shall create a key from the shared access key signing with HmacSHA256]
-            // Get an hmac_sha1 key from the raw key bytes
-            byte[] keyBytes = Base64.decodeBase64Local(this.keyValue.getBytes("UTF-8"));
-            SecretKeySpec signingKey = new SecretKeySpec(keyBytes, "HmacSHA256");
-
-            // Get an hmac_sha1 Mac instance and initialize with the signing key
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(signingKey);
-
-            // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_005: [The constructor shall compute the final signature by url encoding the signed key]
-            // Compute the hmac on input data bytes
-            byte[] rawHmac = mac.doFinal(toSign.getBytes("UTF-8"));
-            // Convert raw bytes to Hex
-            String signature = URLEncoder.encode(
-                    Base64.encodeBase64StringLocal(rawHmac), "UTF-8");
-
-            // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_006: [The constructor shall concatenate the target uri, the signature, the expiry time and the key name using the format: "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s"]
-            return String.format(TOKEN_FORMAT, targetUri, signature, this.expiryTime, this.keyName);
+        	return this.sharedAccessSignature;
         }
-        catch (UnsupportedEncodingException | NoSuchAlgorithmException | InvalidKeyException e)
-        {
-            // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_007: [The constructor shall throw Exception if building the token failed]
-            throw new RuntimeException(e);
-        }
+    	else
+    	{
+            String targetUri;
+            try
+            {
+                // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_002: [The constructor shall create a target uri from the url encoded host name)]
+                targetUri = URLEncoder.encode(this.resourceUri.toLowerCase(), String.valueOf(StandardCharsets.UTF_8));
+                // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_003: [The constructor shall create a string to sign by concatenating the target uri and the expiry time string (one year)]
+                String toSign = targetUri + "\n" + this.expiryTime;
+
+                // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_004: [The constructor shall create a key from the shared access key signing with HmacSHA256]
+                // Get an hmac_sha1 key from the raw key bytes
+                byte[] keyBytes = Base64.decodeBase64Local(this.keyValue.getBytes("UTF-8"));
+                SecretKeySpec signingKey = new SecretKeySpec(keyBytes, "HmacSHA256");
+
+                // Get an hmac_sha1 Mac instance and initialize with the signing key
+                Mac mac = Mac.getInstance("HmacSHA256");
+                mac.init(signingKey);
+
+                // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_005: [The constructor shall compute the final signature by url encoding the signed key]
+                // Compute the hmac on input data bytes
+                byte[] rawHmac = mac.doFinal(toSign.getBytes("UTF-8"));
+                // Convert raw bytes to Hex
+                String signature = URLEncoder.encode(
+                        Base64.encodeBase64StringLocal(rawHmac), "UTF-8");
+
+                // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_006: [The constructor shall concatenate the target uri, the signature, the expiry time and the key name using the format: "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s"]
+                return String.format(TOKEN_FORMAT, targetUri, signature, this.expiryTime, this.keyName);
+            }
+            catch (UnsupportedEncodingException | NoSuchAlgorithmException | InvalidKeyException e)
+            {
+                // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_007: [The constructor shall throw Exception if building the token failed]
+                throw new RuntimeException(e);
+            }
+    	}
     }
 
     /**
@@ -121,6 +133,17 @@ public final class ProvisioningSasToken
         long expiresOnDate = System.currentTimeMillis();
         expiresOnDate += TOKEN_VALID_SECS * ONE_SECOND_IN_MILLISECONDS;
         return expiresOnDate / ONE_SECOND_IN_MILLISECONDS;
+    }
+    
+    /**
+     * Helper function to return the current token expiration state
+     *
+     * @return Boolean representing the current token expiration state
+     */
+    private boolean isExpiring()
+    {
+        long expiryTimeInMilliSeconds = this.expiryTime * ONE_SECOND_IN_MILLISECONDS;
+        return expiryTimeInMilliSeconds - System.currentTimeMillis() <= BUFFER_SECONDS;
     }
 
     /**

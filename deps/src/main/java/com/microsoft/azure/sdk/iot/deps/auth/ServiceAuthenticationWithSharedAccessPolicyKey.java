@@ -3,7 +3,7 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.provisioning.service.auth;
+package com.microsoft.azure.sdk.iot.deps.auth;
 
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
 

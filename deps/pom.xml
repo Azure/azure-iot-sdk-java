@@ -91,6 +91,12 @@
             <version>1.0.4</version>
             <type>jar</type>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.microsoft.rest/client-runtime -->
+		<dependency>
+		    <groupId>com.microsoft.rest</groupId>
+		    <artifactId>client-runtime</artifactId>
+		    <version>1.6.2</version>
+		</dependency>
     </dependencies>
     <build>
         <plugins>
