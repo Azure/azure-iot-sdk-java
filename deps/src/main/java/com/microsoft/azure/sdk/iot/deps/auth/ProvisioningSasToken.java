@@ -45,7 +45,7 @@ public final class ProvisioningSasToken
     private final String keyName;
     /* The SAS token that grants access. */
     private final String token;
-    /* The value of SharedAccessGignature */
+    /* The value of SharedAccessSignature */
     private final String sharedAccessSignature;
 
     /**

@@ -20,7 +20,6 @@ public class SharedAccessSignatureCredentials implements ServiceClientCredential
 	public void applyCredentialsFilter(Builder clientBuilder)
 	{
 		String sasToken = getSASToken(this.provisioningConnectionString);
-		// TODO Auto-generated method stub
 		clientBuilder.addInterceptor(new BasicAuthInterceptor(sasToken)).build();
 	}
 	
