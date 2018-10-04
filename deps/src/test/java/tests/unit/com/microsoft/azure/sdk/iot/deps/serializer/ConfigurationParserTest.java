@@ -67,7 +67,6 @@ public class ConfigurationParserTest
         //assert
         assertNotNull(parser);
         assertEquals("someconfig", parser.getId());
-        assertEquals("1.0", parser.getSchemaVersion());
         assertEquals("MQ==", parser.getETag());
         assertEquals(ParserUtility.getDateTimeUtc("0001-01-01T00:00:00"), parser.getCreatedTimeUtc());
         assertEquals(ParserUtility.getDateTimeUtc("0001-01-01T00:00:00"), parser.getLastUpdatedTimeUtc());
