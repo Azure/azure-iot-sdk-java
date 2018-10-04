@@ -116,12 +116,6 @@ public class ConfigurationParser
             throw new IllegalArgumentException("The provided json must contain the field for configurationId and its value may not be empty");
         }
 
-        //Codes_SRS_CONFIGURATION_PARSER_28_004: [If the provided json is missing the schemaVersion field or its value is empty, an IllegalArgumentException shall be thrown.]
-        if (configurationParser.schemaVersion == null || configurationParser.schemaVersion.isEmpty())
-        {
-            throw new IllegalArgumentException("The provided json must contain the field for schemaVersion and its value may not be empty");
-        }
-
         this.id = configurationParser.id;
         this.schemaVersion = configurationParser.schemaVersion;
         this.labels = configurationParser.labels;
@@ -221,16 +215,9 @@ public class ConfigurationParser
      * Setter for schemaVersion
      *
      * @param schemaVersion the value to set schemaVersion to
-     * @throws IllegalArgumentException if schemaVersion is null
      */
-    public void setSchemaVersion(String schemaVersion) throws IllegalArgumentException
+    public void setSchemaVersion(String schemaVersion)
     {
-        //Codes_SRS_CONFIGURATION_PARSER_28_011: [If the provided schemaVersion value is null, an IllegalArgumentException shall be thrown.]
-        if (schemaVersion == null || schemaVersion.isEmpty())
-        {
-            throw new IllegalArgumentException("SchemaVersion cannot not be null");
-        }
-
         //Codes_SRS_CONFIGURATION_PARSER_28_012: [This method shall set the value of schemaVersion to the provided value.]
         this.schemaVersion = schemaVersion;
     }
