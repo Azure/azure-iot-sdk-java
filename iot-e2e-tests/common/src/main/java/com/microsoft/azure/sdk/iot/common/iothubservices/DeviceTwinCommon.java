@@ -1487,7 +1487,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Ignore
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void getDeviceTwinRecoveredFromTcpConnectionDrop() throws Exception
     {
@@ -1522,7 +1521,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Ignore
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void getDeviceTwinRecoveredFromAmqpsConnectionDrop() throws Exception
     {
@@ -1562,7 +1560,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Ignore
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void getDeviceTwinRecoveredFromAmqpsSessionDrop() throws Exception
     {
@@ -1614,7 +1611,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Ignore
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void getDeviceTwinRecoveredFromAmqpsCBSReqLinkDrop() throws Exception
     {
@@ -1672,7 +1668,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Ignore
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void getDeviceTwinRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
     {
@@ -1718,7 +1713,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Ignore
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void getDeviceTwinRecoveredFromAmqpsD2CLinkDrop() throws Exception
     {
@@ -1772,7 +1766,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Ignore
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void getDeviceTwinRecoveredFromAmqpsC2DLinkDrop() throws Exception
     {
@@ -1834,7 +1827,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Ignore
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void getDeviceTwinRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
     {
@@ -1895,7 +1887,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Ignore
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void getDeviceTwinRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
     {
@@ -1956,7 +1947,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Ignore
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void getDeviceTwinRecoveredFromAmqpsMethodReqLinkDrop() throws Exception
     {
@@ -2017,7 +2007,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Ignore
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void getDeviceTwinRecoveredFromAmqpsMethodRespLinkDrop() throws Exception
     {
@@ -2038,7 +2027,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Ignore
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void getDeviceTwinRecoveredFromGracefulShutdownAmqp() throws Exception
     {
@@ -2052,7 +2040,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Ignore
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void getDeviceTwinRecoveredFromGracefulShutdownMqtt() throws Exception
     {

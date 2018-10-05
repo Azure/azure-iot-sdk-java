@@ -40,12 +40,18 @@ public class AmqpsSessionManager
      *                           session management.
      * @throws TransportException if a transport error occurs.
      */
-    public AmqpsSessionManager(DeviceClientConfig deviceClientConfig) throws TransportException
+    public AmqpsSessionManager(DeviceClientConfig deviceClientConfig, ScheduledExecutorService scheduledExecutorService) throws TransportException
     {
         // Codes_SRS_AMQPSESSIONMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig parameter is null.]
         if (deviceClientConfig == null)
         {
             throw new IllegalArgumentException("deviceClientConfig cannot be null.");
+        }
+
+        // Codes_SRS_AMQPSESSIONMANAGER_28_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig parameter is null.]
+        if (scheduledExecutorService == null)
+        {
+            throw new IllegalArgumentException("scheduledExecutorService cannot be null.");
         }
 
         this.logger = new CustomLogger(this.getClass());
@@ -62,10 +68,10 @@ public class AmqpsSessionManager
 
                 // Codes_SRS_AMQPSESSIONMANAGER_12_006: [The constructor shall create and start a scheduler for AmqpsDeviceAuthenticationCBSTokenRenewalTask if the authentication type is CBS.]
                 this.cbsAuthSendTask = new AmqpsDeviceAuthenticationCBSSendTask((AmqpsDeviceAuthenticationCBS) this.amqpsDeviceAuthentication);
-                this.taskSchedulerCBSSend = Executors.newScheduledThreadPool(2);
+                this.taskSchedulerCBSSend = scheduledExecutorService;
                 this.taskSchedulerCBSSend.scheduleAtFixedRate(this.cbsAuthSendTask, 0, SEND_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
-
                 break;
+
             case X509_CERTIFICATE:
                 this.amqpsDeviceAuthentication = new AmqpsDeviceAuthenticationX509(this.deviceClientConfig);
                 break;

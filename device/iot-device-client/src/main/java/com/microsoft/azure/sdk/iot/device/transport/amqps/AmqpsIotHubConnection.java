@@ -141,7 +141,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         logger.LogInfo("AmqpsIotHubConnection object is created successfully using port %s in %s method ", useWebSockets ? AMQP_WEB_SOCKET_PORT : AMQP_PORT, logger.getMethodName());
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_12_001: [The constructor shall initialize the AmqpsSessionManager member variable with the given config.]
-        this.amqpsSessionManager = new AmqpsSessionManager(this.deviceClientConfig);
+        this.amqpsSessionManager = new AmqpsSessionManager(this.deviceClientConfig, Executors.newScheduledThreadPool(2));
     }
 
     /**
