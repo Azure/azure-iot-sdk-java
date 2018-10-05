@@ -11,83 +11,90 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Bulk enrollment operation error.
  */
-public class BulkEnrollmentOperationError {
-    /**
-     * Device registration id.
-     */
-    @JsonProperty(value = "registrationId", required = true)
-    private String registrationId;
+public class BulkEnrollmentOperationError
+{
+	/**
+	 * Device registration id.
+	 */
+	@JsonProperty(value = "registrationId", required = true)
+	private String registrationId;
 
-    /**
-     * Error code.
-     */
-    @JsonProperty(value = "errorCode", required = true)
-    private int errorCode;
+	/**
+	 * Error code.
+	 */
+	@JsonProperty(value = "errorCode", required = true)
+	private int errorCode;
 
-    /**
-     * Error status.
-     */
-    @JsonProperty(value = "errorStatus", required = true)
-    private String errorStatus;
+	/**
+	 * Error status.
+	 */
+	@JsonProperty(value = "errorStatus", required = true)
+	private String errorStatus;
 
-    /**
-     * Get device registration id.
-     *
-     * @return the registrationId value
-     */
-    public String registrationId() {
-        return this.registrationId;
-    }
+	/**
+	 * Get device registration id.
+	 *
+	 * @return the registrationId value
+	 */
+	public String registrationId()
+	{
+		return this.registrationId;
+	}
 
-    /**
-     * Set device registration id.
-     *
-     * @param registrationId the registrationId value to set
-     * @return the BulkEnrollmentOperationError object itself.
-     */
-    public BulkEnrollmentOperationError withRegistrationId(String registrationId) {
-        this.registrationId = registrationId;
-        return this;
-    }
+	/**
+	 * Set device registration id.
+	 *
+	 * @param registrationId the registrationId value to set
+	 * @return the BulkEnrollmentOperationError object itself.
+	 */
+	public BulkEnrollmentOperationError withRegistrationId(String registrationId)
+	{
+		this.registrationId = registrationId;
+		return this;
+	}
 
-    /**
-     * Get error code.
-     *
-     * @return the errorCode value
-     */
-    public int errorCode() {
-        return this.errorCode;
-    }
+	/**
+	 * Get error code.
+	 *
+	 * @return the errorCode value
+	 */
+	public int errorCode()
+	{
+		return this.errorCode;
+	}
 
-    /**
-     * Set error code.
-     *
-     * @param errorCode the errorCode value to set
-     * @return the BulkEnrollmentOperationError object itself.
-     */
-    public BulkEnrollmentOperationError withErrorCode(int errorCode) {
-        this.errorCode = errorCode;
-        return this;
-    }
+	/**
+	 * Set error code.
+	 *
+	 * @param errorCode the errorCode value to set
+	 * @return the BulkEnrollmentOperationError object itself.
+	 */
+	public BulkEnrollmentOperationError withErrorCode(int errorCode)
+	{
+		this.errorCode = errorCode;
+		return this;
+	}
 
-    /**
-     * Get error status.
-     *
-     * @return the errorStatus value
-     */
-    public String errorStatus() {
-        return this.errorStatus;
-    }
+	/**
+	 * Get error status.
+	 *
+	 * @return the errorStatus value
+	 */
+	public String errorStatus()
+	{
+		return this.errorStatus;
+	}
 
-    /**
-     * Set error status.
-     *
-     * @param errorStatus the errorStatus value to set
-     * @return the BulkEnrollmentOperationError object itself.
-     */
-    public BulkEnrollmentOperationError withErrorStatus(String errorStatus) {
-        this.errorStatus = errorStatus;
-        return this;
-    }
+	/**
+	 * Set error status.
+	 *
+	 * @param errorStatus the errorStatus value to set
+	 * @return the BulkEnrollmentOperationError object itself.
+	 */
+	public BulkEnrollmentOperationError withErrorStatus(String errorStatus)
+	{
+		this.errorStatus = errorStatus;
+		return this;
+	}
 
 }

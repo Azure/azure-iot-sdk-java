@@ -11,57 +11,62 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Certificate and Certificate info.
  */
-public class X509CertificateWithInfo {
-    /**
-     * The certificate property.
-     */
-    @JsonProperty(value = "certificate")
-    private String certificate;
+public class X509CertificateWithInfo
+{
+	/**
+	 * The certificate property.
+	 */
+	@JsonProperty(value = "certificate")
+	private String certificate;
 
-    /**
-     * The info property.
-     */
-    @JsonProperty(value = "info")
-    private X509CertificateInfo info;
+	/**
+	 * The info property.
+	 */
+	@JsonProperty(value = "info")
+	private X509CertificateInfo info;
 
-    /**
-     * Get the certificate value.
-     *
-     * @return the certificate value
-     */
-    public String certificate() {
-        return this.certificate;
-    }
+	/**
+	 * Get the certificate value.
+	 *
+	 * @return the certificate value
+	 */
+	public String certificate()
+	{
+		return this.certificate;
+	}
 
-    /**
-     * Set the certificate value.
-     *
-     * @param certificate the certificate value to set
-     * @return the X509CertificateWithInfo object itself.
-     */
-    public X509CertificateWithInfo withCertificate(String certificate) {
-        this.certificate = certificate;
-        return this;
-    }
+	/**
+	 * Set the certificate value.
+	 *
+	 * @param certificate the certificate value to set
+	 * @return the X509CertificateWithInfo object itself.
+	 */
+	public X509CertificateWithInfo withCertificate(String certificate)
+	{
+		this.certificate = certificate;
+		return this;
+	}
 
-    /**
-     * Get the info value.
-     *
-     * @return the info value
-     */
-    public X509CertificateInfo info() {
-        return this.info;
-    }
+	/**
+	 * Get the info value.
+	 *
+	 * @return the info value
+	 */
+	public X509CertificateInfo info()
+	{
+		return this.info;
+	}
 
-    /**
-     * Set the info value.
-     *
-     * @param info the info value to set
-     * @return the X509CertificateWithInfo object itself.
-     */
-    public X509CertificateWithInfo withInfo(X509CertificateInfo info) {
-        this.info = info;
-        return this;
-    }
+	/**
+	 * Set the info value.
+	 *
+	 * @param info the info value to set
+	 * @return the X509CertificateWithInfo object itself.
+	 */
+	public X509CertificateWithInfo withInfo(X509CertificateInfo info)
+	{
+		this.info = info;
+		return this;
+	}
 
 }

@@ -11,57 +11,62 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Initial device twin. Contains a subset of the properties of Twin.
  */
-public class InitialTwin {
-    /**
-     * Twin tags.
-     */
-    @JsonProperty(value = "tags")
-    private TwinCollection tags;
+public class InitialTwin
+{
+	/**
+	 * Twin tags.
+	 */
+	@JsonProperty(value = "tags")
+	private TwinCollection tags;
 
-    /**
-     * Twin desired properties.
-     */
-    @JsonProperty(value = "properties")
-    private InitialTwinProperties properties;
+	/**
+	 * Twin desired properties.
+	 */
+	@JsonProperty(value = "properties")
+	private InitialTwinProperties properties;
 
-    /**
-     * Get twin tags.
-     *
-     * @return the tags value
-     */
-    public TwinCollection tags() {
-        return this.tags;
-    }
+	/**
+	 * Get twin tags.
+	 *
+	 * @return the tags value
+	 */
+	public TwinCollection tags()
+	{
+		return this.tags;
+	}
 
-    /**
-     * Set twin tags.
-     *
-     * @param tags the tags value to set
-     * @return the InitialTwin object itself.
-     */
-    public InitialTwin withTags(TwinCollection tags) {
-        this.tags = tags;
-        return this;
-    }
+	/**
+	 * Set twin tags.
+	 *
+	 * @param tags the tags value to set
+	 * @return the InitialTwin object itself.
+	 */
+	public InitialTwin withTags(TwinCollection tags)
+	{
+		this.tags = tags;
+		return this;
+	}
 
-    /**
-     * Get twin desired properties.
-     *
-     * @return the properties value
-     */
-    public InitialTwinProperties properties() {
-        return this.properties;
-    }
+	/**
+	 * Get twin desired properties.
+	 *
+	 * @return the properties value
+	 */
+	public InitialTwinProperties properties()
+	{
+		return this.properties;
+	}
 
-    /**
-     * Set twin desired properties.
-     *
-     * @param properties the properties value to set
-     * @return the InitialTwin object itself.
-     */
-    public InitialTwin withProperties(InitialTwinProperties properties) {
-        this.properties = properties;
-        return this;
-    }
+	/**
+	 * Set twin desired properties.
+	 *
+	 * @param properties the properties value to set
+	 * @return the InitialTwin object itself.
+	 */
+	public InitialTwin withProperties(InitialTwinProperties properties)
+	{
+		this.properties = properties;
+		return this;
+	}
 
 }

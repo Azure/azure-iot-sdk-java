@@ -28,890 +28,1053 @@ import com.microsoft.rest.RestClient;
 /**
  * The interface for ProvisioningServiceClient class.
  */
-public interface ProvisioningServiceClient {
-    /**
-     * Gets the REST client.
-     *
-     * @return the {@link RestClient} object.
-    */
-    RestClient restClient();
-
-    /**
-     * The default base URL.
-     */
-    String DEFAULT_BASE_URL = "https://your-dps.azure-devices-provisioning.net";
-
-    /**
-     * Gets The API version to use for the request. Supported versions include: 2018-09-01-preview.
-     *
-     * @return the apiVersion value.
-     */
-    String apiVersion();
-
-    /**
-     * Sets The API version to use for the request. Supported versions include: 2018-09-01-preview.
-     *
-     * @param apiVersion the apiVersion value.
-     * @return the service client itself
-     */
-    ProvisioningServiceClient withApiVersion(String apiVersion);
-
-    /**
-     * Get a device enrollment record.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the IndividualEnrollment object if successful.
-     */
-    IndividualEnrollment getIndividualEnrollment(String id);
-
-    /**
-     * Get a device enrollment record.
-     *
-     * @param id Registration ID.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<IndividualEnrollment> getIndividualEnrollmentAsync(String id, final ServiceCallback<IndividualEnrollment> serviceCallback);
-
-    /**
-     * Get a device enrollment record.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the IndividualEnrollment object
-     */
-    Observable<IndividualEnrollment> getIndividualEnrollmentAsync(String id);
-
-    /**
-     * Get a device enrollment record.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the IndividualEnrollment object
-     */
-    Observable<ServiceResponse<IndividualEnrollment>> getIndividualEnrollmentWithServiceResponseAsync(String id);
-
-    /**
-     * Create or update a device enrollment record.
-     *
-     * @param id The registration ID is alphanumeric, lowercase, and may contain hyphens.
-     * @param enrollment The device enrollment record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the IndividualEnrollment object if successful.
-     */
-    IndividualEnrollment createOrUpdateIndividualEnrollment(String id, IndividualEnrollment enrollment);
-
-    /**
-     * Create or update a device enrollment record.
-     *
-     * @param id The registration ID is alphanumeric, lowercase, and may contain hyphens.
-     * @param enrollment The device enrollment record.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<IndividualEnrollment> createOrUpdateIndividualEnrollmentAsync(String id, IndividualEnrollment enrollment, final ServiceCallback<IndividualEnrollment> serviceCallback);
-
-    /**
-     * Create or update a device enrollment record.
-     *
-     * @param id The registration ID is alphanumeric, lowercase, and may contain hyphens.
-     * @param enrollment The device enrollment record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the IndividualEnrollment object
-     */
-    Observable<IndividualEnrollment> createOrUpdateIndividualEnrollmentAsync(String id, IndividualEnrollment enrollment);
-
-    /**
-     * Create or update a device enrollment record.
-     *
-     * @param id The registration ID is alphanumeric, lowercase, and may contain hyphens.
-     * @param enrollment The device enrollment record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the IndividualEnrollment object
-     */
-    Observable<ServiceResponse<IndividualEnrollment>> createOrUpdateIndividualEnrollmentWithServiceResponseAsync(String id, IndividualEnrollment enrollment);
-    /**
-     * Create or update a device enrollment record.
-     *
-     * @param id The registration ID is alphanumeric, lowercase, and may contain hyphens.
-     * @param enrollment The device enrollment record.
-     * @param ifMatch The ETag of the enrollment record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the IndividualEnrollment object if successful.
-     */
-    IndividualEnrollment createOrUpdateIndividualEnrollment(String id, IndividualEnrollment enrollment, String ifMatch);
-
-    /**
-     * Create or update a device enrollment record.
-     *
-     * @param id The registration ID is alphanumeric, lowercase, and may contain hyphens.
-     * @param enrollment The device enrollment record.
-     * @param ifMatch The ETag of the enrollment record.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<IndividualEnrollment> createOrUpdateIndividualEnrollmentAsync(String id, IndividualEnrollment enrollment, String ifMatch, final ServiceCallback<IndividualEnrollment> serviceCallback);
-
-    /**
-     * Create or update a device enrollment record.
-     *
-     * @param id The registration ID is alphanumeric, lowercase, and may contain hyphens.
-     * @param enrollment The device enrollment record.
-     * @param ifMatch The ETag of the enrollment record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the IndividualEnrollment object
-     */
-    Observable<IndividualEnrollment> createOrUpdateIndividualEnrollmentAsync(String id, IndividualEnrollment enrollment, String ifMatch);
-
-    /**
-     * Create or update a device enrollment record.
-     *
-     * @param id The registration ID is alphanumeric, lowercase, and may contain hyphens.
-     * @param enrollment The device enrollment record.
-     * @param ifMatch The ETag of the enrollment record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the IndividualEnrollment object
-     */
-    Observable<ServiceResponse<IndividualEnrollment>> createOrUpdateIndividualEnrollmentWithServiceResponseAsync(String id, IndividualEnrollment enrollment, String ifMatch);
-
-    /**
-     * Delete a device enrollment record.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     */
-    void deleteIndividualEnrollment(String id);
-
-    /**
-     * Delete a device enrollment record.
-     *
-     * @param id Registration ID.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<Void> deleteIndividualEnrollmentAsync(String id, final ServiceCallback<Void> serviceCallback);
-
-    /**
-     * Delete a device enrollment record.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceResponse} object if successful.
-     */
-    Observable<Void> deleteIndividualEnrollmentAsync(String id);
-
-    /**
-     * Delete a device enrollment record.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceResponse} object if successful.
-     */
-    Observable<ServiceResponse<Void>> deleteIndividualEnrollmentWithServiceResponseAsync(String id);
-    /**
-     * Delete a device enrollment record.
-     *
-     * @param id Registration ID.
-     * @param ifMatch The ETag of the enrollment record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     */
-    void deleteIndividualEnrollment(String id, String ifMatch);
-
-    /**
-     * Delete a device enrollment record.
-     *
-     * @param id Registration ID.
-     * @param ifMatch The ETag of the enrollment record.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<Void> deleteIndividualEnrollmentAsync(String id, String ifMatch, final ServiceCallback<Void> serviceCallback);
-
-    /**
-     * Delete a device enrollment record.
-     *
-     * @param id Registration ID.
-     * @param ifMatch The ETag of the enrollment record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceResponse} object if successful.
-     */
-    Observable<Void> deleteIndividualEnrollmentAsync(String id, String ifMatch);
-
-    /**
-     * Delete a device enrollment record.
-     *
-     * @param id Registration ID.
-     * @param ifMatch The ETag of the enrollment record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceResponse} object if successful.
-     */
-    Observable<ServiceResponse<Void>> deleteIndividualEnrollmentWithServiceResponseAsync(String id, String ifMatch);
-
-    /**
-     * Get a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the EnrollmentGroup object if successful.
-     */
-    EnrollmentGroup getEnrollmentGroup(String id);
-
-    /**
-     * Get a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<EnrollmentGroup> getEnrollmentGroupAsync(String id, final ServiceCallback<EnrollmentGroup> serviceCallback);
-
-    /**
-     * Get a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the EnrollmentGroup object
-     */
-    Observable<EnrollmentGroup> getEnrollmentGroupAsync(String id);
-
-    /**
-     * Get a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the EnrollmentGroup object
-     */
-    Observable<ServiceResponse<EnrollmentGroup>> getEnrollmentGroupWithServiceResponseAsync(String id);
-
-    /**
-     * Create or update a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param enrollmentGroup The device enrollment group.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the EnrollmentGroup object if successful.
-     */
-    EnrollmentGroup createOrUpdateEnrollmentGroup(String id, EnrollmentGroup enrollmentGroup);
-
-    /**
-     * Create or update a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param enrollmentGroup The device enrollment group.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<EnrollmentGroup> createOrUpdateEnrollmentGroupAsync(String id, EnrollmentGroup enrollmentGroup, final ServiceCallback<EnrollmentGroup> serviceCallback);
-
-    /**
-     * Create or update a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param enrollmentGroup The device enrollment group.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the EnrollmentGroup object
-     */
-    Observable<EnrollmentGroup> createOrUpdateEnrollmentGroupAsync(String id, EnrollmentGroup enrollmentGroup);
-
-    /**
-     * Create or update a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param enrollmentGroup The device enrollment group.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the EnrollmentGroup object
-     */
-    Observable<ServiceResponse<EnrollmentGroup>> createOrUpdateEnrollmentGroupWithServiceResponseAsync(String id, EnrollmentGroup enrollmentGroup);
-    /**
-     * Create or update a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param enrollmentGroup The device enrollment group.
-     * @param ifMatch The ETag of the enrollment record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the EnrollmentGroup object if successful.
-     */
-    EnrollmentGroup createOrUpdateEnrollmentGroup(String id, EnrollmentGroup enrollmentGroup, String ifMatch);
-
-    /**
-     * Create or update a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param enrollmentGroup The device enrollment group.
-     * @param ifMatch The ETag of the enrollment record.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<EnrollmentGroup> createOrUpdateEnrollmentGroupAsync(String id, EnrollmentGroup enrollmentGroup, String ifMatch, final ServiceCallback<EnrollmentGroup> serviceCallback);
-
-    /**
-     * Create or update a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param enrollmentGroup The device enrollment group.
-     * @param ifMatch The ETag of the enrollment record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the EnrollmentGroup object
-     */
-    Observable<EnrollmentGroup> createOrUpdateEnrollmentGroupAsync(String id, EnrollmentGroup enrollmentGroup, String ifMatch);
-
-    /**
-     * Create or update a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param enrollmentGroup The device enrollment group.
-     * @param ifMatch The ETag of the enrollment record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the EnrollmentGroup object
-     */
-    Observable<ServiceResponse<EnrollmentGroup>> createOrUpdateEnrollmentGroupWithServiceResponseAsync(String id, EnrollmentGroup enrollmentGroup, String ifMatch);
-
-    /**
-     * Delete a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     */
-    void deleteEnrollmentGroup(String id);
-
-    /**
-     * Delete a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<Void> deleteEnrollmentGroupAsync(String id, final ServiceCallback<Void> serviceCallback);
-
-    /**
-     * Delete a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceResponse} object if successful.
-     */
-    Observable<Void> deleteEnrollmentGroupAsync(String id);
-
-    /**
-     * Delete a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceResponse} object if successful.
-     */
-    Observable<ServiceResponse<Void>> deleteEnrollmentGroupWithServiceResponseAsync(String id);
-    /**
-     * Delete a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param ifMatch The ETag of the enrollment group record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     */
-    void deleteEnrollmentGroup(String id, String ifMatch);
-
-    /**
-     * Delete a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param ifMatch The ETag of the enrollment group record.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<Void> deleteEnrollmentGroupAsync(String id, String ifMatch, final ServiceCallback<Void> serviceCallback);
-
-    /**
-     * Delete a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param ifMatch The ETag of the enrollment group record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceResponse} object if successful.
-     */
-    Observable<Void> deleteEnrollmentGroupAsync(String id, String ifMatch);
-
-    /**
-     * Delete a device enrollment group.
-     *
-     * @param id Enrollment group ID.
-     * @param ifMatch The ETag of the enrollment group record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceResponse} object if successful.
-     */
-    Observable<ServiceResponse<Void>> deleteEnrollmentGroupWithServiceResponseAsync(String id, String ifMatch);
-
-    /**
-     * Gets the device registration state.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the DeviceRegistrationState object if successful.
-     */
-    DeviceRegistrationState getDeviceRegistrationState(String id);
-
-    /**
-     * Gets the device registration state.
-     *
-     * @param id Registration ID.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<DeviceRegistrationState> getDeviceRegistrationStateAsync(String id, final ServiceCallback<DeviceRegistrationState> serviceCallback);
-
-    /**
-     * Gets the device registration state.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the DeviceRegistrationState object
-     */
-    Observable<DeviceRegistrationState> getDeviceRegistrationStateAsync(String id);
-
-    /**
-     * Gets the device registration state.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the DeviceRegistrationState object
-     */
-    Observable<ServiceResponse<DeviceRegistrationState>> getDeviceRegistrationStateWithServiceResponseAsync(String id);
-
-    /**
-     * Deletes the device registration.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     */
-    void deleteDeviceRegistrationState(String id);
-
-    /**
-     * Deletes the device registration.
-     *
-     * @param id Registration ID.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<Void> deleteDeviceRegistrationStateAsync(String id, final ServiceCallback<Void> serviceCallback);
-
-    /**
-     * Deletes the device registration.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceResponse} object if successful.
-     */
-    Observable<Void> deleteDeviceRegistrationStateAsync(String id);
-
-    /**
-     * Deletes the device registration.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceResponse} object if successful.
-     */
-    Observable<ServiceResponse<Void>> deleteDeviceRegistrationStateWithServiceResponseAsync(String id);
-    /**
-     * Deletes the device registration.
-     *
-     * @param id Registration ID.
-     * @param ifMatch The ETag of the registration status record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     */
-    void deleteDeviceRegistrationState(String id, String ifMatch);
-
-    /**
-     * Deletes the device registration.
-     *
-     * @param id Registration ID.
-     * @param ifMatch The ETag of the registration status record.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<Void> deleteDeviceRegistrationStateAsync(String id, String ifMatch, final ServiceCallback<Void> serviceCallback);
-
-    /**
-     * Deletes the device registration.
-     *
-     * @param id Registration ID.
-     * @param ifMatch The ETag of the registration status record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceResponse} object if successful.
-     */
-    Observable<Void> deleteDeviceRegistrationStateAsync(String id, String ifMatch);
-
-    /**
-     * Deletes the device registration.
-     *
-     * @param id Registration ID.
-     * @param ifMatch The ETag of the registration status record.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceResponse} object if successful.
-     */
-    Observable<ServiceResponse<Void>> deleteDeviceRegistrationStateWithServiceResponseAsync(String id, String ifMatch);
-
-    /**
-     * Bulk device enrollment operation.
-     *
-     * @param bulkOperation Bulk operation.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the BulkEnrollmentOperationResult object if successful.
-     */
-    BulkEnrollmentOperationResult runBulkEnrollmentOperation(BulkEnrollmentOperation bulkOperation);
-
-    /**
-     * Bulk device enrollment operation.
-     *
-     * @param bulkOperation Bulk operation.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<BulkEnrollmentOperationResult> runBulkEnrollmentOperationAsync(BulkEnrollmentOperation bulkOperation, final ServiceCallback<BulkEnrollmentOperationResult> serviceCallback);
-
-    /**
-     * Bulk device enrollment operation.
-     *
-     * @param bulkOperation Bulk operation.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the BulkEnrollmentOperationResult object
-     */
-    Observable<BulkEnrollmentOperationResult> runBulkEnrollmentOperationAsync(BulkEnrollmentOperation bulkOperation);
-
-    /**
-     * Bulk device enrollment operation.
-     *
-     * @param bulkOperation Bulk operation.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the BulkEnrollmentOperationResult object
-     */
-    Observable<ServiceResponse<BulkEnrollmentOperationResult>> runBulkEnrollmentOperationWithServiceResponseAsync(BulkEnrollmentOperation bulkOperation);
-
-    /**
-     * Query the device enrollment records.
-     *
-     * @param querySpecification The query specification.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the List&lt;IndividualEnrollment&gt; object if successful.
-     */
-    List<IndividualEnrollment> queryIndividualEnrollments(QuerySpecification querySpecification);
-
-    /**
-     * Query the device enrollment records.
-     *
-     * @param querySpecification The query specification.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<List<IndividualEnrollment>> queryIndividualEnrollmentsAsync(QuerySpecification querySpecification, final ServiceCallback<List<IndividualEnrollment>> serviceCallback);
-
-    /**
-     * Query the device enrollment records.
-     *
-     * @param querySpecification The query specification.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the List&lt;IndividualEnrollment&gt; object
-     */
-    Observable<List<IndividualEnrollment>> queryIndividualEnrollmentsAsync(QuerySpecification querySpecification);
-
-    /**
-     * Query the device enrollment records.
-     *
-     * @param querySpecification The query specification.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the List&lt;IndividualEnrollment&gt; object
-     */
-    Observable<ServiceResponseWithHeaders<List<IndividualEnrollment>, QueryIndividualEnrollmentsHeaders>> queryIndividualEnrollmentsWithServiceResponseAsync(QuerySpecification querySpecification);
-    /**
-     * Query the device enrollment records.
-     *
-     * @param querySpecification The query specification.
-     * @param xMsMaxItemCount pageSize
-     * @param xMsContinuation continuation token
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the List&lt;IndividualEnrollment&gt; object if successful.
-     */
-    List<IndividualEnrollment> queryIndividualEnrollments(QuerySpecification querySpecification, Integer xMsMaxItemCount, String xMsContinuation);
-
-    /**
-     * Query the device enrollment records.
-     *
-     * @param querySpecification The query specification.
-     * @param xMsMaxItemCount pageSize
-     * @param xMsContinuation continuation token
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<List<IndividualEnrollment>> queryIndividualEnrollmentsAsync(QuerySpecification querySpecification, Integer xMsMaxItemCount, String xMsContinuation, final ServiceCallback<List<IndividualEnrollment>> serviceCallback);
-
-    /**
-     * Query the device enrollment records.
-     *
-     * @param querySpecification The query specification.
-     * @param xMsMaxItemCount pageSize
-     * @param xMsContinuation continuation token
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the List&lt;IndividualEnrollment&gt; object
-     */
-    Observable<List<IndividualEnrollment>> queryIndividualEnrollmentsAsync(QuerySpecification querySpecification, Integer xMsMaxItemCount, String xMsContinuation);
-
-    /**
-     * Query the device enrollment records.
-     *
-     * @param querySpecification The query specification.
-     * @param xMsMaxItemCount pageSize
-     * @param xMsContinuation continuation token
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the List&lt;IndividualEnrollment&gt; object
-     */
-    Observable<ServiceResponseWithHeaders<List<IndividualEnrollment>, QueryIndividualEnrollmentsHeaders>> queryIndividualEnrollmentsWithServiceResponseAsync(QuerySpecification querySpecification, Integer xMsMaxItemCount, String xMsContinuation);
-
-    /**
-     * Get the attestation mechanism in the device enrollment record.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the AttestationMechanism object if successful.
-     */
-    AttestationMechanism getIndividualEnrollmentAttestationMechanism(String id);
-
-    /**
-     * Get the attestation mechanism in the device enrollment record.
-     *
-     * @param id Registration ID.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<AttestationMechanism> getIndividualEnrollmentAttestationMechanismAsync(String id, final ServiceCallback<AttestationMechanism> serviceCallback);
-
-    /**
-     * Get the attestation mechanism in the device enrollment record.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the AttestationMechanism object
-     */
-    Observable<AttestationMechanism> getIndividualEnrollmentAttestationMechanismAsync(String id);
-
-    /**
-     * Get the attestation mechanism in the device enrollment record.
-     *
-     * @param id Registration ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the AttestationMechanism object
-     */
-    Observable<ServiceResponse<AttestationMechanism>> getIndividualEnrollmentAttestationMechanismWithServiceResponseAsync(String id);
-
-    /**
-     * Query the device enrollment groups.
-     *
-     * @param querySpecification The query specification.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the List&lt;EnrollmentGroup&gt; object if successful.
-     */
-    List<EnrollmentGroup> queryEnrollmentGroups(QuerySpecification querySpecification);
-
-    /**
-     * Query the device enrollment groups.
-     *
-     * @param querySpecification The query specification.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<List<EnrollmentGroup>> queryEnrollmentGroupsAsync(QuerySpecification querySpecification, final ServiceCallback<List<EnrollmentGroup>> serviceCallback);
-
-    /**
-     * Query the device enrollment groups.
-     *
-     * @param querySpecification The query specification.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the List&lt;EnrollmentGroup&gt; object
-     */
-    Observable<List<EnrollmentGroup>> queryEnrollmentGroupsAsync(QuerySpecification querySpecification);
-
-    /**
-     * Query the device enrollment groups.
-     *
-     * @param querySpecification The query specification.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the List&lt;EnrollmentGroup&gt; object
-     */
-    Observable<ServiceResponseWithHeaders<List<EnrollmentGroup>, QueryEnrollmentGroupsHeaders>> queryEnrollmentGroupsWithServiceResponseAsync(QuerySpecification querySpecification);
-    /**
-     * Query the device enrollment groups.
-     *
-     * @param querySpecification The query specification.
-     * @param xMsMaxItemCount pageSize
-     * @param xMsContinuation continuation token
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the List&lt;EnrollmentGroup&gt; object if successful.
-     */
-    List<EnrollmentGroup> queryEnrollmentGroups(QuerySpecification querySpecification, Integer xMsMaxItemCount, String xMsContinuation);
-
-    /**
-     * Query the device enrollment groups.
-     *
-     * @param querySpecification The query specification.
-     * @param xMsMaxItemCount pageSize
-     * @param xMsContinuation continuation token
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<List<EnrollmentGroup>> queryEnrollmentGroupsAsync(QuerySpecification querySpecification, Integer xMsMaxItemCount, String xMsContinuation, final ServiceCallback<List<EnrollmentGroup>> serviceCallback);
-
-    /**
-     * Query the device enrollment groups.
-     *
-     * @param querySpecification The query specification.
-     * @param xMsMaxItemCount pageSize
-     * @param xMsContinuation continuation token
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the List&lt;EnrollmentGroup&gt; object
-     */
-    Observable<List<EnrollmentGroup>> queryEnrollmentGroupsAsync(QuerySpecification querySpecification, Integer xMsMaxItemCount, String xMsContinuation);
-
-    /**
-     * Query the device enrollment groups.
-     *
-     * @param querySpecification The query specification.
-     * @param xMsMaxItemCount pageSize
-     * @param xMsContinuation continuation token
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the List&lt;EnrollmentGroup&gt; object
-     */
-    Observable<ServiceResponseWithHeaders<List<EnrollmentGroup>, QueryEnrollmentGroupsHeaders>> queryEnrollmentGroupsWithServiceResponseAsync(QuerySpecification querySpecification, Integer xMsMaxItemCount, String xMsContinuation);
-
-    /**
-     * Get the attestation mechanism in the device enrollment group record.
-     *
-     * @param id Enrollment group ID
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the AttestationMechanism object if successful.
-     */
-    AttestationMechanism getEnrollmentGroupAttestationMechanism(String id);
-
-    /**
-     * Get the attestation mechanism in the device enrollment group record.
-     *
-     * @param id Enrollment group ID
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<AttestationMechanism> getEnrollmentGroupAttestationMechanismAsync(String id, final ServiceCallback<AttestationMechanism> serviceCallback);
-
-    /**
-     * Get the attestation mechanism in the device enrollment group record.
-     *
-     * @param id Enrollment group ID
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the AttestationMechanism object
-     */
-    Observable<AttestationMechanism> getEnrollmentGroupAttestationMechanismAsync(String id);
-
-    /**
-     * Get the attestation mechanism in the device enrollment group record.
-     *
-     * @param id Enrollment group ID
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the AttestationMechanism object
-     */
-    Observable<ServiceResponse<AttestationMechanism>> getEnrollmentGroupAttestationMechanismWithServiceResponseAsync(String id);
-
-    /**
-     * Gets the registration state of devices in this enrollmentGroup.
-     *
-     * @param id Enrollment group ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @throws ProvisioningServiceErrorDetailsException thrown if the request is rejected by server
-     * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the List&lt;DeviceRegistrationState&gt; object if successful.
-     */
-    List<DeviceRegistrationState> queryDeviceRegistrationStates(String id);
-
-    /**
-     * Gets the registration state of devices in this enrollmentGroup.
-     *
-     * @param id Enrollment group ID.
-     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the {@link ServiceFuture} object
-     */
-    ServiceFuture<List<DeviceRegistrationState>> queryDeviceRegistrationStatesAsync(String id, final ServiceCallback<List<DeviceRegistrationState>> serviceCallback);
-
-    /**
-     * Gets the registration state of devices in this enrollmentGroup.
-     *
-     * @param id Enrollment group ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the List&lt;DeviceRegistrationState&gt; object
-     */
-    Observable<List<DeviceRegistrationState>> queryDeviceRegistrationStatesAsync(String id);
-
-    /**
-     * Gets the registration state of devices in this enrollmentGroup.
-     *
-     * @param id Enrollment group ID.
-     * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the List&lt;DeviceRegistrationState&gt; object
-     */
-    Observable<ServiceResponse<List<DeviceRegistrationState>>> queryDeviceRegistrationStatesWithServiceResponseAsync(String id);
+public interface ProvisioningServiceClient
+{
+	/**
+	 * Gets the REST client.
+	 *
+	 * @return the {@link RestClient} object.
+	 */
+	RestClient restClient();
+
+	/**
+	 * The default base URL.
+	 */
+	String DEFAULT_BASE_URL = "https://your-dps.azure-devices-provisioning.net";
+
+	/**
+	 * Gets The API version to use for the request. Supported versions include:
+	 * 2018-09-01-preview.
+	 *
+	 * @return the apiVersion value.
+	 */
+	String apiVersion();
+
+	/**
+	 * Sets The API version to use for the request. Supported versions include:
+	 * 2018-09-01-preview.
+	 *
+	 * @param apiVersion the apiVersion value.
+	 * @return the service client itself
+	 */
+	ProvisioningServiceClient withApiVersion(String apiVersion);
+
+	/**
+	 * Get a device enrollment record.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the IndividualEnrollment object if successful.
+	 */
+	IndividualEnrollment getIndividualEnrollment(String id);
+
+	/**
+	 * Get a device enrollment record.
+	 *
+	 * @param id              Registration ID.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<IndividualEnrollment> getIndividualEnrollmentAsync(String id,
+			final ServiceCallback<IndividualEnrollment> serviceCallback);
+
+	/**
+	 * Get a device enrollment record.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the IndividualEnrollment object
+	 */
+	Observable<IndividualEnrollment> getIndividualEnrollmentAsync(String id);
+
+	/**
+	 * Get a device enrollment record.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the IndividualEnrollment object
+	 */
+	Observable<ServiceResponse<IndividualEnrollment>> getIndividualEnrollmentWithServiceResponseAsync(String id);
+
+	/**
+	 * Create or update a device enrollment record.
+	 *
+	 * @param id         The registration ID is alphanumeric, lowercase, and may
+	 *                   contain hyphens.
+	 * @param enrollment The device enrollment record.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the IndividualEnrollment object if successful.
+	 */
+	IndividualEnrollment createOrUpdateIndividualEnrollment(String id, IndividualEnrollment enrollment);
+
+	/**
+	 * Create or update a device enrollment record.
+	 *
+	 * @param id              The registration ID is alphanumeric, lowercase, and
+	 *                        may contain hyphens.
+	 * @param enrollment      The device enrollment record.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<IndividualEnrollment> createOrUpdateIndividualEnrollmentAsync(String id,
+			IndividualEnrollment enrollment, final ServiceCallback<IndividualEnrollment> serviceCallback);
+
+	/**
+	 * Create or update a device enrollment record.
+	 *
+	 * @param id         The registration ID is alphanumeric, lowercase, and may
+	 *                   contain hyphens.
+	 * @param enrollment The device enrollment record.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the IndividualEnrollment object
+	 */
+	Observable<IndividualEnrollment> createOrUpdateIndividualEnrollmentAsync(String id,
+			IndividualEnrollment enrollment);
+
+	/**
+	 * Create or update a device enrollment record.
+	 *
+	 * @param id         The registration ID is alphanumeric, lowercase, and may
+	 *                   contain hyphens.
+	 * @param enrollment The device enrollment record.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the IndividualEnrollment object
+	 */
+	Observable<ServiceResponse<IndividualEnrollment>> createOrUpdateIndividualEnrollmentWithServiceResponseAsync(
+			String id, IndividualEnrollment enrollment);
+
+	/**
+	 * Create or update a device enrollment record.
+	 *
+	 * @param id         The registration ID is alphanumeric, lowercase, and may
+	 *                   contain hyphens.
+	 * @param enrollment The device enrollment record.
+	 * @param ifMatch    The ETag of the enrollment record.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the IndividualEnrollment object if successful.
+	 */
+	IndividualEnrollment createOrUpdateIndividualEnrollment(String id, IndividualEnrollment enrollment, String ifMatch);
+
+	/**
+	 * Create or update a device enrollment record.
+	 *
+	 * @param id              The registration ID is alphanumeric, lowercase, and
+	 *                        may contain hyphens.
+	 * @param enrollment      The device enrollment record.
+	 * @param ifMatch         The ETag of the enrollment record.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<IndividualEnrollment> createOrUpdateIndividualEnrollmentAsync(String id,
+			IndividualEnrollment enrollment, String ifMatch,
+			final ServiceCallback<IndividualEnrollment> serviceCallback);
+
+	/**
+	 * Create or update a device enrollment record.
+	 *
+	 * @param id         The registration ID is alphanumeric, lowercase, and may
+	 *                   contain hyphens.
+	 * @param enrollment The device enrollment record.
+	 * @param ifMatch    The ETag of the enrollment record.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the IndividualEnrollment object
+	 */
+	Observable<IndividualEnrollment> createOrUpdateIndividualEnrollmentAsync(String id, IndividualEnrollment enrollment,
+			String ifMatch);
+
+	/**
+	 * Create or update a device enrollment record.
+	 *
+	 * @param id         The registration ID is alphanumeric, lowercase, and may
+	 *                   contain hyphens.
+	 * @param enrollment The device enrollment record.
+	 * @param ifMatch    The ETag of the enrollment record.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the IndividualEnrollment object
+	 */
+	Observable<ServiceResponse<IndividualEnrollment>> createOrUpdateIndividualEnrollmentWithServiceResponseAsync(
+			String id, IndividualEnrollment enrollment, String ifMatch);
+
+	/**
+	 * Delete a device enrollment record.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 */
+	void deleteIndividualEnrollment(String id);
+
+	/**
+	 * Delete a device enrollment record.
+	 *
+	 * @param id              Registration ID.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<Void> deleteIndividualEnrollmentAsync(String id, final ServiceCallback<Void> serviceCallback);
+
+	/**
+	 * Delete a device enrollment record.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceResponse} object if successful.
+	 */
+	Observable<Void> deleteIndividualEnrollmentAsync(String id);
+
+	/**
+	 * Delete a device enrollment record.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceResponse} object if successful.
+	 */
+	Observable<ServiceResponse<Void>> deleteIndividualEnrollmentWithServiceResponseAsync(String id);
+
+	/**
+	 * Delete a device enrollment record.
+	 *
+	 * @param id      Registration ID.
+	 * @param ifMatch The ETag of the enrollment record.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 */
+	void deleteIndividualEnrollment(String id, String ifMatch);
+
+	/**
+	 * Delete a device enrollment record.
+	 *
+	 * @param id              Registration ID.
+	 * @param ifMatch         The ETag of the enrollment record.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<Void> deleteIndividualEnrollmentAsync(String id, String ifMatch,
+			final ServiceCallback<Void> serviceCallback);
+
+	/**
+	 * Delete a device enrollment record.
+	 *
+	 * @param id      Registration ID.
+	 * @param ifMatch The ETag of the enrollment record.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceResponse} object if successful.
+	 */
+	Observable<Void> deleteIndividualEnrollmentAsync(String id, String ifMatch);
+
+	/**
+	 * Delete a device enrollment record.
+	 *
+	 * @param id      Registration ID.
+	 * @param ifMatch The ETag of the enrollment record.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceResponse} object if successful.
+	 */
+	Observable<ServiceResponse<Void>> deleteIndividualEnrollmentWithServiceResponseAsync(String id, String ifMatch);
+
+	/**
+	 * Get a device enrollment group.
+	 *
+	 * @param id Enrollment group ID.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the EnrollmentGroup object if successful.
+	 */
+	EnrollmentGroup getEnrollmentGroup(String id);
+
+	/**
+	 * Get a device enrollment group.
+	 *
+	 * @param id              Enrollment group ID.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<EnrollmentGroup> getEnrollmentGroupAsync(String id,
+			final ServiceCallback<EnrollmentGroup> serviceCallback);
+
+	/**
+	 * Get a device enrollment group.
+	 *
+	 * @param id Enrollment group ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the EnrollmentGroup object
+	 */
+	Observable<EnrollmentGroup> getEnrollmentGroupAsync(String id);
+
+	/**
+	 * Get a device enrollment group.
+	 *
+	 * @param id Enrollment group ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the EnrollmentGroup object
+	 */
+	Observable<ServiceResponse<EnrollmentGroup>> getEnrollmentGroupWithServiceResponseAsync(String id);
+
+	/**
+	 * Create or update a device enrollment group.
+	 *
+	 * @param id              Enrollment group ID.
+	 * @param enrollmentGroup The device enrollment group.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the EnrollmentGroup object if successful.
+	 */
+	EnrollmentGroup createOrUpdateEnrollmentGroup(String id, EnrollmentGroup enrollmentGroup);
+
+	/**
+	 * Create or update a device enrollment group.
+	 *
+	 * @param id              Enrollment group ID.
+	 * @param enrollmentGroup The device enrollment group.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<EnrollmentGroup> createOrUpdateEnrollmentGroupAsync(String id, EnrollmentGroup enrollmentGroup,
+			final ServiceCallback<EnrollmentGroup> serviceCallback);
+
+	/**
+	 * Create or update a device enrollment group.
+	 *
+	 * @param id              Enrollment group ID.
+	 * @param enrollmentGroup The device enrollment group.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the EnrollmentGroup object
+	 */
+	Observable<EnrollmentGroup> createOrUpdateEnrollmentGroupAsync(String id, EnrollmentGroup enrollmentGroup);
+
+	/**
+	 * Create or update a device enrollment group.
+	 *
+	 * @param id              Enrollment group ID.
+	 * @param enrollmentGroup The device enrollment group.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the EnrollmentGroup object
+	 */
+	Observable<ServiceResponse<EnrollmentGroup>> createOrUpdateEnrollmentGroupWithServiceResponseAsync(String id,
+			EnrollmentGroup enrollmentGroup);
+
+	/**
+	 * Create or update a device enrollment group.
+	 *
+	 * @param id              Enrollment group ID.
+	 * @param enrollmentGroup The device enrollment group.
+	 * @param ifMatch         The ETag of the enrollment record.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the EnrollmentGroup object if successful.
+	 */
+	EnrollmentGroup createOrUpdateEnrollmentGroup(String id, EnrollmentGroup enrollmentGroup, String ifMatch);
+
+	/**
+	 * Create or update a device enrollment group.
+	 *
+	 * @param id              Enrollment group ID.
+	 * @param enrollmentGroup The device enrollment group.
+	 * @param ifMatch         The ETag of the enrollment record.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<EnrollmentGroup> createOrUpdateEnrollmentGroupAsync(String id, EnrollmentGroup enrollmentGroup,
+			String ifMatch, final ServiceCallback<EnrollmentGroup> serviceCallback);
+
+	/**
+	 * Create or update a device enrollment group.
+	 *
+	 * @param id              Enrollment group ID.
+	 * @param enrollmentGroup The device enrollment group.
+	 * @param ifMatch         The ETag of the enrollment record.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the EnrollmentGroup object
+	 */
+	Observable<EnrollmentGroup> createOrUpdateEnrollmentGroupAsync(String id, EnrollmentGroup enrollmentGroup,
+			String ifMatch);
+
+	/**
+	 * Create or update a device enrollment group.
+	 *
+	 * @param id              Enrollment group ID.
+	 * @param enrollmentGroup The device enrollment group.
+	 * @param ifMatch         The ETag of the enrollment record.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the EnrollmentGroup object
+	 */
+	Observable<ServiceResponse<EnrollmentGroup>> createOrUpdateEnrollmentGroupWithServiceResponseAsync(String id,
+			EnrollmentGroup enrollmentGroup, String ifMatch);
+
+	/**
+	 * Delete a device enrollment group.
+	 *
+	 * @param id Enrollment group ID.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 */
+	void deleteEnrollmentGroup(String id);
+
+	/**
+	 * Delete a device enrollment group.
+	 *
+	 * @param id              Enrollment group ID.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<Void> deleteEnrollmentGroupAsync(String id, final ServiceCallback<Void> serviceCallback);
+
+	/**
+	 * Delete a device enrollment group.
+	 *
+	 * @param id Enrollment group ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceResponse} object if successful.
+	 */
+	Observable<Void> deleteEnrollmentGroupAsync(String id);
+
+	/**
+	 * Delete a device enrollment group.
+	 *
+	 * @param id Enrollment group ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceResponse} object if successful.
+	 */
+	Observable<ServiceResponse<Void>> deleteEnrollmentGroupWithServiceResponseAsync(String id);
+
+	/**
+	 * Delete a device enrollment group.
+	 *
+	 * @param id      Enrollment group ID.
+	 * @param ifMatch The ETag of the enrollment group record.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 */
+	void deleteEnrollmentGroup(String id, String ifMatch);
+
+	/**
+	 * Delete a device enrollment group.
+	 *
+	 * @param id              Enrollment group ID.
+	 * @param ifMatch         The ETag of the enrollment group record.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<Void> deleteEnrollmentGroupAsync(String id, String ifMatch,
+			final ServiceCallback<Void> serviceCallback);
+
+	/**
+	 * Delete a device enrollment group.
+	 *
+	 * @param id      Enrollment group ID.
+	 * @param ifMatch The ETag of the enrollment group record.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceResponse} object if successful.
+	 */
+	Observable<Void> deleteEnrollmentGroupAsync(String id, String ifMatch);
+
+	/**
+	 * Delete a device enrollment group.
+	 *
+	 * @param id      Enrollment group ID.
+	 * @param ifMatch The ETag of the enrollment group record.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceResponse} object if successful.
+	 */
+	Observable<ServiceResponse<Void>> deleteEnrollmentGroupWithServiceResponseAsync(String id, String ifMatch);
+
+	/**
+	 * Gets the device registration state.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the DeviceRegistrationState object if successful.
+	 */
+	DeviceRegistrationState getDeviceRegistrationState(String id);
+
+	/**
+	 * Gets the device registration state.
+	 *
+	 * @param id              Registration ID.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<DeviceRegistrationState> getDeviceRegistrationStateAsync(String id,
+			final ServiceCallback<DeviceRegistrationState> serviceCallback);
+
+	/**
+	 * Gets the device registration state.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the DeviceRegistrationState object
+	 */
+	Observable<DeviceRegistrationState> getDeviceRegistrationStateAsync(String id);
+
+	/**
+	 * Gets the device registration state.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the DeviceRegistrationState object
+	 */
+	Observable<ServiceResponse<DeviceRegistrationState>> getDeviceRegistrationStateWithServiceResponseAsync(String id);
+
+	/**
+	 * Deletes the device registration.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 */
+	void deleteDeviceRegistrationState(String id);
+
+	/**
+	 * Deletes the device registration.
+	 *
+	 * @param id              Registration ID.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<Void> deleteDeviceRegistrationStateAsync(String id, final ServiceCallback<Void> serviceCallback);
+
+	/**
+	 * Deletes the device registration.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceResponse} object if successful.
+	 */
+	Observable<Void> deleteDeviceRegistrationStateAsync(String id);
+
+	/**
+	 * Deletes the device registration.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceResponse} object if successful.
+	 */
+	Observable<ServiceResponse<Void>> deleteDeviceRegistrationStateWithServiceResponseAsync(String id);
+
+	/**
+	 * Deletes the device registration.
+	 *
+	 * @param id      Registration ID.
+	 * @param ifMatch The ETag of the registration status record.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 */
+	void deleteDeviceRegistrationState(String id, String ifMatch);
+
+	/**
+	 * Deletes the device registration.
+	 *
+	 * @param id              Registration ID.
+	 * @param ifMatch         The ETag of the registration status record.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<Void> deleteDeviceRegistrationStateAsync(String id, String ifMatch,
+			final ServiceCallback<Void> serviceCallback);
+
+	/**
+	 * Deletes the device registration.
+	 *
+	 * @param id      Registration ID.
+	 * @param ifMatch The ETag of the registration status record.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceResponse} object if successful.
+	 */
+	Observable<Void> deleteDeviceRegistrationStateAsync(String id, String ifMatch);
+
+	/**
+	 * Deletes the device registration.
+	 *
+	 * @param id      Registration ID.
+	 * @param ifMatch The ETag of the registration status record.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceResponse} object if successful.
+	 */
+	Observable<ServiceResponse<Void>> deleteDeviceRegistrationStateWithServiceResponseAsync(String id, String ifMatch);
+
+	/**
+	 * Bulk device enrollment operation.
+	 *
+	 * @param bulkOperation Bulk operation.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the BulkEnrollmentOperationResult object if successful.
+	 */
+	BulkEnrollmentOperationResult runBulkEnrollmentOperation(BulkEnrollmentOperation bulkOperation);
+
+	/**
+	 * Bulk device enrollment operation.
+	 *
+	 * @param bulkOperation   Bulk operation.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<BulkEnrollmentOperationResult> runBulkEnrollmentOperationAsync(BulkEnrollmentOperation bulkOperation,
+			final ServiceCallback<BulkEnrollmentOperationResult> serviceCallback);
+
+	/**
+	 * Bulk device enrollment operation.
+	 *
+	 * @param bulkOperation Bulk operation.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the BulkEnrollmentOperationResult object
+	 */
+	Observable<BulkEnrollmentOperationResult> runBulkEnrollmentOperationAsync(BulkEnrollmentOperation bulkOperation);
+
+	/**
+	 * Bulk device enrollment operation.
+	 *
+	 * @param bulkOperation Bulk operation.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the BulkEnrollmentOperationResult object
+	 */
+	Observable<ServiceResponse<BulkEnrollmentOperationResult>> runBulkEnrollmentOperationWithServiceResponseAsync(
+			BulkEnrollmentOperation bulkOperation);
+
+	/**
+	 * Query the device enrollment records.
+	 *
+	 * @param querySpecification The query specification.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the List&lt;IndividualEnrollment&gt; object if successful.
+	 */
+	List<IndividualEnrollment> queryIndividualEnrollments(QuerySpecification querySpecification);
+
+	/**
+	 * Query the device enrollment records.
+	 *
+	 * @param querySpecification The query specification.
+	 * @param serviceCallback    the async ServiceCallback to handle successful and
+	 *                           failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<List<IndividualEnrollment>> queryIndividualEnrollmentsAsync(QuerySpecification querySpecification,
+			final ServiceCallback<List<IndividualEnrollment>> serviceCallback);
+
+	/**
+	 * Query the device enrollment records.
+	 *
+	 * @param querySpecification The query specification.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the List&lt;IndividualEnrollment&gt; object
+	 */
+	Observable<List<IndividualEnrollment>> queryIndividualEnrollmentsAsync(QuerySpecification querySpecification);
+
+	/**
+	 * Query the device enrollment records.
+	 *
+	 * @param querySpecification The query specification.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the List&lt;IndividualEnrollment&gt; object
+	 */
+	Observable<ServiceResponseWithHeaders<List<IndividualEnrollment>, QueryIndividualEnrollmentsHeaders>> queryIndividualEnrollmentsWithServiceResponseAsync(
+			QuerySpecification querySpecification);
+
+	/**
+	 * Query the device enrollment records.
+	 *
+	 * @param querySpecification The query specification.
+	 * @param xMsMaxItemCount    pageSize
+	 * @param xMsContinuation    continuation token
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the List&lt;IndividualEnrollment&gt; object if successful.
+	 */
+	List<IndividualEnrollment> queryIndividualEnrollments(QuerySpecification querySpecification,
+			Integer xMsMaxItemCount, String xMsContinuation);
+
+	/**
+	 * Query the device enrollment records.
+	 *
+	 * @param querySpecification The query specification.
+	 * @param xMsMaxItemCount    pageSize
+	 * @param xMsContinuation    continuation token
+	 * @param serviceCallback    the async ServiceCallback to handle successful and
+	 *                           failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<List<IndividualEnrollment>> queryIndividualEnrollmentsAsync(QuerySpecification querySpecification,
+			Integer xMsMaxItemCount, String xMsContinuation,
+			final ServiceCallback<List<IndividualEnrollment>> serviceCallback);
+
+	/**
+	 * Query the device enrollment records.
+	 *
+	 * @param querySpecification The query specification.
+	 * @param xMsMaxItemCount    pageSize
+	 * @param xMsContinuation    continuation token
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the List&lt;IndividualEnrollment&gt; object
+	 */
+	Observable<List<IndividualEnrollment>> queryIndividualEnrollmentsAsync(QuerySpecification querySpecification,
+			Integer xMsMaxItemCount, String xMsContinuation);
+
+	/**
+	 * Query the device enrollment records.
+	 *
+	 * @param querySpecification The query specification.
+	 * @param xMsMaxItemCount    pageSize
+	 * @param xMsContinuation    continuation token
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the List&lt;IndividualEnrollment&gt; object
+	 */
+	Observable<ServiceResponseWithHeaders<List<IndividualEnrollment>, QueryIndividualEnrollmentsHeaders>> queryIndividualEnrollmentsWithServiceResponseAsync(
+			QuerySpecification querySpecification, Integer xMsMaxItemCount, String xMsContinuation);
+
+	/**
+	 * Get the attestation mechanism in the device enrollment record.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the AttestationMechanism object if successful.
+	 */
+	AttestationMechanism getIndividualEnrollmentAttestationMechanism(String id);
+
+	/**
+	 * Get the attestation mechanism in the device enrollment record.
+	 *
+	 * @param id              Registration ID.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<AttestationMechanism> getIndividualEnrollmentAttestationMechanismAsync(String id,
+			final ServiceCallback<AttestationMechanism> serviceCallback);
+
+	/**
+	 * Get the attestation mechanism in the device enrollment record.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the AttestationMechanism object
+	 */
+	Observable<AttestationMechanism> getIndividualEnrollmentAttestationMechanismAsync(String id);
+
+	/**
+	 * Get the attestation mechanism in the device enrollment record.
+	 *
+	 * @param id Registration ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the AttestationMechanism object
+	 */
+	Observable<ServiceResponse<AttestationMechanism>> getIndividualEnrollmentAttestationMechanismWithServiceResponseAsync(
+			String id);
+
+	/**
+	 * Query the device enrollment groups.
+	 *
+	 * @param querySpecification The query specification.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the List&lt;EnrollmentGroup&gt; object if successful.
+	 */
+	List<EnrollmentGroup> queryEnrollmentGroups(QuerySpecification querySpecification);
+
+	/**
+	 * Query the device enrollment groups.
+	 *
+	 * @param querySpecification The query specification.
+	 * @param serviceCallback    the async ServiceCallback to handle successful and
+	 *                           failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<List<EnrollmentGroup>> queryEnrollmentGroupsAsync(QuerySpecification querySpecification,
+			final ServiceCallback<List<EnrollmentGroup>> serviceCallback);
+
+	/**
+	 * Query the device enrollment groups.
+	 *
+	 * @param querySpecification The query specification.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the List&lt;EnrollmentGroup&gt; object
+	 */
+	Observable<List<EnrollmentGroup>> queryEnrollmentGroupsAsync(QuerySpecification querySpecification);
+
+	/**
+	 * Query the device enrollment groups.
+	 *
+	 * @param querySpecification The query specification.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the List&lt;EnrollmentGroup&gt; object
+	 */
+	Observable<ServiceResponseWithHeaders<List<EnrollmentGroup>, QueryEnrollmentGroupsHeaders>> queryEnrollmentGroupsWithServiceResponseAsync(
+			QuerySpecification querySpecification);
+
+	/**
+	 * Query the device enrollment groups.
+	 *
+	 * @param querySpecification The query specification.
+	 * @param xMsMaxItemCount    pageSize
+	 * @param xMsContinuation    continuation token
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the List&lt;EnrollmentGroup&gt; object if successful.
+	 */
+	List<EnrollmentGroup> queryEnrollmentGroups(QuerySpecification querySpecification, Integer xMsMaxItemCount,
+			String xMsContinuation);
+
+	/**
+	 * Query the device enrollment groups.
+	 *
+	 * @param querySpecification The query specification.
+	 * @param xMsMaxItemCount    pageSize
+	 * @param xMsContinuation    continuation token
+	 * @param serviceCallback    the async ServiceCallback to handle successful and
+	 *                           failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<List<EnrollmentGroup>> queryEnrollmentGroupsAsync(QuerySpecification querySpecification,
+			Integer xMsMaxItemCount, String xMsContinuation,
+			final ServiceCallback<List<EnrollmentGroup>> serviceCallback);
+
+	/**
+	 * Query the device enrollment groups.
+	 *
+	 * @param querySpecification The query specification.
+	 * @param xMsMaxItemCount    pageSize
+	 * @param xMsContinuation    continuation token
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the List&lt;EnrollmentGroup&gt; object
+	 */
+	Observable<List<EnrollmentGroup>> queryEnrollmentGroupsAsync(QuerySpecification querySpecification,
+			Integer xMsMaxItemCount, String xMsContinuation);
+
+	/**
+	 * Query the device enrollment groups.
+	 *
+	 * @param querySpecification The query specification.
+	 * @param xMsMaxItemCount    pageSize
+	 * @param xMsContinuation    continuation token
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the List&lt;EnrollmentGroup&gt; object
+	 */
+	Observable<ServiceResponseWithHeaders<List<EnrollmentGroup>, QueryEnrollmentGroupsHeaders>> queryEnrollmentGroupsWithServiceResponseAsync(
+			QuerySpecification querySpecification, Integer xMsMaxItemCount, String xMsContinuation);
+
+	/**
+	 * Get the attestation mechanism in the device enrollment group record.
+	 *
+	 * @param id Enrollment group ID
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the AttestationMechanism object if successful.
+	 */
+	AttestationMechanism getEnrollmentGroupAttestationMechanism(String id);
+
+	/**
+	 * Get the attestation mechanism in the device enrollment group record.
+	 *
+	 * @param id              Enrollment group ID
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<AttestationMechanism> getEnrollmentGroupAttestationMechanismAsync(String id,
+			final ServiceCallback<AttestationMechanism> serviceCallback);
+
+	/**
+	 * Get the attestation mechanism in the device enrollment group record.
+	 *
+	 * @param id Enrollment group ID
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the AttestationMechanism object
+	 */
+	Observable<AttestationMechanism> getEnrollmentGroupAttestationMechanismAsync(String id);
+
+	/**
+	 * Get the attestation mechanism in the device enrollment group record.
+	 *
+	 * @param id Enrollment group ID
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the AttestationMechanism object
+	 */
+	Observable<ServiceResponse<AttestationMechanism>> getEnrollmentGroupAttestationMechanismWithServiceResponseAsync(
+			String id);
+
+	/**
+	 * Gets the registration state of devices in this enrollmentGroup.
+	 *
+	 * @param id Enrollment group ID.
+	 * @throws IllegalArgumentException                 thrown if parameters fail
+	 *                                                  the validation
+	 * @throws ProvisioningServiceErrorDetailsException thrown if the request is
+	 *                                                  rejected by server
+	 * @throws RuntimeException                         all other wrapped checked
+	 *                                                  exceptions if the request
+	 *                                                  fails to be sent
+	 * @return the List&lt;DeviceRegistrationState&gt; object if successful.
+	 */
+	List<DeviceRegistrationState> queryDeviceRegistrationStates(String id);
+
+	/**
+	 * Gets the registration state of devices in this enrollmentGroup.
+	 *
+	 * @param id              Enrollment group ID.
+	 * @param serviceCallback the async ServiceCallback to handle successful and
+	 *                        failed responses.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the {@link ServiceFuture} object
+	 */
+	ServiceFuture<List<DeviceRegistrationState>> queryDeviceRegistrationStatesAsync(String id,
+			final ServiceCallback<List<DeviceRegistrationState>> serviceCallback);
+
+	/**
+	 * Gets the registration state of devices in this enrollmentGroup.
+	 *
+	 * @param id Enrollment group ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the List&lt;DeviceRegistrationState&gt; object
+	 */
+	Observable<List<DeviceRegistrationState>> queryDeviceRegistrationStatesAsync(String id);
+
+	/**
+	 * Gets the registration state of devices in this enrollmentGroup.
+	 *
+	 * @param id Enrollment group ID.
+	 * @throws IllegalArgumentException thrown if parameters fail the validation
+	 * @return the observable to the List&lt;DeviceRegistrationState&gt; object
+	 */
+	Observable<ServiceResponse<List<DeviceRegistrationState>>> queryDeviceRegistrationStatesWithServiceResponseAsync(
+			String id);
 
 }

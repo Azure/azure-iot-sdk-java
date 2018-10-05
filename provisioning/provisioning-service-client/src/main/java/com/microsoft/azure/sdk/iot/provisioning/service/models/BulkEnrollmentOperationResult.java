@@ -12,57 +12,62 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Results of a bulk enrollment operation.
  */
-public class BulkEnrollmentOperationResult {
-    /**
-     * Indicates if the operation was successful in its entirety.
-     */
-    @JsonProperty(value = "isSuccessful", required = true)
-    private boolean isSuccessful;
+public class BulkEnrollmentOperationResult
+{
+	/**
+	 * Indicates if the operation was successful in its entirety.
+	 */
+	@JsonProperty(value = "isSuccessful", required = true)
+	private boolean isSuccessful;
 
-    /**
-     * Registration errors.
-     */
-    @JsonProperty(value = "errors")
-    private List<BulkEnrollmentOperationError> errors;
+	/**
+	 * Registration errors.
+	 */
+	@JsonProperty(value = "errors")
+	private List<BulkEnrollmentOperationError> errors;
 
-    /**
-     * Get indicates if the operation was successful in its entirety.
-     *
-     * @return the isSuccessful value
-     */
-    public boolean isSuccessful() {
-        return this.isSuccessful;
-    }
+	/**
+	 * Get indicates if the operation was successful in its entirety.
+	 *
+	 * @return the isSuccessful value
+	 */
+	public boolean isSuccessful()
+	{
+		return this.isSuccessful;
+	}
 
-    /**
-     * Set indicates if the operation was successful in its entirety.
-     *
-     * @param isSuccessful the isSuccessful value to set
-     * @return the BulkEnrollmentOperationResult object itself.
-     */
-    public BulkEnrollmentOperationResult withIsSuccessful(boolean isSuccessful) {
-        this.isSuccessful = isSuccessful;
-        return this;
-    }
+	/**
+	 * Set indicates if the operation was successful in its entirety.
+	 *
+	 * @param isSuccessful the isSuccessful value to set
+	 * @return the BulkEnrollmentOperationResult object itself.
+	 */
+	public BulkEnrollmentOperationResult withIsSuccessful(boolean isSuccessful)
+	{
+		this.isSuccessful = isSuccessful;
+		return this;
+	}
 
-    /**
-     * Get registration errors.
-     *
-     * @return the errors value
-     */
-    public List<BulkEnrollmentOperationError> errors() {
-        return this.errors;
-    }
+	/**
+	 * Get registration errors.
+	 *
+	 * @return the errors value
+	 */
+	public List<BulkEnrollmentOperationError> errors()
+	{
+		return this.errors;
+	}
 
-    /**
-     * Set registration errors.
-     *
-     * @param errors the errors value to set
-     * @return the BulkEnrollmentOperationResult object itself.
-     */
-    public BulkEnrollmentOperationResult withErrors(List<BulkEnrollmentOperationError> errors) {
-        this.errors = errors;
-        return this;
-    }
+	/**
+	 * Set registration errors.
+	 *
+	 * @param errors the errors value to set
+	 * @return the BulkEnrollmentOperationResult object itself.
+	 */
+	public BulkEnrollmentOperationResult withErrors(List<BulkEnrollmentOperationError> errors)
+	{
+		this.errors = errors;
+		return this;
+	}
 
 }

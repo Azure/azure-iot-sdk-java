@@ -11,31 +11,34 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * A Json query request.
  */
-public class QuerySpecification {
-    /**
-     * The query.
-     */
-    @JsonProperty(value = "query", required = true)
-    private String query;
+public class QuerySpecification
+{
+	/**
+	 * The query.
+	 */
+	@JsonProperty(value = "query", required = true)
+	private String query;
 
-    /**
-     * Get the query.
-     *
-     * @return the query value
-     */
-    public String query() {
-        return this.query;
-    }
+	/**
+	 * Get the query.
+	 *
+	 * @return the query value
+	 */
+	public String query()
+	{
+		return this.query;
+	}
 
-    /**
-     * Set the query.
-     *
-     * @param query the query value to set
-     * @return the QuerySpecification object itself.
-     */
-    public QuerySpecification withQuery(String query) {
-        this.query = query;
-        return this;
-    }
+	/**
+	 * Set the query.
+	 *
+	 * @param query the query value to set
+	 * @return the QuerySpecification object itself.
+	 */
+	public QuerySpecification withQuery(String query)
+	{
+		this.query = query;
+		return this;
+	}
 
 }

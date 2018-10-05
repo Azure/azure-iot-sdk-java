@@ -11,57 +11,62 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Primary and secondary CA references.
  */
-public class X509CAReferences {
-    /**
-     * The primary property.
-     */
-    @JsonProperty(value = "primary")
-    private String primary;
+public class X509CAReferences
+{
+	/**
+	 * The primary property.
+	 */
+	@JsonProperty(value = "primary")
+	private String primary;
 
-    /**
-     * The secondary property.
-     */
-    @JsonProperty(value = "secondary")
-    private String secondary;
+	/**
+	 * The secondary property.
+	 */
+	@JsonProperty(value = "secondary")
+	private String secondary;
 
-    /**
-     * Get the primary value.
-     *
-     * @return the primary value
-     */
-    public String primary() {
-        return this.primary;
-    }
+	/**
+	 * Get the primary value.
+	 *
+	 * @return the primary value
+	 */
+	public String primary()
+	{
+		return this.primary;
+	}
 
-    /**
-     * Set the primary value.
-     *
-     * @param primary the primary value to set
-     * @return the X509CAReferences object itself.
-     */
-    public X509CAReferences withPrimary(String primary) {
-        this.primary = primary;
-        return this;
-    }
+	/**
+	 * Set the primary value.
+	 *
+	 * @param primary the primary value to set
+	 * @return the X509CAReferences object itself.
+	 */
+	public X509CAReferences withPrimary(String primary)
+	{
+		this.primary = primary;
+		return this;
+	}
 
-    /**
-     * Get the secondary value.
-     *
-     * @return the secondary value
-     */
-    public String secondary() {
-        return this.secondary;
-    }
+	/**
+	 * Get the secondary value.
+	 *
+	 * @return the secondary value
+	 */
+	public String secondary()
+	{
+		return this.secondary;
+	}
 
-    /**
-     * Set the secondary value.
-     *
-     * @param secondary the secondary value to set
-     * @return the X509CAReferences object itself.
-     */
-    public X509CAReferences withSecondary(String secondary) {
-        this.secondary = secondary;
-        return this;
-    }
+	/**
+	 * Set the secondary value.
+	 *
+	 * @param secondary the secondary value to set
+	 * @return the X509CAReferences object itself.
+	 */
+	public X509CAReferences withSecondary(String secondary)
+	{
+		this.secondary = secondary;
+		return this;
+	}
 
 }

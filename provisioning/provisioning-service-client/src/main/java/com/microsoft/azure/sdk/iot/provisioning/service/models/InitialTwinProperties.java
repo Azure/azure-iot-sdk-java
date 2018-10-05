@@ -11,31 +11,34 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Represents the initial properties that will be set on the device twin.
  */
-public class InitialTwinProperties {
-    /**
-     * Gets and sets the InitialTwin desired properties.
-     */
-    @JsonProperty(value = "desired")
-    private TwinCollection desired;
+public class InitialTwinProperties
+{
+	/**
+	 * Gets and sets the InitialTwin desired properties.
+	 */
+	@JsonProperty(value = "desired")
+	private TwinCollection desired;
 
-    /**
-     * Get gets and sets the InitialTwin desired properties.
-     *
-     * @return the desired value
-     */
-    public TwinCollection desired() {
-        return this.desired;
-    }
+	/**
+	 * Get gets and sets the InitialTwin desired properties.
+	 *
+	 * @return the desired value
+	 */
+	public TwinCollection desired()
+	{
+		return this.desired;
+	}
 
-    /**
-     * Set gets and sets the InitialTwin desired properties.
-     *
-     * @param desired the desired value to set
-     * @return the InitialTwinProperties object itself.
-     */
-    public InitialTwinProperties withDesired(TwinCollection desired) {
-        this.desired = desired;
-        return this;
-    }
+	/**
+	 * Set gets and sets the InitialTwin desired properties.
+	 *
+	 * @param desired the desired value to set
+	 * @return the InitialTwinProperties object itself.
+	 */
+	public InitialTwinProperties withDesired(TwinCollection desired)
+	{
+		this.desired = desired;
+		return this;
+	}
 
 }

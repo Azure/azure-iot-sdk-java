@@ -11,57 +11,62 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Attestation via TPM.
  */
-public class TpmAttestation {
-    /**
-     * The endorsementKey property.
-     */
-    @JsonProperty(value = "endorsementKey", required = true)
-    private String endorsementKey;
+public class TpmAttestation
+{
+	/**
+	 * The endorsementKey property.
+	 */
+	@JsonProperty(value = "endorsementKey", required = true)
+	private String endorsementKey;
 
-    /**
-     * The storageRootKey property.
-     */
-    @JsonProperty(value = "storageRootKey")
-    private String storageRootKey;
+	/**
+	 * The storageRootKey property.
+	 */
+	@JsonProperty(value = "storageRootKey")
+	private String storageRootKey;
 
-    /**
-     * Get the endorsementKey value.
-     *
-     * @return the endorsementKey value
-     */
-    public String endorsementKey() {
-        return this.endorsementKey;
-    }
+	/**
+	 * Get the endorsementKey value.
+	 *
+	 * @return the endorsementKey value
+	 */
+	public String endorsementKey()
+	{
+		return this.endorsementKey;
+	}
 
-    /**
-     * Set the endorsementKey value.
-     *
-     * @param endorsementKey the endorsementKey value to set
-     * @return the TpmAttestation object itself.
-     */
-    public TpmAttestation withEndorsementKey(String endorsementKey) {
-        this.endorsementKey = endorsementKey;
-        return this;
-    }
+	/**
+	 * Set the endorsementKey value.
+	 *
+	 * @param endorsementKey the endorsementKey value to set
+	 * @return the TpmAttestation object itself.
+	 */
+	public TpmAttestation withEndorsementKey(String endorsementKey)
+	{
+		this.endorsementKey = endorsementKey;
+		return this;
+	}
 
-    /**
-     * Get the storageRootKey value.
-     *
-     * @return the storageRootKey value
-     */
-    public String storageRootKey() {
-        return this.storageRootKey;
-    }
+	/**
+	 * Get the storageRootKey value.
+	 *
+	 * @return the storageRootKey value
+	 */
+	public String storageRootKey()
+	{
+		return this.storageRootKey;
+	}
 
-    /**
-     * Set the storageRootKey value.
-     *
-     * @param storageRootKey the storageRootKey value to set
-     * @return the TpmAttestation object itself.
-     */
-    public TpmAttestation withStorageRootKey(String storageRootKey) {
-        this.storageRootKey = storageRootKey;
-        return this;
-    }
+	/**
+	 * Set the storageRootKey value.
+	 *
+	 * @param storageRootKey the storageRootKey value to set
+	 * @return the TpmAttestation object itself.
+	 */
+	public TpmAttestation withStorageRootKey(String storageRootKey)
+	{
+		this.storageRootKey = storageRootKey;
+		return this;
+	}
 
 }

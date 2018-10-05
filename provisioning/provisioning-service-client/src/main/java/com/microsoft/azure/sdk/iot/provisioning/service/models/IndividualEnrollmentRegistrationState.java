@@ -6,9 +6,9 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.models;
 
-
 /**
  * Current registration status.
  */
-public class IndividualEnrollmentRegistrationState extends DeviceRegistrationState {
+public class IndividualEnrollmentRegistrationState extends DeviceRegistrationState
+{
 }

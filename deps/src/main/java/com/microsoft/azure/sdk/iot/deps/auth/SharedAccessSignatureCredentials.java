@@ -4,7 +4,6 @@
 package com.microsoft.azure.sdk.iot.deps.auth;
 
 import com.microsoft.rest.credentials.ServiceClientCredentials;
-
 import okhttp3.OkHttpClient.Builder;
 
 public class SharedAccessSignatureCredentials implements ServiceClientCredentials
@@ -22,10 +21,9 @@ public class SharedAccessSignatureCredentials implements ServiceClientCredential
 		String sasToken = getSASToken(this.provisioningConnectionString);
 		clientBuilder.addInterceptor(new BasicAuthInterceptor(sasToken)).build();
 	}
-	
-	private String getSASToken(ProvisioningConnectionString connectionString)
-    {
-        return new ProvisioningSasToken(connectionString).toString();
-    }
-}
 
+	private String getSASToken(ProvisioningConnectionString connectionString)
+	{
+		return new ProvisioningSasToken(connectionString).toString();
+	}
+}

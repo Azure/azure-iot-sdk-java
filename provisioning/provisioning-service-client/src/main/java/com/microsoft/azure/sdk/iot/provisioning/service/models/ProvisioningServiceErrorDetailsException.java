@@ -11,33 +11,42 @@ import okhttp3.ResponseBody;
 import retrofit2.Response;
 
 /**
- * Exception thrown for an invalid response with
- * ProvisioningServiceErrorDetails information.
+ * Exception thrown for an invalid response with ProvisioningServiceErrorDetails
+ * information.
  */
-public class ProvisioningServiceErrorDetailsException extends RestException {
-    /**
-     * Initializes a new instance of the ProvisioningServiceErrorDetailsException class.
-     *
-     * @param message the exception message or the response content if a message is not available
-     * @param response the HTTP response
-     */
-    public ProvisioningServiceErrorDetailsException(final String message, final Response<ResponseBody> response) {
-        super(message, response);
-    }
+public class ProvisioningServiceErrorDetailsException extends RestException
+{
+	/**
+	 * Initializes a new instance of the ProvisioningServiceErrorDetailsException
+	 * class.
+	 *
+	 * @param message  the exception message or the response content if a message is
+	 *                 not available
+	 * @param response the HTTP response
+	 */
+	public ProvisioningServiceErrorDetailsException(final String message, final Response<ResponseBody> response)
+	{
+		super(message, response);
+	}
 
-    /**
-     * Initializes a new instance of the ProvisioningServiceErrorDetailsException class.
-     *
-     * @param message the exception message or the response content if a message is not available
-     * @param response the HTTP response
-     * @param body the deserialized response body
-     */
-    public ProvisioningServiceErrorDetailsException(final String message, final Response<ResponseBody> response, final ProvisioningServiceErrorDetails body) {
-        super(message, response, body);
-    }
+	/**
+	 * Initializes a new instance of the ProvisioningServiceErrorDetailsException
+	 * class.
+	 *
+	 * @param message  the exception message or the response content if a message is
+	 *                 not available
+	 * @param response the HTTP response
+	 * @param body     the deserialized response body
+	 */
+	public ProvisioningServiceErrorDetailsException(final String message, final Response<ResponseBody> response,
+			final ProvisioningServiceErrorDetails body)
+	{
+		super(message, response, body);
+	}
 
-    @Override
-    public ProvisioningServiceErrorDetails body() {
-        return (ProvisioningServiceErrorDetails) super.body();
-    }
+	@Override
+	public ProvisioningServiceErrorDetails body()
+	{
+		return (ProvisioningServiceErrorDetails) super.body();
+	}
 }

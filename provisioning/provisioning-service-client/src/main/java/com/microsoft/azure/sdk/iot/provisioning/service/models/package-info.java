@@ -3,7 +3,7 @@
 // regenerated.
 
 /**
- * This package contains the models classes for ProvisioningServiceClient.
- * API for service operations with the Azure IoT Hub Device Provisioning Service.
+ * This package contains the models classes for ProvisioningServiceClient. API
+ * for service operations with the Azure IoT Hub Device Provisioning Service.
  */
 package com.microsoft.azure.sdk.iot.provisioning.service.models;

@@ -10,9 +10,10 @@ import com.microsoft.rest.credentials.ServiceClientCredentials;
 
 public class ProvisioningServiceClientHelper
 {
-    public static ServiceClientCredentials createCredentialsFromConnectionString(String connectionString)
-    {
-        ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
-        return new SharedAccessSignatureCredentials(provisioningConnectionString);
-    }
+	public static ServiceClientCredentials createCredentialsFromConnectionString(String connectionString)
+	{
+		ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder
+				.createConnectionString(connectionString);
+		return new SharedAccessSignatureCredentials(provisioningConnectionString);
+	}
 }

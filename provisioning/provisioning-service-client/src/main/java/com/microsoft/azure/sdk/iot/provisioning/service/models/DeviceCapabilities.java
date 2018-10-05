@@ -11,31 +11,34 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Device capabilities.
  */
-public class DeviceCapabilities {
-    /**
-     * If set to true, this device is an IoTEdge device.
-     */
-    @JsonProperty(value = "iotEdge", required = true)
-    private boolean iotEdge;
+public class DeviceCapabilities
+{
+	/**
+	 * If set to true, this device is an IoTEdge device.
+	 */
+	@JsonProperty(value = "iotEdge", required = true)
+	private boolean iotEdge;
 
-    /**
-     * Get if set to true, this device is an IoTEdge device.
-     *
-     * @return the iotEdge value
-     */
-    public boolean iotEdge() {
-        return this.iotEdge;
-    }
+	/**
+	 * Get if set to true, this device is an IoTEdge device.
+	 *
+	 * @return the iotEdge value
+	 */
+	public boolean iotEdge()
+	{
+		return this.iotEdge;
+	}
 
-    /**
-     * Set if set to true, this device is an IoTEdge device.
-     *
-     * @param iotEdge the iotEdge value to set
-     * @return the DeviceCapabilities object itself.
-     */
-    public DeviceCapabilities withIotEdge(boolean iotEdge) {
-        this.iotEdge = iotEdge;
-        return this;
-    }
+	/**
+	 * Set if set to true, this device is an IoTEdge device.
+	 *
+	 * @param iotEdge the iotEdge value to set
+	 * @return the DeviceCapabilities object itself.
+	 */
+	public DeviceCapabilities withIotEdge(boolean iotEdge)
+	{
+		this.iotEdge = iotEdge;
+		return this;
+	}
 
 }

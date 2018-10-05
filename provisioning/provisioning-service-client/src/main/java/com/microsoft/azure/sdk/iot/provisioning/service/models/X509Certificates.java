@@ -11,57 +11,62 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Primary and secondary certificates.
  */
-public class X509Certificates {
-    /**
-     * The primary property.
-     */
-    @JsonProperty(value = "primary")
-    private X509CertificateWithInfo primary;
+public class X509Certificates
+{
+	/**
+	 * The primary property.
+	 */
+	@JsonProperty(value = "primary")
+	private X509CertificateWithInfo primary;
 
-    /**
-     * The secondary property.
-     */
-    @JsonProperty(value = "secondary")
-    private X509CertificateWithInfo secondary;
+	/**
+	 * The secondary property.
+	 */
+	@JsonProperty(value = "secondary")
+	private X509CertificateWithInfo secondary;
 
-    /**
-     * Get the primary value.
-     *
-     * @return the primary value
-     */
-    public X509CertificateWithInfo primary() {
-        return this.primary;
-    }
+	/**
+	 * Get the primary value.
+	 *
+	 * @return the primary value
+	 */
+	public X509CertificateWithInfo primary()
+	{
+		return this.primary;
+	}
 
-    /**
-     * Set the primary value.
-     *
-     * @param primary the primary value to set
-     * @return the X509Certificates object itself.
-     */
-    public X509Certificates withPrimary(X509CertificateWithInfo primary) {
-        this.primary = primary;
-        return this;
-    }
+	/**
+	 * Set the primary value.
+	 *
+	 * @param primary the primary value to set
+	 * @return the X509Certificates object itself.
+	 */
+	public X509Certificates withPrimary(X509CertificateWithInfo primary)
+	{
+		this.primary = primary;
+		return this;
+	}
 
-    /**
-     * Get the secondary value.
-     *
-     * @return the secondary value
-     */
-    public X509CertificateWithInfo secondary() {
-        return this.secondary;
-    }
+	/**
+	 * Get the secondary value.
+	 *
+	 * @return the secondary value
+	 */
+	public X509CertificateWithInfo secondary()
+	{
+		return this.secondary;
+	}
 
-    /**
-     * Set the secondary value.
-     *
-     * @param secondary the secondary value to set
-     * @return the X509Certificates object itself.
-     */
-    public X509Certificates withSecondary(X509CertificateWithInfo secondary) {
-        this.secondary = secondary;
-        return this;
-    }
+	/**
+	 * Set the secondary value.
+	 *
+	 * @param secondary the secondary value to set
+	 * @return the X509Certificates object itself.
+	 */
+	public X509Certificates withSecondary(X509CertificateWithInfo secondary)
+	{
+		this.secondary = secondary;
+		return this;
+	}
 
 }

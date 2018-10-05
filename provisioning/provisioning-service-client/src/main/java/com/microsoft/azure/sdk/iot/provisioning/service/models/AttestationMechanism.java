@@ -11,110 +11,121 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Attestation mechanism for individualEnrollment as well as enrollmentGroup.
  */
-public class AttestationMechanism {
-    /**
-     * Attestation Type. Possible values include: 'none', 'tpm', 'x509',
-     * 'symmetricKey'.
-     */
-    @JsonProperty(value = "type", required = true)
-    private String type;
+public class AttestationMechanism
+{
+	/**
+	 * Attestation Type. Possible values include: 'none', 'tpm', 'x509',
+	 * 'symmetricKey'.
+	 */
+	@JsonProperty(value = "type", required = true)
+	private String type;
 
-    /**
-     * TPM attestation method.
-     */
-    @JsonProperty(value = "tpm")
-    private TpmAttestation tpm;
+	/**
+	 * TPM attestation method.
+	 */
+	@JsonProperty(value = "tpm")
+	private TpmAttestation tpm;
 
-    /**
-     * X509 attestation method.
-     */
-    @JsonProperty(value = "x509")
-    private X509Attestation x509;
+	/**
+	 * X509 attestation method.
+	 */
+	@JsonProperty(value = "x509")
+	private X509Attestation x509;
 
-    /**
-     * Symmetric Key attestation method.
-     */
-    @JsonProperty(value = "symmetricKey")
-    private SymmetricKeyAttestation symmetricKey;
+	/**
+	 * Symmetric Key attestation method.
+	 */
+	@JsonProperty(value = "symmetricKey")
+	private SymmetricKeyAttestation symmetricKey;
 
-    /**
-     * Get attestation Type. Possible values include: 'none', 'tpm', 'x509', 'symmetricKey'.
-     *
-     * @return the type value
-     */
-    public String type() {
-        return this.type;
-    }
+	/**
+	 * Get attestation Type. Possible values include: 'none', 'tpm', 'x509',
+	 * 'symmetricKey'.
+	 *
+	 * @return the type value
+	 */
+	public String type()
+	{
+		return this.type;
+	}
 
-    /**
-     * Set attestation Type. Possible values include: 'none', 'tpm', 'x509', 'symmetricKey'.
-     *
-     * @param type the type value to set
-     * @return the AttestationMechanism object itself.
-     */
-    public AttestationMechanism withType(String type) {
-        this.type = type;
-        return this;
-    }
+	/**
+	 * Set attestation Type. Possible values include: 'none', 'tpm', 'x509',
+	 * 'symmetricKey'.
+	 *
+	 * @param type the type value to set
+	 * @return the AttestationMechanism object itself.
+	 */
+	public AttestationMechanism withType(String type)
+	{
+		this.type = type;
+		return this;
+	}
 
-    /**
-     * Get tPM attestation method.
-     *
-     * @return the tpm value
-     */
-    public TpmAttestation tpm() {
-        return this.tpm;
-    }
+	/**
+	 * Get tPM attestation method.
+	 *
+	 * @return the tpm value
+	 */
+	public TpmAttestation tpm()
+	{
+		return this.tpm;
+	}
 
-    /**
-     * Set tPM attestation method.
-     *
-     * @param tpm the tpm value to set
-     * @return the AttestationMechanism object itself.
-     */
-    public AttestationMechanism withTpm(TpmAttestation tpm) {
-        this.tpm = tpm;
-        return this;
-    }
+	/**
+	 * Set tPM attestation method.
+	 *
+	 * @param tpm the tpm value to set
+	 * @return the AttestationMechanism object itself.
+	 */
+	public AttestationMechanism withTpm(TpmAttestation tpm)
+	{
+		this.tpm = tpm;
+		return this;
+	}
 
-    /**
-     * Get x509 attestation method.
-     *
-     * @return the x509 value
-     */
-    public X509Attestation x509() {
-        return this.x509;
-    }
+	/**
+	 * Get x509 attestation method.
+	 *
+	 * @return the x509 value
+	 */
+	public X509Attestation x509()
+	{
+		return this.x509;
+	}
 
-    /**
-     * Set x509 attestation method.
-     *
-     * @param x509 the x509 value to set
-     * @return the AttestationMechanism object itself.
-     */
-    public AttestationMechanism withX509(X509Attestation x509) {
-        this.x509 = x509;
-        return this;
-    }
+	/**
+	 * Set x509 attestation method.
+	 *
+	 * @param x509 the x509 value to set
+	 * @return the AttestationMechanism object itself.
+	 */
+	public AttestationMechanism withX509(X509Attestation x509)
+	{
+		this.x509 = x509;
+		return this;
+	}
 
-    /**
-     * Get symmetric Key attestation method.
-     *
-     * @return the symmetricKey value
-     */
-    public SymmetricKeyAttestation symmetricKey() {
-        return this.symmetricKey;
-    }
+	/**
+	 * Get symmetric Key attestation method.
+	 *
+	 * @return the symmetricKey value
+	 */
+	public SymmetricKeyAttestation symmetricKey()
+	{
+		return this.symmetricKey;
+	}
 
-    /**
-     * Set symmetric Key attestation method.
-     *
-     * @param symmetricKey the symmetricKey value to set
-     * @return the AttestationMechanism object itself.
-     */
-    public AttestationMechanism withSymmetricKey(SymmetricKeyAttestation symmetricKey) {
-        this.symmetricKey = symmetricKey;
-        return this;
-    }
+	/**
+	 * Set symmetric Key attestation method.
+	 *
+	 * @param symmetricKey the symmetricKey value to set
+	 * @return the AttestationMechanism object itself.
+	 */
+	public AttestationMechanism withSymmetricKey(SymmetricKeyAttestation symmetricKey)
+	{
+		this.symmetricKey = symmetricKey;
+		return this;
+	}
 
 }
