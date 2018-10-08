@@ -31,7 +31,6 @@ import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;

@@ -68,7 +68,7 @@ public class ProvisioningClientIT
     private static final String TPM_SIMULATOR_IP_ADDRESS_ENV_NAME = "IOT_DPS_TPM_SIMULATOR_IP_ADDRESS"; // ip address of TPM simulator
     private static String tpmSimulatorIpAddress = "";
 
-    private static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1 * 60 * 1000; //
+    private static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 20 * 60 * 1000; // one registration could take up to 20 mins
 
     private static final long TPM_CONNECTION_TIMEOUT = 1 * 60 * 1000;
 
@@ -76,7 +76,7 @@ public class ProvisioningClientIT
     private static final List<MessageAndResult> messagesToSendAndResultsExpected = new ArrayList<>();
 
     // How much to wait until a message makes it to the server, in milliseconds
-    private static final Integer IOTHUB_MAX_SEND_TIMEOUT = 60000; // milli secs of time to wait
+    private static final Integer IOTHUB_MAX_SEND_TIMEOUT = 120000; // milli secs of time to wait
 
     //How many milliseconds between retry
     private static final Integer IOTHUB_RETRY_MILLISECONDS = 100;

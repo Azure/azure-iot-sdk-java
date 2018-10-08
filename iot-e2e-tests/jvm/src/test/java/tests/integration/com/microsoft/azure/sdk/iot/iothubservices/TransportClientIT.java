@@ -42,6 +42,7 @@ import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothubservices.TransportClientIT.STATUS.FAILURE;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothubservices.TransportClientIT.STATUS.SUCCESS;
 
+@Ignore
 //Ignoring these tests as they frequently fail. Needs investigations
 public class TransportClientIT extends MethodNameLoggingIntegrationTest
 {

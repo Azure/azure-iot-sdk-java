@@ -38,12 +38,14 @@ import static org.junit.Assert.*;
 public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
 {
     // Max time to wait to see it on Hub
-    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 200; // 0.2 sec
+    private static final long PERIODIC_WAIT_TIME_FOR_VERIFICATION = 100; // 0.1 sec
+    private static final long MAX_WAIT_TIME_FOR_VERIFICATION = 60000; // 60 sec
+    private static final long DELAY_BETWEEN_OPERATIONS = 200; // 0.2 sec
 
-    private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB * 10; // 2 sec
+    private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = DELAY_BETWEEN_OPERATIONS * 10; // 2 sec
 
     //Max time to wait before timing out test
-    private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB + 50000; // 50 secs
+    private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = 120000; // 2 min
 
     // Max reported properties to be tested
     private static final Integer MAX_PROPERTIES_TO_TEST = 5;
@@ -67,6 +69,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
     private static final String PROPERTY_VALUE = "Value";
     private static final String PROPERTY_VALUE_QUERY = "ValueQuery";
     private static final String PROPERTY_VALUE_UPDATE = "Update";
+    private static final String PROPERTY_VALUE_UPDATE2 = "Update2";
     private static final String TAG_KEY = "Tag_Key";
     private static final String TAG_VALUE = "Tag_Value";
     private static final String TAG_VALUE_UPDATE = "Tag_Value_Update";
@@ -92,7 +95,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
 
     private enum STATUS
     {
-        SUCCESS, FAILURE
+        SUCCESS, FAILURE, UNKNOWN
     }
 
     protected class DeviceTwinStatusCallBack implements IotHubEventCallback
@@ -210,7 +213,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
             devicesUnderTest[i].sCModuleForRegistryManager = com.microsoft.azure.sdk.iot.service.Module.createFromId(id, "module", null);
             devicesUnderTest[i].sCDeviceForRegistryManager = registryManager.addDevice(devicesUnderTest[i].sCDeviceForRegistryManager);
             devicesUnderTest[i].sCModuleForRegistryManager = registryManager.addModule(devicesUnderTest[i].sCModuleForRegistryManager);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+            Thread.sleep(DELAY_BETWEEN_OPERATIONS);
             setUpTwin(devicesUnderTest[i]);
         }
     }
@@ -221,7 +224,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         {
             tearDownTwin(devicesUnderTest[i]);
             registryManager.removeDevice(devicesUnderTest[i].sCDeviceForRegistryManager.getDeviceId());
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+            Thread.sleep(DELAY_BETWEEN_OPERATIONS);
         }
     }
 
@@ -274,7 +277,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
             {
                 ((ModuleClient) internalClient).startTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
             }
-            deviceState.deviceTwinStatus = STATUS.SUCCESS;
+            deviceState.deviceTwinStatus = STATUS.UNKNOWN;
         }
 
         // set up twin on ServiceClient
@@ -290,7 +293,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
             }
 
             sCDeviceTwin.getTwin(deviceState.sCDeviceForTwin);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+            Thread.sleep(DELAY_BETWEEN_OPERATIONS);
         }
     }
 
@@ -432,37 +435,65 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         internalClient = null;
     }
 
-    private int readReportedProperties(DeviceState deviceState, String startsWithKey, String startsWithValue) throws IOException, IotHubException, InterruptedException
+    private void readReportedPropertiesAndVerify(DeviceState deviceState, String startsWithKey, String startsWithValue, int expectedReportedPropCount) throws IOException, IotHubException, InterruptedException
     {
-        int totalCount = 0;
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        sCDeviceTwin.getTwin(deviceState.sCDeviceForTwin);
-        Set<Pair> repProperties = deviceState.sCDeviceForTwin.getReportedProperties();
+        int actualCount = 0;
 
-        for (Pair p : repProperties)
+        // Check status periodically for success or until timeout
+        long startTime = System.currentTimeMillis();
+        long timeElapsed;
+        while (expectedReportedPropCount != actualCount)
         {
-            String val = (String) p.getValue();
-            if (p.getKey().startsWith(startsWithKey) && val.startsWith(startsWithValue))
+            Thread.sleep(PERIODIC_WAIT_TIME_FOR_VERIFICATION);
+            timeElapsed = System.currentTimeMillis() - startTime;
+            if (timeElapsed > MAX_WAIT_TIME_FOR_VERIFICATION)
             {
-                totalCount++;
+                break;
+            }
+
+            actualCount = 0;
+            sCDeviceTwin.getTwin(deviceState.sCDeviceForTwin);
+            Set<Pair> repProperties = deviceState.sCDeviceForTwin.getReportedProperties();
+
+            for (Pair p : repProperties)
+            {
+                String val = (String) p.getValue();
+                if (p.getKey().startsWith(startsWithKey) && val.startsWith(startsWithValue))
+                {
+                    actualCount++;
+                }
             }
         }
-        return totalCount;
+        assertEquals(expectedReportedPropCount, actualCount);
     }
 
-    private void sendReportedPropertiesAndVerify(int numOfProp) throws IOException, IotHubException, InterruptedException
+    private void waitAndVerifyTwinStatusBecomesSuccess() throws InterruptedException
     {
+        // Check status periodically for success or until timeout
+        long startTime = System.currentTimeMillis();
+        long timeElapsed = 0;
+        while (STATUS.SUCCESS != deviceUnderTest.deviceTwinStatus)
+        {
+            Thread.sleep(PERIODIC_WAIT_TIME_FOR_VERIFICATION);
+            timeElapsed = System.currentTimeMillis() - startTime;
+            if (timeElapsed > MAX_WAIT_TIME_FOR_VERIFICATION)
+            {
+                break;
+            }
+        }
+        assertEquals(STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
+    }
+
+    private void sendReportedPropertiesAndVerify(int numOfProp) throws IOException, IotHubException, InterruptedException {
         // Act
         // send max_prop RP all at once
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(numOfProp);
         internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         // Assert
-        assertEquals(STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
+        waitAndVerifyTwinStatusBecomesSuccess();
         // verify if they are received by SC
-        int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE);
-        assertEquals(numOfProp, actualReportedPropFound);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, numOfProp);
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -499,7 +530,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 }
             });
         }
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
         executor.shutdown();
         if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
         {
@@ -507,8 +537,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         }
 
         // verify if they are received by SC
-        int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE);
-        assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST.intValue());
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -522,14 +551,10 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         {
             deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
             internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-            assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+            waitAndVerifyTwinStatusBecomesSuccess();
         }
 
-        Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
-        int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE);
-        assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
-
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST.intValue());
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -539,21 +564,18 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         // send max_prop RP all at once
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
         internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         // act
         // Update RP
         deviceUnderTest.dCDeviceForTwin.updateAllExistingReportedProperties();
         internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         // assert
-        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+        waitAndVerifyTwinStatusBecomesSuccess();
 
         // verify if they are received by SC
-        Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
-        int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
-        assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST.intValue());
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -565,7 +587,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         // send max_prop RP all at once
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
         internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         // act
         // Update RP
@@ -581,16 +603,16 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                     {
                         deviceUnderTest.dCDeviceForTwin.updateExistingReportedProperty(index);
                         internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+                        waitAndVerifyTwinStatusBecomesSuccess();
                     }
-                    catch (IOException e)
+                    catch (IOException | InterruptedException e)
                     {
                         fail(e.getMessage());
                     }
-                    assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
                 }
             });
         }
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
         executor.shutdown();
         if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
         {
@@ -601,9 +623,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
 
         // verify if they are received by SC
-        Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
-        int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
-        assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST.intValue());
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -613,7 +633,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         // send max_prop RP all at once
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
         internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         // act
         // Update RP
@@ -622,15 +642,38 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
             deviceUnderTest.dCDeviceForTwin.updateExistingReportedProperty(i);
             internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
         }
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         // assert
-        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+        waitAndVerifyTwinStatusBecomesSuccess();
 
         // verify if they are received by SC
-        Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
-        int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
-        assertEquals(MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST.intValue());
+    }
+
+    void waitAndVerifyDesiredPropertyCallback(String propPrefix, boolean withVersion) throws InterruptedException
+    {
+        // Check status periodically for success or until timeout
+        long startTime = System.currentTimeMillis();
+        long timeElapsed = 0;
+
+        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
+        {
+            while (!propertyState.callBackTriggered || !((String) propertyState.propertyNewValue).startsWith(propPrefix))
+            {
+                Thread.sleep(PERIODIC_WAIT_TIME_FOR_VERIFICATION);
+                timeElapsed = System.currentTimeMillis() - startTime;
+                if (timeElapsed > MAX_WAIT_TIME_FOR_VERIFICATION)
+                {
+                    break;
+                }
+            }
+            assertTrue("Callback was not triggered for one or more properties", propertyState.callBackTriggered);
+            assertTrue(((String) propertyState.propertyNewValue).startsWith(propPrefix));
+            if (withVersion)
+            {
+                assertNotEquals("Version was not set in the callback", (int) propertyState.propertyNewVersion, -1);
+            }
+        }
     }
 
     private void subscribeToDesiredPropertiesAndVerify(int numOfProp) throws IOException, InterruptedException, IotHubException
@@ -647,7 +690,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
 
         // act
         internalClient.subscribeToDesiredProperties(deviceUnderTest.dCDeviceForTwin.getDesiredProp());
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         Set<Pair> desiredProperties = new HashSet<>();
         for (int i = 0; i < numOfProp; i++)
@@ -656,16 +699,10 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         }
         deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
         sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         // assert
-        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
-        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
-        {
-            assertTrue("Callback was not triggered for one or more properties", propertyState.callBackTriggered);
-            assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
-            assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
-        }
+        waitAndVerifyTwinStatusBecomesSuccess();
+        waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, false);
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -691,7 +728,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
 
         // act
         internalClient.subscribeToTwinDesiredProperties(desiredPropertiesCB);
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         Set<Pair> desiredProperties = new HashSet<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
@@ -700,17 +737,10 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         }
         deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
         sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         // assert
-        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
-        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
-        {
-            assertTrue("Callback was not triggered for one or more properties", propertyState.callBackTriggered);
-            assertNotEquals("Version was not set in the callback", (int)propertyState.propertyNewVersion, -1);
-            assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
-            assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
-        }
+        waitAndVerifyTwinStatusBecomesSuccess();
+        waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, true);
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -726,7 +756,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
             desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>(deviceUnderTest.dCOnProperty, propertyState));
         }
         internalClient.subscribeToTwinDesiredProperties(desiredPropertiesCB);
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         Set<Pair> desiredProperties = new HashSet<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
@@ -735,7 +765,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         }
         deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
         sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
         {
@@ -753,17 +783,9 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
             ((ModuleClient)internalClient).getTwin();
         }
 
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-
         // assert
-        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
-        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
-        {
-            assertTrue("Callback was not triggered for one or more properties", propertyState.callBackTriggered);
-            assertNotEquals("Version was not set in the callback", (int)propertyState.propertyNewVersion, -1);
-            assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
-            assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
-        }
+        waitAndVerifyTwinStatusBecomesSuccess();
+        waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, true);
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -783,7 +805,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
 
         // act
         internalClient.subscribeToDesiredProperties(deviceUnderTest.dCDeviceForTwin.getDesiredProp());
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
@@ -806,7 +828,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                     }
                 }
             });
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+            Thread.sleep(DELAY_BETWEEN_OPERATIONS);
         }
 
         executor.shutdown();
@@ -816,12 +838,8 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         }
 
         // assert
-        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
-        {
-            assertTrue(propertyState.property.toString(), propertyState.callBackTriggered);
-            assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
-            assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
-        }
+        waitAndVerifyTwinStatusBecomesSuccess();
+        waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, false);
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -839,7 +857,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
 
         // act
         internalClient.subscribeToDesiredProperties(deviceUnderTest.dCDeviceForTwin.getDesiredProp());
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
@@ -847,16 +865,12 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
             desiredProperties.add(new Pair(PROPERTY_KEY + i, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
             deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
             sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+            Thread.sleep(DELAY_BETWEEN_OPERATIONS);
         }
 
         // assert
-        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
-        {
-            assertTrue(propertyState.property.toString(), propertyState.callBackTriggered);
-            assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
-            assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
-        }
+        waitAndVerifyTwinStatusBecomesSuccess();
+        waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, false);
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -871,7 +885,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
             tags.add(new Pair(TAG_KEY + i, TAG_VALUE + i));
             devicesUnderTest[i].sCDeviceForTwin.setTags(tags);
             sCDeviceTwin.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+            Thread.sleep(DELAY_BETWEEN_OPERATIONS);
             devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
 
@@ -879,7 +893,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         for (int i = 0; i < MAX_DEVICES; i++)
         {
             sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+            Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
             for (Pair t : devicesUnderTest[i].sCDeviceForTwin.getTags())
             {
@@ -2101,12 +2115,10 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         // add one new reported property
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
         internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
-        assertEquals(STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
+        waitAndVerifyTwinStatusBecomesSuccess();
         // verify if they are received by SC
-        int actualReportedPropFound = readReportedProperties(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE);
-        assertEquals(2 , actualReportedPropFound);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, 2);
     }
 
     private void errorInjectionSubscribeToDesiredPropertiesFlow(Message errorInjectionMessage) throws Exception
@@ -2131,16 +2143,14 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         assertEquals(1, deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size());
         Set<Pair> dp = new HashSet<>();
         Pair p = deviceUnderTest.sCDeviceForTwin.getDesiredProperties().iterator().next();
-        p.setValue(PROPERTY_VALUE_UPDATE + "2" + UUID.randomUUID());
+        p.setValue(PROPERTY_VALUE_UPDATE2 + UUID.randomUUID());
         dp.add(p);
         deviceUnderTest.sCDeviceForTwin.setDesiredProperties(dp);
 
         sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
-        assertTrue("Callback was not triggered for one or more properties", deviceUnderTest.dCDeviceForTwin.propertyStateList.get(0).callBackTriggered);
-        assertTrue(((String) deviceUnderTest.dCDeviceForTwin.propertyStateList.get(0).propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE + "2"));
-        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+        waitAndVerifyTwinStatusBecomesSuccess();
+        waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE2, false);
     }
 
     private void errorInjectionGetDeviceTwinFlow(Message errorInjectionMessage) throws Exception
@@ -2176,15 +2186,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
             ((ModuleClient)internalClient).getTwin();
         }
 
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-
-        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
-        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
-        {
-            assertTrue("Callback was not triggered for one or more properties", propertyState.callBackTriggered);
-            assertNotEquals("Version was not set in the callback", (int)propertyState.propertyNewVersion, -1);
-            assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
-            assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
-        }
+        waitAndVerifyTwinStatusBecomesSuccess();
+        waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, true);
     }
 }
