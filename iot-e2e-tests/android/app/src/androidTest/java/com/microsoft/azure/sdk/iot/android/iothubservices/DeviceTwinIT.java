@@ -3,17 +3,18 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
+package com.microsoft.azure.sdk.iot.android.iothubservices;
 
+import android.os.Bundle;
+import android.support.test.InstrumentationRegistry;
+import com.microsoft.azure.sdk.iot.android.helper.Tools;
 import com.microsoft.azure.sdk.iot.common.TestConstants;
-import com.microsoft.azure.sdk.iot.common.X509Cert;
-import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.iothubservices.DeviceTwinCommon;
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
@@ -25,11 +26,14 @@ public class DeviceTwinIT extends DeviceTwinCommon
     @Parameterized.Parameters(name = "{2} with {3} auth using {4}")
     public static Collection inputsCommons() throws IOException, GeneralSecurityException
     {
-        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        X509Cert cert = new X509Cert(0,false, "TestLeaf", "TestRoot");
-        privateKey =  cert.getPrivateKeyLeafPem();
-        publicKeyCert = cert.getPublicCertLeafPem();
-        x509Thumbprint = cert.getThumbPrintLeaf();
+        Bundle bundle = InstrumentationRegistry.getArguments();
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME, bundle);
+        x509Thumbprint = Tools.retrieveEnvironmentVariableValue("IOTHUB_E2E_X509_THUMBPRINT", bundle);
+        String privateKeyBase64Encoded = Tools.retrieveEnvironmentVariableValue("IOTHUB_E2E_X509_PRIVATE_KEY_BASE64", bundle);
+        String publicKeyCertBase64Encoded = Tools.retrieveEnvironmentVariableValue("IOTHUB_E2E_X509_CERT_BASE64", bundle);
+        privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
+        publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
+
         return DeviceTwinCommon.inputsCommon();
     }
 

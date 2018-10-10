@@ -18,7 +18,6 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
 import com.microsoft.azure.sdk.iot.common.DeviceConnectionString;
-import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

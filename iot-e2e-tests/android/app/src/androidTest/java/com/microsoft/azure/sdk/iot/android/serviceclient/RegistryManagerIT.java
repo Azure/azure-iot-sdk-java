@@ -3,10 +3,12 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package tests.integration.com.microsoft.azure.sdk.iot.serviceclient;
+package com.microsoft.azure.sdk.iot.android.serviceclient;
 
+import android.os.Bundle;
+import android.support.test.InstrumentationRegistry;
+import com.microsoft.azure.sdk.iot.android.helper.Tools;
 import com.microsoft.azure.sdk.iot.common.TestConstants;
-import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.serviceclient.RegistryManagerCommon;
 import org.junit.BeforeClass;
 import java.io.IOException;
@@ -16,7 +18,9 @@ public class RegistryManagerIT extends RegistryManagerCommon
     @BeforeClass
     public static void setUp() throws IOException
     {
-        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        Bundle bundle = InstrumentationRegistry.getArguments();
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME, bundle);
+
         RegistryManagerCommon.setUp();
     }
 }

@@ -18,7 +18,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
-            debuggable false
+            debuggable true
         }
     }
 
@@ -48,8 +48,10 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:multidex:1.0.3'
+    implementation ('com.microsoft.azure.android:azure-storage-android:2.0.0@aar')
     implementation ('com.microsoft.azure.sdk.iot:iot-e2e-common:0.20.0'){
         exclude module: 'junit'
+        exclude module: 'azure-storage'
     }
     androidTestImplementation 'com.android.support:support-annotations:27.1.1'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

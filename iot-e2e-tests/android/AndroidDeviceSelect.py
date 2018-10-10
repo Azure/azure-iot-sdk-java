@@ -19,7 +19,7 @@ def startAvd():
         writeToFile((getDeviceList()[0]).split()[0])
     else:
         print("Creating emulator")
-        os.popen("echo no | avdmanager create avd -n test -k \"system-images;android-25;google_apis;x86\"").read()
+        os.popen("echo no | avdmanager create avd --force -n test -k \"system-images;android-25;google_apis_playstore;x86\"").read()
         time.sleep(10)
         startAvd()
 
