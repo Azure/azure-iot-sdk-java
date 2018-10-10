@@ -4,21 +4,5 @@
 @REM -- Build Android project --
 ECHO building android project
 call gradle wrapper
-call gradlew :clean :app:clean :app:assembleDebug :app:assembleDebugAndroidTest
-set skipAndroidTests=%1
-ECHO %skipAndroidTests% 
-if %skipAndroidTests%==false (
-@REM -- Select Android Device --
-python AndroidDeviceSelect.py
-@REM -- set device variable --
-call renew_env.cmd 
-ECHO We're working with "%ANDROID_DEVICE_NAME%"
-@REM -- installing device and test apk--
-ECHO installing app apk on device
-call adb -s %ANDROID_DEVICE_NAME% install -r -g  app\build\outputs\apk\debug\app-debug.apk
-ECHO installing test apk on device
-call adb -s %ANDROID_DEVICE_NAME% install -r -g  app\build\outputs\apk\androidTest\debug\app-debug-androidTest.apk
-@REM -- Starting Android Tests --
-ECHO starting android tests
-python runInstrumentationTests.py %ANDROID_DEVICE_NAME%
-)
+call gradlew :clean :app:clean :app:assembleDebug 
+call gradlew :app:assembleDebugAndroidTest -PIotHubConnectionString=%IOTHUB_CONNECTION_STRING% -PIotHubPublicCertBase64=%IOTHUB_E2E_X509_CERT_BASE64% -PIotHubPrivateKeyBase64=%IOTHUB_E2E_X509_PRIVATE_KEY_BASE64% -PIotHubThumbprint=%IOTHUB_E2E_X509_THUMBPRINT% -PIotHubInvalidCertConnectionString=%IOTHUB_DEVICE_CONN_STRING_INVALIDCERT% -PAppCenterAppSecret=%APPCENTER_APP_SECRET%

@@ -5,29 +5,28 @@
 
 package com.microsoft.azure.sdk.iot.android.serviceclient;
 
-import android.os.Bundle;
-import android.support.test.InstrumentationRegistry;
-import com.microsoft.azure.sdk.iot.android.helper.Tools;
-import com.microsoft.azure.sdk.iot.common.TestConstants;
+import com.microsoft.appcenter.espresso.Factory;
+import com.microsoft.appcenter.espresso.ReportHelper;
+import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.common.serviceclient.ExportImportCommon;
 import com.microsoft.azure.storage.StorageException;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
+import org.junit.Rule;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 
-@Ignore
 public class ExportImportIT extends ExportImportCommon
 {
+    @Rule
+    public ReportHelper reportHelper = Factory.getReportHelper();
+
     @BeforeClass
     public static void setUp() throws URISyntaxException, InvalidKeyException, StorageException, IOException
     {
-        Bundle bundle = InstrumentationRegistry.getArguments();
-        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME, bundle);
-        storageAccountConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.STORAGE_ACCOUNT_CONNECTION_STRING_ENV_VAR_NAME, bundle);
-
+        iotHubConnectionString = BuildConfig.IotHubConnectionString;
+        storageAccountConnectionString = BuildConfig.IotHubInvalidCertConnectionString;
         ExportImportCommon.setUp();
     }
 }
