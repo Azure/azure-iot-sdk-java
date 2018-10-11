@@ -95,8 +95,9 @@ import java.util.Map;
  */
 public class TwinCollection extends HashMap<String, Object>
 {
-    // By definition, Twin maps cannot contain more than 5 levels.
-    private static final int MAX_TWIN_LEVEL = 6;
+    // By definition, Twin maps cannot contain more than 5 levels,
+    // discounting top-level -> "reported", and allowing for a flat inner level
+    private static final int MAX_TWIN_LEVEL = 8;
 
     // the Twin collection version
     private static final String VERSION_TAG = "$version";
