@@ -1,16 +1,4 @@
-# Prepare your development environment
-
-This document describes how to prepare your development environment to use the *Microsoft Azure IoT device SDK for Java*.
-
-* [Java JDK SE](#installjava)
-* [Maven 3](#installmaven)
-* [Azure IoT device SDK for Java](#installiot)
-	* [Build from source](#installiotsource)
-	* [Include using Maven](#installiotmaven)
-* [Build for Android device](#installiotandroid)
-* [Application Samples](#samplecode)
-
-<a name="installjava"></a>
+<a name="installjava"/>
 ## Install Java JDK SE
 To use the SDK and run the samples you will need **Java SE 8**.
 
@@ -59,7 +47,7 @@ Take note of the jdk location. ```update-alternatives``` will show something sim
 export JAVA_HOME=/path/to/jdk
 ```
 
-<a name="installmaven"></a>
+<a name="installmaven"/>
 ## Install Maven
 Using **_Maven 3_** is the recommended way to install **Azure IoT SDKs for Java**.
 
@@ -89,14 +77,14 @@ You can verify that the environment variables necessary to run **_Maven 3_** hav
 ```
 mvn --version
 ```
-<a name="installiot"></a>
+<a name="installiot"/>
 ## Install Azure IoT device and service SDKs for Java
 
 There are two ways to get the .jar libraries for the Azure IoT device and service SDKs:
 * Include the project as a dependency in your project if your project is a Maven project.
 * Download the source code and build on your machine
 
-<a name="installiotmaven"></a>
+<a name="installiotmaven"/>
 ### Get Azure IoT SDKs for Java from Maven (as a dependency)
 _This is the recommended method of including the Azure IoT SDKs in your project, however this method will only work if your project is a Maven project and if you have gone through the setup described above_
 
@@ -107,7 +95,7 @@ _This is the recommended method of including the Azure IoT SDKs in your project,
 	<dependency>
 		<groupId>com.microsoft.azure.sdk.iot</groupId>
 		<artifactId>iot-device-client</artifactId>
-		<version>1.0.17</version>
+		<version>1.14.1</version>
 		<!--This is the current version number as of the writing of this document. Yours may be different.-->
 	</dependency>
 ```
@@ -118,13 +106,13 @@ _This is the recommended method of including the Azure IoT SDKs in your project,
 	<dependency>
 		<groupId>com.microsoft.azure.sdk.iot</groupId>
 		<artifactId>iot-service-client</artifactId>
-		<version>1.0.12</version>
+		<version>1.15.1</version>
 		<!--This is the current version number as of the writing of this document. Yours may be different.-->
 	</dependency>
 ```
-<a name="installiotsource"></a>
+<a name="installiotsource"/>
 ### Build Azure IoT device and service SDKs for Java from the source code
-* Get a copy of the **Azure IoT SDK for Java** from GitHub (current repo). You should fetch a copy of the source from the **master** branch of the GitHub repository: <https://github.com/Azure/azure-iot-sdk-java>
+* Get a copy of the **Azure IoT SDK for Java** from GitHub (current repo). You should fetch a copy of the source from the **master** branch of the GitHub repository: &lt;https://github.com/Azure/azure-iot-sdk-java>
 ```
 	git clone https://github.com/Azure/azure-iot-sdk-java.git
 ```
@@ -154,13 +142,13 @@ The compiled JAR file with all dependencies bundled in can then be found at:
 ```
 When you're ready to use the Java service SDK in your own project, include this JAR file in your project.
 
-<a name="installiotandroid"></a> 
+<a name="installiotandroid"/> 
 ## Building for Android Device
 - Download and install [Android Studio][android-studio]
 - Load and build **sample** located at java\device\samples\android-sample
 - Sample has dependence on remote library `iot-device-client`. It is currently set to use the latest version of the library. If you want to choose a different version, please update `device\samples\android-sample\app\build.gradle` file to point to the version you want to use. For list of available versions search [Maven Repository][maven-repository]
 
-<a name="samplecode"></a>
+<a name="samplecode"/>
 ## Sample applications
 
 This repository contains various [simple sample applications][device-samples] that illustrate how to use the Microsoft Azure IoT device SDK for Java.
