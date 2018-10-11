@@ -8,21 +8,27 @@ package com.microsoft.azure.sdk.iot.android.serviceclient;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
-import com.microsoft.azure.sdk.iot.common.serviceclient.RegistryManagerCommon;
+import com.microsoft.azure.sdk.iot.common.serviceclient.ExportImportCommon;
+import com.microsoft.azure.storage.StorageException;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 
-public class RegistryManagerIT extends RegistryManagerCommon
+@Ignore
+public class ExportImportITonAndroid extends ExportImportCommon
 {
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
     @BeforeClass
-    public static void setUp() throws IOException
+    public static void setUp() throws URISyntaxException, InvalidKeyException, StorageException, IOException
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
-        RegistryManagerCommon.setUp();
+        storageAccountConnectionString = BuildConfig.IotHubInvalidCertConnectionString;
+        ExportImportCommon.setUp();
     }
 }

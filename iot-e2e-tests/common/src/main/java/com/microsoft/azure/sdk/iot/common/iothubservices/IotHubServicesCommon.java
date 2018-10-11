@@ -23,7 +23,7 @@ import static junit.framework.TestCase.fail;
  */
 public class IotHubServicesCommon
 {
-    private final static long OPEN_RETRY_TIMEOUT = 3*60*1000; //3 minutes, or about 3 retries if open's keep timing out
+    private final static long OPEN_RETRY_TIMEOUT = 5*60*1000; //5 minutes
 
     //if error injection message has not taken effect after 1 minute, the test will timeout
     private final static long ERROR_INJECTION_MESSAGE_EFFECT_TIMEOUT = 1 * 60 * 1000;
@@ -312,17 +312,19 @@ public class IotHubServicesCommon
 
     public static void openClientWithRetry(InternalClient client)
     {
+        int count =0;
         boolean clientOpenSucceeded = false;
         long startTime = System.currentTimeMillis();
         while (!clientOpenSucceeded)
         {
             if (System.currentTimeMillis() - startTime > OPEN_RETRY_TIMEOUT)
             {
-                Assert.fail("Timed out trying to open the client");
+                Assert.fail("Timed out trying to open the client " + count);
             }
 
             try
             {
+                count++;
                 client.open();
                 clientOpenSucceeded = true;
             }

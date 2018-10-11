@@ -12,11 +12,11 @@ for %%i in ("%build-root%") do set build-root=%%~fi
 call RD /S /Q "c:/users/%USERNAME%/.m2"
 
 @REM -- Android Test Build --
-cd %build-root%
-call mvn install -DskipITs=true
+cd %build-root%\iot-e2e-tests\common
+call mvn install
 if errorlevel 1 goto :eof
 cd %build-root%\iot-e2e-tests\android
 call gradle wrapper
 call gradlew :clean :app:clean :app:assembleDebug 
-call gradlew :app:assembleDebugAndroidTest -PIotHubConnectionString=%IOTHUB_CONNECTION_STRING% -PIotHubPublicCertBase64=%IOTHUB_E2E_X509_CERT_BASE64% -PIotHubPrivateKeyBase64=%IOTHUB_E2E_X509_PRIVATE_KEY_BASE64% -PIotHubThumbprint=%IOTHUB_E2E_X509_THUMBPRINT% -PIotHubInvalidCertConnectionString=%IOTHUB_DEVICE_CONN_STRING_INVALIDCERT% -PAppCenterAppSecret=%APPCENTER_APP_SECRET%
+call gradlew :app:assembleDebugAndroidTest -PIotHubConnectionString=%IOTHUB_CONNECTION_STRING% -PIotHubPublicCertBase64=%IOTHUB_E2E_X509_CERT_BASE64% -PIotHubPrivateKeyBase64=%IOTHUB_E2E_X509_PRIVATE_KEY_BASE64% -PIotHubThumbprint=%IOTHUB_E2E_X509_THUMBPRINT% -PIotHubInvalidCertConnectionString=%IOTHUB_CONN_STRING_INVALIDCERT% -PAppCenterAppSecret=%APPCENTER_APP_SECRET%
 

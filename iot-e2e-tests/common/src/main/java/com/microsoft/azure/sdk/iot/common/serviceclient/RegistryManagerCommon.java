@@ -313,8 +313,17 @@ public class RegistryManagerCommon
         // Assert
         assertEquals(configId, configAdded.getId());
         assertEquals(configId, configRetrieved.getId());
-        assertEquals("{temperature=66.0, pressure=28.0}",
-                configRetrieved.getContent().getDeviceContent().get("properties.desired.chiller-water").toString());
+        String actualString = configRetrieved.getContent().getDeviceContent().get("properties.desired.chiller-water").toString();
+        actualString = actualString.substring(1, actualString.length()-1);
+        String[] keyValuePairs = actualString.split(",");
+        HashMap<String, String> actualMap = new HashMap<>();
+        for (String pair : keyValuePairs)
+        {
+            String[] entry = pair.split("=");
+            actualMap.put(entry[0].trim(), entry[1].trim());
+        }
+        assertEquals("66.0", actualMap.get("temperature"));
+        assertEquals("28.0", actualMap.get("pressure"));
         assertEquals("SELECT deviceId FROM devices WHERE properties.reported.chillerWaterSettings.status=\'pending\'",
                 configRetrieved.getMetrics().getQueries().get("waterSettingsPending"));
         assertEquals("properties.reported.chillerProperties.model=\'4000x\'",

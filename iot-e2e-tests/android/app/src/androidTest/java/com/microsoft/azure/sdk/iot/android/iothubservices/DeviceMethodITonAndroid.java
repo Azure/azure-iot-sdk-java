@@ -17,7 +17,10 @@ import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+
+import org.junit.Ignore;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import java.io.IOException;
@@ -26,7 +29,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collection;
 
 @RunWith(Parameterized.class)
-public class DeviceMethodIT extends DeviceMethodCommon
+public class DeviceMethodITonAndroid extends DeviceMethodCommon
 {
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
@@ -41,12 +44,104 @@ public class DeviceMethodIT extends DeviceMethodCommon
         x509Thumbprint = BuildConfig.IotHubThumbprint;
         privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
         publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
+        includeModuleClientTest = false;
 
         return DeviceMethodCommon.inputsCommon();
     }
 
-    public DeviceMethodIT(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, Device device, Module module)
+    public DeviceMethodITonAndroid(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, Device device, Module module)
     {
         super(deviceTestManager, protocol, authenticationType, clientType, device, module);
+    }
+
+    @Ignore
+    @Override
+    @Test
+    public void invokeMethodRecoveredFromTcpConnectionDrop() throws Exception
+    {
+    }
+
+    @Ignore
+    @Override
+    @Test
+    public void invokeMethodRecoveredFromAmqpsConnectionDrop() throws Exception
+    {
+    }
+
+    @Ignore
+    @Override
+    @Test
+    public void invokeMethodRecoveredFromAmqpsSessionDrop() throws Exception
+    {
+    }
+
+    @Ignore
+    @Override
+    @Test
+    public void invokeMethodRecoveredFromAmqpsCBSReqLinkDrop() throws Exception
+    {
+    }
+
+    @Ignore
+    @Override
+    @Test
+    public void invokeMethodRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
+    {
+    }
+
+    @Ignore
+    @Override
+    @Test
+    public void invokeMethodRecoveredFromAmqpsD2CLinkDrop() throws Exception
+    {
+    }
+
+    @Ignore
+    @Override
+    @Test
+    public void invokeMethodRecoveredFromAmqpsC2DLinkDrop() throws Exception
+    {
+    }
+
+    @Ignore
+    @Override
+    @Test
+    public void invokeMethodRecoveredFromAmqpsMethodReqLinkDrop() throws Exception
+    {
+    }
+
+    @Ignore
+    @Override
+    @Test
+    public void invokeMethodRecoveredFromAmqpsMethodRespLinkDrop() throws Exception
+    {
+    }
+
+    @Ignore
+    @Override
+    @Test
+    public void invokeMethodRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
+    {
+    }
+
+    @Ignore
+    @Override
+    @Test
+    public void invokeMethodRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
+    {
+    }
+
+    @Ignore
+    @Override
+    @Test
+    public void invokeMethodRecoveredFromGracefulShutdownAmqp() throws Exception
+    {
+    }
+
+    @Ignore
+    @Override
+    @Test
+    public void invokeMethodRecoveredFromGracefulShutdownMqtt() throws Exception
+    {
     }
 }

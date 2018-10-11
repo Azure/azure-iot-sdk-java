@@ -9,13 +9,15 @@ import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.common.serviceclient.ServiceClientCommon;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import java.util.Collection;
 
 @RunWith(Parameterized.class)
-public class ServiceClientIT extends ServiceClientCommon
+public class ServiceClientITonAndroid extends ServiceClientCommon
 {
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
@@ -29,7 +31,7 @@ public class ServiceClientIT extends ServiceClientCommon
         return ServiceClientCommon.inputsCommon();
     }
 
-    public ServiceClientIT(IotHubServiceClientProtocol protocol)
+    public ServiceClientITonAndroid(IotHubServiceClientProtocol protocol)
     {
         super(protocol);
     }

@@ -8,23 +8,21 @@ package com.microsoft.azure.sdk.iot.android.serviceclient;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
-import com.microsoft.azure.sdk.iot.common.serviceclient.JobClientCommon;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.common.serviceclient.RegistryManagerCommon;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
-public class JobClientIT extends JobClientCommon
+public class RegistryManagerITonAndroid extends RegistryManagerCommon
 {
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
     @BeforeClass
-    public static void setUp() throws IOException, IotHubException, InterruptedException, URISyntaxException
+    public static void setUp() throws IOException
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
-        JobClientCommon.setUp();
+        RegistryManagerCommon.setUp();
     }
 }

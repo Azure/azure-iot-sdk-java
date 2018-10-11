@@ -73,6 +73,8 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
     private static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
     private static final long ERROR_INJECTION_EXECUTION_TIMEOUT = 2* 60 * 1000; // 2 minute
 
+    protected static boolean includeModuleClientTest = true;
+
     public static Collection inputsCommon() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, InterruptedException, ModuleClientException
     {
         methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
@@ -115,12 +117,14 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
                 deviceTestManagers.add(deviceClientSasTestManager);
                 inputs.add(makeSubArray(deviceClientSasTestManager, protocol, SAS, "DeviceClient", device, null));
 
-                //sas module client
-                ModuleClient moduleClient = new ModuleClient(registryManager.getDeviceConnectionString(device) + ";ModuleId=" + module.getId(), protocol);
-                DeviceTestManager moduleClientSasTestManager = new DeviceTestManager(moduleClient);
-                deviceTestManagers.add(moduleClientSasTestManager);
-                inputs.add(makeSubArray(moduleClientSasTestManager, protocol, SAS, "ModuleClient", device, module));
-
+                if (includeModuleClientTest)
+                {
+                    //sas module client
+                    ModuleClient moduleClient = new ModuleClient(registryManager.getDeviceConnectionString(device) + ";ModuleId=" + module.getId(), protocol);
+                    DeviceTestManager moduleClientSasTestManager = new DeviceTestManager(moduleClient);
+                    deviceTestManagers.add(moduleClientSasTestManager);
+                    inputs.add(makeSubArray(moduleClientSasTestManager, protocol, SAS, "ModuleClient", device, module));
+                }
 
                 if (protocol != MQTT_WS && protocol != AMQPS_WS)
                 {
@@ -130,11 +134,14 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
                     deviceTestManagers.add(deviceClientX509TestManager);
                     inputs.add(makeSubArray(deviceClientX509TestManager, protocol, SELF_SIGNED, "DeviceClient", deviceX509, null));
 
-                    //x509 module client
-                    ModuleClient moduleClientX509 = new ModuleClient(registryManager.getDeviceConnectionString(deviceX509) + ";ModuleId=" + moduleX509.getId(), protocol, publicKeyCert, false, privateKey, false);
-                    DeviceTestManager moduleClientX509TestManager = new DeviceTestManager(moduleClientX509);
-                    deviceTestManagers.add(moduleClientX509TestManager);
-                    inputs.add(makeSubArray(moduleClientX509TestManager, protocol, SELF_SIGNED, "ModuleClient", deviceX509, moduleX509));
+                    if (includeModuleClientTest)
+                    {
+                        //x509 module client
+                        ModuleClient moduleClientX509 = new ModuleClient(registryManager.getDeviceConnectionString(deviceX509) + ";ModuleId=" + moduleX509.getId(), protocol, publicKeyCert, false, privateKey, false);
+                        DeviceTestManager moduleClientX509TestManager = new DeviceTestManager(moduleClientX509);
+                        deviceTestManagers.add(moduleClientX509TestManager);
+                        inputs.add(makeSubArray(moduleClientX509TestManager, protocol, SELF_SIGNED, "ModuleClient", deviceX509, moduleX509));
+                    }
                 }
             }
         }

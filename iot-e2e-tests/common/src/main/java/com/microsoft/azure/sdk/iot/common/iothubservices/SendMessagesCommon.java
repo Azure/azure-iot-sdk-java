@@ -101,6 +101,8 @@ public class SendMessagesCommon extends MethodNameLoggingIntegrationTest
 
     private static RegistryManager registryManager;
 
+    protected static boolean includeModuleClientTest = true;
+
     public SendMessagesCommon(InternalClient client, IotHubClientProtocol protocol, Device device, AuthenticationType authenticationType, String clientType)
     {
         this.testInstance = new SendMessagesITRunner(client, protocol, device, authenticationType, clientType);
@@ -141,32 +143,54 @@ public class SendMessagesCommon extends MethodNameLoggingIntegrationTest
 
         hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
 
-        List inputs = Arrays.asList(
-                new Object[][]
-                        {
-                                //sas token device client
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), HTTPS), HTTPS, device, SAS, "DeviceClient"},
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT), MQTT, device, SAS, "DeviceClient"},
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT_WS), MQTT_WS, device, SAS, "DeviceClient"},
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS), AMQPS, device, SAS, "DeviceClient"},
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, "DeviceClient"},
+        List inputs;
+        if (includeModuleClientTest) {
+            inputs = Arrays.asList(
+                    new Object[][]
+                            {
+                                    //sas token device client
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), HTTPS), HTTPS, device, SAS, "DeviceClient"},
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT), MQTT, device, SAS, "DeviceClient"},
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT_WS), MQTT_WS, device, SAS, "DeviceClient"},
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS), AMQPS, device, SAS, "DeviceClient"},
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, "DeviceClient"},
 
-                                //x509 device client
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), HTTPS, publicKeyCert, false, privateKey, false), HTTPS, deviceX509, SELF_SIGNED, "DeviceClient"},
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), MQTT, publicKeyCert, false, privateKey, false), MQTT, deviceX509, SELF_SIGNED, "DeviceClient"},
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceX509, SELF_SIGNED, "DeviceClient"},
+                                    //x509 device client
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), HTTPS, publicKeyCert, false, privateKey, false), HTTPS, deviceX509, SELF_SIGNED, "DeviceClient"},
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), MQTT, publicKeyCert, false, privateKey, false), MQTT, deviceX509, SELF_SIGNED, "DeviceClient"},
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceX509, SELF_SIGNED, "DeviceClient"},
 
-                                //sas token module client
-                                {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), MQTT), MQTT, device, SAS, "ModuleClient"},
-                                {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), MQTT_WS), MQTT_WS, device, SAS, "ModuleClient"},
-                                {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), AMQPS), AMQPS, device, SAS, "ModuleClient"},
-                                {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), AMQPS_WS), AMQPS_WS, device, SAS, "ModuleClient"},
+                                    //sas token module client
+                                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), MQTT), MQTT, device, SAS, "ModuleClient"},
+                                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), MQTT_WS), MQTT_WS, device, SAS, "ModuleClient"},
+                                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), AMQPS), AMQPS, device, SAS, "ModuleClient"},
+                                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), AMQPS_WS), AMQPS_WS, device, SAS, "ModuleClient"},
 
-                                //x509 module client
-                                {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), MQTT, publicKeyCert, false, privateKey, false), MQTT, device, SELF_SIGNED, "ModuleClient"},
-                                {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, device, SELF_SIGNED, "ModuleClient"}
-                        }
-        );
+                                    //x509 module client
+                                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), MQTT, publicKeyCert, false, privateKey, false), MQTT, device, SELF_SIGNED, "ModuleClient"},
+                                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, device, SELF_SIGNED, "ModuleClient"}
+                            }
+            );
+        }
+        else
+        {
+            inputs = Arrays.asList(
+                    new Object[][]
+                            {
+                                    //sas token device client
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), HTTPS), HTTPS, device, SAS, "DeviceClient"},
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT), MQTT, device, SAS, "DeviceClient"},
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT_WS), MQTT_WS, device, SAS, "DeviceClient"},
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS), AMQPS, device, SAS, "DeviceClient"},
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, "DeviceClient"},
+
+                                    //x509 device client
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), HTTPS, publicKeyCert, false, privateKey, false), HTTPS, deviceX509, SELF_SIGNED, "DeviceClient"},
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), MQTT, publicKeyCert, false, privateKey, false), MQTT, deviceX509, SELF_SIGNED, "DeviceClient"},
+                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceX509, SELF_SIGNED, "DeviceClient"},
+                            }
+            );
+        }
 
         return inputs;
     }

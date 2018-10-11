@@ -93,6 +93,8 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
     // How much to wait until a message makes it to the server, in milliseconds
     private static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
 
+    protected static boolean includeModuleClientTest = true;
+
     private enum STATUS
     {
         SUCCESS, FAILURE, UNKNOWN
@@ -334,26 +336,49 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         String moduleIdMqtt = "java-device-client-e2e-test-mqtt-module".concat("-" + uuid);
         String moduleIdMqttWs = "java-device-client-e2e-test-mqttws-module".concat("-" + uuid);
 
-        return Arrays.asList(
-            new Object[][]
-                {
-                    //sas token, device client
-                    {deviceIdAmqps, null, AMQPS, SAS, "DeviceClient"},
-                    {deviceIdAmqpsWs, null, AMQPS_WS, SAS, "DeviceClient"},
-                    {deviceIdMqtt, null, MQTT, SAS, "DeviceClient"},
-                    {deviceIdMqttWs,  null, MQTT_WS, SAS, "DeviceClient"},
+        List inputs;
+        if (includeModuleClientTest)
+        {
+            inputs =  Arrays.asList(
+                    new Object[][]
+                            {
+                                    //sas token, device client
+                                    {deviceIdAmqps, null, AMQPS, SAS, "DeviceClient"},
+                                    {deviceIdAmqpsWs, null, AMQPS_WS, SAS, "DeviceClient"},
+                                    {deviceIdMqtt, null, MQTT, SAS, "DeviceClient"},
+                                    {deviceIdMqttWs,  null, MQTT_WS, SAS, "DeviceClient"},
 
-                    //x509, device client
-                    {deviceIdAmqpsX509, null, AMQPS, SELF_SIGNED, "DeviceClient"},
-                    {deviceIdMqttX509, null, MQTT, SELF_SIGNED, "DeviceClient"},
+                                    //x509, device client
+                                    {deviceIdAmqpsX509, null, AMQPS, SELF_SIGNED, "DeviceClient"},
+                                    {deviceIdMqttX509, null, MQTT, SELF_SIGNED, "DeviceClient"},
 
-                    //sas token, module client
-                    {deviceIdAmqps, moduleIdAmqps, AMQPS, SAS, "ModuleClient"},
-                    {deviceIdAmqpsWs, moduleIdAmqpsWs, AMQPS_WS, SAS, "ModuleClient"},
-                    {deviceIdMqtt, moduleIdMqtt, MQTT, SAS, "ModuleClient"},
-                    {deviceIdMqttWs,  moduleIdMqttWs, MQTT_WS, SAS, "ModuleClient"}
-               }
-        );
+                                    //sas token, module client
+                                    {deviceIdAmqps, moduleIdAmqps, AMQPS, SAS, "ModuleClient"},
+                                    {deviceIdAmqpsWs, moduleIdAmqpsWs, AMQPS_WS, SAS, "ModuleClient"},
+                                    {deviceIdMqtt, moduleIdMqtt, MQTT, SAS, "ModuleClient"},
+                                    {deviceIdMqttWs,  moduleIdMqttWs, MQTT_WS, SAS, "ModuleClient"}
+                            }
+            );
+        }
+        else
+        {
+            inputs =  Arrays.asList(
+                    new Object[][]
+                            {
+                                    //sas token, device client
+                                    {deviceIdAmqps, null, AMQPS, SAS, "DeviceClient"},
+                                    {deviceIdAmqpsWs, null, AMQPS_WS, SAS, "DeviceClient"},
+                                    {deviceIdMqtt, null, MQTT, SAS, "DeviceClient"},
+                                    {deviceIdMqttWs,  null, MQTT_WS, SAS, "DeviceClient"},
+
+                                    //x509, device client
+                                    {deviceIdAmqpsX509, null, AMQPS, SELF_SIGNED, "DeviceClient"},
+                                    {deviceIdMqttX509, null, MQTT, SELF_SIGNED, "DeviceClient"},
+                            }
+            );
+        }
+
+        return inputs;
     }
 
     public DeviceTwinCommon(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType)
