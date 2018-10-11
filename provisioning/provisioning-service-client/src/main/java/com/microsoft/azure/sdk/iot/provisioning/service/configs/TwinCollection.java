@@ -185,6 +185,12 @@ public class TwinCollection extends HashMap<String, Object>
     @Override
     public Object put(String key, Object value)
     {
+        if (key == null || key.isEmpty())
+        {
+            /* SRS_TWIN_COLLECTION_21_010: [The put shall throw IllegalArgumentException if the provided key is null, empty, or invalid, or if the value is invalid.] */
+            throw new IllegalArgumentException("Key cannot be null or empty");
+        }
+
         /* SRS_TWIN_COLLECTION_21_006: [The put shall return the previous value of the key.] */
         Object last = get(key);
         /* SRS_TWIN_COLLECTION_21_007: [The put shall add the new pair key value to the TwinCollection.] */
@@ -198,8 +204,12 @@ public class TwinCollection extends HashMap<String, Object>
             super.put(key, value);
         }
         /* SRS_TWIN_COLLECTION_21_009: [The put shall throw IllegalArgumentException if the final collection contain more that 5 levels.] */
-        /* SRS_TWIN_COLLECTION_21_010: [The put shall throw IllegalArgumentException if the provided key is null, empty, or invalid, or if the value is invalid.] */
-        ParserUtility.validateMap(this, MAX_TWIN_LEVEL, true);
+        /* Codes_SRS_TWIN_COLLECTION_34_028: [The put shall not validate the map if the provided key is a metadata tag, or a version tag.] */
+        if (!key.equals(VERSION_TAG) && !key.equals(METADATA_TAG))
+        {
+            ParserUtility.validateMap(this, MAX_TWIN_LEVEL, true);
+        }
+
         return last;
     }
 

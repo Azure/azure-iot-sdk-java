@@ -5,6 +5,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinMetadata;
 import mockit.Deencapsulation;
 import org.junit.Test;
 import tests.unit.com.microsoft.azure.sdk.iot.deps.Helpers;
@@ -533,7 +534,7 @@ public class ParserUtilityTest
         ParserUtility.validateMap(mapSample, 10, true);
     }
 
-    /* Tests_SRS_PARSER_UTILITY_21_052: [The validateMap shall throws IllegalArgumentException if the provided map contains more than maxLevel levels.] */
+    /* Tests_SRS_PARSER_UTILITY_21_052: [The validateMap shall throws IllegalArgumentException if the provided map contains more than maxLevel levels and those extra levels contain more than just metadata.] */
     @Test (expected = IllegalArgumentException.class)
     public void validateMapThrowsOnBiggerThanMaxLevel() throws ClassNotFoundException
     {
@@ -558,6 +559,44 @@ public class ParserUtilityTest
                                 {
                                     {
                                         put("inner22", "innerValue");
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        };
+
+        // act
+        ParserUtility.validateMap(mapSample, 3, false);
+    }
+
+    /* Tests_SRS_PARSER_UTILITY_21_052: [The validateMap shall throws IllegalArgumentException if the provided map contains more than maxLevel levels and those extra levels contain more than just metadata.] */
+    @Test
+    public void validateMapDoesNotThrowOnBiggerThanMaxLevelIfOnlyMetadata() throws ClassNotFoundException
+    {
+        // arrange
+        final Map<String, Object> mapSample = new HashMap<String, Object>()
+        {
+            {
+                put("key1", "value");
+                put("root", new HashMap<String, Object>()
+                {
+                    {
+                        put("inner1", new HashMap<String, Object>()
+                        {
+                            {
+                                put("innerI1", "innerValue");
+                            }
+                        });
+                        put("inner20", new HashMap<String, Object>()
+                        {
+                            {
+                                put("inner21", new HashMap<String, Object>()
+                                {
+                                    {
+                                        put(TwinMetadata.LAST_UPDATE_TAG, "metaDataValue");
                                     }
                                 });
                             }

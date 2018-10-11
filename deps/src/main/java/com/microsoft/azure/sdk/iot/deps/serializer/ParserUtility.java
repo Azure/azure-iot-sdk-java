@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinMetadata;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
@@ -227,17 +228,33 @@ public class ParserUtility
 
             if((value != null) && (value instanceof Map))
             {
-                /* Codes_SRS_PARSER_UTILITY_21_052: [The validateMap shall throws IllegalArgumentException if the provided map contains more than maxLevel levels.] */
+                /* Codes_SRS_PARSER_UTILITY_21_052: [The validateMap shall throws IllegalArgumentException if the provided map contains more than maxLevel levels and those extra levels contain more than just metadata.] */
                 if(level <= maxLevel)
                 {
                     validateMapInternal((Map<String, Object>) value, level, maxLevel, allowMetadata);
                 }
                 else
                 {
-                    throw new IllegalArgumentException("Map exceed maximum of " + maxLevel + " levels");
+                    if (!mapOnlyContainsMetaData((Map<String, Object>)value))
+                    {
+                        throw new IllegalArgumentException("Map exceed maximum of " + maxLevel + " levels");
+                    }
                 }
             }
         }
+    }
+
+    private static boolean mapOnlyContainsMetaData(Map<String, Object> map)
+    {
+        for (String key : map.keySet())
+        {
+            if (!(key.equals(TwinMetadata.LAST_UPDATE_TAG)) && !(key.equals(TwinMetadata.LAST_UPDATE_VERSION_TAG)))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

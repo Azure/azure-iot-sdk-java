@@ -6,8 +6,13 @@ package tests.unit.com.microsoft.azure.sdk.iot.deps.twin;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinMetadata;
 import mockit.Deencapsulation;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
 import org.junit.Test;
 import tests.unit.com.microsoft.azure.sdk.iot.deps.Helpers;
 
@@ -528,6 +533,116 @@ public class TwinCollectionTest
         twinCollection.put("Key1", rawMap);
 
         // assert
+    }
+
+    /* Tests_SRS_TWIN_COLLECTION_34_028: [The put shall not validate the map if the provided key is a metadata tag, or a version tag.] */
+    @Test
+    public void putDoesNotThrowOn6InnerMapsIfHighestLevelIsMetaData(@Mocked final ParserUtility mockedParserUtility,
+                                                                    @Mocked final JsonElement mockedJsonElement)
+    {
+        // arrange
+        final Map<String, Object> rawMap = new HashMap<String, Object>()
+        {
+            {
+                put(VALID_KEY_NAME, VALID_VALUE_NAME);
+                put("MaxSpeed", new TwinCollection()
+                {
+                    {
+                        put("Value", 500.0);
+                        put("NewValue", 300.0);
+                        put("Inner1", new TwinCollection()
+                        {
+                            {
+                                put("Inner2", new TwinCollection()
+                                {
+                                    {
+                                        put("Inner3", new TwinCollection()
+                                        {
+                                            {
+                                                put("Inner4", new TwinCollection()
+                                                {
+                                                    {
+                                                        put("Inner5", "FinalInnerValue");
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        };
+        final TwinCollection twinCollection = new TwinCollection();
+
+        // act
+        twinCollection.put(Deencapsulation.getField(TwinCollection.class, "METADATA_TAG").toString(), rawMap);
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockedParserUtility.validateMap(twinCollection, anyInt, anyBoolean);
+                times = 0;
+            }
+        };
+    }
+
+    /* Tests_SRS_TWIN_COLLECTION_34_028: [The put shall not validate the map if the provided key is a metadata tag, or a version tag.] */
+    @Test
+    public void putDoesNotThrowOn6InnerMapsIfHighestLevelIsVersionTag(@Mocked final ParserUtility mockedParserUtility,
+                                                                    @Mocked final JsonElement mockedJsonElement)
+    {
+        // arrange
+        final Map<String, Object> rawMap = new HashMap<String, Object>()
+        {
+            {
+                put(VALID_KEY_NAME, VALID_VALUE_NAME);
+                put("MaxSpeed", new TwinCollection()
+                {
+                    {
+                        put("Value", 500.0);
+                        put("NewValue", 300.0);
+                        put("Inner1", new TwinCollection()
+                        {
+                            {
+                                put("Inner2", new TwinCollection()
+                                {
+                                    {
+                                        put("Inner3", new TwinCollection()
+                                        {
+                                            {
+                                                put("Inner4", new TwinCollection()
+                                                {
+                                                    {
+                                                        put("Inner5", "FinalInnerValue");
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        };
+        final TwinCollection twinCollection = new TwinCollection();
+
+        // act
+        twinCollection.put(Deencapsulation.getField(TwinCollection.class, "VERSION_TAG").toString(), rawMap);
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockedParserUtility.validateMap(twinCollection, anyInt, anyBoolean);
+                times = 0;
+            }
+        };
     }
 
     /* SRS_TWIN_COLLECTION_21_010: [The put shall throw IllegalArgumentException if the provided key is null, empty, or invalid, or if the value is invalid.] */

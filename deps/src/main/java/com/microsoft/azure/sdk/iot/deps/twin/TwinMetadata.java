@@ -48,11 +48,11 @@ import java.util.Map;
 public class TwinMetadata
 {
     // the entity last updated date and time in the TwinCollection
-    protected static final String LAST_UPDATE_TAG = "$lastUpdated";
+    public static final String LAST_UPDATE_TAG = "$lastUpdated";
     private Date lastUpdated;
 
     // the entity last updated version in the TwinCollection
-    protected static final String LAST_UPDATE_VERSION_TAG = "$lastUpdatedVersion";
+    public static final String LAST_UPDATE_VERSION_TAG = "$lastUpdatedVersion";
     private Integer lastUpdatedVersion;
 
     /**
