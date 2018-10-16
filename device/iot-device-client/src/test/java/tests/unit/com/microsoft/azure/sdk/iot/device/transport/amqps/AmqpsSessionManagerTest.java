@@ -142,8 +142,6 @@ public class AmqpsSessionManagerTest
         new Verifications()
         {
             {
-                new AmqpsDeviceAuthenticationCBS(mockDeviceClientConfig);
-                times = 1;
                 mockScheduledExecutorService.scheduleAtFixedRate((Runnable)any, 0, 300, TimeUnit.MILLISECONDS);
                 times = 1;
             }
@@ -606,6 +604,7 @@ public class AmqpsSessionManagerTest
                 result = linkName;
                 Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "isLinkFound", linkName);
                 result = true;
+                times = 1;
             }
         };
 
@@ -624,13 +623,6 @@ public class AmqpsSessionManagerTest
 
         // assert
         assertTrue(returnValue);
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "isLinkFound", linkName);
-                times = 1;
-            }
-        };
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_031: [The function shall call all all device session's isLinkFound, and if both links are opened notify the lock.]
@@ -824,14 +816,6 @@ public class AmqpsSessionManagerTest
 
         // assert
         assertEquals(mockAmqpsMessage, amqpsMessage);
-
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "getMessageFromReceiverLink", linkName);
-                times = 1;
-            }
-        };
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_037: [The function shall return with the authentication isLinkFound's return value if the authentication is not open.]
@@ -978,8 +962,6 @@ public class AmqpsSessionManagerTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "convertToProton", mockMessage);
-                times = 1;
                 Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "convertToProton", mockMessage);
                 times = 0;
             }
@@ -1015,16 +997,6 @@ public class AmqpsSessionManagerTest
 
         // assert
         assertNull(amqpsConvertToProtonReturnValue);
-
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "convertToProton", mockMessage);
-                times = 1;
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "convertToProton", mockMessage);
-                times = 1;
-            }
-        };
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_041: [The function shall call all device session's convertFromProton, and if any of them not null return with the value.]
@@ -1047,6 +1019,7 @@ public class AmqpsSessionManagerTest
             {
                 Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
                 result = mockAmqpsConvertFromProtonReturnValue;
+                times = 1;
             }
         };
 
@@ -1059,8 +1032,6 @@ public class AmqpsSessionManagerTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
-                times = 1;
                 Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
                 times = 0;
             }
@@ -1096,16 +1067,6 @@ public class AmqpsSessionManagerTest
 
         // assert
         assertNull(amqpsConvertFromProtonReturnValue);
-
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
-                times = 1;
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
-                times = 1;
-            }
-        };
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_34_045: [If this object's authentication is not open, this function shall return false.]
@@ -1148,9 +1109,11 @@ public class AmqpsSessionManagerTest
 
                 mockAmqpsSessionDeviceOperation.operationLinksOpened();
                 result = true;
+                times = 1;
 
                 mockAmqpsSessionDeviceOperation1.operationLinksOpened();
                 result = false;
+                times = 1;
             }
         };
 
@@ -1159,16 +1122,6 @@ public class AmqpsSessionManagerTest
 
         //assert
         assertFalse(result);
-        new Verifications()
-        {
-            {
-                mockAmqpsSessionDeviceOperation.operationLinksOpened();
-                times = 1;
-
-                mockAmqpsSessionDeviceOperation1.operationLinksOpened();
-                times = 1;
-            }
-        };
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_34_044: [If this object's authentication is open, this function shall return if all saved sessions' links are open.]
@@ -1200,16 +1153,6 @@ public class AmqpsSessionManagerTest
 
         //assert
         assertTrue(result);
-        new Verifications()
-        {
-            {
-                mockAmqpsSessionDeviceOperation.operationLinksOpened();
-                times = 1;
-
-                mockAmqpsSessionDeviceOperation1.operationLinksOpened();
-                times = 1;
-            }
-        };
     }
 
     private void baseExpectationsSAS()

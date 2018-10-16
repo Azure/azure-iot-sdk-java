@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage;
+import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -494,7 +495,7 @@ public class HttpsSingleMessageTest
         final String propertyName = "iothub-app-test-property-name";
         final String propertyValue = "test-property-value";
         headerFields.put(propertyName, propertyValue);
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 mockResponse.getBody();
@@ -520,12 +521,6 @@ public class HttpsSingleMessageTest
         httpsMsg.toMessage();
 
         final byte[] expectedBody = body;
-        new Verifications()
-        {
-            {
-                new Message(expectedBody);
-            }
-        };
     }
 
     // Tests_SRS_HTTPSSINGLEMESSAGE_11_008: [The function shall return an IoT Hub message with application-defined properties that have the prefix 'iothub-app' removed.]

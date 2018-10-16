@@ -241,7 +241,6 @@ public class AmqpSendHandlerTest
                 message = Proton.message();
                 new Properties();
                 result = properties;
-                properties.setTo(toProperty);
                 message.setProperties(properties);
                 binary = new Binary(content.getBytes());
                 section = new Data(binary);
@@ -296,7 +295,6 @@ public class AmqpSendHandlerTest
                 message = Proton.message();
                 new Properties();
                 result = properties;
-                properties.setTo(toProperty);
                 message.setProperties(properties);
                 binary = new Binary(content.getBytes());
                 section = new Data(binary);

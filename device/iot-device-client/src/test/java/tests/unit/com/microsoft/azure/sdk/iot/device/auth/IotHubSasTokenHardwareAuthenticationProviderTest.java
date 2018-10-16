@@ -58,7 +58,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         //arrange
         final String someToken = "someToken";
         final byte[] tokenBytes= someToken.getBytes();
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 URLEncoder.encode(anyString, encodingName);
@@ -93,13 +93,6 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         assertEquals(expectedDeviceId, actualDeviceId);
         assertEquals(expectedModuleId, actualModuleId);
         assertEquals(mockSecurityProviderTpm, actualSecurityProvider);
-        new Verifications()
-        {
-            {
-                Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {SSLContext.class}, mockSSLContext);
-                times = 1;
-            }
-        };
     }
 
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_003: [If the provided security provider is not an instance of SecurityProviderTpm, this function shall throw an IllegalArgumentException.]
@@ -148,6 +141,8 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         //arrange
         final String someToken = "someToken";
         final byte[] tokenBytes= someToken.getBytes();
+
+        //assert
         new Expectations()
         {
             {
@@ -159,6 +154,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
 
                 mockSecurityProviderTpm.signWithIdentity((byte[]) any);
                 result = tokenBytes;
+                times = 2;
 
                 Base64.encodeBase64Local((byte[]) any);
                 result = tokenBytes;
@@ -175,15 +171,6 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
 
         //act
         Deencapsulation.invoke(sasAuth, "getRenewedSasToken");
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockSecurityProviderTpm.signWithIdentity((byte[]) any);
-                times = 2;
-            }
-        };
     }
 
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_005: [This function shall return the saved sas token.]

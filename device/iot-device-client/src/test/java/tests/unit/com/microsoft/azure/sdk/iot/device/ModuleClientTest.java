@@ -580,7 +580,7 @@ public class ModuleClientTest
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleGenerationIdVariableName").toString(), expectedGenerationId);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 mockedSystem.getenv();
@@ -597,28 +597,15 @@ public class ModuleClientTest
 
                 mockedHttpsHsmTrustBundleProvider.getTrustBundleCerts(expectedIotEdgedUri, expectedApiVersion);
                 result = expectedTrustedCerts;
+
+                Deencapsulation.newInstance(ModuleClient.class,
+                        new Class[] {IotHubAuthenticationProvider.class, IotHubClientProtocol.class, long.class, long.class},
+                        mockedModuleAuthenticationWithHsm, (IotHubClientProtocol) any, anyLong, anyLong);
             }
         };
 
         //act
         ModuleClient.createFromEnvironment(protocol);
-
-        //assert
-        new Verifications()
-        {
-            {
-                new HttpHsmSignatureProvider(expectedIotEdgedUri, expectedApiVersion);
-                times = 1;
-
-                IotHubSasTokenHsmAuthenticationProvider.create((SignatureProvider) any, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, anyString, anyInt, anyInt);
-                times = 1;
-
-                Deencapsulation.newInstance(ModuleClient.class,
-                        new Class[] {IotHubAuthenticationProvider.class, IotHubClientProtocol.class, long.class, long.class},
-                        mockedModuleAuthenticationWithHsm, protocol, anyLong, anyLong);
-                times = 1;
-            }
-        };
     }
 
     //Tests_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,

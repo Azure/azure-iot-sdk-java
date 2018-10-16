@@ -70,8 +70,6 @@ public class MqttConnectionTest
         new Verifications()
         {
             {
-                new MqttAsyncClient(SERVER_URI, CLIENT_ID, mockMemoryPersistence);
-                times = 1;
                 mockMqttConnectionOptions.setKeepAliveInterval(anyInt);
                 times = 1;
                 mockMqttConnectionOptions.setCleanSession(anyBoolean);

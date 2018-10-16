@@ -1700,7 +1700,7 @@ public class InternalClientTest
         Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
         Deencapsulation.setField(client, "config", mockConfig);
         Deencapsulation.setField(client, "twin", null);
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 mockDeviceIO.isOpen();
@@ -1719,9 +1719,6 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                new DeviceTwin(mockDeviceIO, mockConfig, mockedIotHubEventCallback, any, mockedTwinPropertyCallback, any);
-                times = 1;
-
                 mockedDeviceTwin.getDeviceTwin();
                 times = 1;
             }

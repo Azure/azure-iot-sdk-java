@@ -11,10 +11,7 @@ import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadInProgress;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -87,7 +84,7 @@ public class FileUploadTest
     public void constructorSuccess(@Mocked final LinkedBlockingDeque<?> mockFileUploadInProgressQueue) throws IOException
     {
         // arrange
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 new HttpsTransportManager(mockConfig);
@@ -104,10 +101,6 @@ public class FileUploadTest
         new Verifications()
         {
             {
-                new HttpsTransportManager(mockConfig);
-                times = 1;
-                Executors.newScheduledThreadPool(10);
-                times = 1;
                 new LinkedBlockingDeque<>();
                 times = 1;
             }

@@ -9,9 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
+import mockit.*;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
@@ -36,8 +34,6 @@ public class IotHubSasTokenAuthenticationProviderTest
     IotHubSSLContext mockIotHubSSLContext;
     @Mocked
     IotHubSasToken mockSasToken;
-    @Mocked
-    System mockSystem;
 
     private static String expectedDeviceId = "deviceId";
     private static String expectedHostname = "hostname";
@@ -131,7 +127,7 @@ public class IotHubSasTokenAuthenticationProviderTest
     public void isRenewalNecessaryWithExpiredToken()
     {
         //arrange
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 Deencapsulation.invoke(mockSasToken, "isExpired");
@@ -154,7 +150,7 @@ public class IotHubSasTokenAuthenticationProviderTest
     public void isRenewalNecessaryWithNonExpiredToken()
     {
         //arrange
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 Deencapsulation.invoke(mockSasToken, "isExpired");
@@ -177,14 +173,7 @@ public class IotHubSasTokenAuthenticationProviderTest
     public void getExpiryTimeInSecondsSuccess()
     {
         //arrange
-        long expectedExpiryTime = 3601;
-        new NonStrictExpectations()
-        {
-            {
-                System.currentTimeMillis();
-                result = 0;
-            }
-        };
+        long expectedBaseExpiryTime = 3601;
 
         IotHubSasTokenAuthenticationProvider sasAuth = new mockIotHubSasTokenAuthenticationImplementation();
 
@@ -192,7 +181,8 @@ public class IotHubSasTokenAuthenticationProviderTest
         long actualExpiryTime =  Deencapsulation.invoke(sasAuth, "getExpiryTimeInSeconds");
 
         //assert
-        assertEquals(expectedExpiryTime, actualExpiryTime);
+        //expect that the actual expiry time is at least expectedBaseExpiryTime since it should be in the future
+        assertTrue(actualExpiryTime > expectedBaseExpiryTime);
     }
 
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_015: [This function shall save the provided tokenValidSecs as the number of seconds that created sas tokens are valid for.]
@@ -266,7 +256,7 @@ public class IotHubSasTokenAuthenticationProviderTest
     //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_020: [This function shall return false if the saved token has not lived for longer
     // than its buffered threshold.]
     @Test
-    public void shouldRefreshTokenReturnsFalseIfNotBeyondBuffer()
+    public void shouldRefreshTokenReturnsFalseIfNotBeyondBuffer(@Mocked final System mockSystem)
     {
         //arrange
         IotHubSasTokenAuthenticationProvider authenticationProvider = new mockIotHubSasTokenAuthenticationImplementation(100000, 100);
@@ -277,5 +267,4 @@ public class IotHubSasTokenAuthenticationProviderTest
         //assert
         assertFalse(result);
     }
-
 }

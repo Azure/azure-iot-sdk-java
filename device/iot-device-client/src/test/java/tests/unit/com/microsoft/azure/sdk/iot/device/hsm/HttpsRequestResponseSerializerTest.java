@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
+import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -215,7 +216,7 @@ public class HttpsRequestResponseSerializerTest
                         new String(expectedBodyWithNewLine);
 
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 new HttpsResponse(203, expectedBody, expectedHeaders, "OK".getBytes());
@@ -236,13 +237,6 @@ public class HttpsRequestResponseSerializerTest
         HttpsResponse response = HttpsRequestResponseSerializer.deserializeResponse(new BufferedReader(new StringReader(stringToDeserialize)));
 
         //assert
-        new Verifications()
-        {
-            {
-                new HttpsResponse(203, expectedBody, expectedHeaders, "OK".getBytes());
-                times = 1;
-            }
-        };
         assertEquals(200, response.getStatus());
         assertEquals(new String(response.getBody()), "test");
         assertEquals(response.getHeaderFields(), expectedHeaders);

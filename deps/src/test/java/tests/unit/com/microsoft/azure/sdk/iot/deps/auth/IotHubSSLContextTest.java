@@ -162,15 +162,22 @@ public class IotHubSSLContextTest
         final Collection<X509Certificate> testCertChain = new ArrayList<>();
         testCertChain.add(mockedX509Certificate);
 
-        new NonStrictExpectations(IotHubSSLContext.class)
+        new MockUp<IotHubSSLContext>()
+        {
+            @Mock Key parsePrivateKey(String privateKeyString) throws CertificateException
+            {
+                return mockedPrivateKey;
+            }
+
+            @Mock Collection<X509Certificate> parsePublicKeyCertificate(String publicKeyCertificateString) throws CertificateException
+            {
+                return testCertChain;
+            }
+        };
+
+        new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(IotHubSSLContext.class, "parsePrivateKey", privateKey);
-                returns(mockedPrivateKey);
-
-                Deencapsulation.invoke(IotHubSSLContext.class, "parsePublicKeyCertificate", publicKeyCert);
-                returns(testCertChain);
-
                 KeyManagerFactory.getInstance("SunX509");
                 result = mockKeyManagerFactory;
 
@@ -288,7 +295,20 @@ public class IotHubSSLContextTest
         final Collection<X509Certificate> testCertChain = new ArrayList<>();
         testCertChain.add(mockedX509Certificate);
 
-        new NonStrictExpectations(IotHubSSLContext.class)
+        new MockUp<IotHubSSLContext>()
+        {
+            @Mock Key parsePrivateKey(String privateKeyString) throws CertificateException
+            {
+                return mockedPrivateKey;
+            }
+
+            @Mock Collection<X509Certificate> parsePublicKeyCertificate(String publicKeyCertificateString) throws CertificateException
+            {
+                return testCertChain;
+            }
+        };
+
+        new NonStrictExpectations()
         {
             {
                 Deencapsulation.newInstance(IotHubCertificateManager.class);
@@ -359,20 +379,24 @@ public class IotHubSSLContextTest
         final Collection<X509Certificate> testCertChain = new ArrayList<>();
         testCertChain.add(mockedX509Certificate);
 
-        new NonStrictExpectations(IotHubSSLContext.class)
+        new MockUp<IotHubSSLContext>()
+        {
+            @Mock Key parsePrivateKey(String privateKeyString) throws CertificateException
+            {
+                return mockedPrivateKey;
+            }
+
+            @Mock Collection<X509Certificate> parsePublicKeyCertificate(String publicKeyCertificateString) throws CertificateException
+            {
+                return testCertChain;
+            }
+        };
+
+        new Expectations()
         {
             {
                 Deencapsulation.newInstance(IotHubCertificateManager.class);
                 result = mockedCertificateManager;
-
-                Deencapsulation.invoke(IotHubSSLContext.class, "parsePrivateKey", privateKey);
-                returns(mockedPrivateKey);
-
-                Deencapsulation.invoke(IotHubSSLContext.class, "parsePublicKeyCertificate", publicKeyCert);
-                returns(testCertChain);
-
-                KeyManagerFactory.getInstance("SunX509");
-                result = mockKeyManagerFactory;
 
                 Deencapsulation.newInstance(IotHubCertificateManager.class);
                 result = mockedCertificateManager;
@@ -409,9 +433,6 @@ public class IotHubSSLContextTest
                 new SecureRandom();
                 times = 1;
 
-                Deencapsulation.invoke(iotHubSSLContext, "generateTrustManagerFactory", new Class[] { IotHubCertificateManager.class, KeyStore.class }, mockedCertificateManager, mockedKeyStore);
-                times = 1;
-
                 mockedSSLContext.init(mockKeyManagers, mockedTrustManager, new SecureRandom());
                 times = 1;
             }
@@ -441,21 +462,11 @@ public class IotHubSSLContextTest
     public void parsePrivateKeySuccess() throws CertificateException, IOException
     {
         //arrange
-        new NonStrictExpectations(IotHubSSLContext.class)
+        new MockUp<IotHubSSLContext>()
         {
+            @Mock Key parsePrivateKey(String privateKeyString) throws CertificateException
             {
-                new StringReader(expectedPrivateKeyString);
-                result = mockedStringReader;
-
-                new PEMParser(mockedStringReader);
-                result = mockedPEMParser;
-
-                mockedPEMParser.readObject();
-                result = mockedPEMKeyPair;
-
-                //Doing this instead of just mocking JCA converter because trying to mock the JCA converter causes strange errors to be thrown.
-                Deencapsulation.invoke(IotHubSSLContext.class, "getPrivateKey", new Class[] {Object.class}, mockedPEMKeyPair);
-                result = mockedPrivateKey;
+                return mockedPrivateKey;
             }
         };
 
@@ -470,21 +481,11 @@ public class IotHubSSLContextTest
     public void parsePrivateKeyType2Success() throws CertificateException, IOException
     {
         //arrange
-        new NonStrictExpectations(IotHubSSLContext.class)
+        new MockUp<IotHubSSLContext>()
         {
+            @Mock Key parsePrivateKey(String privateKeyString) throws CertificateException
             {
-                new StringReader(expectedPrivateKeyString);
-                result = mockedStringReader;
-
-                new PEMParser(mockedStringReader);
-                result = mockedPEMParser;
-
-                mockedPEMParser.readObject();
-                result = mockedPrivateKeyInfo;
-
-                //Doing this instead of just mocking JCA converter because trying to mock the JCA converter causes strange errors to be thrown.
-                Deencapsulation.invoke(IotHubSSLContext.class, "getPrivateKey", new Class[] {Object.class}, mockedPrivateKeyInfo);
-                result = mockedPrivateKey;
+                return mockedPrivateKey;
             }
         };
 

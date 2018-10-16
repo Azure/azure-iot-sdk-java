@@ -397,10 +397,15 @@ public class AmqpsIotHubConnectionTest {
     public void constructorSetsHostNameCorrectlyWhenWebSocketsAreEnabled() throws TransportException
     {
         // arrange
-        baseExpectations();
         new NonStrictExpectations()
         {
             {
+                mockConfig.getIotHubHostname();
+                result = hostName;
+                mockConfig.getDeviceId();
+                result = deviceId;
+                mockConfig.getIotHubName();
+                result = hubName;
                 mockConfig.isUseWebsocket();
                 result = true;
                 new AmqpsSessionManager(mockConfig, (ScheduledExecutorService)any);
@@ -415,14 +420,6 @@ public class AmqpsIotHubConnectionTest {
         // assert
         String actualHostName = Deencapsulation.getField(connection, "hostName");
         assertEquals(hostName + ":" + amqpWebSocketPort, actualHostName);
-
-        new Verifications()
-        {
-            {
-                new AmqpsSessionManager(mockConfig, (ScheduledExecutorService)any);
-                times = 1;
-            }
-        };
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_001: [The constructor shall initialize the AmqpsSessionManager member variable with the given config.]
@@ -431,10 +428,15 @@ public class AmqpsIotHubConnectionTest {
     public void constructorSetsHostNameCorrectlyWhenWebSocketsAreDisabled() throws TransportException
     {
         // arrange
-        baseExpectations();
         new NonStrictExpectations()
         {
             {
+                mockConfig.getIotHubHostname();
+                result = hostName;
+                mockConfig.getDeviceId();
+                result = deviceId;
+                mockConfig.getIotHubName();
+                result = hubName;
                 mockConfig.isUseWebsocket();
                 result = false;
             }
@@ -2005,11 +2007,19 @@ public class AmqpsIotHubConnectionTest {
     public void OnTransportErrorReportsErrorCodeIfPresent() throws TransportException
     {
         //arrange
+        final StringBuilder methodsCalled = new StringBuilder();
+        new MockUp<AmqpsIotHubConnection>()
+        {
+            @Mock void scheduleReconnection(Throwable throwable)
+            {
+                methodsCalled.append("scheduleReconnection");
+            }
+        };
         baseExpectations();
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         Deencapsulation.setField(connection, "scheduledExecutorService", mockScheduledExecutorService);
-        new NonStrictExpectations(connection)
+        new NonStrictExpectations()
         {
             {
                 mockEvent.getTransport();
@@ -2028,25 +2038,25 @@ public class AmqpsIotHubConnectionTest {
         connection.onTransportError(mockEvent);
 
         //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(connection, "scheduleReconnection", new Class[] {Throwable.class}, (Throwable) any);
-                times = 1;
-                Deencapsulation.newInstance(AmqpsIotHubConnection.ReconnectionTask.class, new Class[] {Throwable.class, IotHubListener.class, String.class}, any, mockedIotHubListener, connection.connectionId);
-                times = 1;
-            }
-        };
+        assertTrue(methodsCalled.toString().contains("scheduleReconnection"));
     }
 
     //Tests_SRS_AMQPSIOTHUBCONNECTION_34_061 [If the provided event object's transport holds a remote error condition object, this function shall report the associated TransportException to this object's listeners.]
     @Test
     public void OnLinkRemoteCloseReportsErrorCodeIfPresent() throws TransportException
     {
+        final StringBuilder methodsCalled = new StringBuilder();
+        new MockUp<AmqpsIotHubConnection>()
+        {
+            @Mock void scheduleReconnection(Throwable throwable)
+            {
+                methodsCalled.append("scheduleReconnection");
+            }
+        };
         baseExpectations();
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
-        new NonStrictExpectations(connection)
+        new Expectations()
         {
             {
                 mockEvent.getTransport();
@@ -2057,7 +2067,6 @@ public class AmqpsIotHubConnectionTest {
                 result = mockedSymbol;
                 mockedSymbol.toString();
                 result = AmqpLinkRedirectException.errorCode;
-                Deencapsulation.invoke(connection, "scheduleReconnection", new Class[] {Throwable.class}, (Throwable) any);
             }
         };
 
@@ -2065,13 +2074,7 @@ public class AmqpsIotHubConnectionTest {
         connection.onLinkRemoteClose(mockEvent);
 
         //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(connection, "scheduleReconnection", new Class[] {Throwable.class}, (Throwable) any);
-                times = 1;
-            }
-        };
+        assertEquals("scheduleReconnection", methodsCalled.toString());
     }
 
     //Tests_SRS_AMQPSIOTHUBCONNECTION_34_089: [If an amqp message can be received from the receiver link, and that amqp message contains a status code that is not 200 or 204, this function shall notify this object's listeners that that message was received and provide the status code's mapped exception.]

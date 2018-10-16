@@ -65,7 +65,7 @@
         <dependency>
             <groupId>org.jmockit</groupId>
             <artifactId>jmockit</artifactId>
-            <version>1.22</version>
+            <version>1.24</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -150,7 +150,7 @@
                     <forkCount>1</forkCount>
                     <reuseForks>true</reuseForks>
                     <argLine>
-                        -javaagent:${settings.localRepository}/org/jmockit/jmockit/1.22/jmockit-1.22.jar
+                        -javaagent:${settings.localRepository}/org/jmockit/jmockit/1.24/jmockit-1.24.jar
                     </argLine>
                 </configuration>
             </plugin>

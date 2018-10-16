@@ -114,14 +114,12 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
     @Test
     public void getRenewedSasTokenAutoRenews(@Mocked final System mockSystem) throws IOException, TransportException
     {
-        //arrange
-        new NonStrictExpectations()
+        //assert
+        new Expectations()
         {
             {
                 System.currentTimeMillis();
                 result = 0;
-                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class}, expectedHostname, expectedDeviceId, expectedDeviceKey, null, expectedModuleId, expectedExpiryTime);
-                result = mockSasToken;
                 Deencapsulation.invoke(mockSasToken, "isExpired");
                 result = true;
                 System.currentTimeMillis();
@@ -131,19 +129,12 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
             }
         };
 
+        //arrange
         IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
         sasAuth.getRenewedSasToken();
 
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class}, expectedHostname, expectedDeviceId, expectedDeviceKey, null, expectedModuleId, expectedExpiryTime);
-                times = 1;
-            }
-        };
     }
 
     //Tests_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_005: [This function shall return the saved sas token.]

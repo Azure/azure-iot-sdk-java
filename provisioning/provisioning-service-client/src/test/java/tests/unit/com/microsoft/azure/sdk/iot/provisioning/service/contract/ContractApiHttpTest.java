@@ -13,10 +13,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningS
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientExceptionManager;
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientTransportException;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -147,6 +144,33 @@ public class ContractApiHttpTest
     public void requestCreatesSasToken() throws ProvisioningServiceClientException, IOException
     {
         // arrange
+        new Expectations()
+        {
+            {
+                new ProvisioningSasToken(mockedProvisioningConnectionString);
+                result = mockedProvisioningSasToken;
+                mockedProvisioningSasToken.toString();
+                result = VALID_SASTOKEN;
+                mockedProvisioningConnectionString.getHostName();
+                result = VALID_HOST_NAME;
+                new URL((String)any);
+                result = mockedURL;
+                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes());
+                result = mockedHttpRequest;
+                mockedHttpRequest.send();
+                result = mockedHttpResponse;
+                mockedHttpResponse.getStatus();
+                result = VALID_SUCCESS_STATUS;
+                mockedHttpResponse.getErrorReason();
+                result = VALID_SUCCESS_MESSAGE.getBytes();
+                mockedHttpResponse.getBody();
+                result = VALID_BODY;
+                mockedHttpResponse.getHeaderFields();
+                result = VALID_HEADER;
+                ProvisioningServiceClientExceptionManager.httpResponseVerification(VALID_SUCCESS_STATUS, VALID_SUCCESS_MESSAGE);
+            }
+        };
+
         ContractApiHttp contractApiHttp = ContractApiHttp.createFromConnectionString(mockedProvisioningConnectionString);
         requestNonStrictExpectations();
 
@@ -156,15 +180,6 @@ public class ContractApiHttpTest
                 VALID_PATH,
                 VALID_HEADER,
                 VALID_PAYLOAD);
-
-        // assert
-        new Verifications()
-        {
-            {
-                new ProvisioningSasToken(mockedProvisioningConnectionString);
-                times = 1;
-            }
-        };
     }
 
     /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_006: [If the request get problem to create the SAS token, it shall throw IllegalArgumentException.*/
@@ -316,6 +331,32 @@ public class ContractApiHttpTest
     public void requestCreatesHttpRequest() throws ProvisioningServiceClientException, IOException
     {
         // arrange
+        new Expectations()
+        {
+            {
+                new ProvisioningSasToken(mockedProvisioningConnectionString);
+                result = mockedProvisioningSasToken;
+                mockedProvisioningSasToken.toString();
+                result = VALID_SASTOKEN;
+                mockedProvisioningConnectionString.getHostName();
+                result = VALID_HOST_NAME;
+                new URL((String)any);
+                result = mockedURL;
+                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes());
+                result = mockedHttpRequest;
+                mockedHttpRequest.send();
+                result = mockedHttpResponse;
+                mockedHttpResponse.getStatus();
+                result = VALID_SUCCESS_STATUS;
+                mockedHttpResponse.getErrorReason();
+                result = VALID_SUCCESS_MESSAGE.getBytes();
+                mockedHttpResponse.getBody();
+                result = VALID_BODY;
+                mockedHttpResponse.getHeaderFields();
+                result = VALID_HEADER;
+                ProvisioningServiceClientExceptionManager.httpResponseVerification(VALID_SUCCESS_STATUS, VALID_SUCCESS_MESSAGE);
+            }
+        };
         ContractApiHttp contractApiHttp = ContractApiHttp.createFromConnectionString(mockedProvisioningConnectionString);
         requestNonStrictExpectations();
 
@@ -325,15 +366,6 @@ public class ContractApiHttpTest
                 VALID_PATH,
                 VALID_HEADER,
                 VALID_PAYLOAD);
-
-        // assert
-        new Verifications()
-        {
-            {
-                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes());
-                times = 1;
-            }
-        };
     }
 
     /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_011: [If the request get problem creating the HttpRequest, it shall throw ProvisioningServiceClientTransportException.*/

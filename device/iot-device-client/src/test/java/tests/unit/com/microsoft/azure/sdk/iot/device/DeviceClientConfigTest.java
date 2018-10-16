@@ -716,9 +716,6 @@ public class DeviceClientConfigTest
                 mockSecurityProviderX509.getSSLContext();
                 result = mockSSLContext;
 
-                new IotHubX509HardwareAuthenticationProvider("hostname", "gatewayHostname", "deviceId", "moduleId", mockSecurityProviderX509);
-                result = mockX509HardwareAuthentication;
-
                 mockIotHubConnectionString.getHostName();
                 result = "hostname";
 
@@ -751,12 +748,9 @@ public class DeviceClientConfigTest
     public void securityClientConstructorWithTPMSuccess() throws SecurityProviderException, IOException
     {
         //arrange
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
-                mockSecurityProviderSAS.getSSLContext();
-                result = mockSSLContext;
-
                 mockIotHubConnectionString.getHostName();
                 result = expectedHostname;
 
@@ -765,9 +759,6 @@ public class DeviceClientConfigTest
 
                 mockIotHubConnectionString.getModuleId();
                 result = expectedModuleId;
-
-                new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, null, expectedDeviceId, expectedModuleId, mockSecurityProviderSAS);
-                result = mockSasTokenHardwareAuthentication;
             }
         };
 

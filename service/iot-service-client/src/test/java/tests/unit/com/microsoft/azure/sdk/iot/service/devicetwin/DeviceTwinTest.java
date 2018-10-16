@@ -70,9 +70,6 @@ public class DeviceTwinTest
     QueryOptions mockQueryOptions;
 
     @Mocked
-    URL mockUrl;
-
-    @Mocked
     Collection mockCollection;
 
     @Mocked
@@ -181,7 +178,7 @@ public class DeviceTwinTest
      **Tests_SRS_DEVICETWIN_25_012: [** The function shall set eTag, tags, desired property map, reported property map on the user device **]**
      */
     @Test
-    public void getTwinOperationSucceeds(@Mocked DeviceTwinDevice mockedDevice) throws Exception
+    public void getTwinOperationSucceeds(@Mocked DeviceTwinDevice mockedDevice, @Mocked final URL mockUrl) throws Exception
     {
         //arrange
         final String connectionString = "testString";
@@ -556,8 +553,6 @@ public class DeviceTwinTest
             {
                 mockedConnectionString.getUrlTwin(anyString);
                 times = 1;
-                new TwinState((TwinCollection)any, (TwinCollection)any, null);
-                times = 1;
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
@@ -652,7 +647,7 @@ public class DeviceTwinTest
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
         TwinCollection testMap = new TwinCollection();
         testMap.put("TestKey", "TestValue");
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 mockedDevice.getDeviceId();
@@ -676,8 +671,6 @@ public class DeviceTwinTest
         {
             {
                 mockedConnectionString.getUrlTwin(anyString);
-                times = 1;
-                new TwinState(null, (TwinCollection)any, null);
                 times = 1;
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
@@ -722,8 +715,6 @@ public class DeviceTwinTest
         {
             {
                 mockedConnectionString.getUrlTwin(anyString);
-                times = 1;
-                new TwinState((TwinCollection)any, null, null);
                 times = 1;
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
@@ -776,7 +767,7 @@ public class DeviceTwinTest
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
@@ -791,8 +782,6 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
-                times = 1;
                 Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
                 times = 1;
             }
@@ -1478,12 +1467,22 @@ public class DeviceTwinTest
 
         String expectedJsonString = "some json string";
 
-        new StrictExpectations(deviceTwin)
+        new MockUp<DeviceTwin>()
+        {
+            @Mock boolean hasNext(QueryCollection deviceTwinQueryCollection)
+            {
+                return true;
+            }
+
+            @Mock DeviceTwinDevice jsonToDeviceTwinDevice(String json) throws IOException
+            {
+                return new DeviceTwinDevice();
+            }
+        };
+
+        new StrictExpectations()
         {
             {
-                deviceTwin.hasNext(mockQueryCollection);
-                result = true;
-
                 Deencapsulation.invoke(mockQueryCollection, "next", new Class[] {QueryOptions.class}, mockQueryOptions);
                 result = mockQueryCollectionResponse;
 
@@ -1499,17 +1498,11 @@ public class DeviceTwinTest
                 mockIterator.next();
                 result = expectedJsonString;
 
-                Deencapsulation.invoke(deviceTwin, "jsonToDeviceTwinDevice", new Class[] {String.class}, expectedJsonString);
-                result = new DeviceTwinDevice();
-
                 mockIterator.hasNext();
                 result = true;
 
                 mockIterator.next();
                 result = expectedJsonString;
-
-                Deencapsulation.invoke(deviceTwin, "jsonToDeviceTwinDevice", new Class[] {String.class}, expectedJsonString);
-                result = new DeviceTwinDevice();
 
                 mockIterator.hasNext();
                 result = false;

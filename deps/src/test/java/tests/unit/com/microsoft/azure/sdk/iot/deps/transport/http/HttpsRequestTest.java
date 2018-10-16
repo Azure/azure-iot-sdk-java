@@ -29,11 +29,9 @@ import static org.junit.Assert.assertThat;
 @RunWith(JMockit.class)
 public class HttpsRequestTest
 {
-    @Mocked URL mockUrl;
-
     // Tests_SRS_HTTPSREQUEST_25_001: [The function shall open a connection with the given URL as the endpoint.]
     @Test
-    public void constructorOpensConnection(@Mocked final HttpConnection mockConn) throws IOException
+    public void constructorOpensConnection(@Mocked final HttpConnection mockConn, @Mocked final URL mockUrl) throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
@@ -58,7 +56,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_25_002: [The function shall write the body to the connection.]
     @Test
-    public void constructorWritesBodyToConnection(@Mocked final HttpConnection mockConn) throws IOException
+    public void constructorWritesBodyToConnection(@Mocked final HttpConnection mockConn, @Mocked final URL mockUrl) throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
@@ -85,7 +83,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_25_003: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
     @Test
-    public void constructorSetsHttpsMethodCorrectly(@Mocked final HttpConnection mockConn) throws IOException
+    public void constructorSetsHttpsMethodCorrectly(@Mocked final HttpConnection mockConn, @Mocked final URL mockUrl) throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
@@ -111,7 +109,7 @@ public class HttpsRequestTest
     // Tests_SRS_HTTPSREQUEST_25_004: [If an IOException occurs in setting up the HTTPS connection, the function shall throw an IOException.]
     // Assert
     @Test(expected = IOException.class)
-    public void constructorThrowsIoExceptionIfCannotSetupConnection(@Mocked final HttpConnection mockConn) throws IOException
+    public void constructorThrowsIoExceptionIfCannotSetupConnection(@Mocked final HttpConnection mockConn, @Mocked final URL mockUrl) throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
@@ -197,14 +195,7 @@ public class HttpsRequestTest
             }
         };
         // Assert
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "http";
-            }
-        };
-        HttpRequest request = new HttpRequest(mockUrl, expectedMethod, body);
+        HttpRequest request = new HttpRequest(new URL("http://www.microsoft.com"), expectedMethod, body);
         // Act
         request.send();
     }
@@ -225,12 +216,12 @@ public class HttpsRequestTest
             Map<String, String> testHeaderFields = new HashMap<>();
 
             @Mock
-            public void $init(URL url, HttpMethod method)
+            void $init(URL url, HttpMethod method)
             {
             }
 
             @Mock
-            public void connect() throws IOException
+            void connect() throws IOException
             {
                 assertThat(testHeaderFields.size(), is(2));
                 assertThat(testHeaderFields.get(field0), is(value0));
@@ -282,15 +273,8 @@ public class HttpsRequestTest
             }
         };
         // Assert
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "http";
-            }
-        };
         // Act
-        HttpRequest request = new HttpRequest(mockUrl, expectedMethod, body);
+        HttpRequest request = new HttpRequest(new URL("http://www.microsoft.com"), expectedMethod, body);
         request.setHeaderField(field0, value0);
         request.setHeaderField(field1, value1);
         request.send();
@@ -363,21 +347,14 @@ public class HttpsRequestTest
             }
         };
         // Assert
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "http";
-            }
-        };
         // Act
-        HttpRequest request = new HttpRequest(mockUrl, httpsMethod, expectedBody);
+        HttpRequest request = new HttpRequest(new URL("http://www.microsoft.com"), httpsMethod, expectedBody);
         request.send();
     }
 
     // Tests_SRS_HTTPSREQUEST_25_006: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
     @Test
-    public void sendReadsStatusCode(@Mocked final HttpConnection mockConn) throws IOException
+    public void sendReadsStatusCode(@Mocked final HttpConnection mockConn, @Mocked final URL mockUrl) throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
@@ -403,7 +380,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_25_006: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
     @Test
-    public void sendReturnsBody(@Mocked final HttpConnection mockConn) throws IOException
+    public void sendReturnsBody(@Mocked final HttpConnection mockConn, @Mocked final URL mockUrl) throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
@@ -430,7 +407,7 @@ public class HttpsRequestTest
     // Tests_SRS_HTTPSREQUEST_25_006: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
     // Tests_SRS_HTTPSREQUEST_25_008: [If an I/O exception occurs because of a bad response status code, the function shall attempt to flush or read the error stream so that the underlying HTTPS connection can be reused.]
     @Test
-    public void sendReturnsError(@Mocked final HttpConnection mockConn) throws IOException
+    public void sendReturnsError(@Mocked final HttpConnection mockConn, @Mocked final URL mockUrl) throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
@@ -458,7 +435,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_25_006: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
     @Test
-    public void sendReturnsHeaderFields(@Mocked final HttpConnection mockConn) throws IOException
+    public void sendReturnsHeaderFields(@Mocked final HttpConnection mockConn, @Mocked final URL mockUrl) throws IOException
     {
         // Arrange
         final Map<String, List<String>> headerFields = new HashMap<>();
@@ -491,7 +468,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_25_006: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
     @Test
-    public void sendReturnsStatusCodeOnBadStatusException(@Mocked final HttpConnection mockConn) throws IOException
+    public void sendReturnsStatusCodeOnBadStatusException(@Mocked final HttpConnection mockConn, @Mocked final URL mockUrl) throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.POST;
@@ -520,7 +497,7 @@ public class HttpsRequestTest
     // Tests_SRS_HTTPSREQUEST_25_007: [If the client cannot connect to the server, the function shall throw an IOException.]
     // Assert
     @Test(expected = IOException.class)
-    public void sendThrowsIoExceptionIfCannotConnect(@Mocked final HttpConnection mockConn) throws IOException
+    public void sendThrowsIoExceptionIfCannotConnect(@Mocked final HttpConnection mockConn, @Mocked final URL mockUrl) throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.POST;
@@ -549,7 +526,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_25_008: [If an I/O exception occurs because of a bad response status code, the function shall attempt to flush or read the error stream so that the underlying HTTPS connection can be reused.]
     @Test
-    public void sendReturnsHeaderFieldsOnBadStatusException(@Mocked final HttpConnection mockConn) throws IOException
+    public void sendReturnsHeaderFieldsOnBadStatusException(@Mocked final HttpConnection mockConn, @Mocked final URL mockUrl) throws IOException
     {
         // Arrange
         final Map<String, List<String>> headerFields = new HashMap<>();
@@ -582,7 +559,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_25_009: [The function shall set the header field with the given name to the given value.]
     @Test
-    public void setHeaderFieldSetsHeaderField(@Mocked final HttpConnection mockConn) throws IOException
+    public void setHeaderFieldSetsHeaderField(@Mocked final HttpConnection mockConn, @Mocked final URL mockUrl) throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.POST;
@@ -610,7 +587,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_25_010: [The function shall set the read timeout for the request to the given value.]
     @Test
-    public void setReadTimeoutSetsReadTimeout(@Mocked final HttpConnection mockConn) throws IOException
+    public void setReadTimeoutSetsReadTimeout(@Mocked final HttpConnection mockConn, @Mocked final URL mockUrl) throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.POST;

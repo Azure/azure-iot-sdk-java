@@ -107,7 +107,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
     @Test
-    public void sendHasCorrectHttpsMethod(final @Mocked URL mockUrl) throws TransportException
+    public void sendHasCorrectHttpsMethod() throws TransportException, MalformedURLException
     {
         final HttpsMethod expectedMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -170,13 +170,8 @@ public class HttpsRequestTest
                 return new HashMap<>();
             }
         };
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "https";
-            }
-        };
+
+        URL mockUrl = new URL("https://www.microsoft.com");
 
         HttpsRequest request =
                 new HttpsRequest(mockUrl, expectedMethod, body, "");
@@ -185,7 +180,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
     @Test
-    public void sendSetsHeaderFieldsCorrectly(final @Mocked URL mockUrl) throws TransportException
+    public void sendSetsHeaderFieldsCorrectly() throws TransportException, MalformedURLException
     {
         final HttpsMethod expectedMethod = HttpsMethod.GET;
         final byte[] body = new byte[0];
@@ -207,7 +202,7 @@ public class HttpsRequestTest
             @Mock
             public void connect()
             {
-                assertThat(testHeaderFields.size(), is(3));
+                assertThat(testHeaderFields.size(), is(4));
                 assertThat(testHeaderFields.get(field0), is(value0));
                 assertThat(testHeaderFields.get(field1), is(value1));
                 assertThat(testHeaderFields.get(userAgent), is(userAgentValue));
@@ -257,13 +252,9 @@ public class HttpsRequestTest
                 return new HashMap<>();
             }
         };
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "https";
-            }
-        };
+
+
+        URL mockUrl = new URL("Http://www.microsoft.com");
 
         HttpsRequest request = new HttpsRequest(mockUrl, expectedMethod, body, userAgentValue);
         request.setHeaderField(field0, value0);
@@ -273,7 +264,7 @@ public class HttpsRequestTest
 
     // Tests_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
     @Test
-    public void sendWritesBodyToOutputStream(final @Mocked URL mockUrl) throws TransportException
+    public void sendWritesBodyToOutputStream() throws TransportException, MalformedURLException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final byte[] expectedBody = { 1, 2, 3 };
@@ -335,13 +326,7 @@ public class HttpsRequestTest
                 return new HashMap<>();
             }
         };
-        new NonStrictExpectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "https";
-            }
-        };
+        URL mockUrl = new URL("https://www.microsoft.com");
 
         HttpsRequest request =
                 new HttpsRequest(mockUrl, httpsMethod, expectedBody, "");

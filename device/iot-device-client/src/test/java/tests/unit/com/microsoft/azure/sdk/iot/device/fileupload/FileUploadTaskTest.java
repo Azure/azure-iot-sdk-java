@@ -309,15 +309,6 @@ public class FileUploadTaskTest
 
         // act
         Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                new FileUploadRequestParser(VALID_BLOB_NAME);
-                times = 1;
-            }
-        };
     }
 
     /* Tests_SRS_FILEUPLOADTASK_21_008: [The run shall set the message method as `POST`.] */
@@ -490,15 +481,6 @@ public class FileUploadTaskTest
 
         // act
         Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                new CloudBlockBlob((URI) any);
-                times = 1;
-            }
-        };
     }
 
     /* Tests_SRS_FILEUPLOADTASK_21_020: [The run shall upload the `inputStream` with the `streamLength` to the created `CloudBlockBlob`.] */
@@ -538,15 +520,6 @@ public class FileUploadTaskTest
 
         // act
         Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                new FileUploadStatusParser(VALID_CORRELATION_ID, true, 0, (String)any);
-                times = 1;
-            }
-        };
     }
 
     /* Tests_SRS_FILEUPLOADTASK_21_023: [The run shall create a FileUpload status notification message, by using the FileUploadStatusParser.] */
@@ -562,15 +535,6 @@ public class FileUploadTaskTest
 
         // act
         Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                new IotHubTransportMessage(VALID_NOTIFICATION_JSON);
-                times = 1;
-            }
-        };
     }
 
     /* Tests_SRS_FILEUPLOADTASK_21_024: [The run shall set the message method as `POST`.] */
@@ -669,8 +633,6 @@ public class FileUploadTaskTest
         new Verifications()
         {
             {
-                new FileUploadRequestParser(VALID_BLOB_NAME);
-                times = 1;
                 mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
                 times = 1;
             }
@@ -705,8 +667,6 @@ public class FileUploadTaskTest
         new Verifications()
         {
             {
-                new IotHubTransportMessage(VALID_REQUEST_JSON);
-                times = 1;
                 mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
                 times = 1;
             }
@@ -946,17 +906,6 @@ public class FileUploadTaskTest
 
         // act
         Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                new FileUploadResponseParser(VALID_RESPONSE_JSON);
-                times = 1;
-                mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
-                times = 1;
-            }
-        };
     }
 
     /* Tests_SRS_FILEUPLOADTASK_21_032: [If create the blob URI failed, the run shall call the `userCallback` reporting the error, and abort the upload.] */
@@ -986,8 +935,6 @@ public class FileUploadTaskTest
         new Verifications()
         {
             {
-                new URI((String)any);
-                times = 1;
                 mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
                 times = 1;
             }
@@ -1023,12 +970,8 @@ public class FileUploadTaskTest
         new Verifications()
         {
             {
-                new CloudBlockBlob((URI) any);
-                times = 1;
                 mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
                 times = 1;
-                new FileUploadStatusParser(VALID_CORRELATION_ID, false, -1, (String)any);
-                times =1;
             }
         };
     }
@@ -1068,8 +1011,6 @@ public class FileUploadTaskTest
                 times = 1;
                 mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
                 times = 1;
-                new FileUploadStatusParser(VALID_CORRELATION_ID, false, -1, (String)any);
-                times =1;
             }
         };
     }
@@ -1102,8 +1043,6 @@ public class FileUploadTaskTest
         new Verifications()
         {
             {
-                new FileUploadStatusParser(VALID_CORRELATION_ID, true, 0, (String)any);
-                times =1;
                 mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
                 times = 1;
             }
@@ -1137,17 +1076,6 @@ public class FileUploadTaskTest
 
         // act
         Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                new IotHubTransportMessage(VALID_NOTIFICATION_JSON);
-                times = 1;
-                mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
-                times = 1;
-            }
-        };
     }
 
     /* Tests_SRS_FILEUPLOADTASK_21_031: [If run failed to send the request, it shall call the userCallback with the status `ERROR`, and abort the upload.] */

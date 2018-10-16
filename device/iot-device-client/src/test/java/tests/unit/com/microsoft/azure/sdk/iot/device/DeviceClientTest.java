@@ -11,10 +11,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.junit.Test;
 
 import java.io.IOError;
@@ -221,7 +218,9 @@ public class DeviceClientTest
         final String connString =
                 "HostName=iothub.device.com;CredentialType=SharedAccessKey;CredentialScope=Device;deviceId=testdevice;SharedAccessKey=adjkl234j52=;";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        new NonStrictExpectations()
+
+        //assert
+        new Expectations()
         {
             {
                 Deencapsulation.newInstance(IotHubConnectionString.class, connString);
@@ -243,9 +242,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                IotHubConnectionString iotHubConnectionString = Deencapsulation.newInstance(IotHubConnectionString.class, connString);
-                times = 1;
-                Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString);
+                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class}, (IotHubConnectionString) any);
                 times = 0;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
                         new Class[] {DeviceClientConfig.class, long.class, long.class},
@@ -1584,13 +1581,15 @@ public class DeviceClientTest
         final String destinationBlobName = "valid/blob/name.txt";
         final long streamLength = 100;
 
-        new NonStrictExpectations()
+        //assert
+        new Expectations()
         {
             {
                 Deencapsulation.newInstance(FileUpload.class, mockConfig);
                 result = mockedFileUpload;
                 Deencapsulation.invoke(mockedFileUpload, "uploadToBlobAsync",
                         destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
+                times = 2;
             }
         };
         DeviceClient client = Deencapsulation.newInstance(DeviceClient.class, new Class[] {String.class, IotHubClientProtocol.class}, "some conn string", protocol);
@@ -1600,19 +1599,6 @@ public class DeviceClientTest
 
         // act
         Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
-
-        // assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.newInstance(FileUpload.class, mockConfig);
-                times = 1;
-                Deencapsulation.invoke(mockedFileUpload, "uploadToBlobAsync",
-                        destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
-                times = 2;
-
-            }
-        };
     }
 
     /* Tests_SRS_INTERNALCLIENT_21_045: [If the `callback` is null, the uploadToBlobAsync shall throw IllegalArgumentException.] */
@@ -1760,7 +1746,8 @@ public class DeviceClientTest
         final String destinationBlobName = "valid/blob/name.txt";
         final long streamLength = 100;
 
-        new NonStrictExpectations()
+        // assert
+        new Expectations()
         {
             {
                 Deencapsulation.newInstance(FileUpload.class, new Class[] {DeviceClientConfig.class}, (DeviceClientConfig) any);
@@ -1773,18 +1760,6 @@ public class DeviceClientTest
 
         // act
         Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
-
-        // assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.newInstance(FileUpload.class, new Class[] {DeviceClientConfig.class}, (DeviceClientConfig) any);
-                times = 1;
-                Deencapsulation.invoke(mockedFileUpload, "uploadToBlobAsync",
-                        destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
-                times = 1;
-            }
-        };
     }
 
     /* Tests_SRS_INTERNALCLIENT_21_054: [If the fileUpload is not null, the closeNow shall call closeNow on fileUpload.] */
