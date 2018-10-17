@@ -42,8 +42,6 @@ import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothubservices.TransportClientIT.STATUS.FAILURE;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothubservices.TransportClientIT.STATUS.SUCCESS;
 
-@Ignore
-//Ignoring these tests as they frequently fail. Needs investigations
 public class TransportClientIT extends MethodNameLoggingIntegrationTest
 {
     //how many devices to test multiplexing with
@@ -64,6 +62,7 @@ public class TransportClientIT extends MethodNameLoggingIntegrationTest
     private static final long MAX_MILLISECS_TIMEOUT_FLUSH_NOTIFICATION = 10 * 1000; // 10 secs
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_PER_CALL_MS = 1000; // 1 second
     private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION * 10; // 2 sec
+    private static final long REGISTRY_MANAGER_DEVICE_CREATION_DELAY_MILLISECONDS = 3 * 1000;
 
     private static Device[] deviceListAmqps = new Device[MAX_DEVICE_MULTIPLEX];
     private static final AtomicBoolean succeed = new AtomicBoolean();
@@ -122,6 +121,8 @@ public class TransportClientIT extends MethodNameLoggingIntegrationTest
             registryManager.addDevice(deviceListAmqps[i]);
             clientConnectionStringArrayList.add(registryManager.getDeviceConnectionString(deviceListAmqps[i]));
         }
+
+        Thread.sleep(MAX_DEVICE_MULTIPLEX * REGISTRY_MANAGER_DEVICE_CREATION_DELAY_MILLISECONDS);
 
         messageProperties = new HashMap<>(3);
         messageProperties.put("name1", "value1");

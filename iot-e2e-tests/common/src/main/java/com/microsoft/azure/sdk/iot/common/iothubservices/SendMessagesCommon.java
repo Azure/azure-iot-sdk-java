@@ -707,7 +707,7 @@ public class SendMessagesCommon extends MethodNameLoggingIntegrationTest
 
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, AMQP_TWIN_RESP_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
-    @Ignore
+
     @Test
     public void sendMessagesWithThrottling() throws URISyntaxException, IOException, IotHubException, InterruptedException
     {
@@ -723,7 +723,7 @@ public class SendMessagesCommon extends MethodNameLoggingIntegrationTest
                 false);
 
     }
-    @Ignore
+
     @Test
     public void sendMessagesWithThrottlingNoRetry() throws URISyntaxException, IOException, IotHubException, InterruptedException
     {
