@@ -54,7 +54,7 @@ public class ServiceBulkOperationSample
     public static void main(String[] args) throws ProvisioningServiceErrorDetailsException, JsonProcessingException
     {
         System.out.println("Starting sample...");
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
         // *********************************** Create a Provisioning Service Client ************************************
         ServiceClientCredentials credentials = ProvisioningServiceClientHelper.createCredentialsFromConnectionString(PROVISIONING_CONNECTION_STRING);
@@ -90,8 +90,8 @@ public class ServiceBulkOperationSample
         		.withMode(BULK_OPERATION_CREATE);
         System.out.println("\nRun the bulk operation to create the individualEnrollments...");
         BulkEnrollmentOperationResult bulkOperationResult =  provisioningServiceClient.runBulkEnrollmentOperation(bulkEnrollmentOperation);
-        System.out.println("Result of the Create bulk enrollment...");
-        System.out.println(bulkOperationResult.isSuccessful());
+		System.out.print("The create bulk enrollment operation...");
+		System.out.println(resultStatus(bulkOperationResult.isSuccessful()));
 
         // ************************************ Update the enrollments in bulk operation *************************************
         System.out.println("\nUpdating the enrollments in bulk...");
@@ -101,7 +101,7 @@ public class ServiceBulkOperationSample
             String registrationId = individualEnrollment.registrationId();
             System.out.println("\nGet the individualEnrollment information for " + registrationId + ":");
             IndividualEnrollment getResult = provisioningServiceClient.getIndividualEnrollment(registrationId);
-            System.out.println(ow.writeValueAsString(getResult));
+            System.out.println(objectWriter.writeValueAsString(getResult));
             getResult.withDeviceId("java_device_id");
             updateEnrollments.add(getResult);
         }
@@ -110,8 +110,8 @@ public class ServiceBulkOperationSample
         		.withMode(BULK_OPERATION_UPDATE);
         System.out.println("\nRun the bulk operation to update the individualEnrollments...");
         bulkOperationResult =  provisioningServiceClient.runBulkEnrollmentOperation(bulkEnrollmentOperation);
-        System.out.println("Result of the Update bulk enrollment...");
-        System.out.println(bulkOperationResult.isSuccessful());
+		System.out.print("The update bulk enrollment operation...");
+		System.out.println(resultStatus(bulkOperationResult.isSuccessful()));
 
         // ************************************ Query info of individualEnrollments ***********************************
         System.out.println("\nCreate a query for enrollments...");
@@ -121,7 +121,7 @@ public class ServiceBulkOperationSample
         
         for (IndividualEnrollment eachEnrollment : queryResult)
         {
-        	System.out.println(ow.writeValueAsString(eachEnrollment));
+        	System.out.println(objectWriter.writeValueAsString(eachEnrollment));
         }
 
         // ********************************** Delete bulk of individualEnrollments ************************************
@@ -130,6 +130,12 @@ public class ServiceBulkOperationSample
         		.withEnrollments(individualEnrollments)
         		.withMode(BULK_OPERATION_DELETE);
         bulkOperationResult =  provisioningServiceClient.runBulkEnrollmentOperation(bulkEnrollmentOperation);
-        System.out.println(bulkOperationResult.isSuccessful());
-    }
+		System.out.print("The delete bulk enrollment operation...");
+		System.out.println(resultStatus(bulkOperationResult.isSuccessful()));
+	}
+
+	private static String resultStatus(boolean isSuccessful)
+	{
+		return isSuccessful ? "Succeeded" : "Failed";
+	}
 }

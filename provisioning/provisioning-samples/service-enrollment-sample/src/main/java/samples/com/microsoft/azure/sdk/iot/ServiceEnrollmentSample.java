@@ -49,7 +49,7 @@ public class ServiceEnrollmentSample
     public static void main(String[] args) throws ProvisioningServiceErrorDetailsException, JsonProcessingException
     {
         System.out.println("Starting sample...");
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
         // *********************************** Create a Provisioning Service Client ************************************
         ServiceClientCredentials credentials = ProvisioningServiceClientHelper.createCredentialsFromConnectionString(PROVISIONING_CONNECTION_STRING);
@@ -95,12 +95,12 @@ public class ServiceEnrollmentSample
         System.out.println("\nAdd new individualEnrollment...");
         IndividualEnrollment individualEnrollmentResult =  provisioningServiceClient.createOrUpdateIndividualEnrollment(REGISTRATION_ID, individualEnrollment);
         System.out.println("\nIndividualEnrollment created with success...");
-        System.out.println(ow.writeValueAsString(individualEnrollmentResult));
+        System.out.println(objectWriter.writeValueAsString(individualEnrollmentResult));
 
         // ************************************* Get info of individualEnrollment *************************************
         System.out.println("\nGet the individualEnrollment information...");
         IndividualEnrollment getIndividualEnrollmentResult = provisioningServiceClient.getIndividualEnrollment(REGISTRATION_ID);
-        System.out.println(ow.writeValueAsString(getIndividualEnrollmentResult));
+        System.out.println(objectWriter.writeValueAsString(getIndividualEnrollmentResult));
         
         // ********************************* Update the info of individualEnrollment ***********************************
         System.out.println("\nUpdate the individualEnrollment information...");
@@ -112,7 +112,7 @@ public class ServiceEnrollmentSample
         getIndividualEnrollmentResult.withInitialTwin(initialTwin);
         IndividualEnrollment updateIndividualEnrollmentResult =  provisioningServiceClient.createOrUpdateIndividualEnrollment(REGISTRATION_ID, getIndividualEnrollmentResult, getIndividualEnrollmentResult.etag());
         System.out.println("\nIndividualEnrollment updated with success...");
-        System.out.println(ow.writeValueAsString(updateIndividualEnrollmentResult));
+        System.out.println(objectWriter.writeValueAsString(updateIndividualEnrollmentResult));
 
         // ************************************ Query info of individualEnrollment ************************************
         System.out.println("\nCreate a query for enrollments...");
@@ -122,7 +122,7 @@ public class ServiceEnrollmentSample
         
         for (IndividualEnrollment eachEnrollment : queryResult)
         {
-        	System.out.println(ow.writeValueAsString(eachEnrollment));
+        	System.out.println(objectWriter.writeValueAsString(eachEnrollment));
         }
 
         // *********************************** Delete info of individualEnrollment ************************************

@@ -60,7 +60,7 @@ public class ServiceEnrollmentGroupSample
     public static void main(String[] args) throws ProvisioningServiceErrorDetailsException, JsonProcessingException
     {
         System.out.println("Starting sample...");
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
         /*
          * Create the device collection.
@@ -96,12 +96,12 @@ public class ServiceEnrollmentGroupSample
         System.out.println("\nAdd new enrollmentGroup...");
         EnrollmentGroup enrollmentGroupResult =  provisioningServiceClient.createOrUpdateEnrollmentGroup(enrollmentGroupId, enrollmentGroup);
         System.out.println("\nEnrollmentGroup created with success...");
-        System.out.println(ow.writeValueAsString(enrollmentGroupResult));
+        System.out.println(objectWriter.writeValueAsString(enrollmentGroupResult));
 
         // **************************************** Get info of enrollmentGroup ****************************************
         System.out.println("\nGet the enrollmentGroup information...");
         EnrollmentGroup getResult = provisioningServiceClient.getEnrollmentGroup(enrollmentGroupId);
-        System.out.println(ow.writeValueAsString(getResult));
+        System.out.println(objectWriter.writeValueAsString(getResult));
 
         // *************************************** Query info of enrollmentGroup ***************************************
         System.out.println("\nCreate a query for the enrollmentGroups...");
@@ -111,7 +111,7 @@ public class ServiceEnrollmentGroupSample
 
         for (EnrollmentGroup eachEnrollmentGroup : queryResult)
         {
-        	System.out.println(ow.writeValueAsString(eachEnrollmentGroup));
+        	System.out.println(objectWriter.writeValueAsString(eachEnrollmentGroup));
         }
 
         // ************************************** Delete info of enrollmentGroup ***************************************
