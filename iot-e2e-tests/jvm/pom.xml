@@ -124,11 +124,6 @@
                     <argLine>
                         -javaagent:${settings.localRepository}/org/jmockit/jmockit/1.22/jmockit-1.22.jar
                     </argLine>
-                    <!-- These tests are currently disabled due to a known issue on the service side 
-                         where sometimes, scheduled jobs block indefinitely -->
-                    <excludes>
-                    	<exclude>**/ExportImportIT.java</exclude>
-                    </excludes>
                 </configuration>
             </plugin>
             <plugin>

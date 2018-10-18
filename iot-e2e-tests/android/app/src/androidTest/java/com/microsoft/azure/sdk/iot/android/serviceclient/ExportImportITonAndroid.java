@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 
-@Ignore
 public class ExportImportITonAndroid extends ExportImportCommon
 {
     @Rule
