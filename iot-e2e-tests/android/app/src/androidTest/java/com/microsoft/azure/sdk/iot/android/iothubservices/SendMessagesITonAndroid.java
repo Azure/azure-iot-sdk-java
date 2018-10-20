@@ -38,7 +38,7 @@ public class SendMessagesITonAndroid extends SendMessagesCommon
     public ReportHelper reportHelper = Factory.getReportHelper();
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{1} with {3} auth using {4}")
+    @Parameterized.Parameters(name = "{1}_{3}_{4}")
     public static Collection inputs() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;

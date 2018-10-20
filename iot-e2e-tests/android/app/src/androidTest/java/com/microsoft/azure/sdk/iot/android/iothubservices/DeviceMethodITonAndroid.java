@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.android.iothubservices;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
+import com.microsoft.azure.sdk.iot.android.helper.Rerun;
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
 import com.microsoft.azure.sdk.iot.common.iothubservices.DeviceMethodCommon;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
@@ -32,10 +33,13 @@ import java.util.Collection;
 public class DeviceMethodITonAndroid extends DeviceMethodCommon
 {
     @Rule
+    public Rerun count = new Rerun(3);
+
+    @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{1} with {2} auth using {3}")
+    @Parameterized.Parameters(name = "{1}_{2}_{3}")
     public static Collection inputsCommons() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, InterruptedException, ModuleClientException
     {
         String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
