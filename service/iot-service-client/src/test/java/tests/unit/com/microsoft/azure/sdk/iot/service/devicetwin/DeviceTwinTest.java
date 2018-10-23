@@ -5,12 +5,10 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.twin.ConfigurationInfo;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
-import com.microsoft.azure.sdk.iot.service.Configuration;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
@@ -987,6 +985,8 @@ public class DeviceTwinTest
                 result = dp;
                 mockedTwinState.getReportedProperty();
                 result = rp;
+                mockCapabilities.isIotEdge();
+                result = Boolean.TRUE;
             }
         };
 
@@ -1013,6 +1013,7 @@ public class DeviceTwinTest
         assetEqualSetAndMap(result.getTags(), (Map)tags);
         assetEqualSetAndMap(result.getDesiredProperties(), (Map)dp);
         assetEqualSetAndMap(result.getReportedProperties(), (Map)rp);
+        assertTrue(result.getCapabilities().isIotEdge());
         assertNull(result.getModuleId());
     }
 
