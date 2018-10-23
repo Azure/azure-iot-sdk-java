@@ -22,7 +22,6 @@
             <version>2.0.0-preview-001</version>
         </dependency>
     </dependencies>
-    
     <build>
         <plugins>
             <plugin>

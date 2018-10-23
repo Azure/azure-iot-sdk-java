@@ -23,6 +23,8 @@ public final class ProvisioningSasToken
 	private static final long TOKEN_VALID_SECS = 365 * 24 * 60 * 60;
 	private static final long ONE_SECOND_IN_MILLISECONDS = 1000;
 	private static final long BUFFER_SECONDS = 0;
+	private static final String UTF_8_ENCODING = "UTF-8";
+	private static final String HMAC_ALGORITHM = "HmacSHA256";
 
 	/**
 	 * The SAS token format. The parameters to be interpolated are, in order: the
@@ -109,19 +111,19 @@ public final class ProvisioningSasToken
 				// Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_004: [The constructor shall create
 				// a key from the shared access key signing with HmacSHA256]
 				// Get an hmac_sha1 key from the raw key bytes
-				byte[] keyBytes = Base64.decodeBase64Local(this.keyValue.getBytes("UTF-8"));
-				SecretKeySpec signingKey = new SecretKeySpec(keyBytes, "HmacSHA256");
+				byte[] keyBytes = Base64.decodeBase64Local(this.keyValue.getBytes(UTF_8_ENCODING));
+				SecretKeySpec signingKey = new SecretKeySpec(keyBytes, HMAC_ALGORITHM);
 
 				// Get an hmac_sha1 Mac instance and initialize with the signing key
-				Mac mac = Mac.getInstance("HmacSHA256");
+				Mac mac = Mac.getInstance(HMAC_ALGORITHM);
 				mac.init(signingKey);
 
 				// Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_005: [The constructor shall
 				// compute the final signature by url encoding the signed key]
 				// Compute the hmac on input data bytes
-				byte[] rawHmac = mac.doFinal(toSign.getBytes("UTF-8"));
+				byte[] rawHmac = mac.doFinal(toSign.getBytes(UTF_8_ENCODING));
 				// Convert raw bytes to Hex
-				String signature = URLEncoder.encode(Base64.encodeBase64StringLocal(rawHmac), "UTF-8");
+				String signature = URLEncoder.encode(Base64.encodeBase64StringLocal(rawHmac), UTF_8_ENCODING);
 
 				// Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_006: [The constructor shall
 				// concatenate the target uri, the signature, the expiry time and the key name
