@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-deps</artifactId>
-            <version>0.7.2</version>
+            <version>0.7.1</version>
         </dependency>
         <dependency>
             <groupId>org.jmockit</groupId>
