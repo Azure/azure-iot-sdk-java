@@ -7,6 +7,8 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
+/* Commenting out the ProvisioningClientIT class until Provisioning Service v2 API is finalized.
+
 import com.microsoft.azure.sdk.iot.common.MessageAndResult;
 import com.microsoft.azure.sdk.iot.common.iothubservices.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
@@ -638,3 +640,4 @@ public class ProvisioningClientIT
 
     }
 }
+*/
