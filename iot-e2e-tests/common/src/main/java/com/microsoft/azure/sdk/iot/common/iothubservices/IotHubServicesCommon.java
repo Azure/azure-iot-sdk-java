@@ -39,41 +39,40 @@ public class IotHubServicesCommon
                                     long interMessageDelay,
                                     List<IotHubConnectionStatus> statusUpdates) throws IOException, InterruptedException
     {
-        openClientWithRetry(client);
-
-        for (int i = 0; i < messagesToSend.size(); ++i)
+        try
         {
-            if (isErrorInjectionMessage(messagesToSend.get(i)))
-            {
-                //error injection message is not guaranteed to be ack'd by service so it may be re-sent. By setting expiry time,
-                // we ensure that error injection message isn't resent to service too many times. The message will still likely
-                // be sent 3 or 4 times causing 3 or 4 disconnections, but the test should recover anyways.
-                messagesToSend.get(i).message.setExpiryTime(200);
-            }
+            openClientWithRetry(client);
+            confirmOpenStablized(statusUpdates, 120000);
 
-            sendMessageAndWaitForResponse(client, messagesToSend.get(i), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
+            for (int i = 0; i < messagesToSend.size(); ++i) {
+                if (isErrorInjectionMessage(messagesToSend.get(i))) {
+                    //error injection message is not guaranteed to be ack'd by service so it may be re-sent. By setting expiry time,
+                    // we ensure that error injection message isn't resent to service too many times. The message will still likely
+                    // be sent 3 or 4 times causing 3 or 4 disconnections, but the test should recover anyways.
+                    messagesToSend.get(i).message.setExpiryTime(200);
+                }
 
-            if (isErrorInjectionMessage(messagesToSend.get(i)))
-            {
-                //wait until error injection message takes affect before sending the next message
-                long startTime = System.currentTimeMillis();
-                while (!statusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING))
-                {
-                    Thread.sleep(300);
+                sendMessageAndWaitForResponse(client, messagesToSend.get(i), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
 
-                    if (System.currentTimeMillis() - startTime > ERROR_INJECTION_MESSAGE_EFFECT_TIMEOUT)
-                    {
-                        fail("Sending message over " + protocol + " protocol failed: Error injection message never caused connection to be lost");
+                if (isErrorInjectionMessage(messagesToSend.get(i))) {
+                    //wait until error injection message takes affect before sending the next message
+                    long startTime = System.currentTimeMillis();
+                    while (!statusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING)) {
+                        Thread.sleep(300);
+
+                        if (System.currentTimeMillis() - startTime > ERROR_INJECTION_MESSAGE_EFFECT_TIMEOUT) {
+                            fail("Sending message over " + protocol + " protocol failed: Error injection message never caused connection to be lost");
+                        }
                     }
+                } else {
+                    Thread.sleep(interMessageDelay);
                 }
             }
-            else
-            {
-                Thread.sleep(interMessageDelay);
-            }
         }
-
-        client.closeNow();
+        finally
+        {
+            client.closeNow();
+        }
     }
 
     public static void sendMessagesExpectingConnectionStatusChangeUpdate(InternalClient client,
@@ -384,6 +383,7 @@ public class IotHubServicesCommon
         //wait to send the message because we want to ensure that the tcp connection drop happens before the message is received
         long startTime = System.currentTimeMillis();
         long timeElapsed = 0;
+
         while (!actualStatusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING))
         {
             Thread.sleep(200);
@@ -411,5 +411,27 @@ public class IotHubServicesCommon
         }
 
         System.out.println("Connection stabilized!");
+    }
+
+    public static void confirmOpenStablized(List actualStatusUpdates, long timeout) throws InterruptedException
+    {
+        long startTime = System.currentTimeMillis();
+        long timeElapsed;
+
+        int numOfUpdates = 0;
+        if (actualStatusUpdates != null)
+        {
+            while (numOfUpdates == 0 || numOfUpdates != actualStatusUpdates.size() || actualStatusUpdates.get(actualStatusUpdates.size() - 1) != IotHubConnectionStatus.CONNECTED)
+            {
+                numOfUpdates = actualStatusUpdates.size();
+                Thread.sleep(6 * 1000);
+                timeElapsed = System.currentTimeMillis() - startTime;
+
+                if (timeElapsed > timeout)
+                {
+                    fail("Timed out waiting for a stable connection on first open");
+                }
+            }
+        }
     }
 }

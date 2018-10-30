@@ -50,7 +50,7 @@ public class SendMessagesCommon extends MethodNameLoggingIntegrationTest
     private static final Integer NUM_KEYS_PER_MESSAGE = 3;
 
     // How much to wait until a message makes it to the server, in milliseconds
-    private static final Integer SEND_TIMEOUT_MILLISECONDS = 120000;
+    private static final Integer SEND_TIMEOUT_MILLISECONDS = 180000;
 
     //How many milliseconds between retry
     private static final Integer RETRY_MILLISECONDS = 100;

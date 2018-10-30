@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.common.Success;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.Module;
@@ -549,8 +550,6 @@ public class ReceiveMessagesCommon extends MethodNameLoggingIntegrationTest
             }
         }, null);
 
-        IotHubServicesCommon.openClientWithRetry(testInstance.client);
-
         com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
 
         if (testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS)
@@ -568,29 +567,35 @@ public class ReceiveMessagesCommon extends MethodNameLoggingIntegrationTest
             ((ModuleClient) testInstance.client).setMessageCallback(callback, messageReceived);
         }
 
-        //error injection message is not guaranteed to be ack'd by service so it may be re-sent. By setting expiry time,
-        // we ensure that error injection message isn't resent to service too many times. The message will still likely
-        // be sent 3 or 4 times causing 3 or 4 disconnections, but the test should recover anyways.
-        errorInjectionMessage.setExpiryTime(200);
-        testInstance.client.sendEventAsync(errorInjectionMessage, new EventCallback(null), null);
-
-        //wait to send the message because we want to ensure that the tcp connection drop happens beforehand and we
-        // want the connection to be re-established before sending anything from service client
-        IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT);
-
-        if (testInstance.client instanceof DeviceClient)
+        try
         {
-            sendMessageToDevice(testInstance.device.getDeviceId(), testInstance.protocol.toString());
+            IotHubServicesCommon.openClientWithRetry(testInstance.client);
+            IotHubServicesCommon.confirmOpenStablized(connectionStatusUpdates, 120000);
+
+            //error injection message is not guaranteed to be ack'd by service so it may be re-sent. By setting expiry time,
+            // we ensure that error injection message isn't resent to service too many times. The message will still likely
+            // be sent 3 or 4 times causing 3 or 4 disconnections, but the test should recover anyways.
+            errorInjectionMessage.setExpiryTime(200);
+            testInstance.client.sendEventAsync(errorInjectionMessage, new EventCallback(null), null);
+
+            //wait to send the message because we want to ensure that the tcp connection drop happens beforehand and we
+            // want the connection to be re-established before sending anything from service client
+            IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT);
+
+            if (testInstance.client instanceof DeviceClient) {
+                sendMessageToDevice(testInstance.device.getDeviceId(), testInstance.protocol.toString());
+            } else if (testInstance.client instanceof ModuleClient) {
+                sendMessageToModule(testInstance.device.getDeviceId(), testInstance.module.getId(), testInstance.protocol.toString());
+            }
+
+            waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
+
+            Thread.sleep(200);
         }
-        else if (testInstance.client instanceof ModuleClient)
+        finally
         {
-            sendMessageToModule(testInstance.device.getDeviceId(), testInstance.module.getId(), testInstance.protocol.toString());
+            testInstance.client.closeNow();
         }
-
-        waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
-
-        Thread.sleep(200);
-        testInstance.client.closeNow();
 
         assertTrue(testInstance.protocol + ", " + testInstance.authenticationType + ": Error Injection message did not cause service to drop TCP connection", connectionStatusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING));
     }
