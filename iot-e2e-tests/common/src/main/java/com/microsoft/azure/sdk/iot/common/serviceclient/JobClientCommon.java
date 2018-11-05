@@ -44,10 +44,10 @@ public class JobClientCommon
     private static String DEVICE_ID_NAME = "E2EJavaJob";
     private static String JOB_ID_NAME = "JobTest";
 
-    private static final long MAX_TIME_WAIT_FOR_PREVIOUSLY_SCHEDULED_JOBS_TO_FINISH_IN_MILLIS = 2 * 60 * 1000; // 2 minutes
+    private static final long MAX_TIME_WAIT_FOR_PREVIOUSLY_SCHEDULED_JOBS_TO_FINISH_IN_MILLIS = 3 * 60 * 1000; // 3 minutes
     private static final long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(120);
     private static final long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toSeconds(5);
-    private static final long TEST_TIMEOUT_MS = 60000L; // 1 minute
+    private static final long TEST_TIMEOUT_MS = 3 * 60 * 1000L; // 3 minutes
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 200; // 0.2 sec
     private static final String PAYLOAD_STRING = "This is a valid payload";
     private static int newTemperature = 70;
@@ -432,7 +432,7 @@ public class JobClientCommon
             {
                 assertTrue("Device didn't receive the twin change", false);
             }
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB); // wait 10 seconds
+            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
             changes = deviceTestManger.getTwinChanges();
         }
 

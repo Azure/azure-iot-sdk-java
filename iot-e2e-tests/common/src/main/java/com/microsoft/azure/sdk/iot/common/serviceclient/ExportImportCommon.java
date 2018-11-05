@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyDevicesException;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.*;
@@ -31,8 +32,8 @@ import static junit.framework.TestCase.fail;
 public class ExportImportCommon
 {
     private static final long IMPORT_EXPORT_TEST_TIMEOUT = 3 * 60 * 1000; //3 minutes
-    private static final long IMPORT_JOB_TIMEOUT = 1 * 60 * 1000; //1 minute
-    private static final long EXPORT_JOB_TIMEOUT = 1 * 60 * 1000; //1 minute
+    private static final long IMPORT_JOB_TIMEOUT = 3 * 60 * 1000; //3 minute
+    private static final long EXPORT_JOB_TIMEOUT = 3 * 60 * 1000; //3 minute
 
     protected static String iotHubConnectionString = "";
     protected static String storageAccountConnectionString = "";
@@ -146,7 +147,21 @@ public class ExportImportCommon
         Boolean excludeKeys = false;
         String containerSasUri = getContainerSasUri(exportContainer);
 
-        JobProperties exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
+        boolean exportJobScheduled = false;
+        JobProperties exportJob = null;
+        while (!exportJobScheduled)
+        {
+            try
+            {
+                exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
+                exportJobScheduled = true;
+            }
+            catch (IotHubTooManyDevicesException e)
+            {
+                //test is being throttled, wait a while and try again
+                Thread.sleep(30 * 1000);
+            }
+        }
 
         JobProperties.JobStatus jobStatus;
 
@@ -228,7 +243,21 @@ public class ExportImportCommon
         importBlob.upload(stream, blobToImport.length);
 
         // Starting the import job
-        JobProperties importJob = registryManager.importDevices(getContainerSasUri(importContainer), getContainerSasUri(importContainer));
+        boolean importJobScheduled = false;
+        JobProperties importJob = null;
+        while (!importJobScheduled)
+        {
+            try
+            {
+                importJob = registryManager.importDevices(getContainerSasUri(importContainer), getContainerSasUri(importContainer));
+                importJobScheduled = true;
+            }
+            catch (IotHubTooManyDevicesException e)
+            {
+                //test is being throttled, wait a while and try again
+                Thread.sleep(30 * 1000);
+            }
+        }
 
         // Waiting for the import job to complete
         long startTime = System.currentTimeMillis();
