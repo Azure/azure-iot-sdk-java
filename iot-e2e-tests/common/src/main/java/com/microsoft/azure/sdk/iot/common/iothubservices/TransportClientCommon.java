@@ -162,6 +162,8 @@ public class TransportClientCommon extends MethodNameLoggingIntegrationTest
         {
             serviceClient.close();
         }
+
+        clientConnectionStringArrayList.clear();
     }
 
     @After
