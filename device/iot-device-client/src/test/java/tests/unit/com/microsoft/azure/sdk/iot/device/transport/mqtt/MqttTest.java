@@ -1358,6 +1358,7 @@ public class MqttTest
         mockMqtt.deliveryComplete(mockMqttDeliveryToken);
 
         //assert
+        assertEquals("unacknowledgedSentMessages should have removed the sent message!", 1, unacknowledgedMessages.size());
         new Verifications()
         {
             {

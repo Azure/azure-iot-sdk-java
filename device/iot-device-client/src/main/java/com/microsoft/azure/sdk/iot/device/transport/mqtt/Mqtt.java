@@ -412,7 +412,7 @@ abstract public class Mqtt implements MqttCallback
             {
                 if (this.unacknowledgedSentMessages.containsKey(iMqttDeliveryToken.getMessageId()))
                 {
-                    Message deliveredMessage = this.unacknowledgedSentMessages.get(iMqttDeliveryToken.getMessageId());
+                    Message deliveredMessage = this.unacknowledgedSentMessages.remove(iMqttDeliveryToken.getMessageId());
 
                     if (deliveredMessage instanceof IotHubTransportMessage)
                     {
@@ -431,7 +431,7 @@ abstract public class Mqtt implements MqttCallback
                     }
 
                     //Codes_SRS_Mqtt_34_042: [If this object has a saved listener, that listener shall be notified of the successfully delivered message.]
-                    this.listener.onMessageSent(this.unacknowledgedSentMessages.get(iMqttDeliveryToken.getMessageId()), null);
+                    this.listener.onMessageSent(deliveredMessage, null);
                 }
             }
         }
