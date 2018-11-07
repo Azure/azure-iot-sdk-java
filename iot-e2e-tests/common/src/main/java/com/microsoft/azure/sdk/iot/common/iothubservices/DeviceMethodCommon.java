@@ -73,6 +73,8 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
     private static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
     private static final long ERROR_INJECTION_EXECUTION_TIMEOUT = 2* 60 * 1000; // 2 minute
 
+    private List<IotHubConnectionStatus> actualStatusUpdates;
+
     protected static boolean includeModuleClientTest = true;
 
     public static Collection inputsCommon() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, InterruptedException, ModuleClientException
@@ -190,6 +192,9 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
     @Before
     public void cleanToStart()
     {
+        actualStatusUpdates = new ArrayList<>();
+        setConnectionStatusCallBack(actualStatusUpdates);
+
         try
         {
             this.testInstance.deviceTestManager.stop();
@@ -208,6 +213,7 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
         try
         {
             this.testInstance.deviceTestManager.start();
+            IotHubServicesCommon.confirmOpenStablized(actualStatusUpdates, 120000);
         }
         catch (IOException | InterruptedException e)
         {
@@ -881,8 +887,6 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
     private void errorInjectionTestFlow(Message errorInjectionMessage) throws Exception
     {
         // Arrange
-        final List<IotHubConnectionStatus> actualStatusUpdates = new ArrayList<>();
-        setConnectionStatusCallBack(actualStatusUpdates);
         invokeMethodSucceed();
 
         // Act

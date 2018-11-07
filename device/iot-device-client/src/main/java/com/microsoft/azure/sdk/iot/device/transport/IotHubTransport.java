@@ -68,6 +68,8 @@ public class IotHubTransport implements IotHubListener
 
     final private Object reconnectionLock = new Object();
 
+    private ScheduledExecutorService scheduledExecutorService;
+
     /**
      * Constructor for an IotHubTransport object with default values
      * @param defaultConfig the config used for opening connections, retrieving retry policy, and checking protocol
@@ -304,6 +306,12 @@ public class IotHubTransport implements IotHubListener
         if (this.taskScheduler != null)
         {
             this.taskScheduler.shutdown();
+        }
+
+        if (this.scheduledExecutorService != null)
+        {
+            this.scheduledExecutorService.shutdownNow();
+            this.scheduledExecutorService = null;
         }
 
         //Codes_SRS_IOTHUBTRANSPORT_34_024: [This function shall close the connection.]
@@ -625,9 +633,13 @@ public class IotHubTransport implements IotHubListener
                 break;
             case AMQPS:
             case AMQPS_WS:
+                if (scheduledExecutorService == null)
+                {
+                    scheduledExecutorService = Executors.newScheduledThreadPool(1);
+                }
                 //Codes_SRS_IOTHUBTRANSPORT_34_037: [If the default config's protocol is AMQPS or AMQPS_WS, this
                 // function shall set this object's iotHubTransportConnection to a new AmqpsIotHubConnection object.]
-                this.iotHubTransportConnection = new AmqpsIotHubConnection(defaultConfig);
+                this.iotHubTransportConnection = new AmqpsIotHubConnection(defaultConfig, scheduledExecutorService);
                 break;
             default:
                 throw new TransportException("Protocol not supported");

@@ -87,7 +87,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
      * @param config The {@link DeviceClientConfig} corresponding to the device associated with this {@link com.microsoft.azure.sdk.iot.device.DeviceClient}.
      * @throws TransportException if failed connecting to iothub.
      */
-    public AmqpsIotHubConnection(DeviceClientConfig config) throws TransportException
+    public AmqpsIotHubConnection(DeviceClientConfig config, ScheduledExecutorService scheduledExecutorService) throws TransportException
     {
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
         // any of the parameters of the configuration is null or empty.]
@@ -107,6 +107,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             throw new IllegalArgumentException("hubName cannot be null or empty.");
         }
+
+        this.scheduledExecutorService = scheduledExecutorService;
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_002: [The constructor shall save the configuration into private member variables.]
         this.deviceClientConfig = config;
@@ -352,12 +354,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 throw new TransportException("Waited too long for the connection to close.", e);
             }
             logger.LogInfo("Shutdown of executor service completed, method name is %s ", logger.getMethodName());
-        }
-
-        if (this.scheduledExecutorService != null && !isReconnecting)
-        {
-            this.scheduledExecutorService.shutdownNow();
-            this.scheduledExecutorService = null;
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
@@ -1041,11 +1037,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
      */
     private void scheduleReconnection(Throwable throwable)
     {
-        if (scheduledExecutorService == null)
-        {
-            scheduledExecutorService = Executors.newScheduledThreadPool(1);
-        }
-
         if (!reconnectionScheduled)
         {
             reconnectionScheduled = true;
@@ -1060,6 +1051,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
      */
     public static class ReconnectionTask implements Callable
     {
+        private final static String THREAD_NAME = "azure-iot-sdk-ReconnectionTask";
         private Throwable connectionLossCause;
         private IotHubListener listener;
         private String connectionId;
@@ -1074,6 +1066,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         @Override
         public Object call()
         {
+            Thread.currentThread().setName(THREAD_NAME);
             this.listener.onConnectionLost(this.connectionLossCause, this.connectionId);
             return null;
         }

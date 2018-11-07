@@ -7,6 +7,7 @@ def IOTHUB_CONNECTION_STRING_ENV_VAR_NAME = project.hasProperty('IotHubConnectio
 def IOTHUB_E2E_X509_THUMBPRINT = project.hasProperty('IotHubThumbprint') ? '"'+project.property('IotHubThumbprint')+'"': '"Define IotHub Cert Thumbprint"'
 def IOTHUB_CONN_STRING_INVALIDCERT = project.hasProperty('IotHubInvalidCertConnectionString') ? '"'+project.property('IotHubInvalidCertConnectionString')+'"': '"Define IotHub Invalid Cert Connection"'
 def APPCENTER_APP_SECRET = project.hasProperty('AppCenterAppSecret') ? '"'+project.property('AppCenterAppSecret')+'"': '"Define AppCenter App Secret"'
+def STORAGE_ACCOUNT_CONNECTION_STRING = project.hasProperty('StorageAccountConnectionString') ? '"'+project.property('StorageAccountConnectionString')+'"': '"Define Storage Account Connection String"'
 
 def STRING='String'
 //***********************************************************************************************//
@@ -31,6 +32,7 @@ android {
             buildConfigField STRING, 'IotHubThumbprint', IOTHUB_E2E_X509_THUMBPRINT
             buildConfigField STRING, 'IotHubInvalidCertConnectionString', IOTHUB_CONN_STRING_INVALIDCERT
             buildConfigField STRING, 'AppCenterAppSecret', APPCENTER_APP_SECRET
+            buildConfigField STRING, 'StorageAccountConnectionString', STORAGE_ACCOUNT_CONNECTION_STRING
         }
     }
     buildTypes {
