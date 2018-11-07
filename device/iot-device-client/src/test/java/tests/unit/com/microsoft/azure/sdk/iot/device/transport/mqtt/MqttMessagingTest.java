@@ -78,7 +78,7 @@ public class MqttMessagingTest
     }
 
     /*
-    **Tests_SRS_MqttMessaging_25_001: [The constructor shall throw IllegalArgumentException if any of the parameters are null or empty .]
+     **Tests_SRS_MqttMessaging_25_001: [The constructor shall throw IllegalArgumentException if any of the parameters are null or empty .]
      */
     @Test (expected = IllegalArgumentException.class)
     public void constructorFailsIfMqttConnectionIsNull() throws TransportException
@@ -87,7 +87,7 @@ public class MqttMessagingTest
     }
 
     /*
-    **Tests_SRS_MqttMessaging_25_001: [The constructor shall throw IllegalArgumentException if any of the parameters are null or empty .]
+     **Tests_SRS_MqttMessaging_25_001: [The constructor shall throw IllegalArgumentException if any of the parameters are null or empty .]
      */
     @Test (expected = IllegalArgumentException.class)
     public void constructorFailsIfDeviceIDIsEmpty() throws TransportException
@@ -102,7 +102,7 @@ public class MqttMessagingTest
     }
 
     /*
-    **Tests_SRS_MqttMessaging_25_020: [start method shall be call connect to establish a connection to IOT Hub with the given configuration.]
+     **Tests_SRS_MqttMessaging_25_020: [start method shall be call connect to establish a connection to IOT Hub with the given configuration.]
      */
     @Test
     public  void startCallsConnectAndSubscribe(@Mocked final Mqtt mockMqtt) throws TransportException
@@ -187,9 +187,9 @@ public class MqttMessagingTest
     }
 
     /*
-    **Tests_SRS_MqttMessaging_25_022: [stop method shall be call disconnect to tear down a connection to IOT Hub with the given configuration.]
+     **Tests_SRS_MqttMessaging_25_022: [stop method shall be call disconnect to tear down a connection to IOT Hub with the given configuration.]
 
-    **Tests_SRS_MqttMessaging_25_023: [stop method shall be call restartBaseMqtt to tear down a the base class even if disconnect fails.]
+     **Tests_SRS_MqttMessaging_25_023: [stop method shall be call restartBaseMqtt to tear down a the base class even if disconnect fails.]
      */
     @Test
     public void stopCallsDisconnect(@Mocked final Mqtt mockMqtt) throws TransportException
@@ -241,7 +241,7 @@ public class MqttMessagingTest
     }
 
     /*
-    **Tests_SRS_MqttMessaging_25_024: [send method shall publish a message to the IOT Hub on the publish topic by calling method publish().]
+     **Tests_SRS_MqttMessaging_25_024: [send method shall publish a message to the IOT Hub on the publish topic by calling method publish().]
      */
     @Test
     public void sendShallMessageToLowerLayer(@Mocked final Mqtt mockMqtt) throws TransportException
@@ -300,7 +300,7 @@ public class MqttMessagingTest
     }
 
     /*
-    **Tests_SRS_MqttMessaging_25_025: [send method shall throw an IllegalArgumentException if the message is null.]
+     **Tests_SRS_MqttMessaging_25_025: [send method shall throw an IllegalArgumentException if the message is null.]
      */
     @Test (expected = IllegalArgumentException.class)
     public void sendShallThrowTransportExceptionIfMessageIsNull(@Mocked final Mqtt mockMqtt) throws TransportException
@@ -600,9 +600,9 @@ public class MqttMessagingTest
         };
     }
 
-    //Tests_SRS_MqttMessaging_34_036: [start method shall subscribe to the inputs channel if communicating as a module.]
+    //Tests_SRS_MqttMessaging_34_036: [start method shall subscribe to the inputs channel if communicating as a module to an edgehub.]
     @Test
-    public void startSubscribesForInputEventsIfIotHub(@Mocked final Mqtt mockMqtt) throws TransportException
+    public void startDoesNotSubscribeForInputEventsIfIotHub(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
         String deviceId = "1234";
@@ -619,7 +619,7 @@ public class MqttMessagingTest
         {
             {
                 Deencapsulation.invoke(mockMqtt, "subscribe", inputsSubsriptionChannel);
-                times = 1;
+                times = 0;
 
                 Deencapsulation.invoke(mockMqtt, "subscribe", eventsSubsriptionChannel);
                 times = 1;

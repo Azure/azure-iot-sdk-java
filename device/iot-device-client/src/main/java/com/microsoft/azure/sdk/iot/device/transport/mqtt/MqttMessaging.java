@@ -60,10 +60,9 @@ public class MqttMessaging extends Mqtt
             //Codes_SRS_MqttMessaging_34_035: [start method shall subscribe to the cloud to device events if not communicating to an edgeHub.]
             this.subscribe(this.eventsSubscribeTopic);
         }
-
-        if (this.moduleId != null && !this.moduleId.isEmpty())
+        else if (this.moduleId != null && !this.moduleId.isEmpty())
         {
-            //Codes_SRS_MqttMessaging_34_036: [start method shall subscribe to the inputs channel if communicating as a module.]
+            //Codes_SRS_MqttMessaging_34_036: [start method shall subscribe to the inputs channel if communicating as a module to an edgehub.]
             this.subscribe(this.inputsSubscribeTopic);
         }
     }
