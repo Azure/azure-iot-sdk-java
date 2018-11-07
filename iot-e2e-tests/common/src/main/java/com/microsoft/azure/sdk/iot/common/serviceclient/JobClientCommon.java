@@ -31,6 +31,7 @@ import static org.junit.Assert.*;
 /**
  * Integration E2E test for Job Client on the service client.
  */
+@Ignore
 public class JobClientCommon
 {
     protected static String iotHubConnectionString = "";
