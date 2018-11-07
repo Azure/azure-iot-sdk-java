@@ -718,7 +718,7 @@ public class SendMessagesCommon extends MethodNameLoggingIntegrationTest
         }
 
         errorInjectionTestFlowNoDisconnect(
-                ErrorInjectionHelper.throttledConnectionErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.Duration10Sec),
+                ErrorInjectionHelper.throttledConnectionErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec),
                 IotHubStatusCode.OK_EMPTY,
                 false);
 
@@ -734,7 +734,7 @@ public class SendMessagesCommon extends MethodNameLoggingIntegrationTest
         }
 
         errorInjectionTestFlowNoDisconnect(
-                ErrorInjectionHelper.throttledConnectionErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.Duration10Sec),
+                ErrorInjectionHelper.throttledConnectionErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec),
                 IotHubStatusCode.THROTTLED,
                 true);
 
@@ -750,7 +750,7 @@ public class SendMessagesCommon extends MethodNameLoggingIntegrationTest
         }
 
         errorInjectionTestFlowNoDisconnect(
-                ErrorInjectionHelper.authErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.Duration10Sec),
+                ErrorInjectionHelper.authErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec),
                 IotHubStatusCode.ERROR,
                 false);
     }
@@ -765,7 +765,7 @@ public class SendMessagesCommon extends MethodNameLoggingIntegrationTest
         }
 
         errorInjectionTestFlowNoDisconnect(
-                ErrorInjectionHelper.quotaExceededErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.Duration10Sec),
+                ErrorInjectionHelper.quotaExceededErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec),
                 IotHubStatusCode.ERROR,
                 false);
     }
@@ -862,6 +862,8 @@ public class SendMessagesCommon extends MethodNameLoggingIntegrationTest
                 RETRY_MILLISECONDS,
                 SEND_TIMEOUT_MILLISECONDS,
                 this.testInstance.protocol);
+
+        dc.closeNow();
 
         //cleanup
         registryManager.removeDevice(target.getDeviceId());

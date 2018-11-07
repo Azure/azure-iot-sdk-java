@@ -31,9 +31,9 @@ import static junit.framework.TestCase.fail;
 
 public class ExportImportCommon
 {
-    private static final long IMPORT_EXPORT_TEST_TIMEOUT = 3 * 60 * 1000; //3 minutes
-    private static final long IMPORT_JOB_TIMEOUT = 3 * 60 * 1000; //3 minute
-    private static final long EXPORT_JOB_TIMEOUT = 3 * 60 * 1000; //3 minute
+    private static final long IMPORT_EXPORT_TEST_TIMEOUT = 8 * 60 * 1000; //3 minutes
+    private static final long IMPORT_JOB_TIMEOUT = 6 * 60 * 1000; //3 minute
+    private static final long EXPORT_JOB_TIMEOUT = 6 * 60 * 1000; //3 minute
 
     protected static String iotHubConnectionString = "";
     protected static String storageAccountConnectionString = "";

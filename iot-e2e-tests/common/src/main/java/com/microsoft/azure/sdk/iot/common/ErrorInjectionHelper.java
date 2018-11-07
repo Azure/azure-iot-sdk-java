@@ -33,7 +33,6 @@ public class ErrorInjectionHelper
 
     public static final int DefaultDelayInSec = 1;
     public static final int DefaultDurationInSec = 5;
-    public static final int Duration10Sec = 10;
 
     public static Message tcpConnectionDropErrorInjectionMessage(int delayInSecs, int durationInSecs)
     {
