@@ -907,8 +907,6 @@ public class AmqpsIotHubConnectionTest {
                 times = 1;
                 mockExecutorService.shutdown();
                 times = 1;
-                mockScheduledExecutorService.shutdownNow();
-                times = 1;
             }
         };
     }

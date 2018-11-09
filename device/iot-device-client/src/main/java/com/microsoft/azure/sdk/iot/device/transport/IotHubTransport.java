@@ -69,6 +69,7 @@ public class IotHubTransport implements IotHubListener
     final private Object reconnectionLock = new Object();
 
     private ScheduledExecutorService scheduledExecutorService;
+    private static final int POOL_SIZE = 1;
 
     /**
      * Constructor for an IotHubTransport object with default values
@@ -635,7 +636,7 @@ public class IotHubTransport implements IotHubListener
             case AMQPS_WS:
                 if (scheduledExecutorService == null)
                 {
-                    scheduledExecutorService = Executors.newScheduledThreadPool(1);
+                    scheduledExecutorService = Executors.newScheduledThreadPool(POOL_SIZE);
                 }
                 //Codes_SRS_IOTHUBTRANSPORT_34_037: [If the default config's protocol is AMQPS or AMQPS_WS, this
                 // function shall set this object's iotHubTransportConnection to a new AmqpsIotHubConnection object.]

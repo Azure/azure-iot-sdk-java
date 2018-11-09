@@ -17,6 +17,7 @@ import org.junit.Rule;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+@Ignore
 public class JobClientITonAndroid extends JobClientCommon
 {
     @Rule

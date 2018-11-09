@@ -226,6 +226,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
             catch (InterruptedException e)
             {
+                executorServicesCleanup();
                 logger.LogError(e);
                 throw new TransportException("Waited too long for the connection to open.");
             }
@@ -325,6 +326,13 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             throw new TransportException("Waited too long for the connection to close.", e);
         }
 
+        this.executorServicesCleanup();
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
+    }
+
+    private void executorServicesCleanup() throws TransportException
+    {
         if (this.executorService != null)
         {
             logger.LogInfo("Shutdown of executor service has started, method name is %s ", logger.getMethodName());
@@ -355,8 +363,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
             logger.LogInfo("Shutdown of executor service completed, method name is %s ", logger.getMethodName());
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**

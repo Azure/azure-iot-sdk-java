@@ -20,10 +20,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason.*;
 import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.*;
@@ -96,6 +93,9 @@ public class IotHubTransportTest
 
     @Mocked
     IotHubServiceException mockedIothubServiceException;
+
+    @Mocked
+    Executors mockExecutors;
 
     //Tests_SRS_IOTHUBTRANSPORT_34_001: [The constructor shall save the default config.]
     //Tests_SRS_IOTHUBTRANSPORT_34_003: [The constructor shall set the connection status as DISCONNECTED and the current retry attempt to 0.]
@@ -882,7 +882,8 @@ public class IotHubTransportTest
             {
                 mockedConfig.getProtocol();
                 result = IotHubClientProtocol.AMQPS;
-
+                Executors.newScheduledThreadPool(1);
+                result = mockedScheduledExecutorService;
                 new AmqpsIotHubConnection(mockedConfig, mockedScheduledExecutorService);
                 result = mockedAmqpsIotHubConnection;
             }
@@ -918,7 +919,8 @@ public class IotHubTransportTest
             {
                 mockedConfig.getProtocol();
                 result = IotHubClientProtocol.AMQPS_WS;
-
+                Executors.newScheduledThreadPool(1);
+                result = mockedScheduledExecutorService;
                 new AmqpsIotHubConnection(mockedConfig, mockedScheduledExecutorService);
                 result = mockedAmqpsIotHubConnection;
             }

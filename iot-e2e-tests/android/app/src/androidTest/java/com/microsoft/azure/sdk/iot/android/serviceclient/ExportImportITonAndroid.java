@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 
+@Ignore
 public class ExportImportITonAndroid extends ExportImportCommon
 {
     @Rule
@@ -27,7 +28,7 @@ public class ExportImportITonAndroid extends ExportImportCommon
     public static void setUp() throws URISyntaxException, InvalidKeyException, StorageException, IOException
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
-        storageAccountConnectionString = BuildConfig.IotHubInvalidCertConnectionString;
+        storageAccountConnectionString = BuildConfig.StorageAccountConnectionString;
         ExportImportCommon.setUp();
     }
 }

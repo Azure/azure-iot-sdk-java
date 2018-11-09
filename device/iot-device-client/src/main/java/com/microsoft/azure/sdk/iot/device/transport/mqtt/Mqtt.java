@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
+import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
@@ -115,6 +116,7 @@ abstract public class Mqtt implements MqttCallback
             }
             catch (MqttException e)
             {
+                this.disconnect();
                 //Codes_SRS_Mqtt_34_044: [If an MqttException is encountered while connecting, this function shall throw the associated ProtocolException.]
                 throw PahoExceptionTranslator.convertToMqttException(e, "Unable to establish MQTT connection");
             }
@@ -341,16 +343,37 @@ abstract public class Mqtt implements MqttCallback
     @Override
     public void connectionLost(Throwable throwable)
     {
+        TransportException ex = null;
+
+        try
+        {
+            if (mqttConnection != null)
+            {
+                this.disconnect();
+            }
+        }
+        catch (TransportException e)
+        {
+            ex = e;
+        }
+
         if (this.listener != null)
         {
-            if (throwable instanceof MqttException)
+            if (ex == null)
             {
-                //Codes_SRS_Mqtt_34_055: [If the provided throwable is an instance of MqttException, this function shall derive the associated ConnectionStatusException and notify the listener of that derived exception.]
-                throwable = PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
+                if (throwable instanceof MqttException)
+                {
+                    //Codes_SRS_Mqtt_34_055: [If the provided throwable is an instance of MqttException, this function shall derive the associated ConnectionStatusException and notify the listener of that derived exception.]
+                    throwable = PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
+                }
+                else
+                {
+                    throwable = new TransportException(throwable);
+                }
             }
             else
             {
-                throwable = new TransportException(throwable);
+                throwable = ex;
             }
 
             //Codes_SRS_Mqtt_34_045: [If this object has a saved listener, this function shall notify the listener that connection was lost.]

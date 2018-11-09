@@ -45,7 +45,8 @@ public class IotHubServicesCommon
             confirmOpenStablized(statusUpdates, 120000);
 
             for (int i = 0; i < messagesToSend.size(); ++i) {
-                if (isErrorInjectionMessage(messagesToSend.get(i))) {
+                if (isErrorInjectionMessage(messagesToSend.get(i)))
+                {
                     //error injection message is not guaranteed to be ack'd by service so it may be re-sent. By setting expiry time,
                     // we ensure that error injection message isn't resent to service too many times. The message will still likely
                     // be sent 3 or 4 times causing 3 or 4 disconnections, but the test should recover anyways.
@@ -54,7 +55,8 @@ public class IotHubServicesCommon
 
                 sendMessageAndWaitForResponse(client, messagesToSend.get(i), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
 
-                if (isErrorInjectionMessage(messagesToSend.get(i))) {
+                if (isErrorInjectionMessage(messagesToSend.get(i)))
+                {
                     //wait until error injection message takes affect before sending the next message
                     long startTime = System.currentTimeMillis();
                     while (!statusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING)) {
@@ -64,7 +66,9 @@ public class IotHubServicesCommon
                             fail("Sending message over " + protocol + " protocol failed: Error injection message never caused connection to be lost");
                         }
                     }
-                } else {
+                }
+                else
+                {
                     Thread.sleep(interMessageDelay);
                 }
             }
