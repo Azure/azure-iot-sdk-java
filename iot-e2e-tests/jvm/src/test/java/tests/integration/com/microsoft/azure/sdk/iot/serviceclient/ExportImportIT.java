@@ -10,13 +10,11 @@ import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.serviceclient.ExportImportCommon;
 import com.microsoft.azure.storage.StorageException;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 
-@Ignore
 public class ExportImportIT extends ExportImportCommon
 {
     @BeforeClass

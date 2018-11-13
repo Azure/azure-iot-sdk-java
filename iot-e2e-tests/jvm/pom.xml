@@ -111,6 +111,14 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <excludes>
+                        <exclude>
+                            **/JobClientIT.java
+                        </exclude>
+                        <exclude>
+                            **/ExportImportIT.java
+                        </exclude>
+                    </excludes>
                     <!--
                     Maximum of 8 jvm instances active at a time, may be running test methods
                     from different test classes at the same time. But since they are in seperate JVM's, race conditions
