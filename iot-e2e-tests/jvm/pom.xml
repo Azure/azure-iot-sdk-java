@@ -113,12 +113,16 @@
                 <configuration>
                     <excludes>
                         <exclude>
-                            **/JobClientIT.java
+                            **/JobClientJVMRunner.java
                         </exclude>
                         <exclude>
-                            **/ExportImportIT.java
+                            **/ExportImportJVMRunner.java
                         </exclude>
                     </excludes>
+                    <includes>
+                        <!-- Mvn install will run tests found in the files that match the ______JVMRunner.java naming pattern -->
+                        <include>*JVMRunner.java</include>
+                    </includes>
                     <!--
                     Maximum of 8 jvm instances active at a time, may be running test methods
                     from different test classes at the same time. But since they are in seperate JVM's, race conditions

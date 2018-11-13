@@ -216,3 +216,11 @@ provisioning/provisioning-tools/tpm-simulator/NVChip
 # vertx log files (for Edge E2E wrapper)
 .vertx
 vertx.log.lck
+
+
+# =========================
+# Android environment variable config
+# =========================
+
+*.properties
+iot-e2e-tests/android/gradle.properties

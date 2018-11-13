@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.common.helpers;
 
-import com.microsoft.azure.sdk.iot.common.MessageAndResult;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 
