@@ -16,6 +16,6 @@ public class IotHubBadFormatException extends IotHubException
     }
     public IotHubBadFormatException(String message)
     {
-        super("Bad message format!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
+        super(message);
     }
 }

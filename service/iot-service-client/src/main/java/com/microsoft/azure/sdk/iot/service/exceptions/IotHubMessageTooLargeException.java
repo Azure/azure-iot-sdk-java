@@ -17,6 +17,6 @@ public class IotHubMessageTooLargeException extends IotHubException
 
     public IotHubMessageTooLargeException(String message)
     {
-        super("Message too large!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
+        super(message);
     }
 }

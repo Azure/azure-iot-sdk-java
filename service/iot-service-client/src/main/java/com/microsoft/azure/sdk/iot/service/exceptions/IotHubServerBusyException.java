@@ -16,6 +16,6 @@ public class IotHubServerBusyException extends IotHubException
     }
     public IotHubServerBusyException(String message)
     {
-        super("Server busy!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
+        super(message);
     }
 }

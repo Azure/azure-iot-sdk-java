@@ -17,6 +17,6 @@ public class IotHubUnathorizedException extends IotHubException
 
     public IotHubUnathorizedException(String message)
     {
-        super("Unauthorized!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
+        super(message);
     }
 }

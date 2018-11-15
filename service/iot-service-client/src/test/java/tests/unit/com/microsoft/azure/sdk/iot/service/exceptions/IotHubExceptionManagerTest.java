@@ -289,7 +289,7 @@ public class IotHubExceptionManagerTest
         catch (IotHubBadFormatException expected)
         {
             // Expected throw.
-            assertThat(expected.getMessage(), is("Bad message format! {\"ExceptionMessage\":\"This is the error message\"}"));
+            assertThat(expected.getMessage(), is("{\"ExceptionMessage\":\"This is the error message\"}"));
         }
     }
 
@@ -313,7 +313,7 @@ public class IotHubExceptionManagerTest
         catch (IotHubBadFormatException expected)
         {
             // Expected throw.
-            assertThat(expected.getMessage(), is("Bad message format! {\"ExceptionMessage\":null}"));
+            assertThat(expected.getMessage(), is("{\"ExceptionMessage\":null}"));
         }
     }
 
@@ -337,7 +337,7 @@ public class IotHubExceptionManagerTest
         catch (IotHubBadFormatException expected)
         {
             // Expected throw.
-            assertThat(expected.getMessage(), is("Bad message format! {\"ExceptionMessage\":}"));
+            assertThat(expected.getMessage(), is("{\"ExceptionMessage\":}"));
         }
     }
 
@@ -361,7 +361,7 @@ public class IotHubExceptionManagerTest
         catch (IotHubBadFormatException expected)
         {
             // Expected throw.
-            assertThat(expected.getMessage(), is("Bad message format! ErrorCode:IotHubUnauthorizedAccess;Unauthorized Tracking ID:(tracking id)-TimeStamp:12/14/2016 03:15:17"));
+            assertThat(expected.getMessage(), is("ErrorCode:IotHubUnauthorizedAccess;Unauthorized Tracking ID:(tracking id)-TimeStamp:12/14/2016 03:15:17"));
         }
     }
 
@@ -385,7 +385,7 @@ public class IotHubExceptionManagerTest
         catch (IotHubBadFormatException expected)
         {
             // Expected throw.
-            assertThat(expected.getMessage(), is("Bad message format! ErrorCode:ArgumentInvalid;Missing or invalid etag for job type ScheduleUpdateTwin. ScheduleUpdateTwin job type is a force update, which only accepts '*' as the Etag. Tracking ID:1234-TimeStamp:06/26/2017 20:56:33"));
+            assertThat(expected.getMessage(), is("ErrorCode:ArgumentInvalid;Missing or invalid etag for job type ScheduleUpdateTwin. ScheduleUpdateTwin job type is a force update, which only accepts '*' as the Etag. Tracking ID:1234-TimeStamp:06/26/2017 20:56:33"));
         }
     }
 }

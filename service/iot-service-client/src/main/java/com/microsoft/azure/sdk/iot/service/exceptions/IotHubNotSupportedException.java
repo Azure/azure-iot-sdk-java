@@ -17,6 +17,6 @@ public class IotHubNotSupportedException extends IotHubException
 
     public IotHubNotSupportedException(String message)
     {
-        super("Not supported!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
+        super(message);
     }
 }

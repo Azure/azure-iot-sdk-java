@@ -17,6 +17,6 @@ public class IotHubNotFoundException extends IotHubException
 
     public IotHubNotFoundException(String message)
     {
-        super("IoT Hub not found!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
+        super(message);
     }
 }

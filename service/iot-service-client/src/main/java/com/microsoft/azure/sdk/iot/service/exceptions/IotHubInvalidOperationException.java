@@ -17,6 +17,6 @@ public class IotHubInvalidOperationException extends IotHubException
 
     public IotHubInvalidOperationException(String message)
     {
-        super("Invalid operation!" + (((message == null) || message.isEmpty()) ? "" : " " + message));
+        super(message);
     }
 }
