@@ -7,17 +7,25 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.helpers.TestConstants;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.X509Cert;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.FileUploadTests;
 import org.junit.BeforeClass;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
 
 public class FileUploadJVMRunner extends FileUploadTests
 {
     @BeforeClass
-    public static void setup() throws IOException
+    public static void setup() throws IOException, GeneralSecurityException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        FileUploadTests.setUp();
+        X509Cert cert = new X509Cert(0,false, "TestLeaf", "TestRoot");
+        String publicKeyCert = cert.getPublicCertLeafPem();
+        String privateKey =  cert.getPrivateKeyLeafPem();
+        String x509Thumbprint = cert.getThumbPrintLeaf();
+        FileUploadTests.setUp(publicKeyCert, privateKey, x509Thumbprint);
     }
 }

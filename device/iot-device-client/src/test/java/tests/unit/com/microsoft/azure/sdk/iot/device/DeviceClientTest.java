@@ -1854,32 +1854,6 @@ public class DeviceClientTest
         Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
     }
 
-    // Tests_SRS_INTERNALCLIENT_34_066: [If this function is called when the device client is using x509 authentication, an UnsupportedOperationException shall be thrown.]
-    @Test (expected = UnsupportedOperationException.class)
-    public void startFileUploadUploadToBlobAsyncAuthTypeThrows(@Mocked final FileUpload mockedFileUpload,
-                                                               @Mocked final InputStream mockInputStream,
-                                                               @Mocked final IotHubEventCallback mockedStatusCB,
-                                                               @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
-    {
-        //arrange
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        final String destinationBlobName = "valid/blob/name.txt";
-        final long streamLength = 100;
-
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
-            }
-        };
-        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class, new Class[] {String.class, IotHubClientProtocol.class}, "some conn string", protocol);
-        Deencapsulation.setField(client, "config", mockConfig);
-
-        // act
-        Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
-    }
-
     /* Tests_SRS_INTERNALCLIENT_21_051: [If uploadToBlobAsync failed to start the upload using the FileUpload, it shall bypass the exception.] */
     @Test (expected = IllegalArgumentException.class)
     public void startFileUploadUploadToBlobAsyncThrows(@Mocked final FileUpload mockedFileUpload,

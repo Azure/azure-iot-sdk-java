@@ -13,12 +13,10 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -66,9 +64,14 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
     private static DeviceClient deviceClient;
     private static ServiceClient serviceClient;
     private static Device scDevice;
+    private static Device scDevicex509;
     private static FileUploadState[] fileUploadState;
     private static MessageState[] messageStates;
     private static FileUploadNotificationReceiver fileUploadNotificationReceiver;
+
+    private static String publicKeyCertificate;
+    private static String privateKeyCertificate;
+    private static String x509Thumbprint;
 
     enum STATUS
     {
@@ -127,11 +130,15 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
         }
     }
 
-    public static void setUp() throws IOException
+    public static void setUp(String publicK, String privateK, String thumbprint) throws IOException
     {
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
 
+        publicKeyCertificate = publicK;
+        privateKeyCertificate = privateK;
+        x509Thumbprint = thumbprint;
+        
         fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
         assertNotNull(fileUploadNotificationReceiver);
     }
@@ -142,6 +149,11 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
         String deviceId = "java-file-upload-e2e-test".concat(UUID.randomUUID().toString());
         scDevice = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, null, null);
         scDevice = registryManager.addDevice(scDevice);
+
+        String deviceIdX509 = "java-file-upload-e2e-test-x509".concat(UUID.randomUUID().toString());
+        scDevicex509 = com.microsoft.azure.sdk.iot.service.Device.createDevice(deviceIdX509, AuthenticationType.SELF_SIGNED);
+        scDevicex509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        scDevicex509 = registryManager.addDevice(scDevicex509);
 
         // flush pending notifications before every test to prevent random test failures
         // because of notifications received from other failed test
@@ -177,6 +189,7 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
         try
         {
             registryManager.removeDevice(scDevice);
+            registryManager.removeDevice(scDevicex509);
         }
         catch (IotHubNotFoundException | IOException e)
         {
@@ -209,6 +222,12 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
     private void setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, InterruptedException
     {
         deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, scDevice), protocol);
+        IotHubServicesCommon.openClientWithRetry(deviceClient);
+    }
+
+    private void setUpX509DeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, InterruptedException
+    {
+        deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, scDevicex509), protocol, publicKeyCertificate, false, privateKeyCertificate, false);
         IotHubServicesCommon.openClientWithRetry(deviceClient);
     }
 
@@ -247,7 +266,7 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
         // act
         deviceClient.uploadToBlobAsync(fileUploadState[0].blobName, fileUploadState[0].fileInputStream, fileUploadState[0].fileLength, new FileUploadCallback(), fileUploadState[0]);
 
-        FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
+        FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
 
         // assert
         verifyNotification(fileUploadNotification, fileUploadState[0]);
@@ -264,7 +283,7 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
 
         // act
         deviceClient.uploadToBlobAsync(fileUploadState[MAX_FILES_TO_UPLOAD - 1].blobName, fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileInputStream, fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileLength, new FileUploadCallback(), fileUploadState[MAX_FILES_TO_UPLOAD - 1]);
-        FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
+        FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
 
         // assert
         assertNotNull(fileUploadNotification);
@@ -285,7 +304,7 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
         for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
         {
             deviceClient.uploadToBlobAsync(fileUploadState[i].blobName, fileUploadState[i].fileInputStream, fileUploadState[i].fileLength, new FileUploadCallback(), fileUploadState[i]);
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
 
             // assert
             verifyNotification(fileUploadNotification, fileUploadState[i]);
@@ -328,7 +347,7 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
 
             // assert
             verifyNotification(fileUploadNotification, fileUploadState[i]);
@@ -386,7 +405,7 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
 
             // assert
             verifyNotification(fileUploadNotification, fileUploadState[i]);
@@ -410,22 +429,68 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
         tearDownDeviceClient();
     }
 
-    private FileUploadNotification getFileUploadNotificationForThisDevice() throws IOException, InterruptedException
+    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void uploadToBlobAsyncAndTelemetryOnMQTTWS() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException
     {
-        FileUploadNotification fileUploadNotification;
-        do
+        // arrange
+        setUpDeviceClient(IotHubClientProtocol.MQTT_WS);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        // act
+        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
         {
-            fileUploadNotification = fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-            assertNotNull(fileUploadNotification);
+            final int index = i;
+            executor.submit(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    try
+                    {
+                        deviceClient.uploadToBlobAsync(fileUploadState[index].blobName, fileUploadState[index].fileInputStream, fileUploadState[index].fileLength, new FileUploadCallback(), fileUploadState[index]);
+                    }
+                    catch (IOException e)
+                    {
+                        fail(e.getMessage());
+                    }
+                }
+            });
 
-            //ignore any file upload notifications received that are not about this device
-        } while (!fileUploadNotification.getDeviceId().equals(scDevice.getDeviceId()));
+            executor.submit(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    deviceClient.sendEventAsync(new com.microsoft.azure.sdk.iot.device.Message(messageStates[index].messageBody), new FileUploadCallback(), messageStates[index]);
+                }
+            });
 
-        return fileUploadNotification;
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
+
+            // assert
+            verifyNotification(fileUploadNotification, fileUploadState[i]);
+
+            assertTrue(fileUploadState[i].isCallBackTriggered);
+            assertEquals(fileUploadState[i].fileUploadStatus, SUCCESS);
+            assertEquals(messageStates[i].messageStatus, SUCCESS);
+        }
+
+        executor.shutdown();
+        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        {
+            executor.shutdownNow();
+        }
+
+        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        {
+            assertEquals("File" + i + " has no notification", fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+        }
+
+        tearDownDeviceClient();
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void uploadToBlobAsyncSingleFileAndTelemetryOnAMQP() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException
+    public void uploadToBlobAsyncSingleFileOnAMQP() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException
     {
         // arrange
         setUpDeviceClient(IotHubClientProtocol.AMQPS);
@@ -460,7 +525,7 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
 
             // assert
             verifyNotification(fileUploadNotification, fileUploadState[i]);
@@ -484,7 +549,7 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void uploadToBlobAsyncSingleFileAndTelemetryOnAMQPWS() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException
+    public void uploadToBlobAsyncSingleFileOnAMQPWS() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException
     {
         // arrange
         setUpDeviceClient(IotHubClientProtocol.AMQPS_WS);
@@ -519,7 +584,7 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
 
             // assert
             verifyNotification(fileUploadNotification, fileUploadState[i]);
@@ -543,7 +608,7 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void uploadToBlobAsyncSingleFileAndTelemetryOnHttp() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException
+    public void uploadToBlobAsyncSingleFileOnHttp() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException
     {
         // arrange
         setUpDeviceClient(IotHubClientProtocol.HTTPS);
@@ -578,7 +643,7 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice();
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
 
             // assert
             verifyNotification(fileUploadNotification, fileUploadState[i]);
@@ -599,5 +664,197 @@ public class FileUploadTests extends MethodNameLoggingIntegrationTest
         }
 
         tearDownDeviceClient();
+    }
+
+    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void uploadToBlobAsyncSingleFileOnHttpSelfSigned() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException
+    {
+        // arrange
+        setUpX509DeviceClient(IotHubClientProtocol.HTTPS);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        // act
+        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        {
+            final int index = i;
+            executor.submit(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    try
+                    {
+                        deviceClient.uploadToBlobAsync(fileUploadState[index].blobName, fileUploadState[index].fileInputStream, fileUploadState[index].fileLength, new FileUploadCallback(), fileUploadState[index]);
+                    }
+                    catch (IOException e)
+                    {
+                        fail(e.getMessage());
+                    }
+                }
+            });
+
+            executor.submit(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    deviceClient.sendEventAsync(new com.microsoft.azure.sdk.iot.device.Message(messageStates[index].messageBody), new FileUploadCallback(), messageStates[index]);
+                }
+            });
+
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevicex509);
+
+            // assert
+            verifyNotification(fileUploadNotification, fileUploadState[i]);
+            assertTrue(fileUploadState[i].isCallBackTriggered);
+            assertEquals(fileUploadState[i].fileUploadStatus, SUCCESS);
+            assertEquals(messageStates[i].messageStatus, SUCCESS);
+        }
+
+        executor.shutdown();
+        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        {
+            executor.shutdownNow();
+        }
+
+        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        {
+            assertEquals("File" + i + " has no notification", fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+        }
+
+        tearDownDeviceClient();
+    }
+
+    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void uploadToBlobAsyncAndTelemetryOnMQTTSelfSigned() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException
+    {
+        // arrange
+        setUpX509DeviceClient(IotHubClientProtocol.MQTT);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        // act
+        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        {
+            final int index = i;
+            executor.submit(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    try
+                    {
+                        deviceClient.uploadToBlobAsync(fileUploadState[index].blobName, fileUploadState[index].fileInputStream, fileUploadState[index].fileLength, new FileUploadCallback(), fileUploadState[index]);
+                    }
+                    catch (IOException e)
+                    {
+                        fail(e.getMessage());
+                    }
+                }
+            });
+
+            executor.submit(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    deviceClient.sendEventAsync(new com.microsoft.azure.sdk.iot.device.Message(messageStates[index].messageBody), new FileUploadCallback(), messageStates[index]);
+                }
+            });
+
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevicex509);
+
+            // assert
+            verifyNotification(fileUploadNotification, fileUploadState[i]);
+
+            assertTrue(fileUploadState[i].isCallBackTriggered);
+            assertEquals(fileUploadState[i].fileUploadStatus, SUCCESS);
+            assertEquals(messageStates[i].messageStatus, SUCCESS);
+        }
+
+        executor.shutdown();
+        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        {
+            executor.shutdownNow();
+        }
+
+        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        {
+            assertEquals("File" + i + " has no notification", fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+        }
+
+        tearDownDeviceClient();
+    }
+
+    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void uploadToBlobAsyncSingleFileOnAMQPSelfSigned() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException
+    {
+        // arrange
+        setUpX509DeviceClient(IotHubClientProtocol.AMQPS);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        // act
+        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        {
+            final int index = i;
+            executor.submit(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    try
+                    {
+                        deviceClient.uploadToBlobAsync(fileUploadState[index].blobName, fileUploadState[index].fileInputStream, fileUploadState[index].fileLength, new FileUploadCallback(), fileUploadState[index]);
+                    }
+                    catch (IOException e)
+                    {
+                        fail(e.getMessage());
+                    }
+                }
+            });
+
+            executor.submit(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    deviceClient.sendEventAsync(new com.microsoft.azure.sdk.iot.device.Message(messageStates[index].messageBody), new FileUploadCallback(), messageStates[index]);
+                }
+            });
+
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevicex509);
+
+            // assert
+            verifyNotification(fileUploadNotification, fileUploadState[i]);
+            assertTrue(fileUploadState[i].isCallBackTriggered);
+            assertEquals(fileUploadState[i].fileUploadStatus, SUCCESS);
+            assertEquals(messageStates[i].messageStatus, SUCCESS);
+        }
+
+        executor.shutdown();
+        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        {
+            executor.shutdownNow();
+        }
+
+        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        {
+            assertEquals("File" + i + " has no notification", fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+        }
+
+        tearDownDeviceClient();
+    }
+
+    private FileUploadNotification getFileUploadNotificationForThisDevice(Device device) throws IOException, InterruptedException
+    {
+        FileUploadNotification fileUploadNotification;
+        do
+        {
+            fileUploadNotification = fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+            assertNotNull(fileUploadNotification);
+
+            //ignore any file upload notifications received that are not about this device
+        } while (!fileUploadNotification.getDeviceId().equals(device.getDeviceId()));
+
+        return fileUploadNotification;
     }
 }

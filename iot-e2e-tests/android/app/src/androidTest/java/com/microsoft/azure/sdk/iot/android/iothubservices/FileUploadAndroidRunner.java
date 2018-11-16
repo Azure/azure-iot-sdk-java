@@ -10,6 +10,8 @@ import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.FileUploadTests;
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
+
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -28,8 +30,13 @@ public class FileUploadAndroidRunner extends FileUploadTests
     @BeforeClass
     public static void setup() throws IOException
     {
+        String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
+        String publicKeyCertBase64Encoded = BuildConfig.IotHubPublicCertBase64;
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
-        FileUploadTests.setUp();
+        String x509Thumbprint = BuildConfig.IotHubThumbprint;
+        String privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
+        String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
+        FileUploadTests.setUp(publicKeyCert, privateKey, x509Thumbprint);
     }
 
     @Ignore

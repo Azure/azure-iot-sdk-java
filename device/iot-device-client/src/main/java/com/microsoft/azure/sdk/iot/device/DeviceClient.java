@@ -393,6 +393,9 @@ public final class DeviceClient extends InternalClient implements Closeable
     /**
      * Asynchronously upload a stream to the IoT Hub.
      *
+     * NOTE: IotHub does not currently support CA signed devices using file upload. Please use SAS based authentication or
+     * self signed certificates.
+     *
      * @param destinationBlobName is a string with the name of the file in the storage.
      * @param inputStream is a InputStream with the stream to upload in the blob.
      * @param streamLength is a long with the number of bytes in the stream to upload.
@@ -402,10 +405,9 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @throws IllegalArgumentException if the provided blob name, or the file path is {@code null},
      *          empty or not valid, or if the callback is {@code null}.
      * @throws IOException if the client cannot create a instance of the FileUpload or the transport.
-     * @throws UnsupportedOperationException if this method is called when using x509 authentication
      */
     public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
-                                  IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException, IOException, UnsupportedOperationException
+                                  IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException, IOException
     {
         if (callback == null)
         {
@@ -423,11 +425,6 @@ public final class DeviceClient extends InternalClient implements Closeable
         }
 
         ParserUtility.validateBlobName(destinationBlobName);
-
-        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
-        {
-            throw new UnsupportedOperationException("File Upload does not support x509 authentication");
-        }
 
         if (this.fileUpload == null)
         {
