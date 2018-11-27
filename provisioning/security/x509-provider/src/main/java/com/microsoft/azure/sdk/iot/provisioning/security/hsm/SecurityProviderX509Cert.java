@@ -211,12 +211,12 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
     {
         if (possiblePrivateKey instanceof  PEMKeyPair)
         {
-            return new JcaPEMKeyConverter().setProvider("BC").getKeyPair((PEMKeyPair) possiblePrivateKey)
+            return new JcaPEMKeyConverter().getKeyPair((PEMKeyPair) possiblePrivateKey)
                 .getPrivate();
         }
         else if (possiblePrivateKey instanceof PrivateKeyInfo)
         {
-            return new JcaPEMKeyConverter().setProvider("BC").getPrivateKey((PrivateKeyInfo) possiblePrivateKey);
+            return new JcaPEMKeyConverter().getPrivateKey((PrivateKeyInfo) possiblePrivateKey);
         }
         else
         {
