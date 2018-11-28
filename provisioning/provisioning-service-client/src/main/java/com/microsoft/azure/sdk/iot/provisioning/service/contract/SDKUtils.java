@@ -13,7 +13,7 @@ public class SDKUtils
     private static final String PROVISIONING_SERVICE_CLIENT_VERSION = "1.3.3";
 
     private static String JAVA_RUNTIME = System.getProperty("java.version");
-    private static String OPERATING_SYSTEM = System.getProperty("os.name");
+    private static String OPERATING_SYSTEM = System.getProperty("java.runtime.name").toLowerCase().contains("android") ? "Android" : System.getProperty("os.name");
     private static String PROCESSOR_ARCHITECTURE = System.getProperty("os.arch");
 
     /**
@@ -35,6 +35,6 @@ public class SDKUtils
     public static String getUserAgentString()
     {
         /* SRS_SDK_UTILS_21_002: [The getUserAgentString shall return a string with the SDK name and version separated by `/`.] */
-        return PROVISIONING_SERVICE_CLIENT + PROVISIONING_SERVICE_CLIENT_VERSION;
+        return PROVISIONING_SERVICE_CLIENT + PROVISIONING_SERVICE_CLIENT_VERSION + " (" + JAVA_RUNTIME + "; " + OPERATING_SYSTEM +"; " + PROCESSOR_ARCHITECTURE + ")";
     }
 }
