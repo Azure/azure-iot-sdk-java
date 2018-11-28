@@ -17,6 +17,7 @@ import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.*;
@@ -249,11 +250,18 @@ public class HttpsHsmClient
             UnixSocketAddress address = new UnixSocketAddress(unixSocketAddress);
             channel = UnixSocketChannel.open(address);
 
-            channel.write(ByteBuffer.wrap(requestBytes));
-
             if (httpsRequest.getBody() != null)
             {
-                channel.write(ByteBuffer.wrap(httpsRequest.getBody()));
+                //append http request body to the request bytes
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+                outputStream.write(requestBytes);
+                outputStream.write(httpsRequest.getBody());
+
+                channel.write(ByteBuffer.wrap(outputStream.toByteArray()));
+            }
+            else
+            {
+                channel.write(ByteBuffer.wrap(requestBytes));
             }
 
             //read response

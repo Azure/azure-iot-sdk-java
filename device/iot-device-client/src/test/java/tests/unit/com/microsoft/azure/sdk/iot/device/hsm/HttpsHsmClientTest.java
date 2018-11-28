@@ -262,6 +262,9 @@ public class HttpsHsmClientTest
                 HttpsRequestResponseSerializer.deserializeResponse((BufferedReader) any);
                 times = 1;
 
+                mockedUnixSocketChannel.write((ByteBuffer) any);
+                times = 1;
+
                 mockedHttpsRequest.send();
                 times = 0;
             }
