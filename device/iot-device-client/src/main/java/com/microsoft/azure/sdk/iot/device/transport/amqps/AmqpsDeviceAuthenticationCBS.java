@@ -302,7 +302,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         Section section = null;
         try
         {
-            section = new AmqpValue(deviceClientConfig.getSasTokenAuthentication().getRenewedSasToken());
+            section = new AmqpValue(deviceClientConfig.getSasTokenAuthentication().getRenewedSasToken(true));
             outgoingMessage.setBody(section);
         }
         catch (IOException e)

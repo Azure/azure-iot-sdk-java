@@ -35,7 +35,7 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
     protected IotHubSasToken sasToken;
 
     public abstract boolean canRefreshToken();
-    public abstract String getRenewedSasToken() throws IOException, TransportException;
+    public abstract String getRenewedSasToken(boolean proactivelyRenew) throws IOException, TransportException;
 
     public IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId)
     {
@@ -71,28 +71,42 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
         this.tokenValidSecs = tokenValidSecs;
     }
 
+    /**
+     * Returns true if the saved sas token needs to be manually renewed by the user
+     * @return true if the saved sas token needs to be manually renewed by the user
+     */
     public boolean isRenewalNecessary()
     {
         //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the saved sas token has expired, this function shall return true.]
         return (this.sasToken != null && this.sasToken.isExpired());
     }
 
-    public boolean shouldRefreshToken()
+    /**
+     * Returns true if the saved token should be refreshed
+     *
+     * @param proactivelyRenew if true, this function will return true even if the saved token has not expired, but only
+     *                         if the token has lived beyond its time buffer percentage
+     * @return true if the caller should refresh the saved sas token
+     */
+    public boolean shouldRefreshToken(boolean proactivelyRenew)
     {
         if (this.sasToken.isExpired())
         {
             return true;
         }
 
-        long expiryTimeSeconds = IotHubSasToken.getExpiryTimeFromToken(this.sasToken.toString());
-        long tokenStartTime = expiryTimeSeconds - this.tokenValidSecs;
-        long bufferExpiryTime = this.tokenValidSecs * this.timeBufferPercentage / 100 + tokenStartTime;
-        long currentTimeSeconds = System.currentTimeMillis() / 1000;
-        if (bufferExpiryTime < currentTimeSeconds)
+        if (proactivelyRenew)
         {
-            //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_019: [This function shall return true if the saved token has lived for longer
-            // than its buffered threshold.]
-            return true;
+            long expiryTimeSeconds = IotHubSasToken.getExpiryTimeFromToken(this.sasToken.toString());
+            long tokenStartTime = expiryTimeSeconds - this.tokenValidSecs;
+            long bufferExpiryTime = this.tokenValidSecs * this.timeBufferPercentage / 100 + tokenStartTime;
+            long currentTimeSeconds = System.currentTimeMillis() / 1000;
+            if (bufferExpiryTime < currentTimeSeconds)
+            {
+                //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_019: [This function shall return true if the saved token has lived for longer
+                // than its buffered threshold.]
+                return true;
+            }
         }
 
         //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_020: [This function shall return false if the saved token has not lived for longer

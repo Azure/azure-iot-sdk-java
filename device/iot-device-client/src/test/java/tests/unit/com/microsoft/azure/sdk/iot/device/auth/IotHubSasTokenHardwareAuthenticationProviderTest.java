@@ -136,7 +136,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
 
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_035: [If the saved sas token has expired and there is a security provider, the saved sas token shall be refreshed with a new token from the security provider.]
     @Test
-    public void getRenewedSasTokenAutoRenewsFromSecurityProvider(@Mocked final System systemMock) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, SecurityProviderException, InvalidKeyException
+    public void getRenewedSasTokenAutoRenewsFromSecurityProvider() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, SecurityProviderException, InvalidKeyException
     {
         //arrange
         final String someToken = "someToken";
@@ -170,7 +170,46 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
 
         //act
-        Deencapsulation.invoke(sasAuth, "getRenewedSasToken");
+        Deencapsulation.invoke(sasAuth, "getRenewedSasToken", false);
+    }
+
+    //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_036: [If the saved sas token has not expired and there is a security provider, but the sas token should be proactively renewed, the saved sas token shall be refreshed with a new token from the security provider.]
+    @Test
+    public void getRenewedSasTokenProactivelyRenewsFromSecurityProvider() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, SecurityProviderException, InvalidKeyException
+    {
+        //arrange
+        final String someToken = "someToken";
+        final byte[] tokenBytes= someToken.getBytes();
+
+        //assert
+        new Expectations()
+        {
+            {
+                URLEncoder.encode(anyString, encodingName);
+                result = someToken;
+
+                System.currentTimeMillis();
+                result = 0;
+
+                mockSecurityProviderTpm.signWithIdentity((byte[]) any);
+                result = tokenBytes;
+                times = 2;
+
+                Base64.encodeBase64Local((byte[]) any);
+                result = tokenBytes;
+
+                URLEncoder.encode(anyString, encodingName);
+                result = someToken;
+
+                Deencapsulation.invoke(mockSasToken, "isExpired");
+                result = false;
+            }
+        };
+
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+
+        //act
+        Deencapsulation.invoke(sasAuth, "getRenewedSasToken", true);
     }
 
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_005: [This function shall return the saved sas token.]
@@ -201,7 +240,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
 
         //act
-        String actualSasToken = Deencapsulation.invoke(sasAuth, "getRenewedSasToken");
+        String actualSasToken = Deencapsulation.invoke(sasAuth, "getRenewedSasToken", false);
 
         //assert
         assertEquals(mockSasToken.toString(), actualSasToken);

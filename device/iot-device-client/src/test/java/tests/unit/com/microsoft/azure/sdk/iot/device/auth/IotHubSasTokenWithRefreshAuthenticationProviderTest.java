@@ -38,7 +38,7 @@ public class IotHubSasTokenWithRefreshAuthenticationProviderTest
         }
 
         @Override
-        public boolean shouldRefreshToken()
+        public boolean shouldRefreshToken(boolean proactivelyRenew)
         {
             return this.shouldRefresh;
         }
@@ -126,7 +126,7 @@ public class IotHubSasTokenWithRefreshAuthenticationProviderTest
         moduleAuthenticationWithTokenRefresh.nextToken = newSasToken;
 
         //act
-        String actual = moduleAuthenticationWithTokenRefresh.getRenewedSasToken();
+        String actual = moduleAuthenticationWithTokenRefresh.getRenewedSasToken(true);
 
         //assert
         assertEquals(newSasToken.toString(), actual);
@@ -146,10 +146,9 @@ public class IotHubSasTokenWithRefreshAuthenticationProviderTest
         moduleAuthenticationWithTokenRefresh.nextToken = newSasToken;
 
         //act
-        String actual = moduleAuthenticationWithTokenRefresh.getRenewedSasToken();
+        String actual = moduleAuthenticationWithTokenRefresh.getRenewedSasToken(false);
 
         //assert
         assertEquals(oldSasToken.toString(), actual);
     }
-
 }

@@ -78,7 +78,7 @@ public class IotHubSasTokenAuthenticationProviderTest
         }
 
         @Override
-        public String getRenewedSasToken() throws IOException
+        public String getRenewedSasToken(boolean proactivelyRenew) throws IOException
         {
             return null;
         }
@@ -247,7 +247,7 @@ public class IotHubSasTokenAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider authenticationProvider = new mockIotHubSasTokenAuthenticationImplementation(10, 1);
 
         //act
-        boolean result = authenticationProvider.shouldRefreshToken();
+        boolean result = authenticationProvider.shouldRefreshToken(true);
 
         //assert
         assertTrue(result);
@@ -262,7 +262,7 @@ public class IotHubSasTokenAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider authenticationProvider = new mockIotHubSasTokenAuthenticationImplementation(100000, 100);
 
         //act
-        boolean result = authenticationProvider.shouldRefreshToken();
+        boolean result = authenticationProvider.shouldRefreshToken(true);
 
         //assert
         assertFalse(result);
