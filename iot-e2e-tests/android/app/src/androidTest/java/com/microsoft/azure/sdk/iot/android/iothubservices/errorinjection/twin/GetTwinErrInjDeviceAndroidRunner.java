@@ -3,18 +3,19 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.android.iothubservices;
+package com.microsoft.azure.sdk.iot.android.iothubservices.errorinjection.twin;
 
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.Rerun;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
-import com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin.ReportedPropertiesTests;
+import com.microsoft.azure.sdk.iot.common.tests.iothubservices.errorinjection.GetTwinErrInjTests;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+
 import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
@@ -25,7 +26,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collection;
 
 @RunWith(Parameterized.class)
-public class ReportedPropertiesDeviceAndroidRunner extends ReportedPropertiesTests
+public class GetTwinErrInjDeviceAndroidRunner extends GetTwinErrInjTests
 {
     static Collection<BaseDevice> identities;
 
@@ -35,7 +36,7 @@ public class ReportedPropertiesDeviceAndroidRunner extends ReportedPropertiesTes
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public ReportedPropertiesDeviceAndroidRunner(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public GetTwinErrInjDeviceAndroidRunner(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
@@ -50,6 +51,7 @@ public class ReportedPropertiesDeviceAndroidRunner extends ReportedPropertiesTes
         String x509Thumbprint = BuildConfig.IotHubThumbprint;
         String privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
         String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
+
         Collection inputs = inputsCommon(ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
 
         identities = getIdentities(inputs);

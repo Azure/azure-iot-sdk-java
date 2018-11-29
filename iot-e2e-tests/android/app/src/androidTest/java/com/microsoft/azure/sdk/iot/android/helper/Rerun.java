@@ -1,21 +1,30 @@
+/*
+ *  Copyright (c) Microsoft. All rights reserved.
+ *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
+ */
+
 package com.microsoft.azure.sdk.iot.android.helper;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-public class Rerun implements TestRule {
+public class Rerun implements TestRule
+{
     private int count;
 
-    public Rerun(int count) {
+    public Rerun(int count)
+    {
         this.count = count;
     }
 
-    public Statement apply(Statement base, Description description) {
+    public Statement apply(Statement base, Description description)
+    {
         return statement(base, description);
     }
 
-    private Statement statement(final Statement base, final Description description) {
+    private Statement statement(final Statement base, final Description description)
+    {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {

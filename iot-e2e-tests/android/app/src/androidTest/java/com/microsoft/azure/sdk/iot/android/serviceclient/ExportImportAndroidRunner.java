@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.android.serviceclient;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
+import com.microsoft.azure.sdk.iot.android.helper.RegressionTestSuite;
 import com.microsoft.azure.sdk.iot.common.tests.serviceclient.ExportImportTests;
 import com.microsoft.azure.storage.StorageException;
 import org.junit.BeforeClass;
@@ -19,6 +20,7 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 
 @Ignore
+@RegressionTestSuite
 public class ExportImportAndroidRunner extends ExportImportTests
 {
     @Rule
