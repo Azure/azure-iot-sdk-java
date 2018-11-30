@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.android.iothubservices.messaging;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
+import com.microsoft.azure.sdk.iot.android.helper.Rerun;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroupA;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.telemetry.ReceiveMessagesTests;
@@ -34,6 +35,9 @@ import java.util.Collection;
 public class ReceiveMessagesModuleAndroidRunner extends ReceiveMessagesTests
 {
     static Collection<BaseDevice> identities;
+
+    @Rule
+    public Rerun count = new Rerun(3);
 
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
