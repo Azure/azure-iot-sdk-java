@@ -46,8 +46,6 @@ public class IotHubServicesCommon
                 confirmOpenStabilized(statusUpdates, 120000);
             }
 
-            confirmOpenStabilized(statusUpdates, 120000);
-
             for (int i = 0; i < messagesToSend.size(); ++i)
             {
                 if (isErrorInjectionMessage(messagesToSend.get(i)))
