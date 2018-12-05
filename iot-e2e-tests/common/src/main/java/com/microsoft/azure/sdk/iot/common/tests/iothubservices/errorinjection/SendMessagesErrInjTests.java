@@ -349,7 +349,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
             if (this.testInstance.authenticationType == SELF_SIGNED)
             {
                 targetDevice = Device.createDevice(deviceId, SELF_SIGNED);
-                targetDevice.setThumbprint(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
+                targetDevice.setThumbprintFinal(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
                 Tools.addDeviceWithRetry(registryManager, targetDevice);
                 client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice), this.testInstance.protocol, testInstance.publicKeyCert, false, testInstance.privateKey, false);
             }

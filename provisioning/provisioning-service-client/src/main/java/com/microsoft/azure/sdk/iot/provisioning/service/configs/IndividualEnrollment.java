@@ -235,15 +235,15 @@ public class IndividualEnrollment extends Serializable
         /* SRS_INDIVIDUAL_ENROLLMENT_21_006: [If the `deviceId`, `iotHubHostName`, `provisioningStatus`, or `registrationState` is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
         if (result.deviceId != null)
         {
-            this.setDeviceId(result.deviceId);
+            this.setDeviceIdFinal(result.deviceId);
         }
         if (result.iotHubHostName != null)
         {
-            this.setIotHubHostName(result.iotHubHostName);
+            this.setIotHubHostNameFinal(result.iotHubHostName);
         }
         if (result.provisioningStatus != null)
         {
-            this.setProvisioningStatus(result.provisioningStatus);
+            this.setProvisioningStatusFinal(result.provisioningStatus);
         }
         if (result.registrationState != null)
         {
@@ -277,13 +277,13 @@ public class IndividualEnrollment extends Serializable
         /* SRS_INDIVIDUAL_ENROLLMENT_21_011: [If the etag is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
         if (result.etag != null)
         {
-            this.setEtag(result.etag);
+            this.setEtagFinal(result.etag);
         }
 
         /* SRS_INDIVIDUAL_ENROLLMENT_34_052: [If the device capabilities is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
         if (result.capabilities != null)
         {
-            this.setCapabilities(result.capabilities);
+            this.setCapabilitiesFinal(result.capabilities);
         }
     }
 
@@ -335,7 +335,7 @@ public class IndividualEnrollment extends Serializable
      * @param registrationId the {@code String} with the new registrationId. It cannot be {@code null}, empty, or invalid.
      * @throws IllegalArgumentException If the provided registrationId is {@code null}, empty, or invalid.
      */
-    protected void setRegistrationId(String registrationId)
+    protected final void setRegistrationId(String registrationId)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throw IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
         ParserUtility.validateId(registrationId);
@@ -365,10 +365,35 @@ public class IndividualEnrollment extends Serializable
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      * </p>
      *
+     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setDeviceIdFinal(String)}
+     *
      * @param deviceId the {@code String} with the new deviceID. It cannot be {@code null}, empty, or invalid.
      * @throws IllegalArgumentException If the provided deviceId is {@code null}, empty, or invalid.
      */
+    @Deprecated
     public void setDeviceId(String deviceId)
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId is null, empty, or invalid.] */
+        ParserUtility.validateId(deviceId);
+
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_021: [The setDeviceId shall store the provided deviceId.] */
+        this.deviceId = deviceId;
+    }
+
+    /**
+     * Setter for the deviceId.
+     *
+     * <p>
+     * A valid device Id shall follow this criteria.
+     * A case-sensitive string (up to 128 char long)
+     * of ASCII 7-bit alphanumeric chars
+     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+     * </p>
+     *
+     * @param deviceId the {@code String} with the new deviceID. It cannot be {@code null}, empty, or invalid.
+     * @throws IllegalArgumentException If the provided deviceId is {@code null}, empty, or invalid.
+     */
+    public final void setDeviceIdFinal(String deviceId)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId is null, empty, or invalid.] */
         ParserUtility.validateId(deviceId);
@@ -395,7 +420,7 @@ public class IndividualEnrollment extends Serializable
      * @throws IllegalArgumentException If the provided registrationState is {@code null}.
      * @see DeviceRegistrationState
      */
-    protected void setRegistrationState(DeviceRegistrationState registrationState)
+    protected final void setRegistrationState(DeviceRegistrationState registrationState)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_023: [The setRegistrationState shall throw IllegalArgumentException if the provided registrationState is null.] */
         ParserUtility.validateObject(registrationState);
@@ -427,7 +452,7 @@ public class IndividualEnrollment extends Serializable
      * @throws IllegalArgumentException If the provided attestation mechanism is {@code null} or invalid.
      * @see AttestationMechanism
      */
-    protected void setAttestation(AttestationMechanism attestationMechanism)
+    protected final void setAttestation(AttestationMechanism attestationMechanism)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_026: [The setAttestation shall throw IllegalArgumentException if the attestation is null or invalid.] */
         ParserUtility.validateObject(attestationMechanism);
@@ -490,10 +515,36 @@ public class IndividualEnrollment extends Serializable
      * A valid host name shall have, at least 2 parts separated by '.'.
      * </p>
      *
+     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setIotHubHostNameFinal(String)}
+     *
      * @param iotHubHostName the {@code String} with the new iotHubHostName. It cannot be {@code null}, empty, or invalid.
      * @throws IllegalArgumentException If the provided iotHubHostName is {@code null}, empty, or invalid.
      */
+    @Deprecated
     public void setIotHubHostName(String iotHubHostName)
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_029: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
+        ParserUtility.validateHostName(iotHubHostName);
+
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_030: [The setIotHubHostName shall store the provided iotHubHostName.] */
+        this.iotHubHostName = iotHubHostName;
+    }
+
+    /**
+     * Setter for the iotHubHostName.
+     *
+     * <p>
+     * A valid iothub host name shall follow this criteria.
+     * A case-sensitive string (up to 128 char long)
+     * of ASCII 7-bit alphanumeric chars
+     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+     * A valid host name shall have, at least 2 parts separated by '.'.
+     * </p>
+     *
+     * @param iotHubHostName the {@code String} with the new iotHubHostName. It cannot be {@code null}, empty, or invalid.
+     * @throws IllegalArgumentException If the provided iotHubHostName is {@code null}, empty, or invalid.
+     */
+    public final void setIotHubHostNameFinal(String iotHubHostName)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_029: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
         ParserUtility.validateHostName(iotHubHostName);
@@ -550,10 +601,32 @@ public class IndividualEnrollment extends Serializable
      * It provides a Status precondition for the provisioned device.
      * </p>
      *
+     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setProvisioningStatusFinal(ProvisioningStatus)}
+     *
      * @param provisioningStatus the {@code ProvisioningStatus} with the new provisioningStatus. It cannot be {@code null}.
      * @throws IllegalArgumentException If the provided provisioningStatus is {@code null}.
      */
+    @Deprecated
     public void setProvisioningStatus(ProvisioningStatus provisioningStatus)
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_035: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
+        ParserUtility.validateObject(provisioningStatus);
+
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_036: [The setProvisioningStatus shall store the provided provisioningStatus.] */
+        this.provisioningStatus = provisioningStatus;
+    }
+
+    /**
+     * Setter for the provisioningStatus.
+     *
+     * <p>
+     * It provides a Status precondition for the provisioned device.
+     * </p>
+     *
+     * @param provisioningStatus the {@code ProvisioningStatus} with the new provisioningStatus. It cannot be {@code null}.
+     * @throws IllegalArgumentException If the provided provisioningStatus is {@code null}.
+     */
+    public final void setProvisioningStatusFinal(ProvisioningStatus provisioningStatus)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_035: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
         ParserUtility.validateObject(provisioningStatus);
@@ -587,7 +660,7 @@ public class IndividualEnrollment extends Serializable
      *
      * @param createdDateTimeUtc the {@code String} with the new createdDateTimeUtc. It can be {@code null}, empty or not valid.
      */
-    protected void setCreatedDateTimeUtc(String createdDateTimeUtc)
+    protected final void setCreatedDateTimeUtc(String createdDateTimeUtc)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_038: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
         /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
@@ -619,7 +692,7 @@ public class IndividualEnrollment extends Serializable
      *
      * @param lastUpdatedDateTimeUtc the {@code String} with the new lastUpdatedDateTimeUtc. It can be {@code null}, empty or not valid.
      */
-    protected void setLastUpdatedDateTimeUtc(String lastUpdatedDateTimeUtc)
+    protected final void setLastUpdatedDateTimeUtc(String lastUpdatedDateTimeUtc)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_041: [The setLastUpdatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
         /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
@@ -640,10 +713,28 @@ public class IndividualEnrollment extends Serializable
     /**
      * Setter for the etag.
      *
+     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setEtagFinal(String)}
+     *
      * @param etag the {@code String} with the new etag. It cannot be {@code null}, empty or invalid.
      * @throws IllegalArgumentException If the provided etag is {@code null}, empty or invalid.
      */
+    @Deprecated
     public void setEtag(String etag)
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_047: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
+        ParserUtility.validateStringUTF8(etag);
+
+        /* SRS_INDIVIDUAL_ENROLLMENT_21_048: [The setEtag shall store the provided etag.] */
+        this.etag = etag;
+    }
+
+    /**
+     * Setter for the etag.
+     *
+     * @param etag the {@code String} with the new etag. It cannot be {@code null}, empty or invalid.
+     * @throws IllegalArgumentException If the provided etag is {@code null}, empty or invalid.
+     */
+    public final void setEtagFinal(String etag)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_047: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
         ParserUtility.validateStringUTF8(etag);
@@ -658,7 +749,22 @@ public class IndividualEnrollment extends Serializable
         return this.capabilities;
     }
 
+    /**
+     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setCapabilitiesFinal(DeviceCapabilities)}
+     *
+     * @param capabilities the device capabilities to set
+     */
+    @Deprecated
     public void setCapabilities(DeviceCapabilities capabilities)
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_053: [This function shall save the provided capabilities.] */
+        this.capabilities = capabilities;
+    }
+
+    /**
+     * @param capabilities the device capabilities to set
+     */
+    public final void setCapabilitiesFinal(DeviceCapabilities capabilities)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_34_053: [This function shall save the provided capabilities.] */
         this.capabilities = capabilities;

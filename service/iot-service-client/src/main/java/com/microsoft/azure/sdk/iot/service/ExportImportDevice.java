@@ -162,7 +162,7 @@ public class ExportImportDevice
      * Getter for device authentication mechanism.
      * @return The device authentication mechanism.
      */
-    public AuthenticationMechanism getAuthentication()
+    public AuthenticationMechanism getAuthenticationFinal()
     {
         return authentication;
     }
@@ -232,7 +232,7 @@ public class ExportImportDevice
         {
             ExportImportDevice otherExportImportDevice = (ExportImportDevice) other;
 
-            if (!Tools.areEqual(this.getAuthentication(), otherExportImportDevice.getAuthentication()))
+            if (!Tools.areEqual(this.getAuthenticationFinal(), otherExportImportDevice.getAuthenticationFinal()))
             {
                 return false;
             }
@@ -268,13 +268,13 @@ public class ExportImportDevice
      */
     ExportImportDevice(ExportImportDeviceParser parser) throws IllegalArgumentException
     {
-        if (parser.getId() == null)
+        if (parser.getIdFinal() == null)
         {
             //Codes_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_053: [If the provided parser does not have values for the properties deviceId or authentication, an IllegalArgumentException shall be thrown.]
             throw new IllegalArgumentException("The id property of the parser object may not be null");
         }
 
-        if (parser.getAuthentication() == null)
+        if (parser.getAuthenticationFinal() == null)
         {
             //Codes_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_053: [If the provided parser does not have values for the properties deviceId or authentication, an IllegalArgumentException shall be thrown.]
             throw new IllegalArgumentException("The authentication property of the parser object may not be null");
@@ -282,7 +282,7 @@ public class ExportImportDevice
 
         //Codes_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_052: [This constructor shall use the properties of the provided parser object to set the new ExportImportDevice's properties.]
         this.eTag = parser.getETag();
-        this.id = parser.getId();
+        this.id = parser.getIdFinal();
         this.statusReason = parser.getStatusReason();
 
         if (parser.getImportMode() != null)
@@ -295,42 +295,42 @@ public class ExportImportDevice
             this.status = DeviceStatus.fromString(parser.getStatus());
         }
 
-        this.authentication = new AuthenticationMechanism(AuthenticationType.valueOf(parser.getAuthentication().getType().toString()));
+        this.authentication = new AuthenticationMechanism(AuthenticationType.valueOf(parser.getAuthenticationFinal().getType().toString()));
         if (this.authentication.getAuthenticationType() == AuthenticationType.CERTIFICATE_AUTHORITY)
         {
             //do nothing
         }
         else if (this.authentication.getAuthenticationType() == AuthenticationType.SELF_SIGNED)
         {
-            if (parser.getAuthentication().getThumbprint() == null
-                    || Tools.isNullOrEmpty(parser.getAuthentication().getThumbprint().getPrimaryThumbprint())
-                    || Tools.isNullOrEmpty(parser.getAuthentication().getThumbprint().getSecondaryThumbprint()))
+            if (parser.getAuthenticationFinal().getThumbprint() == null
+                    || Tools.isNullOrEmpty(parser.getAuthenticationFinal().getThumbprint().getPrimaryThumbprintFinal())
+                    || Tools.isNullOrEmpty(parser.getAuthenticationFinal().getThumbprint().getSecondaryThumbprintFinal()))
             {
                 //Codes_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_059: [If the provided parser uses self signed authentication and is missing one or both thumbprints, two new thumbprints will be generated.]
                 this.authentication = new AuthenticationMechanism(this.authentication.getAuthenticationType());
             }
             else
             {
-                String primaryThumbprint = parser.getAuthentication().getThumbprint().getPrimaryThumbprint();
-                String secondaryThumbprint = parser.getAuthentication().getThumbprint().getSecondaryThumbprint();
+                String primaryThumbprint = parser.getAuthenticationFinal().getThumbprint().getPrimaryThumbprintFinal();
+                String secondaryThumbprint = parser.getAuthenticationFinal().getThumbprint().getSecondaryThumbprintFinal();
                 this.authentication = new AuthenticationMechanism(primaryThumbprint, secondaryThumbprint);
             }
         }
         else if (this.authentication.getAuthenticationType() == AuthenticationType.SAS)
         {
-            if (parser.getAuthentication().getSymmetricKey() == null
-                    || Tools.isNullOrEmpty(parser.getAuthentication().getSymmetricKey().getPrimaryKey())
-                    || Tools.isNullOrEmpty(parser.getAuthentication().getSymmetricKey().getSecondaryKey()))
+            if (parser.getAuthenticationFinal().getSymmetricKey() == null
+                    || Tools.isNullOrEmpty(parser.getAuthenticationFinal().getSymmetricKey().getPrimaryKeyFinal())
+                    || Tools.isNullOrEmpty(parser.getAuthenticationFinal().getSymmetricKey().getSecondaryKeyFinal()))
             {
                 //Codes_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_058: [If the provided parser uses SAS authentication and is missing one or both symmetric keys, two new keys will be generated.]
                 this.authentication = new AuthenticationMechanism(AuthenticationType.SAS);
             }
             else
             {
-                String primaryKey = parser.getAuthentication().getSymmetricKey().getPrimaryKey();
-                String secondaryKey = parser.getAuthentication().getSymmetricKey().getSecondaryKey();
-                this.authentication.getSymmetricKey().setPrimaryKey(primaryKey);
-                this.authentication.getSymmetricKey().setSecondaryKey(secondaryKey);
+                String primaryKey = parser.getAuthenticationFinal().getSymmetricKey().getPrimaryKeyFinal();
+                String secondaryKey = parser.getAuthenticationFinal().getSymmetricKey().getSecondaryKeyFinal();
+                this.authentication.getSymmetricKey().setPrimaryKeyFinal(primaryKey);
+                this.authentication.getSymmetricKey().setSecondaryKeyFinal(secondaryKey);
             }
         }
     }
@@ -360,18 +360,18 @@ public class ExportImportDevice
         if (this.authentication != null)
         {
             parser.setAuthentication(new AuthenticationParser());
-            if (this.getAuthentication().getAuthenticationType() != null)
+            if (this.getAuthenticationFinal().getAuthenticationType() != null)
             {
-                parser.getAuthentication().setType(AuthenticationTypeParser.valueOf(this.authentication.getAuthenticationType().toString()));
-                if (this.getAuthentication().getAuthenticationType() == AuthenticationType.CERTIFICATE_AUTHORITY)
+                parser.getAuthenticationFinal().setType(AuthenticationTypeParser.valueOf(this.authentication.getAuthenticationType().toString()));
+                if (this.getAuthenticationFinal().getAuthenticationType() == AuthenticationType.CERTIFICATE_AUTHORITY)
                 {
                     //do nothing
                 }
-                else if (this.getAuthentication().getAuthenticationType() == AuthenticationType.SELF_SIGNED)
+                else if (this.getAuthenticationFinal().getAuthenticationType() == AuthenticationType.SELF_SIGNED)
                 {
                     if (this.authentication.getPrimaryThumbprint() != null && this.authentication.getSecondaryThumbprint() != null)
                     {
-                        parser.getAuthentication().setThumbprint(new X509ThumbprintParser(
+                        parser.getAuthenticationFinal().setThumbprint(new X509ThumbprintParser(
                                 this.authentication.getPrimaryThumbprint(),
                                 this.authentication.getSecondaryThumbprint()));
                     }
@@ -381,13 +381,13 @@ public class ExportImportDevice
                         throw new IllegalStateException("ExportImportDevice cannot have self signed authentication without a complete thumbprint.");
                     }
                 }
-                else if (this.getAuthentication().getAuthenticationType() == AuthenticationType.SAS)
+                else if (this.getAuthenticationFinal().getAuthenticationType() == AuthenticationType.SAS)
                 {
                     if (this.authentication.getSymmetricKey() != null
                             && this.authentication.getSymmetricKey().getPrimaryKey() != null
                             && this.authentication.getSymmetricKey().getSecondaryKey() != null)
                     {
-                        parser.getAuthentication().setSymmetricKey(new SymmetricKeyParser(
+                        parser.getAuthenticationFinal().setSymmetricKey(new SymmetricKeyParser(
                                 this.authentication.getSymmetricKey().getPrimaryKey(),
                                 this.authentication.getSymmetricKey().getSecondaryKey()));
                     }

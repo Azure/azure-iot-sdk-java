@@ -45,7 +45,7 @@ public class JobPropertiesParserTest
         // assert
         assertEquals(parser.isExcludeKeysInExport(), processedParser.isExcludeKeysInExport());
         assertEquals(parser.getFailureReason(), processedParser.getFailureReason());
-        assertEquals(parser.getJobId(), processedParser.getJobId());
+        assertEquals(parser.getJobIdFinal(), processedParser.getJobIdFinal());
         assertEquals(parser.getInputBlobContainerUri(), processedParser.getInputBlobContainerUri());
         assertEquals(parser.getOutputBlobContainerUri(), processedParser.getOutputBlobContainerUri());
         assertEquals(parser.getProgress(), processedParser.getProgress());

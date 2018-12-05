@@ -46,7 +46,7 @@ public class JobPropertiesTest
         assertEquals(parser.getType(), jobProperties.getType().toString());
         assertEquals(parser.getStatus(), jobProperties.getStatus().toString());
         assertEquals(parser.getProgress(), jobProperties.getProgress());
-        assertEquals(parser.getJobId(), jobProperties.getJobId());
+        assertEquals(parser.getJobIdFinal(), jobProperties.getJobId());
         assertEquals(parser.getFailureReason(), jobProperties.getFailureReason());
         assertEquals(parser.getEndTimeUtc(), jobProperties.getEndTimeUtc());
         assertEquals(parser.getStartTimeUtc(), jobProperties.getStartTimeUtc());
@@ -65,7 +65,7 @@ public class JobPropertiesTest
         jobProperties.setOutputBlobContainerUri("outputContainerUri");
         jobProperties.setProgress(0);
         jobProperties.setExcludeKeysInExport(false);
-        jobProperties.setJobId("jobId");
+        jobProperties.setJobIdFinal("jobId");
         jobProperties.setStatus(JobProperties.JobStatus.COMPLETED);
         jobProperties.setType(JobProperties.JobType.IMPORT);
 
@@ -79,7 +79,7 @@ public class JobPropertiesTest
         assertEquals(parser.getType().toUpperCase(), jobProperties.getType().toString());
         assertEquals(parser.getStatus(), jobProperties.getStatus().toString());
         assertEquals(parser.getProgress(), jobProperties.getProgress());
-        assertEquals(parser.getJobId(), jobProperties.getJobId());
+        assertEquals(parser.getJobIdFinal(), jobProperties.getJobId());
         assertEquals(parser.getFailureReason(), jobProperties.getFailureReason());
         assertEquals(parser.getEndTimeUtc(), jobProperties.getEndTimeUtc());
         assertEquals(parser.getStartTimeUtc(), jobProperties.getStartTimeUtc());
@@ -89,7 +89,7 @@ public class JobPropertiesTest
     @Test (expected = IllegalArgumentException.class)
     public void cannotSetJobIdToNull()
     {
-        new JobProperties().setJobId(null);
+        new JobProperties().setJobIdFinal(null);
     }
 
     private JobPropertiesParser toJobPropertiesParser(JobProperties jobProperties)

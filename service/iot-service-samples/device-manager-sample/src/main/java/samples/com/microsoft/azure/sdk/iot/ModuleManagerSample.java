@@ -124,8 +124,8 @@ public class ModuleManagerSample
         RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
 
         Module module = Module.createFromId(SampleUtils.deviceId, SampleUtils.moduleId0, null);
-        module.getSymmetricKey().setPrimaryKey(primaryKey);
-        module.getSymmetricKey().setSecondaryKey(secondaryKey);
+        module.getSymmetricKey().setPrimaryKeyFinal(primaryKey);
+        module.getSymmetricKey().setSecondaryKeyFinal(secondaryKey);
         try
         {
             module = registryManager.updateModule(module);

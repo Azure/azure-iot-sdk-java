@@ -114,7 +114,7 @@ public class ExportImportTests
             deviceToAdd.setId(deviceId);
             deviceToAdd.setAuthentication(authentication);
             deviceToAdd.setStatus(DeviceStatus.Enabled);
-            TwinCollection tags = new TwinCollection(); tags.put("test01", "firstvalue");
+            TwinCollection tags = new TwinCollection(); tags.putFinal("test01", "firstvalue");
             deviceToAdd.setTags(tags);
 
             devicesForImport.add(deviceToAdd);

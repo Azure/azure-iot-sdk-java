@@ -43,9 +43,9 @@ public class ServiceEnrollmentSample
                         attestation);
 
         // The following parameters are optional. Remove it if you don't need.
-        individualEnrollment.setDeviceId(DEVICE_ID);
-        individualEnrollment.setIotHubHostName(IOTHUB_HOST_NAME);
-        individualEnrollment.setProvisioningStatus(PROVISIONING_STATUS);
+        individualEnrollment.setDeviceIdFinal(DEVICE_ID);
+        individualEnrollment.setIotHubHostNameFinal(IOTHUB_HOST_NAME);
+        individualEnrollment.setProvisioningStatusFinal(PROVISIONING_STATUS);
 
         // ************************************ Create the individualEnrollment *************************************
         System.out.println("\nAdd new individualEnrollment...");

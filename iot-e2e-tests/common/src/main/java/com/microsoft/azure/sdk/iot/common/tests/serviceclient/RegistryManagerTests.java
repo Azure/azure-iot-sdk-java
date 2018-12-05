@@ -128,7 +128,7 @@ public class RegistryManagerTests extends IntegrationTest
 
         //-Create-//
         Device deviceAdded = Device.createDevice(deviceId, AuthenticationType.SELF_SIGNED);
-        deviceAdded.setThumbprint(primaryThumbprint, secondaryThumbprint);
+        deviceAdded.setThumbprintFinal(primaryThumbprint, secondaryThumbprint);
         Tools.addDeviceWithRetry(registryManager, deviceAdded);
 
         //-Read-//
@@ -136,7 +136,7 @@ public class RegistryManagerTests extends IntegrationTest
 
         //-Update-//
         Device deviceUpdated = registryManager.getDevice(deviceId);
-        deviceUpdated.setThumbprint(primaryThumbprint2, secondaryThumbprint2);
+        deviceUpdated.setThumbprintFinal(primaryThumbprint2, secondaryThumbprint2);
         deviceUpdated = registryManager.updateDevice(deviceUpdated);
 
         //-Delete-//
@@ -184,7 +184,7 @@ public class RegistryManagerTests extends IntegrationTest
 
         //-Update-//
         Module moduleUpdated = registryManager.getModule(deviceForTest, moduleId);
-        moduleUpdated.getSymmetricKey().setPrimaryKey(expectedSymmetricKey.getPrimaryKey());
+        moduleUpdated.getSymmetricKey().setPrimaryKeyFinal(expectedSymmetricKey.getPrimaryKey());
         moduleUpdated = registryManager.updateModule(moduleUpdated);
 
         //-Delete-//
@@ -244,7 +244,7 @@ public class RegistryManagerTests extends IntegrationTest
 
         //-Create-//
         Module moduleAdded = Module.createModule(deviceForTest, moduleId, AuthenticationType.SELF_SIGNED);
-        moduleAdded.setThumbprint(primaryThumbprint, secondaryThumbprint);
+        moduleAdded.setThumbprintFinal(primaryThumbprint, secondaryThumbprint);
         Tools.addModuleWithRetry(registryManager, moduleAdded);
 
         //-Read-//
@@ -252,7 +252,7 @@ public class RegistryManagerTests extends IntegrationTest
 
         //-Update-//
         Module moduleUpdated = registryManager.getModule(deviceForTest, moduleId);
-        moduleUpdated.setThumbprint(primaryThumbprint2, secondaryThumbprint2);
+        moduleUpdated.setThumbprintFinal(primaryThumbprint2, secondaryThumbprint2);
         moduleUpdated = registryManager.updateModule(moduleUpdated);
 
         //-Delete-//

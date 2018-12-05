@@ -59,8 +59,8 @@ public class ServiceEnrollmentGroupSample
                 new EnrollmentGroup(
                         enrollmentGroupId,
                         attestation);
-        enrollmentGroup.setIotHubHostName(IOTHUB_HOST_NAME);                // Optional parameter.
-        enrollmentGroup.setProvisioningStatus(ProvisioningStatus.ENABLED);  // Optional parameter.
+        enrollmentGroup.setIotHubHostNameFinal(IOTHUB_HOST_NAME);                // Optional parameter.
+        enrollmentGroup.setProvisioningStatusFinal(ProvisioningStatus.ENABLED);  // Optional parameter.
         System.out.println("\nAdd new enrollmentGroup...");
         EnrollmentGroup enrollmentGroupResult =  provisioningServiceClient.createOrUpdateEnrollmentGroup(enrollmentGroup);
         System.out.println("\nEnrollmentGroup created with success...");

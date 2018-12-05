@@ -176,7 +176,7 @@ public class Message
     public Message()
     {
         this.properties = new HashMap<String, String>(1);
-        this.setDeliveryAcknowledgement(DeliveryAcknowledgement.Full);
+        this.setDeliveryAcknowledgementFinal(DeliveryAcknowledgement.Full);
     }
 
     /**
@@ -241,7 +241,22 @@ public class Message
         return this.deliveryAcknowledgement;
     }
 
+    /**
+     * @deprecated as of service-client version 1.15.1, please use {@link #setDeliveryAcknowledgementFinal(DeliveryAcknowledgement)}
+     *
+     * @param deliveryAcknowledgement the delivery acknowledgement to set
+     */
+    @Deprecated
     public void setDeliveryAcknowledgement(DeliveryAcknowledgement deliveryAcknowledgement)
+    {
+        this.deliveryAcknowledgement = deliveryAcknowledgement;
+        this.properties.put(deliveryAcknowledgementPropertyName, deliveryAcknowledgement.name().toLowerCase());
+    }
+
+    /**
+     * @param deliveryAcknowledgement the delivery acknowledgement to set
+     */
+    public final void setDeliveryAcknowledgementFinal(DeliveryAcknowledgement deliveryAcknowledgement)
     {
         this.deliveryAcknowledgement = deliveryAcknowledgement;
         this.properties.put(deliveryAcknowledgementPropertyName, deliveryAcknowledgement.name().toLowerCase());
@@ -263,6 +278,6 @@ public class Message
     public void clearCustomProperties()
     {
         this.properties.clear();
-        setDeliveryAcknowledgement(this.deliveryAcknowledgement);
+        setDeliveryAcknowledgementFinal(this.deliveryAcknowledgement);
     }
 }

@@ -66,7 +66,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyToken extends Authentica
      * Setter for policy name
      * @param policyName The string value to set
      */
-    protected void setPolicyName(String policyName)
+    protected final void setPolicyName(String policyName)
     {
         this.policyName = policyName;
     }
@@ -84,7 +84,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyToken extends Authentica
      * Setter for policy token
      * @param token The string value to set
      */
-    protected void setToken(String token)
+    protected final void setToken(String token)
     {
         this.token = token;
     }

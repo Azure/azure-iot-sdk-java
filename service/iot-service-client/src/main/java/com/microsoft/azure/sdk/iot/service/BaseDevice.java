@@ -187,9 +187,35 @@ public class BaseDevice
      * Setter for X509 thumbprint
      * @param primaryThumbprint the primary thumbprint to set
      * @param secondaryThumbprint the secondary thumbprint to set
+     *
+     * @deprecated as of service-client version 1.15.1, please use {@link #setThumbprintFinal(String, String)}
+     *
      * @throws IllegalArgumentException if primaryThumbprint or secondaryThumbprint is null or empty
      */
+    @Deprecated
     public void setThumbprint(String primaryThumbprint, String secondaryThumbprint)
+    {
+        if (Tools.isNullOrEmpty(primaryThumbprint) || Tools.isNullOrEmpty(secondaryThumbprint))
+        {
+            throw new IllegalArgumentException("Thumbprint may not be null or empty");
+        }
+
+        if (this.authentication == null)
+        {
+            this.authentication = new AuthenticationMechanism(AuthenticationType.SELF_SIGNED);
+        }
+
+        this.authentication.setPrimaryThumbprint(primaryThumbprint);
+        this.authentication.setSecondaryThumbprint(secondaryThumbprint);
+    }
+
+    /**
+     * Setter for X509 thumbprint
+     * @param primaryThumbprint the primary thumbprint to set
+     * @param secondaryThumbprint the secondary thumbprint to set
+     * @throws IllegalArgumentException if primaryThumbprint or secondaryThumbprint is null or empty
+     */
+    public final void setThumbprintFinal(String primaryThumbprint, String secondaryThumbprint)
     {
         if (Tools.isNullOrEmpty(primaryThumbprint) || Tools.isNullOrEmpty(secondaryThumbprint))
         {
@@ -456,10 +482,10 @@ public class BaseDevice
         else if (authenticationType == AuthenticationType.SELF_SIGNED)
         {
             if (parser.getAuthenticationParser().getThumbprint() != null
-                    && parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprint() != null
-                    && parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprint() != null)
+                    && parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprintFinal() != null
+                    && parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprintFinal() != null)
             {
-                this.setThumbprint(parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprint(), parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprint());
+                this.setThumbprintFinal(parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprintFinal(), parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprintFinal());
             }
             else
             {
@@ -470,11 +496,11 @@ public class BaseDevice
         else if (authenticationType == AuthenticationType.SAS)
         {
             if (parser.getAuthenticationParser().getSymmetricKey() != null
-                    && parser.getAuthenticationParser().getSymmetricKey().getPrimaryKey() != null
-                    && parser.getAuthenticationParser().getSymmetricKey().getSecondaryKey() != null)
+                    && parser.getAuthenticationParser().getSymmetricKey().getPrimaryKeyFinal() != null
+                    && parser.getAuthenticationParser().getSymmetricKey().getSecondaryKeyFinal() != null)
             {
-                this.getSymmetricKey().setPrimaryKey(parser.getAuthenticationParser().getSymmetricKey().getPrimaryKey());
-                this.getSymmetricKey().setSecondaryKey(parser.getAuthenticationParser().getSymmetricKey().getSecondaryKey());
+                this.getSymmetricKey().setPrimaryKeyFinal(parser.getAuthenticationParser().getSymmetricKey().getPrimaryKeyFinal());
+                this.getSymmetricKey().setSecondaryKeyFinal(parser.getAuthenticationParser().getSymmetricKey().getSecondaryKeyFinal());
             }
             else
             {

@@ -64,33 +64,15 @@ public class IndividualEnrollmentTest
         }
 
         @Mock
-        protected void setRegistrationId(String registrationId)
-        {
-            mockedRegistrationId = registrationId;
-        }
-
-        @Mock
-        public void setDeviceId(String deviceId)
-        {
-            mockedDeviceId = deviceId;
-        }
-
-        @Mock
-        public void setAttestation(AttestationMechanism attestationMechanism)
-        {
-            mockedAttestationMechanism = attestationMechanism;
-        }
-
-        @Mock
         public void setAttestation(Attestation attestation)
         {
             mockedAttestation = attestation;
         }
 
         @Mock
-        public void setIotHubHostName(String iotHubHostName)
+        public Attestation getAttestation()
         {
-            mockedIotHubHostName = iotHubHostName;
+            return mockedAttestation;
         }
 
         @Mock
@@ -100,27 +82,9 @@ public class IndividualEnrollmentTest
         }
 
         @Mock
-        protected void setRegistrationState(DeviceRegistrationState registrationState)
-        {
-            mockedRegistrationState = registrationState;
-        }
-
-        @Mock
         public void setInitialTwin(TwinState initialTwin)
         {
             mockedInitialTwin = initialTwin;
-        }
-
-        @Mock
-        protected void setCreatedDateTimeUtc(String createdDateTimeUtc)
-        {
-            mockedCreatedDateTimeUtc = createdDateTimeUtc;
-        }
-
-        @Mock
-        protected void setLastUpdatedDateTimeUtc(String lastUpdatedDateTimeUtc)
-        {
-            mockedLastUpdatedDateTimeUtc = lastUpdatedDateTimeUtc;
         }
 
         @Mock
@@ -144,9 +108,9 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = new IndividualEnrollment(
                 VALID_REGISTRATION_ID,
                 new TpmAttestation(VALID_ENDORSEMENT_KEY, VALID_STORAGE_ROOT_KEY));
-        individualEnrollment.setDeviceId(VALID_DEVICE_ID);
-        individualEnrollment.setIotHubHostName(VALID_IOTHUB_HOST_NAME);
-        individualEnrollment.setProvisioningStatus(ProvisioningStatus.ENABLED);
+        individualEnrollment.setDeviceIdFinal(VALID_DEVICE_ID);
+        individualEnrollment.setIotHubHostNameFinal(VALID_IOTHUB_HOST_NAME);
+        individualEnrollment.setProvisioningStatusFinal(ProvisioningStatus.ENABLED);
 
         return individualEnrollment;
     }
@@ -170,7 +134,7 @@ public class IndividualEnrollmentTest
 
         // assert
         assertNotNull(enrollment);
-        assertEquals(VALID_REGISTRATION_ID, enrollment.mockedRegistrationId);
+        assertEquals(VALID_REGISTRATION_ID, Deencapsulation.getField(enrollment, "registrationId"));
         assertNotNull(enrollment.mockedAttestation);
     }
 
@@ -236,8 +200,8 @@ public class IndividualEnrollmentTest
         MockIndividualEnrollment enrollment = new MockIndividualEnrollment(json);
 
         // assert
-        assertEquals(VALID_REGISTRATION_ID, enrollment.mockedRegistrationId);
-        assertNotNull(enrollment.mockedAttestationMechanism);
+        assertEquals(VALID_REGISTRATION_ID, Deencapsulation.getField(enrollment, "registrationId"));
+        assertNotNull(enrollment.getAttestation());
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_006: [If the `deviceId`, `iotHubHostName`, `provisioningStatus`, or `registrationState` is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
@@ -272,10 +236,10 @@ public class IndividualEnrollmentTest
         MockIndividualEnrollment enrollment = new MockIndividualEnrollment(json);
 
         // assert
-        assertEquals(VALID_DEVICE_ID, enrollment.mockedDeviceId);
-        assertNotNull(enrollment.mockedRegistrationState);
-        assertEquals(VALID_IOTHUB_HOST_NAME, enrollment.mockedIotHubHostName);
-        assertEquals(ProvisioningStatus.ENABLED, enrollment.mockedProvisioningStatus);
+        assertEquals(VALID_DEVICE_ID, Deencapsulation.getField(enrollment, "deviceId"));
+        assertNotNull(Deencapsulation.getField(enrollment, "registrationState"));
+        assertEquals(VALID_IOTHUB_HOST_NAME, Deencapsulation.getField(enrollment, "iotHubHostName"));
+        assertEquals(ProvisioningStatus.ENABLED, Deencapsulation.getField(enrollment, "provisioningStatus"));
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_006: [If the `deviceId`, `iotHubHostName`, `provisioningStatus`, or `registrationState` is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
@@ -447,7 +411,7 @@ public class IndividualEnrollmentTest
         MockIndividualEnrollment enrollment = new MockIndividualEnrollment(json);
 
         // assert
-        assertEquals(VALID_DATE_AS_STRING, enrollment.mockedCreatedDateTimeUtc);
+        assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollment, "createdDateTimeUtcDate").toString());
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_009: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
@@ -500,7 +464,7 @@ public class IndividualEnrollmentTest
         MockIndividualEnrollment enrollment = new MockIndividualEnrollment(json);
 
         // assert
-        assertEquals(VALID_DATE_AS_STRING, enrollment.mockedLastUpdatedDateTimeUtc);
+        assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollment, "lastUpdatedDateTimeUtcDate").toString());
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_010: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
@@ -554,7 +518,7 @@ public class IndividualEnrollmentTest
         MockIndividualEnrollment enrollment = new MockIndividualEnrollment(json);
 
         // assert
-        assertEquals(VALID_PARSED_ETAG, enrollment.mockedEtag);
+        assertEquals(VALID_PARSED_ETAG, Deencapsulation.getField(enrollment, "etag"));
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_011: [If the etag is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
@@ -1049,7 +1013,7 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        individualEnrollment.setIotHubHostName(null);
+        individualEnrollment.setIotHubHostNameFinal(null);
 
         // assert
     }
@@ -1062,7 +1026,7 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        individualEnrollment.setIotHubHostName("");
+        individualEnrollment.setIotHubHostNameFinal("");
 
         // assert
     }
@@ -1075,7 +1039,7 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        individualEnrollment.setIotHubHostName("NewHostName.\u1234a.b");
+        individualEnrollment.setIotHubHostNameFinal("NewHostName.\u1234a.b");
 
         // assert
     }
@@ -1088,7 +1052,7 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        individualEnrollment.setIotHubHostName("NewHostName.&a.b");
+        individualEnrollment.setIotHubHostNameFinal("NewHostName.&a.b");
 
         // assert
     }
@@ -1101,7 +1065,7 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        individualEnrollment.setIotHubHostName("NewHostName");
+        individualEnrollment.setIotHubHostNameFinal("NewHostName");
 
         // assert
     }
@@ -1116,7 +1080,7 @@ public class IndividualEnrollmentTest
         assertNotEquals(newHostName, Deencapsulation.getField(individualEnrollment, "iotHubHostName"));
 
         // act
-        individualEnrollment.setIotHubHostName(newHostName);
+        individualEnrollment.setIotHubHostNameFinal(newHostName);
 
         // assert
         assertEquals(newHostName, Deencapsulation.getField(individualEnrollment, "iotHubHostName"));
@@ -1158,7 +1122,7 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        individualEnrollment.setProvisioningStatus(null);
+        individualEnrollment.setProvisioningStatusFinal(null);
 
         // assert
     }
@@ -1172,7 +1136,7 @@ public class IndividualEnrollmentTest
         assertNotEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(individualEnrollment, "provisioningStatus"));
 
         // act
-        individualEnrollment.setProvisioningStatus(ProvisioningStatus.DISABLED);
+        individualEnrollment.setProvisioningStatusFinal(ProvisioningStatus.DISABLED);
 
         // assert
         assertEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(individualEnrollment, "provisioningStatus"));

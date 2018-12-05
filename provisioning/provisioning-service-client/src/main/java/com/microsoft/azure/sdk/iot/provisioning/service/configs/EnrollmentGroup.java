@@ -235,15 +235,15 @@ public class EnrollmentGroup extends Serializable
         /* SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwin`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
         if(result.iotHubHostName != null)
         {
-            this.setIotHubHostName(result.iotHubHostName);
+            this.setIotHubHostNameFinal(result.iotHubHostName);
         }
         if(result.provisioningStatus != null)
         {
-            this.setProvisioningStatus(result.provisioningStatus);
+            this.setProvisioningStatusFinal(result.provisioningStatus);
         }
         if (result.initialTwin != null)
         {
-            this.setInitialTwin(result.initialTwin);
+            this.setInitialTwinFinal(result.initialTwin);
         }
 
         /* SRS_ENROLLMENT_GROUP_21_007: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
@@ -261,7 +261,7 @@ public class EnrollmentGroup extends Serializable
         /* SRS_ENROLLMENT_GROUP_21_009: [If the etag is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
         if(result.etag != null)
         {
-            this.setEtag(result.etag);
+            this.setEtagFinal(result.etag);
         }
     }
 
@@ -317,7 +317,7 @@ public class EnrollmentGroup extends Serializable
      * @param enrollmentGroupId the {@code String} with the new enrollmentGroupId. It cannot be {@code null}, empty, or invalid.
      * @throws IllegalArgumentException If the provided enrollmentGroupId is {@code null}, empty, or invalid.
      */
-    protected void setEnrollmentGroupId(String enrollmentGroupId)
+    protected final void setEnrollmentGroupId(String enrollmentGroupId)
     {
         /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
         ParserUtility.validateId(enrollmentGroupId);
@@ -351,7 +351,7 @@ public class EnrollmentGroup extends Serializable
      * @param attestationMechanism the {@code AttestationMechanism} with the new attestation mechanism. It can be `tpm` or `x509`.
      * @throws IllegalArgumentException If the provided attestation mechanism is {@code null}.
      */
-    protected void setAttestation(AttestationMechanism attestationMechanism)
+    protected final void setAttestation(AttestationMechanism attestationMechanism)
     {
         /* SRS_ENROLLMENT_GROUP_21_018: [The setAttestation shall throw IllegalArgumentException if the attestation is null.] */
         if(attestationMechanism == null)
@@ -399,7 +399,7 @@ public class EnrollmentGroup extends Serializable
         {
             throw new IllegalArgumentException("attestation for EnrollmentGroup shall be X509");
         }
-        if(((X509Attestation)attestation).getRootCertificates() == null)
+        if(((X509Attestation)attestation).getRootCertificatesFinal() == null)
         {
             throw new IllegalArgumentException("attestation for EnrollmentGroup shall be X509 signingCertificate");
         }
@@ -433,7 +433,31 @@ public class EnrollmentGroup extends Serializable
      * @param iotHubHostName the {@code String} with the new iotHubHostName. It cannot be {@code null}, empty, or invalid.
      * @throws IllegalArgumentException If the provided iotHubHostName is {@code null}, empty, or invalid.
      */
+    @Deprecated
     public void setIotHubHostName(String iotHubHostName)
+    {
+        /* SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
+        ParserUtility.validateHostName(iotHubHostName);
+
+        /* SRS_ENROLLMENT_GROUP_21_022: [The setIotHubHostName shall store the provided iotHubHostName.] */
+        this.iotHubHostName = iotHubHostName;
+    }
+
+    /**
+     * Setter for the iotHubHostName.
+     *
+     * <p>
+     *     A valid iothub host name shall follow this criteria.
+     *         A case-sensitive string (up to 128 char long)
+     *         of ASCII 7-bit alphanumeric chars
+     *         + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+     *     A valid host name shall have, at least 2 parts separated by '.'.
+     * </p>
+     *
+     * @param iotHubHostName the {@code String} with the new iotHubHostName. It cannot be {@code null}, empty, or invalid.
+     * @throws IllegalArgumentException If the provided iotHubHostName is {@code null}, empty, or invalid.
+     */
+    public final void setIotHubHostNameFinal(String iotHubHostName)
     {
         /* SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
         ParserUtility.validateHostName(iotHubHostName);
@@ -463,7 +487,30 @@ public class EnrollmentGroup extends Serializable
      * @param initialTwin the {@code TwinState} with the new initialTwin. It cannot be {@code null}.
      * @throws IllegalArgumentException If the provided initialTwin is {@code null}.
      */
+    @Deprecated
     public void setInitialTwin(TwinState initialTwin)
+    {
+        /* SRS_ENROLLMENT_GROUP_21_024: [The setInitialTwin shall throw IllegalArgumentException if the initialTwin is null.] */
+        if(initialTwin == null)
+        {
+            throw new IllegalArgumentException("initialTwin cannot be null");
+        }
+
+        /* SRS_ENROLLMENT_GROUP_21_025: [The setInitialTwin shall store the provided initialTwin.] */
+        this.initialTwin = initialTwin;
+    }
+
+    /**
+     * Setter for the initialTwin.
+     *
+     * <p>
+     *     It provides a Twin precondition for the provisioned device.
+     * </p>
+     *
+     * @param initialTwin the {@code TwinState} with the new initialTwin. It cannot be {@code null}.
+     * @throws IllegalArgumentException If the provided initialTwin is {@code null}.
+     */
+    public final void setInitialTwinFinal(TwinState initialTwin)
     {
         /* SRS_ENROLLMENT_GROUP_21_024: [The setInitialTwin shall throw IllegalArgumentException if the initialTwin is null.] */
         if(initialTwin == null)
@@ -493,10 +540,36 @@ public class EnrollmentGroup extends Serializable
      *     It provides a Status precondition for the provisioned device.
      * </p>
      *
+     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setProvisioningStatusFinal(ProvisioningStatus)}
+     *
      * @param provisioningStatus the {@code ProvisioningStatus} with the new provisioningStatus. It cannot be {@code null}.
      * @throws IllegalArgumentException If the provided provisioningStatus is {@code null}.
      */
+    @Deprecated
     public void setProvisioningStatus(ProvisioningStatus provisioningStatus)
+    {
+        /* SRS_ENROLLMENT_GROUP_21_027: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
+        if(provisioningStatus == null)
+        {
+            throw new IllegalArgumentException("provisioningStatus cannot be null");
+        }
+
+        /* SRS_ENROLLMENT_GROUP_21_028: [The setProvisioningStatus shall store the provided provisioningStatus.] */
+        this.provisioningStatus = provisioningStatus;
+    }
+
+
+    /**
+     * Setter for the provisioningStatus.
+     *
+     * <p>
+     *     It provides a Status precondition for the provisioned device.
+     * </p>
+     *
+     * @param provisioningStatus the {@code ProvisioningStatus} with the new provisioningStatus. It cannot be {@code null}.
+     * @throws IllegalArgumentException If the provided provisioningStatus is {@code null}.
+     */
+    public final void setProvisioningStatusFinal(ProvisioningStatus provisioningStatus)
     {
         /* SRS_ENROLLMENT_GROUP_21_027: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
         if(provisioningStatus == null)
@@ -532,7 +605,7 @@ public class EnrollmentGroup extends Serializable
      *
      * @param createdDateTimeUtc the {@code String} with the new createdDateTimeUtc. It can be {@code null}, empty or not valid.
      */
-    protected void setCreatedDateTimeUtc(String createdDateTimeUtc)
+    protected final void setCreatedDateTimeUtc(String createdDateTimeUtc)
     {
         /* SRS_ENROLLMENT_GROUP_21_030: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
         /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
@@ -563,7 +636,7 @@ public class EnrollmentGroup extends Serializable
      *
      * @param lastUpdatedDateTimeUtc the {@code String} with the new lastUpdatedDateTimeUtc. It can be {@code null}, empty or not valid.
      */
-    protected void setLastUpdatedDateTimeUtc(String lastUpdatedDateTimeUtc)
+    protected final void setLastUpdatedDateTimeUtc(String lastUpdatedDateTimeUtc)
     {
         /* SRS_ENROLLMENT_GROUP_21_033: [The setLastUpdatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
         /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
@@ -584,10 +657,28 @@ public class EnrollmentGroup extends Serializable
     /**
      * Setter for the etag.
      *
+     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setEtagFinal(String)}
+     *
      * @param etag the {@code String} with the new etag. It cannot be {@code null}, empty or invalid.
      * @throws IllegalArgumentException If the provided etag is {@code null}, empty or invalid.
      */
+    @Deprecated
     public void setEtag(String etag)
+    {
+        /* SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
+        ParserUtility.validateStringUTF8(etag);
+
+        /* SRS_ENROLLMENT_GROUP_21_037: [The setEtag shall store the provided etag.] */
+        this.etag = etag;
+    }
+
+    /**
+     * Setter for the etag.
+     *
+     * @param etag the {@code String} with the new etag. It cannot be {@code null}, empty or invalid.
+     * @throws IllegalArgumentException If the provided etag is {@code null}, empty or invalid.
+     */
+    public final void setEtagFinal(String etag)
     {
         /* SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
         ParserUtility.validateStringUTF8(etag);

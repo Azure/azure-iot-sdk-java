@@ -167,7 +167,7 @@ public class JobResultTest
         final String json = "validJson";
 
         TwinCollection tags = new TwinCollection();
-        tags.put("tag1", "val1");
+        tags.putFinal("tag1", "val1");
 
         TwinState twinState = new TwinState(tags, null, null);
         twinState.setDeviceId(DEVICE_ID);
@@ -216,7 +216,7 @@ public class JobResultTest
         final Date now = new Date();
 
         TwinCollection tags = new TwinCollection();
-        tags.put("tag1", "val1");
+        tags.putFinal("tag1", "val1");
 
         TwinState twinState = new TwinState(tags, null, null);
         twinState.setDeviceId(DEVICE_ID);
@@ -254,7 +254,7 @@ public class JobResultTest
         final Date now = new Date();
 
         TwinCollection desired = new TwinCollection();
-        desired.put("prop1", "val1");
+        desired.putFinal("prop1", "val1");
 
         TwinState twinState = new TwinState(null, desired, null);
         twinState.setDeviceId(DEVICE_ID);
@@ -291,7 +291,7 @@ public class JobResultTest
         final Date now = new Date();
 
         TwinCollection tags = new TwinCollection();
-        tags.put("tag1", "val1");
+        tags.putFinal("tag1", "val1");
 
         TwinState twinState = new TwinState(tags, null, null);
         twinState.setDeviceId(DEVICE_ID);
@@ -329,7 +329,7 @@ public class JobResultTest
         final Date now = new Date();
 
         TwinCollection tags = new TwinCollection();
-        tags.put("tag1", "val1");
+        tags.putFinal("tag1", "val1");
 
         TwinState twinState = new TwinState(tags, null, null);
         twinState.setETag(ETAG);
@@ -506,7 +506,7 @@ public class JobResultTest
                 "}";
 
         TwinCollection tags = new TwinCollection();
-        tags.put("tag1", "val1");
+        tags.putFinal("tag1", "val1");
 
         TwinState twinState = new TwinState(tags, null, null);
         twinState.setDeviceId(DEVICE_ID);
@@ -566,9 +566,9 @@ public class JobResultTest
                         "}";
 
         TwinCollection tags = new TwinCollection();
-        tags.put("tag1", "val1");
+        tags.putFinal("tag1", "val1");
         TwinCollection desired = new TwinCollection();
-        desired.put("key1", "val1");
+        desired.putFinal("key1", "val1");
 
         TwinState twinState = new TwinState(tags, desired, null);
         twinState.setDeviceId(DEVICE_ID);

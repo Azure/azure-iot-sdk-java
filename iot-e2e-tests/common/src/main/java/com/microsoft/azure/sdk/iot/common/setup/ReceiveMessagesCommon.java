@@ -117,14 +117,14 @@ public class ReceiveMessagesCommon extends IntegrationTest
         module = Module.createFromId(deviceId, moduleId, null);
         moduleX509 = Module.createModule(deviceIdX509, moduleIdX509, SELF_SIGNED);
 
-        deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
-        moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+        moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
 
         module = Module.createFromId(deviceId, moduleId, null);
         moduleX509 = Module.createModule(deviceIdX509, moduleIdX509, SELF_SIGNED);
 
-        deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
-        moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+        moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
 
         Tools.addDeviceWithRetry(registryManager, device);
         Tools.addDeviceWithRetry(registryManager, deviceX509);

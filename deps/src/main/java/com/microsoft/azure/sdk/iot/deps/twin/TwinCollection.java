@@ -67,7 +67,7 @@ import java.util.Map;
  *
  * <p> This class exposes the Twin collection with or without metadata as a Map here
  *     user can gat both the value and the metadata. For instance, in the above TwinCollection,
- *     {@link #get(Object)} for <b>Color</b> will return <b>White</b> and the {@link #getTwinMetadata(String)}
+ *     {@link #get(Object)} for <b>Color</b> will return <b>White</b> and the {@link #getTwinMetadataFinal(String)}
  *     for <b>Color</b> will return the Object TwinMetadata that contain {@link TwinMetadata#getLastUpdated()}
  *     that will returns the {@code Date} <b>2017-09-21T02:07:44.238Z</b> and {@link TwinMetadata#getLastUpdatedVersion()}
  *     that will returns the {@code Integer} <b>4</b>.
@@ -84,7 +84,7 @@ import java.util.Map;
  *
  *      // As in the root TwinCollection, the inner TwinCollection contain its own metadata.
  *      // So, get the metadata information for the inner NewValue.
- *      TwinMetadata maxSpeedNewValueMetadata = innerMaxSpeed.getTwinMetadata("NewValue");
+ *      TwinMetadata maxSpeedNewValueMetadata = innerMaxSpeed.getTwinMetadataFinal("NewValue");
  *      Date newValueLastUpdated = maxSpeedNewValueMetadata.getLastUpdated(); //Shall contain `2017-09-21T02:07:44.238Z`
  *      Integer newValueLastUpdatedVersion = maxSpeedNewValueMetadata.getLastUpdatedVersion(); //Shall contain `4`
  * }
@@ -110,8 +110,8 @@ public class TwinCollection extends HashMap<String, Object>
     /**
      * Constructor
      *
-     * <p> Creates an empty collection. Fill it with {@link #put(String, Object)}
-     *     or {@link #putAll(Map)}.
+     * <p> Creates an empty collection. Fill it with {@link #putFinal(String, Object)}
+     *     or {@link #putAllFinal(Map)}.
      */
     public TwinCollection()
     {
@@ -131,8 +131,8 @@ public class TwinCollection extends HashMap<String, Object>
         /* SRS_TWIN_COLLECTION_21_002: [If the Map is null or empty, the constructor shall create a new empty instance.] */
         if((map != null) && !map.isEmpty())
         {
-            /* SRS_TWIN_COLLECTION_21_003: [The constructor shall create a new instance of the super class and add the provided Map by calling putAll.] */
-            this.putAll(map);
+            /* SRS_TWIN_COLLECTION_21_003: [The constructor shall create a new instance of the super class and add the provided Map by calling putAllFinal.] */
+            this.putAllFinal(map);
         }
     }
 
@@ -150,8 +150,8 @@ public class TwinCollection extends HashMap<String, Object>
         {
             /* SRS_TWIN_COLLECTION_21_026: [The constructor shall create a new instance of the super class and add the provided Map.] */
             /* SRS_TWIN_COLLECTION_21_027: [The constructor shall copy the version and metadata from the provided TwinCollection.] */
-            this.version = collection.getVersion();
-            this.twinMetadata = collection.getTwinMetadata();
+            this.version = collection.getVersionFinal();
+            this.twinMetadata = collection.getTwinMetadataFinal();
             for (Map.Entry<String, Object> entry: collection.entrySet())
             {
                 if(entry.getValue() instanceof TwinCollection)
@@ -162,7 +162,7 @@ public class TwinCollection extends HashMap<String, Object>
                 {
                     super.put((String)entry.getKey(), entry.getValue());
                 }
-                this.metadataMap.put((String)entry.getKey(), collection.getTwinMetadata((String)entry.getKey()));
+                this.metadataMap.put((String)entry.getKey(), collection.getTwinMetadataFinal((String)entry.getKey()));
             }
         }
     }
@@ -179,8 +179,11 @@ public class TwinCollection extends HashMap<String, Object>
      * <p> As defined by the Twin, the value of a entry can be an inner Map. TwinCollection will
      *     accept up to 5 levels of inner Maps.
      *
+     * @deprecated as of Deps version 0.7.1, please use {@link #putAllFinal(Map)}
+     *
      * @param map A {@code Map} of entries to add to the TwinCollection.
      */
+    @Deprecated
     @Override
     public void putAll(Map<? extends String, ?> map)
     {
@@ -193,7 +196,34 @@ public class TwinCollection extends HashMap<String, Object>
         /* SRS_TWIN_COLLECTION_21_005: [The putAll shall copy all entries in the provided Map to the TwinCollection.] */
         for(Map.Entry<? extends String, ?> entry: map.entrySet())
         {
-            this.put(entry.getKey(), entry.getValue());
+            this.putFinal(entry.getKey(), entry.getValue());
+        }
+    }
+
+    /**
+     * Add all information in the provided Map to the TwinCollection.
+     *
+     * <p> This function will add all entries in the Map to the TwinCollection. If the provided
+     *     key already exists, it will replace the value by the new one. This function will not
+     *     delete or change the content of the other keys in the Map.
+     *
+     * <p> As defined by the Twin, the value of a entry can be an inner Map. TwinCollection will
+     *     accept up to 5 levels of inner Maps.
+     *
+     * @param map A {@code Map} of entries to add to the TwinCollection.
+     */
+    public final void putAllFinal(Map<? extends String, ?> map)
+    {
+        /* SRS_TWIN_COLLECTION_21_004: [The putAll shall throw IllegalArgumentException if the provided Map is null, empty or invalid.] */
+        if((map == null) || map.isEmpty())
+        {
+            throw new IllegalArgumentException("map to add cannot be null or empty.");
+        }
+
+        /* SRS_TWIN_COLLECTION_21_005: [The putAll shall copy all entries in the provided Map to the TwinCollection.] */
+        for(Map.Entry<? extends String, ?> entry: map.entrySet())
+        {
+            this.putFinal(entry.getKey(), entry.getValue());
         }
     }
 
@@ -210,9 +240,55 @@ public class TwinCollection extends HashMap<String, Object>
      * @param key the {@code String} that represent the key of the new entry. It cannot be {#code null} or empty.
      * @param value the {@code Object} that represents the value of the new entry. It cannot be user defined type or array.
      * @return The {@code Object} that correspond to the last value of this key. It will be {@code null} if there is no previous value.
+
+     * @deprecated as of Deps version 0.7.1, please use {@link #putFinal(String, Object)}
      */
     @Override
+    @Deprecated
     public Object put(String key, Object value)
+    {
+        if (key == null || key.isEmpty())
+        {
+            /* SRS_TWIN_COLLECTION_21_010: [The put shall throw IllegalArgumentException if the provided key is null, empty, or invalid, or if the value is invalid.] */
+            throw new IllegalArgumentException("Key cannot be null or empty");
+        }
+
+        /* SRS_TWIN_COLLECTION_21_006: [The put shall return the previous value of the key.] */
+        Object last = get(key);
+        /* SRS_TWIN_COLLECTION_21_007: [The put shall add the new pair key value to the TwinCollection.] */
+        if(value instanceof Map)
+        {
+            /* SRS_TWIN_COLLECTION_21_008: [If the value contain a Map, the put shall convert this map in inner TwinCollection.] */
+            super.put(key, new TwinCollection((Map<? extends String, Object>)value));
+        }
+        else
+        {
+            super.put(key, value);
+        }
+
+        /* SRS_TWIN_COLLECTION_21_009: [The put shall throw IllegalArgumentException if the final collection contain more that 5 levels.] */
+        /* Codes_SRS_TWIN_COLLECTION_34_028: [The put shall not validate the map if the provided key is a metadata tag, or a version tag.] */
+        if (!key.equals(VERSION_TAG) && !key.equals(METADATA_TAG))
+        {
+            ParserUtility.validateMap(this, MAX_TWIN_LEVEL, true);
+        }
+
+        return last;
+    }
+
+    /**
+     * Add a single new entry in the TwinCollection.
+     *
+     * <p> This function will add a single pair key value to the TwinCollection. By the
+     *     Twin definition, the {@code Object} can contain types of {@code Boolean},
+     *     {@code Number}, {@code String}, {@code Object}, or up to 5 levels of
+     *     sub-TwinCollection, but it cannot be types defined by the user or arrays.
+     *
+     * @param key the {@code String} that represent the key of the new entry. It cannot be {#code null} or empty.
+     * @param value the {@code Object} that represents the value of the new entry. It cannot be user defined type or array.
+     * @return The {@code Object} that correspond to the last value of this key. It will be {@code null} if there is no previous value.
+     */
+    public final Object putFinal(String key, Object value)
     {
         if (key == null || key.isEmpty())
         {
@@ -319,7 +395,7 @@ public class TwinCollection extends HashMap<String, Object>
             else
             {
                 /* SRS_TWIN_COLLECTION_21_015: [The constructor shall throw IllegalArgumentException if the Twin collection contain more than 5 levels.] */
-                twinCollection.put(entry.getKey(), entry.getValue());
+                twinCollection.putFinal(entry.getKey(), entry.getValue());
             }
         }
 
@@ -446,9 +522,23 @@ public class TwinCollection extends HashMap<String, Object>
     /**
      * Getter for the version.
      *
+     * @deprecated as of Deps version 0.7.1, please use {@link #getVersionFinal()}
+     *
      * @return The {@code Integer} with the version content. It can be {@code null}.
      */
+    @Deprecated
     public Integer getVersion()
+    {
+        /* SRS_TWIN_COLLECTION_21_021: [The getVersion shall return a Integer with the stored version.] */
+        return this.version;
+    }
+
+    /**
+     * Getter for the version.
+     *
+     * @return The {@code Integer} with the version content. It can be {@code null}.
+     */
+    public final Integer getVersionFinal()
     {
         /* SRS_TWIN_COLLECTION_21_021: [The getVersion shall return a Integer with the stored version.] */
         return this.version;
@@ -457,9 +547,27 @@ public class TwinCollection extends HashMap<String, Object>
     /**
      * Getter for the TwinCollection metadata
      *
+     * @deprecated as of Deps version 0.7.1, please use {@link #getTwinMetadataFinal()}
+     *
      * @return the {@link TwinMetadata} of the Whole TwinCollection. It can be {@code null}.
      */
+    @Deprecated
     public TwinMetadata getTwinMetadata()
+    {
+        /* SRS_TWIN_COLLECTION_21_022: [The getTwinMetadata shall return the metadata of the whole TwinCollection.] */
+        if(this.twinMetadata == null)
+        {
+            return null;
+        }
+        return new TwinMetadata(this.twinMetadata);
+    }
+
+    /**
+     * Getter for the TwinCollection metadata
+     *
+     * @return the {@link TwinMetadata} of the Whole TwinCollection. It can be {@code null}.
+     */
+    public final TwinMetadata getTwinMetadataFinal()
     {
         /* SRS_TWIN_COLLECTION_21_022: [The getTwinMetadata shall return the metadata of the whole TwinCollection.] */
         if(this.twinMetadata == null)
@@ -472,10 +580,29 @@ public class TwinCollection extends HashMap<String, Object>
     /**
      * Getter for the entry metadata in the TwinCollection.
      *
+     * @deprecated as of Deps version 0.7.1, please use {@link #getTwinMetadataFinal(String)}
+     *
      * @param key the {@code String} with the name of the entry to retrieve the metadata.
      * @return the {@link TwinMetadata} ot the specific entry in the TwinCollection. It can be {@code null}.
      */
+    @Deprecated
     public TwinMetadata getTwinMetadata(String key)
+    {
+        /* SRS_TWIN_COLLECTION_21_023: [The getTwinMetadata shall return the metadata of the entry that correspond to the provided key.] */
+        if(this.metadataMap.get(key) == null)
+        {
+            return null;
+        }
+        return new TwinMetadata(this.metadataMap.get(key));
+    }
+
+    /**
+     * Getter for the entry metadata in the TwinCollection.
+     *
+     * @param key the {@code String} with the name of the entry to retrieve the metadata.
+     * @return the {@link TwinMetadata} ot the specific entry in the TwinCollection. It can be {@code null}.
+     */
+    public final TwinMetadata getTwinMetadataFinal(String key)
     {
         /* SRS_TWIN_COLLECTION_21_023: [The getTwinMetadata shall return the metadata of the entry that correspond to the provided key.] */
         if(this.metadataMap.get(key) == null)

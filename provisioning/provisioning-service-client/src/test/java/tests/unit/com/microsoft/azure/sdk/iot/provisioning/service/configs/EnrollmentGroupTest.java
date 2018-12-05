@@ -78,27 +78,15 @@ public class EnrollmentGroupTest
         }
 
         @Mock
-        protected void setEnrollmentGroupId(String enrollmentGroupId)
-        {
-            mockedEnrollmentGroupId = enrollmentGroupId;
-        }
-
-        @Mock
-        protected void setAttestation(AttestationMechanism attestationMechanism)
-        {
-            mockedAttestationMechanism = attestationMechanism;
-        }
-
-        @Mock
         public void setAttestation(Attestation attestation)
         {
             mockedAttestation = attestation;
         }
 
         @Mock
-        public void setIotHubHostName(String iotHubHostName)
+        public Attestation getAttestation()
         {
-            mockedIotHubHostName = iotHubHostName;
+            return mockedAttestation;
         }
 
         @Mock
@@ -111,18 +99,6 @@ public class EnrollmentGroupTest
         public void setInitialTwin(TwinState initialTwin)
         {
             mockedInitialTwin = initialTwin;
-        }
-
-        @Mock
-        protected void setCreatedDateTimeUtc(String createdDateTimeUtc)
-        {
-            mockedCreatedDateTimeUtc = createdDateTimeUtc;
-        }
-
-        @Mock
-        protected void setLastUpdatedDateTimeUtc(String lastUpdatedDateTimeUtc)
-        {
-            mockedLastUpdatedDateTimeUtc = lastUpdatedDateTimeUtc;
         }
 
         @Mock
@@ -146,8 +122,8 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = new EnrollmentGroup(
                 VALID_ENROLLMENT_GROUP_ID,
                 X509Attestation.createFromRootCertificates(PUBLIC_KEY_CERTIFICATE_STRING, null));
-        enrollmentGroup.setIotHubHostName(VALID_IOTHUB_HOST_NAME);
-        enrollmentGroup.setProvisioningStatus(ProvisioningStatus.ENABLED);
+        enrollmentGroup.setIotHubHostNameFinal(VALID_IOTHUB_HOST_NAME);
+        enrollmentGroup.setProvisioningStatusFinal(ProvisioningStatus.ENABLED);
         return enrollmentGroup;
     }
 
@@ -169,7 +145,7 @@ public class EnrollmentGroupTest
 
         // assert
         assertNotNull(enrollmentGroup);
-        assertEquals(VALID_ENROLLMENT_GROUP_ID, enrollmentGroup.mockedEnrollmentGroupId);
+        assertEquals(VALID_ENROLLMENT_GROUP_ID, Deencapsulation.getField(enrollmentGroup, "enrollmentGroupId"));
         assertNotNull(enrollmentGroup.mockedAttestation);
     }
 
@@ -267,7 +243,7 @@ public class EnrollmentGroupTest
         Attestation attestation = enrollmentGroup.getAttestation();
         assertTrue("attestation is not x509", (attestation instanceof X509Attestation));
         X509Attestation x509Attestation = (X509Attestation)attestation;
-        X509CertificateWithInfo primary = x509Attestation.getRootCertificates().getPrimary();
+        X509CertificateWithInfo primary = x509Attestation.getRootCertificatesFinal().getPrimaryFinal();
         assertEquals(PUBLIC_KEY_CERTIFICATE_STRING, primary.getCertificate());
         X509CertificateInfo info = primary.getInfo();
         assertEquals(VALID_ENROLLMENT_GROUP_ID, info.getSha256Thumbprint());
@@ -275,7 +251,7 @@ public class EnrollmentGroupTest
 
     /* SRS_ENROLLMENT_GROUP_21_005: [The constructor shall judge and store the provided mandatory parameters `enrollmentGroupId` and `attestation` using the EnrollmentGroup setters.] */
     @Test
-    public void constructorWithJsonUsesSetters()
+    public void constructorWithJsonUsesSetters() throws ProvisioningServiceClientException
     {
         // arrange
         final String json = "{\n" +
@@ -298,8 +274,8 @@ public class EnrollmentGroupTest
         MockEnrollmentGroup enrollmentGroup = new MockEnrollmentGroup(json);
 
         // assert
-        assertEquals(VALID_ENROLLMENT_GROUP_ID, enrollmentGroup.mockedEnrollmentGroupId);
-        assertNotNull(enrollmentGroup.mockedAttestationMechanism);
+        assertEquals(VALID_ENROLLMENT_GROUP_ID, Deencapsulation.getField(enrollmentGroup, "enrollmentGroupId"));
+        assertNotNull(enrollmentGroup.getAttestation());
     }
 
     /* SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwin`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
@@ -336,9 +312,9 @@ public class EnrollmentGroupTest
         MockEnrollmentGroup enrollmentGroup = new MockEnrollmentGroup(json);
 
         // assert
-        assertNotNull(enrollmentGroup.mockedInitialTwin);
-        assertEquals(VALID_IOTHUB_HOST_NAME, enrollmentGroup.mockedIotHubHostName);
-        assertEquals(ProvisioningStatus.ENABLED, enrollmentGroup.mockedProvisioningStatus);
+        assertNotNull(Deencapsulation.getField(enrollmentGroup, "initialTwin"));
+        assertEquals(VALID_IOTHUB_HOST_NAME, Deencapsulation.getField(enrollmentGroup, "iotHubHostName"));
+        assertEquals(ProvisioningStatus.ENABLED, Deencapsulation.getField(enrollmentGroup, "provisioningStatus"));
     }
 
     /* SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwin`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
@@ -396,7 +372,7 @@ public class EnrollmentGroupTest
         MockEnrollmentGroup enrollmentGroup = new MockEnrollmentGroup(json);
 
         // assert
-        assertEquals(VALID_DATE_AS_STRING, enrollmentGroup.mockedCreatedDateTimeUtc);
+        assertEquals(VALID_DATE, Deencapsulation.getField(enrollmentGroup, "createdDateTimeUtcDate"));
     }
 
     /* SRS_ENROLLMENT_GROUP_21_007: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
@@ -455,7 +431,7 @@ public class EnrollmentGroupTest
         MockEnrollmentGroup enrollmentGroup = new MockEnrollmentGroup(json);
 
         // assert
-        assertEquals(VALID_DATE_AS_STRING, enrollmentGroup.mockedLastUpdatedDateTimeUtc);
+        assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollmentGroup, "lastUpdatedDateTimeUtcDate").toString());
     }
 
     /* SRS_ENROLLMENT_GROUP_21_008: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
@@ -515,7 +491,7 @@ public class EnrollmentGroupTest
         MockEnrollmentGroup enrollmentGroup = new MockEnrollmentGroup(json);
 
         // assert
-        assertEquals(VALID_PARSED_ETAG, enrollmentGroup.mockedEtag);
+        assertEquals(VALID_PARSED_ETAG, Deencapsulation.getField(enrollmentGroup, "etag"));
     }
 
     /* SRS_ENROLLMENT_GROUP_21_009: [If the etag is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
@@ -598,7 +574,7 @@ public class EnrollmentGroupTest
     {
         // arrange
         EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
-        enrollmentGroup.setInitialTwin(new TwinState(
+        enrollmentGroup.setInitialTwinFinal(new TwinState(
                 new TwinCollection() {{
                     put("tag1", "valueTag1");
                     put("tag2", "valueTag2");
@@ -649,7 +625,7 @@ public class EnrollmentGroupTest
     {
         // arrange
         EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
-        enrollmentGroup.setInitialTwin(new TwinState(
+        enrollmentGroup.setInitialTwinFinal(new TwinState(
                 new TwinCollection() {{
                     put("tag1", "valueTag1");
                     put("tag2", "valueTag2");
@@ -867,7 +843,7 @@ public class EnrollmentGroupTest
             {
                 Deencapsulation.invoke(mockedAttestationMechanismMechanism, "getAttestation");
                 result = mockedX509Attestation;
-                mockedX509Attestation.getRootCertificates();
+                mockedX509Attestation.getRootCertificatesFinal();
                 result = null;
             }
         };
@@ -894,7 +870,7 @@ public class EnrollmentGroupTest
             {
                 Deencapsulation.invoke(mockedAttestationMechanismMechanism, "getAttestation");
                 result = mockedX509Attestation;
-                mockedX509Attestation.getRootCertificates();
+                mockedX509Attestation.getRootCertificatesFinal();
                 result = mockedX509Certificates;
             }
         };
@@ -946,7 +922,7 @@ public class EnrollmentGroupTest
         new NonStrictExpectations()
         {
             {
-                mockedX509Attestation.getRootCertificates();
+                mockedX509Attestation.getRootCertificatesFinal();
                 result = null;
             }
         };
@@ -970,7 +946,7 @@ public class EnrollmentGroupTest
         new NonStrictExpectations()
         {
             {
-                mockedX509Attestation.getRootCertificates();
+                mockedX509Attestation.getRootCertificatesFinal();
                 result = mockedX509Certificates;
             }
         };
@@ -996,7 +972,7 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
 
         // act
-        enrollmentGroup.setIotHubHostName(null);
+        enrollmentGroup.setIotHubHostNameFinal(null);
 
         // assert
     }
@@ -1009,7 +985,7 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
 
         // act
-        enrollmentGroup.setIotHubHostName("");
+        enrollmentGroup.setIotHubHostNameFinal("");
 
         // assert
     }
@@ -1022,7 +998,7 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
 
         // act
-        enrollmentGroup.setIotHubHostName("NewHostName.\u1234a.b");
+        enrollmentGroup.setIotHubHostNameFinal("NewHostName.\u1234a.b");
 
         // assert
     }
@@ -1035,7 +1011,7 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
 
         // act
-        enrollmentGroup.setIotHubHostName("NewHostName.&a.b");
+        enrollmentGroup.setIotHubHostNameFinal("NewHostName.&a.b");
 
         // assert
     }
@@ -1048,7 +1024,7 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
 
         // act
-        enrollmentGroup.setIotHubHostName("NewHostName");
+        enrollmentGroup.setIotHubHostNameFinal("NewHostName");
 
         // assert
     }
@@ -1063,7 +1039,7 @@ public class EnrollmentGroupTest
         assertNotEquals(newHostName, Deencapsulation.getField(enrollmentGroup, "iotHubHostName"));
 
         // act
-        enrollmentGroup.setIotHubHostName(newHostName);
+        enrollmentGroup.setIotHubHostNameFinal(newHostName);
 
         // assert
         assertEquals(newHostName, Deencapsulation.getField(enrollmentGroup, "iotHubHostName"));
@@ -1077,7 +1053,7 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
 
         // act
-        enrollmentGroup.setInitialTwin(null);
+        enrollmentGroup.setInitialTwinFinal(null);
 
         // assert
     }
@@ -1091,7 +1067,7 @@ public class EnrollmentGroupTest
         assertNotEquals(mockedTwinState, Deencapsulation.getField(enrollmentGroup, "initialTwin"));
 
         // act
-        enrollmentGroup.setInitialTwin(mockedTwinState);
+        enrollmentGroup.setInitialTwinFinal(mockedTwinState);
 
         // assert
         assertEquals(mockedTwinState, Deencapsulation.getField(enrollmentGroup, "initialTwin"));
@@ -1105,7 +1081,7 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
 
         // act
-        enrollmentGroup.setProvisioningStatus(null);
+        enrollmentGroup.setProvisioningStatusFinal(null);
 
         // assert
     }
@@ -1119,7 +1095,7 @@ public class EnrollmentGroupTest
         assertNotEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(enrollmentGroup, "provisioningStatus"));
 
         // act
-        enrollmentGroup.setProvisioningStatus(ProvisioningStatus.DISABLED);
+        enrollmentGroup.setProvisioningStatusFinal(ProvisioningStatus.DISABLED);
 
         // assert
         assertEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(enrollmentGroup, "provisioningStatus"));

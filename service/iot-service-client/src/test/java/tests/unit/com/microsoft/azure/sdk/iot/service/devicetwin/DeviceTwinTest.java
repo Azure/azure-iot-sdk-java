@@ -525,7 +525,7 @@ public class DeviceTwinTest
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
         TwinCollection testMap = new TwinCollection();
-        testMap.put("TestKey", "TestValue");
+        testMap.putFinal("TestKey", "TestValue");
         new NonStrictExpectations()
         {
             {
@@ -644,7 +644,7 @@ public class DeviceTwinTest
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
         TwinCollection testMap = new TwinCollection();
-        testMap.put("TestKey", "TestValue");
+        testMap.putFinal("TestKey", "TestValue");
         new Expectations()
         {
             {
@@ -688,7 +688,7 @@ public class DeviceTwinTest
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
         TwinCollection testMap = new TwinCollection();
-        testMap.put("TestKey", "TestValue");
+        testMap.putFinal("TestKey", "TestValue");
         new NonStrictExpectations()
         {
             {
@@ -731,7 +731,7 @@ public class DeviceTwinTest
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
         TwinCollection testMap = new TwinCollection();
-        testMap.put("TestKey", "TestValue");
+        testMap.putFinal("TestKey", "TestValue");
         new NonStrictExpectations()
         {
             {
@@ -945,11 +945,11 @@ public class DeviceTwinTest
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
         final String expectedString = "testJsonAsNext";
         TwinCollection tags = new TwinCollection();
-        tags.put("tagsKey", "tagsValue");
+        tags.putFinal("tagsKey", "tagsValue");
         TwinCollection rp = new TwinCollection();
-        rp.put("rpKey", "rpValue");
+        rp.putFinal("rpKey", "rpValue");
         TwinCollection dp = new TwinCollection();
-        dp.put("dpKey", "dpValue");
+        dp.putFinal("dpKey", "dpValue");
 
         new NonStrictExpectations()
         {
@@ -1018,11 +1018,11 @@ public class DeviceTwinTest
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
         final String expectedString = "testJsonAsNext";
         TwinCollection tags = new TwinCollection();
-        tags.put("tagsKey", "tagsValue");
+        tags.putFinal("tagsKey", "tagsValue");
         TwinCollection rp = new TwinCollection();
-        rp.put("rpKey", "rpValue");
+        rp.putFinal("rpKey", "rpValue");
         TwinCollection dp = new TwinCollection();
-        dp.put("dpKey", "dpValue");
+        dp.putFinal("dpKey", "dpValue");
 
         new NonStrictExpectations()
         {

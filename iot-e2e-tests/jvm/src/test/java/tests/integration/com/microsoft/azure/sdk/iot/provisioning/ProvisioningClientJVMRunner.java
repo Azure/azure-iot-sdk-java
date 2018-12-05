@@ -251,7 +251,7 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
                         registrationId,
                         attestation);
 
-        individualEnrollment.setDeviceId(deviceId);
+        individualEnrollment.setDeviceIdFinal(deviceId);
         if (twinState != null)
         {
             individualEnrollment.setInitialTwin(twinState);
@@ -290,7 +290,7 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
                         registrationId,
                         attestation);
 
-        individualEnrollment.setDeviceId(deviceId);
+        individualEnrollment.setDeviceIdFinal(deviceId);
         if (twinState != null)
         {
             individualEnrollment.setInitialTwin(twinState);

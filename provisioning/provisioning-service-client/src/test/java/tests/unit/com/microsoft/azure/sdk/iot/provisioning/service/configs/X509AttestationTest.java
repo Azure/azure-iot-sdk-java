@@ -480,7 +480,7 @@ public class X509AttestationTest
         X509Attestation x509Attestation = X509Attestation.createFromClientCertificates(PUBLIC_CERTIFICATE_STRING, PUBLIC_CERTIFICATE_STRING);
 
         // act - assert
-        assertNotNull(x509Attestation.getClientCertificates());
+        assertNotNull(x509Attestation.getClientCertificatesFinal());
     }
 
     /* SRS_X509_ATTESTATION_21_017: [The getRootCertificates shall return the stored rootCertificates.] */
@@ -492,7 +492,7 @@ public class X509AttestationTest
         X509Attestation x509Attestation = X509Attestation.createFromRootCertificates(PUBLIC_CERTIFICATE_STRING, PUBLIC_CERTIFICATE_STRING);
 
         // act - assert
-        assertNotNull(x509Attestation.getRootCertificates());
+        assertNotNull(x509Attestation.getRootCertificatesFinal());
     }
 
     /* SRS_X509_ATTESTATION_21_024: [The getCAReferences shall return the stored caReferences.] */
@@ -504,7 +504,7 @@ public class X509AttestationTest
         X509Attestation x509Attestation = X509Attestation.createFromCAReferences(CA_REFERENCES_STRING, CA_REFERENCES_STRING);
 
         // act - assert
-        assertNotNull(x509Attestation.getCAReferences());
+        assertNotNull(x509Attestation.getCAReferencesFinal());
     }
 
 
@@ -523,7 +523,7 @@ public class X509AttestationTest
         new NonStrictExpectations()
         {
             {
-                mockedX509Certificates.getPrimary();
+                mockedX509Certificates.getPrimaryFinal();
                 result = mockedX509CertificateWithInfo;
                 mockedX509CertificateWithInfo.getInfo();
                 result = mockedX509CertificateInfo;
@@ -554,7 +554,7 @@ public class X509AttestationTest
         new NonStrictExpectations()
         {
             {
-                mockedX509Certificates.getPrimary();
+                mockedX509Certificates.getPrimaryFinal();
                 result = mockedX509CertificateWithInfo;
                 mockedX509CertificateWithInfo.getInfo();
                 result = mockedX509CertificateInfo;
@@ -598,7 +598,7 @@ public class X509AttestationTest
         new NonStrictExpectations()
         {
             {
-                mockedX509Certificates.getSecondary();
+                mockedX509Certificates.getSecondaryFinal();
                 result = mockedX509CertificateWithInfo;
                 mockedX509CertificateWithInfo.getInfo();
                 result = mockedX509CertificateInfo;
@@ -627,7 +627,7 @@ public class X509AttestationTest
         new NonStrictExpectations()
         {
             {
-                mockedX509Certificates.getSecondary();
+                mockedX509Certificates.getSecondaryFinal();
                 result = null;
             }
         };
@@ -656,7 +656,7 @@ public class X509AttestationTest
         new NonStrictExpectations()
         {
             {
-                mockedX509Certificates.getSecondary();
+                mockedX509Certificates.getSecondaryFinal();
                 result = mockedX509CertificateWithInfo;
                 mockedX509CertificateWithInfo.getInfo();
                 result = mockedX509CertificateInfo;
@@ -685,7 +685,7 @@ public class X509AttestationTest
         new NonStrictExpectations()
         {
             {
-                mockedX509Certificates.getSecondary();
+                mockedX509Certificates.getSecondaryFinal();
                 result = null;
             }
         };

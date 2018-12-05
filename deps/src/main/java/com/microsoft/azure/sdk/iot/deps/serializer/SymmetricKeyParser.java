@@ -59,10 +59,10 @@ public class SymmetricKeyParser
             throw new IllegalArgumentException("The provided json could not be parsed");
         }
 
-        if (parser.getPrimaryKey() == null
-                || parser.getPrimaryKey().isEmpty()
-                || parser.getSecondaryKey() == null
-                || parser.getSecondaryKey().isEmpty())
+        if (parser.getPrimaryKeyFinal() == null
+                || parser.getPrimaryKeyFinal().isEmpty()
+                || parser.getSecondaryKeyFinal() == null
+                || parser.getSecondaryKeyFinal().isEmpty())
         {
             //Codes_SRS_SYMMETRIC_KEY_PARSER_34_010: [If the provided json is missing the field for either PrimaryKey or SecondaryKey, or either is missing a value, an IllegalArgumentException shall be thrown.]
             throw new IllegalArgumentException("Both the primary key and secondary key must be present and have a value in the provided json.");
@@ -85,9 +85,23 @@ public class SymmetricKeyParser
     /**
      * Getter for PrimaryKey
      *
+     * @deprecated as of Deps version 0.7.1, please use {@link #getPrimaryKeyFinal()}
+     *
      * @return The value of PrimaryKey
      */
+    @Deprecated
     public String getPrimaryKey()
+    {
+        //Codes_SRS_SymmetricKeyParser_34_001: [This method shall return the value of primaryKey]
+        return primaryKey;
+    }
+
+    /**
+     * Getter for PrimaryKey
+     *
+     * @return The value of PrimaryKey
+     */
+    public final String getPrimaryKeyFinal()
     {
         //Codes_SRS_SymmetricKeyParser_34_001: [This method shall return the value of primaryKey]
         return primaryKey;
@@ -113,9 +127,23 @@ public class SymmetricKeyParser
     /**
      * Getter for SecondaryKey
      *
+     * @deprecated as of Deps version 0.7.1, please use {@link #getSecondaryKeyFinal()}
+     *
      * @return The value of SecondaryKey
      */
+    @Deprecated
     public String getSecondaryKey()
+    {
+        //Codes_SRS_SymmetricKeyParser_34_004: [This method shall return the value of secondaryKey]
+        return secondaryKey;
+    }
+
+    /**
+     * Getter for SecondaryKey
+     *
+     * @return The value of SecondaryKey
+     */
+    public final String getSecondaryKeyFinal()
     {
         //Codes_SRS_SymmetricKeyParser_34_004: [This method shall return the value of secondaryKey]
         return secondaryKey;

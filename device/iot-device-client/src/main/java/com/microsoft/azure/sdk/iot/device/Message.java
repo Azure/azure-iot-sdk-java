@@ -564,9 +564,23 @@ public class Message
 
     /**
      * Set the content type of this message. Used in message routing.
+     *
+     * @deprecated as of device-client version 1.14.1, please use {@link #setContentTypeFinal(String)}
+     *
+     *  @param contentType the content type of the message. May be null if you don't want to specify a content type.
+     */
+    @Deprecated
+    public void setContentType(String contentType)
+    {
+        // Codes_SRS_MESSAGE_34_060: [The function shall save the provided content type.]
+        this.contentType = contentType;
+    }
+
+    /**
+     * Set the content type of this message. Used in message routing.
      * @param contentType the content type of the message. May be null if you don't want to specify a content type.
      */
-    public void setContentType(String contentType)
+    public final void setContentTypeFinal(String contentType)
     {
         // Codes_SRS_MESSAGE_34_060: [The function shall save the provided content type.]
         this.contentType = contentType;

@@ -87,9 +87,9 @@ public class DeviceMethodCommon extends IntegrationTest
         Module module = Module.createFromId(deviceId, moduleId, null);
 
         Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
-        deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
         Module moduleX509 = Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
-        moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
 
         Collection<Object[]> inputs = new ArrayList<>();
 

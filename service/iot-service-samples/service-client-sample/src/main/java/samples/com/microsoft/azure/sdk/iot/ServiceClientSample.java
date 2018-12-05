@@ -176,7 +176,7 @@ public class ServiceClientSample
         for (int i = 0; i < MAX_COMMANDS_TO_SEND; i++)
         {
             Message messageToSend = new Message(commandMessage + Integer.toString(i));
-            messageToSend.setDeliveryAcknowledgement(DeliveryAcknowledgement.Full);
+            messageToSend.setDeliveryAcknowledgementFinal(DeliveryAcknowledgement.Full);
 
             // Setting standard properties
             messageToSend.setMessageId(java.util.UUID.randomUUID().toString());

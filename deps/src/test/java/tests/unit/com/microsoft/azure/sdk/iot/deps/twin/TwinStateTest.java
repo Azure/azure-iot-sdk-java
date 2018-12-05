@@ -23,27 +23,27 @@ public class TwinStateTest
     private final static TwinCollection TAGS = new TwinCollection()
     {
         {
-            put("tag1", "val1");
-            put("tag2", "val2");
-            put("tag3", "val3");
+            putFinal("tag1", "val1");
+            putFinal("tag2", "val2");
+            putFinal("tag3", "val3");
         }
     };
 
     private final static TwinCollection PROPERTIES = new TwinCollection()
     {
         {
-            put("prop1", "val1");
-            put("prop2", "val2");
-            put("prop3", "val3");
+            putFinal("prop1", "val1");
+            putFinal("prop2", "val2");
+            putFinal("prop3", "val3");
         }
     };
 
     private final static TwinCollection PROPERTIES_WITH_NULL_VALUES = new TwinCollection()
     {
         {
-            put("prop1", null);
-            put("prop2", null);
-            put("prop3", null);
+            putFinal("prop1", null);
+            putFinal("prop2", null);
+            putFinal("prop3", null);
         }
     };
 

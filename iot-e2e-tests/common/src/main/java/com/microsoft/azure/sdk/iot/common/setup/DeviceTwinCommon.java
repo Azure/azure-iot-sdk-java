@@ -437,7 +437,7 @@ public class DeviceTwinCommon extends IntegrationTest
         else if (this.testInstance.authenticationType == SELF_SIGNED)
         {
             deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createDevice(this.testInstance.deviceId + this.testInstance.uuid, SELF_SIGNED);
-            deviceUnderTest.sCDeviceForRegistryManager.setThumbprint(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
+            deviceUnderTest.sCDeviceForRegistryManager.setThumbprintFinal(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
         }
 
 

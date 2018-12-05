@@ -78,6 +78,9 @@ public class IotHubSSLContext
     /**
      * Creates a default SSLContext for the IotHub with the specified certificate.
      *
+     * @param trustedCert the certificate to be trusted
+     * @param isPath if the trustedCert is a path to the trusted cert, or if it is the certificate itself
+     *
      * @throws KeyStoreException  if no Provider supports a KeyStoreSpi implementation for the specified type or
      *                            if the keystore has not been initialized,
      *                            or the given alias already exists and does not identify an entry containing a trusted certificate,
@@ -108,6 +111,10 @@ public class IotHubSSLContext
 
     /**
      * Creates a default SSLContext for the IotHub with the specified certificate.
+     * @param publicKeyCertificateString the public key for x509 authentication
+     * @param privateKeyString the private key for x509 authentication
+     * @param cert the trusted certificate
+     * @param isPath If the provided cert is a path, or the actual certificate itself
      *
      * @throws KeyStoreException  if no Provider supports a KeyStoreSpi implementation for the specified type or
      *                            if the keystore has not been initialized,

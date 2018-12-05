@@ -158,7 +158,7 @@ public class X509Certificates
     public X509Certificates(X509Certificates x509Certificates)
     {
         /* SRS_X509_CERTIFICATES_21_004: [The constructor shall throw IllegalArgumentException if the provide X509Certificates is null or if its primary certificate is null.] */
-        if((x509Certificates == null) || (x509Certificates.getPrimary() == null))
+        if((x509Certificates == null) || (x509Certificates.getPrimaryFinal() == null))
         {
             throw new IllegalArgumentException("original x509Certificates cannot be null and its primary certificate cannot be null.");
         }
@@ -175,9 +175,23 @@ public class X509Certificates
     /**
      * Getter for the primary.
      *
+     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getPrimaryFinal()}
+     *
      * @return the {@link X509CertificateWithInfo} with the stored primary. It cannot be {@code null}.
      */
+    @Deprecated
     public X509CertificateWithInfo getPrimary()
+    {
+        /* SRS_X509_CERTIFICATES_21_007: [The getPrimary shall return the stored primary.] */
+        return this.primary;
+    }
+
+    /**
+     * Getter for the primary.
+     *
+     * @return the {@link X509CertificateWithInfo} with the stored primary. It cannot be {@code null}.
+     */
+    public final X509CertificateWithInfo getPrimaryFinal()
     {
         /* SRS_X509_CERTIFICATES_21_007: [The getPrimary shall return the stored primary.] */
         return this.primary;
@@ -186,9 +200,23 @@ public class X509Certificates
     /**
      * Getter for the secondary.
      *
+     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getSecondaryFinal()}
+     *
      * @return the {@link X509CertificateWithInfo} with the stored secondary. It can be {@code null}.
      */
+    @Deprecated
     public X509CertificateWithInfo getSecondary()
+    {
+        /* SRS_X509_CERTIFICATES_21_008: [The getSecondary shall return the stored secondary.] */
+        return this.secondary;
+    }
+
+    /**
+     * Getter for the secondary.
+     *
+     * @return the {@link X509CertificateWithInfo} with the stored secondary. It can be {@code null}.
+     */
+    public final X509CertificateWithInfo getSecondaryFinal()
     {
         /* SRS_X509_CERTIFICATES_21_008: [The getSecondary shall return the stored secondary.] */
         return this.secondary;

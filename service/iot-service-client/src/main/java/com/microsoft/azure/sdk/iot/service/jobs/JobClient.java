@@ -327,7 +327,7 @@ public class JobClient
         {
             for (Pair p : set)
             {
-                map.put(p.getKey(), p.getValue());
+                map.putFinal(p.getKey(), p.getValue());
             }
         }
         return map;

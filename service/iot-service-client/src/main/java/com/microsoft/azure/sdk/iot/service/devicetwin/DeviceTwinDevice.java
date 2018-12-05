@@ -244,7 +244,7 @@ public class DeviceTwinDevice
         /*
          **Codes_SRS_DEVICETWINDEVICE_21_035: [** The method shall return the version in the tag TwinCollection.**]**
          */
-        return this.tag.getVersion();
+        return this.tag.getVersionFinal();
     }
 
     /**
@@ -317,7 +317,7 @@ public class DeviceTwinDevice
         /*
          **Codes_SRS_DEVICETWINDEVICE_21_037: [** The method shall return the version in the desired properties TwinCollection.**]**
          */
-        return this.desiredProperties.getVersion();
+        return this.desiredProperties.getVersionFinal();
     }
 
     /**
@@ -362,7 +362,7 @@ public class DeviceTwinDevice
         /*
          **Codes_SRS_DEVICETWINDEVICE_21_039: [** The method shall return the version in the reported properties TwinCollection.**]**
          */
-        return this.reportedProperties.getVersion();
+        return this.reportedProperties.getVersionFinal();
     }
 
     /**
@@ -616,7 +616,7 @@ public class DeviceTwinDevice
                     throw new IllegalArgumentException("Set must not contain multiple pairs with the same keys. Duplicate key: " + p.getKey());
                 }
 
-                map.put(p.getKey(), p.getValue());
+                map.putFinal(p.getKey(), p.getValue());
             }
         }
 

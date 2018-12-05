@@ -39,12 +39,15 @@ public interface SaslHandler
      *
      * @param mechanisms A list of available Sasl Mechanisms offered by the service
      * @return the mechanism to use
+     * @throws Exception if sasl negotiation fails
      */
     String chooseSaslMechanism(String[] mechanisms) throws Exception;
 
     /**
      * Based on the chosen mechanism, builds and returns the bytes to be sent in the payload for the Sasl init message
+     * @param chosenMechanism the sasl mechanism that was chosen
      * @return the bytes to be used as the paylaod for the Sasl init message
+     * @throws Exception if sasl negotiation fails
      */
     byte[] getInitPayload(String chosenMechanism) throws Exception;
 
@@ -52,12 +55,14 @@ public interface SaslHandler
      * Handles a given challenge and returns the bytes to be sent in the payload of the Sasl response message
      * @param saslChallenge The bytes from the Sasl challenge received from the service
      * @return the bytes to be sent in the payload of the Sasl response to the provided challenge
+     * @throws Exception if sasl negotiation fails
      */
     byte[] handleChallenge(byte[] saslChallenge) throws Exception;
 
     /**
      * Handles what to do upon the Sasl negotiation finishing.
      * @param outcome The outcome of the sasl negotiation
+     * @throws Exception if sasl negotiation fails
      */
     void handleOutcome(SaslOutcome outcome) throws Exception;
 }

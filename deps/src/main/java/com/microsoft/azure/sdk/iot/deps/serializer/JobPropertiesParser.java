@@ -99,7 +99,7 @@ public class JobPropertiesParser
             throw new IllegalArgumentException("The provided json could not be parsed");
         }
 
-        if (parser.getJobId() == null || parser.getJobId().isEmpty())
+        if (parser.getJobIdFinal() == null || parser.getJobIdFinal().isEmpty())
         {
             //Codes_SRS_JOB_PROPERTIES_PARSER_34_009: [If the provided json is missing the field for jobId, or if its value is null or empty, an IllegalArgumentException shall be thrown.]
             throw new IllegalArgumentException("The provided json is missing the jobId field");
@@ -182,9 +182,23 @@ public class JobPropertiesParser
     /**
      * Getter for jobId
      *
+     * @deprecated as of Deps version 0.7.1, please use {@link #getJobIdFinal()}
+     *
      * @return The value of jobId
      */
+    @Deprecated
     public String getJobId()
+    {
+        //Codes_SRS_JOB_PROPERTIES_PARSER_34_018: [This method shall return the value of this object's jobId.]
+        return jobId;
+    }
+
+    /**
+     * Getter for jobId
+     *
+     * @return The value of jobId
+     */
+    public final String getJobIdFinal()
     {
         //Codes_SRS_JOB_PROPERTIES_PARSER_34_018: [This method shall return the value of this object's jobId.]
         return jobId;

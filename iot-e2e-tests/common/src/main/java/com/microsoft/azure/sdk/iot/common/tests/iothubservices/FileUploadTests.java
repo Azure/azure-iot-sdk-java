@@ -156,7 +156,7 @@ public class FileUploadTests extends IntegrationTest
 
         String deviceIdX509 = "java-file-upload-e2e-test-x509".concat(UUID.randomUUID().toString());
         scDevicex509 = com.microsoft.azure.sdk.iot.service.Device.createDevice(deviceIdX509, AuthenticationType.SELF_SIGNED);
-        scDevicex509.setThumbprint(x509Thumbprint, x509Thumbprint);
+        scDevicex509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
         scDevicex509 = Tools.addDeviceWithRetry(registryManager, scDevicex509);
 
         // flush pending notifications before every test to prevent random test failures

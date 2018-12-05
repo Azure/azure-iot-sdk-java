@@ -102,8 +102,8 @@ public class DeviceManagerSample
         RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
         
         Device device = Device.createFromId(SampleUtils.deviceId, null, null);
-        device.getSymmetricKey().setPrimaryKey(primaryKey);
-        device.getSymmetricKey().setSecondaryKey(secondaryKey);
+        device.getSymmetricKey().setPrimaryKeyFinal(primaryKey);
+        device.getSymmetricKey().setSecondaryKeyFinal(secondaryKey);
         try
         {
             device = registryManager.updateDevice(device);
