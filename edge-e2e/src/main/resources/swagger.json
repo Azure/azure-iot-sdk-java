@@ -477,7 +477,7 @@
       "get" : {
         "tags" : [ "module" ],
         "summary" : "Wait for a message on a module input",
-        "produces" : [ "text/json" ],
+        "produces" : [ "application/json" ],
         "parameters" : [ {
           "name" : "connectionId",
           "in" : "path",
