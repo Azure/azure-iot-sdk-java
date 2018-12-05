@@ -3,20 +3,22 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.transport.RetryDecision;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
+import com.microsoft.azure.sdk.iot.device.transport.RetryDecision;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
-import java.util.Random;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import org.junit.Test;
+
+import java.security.SecureRandom;
+
 import static org.junit.Assert.*;
 
 public class ExponentialBackoffWithJitterTest
 {
     @Mocked
-    Random mockedRandom;
+    SecureRandom mockedRandom;
 
     // Tests_SRS_EXPONENTIALBACKOFF_28_001: [If the retryCount is less than or equal to 0, the function shall throw an IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)

@@ -211,7 +211,7 @@ public class IotHubSSLContextTest
                 times = 1;
 
                 new SecureRandom();
-                times = 1;
+                times = 2;
 
                 Deencapsulation.invoke(iotHubSSLContext, "generateTrustManagerFactory", new Class[] { IotHubCertificateManager.class, KeyStore.class }, mockedCertificateManager, mockedKeyStore);
                 times = 1;
@@ -356,7 +356,7 @@ public class IotHubSSLContextTest
                 times = 1;
 
                 new SecureRandom();
-                times = 1;
+                times = 2;
 
                 Deencapsulation.invoke(iotHubSSLContext, "generateTrustManagerFactory", new Class[] { IotHubCertificateManager.class, KeyStore.class }, mockedCertificateManager, mockedKeyStore);
                 times = 1;
@@ -431,7 +431,7 @@ public class IotHubSSLContextTest
                 times = 1;
 
                 new SecureRandom();
-                times = 1;
+                times = 2;
 
                 mockedSSLContext.init(mockKeyManagers, mockedTrustManager, new SecureRandom());
                 times = 1;

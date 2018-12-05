@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.service.auth;
 
 import com.microsoft.azure.sdk.iot.service.Tools;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 public class X509Thumbprint
 {
@@ -141,7 +141,8 @@ public class X509Thumbprint
     private String generateValidThumbprint()
     {
         String thumbprint = "";
-        Random rand = new Random(System.currentTimeMillis());
+        SecureRandom rand = new SecureRandom(); //SecureRandom chooses its own seed, better than providing timestamp
+
         for (int i = 0; i < THUMBPRINT_LENGTH; i++)
         {
             thumbprint += Integer.toHexString(rand.nextInt(THUMBPRINT_DIGIT_MAX));

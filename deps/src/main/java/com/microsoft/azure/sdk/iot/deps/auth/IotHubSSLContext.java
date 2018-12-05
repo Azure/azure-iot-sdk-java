@@ -25,6 +25,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -209,6 +210,9 @@ public class IotHubSSLContext
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         kmf.init(keystore, temporaryPassword);
 
+        //wipe password from stack memory after done using it
+        Arrays.fill(temporaryPassword, 0, temporaryPassword.length, '0');
+
         //Codes_SRS_IOTHUBSSLCONTEXT_34_021: [The constructor shall initialize a default trust manager factory that accepts communications from Iot Hub.]
         TrustManagerFactory trustManagerFactory = generateTrustManagerFactory(certificateManager, keystore);
 
@@ -276,7 +280,16 @@ public class IotHubSSLContext
 
     private char[] generateTemporaryPassword()
     {
-        return UUID.randomUUID().toString().toCharArray();
+        byte[] randomBytes = new byte[256];
+        char[] randomChars = new char[256];
+        new SecureRandom().nextBytes(randomBytes);
+
+        for (int i = 0; i < 256; i++)
+        {
+            randomChars[i] = (char) randomBytes[i];
+        }
+
+        return randomChars;
     }
 
     private static Key parsePrivateKey(String privateKeyString) throws CertificateException

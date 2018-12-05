@@ -9,7 +9,7 @@ package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 /**
  * Represents a retry policy that performs exponential backoff with jitter retries.
@@ -23,7 +23,7 @@ public class ExponentialBackoffWithJitter implements RetryPolicy
     private long deltaBackoff = 100;
     private boolean firstFastRetry = true;
 
-    private Random random = new Random();
+    private SecureRandom random = new SecureRandom();
 
     /**
      * Constructor with default backoff values and firstFastRetry
