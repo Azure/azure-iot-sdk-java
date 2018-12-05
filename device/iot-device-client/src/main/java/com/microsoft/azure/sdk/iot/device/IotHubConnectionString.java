@@ -123,7 +123,7 @@ public class IotHubConnectionString
         this.hubName = parseHubName(this.hostName);
 
         this.logger = new CustomLogger(this.getClass());
-        logger.LogInfo("IotHubConnectionString object is created successfully for %s, method name is %s ", this.hostName, logger.getMethodName());
+        logger.LogInfo("IotHubConnectionString object is created successfully, method name is %s ", logger.getMethodName());
     }
 
     /**
@@ -182,7 +182,7 @@ public class IotHubConnectionString
         }
 
         this.logger = new CustomLogger(this.getClass());
-        logger.LogInfo("IotHubConnectionString object is created successfully for %s, method name is %s ", this.hostName, logger.getMethodName());
+        logger.LogInfo("IotHubConnectionString object is created successfully, method name is %s ", logger.getMethodName());
     }
 
     /**
@@ -320,10 +320,9 @@ public class IotHubConnectionString
         if (iotHubNameEndIdx == -1)
         {
             String errStr = String.format(
-                    "%s did not include a valid IoT Hub name as its prefix. "
+                    "Provided hostname did not include a valid IoT Hub name as its prefix. "
                             + "An IoT Hub hostname has the following format: "
-                            + "[iotHubName].[valid URI chars]",
-                    hostName);
+                            + "[iotHubName].[valid URI chars]");
             throw new IllegalArgumentException(errStr);
         }
         return hostName.substring(0, iotHubNameEndIdx);

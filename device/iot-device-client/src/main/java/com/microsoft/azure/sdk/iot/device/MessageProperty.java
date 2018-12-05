@@ -60,7 +60,7 @@ public final class MessageProperty {
     /** The property value. */
     private String value;
     private CustomLogger logger;
-    
+
     /**
      * Constructor.
      *
@@ -100,7 +100,7 @@ public final class MessageProperty {
         // Codes_SRS_MESSAGEPROPERTY_11_003: [If the value contains a character that is not in US-ASCII, the function shall throw an IllegalArgumentException.]
         if (!usesValidChars(value))
         {
-            logger.LogError("%s is not a valid IoT Hub message property value, method name is %s ", value, logger.getMethodName());
+            logger.LogError("The provided value is not a valid IoT Hub message property value, method name is %s ", logger.getMethodName());
             String errMsg = String.format("%s is not a valid IoT Hub message property value.%n", value);
             throw new IllegalArgumentException(errMsg);
         }

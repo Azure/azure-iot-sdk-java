@@ -102,7 +102,7 @@ public class IotHubTransport implements IotHubListener
         if (message == null)
         {
             logger.LogError("onMessageSent called with null message, " +
-                    "method name is %s ", message.getMessageId(), logger.getMethodName());
+                    "method name is %s ", logger.getMethodName());
         }
 
         // remove from in progress queue and add to callback queue

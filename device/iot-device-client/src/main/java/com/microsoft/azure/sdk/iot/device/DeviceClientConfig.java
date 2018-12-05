@@ -170,8 +170,8 @@ public final class DeviceClientConfig
                 publicKeyCertificate, isPathForPublic, privateKey, isPathForPrivate);
 
         this.logger = new CustomLogger(this.getClass());
-        logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
-                iotHubConnectionString.getHostName(), iotHubConnectionString.getDeviceId(), logger.getMethodName());
+        logger.LogInfo("DeviceClientConfig object is created successfully, method name is %s ",
+                logger.getMethodName());
     }
 
     /**

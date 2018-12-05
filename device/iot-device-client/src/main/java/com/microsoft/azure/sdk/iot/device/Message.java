@@ -289,7 +289,7 @@ public class Message
             this.properties.remove(messageProperty);
         }
 
-        logger.LogInfo("Setting message property with name=%s and value=%s, method name is %s ", name, value, logger.getMethodName());
+        logger.LogInfo("Setting message property, method name is %s ", logger.getMethodName());
         this.properties.add(new MessageProperty(name, value));
     }
 
