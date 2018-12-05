@@ -5,13 +5,11 @@
 build_root=$(cd "$(dirname "$0")/.." && pwd)
 
 # -- Java SDK Run E2E --
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root
 mvn install -DskipITs=false -T 2C -Dfailsafe.rerunFailingTestsCount=2
 [ $? -eq 0 ] || exit $?
 
 # -- Java Dependencies --
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/deps
 mvn -q javadoc:javadoc
 [ $? -eq 0 ] || exit $?
@@ -22,7 +20,6 @@ echo [info] --------------------------------------------------------------------
 echo
 
 # -- Java Service Client --
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/service/iot-service-client
 mvn -q javadoc:javadoc
 [ $? -eq 0 ] || exit $?
@@ -33,7 +30,6 @@ echo [info] --------------------------------------------------------------------
 echo
 
 # -- Java Device Client --
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/device/iot-device-client
 mvn -q javadoc:javadoc
 [ $? -eq 0 ] || exit $?
@@ -44,7 +40,6 @@ echo [info] --------------------------------------------------------------------
 echo
 
 # -- Java Provisioning --
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/provisioning
 mvn -q javadoc:javadoc
 [ $? -eq 0 ] || exit $?
