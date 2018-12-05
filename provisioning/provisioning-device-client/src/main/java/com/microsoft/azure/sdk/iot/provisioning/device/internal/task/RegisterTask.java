@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ProvisioningErrorParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
@@ -104,29 +105,10 @@ public class RegisterTask implements Callable
         this.responseCallback = new ResponseCallbackImpl();
     }
 
-    private RegistrationOperationStatusParser authenticateWithX509(String registrationId) throws ProvisioningDeviceClientException
+    private RegistrationOperationStatusParser authenticateWithX509(RequestData requestData) throws ProvisioningDeviceClientException
     {
-        //SRS_RegisterTask_25_003: [ If the provided security client is for X509 then, this method shall throw ProvisioningDeviceClientException if registration id is null. ]
-        if (registrationId == null)
-        {
-            throw new ProvisioningDeviceClientException(new IllegalArgumentException("registration id cannot be null"));
-        }
-
         try
         {
-            SecurityProviderX509 dpsSecurityProviderX509 = (SecurityProviderX509) securityProvider;
-
-            //SRS_RegisterTask_25_004: [ If the provided security client is for X509 then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
-
-            SSLContext sslContext = dpsSecurityProviderX509.getSSLContext();
-            if (sslContext == null)
-            {
-                throw new ProvisioningDeviceSecurityException("Retrieved Null SSL context from security client");
-            }
-            authorization.setSslContext(sslContext);
-
-            RequestData requestData = new RequestData( registrationId,  sslContext, null);
-
             //SRS_RegisterTask_25_006: [ If the provided security client is for X509 then, this method shall trigger authenticateWithProvisioningService on the contract API and wait for response and return it. ]
             ResponseData dpsRegistrationData = new ResponseData();
             this.provisioningDeviceClientContract.authenticateWithProvisioningService(requestData, responseCallback, dpsRegistrationData);
@@ -154,64 +136,62 @@ public class RegisterTask implements Callable
                 throw new ProvisioningDeviceClientException("Did not receive DPS registration successfully");
             }
         }
-        catch (InterruptedException | SecurityProviderException e)
+        catch (InterruptedException e)
         {
             throw new ProvisioningDeviceClientException(e);
         }
     }
 
-    private String constructSasToken(String registrationId, int expiryTime) throws ProvisioningDeviceClientException, UnsupportedEncodingException, SecurityProviderException
+    private String constructSasToken(int expiryTime) throws ProvisioningDeviceClientException, UnsupportedEncodingException, SecurityProviderException
     {
         if (expiryTime <= 0)
         {
             throw new IllegalArgumentException("expiry time cannot be negative or zero");
         }
+        String registrationId = securityProvider.getRegistrationId();
         String tokenScope = new UrlPathBuilder(provisioningDeviceClientConfig.getIdScope()).generateSasTokenUrl(registrationId);
         if (tokenScope == null || tokenScope.isEmpty())
         {
             throw new ProvisioningDeviceClientException("Could not construct token scope");
         }
-        SecurityProviderTpm securityClientTpm = (SecurityProviderTpm) securityProvider;
+
         Long expiryTimeUTC = System.currentTimeMillis() / 1000 + expiryTime;
-        byte[] token = securityClientTpm.signWithIdentity(tokenScope.concat("\n" + String.valueOf(expiryTimeUTC)).getBytes());
+
+        String value = tokenScope.concat("\n" + String.valueOf(expiryTimeUTC));
+        byte[] token = null;
+        if (securityProvider instanceof  SecurityProviderTpm)
+        {
+            SecurityProviderTpm securityClientTpm = (SecurityProviderTpm) securityProvider;
+            token = securityClientTpm.signWithIdentity(value.getBytes());
+        }
+        else if (securityProvider instanceof SecurityProviderSymmetricKey)
+        {
+            SecurityProviderSymmetricKey securityProviderSymmetricKey = (SecurityProviderSymmetricKey)securityProvider;
+            token = securityProviderSymmetricKey.HMACSignData(value.getBytes(StandardCharsets.UTF_8.displayName()), Base64.decodeBase64Local(securityProviderSymmetricKey.getSymmetricKey()));
+        }
+
         if (token == null || token.length == 0)
         {
             throw new ProvisioningDeviceSecurityException("Security client could not sign data successfully");
         }
-
         byte[] base64Signature = Base64.encodeBase64Local(token);
         String base64UrlEncodedSignature = URLEncoder.encode(new String(base64Signature), StandardCharsets.UTF_8.displayName());
+
         //SRS_RegisterTask_25_015: [ If the provided security client is for Key then, this method shall build the SasToken of the format SharedAccessSignature sr=<tokenScope>&sig=<signature>&se=<expiryTime>&skn= and save it to authorization]
         return String.format(SASTOKEN_FORMAT, tokenScope, base64UrlEncodedSignature, expiryTimeUTC);
     }
 
-    private RegistrationOperationStatusParser processWithNonce(byte[] base64DecodedAuthKey,
-                                                               SecurityProviderTpm securityClientTpm,
-                                                               RequestData requestData)
-            throws IOException, InterruptedException, ProvisioningDeviceClientException,SecurityProviderException
+    private RegistrationOperationStatusParser authenticateWithSasToken(RequestData requestData)
+            throws IOException, InterruptedException, ProvisioningDeviceClientException, SecurityProviderException
 
     {
-        if (base64DecodedAuthKey != null)
-        {
-            //SRS_RegisterTask_25_018: [ If the provided security client is for Key then, this method shall import the Base 64 encoded Authentication Key into the HSM using the security client and pass the exception to the user on failure. ]
-            securityClientTpm.activateIdentityKey(base64DecodedAuthKey);
-
-            /*SRS_RegisterTask_25_014: [ If the provided security client is for Key then, this method shall construct SasToken by doing the following
+           /*SRS_RegisterTask_25_014: [ If the provided security client is for Key then, this method shall construct SasToken by doing the following
 
             1. Build a tokenScope of format <scope>/registrations/<registrationId>
             2. Sign the HSM with the string of format <tokenScope>/n<expiryTime> and receive a token
             3. Encode the token to Base64 format and UrlEncode it to generate the signature. ]*/
 
-            String sasToken = null;
-            try
-            {
-                sasToken = this.constructSasToken(securityClientTpm.getRegistrationId(), DEFAULT_EXPIRY_TIME_IN_SECS);
-            }
-            catch (SecurityProviderException e)
-            {
-                throw new ProvisioningDeviceSecurityException(e);
-            }
-
+            String sasToken = this.constructSasToken(DEFAULT_EXPIRY_TIME_IN_SECS);
             requestData.setSasToken(sasToken);
 
             //SRS_RegisterTask_25_016: [ If the provided security client is for Key then, this method shall trigger authenticateWithProvisioningService on the contract API using the sasToken generated and wait for response and return it. ]
@@ -241,80 +221,100 @@ public class RegisterTask implements Callable
                 //SRS_RegisterTask_25_017: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if null response to authenticateWithProvisioningService is received. ]
                 throw new ProvisioningDeviceClientAuthenticationException("Service did not authorize SasToken");
             }
-        }
-        else
+    }
+
+    private RegistrationOperationStatusParser authenticateWithTPM(RequestData requestData) throws ProvisioningDeviceClientException, SecurityProviderException
+    {
+        try
         {
-            //SRS_RegisterTask_25_013: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if Authentication Key received is null. ]
-            throw new ProvisioningDeviceClientAuthenticationException("Service did not send authentication key");
+            if (securityProvider instanceof SecurityProviderTpm)
+            {
+                SecurityProviderTpm securityClientTpm = (SecurityProviderTpm) securityProvider;
+                //SRS_RegisterTask_25_011: [ If the provided security client is for Key then, this method shall trigger authenticateWithTPM on the contract API and wait for Authentication Key and decode it from Base64. Also this method shall pass the exception back to the user if it fails. ]
+                ResponseData nonceResponseData = new ResponseData();
+                this.provisioningDeviceClientContract.requestNonceForTPM(requestData, responseCallback, nonceResponseData);
+
+                waitForResponse(nonceResponseData);
+
+                if (nonceResponseData.getContractState() == DPS_REGISTRATION_RECEIVED)
+                {
+                    if (nonceResponseData.getResponseData() != null)
+                    {
+                        //SRS_RegisterTask_25_018: [ If the provided security client is for Key then, this method shall import the Base 64 encoded Authentication Key into the HSM using the security client and pass the exception to the user on failure. ]
+                        securityClientTpm.activateIdentityKey(nonceResponseData.getResponseData());
+                    }
+                    else
+                    {
+                        //SRS_RegisterTask_25_013: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if Authentication Key received is null. ]
+                        throw new ProvisioningDeviceClientAuthenticationException("Service did not send authentication key");
+                    }
+
+                    return authenticateWithSasToken(requestData);
+                }
+                else
+                {
+                    //SRS_RegisterTask_25_012: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if null response is received. ]
+                    throw new ProvisioningDeviceClientException("Did not receive DPS registration nonce successfully");
+                }
+            }
+            else
+            {
+                throw new ProvisioningDeviceClientException("could not identify security provider");
+            }
+        }
+        catch (IOException | InterruptedException e)
+        {
+            throw new ProvisioningDeviceClientException(e);
         }
     }
 
-    private RegistrationOperationStatusParser authenticateWithSasToken(String registrationId) throws ProvisioningDeviceClientException
+    private RegistrationOperationStatusParser authenticateWithDPS() throws ProvisioningDeviceClientException, SecurityProviderException
     {
-        //SRS_RegisterTask_25_008: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if registration id or endorsement key or storage root key are null. ]
-        if (registrationId == null)
+        if (securityProvider.getRegistrationId() == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("registration id cannot be null"));
         }
 
         try
         {
-            SecurityProviderTpm securityClientTpm = (SecurityProviderTpm) securityProvider;
-            if (securityClientTpm.getEndorsementKey() == null || securityClientTpm.getStorageRootKey() == null)
-            {
-                throw new ProvisioningDeviceSecurityException(new IllegalArgumentException("Ek or SRK cannot be null"));
-            }
-
-            //SRS_RegisterTask_25_009: [ If the provided security client is for Key then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
-            SSLContext sslContext = securityClientTpm.getSSLContext();
+            SSLContext sslContext = securityProvider.getSSLContext();
             if (sslContext == null)
             {
                 throw new ProvisioningDeviceSecurityException("Null SSL Context received from security client");
             }
             authorization.setSslContext(sslContext);
 
-            RequestData requestData = new RequestData(securityClientTpm.getEndorsementKey(), securityClientTpm.getStorageRootKey(), registrationId, sslContext, null);
 
-            //SRS_RegisterTask_25_011: [ If the provided security client is for Key then, this method shall trigger requestNonceForTPM on the contract API and wait for Authentication Key and decode it from Base64. Also this method shall pass the exception back to the user if it fails. ]
-            ResponseData nonceResponseData = new ResponseData();
-            this.provisioningDeviceClientContract.requestNonceForTPM(requestData, responseCallback, nonceResponseData);
-
-            waitForResponse(nonceResponseData);
-
-            if (nonceResponseData.getContractState() == DPS_REGISTRATION_RECEIVED)
-            {
-                return processWithNonce(nonceResponseData.getResponseData(), securityClientTpm, requestData);
-            }
-            else
-            {
-                //SRS_RegisterTask_25_012: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if null response is received. ]
-                throw new ProvisioningDeviceClientException("Did not receive DPS registration nonce successfully");
-            }
-        }
-        catch (IOException | InterruptedException | SecurityProviderException e)
-        {
-            throw new ProvisioningDeviceClientException(e);
-        }
-    }
-
-    private RegistrationOperationStatusParser authenticateWithDPS() throws ProvisioningDeviceClientException
-    {
-        try
-        {
             if (this.securityProvider instanceof SecurityProviderX509)
             {
-                return this.authenticateWithX509(this.securityProvider.getRegistrationId());
+                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, null);
+                return this.authenticateWithX509(requestData);
             }
-            else if (this.securityProvider instanceof SecurityProviderTpm)
+            else if (this.securityProvider instanceof SecurityProviderTpm )
             {
-                return this.authenticateWithSasToken(this.securityProvider.getRegistrationId());
+                SecurityProviderTpm securityProviderTpm = (SecurityProviderTpm)securityProvider;
+                if (securityProviderTpm.getEndorsementKey() == null || securityProviderTpm.getStorageRootKey() == null)
+                {
+                    throw new ProvisioningDeviceSecurityException(new IllegalArgumentException("Ek or SRK cannot be null"));
+                }
+
+                //SRS_RegisterTask_25_009: [ If the provided security client is for Key then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
+                RequestData requestData = new RequestData(securityProviderTpm.getEndorsementKey(), securityProviderTpm.getStorageRootKey(), securityProvider.getRegistrationId(), sslContext, null);
+
+                return this.authenticateWithTPM(requestData);
+            }
+            else if (this.securityProvider instanceof  SecurityProviderSymmetricKey)
+            {
+                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, null);
+
+                return this.authenticateWithSasToken(requestData);
             }
             else
             {
                 throw new ProvisioningDeviceSecurityException("Unknown Security client received");
             }
         }
-        catch (SecurityProviderException e)
+        catch (SecurityProviderException | IOException | InterruptedException  e)
         {
             throw new ProvisioningDeviceSecurityException(e);
         }

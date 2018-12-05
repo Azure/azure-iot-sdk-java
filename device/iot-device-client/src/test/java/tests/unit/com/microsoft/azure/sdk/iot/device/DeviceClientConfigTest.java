@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
@@ -45,14 +46,24 @@ public class DeviceClientConfigTest
     IotHubX509HardwareAuthenticationProvider mockX509HardwareAuthentication;
     @Mocked
     IotHubX509SoftwareAuthenticationProvider mockX509SoftwareAuthentication;
-    @Mocked IotHubConnectionString mockIotHubConnectionString;
-    @Mocked SecurityProvider mockSecurityProvider;
-    @Mocked SecurityProviderX509 mockSecurityProviderX509;
-    @Mocked SecurityProviderTpm mockSecurityProviderSAS;
-    @Mocked SSLContext mockSSLContext;
-    @Mocked RetryPolicy mockRetryPolicy;
-    @Mocked ProductInfo mockedProductInfo;
-    @Mocked MessageCallback mockedMessageCallback;
+    @Mocked
+    IotHubConnectionString mockIotHubConnectionString;
+    @Mocked
+    SecurityProvider mockSecurityProvider;
+    @Mocked
+    SecurityProviderX509 mockSecurityProviderX509;
+    @Mocked
+    SecurityProviderTpm mockSecurityProviderTpm;
+    @Mocked
+    SecurityProviderSymmetricKey mockSecurityProviderSymKey;
+    @Mocked
+    SSLContext mockSSLContext;
+    @Mocked
+    RetryPolicy mockRetryPolicy;
+    @Mocked
+    ProductInfo mockedProductInfo;
+    @Mocked
+    MessageCallback mockedMessageCallback;
 
     private static String expectedDeviceId = "deviceId";
     private static String expectedModuleId = "moduleId";
@@ -763,13 +774,44 @@ public class DeviceClientConfigTest
         };
 
         //act
-        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class}, mockIotHubConnectionString, mockSecurityProviderSAS);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class}, mockIotHubConnectionString, mockSecurityProviderTpm);
 
         //assert
         new Verifications()
         {
             {
-                new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, null, expectedDeviceId, expectedModuleId, mockSecurityProviderSAS);
+                new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, null, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void securityClientConstructorWithSASSuccess() throws SecurityProviderException, IOException
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.getHostName();
+                result = expectedHostname;
+
+                mockIotHubConnectionString.getDeviceId();
+                result = expectedDeviceId;
+
+                mockIotHubConnectionString.getModuleId();
+                result = expectedModuleId;
+            }
+        };
+
+        //act
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class}, mockIotHubConnectionString, mockSecurityProviderSymKey);
+
+        //assert
+        new Verifications()
+        {
+            {
+                new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, null, expectedDeviceId, expectedModuleId, mockSecurityProviderSymKey.getSymmetricKey().toString(), null);
                 times = 1;
             }
         };
@@ -966,7 +1008,7 @@ public class DeviceClientConfigTest
     public void ConstructorSecurityProviderSavesNewProductInfo()
     {
         //act
-        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, mockSecurityProviderSAS);
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, mockSecurityProviderTpm);
 
         //assert
         assertNotNull(Deencapsulation.getField(config, "productInfo"));

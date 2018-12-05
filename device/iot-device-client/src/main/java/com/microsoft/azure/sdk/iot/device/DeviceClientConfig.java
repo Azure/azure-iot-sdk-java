@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 
@@ -195,13 +196,23 @@ public final class DeviceClientConfig
 
         if (securityProvider instanceof SecurityProviderTpm)
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security provider is a SecurityProviderTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthenticationProvider instance using the security provider.]
             this.authenticationProvider = new IotHubSasTokenHardwareAuthenticationProvider(
                     connectionString.getHostName(),
                     connectionString.getGatewayHostName(),
                     connectionString.getDeviceId(),
                     connectionString.getModuleId(),
                     securityProvider);
+        }
+        else if (securityProvider instanceof SecurityProviderSymmetricKey)
+        {
+            //Codes_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security provider is a SecurityProviderTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthenticationProvider instance using the security provider.]
+            this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
+                    connectionString.getHostName(),
+                    connectionString.getGatewayHostName(),
+                    connectionString.getDeviceId(),
+                    connectionString.getModuleId(),
+                    ((SecurityProviderSymmetricKey) securityProvider).getSymmetricKey().toString(),
+                    null);
         }
         else if (securityProvider instanceof SecurityProviderX509)
         {

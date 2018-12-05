@@ -23,6 +23,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RegisterTas
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import mockit.*;
@@ -52,6 +53,8 @@ public class RegisterTaskTest
 
     @Mocked
     SecurityProvider mockedSecurityProvider;
+    @Mocked
+    SecurityProviderSymmetricKey mockedSecurityProviderSymmetricKey;
     @Mocked
     SecurityProviderTpm mockedSecurityProviderTpm;
     @Mocked
@@ -350,7 +353,7 @@ public class RegisterTaskTest
     }
 
     @Test
-    public void authenticateWithSasTokenSucceeds() throws Exception
+    public void authenticateWithSasTokenTpmSucceeds() throws Exception
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
@@ -398,6 +401,58 @@ public class RegisterTaskTest
                 times = 1;
                 mockedSecurityProviderTpm.activateIdentityKey((byte[])any);
                 times = 1;
+                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
+                                                                                           (ResponseCallback)any, any);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void authenticateWithSasTokenSymKeySucceeds() throws Exception
+    {
+        //arrange
+        RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
+                                                                mockedSecurityProviderSymmetricKey, mockedProvisioningDeviceClientContract,
+                                                                mockedAuthorization);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedSecurityProviderSymmetricKey.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedDeviceRegistrationParser.toJson();
+                result = "testJson";
+                mockedSecurityProviderSymmetricKey.getSSLContext();
+                result = mockedSslContext;
+                Deencapsulation.invoke(mockedResponseData, "getResponseData");
+                result = "NonNullValue".getBytes();
+                Deencapsulation.invoke(mockedResponseData, "getContractState");
+                result = DPS_REGISTRATION_RECEIVED;
+                mockedTpmRegistrationResultParser.getAuthenticationKey();
+                result = TEST_AUTH_KEY;
+                mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
+                result = "testUrl";
+                mockedSecurityProviderSymmetricKey.HMACSignData((byte[])any, (byte[]) any);
+                result = "testToken".getBytes();
+            }
+        };
+        //act
+        registerTask.call();
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockedAuthorization, "setSslContext", mockedSslContext);
+                times = 1;
+                Deencapsulation.invoke(mockedAuthorization, "setSasToken", anyString);
+                times = 1;
+                mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any,
+                                                                          (ResponseCallback)any, any);
+                times = 0;
+                mockedSecurityProviderTpm.activateIdentityKey((byte[])any);
+                times = 0;
                 mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);
                 times = 1;
@@ -793,7 +848,7 @@ public class RegisterTaskTest
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
-    public void authenticateWithSasTokenThrowsConstructTokenSignDataFailure() throws Exception
+    public void authenticateWithSasTokenTpmThrowsConstructTokenSignDataFailure() throws Exception
     {
         //arrange
         RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
@@ -822,6 +877,40 @@ public class RegisterTaskTest
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
                 mockedSecurityProviderTpm.signWithIdentity((byte[])any);
+                result = new ProvisioningDeviceClientException("test Exception");
+            }
+        };
+        //act
+        registerTask.call();
+
+    }
+
+    @Test (expected = ProvisioningDeviceClientException.class)
+    public void authenticateWithSasTokenSymKeyThrowsConstructTokenSignDataFailure() throws Exception
+    {
+        //arrange
+        RegisterTask registerTask = Deencapsulation.newInstance(RegisterTask.class, mockedProvisioningDeviceClientConfig,
+                                                                mockedSecurityProviderSymmetricKey, mockedProvisioningDeviceClientContract,
+                                                                mockedAuthorization);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedSecurityProviderSymmetricKey.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedDeviceRegistrationParser.toJson();
+                result = "testJson";
+                mockedSecurityProviderSymmetricKey.getSSLContext();
+                result = mockedSslContext;
+                Deencapsulation.invoke(mockedResponseData, "getResponseData");
+                result = "NonNullValue".getBytes();
+                Deencapsulation.invoke(mockedResponseData, "getContractState");
+                result = DPS_REGISTRATION_RECEIVED;
+                mockedTpmRegistrationResultParser.getAuthenticationKey();
+                result = TEST_AUTH_KEY;
+                mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
+                result = "testUrl";
+                mockedSecurityProviderSymmetricKey.HMACSignData((byte[])any, (byte[]) any);
                 result = new ProvisioningDeviceClientException("test Exception");
             }
         };

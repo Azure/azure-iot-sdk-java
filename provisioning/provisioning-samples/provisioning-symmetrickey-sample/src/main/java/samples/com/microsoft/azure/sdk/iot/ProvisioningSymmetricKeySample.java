@@ -7,24 +7,23 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
-import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMEmulator;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 
 import java.io.IOException;
 import java.util.Scanner;
 
 /**
- * TPM sample
+ * Symmetric Key sample
  */
-public class ProvisioningTpmSample
+public class ProvisioningSymmetricKeySample
 {
     private static final String SCOPE_ID = "[Your scope ID here]";
     private static final String GLOBAL_ENDPOINT = "[Your Provisioning Service Global Endpoint here]";
+    private static final String SYMMETRIC_KEY = "[Enter your Symmetric Key here]";
+    private static final String REGISTRATION_ID = "[Enter your Registration ID here]";
     private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT_WS;
@@ -69,30 +68,18 @@ public class ProvisioningTpmSample
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
-        SecurityProviderTpm securityClientTPMEmulator = null;
+        SecurityProviderSymmetricKey securityClientSymmetricKey = null;
         Scanner scanner = new Scanner(System.in);
         DeviceClient deviceClient = null;
 
-        try
-        {
-            securityClientTPMEmulator = new SecurityProviderTPMEmulator();
-            System.out.println("Endorsement Key : \n" + new String(Base64.encodeBase64Local(securityClientTPMEmulator.getEndorsementKey())));
-            System.out.println("Registration Id : \n" + securityClientTPMEmulator.getRegistrationId());
-            System.out.println("Please visit Azure Portal (https://portal.azure.com/) and create a TPM Individual Enrollment with the information above i.e EndorsementKey and RegistrationId \n" +
-                                       "Press enter when you are ready to run registration after enrolling with the service");
-            scanner.nextLine();
-        }
-        catch (SecurityProviderException e)
-        {
-            e.printStackTrace();
-        }
+        securityClientSymmetricKey = new SecurityProviderSymmetricKey(SYMMETRIC_KEY.getBytes(), REGISTRATION_ID);
 
         ProvisioningDeviceClient provisioningDeviceClient = null;
         try
         {
             ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 
-            provisioningDeviceClient = ProvisioningDeviceClient.create(GLOBAL_ENDPOINT, SCOPE_ID, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, securityClientTPMEmulator);
+            provisioningDeviceClient = ProvisioningDeviceClient.create(GLOBAL_ENDPOINT, SCOPE_ID, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, securityClientSymmetricKey);
 
             provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus);
             while (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
@@ -119,7 +106,7 @@ public class ProvisioningTpmSample
                 String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
                 try
                 {
-                    deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientTPMEmulator, IotHubClientProtocol.MQTT);
+                    deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT);
                     deviceClient.open();
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
