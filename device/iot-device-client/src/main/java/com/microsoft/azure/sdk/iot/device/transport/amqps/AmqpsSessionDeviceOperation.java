@@ -295,7 +295,7 @@ public class AmqpsSessionDeviceOperation
         if (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED)
         {
             // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_013: [The function shall return -1 if the deviceId int he connection string is not equal to the deviceId in the config.]
-            if (this.deviceClientConfig.getDeviceId() == deviceId)
+            if (this.deviceClientConfig.getDeviceId().equals(deviceId))
             {
                 // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_014: [The function shall encode the message and copy the contents to the byte buffer.]
                 byte[] msgData = new byte[1024];

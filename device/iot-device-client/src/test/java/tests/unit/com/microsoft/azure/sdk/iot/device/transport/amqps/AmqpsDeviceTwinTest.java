@@ -508,7 +508,6 @@ public class AmqpsDeviceTwinTest
                 result = messageContext;
                 mockAmqpsMessage.getBody();
                 result = null;
-
                 mockDeviceClientConfig.getDeviceId();
                 result = "some device";
             }
@@ -575,7 +574,6 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
-
                 mockDeviceClientConfig.getDeviceId();
                 result = "some device";
             }
@@ -643,7 +641,6 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
-
                 mockDeviceClientConfig.getDeviceId();
                 result = "some device";
             }
@@ -712,7 +709,6 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
-
                 mockDeviceClientConfig.getDeviceId();
                 result = "some device";
             }
@@ -834,7 +830,6 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
-
                 mockDeviceClientConfig.getDeviceId();
                 result = "some device";
             }
@@ -903,7 +898,6 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
-
                 mockDeviceClientConfig.getDeviceId();
                 result = "some device";
             }
@@ -973,7 +967,6 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
-
                 mockDeviceClientConfig.getDeviceId();
                 result = "some device";
             }
@@ -1043,7 +1036,6 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
-
                 mockDeviceClientConfig.getDeviceId();
                 result = "some device";
             }
@@ -1113,7 +1105,6 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
-
                 mockDeviceClientConfig.getDeviceId();
                 result = "some device";
             }
@@ -1183,7 +1174,6 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
-
                 mockDeviceClientConfig.getDeviceId();
                 result = "some device";
             }
@@ -1258,7 +1248,6 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
-
                 mockDeviceClientConfig.getDeviceId();
                 result = "some device";
             }
@@ -1325,7 +1314,6 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
-
                 mockDeviceClientConfig.getDeviceId();
                 result = "some device";
             }
@@ -1390,7 +1378,6 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
-
                 mockDeviceClientConfig.getDeviceId();
                 result = "some device";
             }

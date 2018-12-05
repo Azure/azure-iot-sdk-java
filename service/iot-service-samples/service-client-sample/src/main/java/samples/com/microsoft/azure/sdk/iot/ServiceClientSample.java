@@ -89,7 +89,6 @@ public class ServiceClientSample
             closeFileUploadNotificationReceiver();
             closeServiceClient();
             System.out.println("********* Shutting down ServiceClient sample...");
-            System.exit(0);
         }
 
         closeFileUploadNotificationReceiver();
@@ -97,7 +96,6 @@ public class ServiceClientSample
         closeServiceClient();
 
         System.out.println("********* Shutting down ServiceClient sample...");
-        System.exit(0);
     }
 
     protected static void openServiceClient() throws Exception

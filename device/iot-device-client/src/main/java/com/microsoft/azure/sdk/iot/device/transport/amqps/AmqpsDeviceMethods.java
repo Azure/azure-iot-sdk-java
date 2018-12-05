@@ -111,7 +111,7 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
      * @throws IllegalArgumentException if deliveryTag's length is 0
      */
     @Override
-    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
+    protected synchronized AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
     {
         if (messageType == MessageType.DEVICE_METHODS)
         {

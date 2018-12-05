@@ -308,7 +308,6 @@ public class MainActivity extends AppCompatActivity {
         client.closeNow();
         System.out.println("Shutting down..." + OPERATING_SYSTEM);
         android.os.Process.killProcess(android.os.Process.myPid());
-        System.exit(1);
     }
 
     public void btnStopOnClick(View v) throws URISyntaxException, IOException

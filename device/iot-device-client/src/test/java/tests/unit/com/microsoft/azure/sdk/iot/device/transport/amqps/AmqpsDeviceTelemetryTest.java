@@ -314,7 +314,7 @@ public class AmqpsDeviceTelemetryTest
     }
 
     /*
-    **Tests_SRS_AMQPSDEVICETELEMETRY_12_008: [**The function shall return null if the Proton message type is not null or DeviceTelelemtry.**]**
+    **Tests_SRS_AMQPSDEVICETELEMETRY_12_008: [**The function shall return null if the Proton message type is not null or DeviceTelemetry.**]**
     */
     @Test
     public void convertFromProtonReturnsNullIfNotDeviceTelemetry(
@@ -337,6 +337,53 @@ public class AmqpsDeviceTelemetryTest
 
         //assert
         assertEquals(null, amqpsConvertFromProtonReturnValue);
+    }
+
+    @Test
+    public void convertFromProtonEmptyBodySuccess(
+            @Mocked final AmqpsMessage mockAmqpsMessage,
+            @Mocked final DeviceClientConfig mockDeviceClientConfig
+    )
+    {
+        //arrange
+        String deviceId = "deviceId";
+        byte[] bytes = new byte[1];
+        final Object messageContext = "context";
+
+        new NonStrictExpectations()
+        {
+            {
+                mockAmqpsMessage.getAmqpsMessageType();
+                result = MessageType.DEVICE_TELEMETRY;
+                mockAmqpsMessage.getMessageAnnotations();
+                result = null;
+                mockAmqpsMessage.getProperties();
+                result = null;
+                mockDeviceClientConfig.getDeviceTelemetryMessageCallback(anyString);
+                result = mockMessageCallback;
+                mockDeviceClientConfig.getDeviceTelemetryMessageContext(anyString);
+                result = messageContext;
+                mockAmqpsMessage.getBody();
+                result = null;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "deviceId";            }
+        };
+
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsDeviceTelemetry, "openLinks", mockSession);
+
+        //act
+        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
+        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
+        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
+        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+
+        //assert
+        assertNotNull(actualMessage);
+        assertEquals(0, actualMessage.getBytes().length);
+        assertEquals(mockMessageCallback, actualMessageCallback);
+        assertEquals(messageContext, actualMessageContext);
     }
 
     /*
