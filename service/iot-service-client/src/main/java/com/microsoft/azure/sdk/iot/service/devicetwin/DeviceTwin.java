@@ -493,6 +493,7 @@ public class DeviceTwin
         deviceTwinDevice.setTags(twinState.getTags());
         deviceTwinDevice.setDesiredProperties(twinState.getDesiredProperty());
         deviceTwinDevice.setReportedProperties(twinState.getReportedProperty());
+        deviceTwinDevice.setCapabilities(twinState.getCapabilities());
 
         if (twinState.getModuleId() != null && !twinState.getModuleId().isEmpty())
         {
