@@ -480,6 +480,50 @@ public class HttpConnectionTest
         };
     }
 
+    // Tests_SRS_HTTPSCONNECTION_25_016: [The function shall close the input stream after it has been completely read.]
+    @Test
+    public void readInputClosesInputStreamEvenIfExceptionOccurs(@Mocked final InputStream mockIs) throws IOException
+    {
+        // Arrange
+        final HttpMethod httpsMethod = HttpMethod.GET;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+                mockUrlConn.getInputStream();
+                result = mockIs;
+                mockIs.read();
+                result = new IOException("This is a test exception");
+            }
+        };
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
+        conn.connect();
+
+        // Act
+        try
+        {
+            conn.readInput();
+        }
+        catch (IOException e)
+        {
+            //expected exception, but not testing for it, so it can be ignored
+        }
+
+        // Assert
+        new Verifications()
+        {
+            {
+                mockIs.close();
+                times = 1;
+            }
+        };
+    }
+
     // Tests_SRS_HTTPSCONNECTION_25_017: [The function shall read from the error stream and return the response.]
     @Test
     public void readErrorCompletelyReadsErrorStream(@Mocked final InputStream mockIs) throws IOException
@@ -594,6 +638,50 @@ public class HttpConnectionTest
         {
             {
                 mockIs.close();
+            }
+        };
+    }
+
+    // Tests_SRS_HTTPSCONNECTION_25_019: [The function shall close the error stream after it has been completely read.]
+    @Test
+    public void readErrorClosesErrorStreamEvenIfExceptionOccurs(@Mocked final InputStream mockIs) throws IOException
+    {
+        // Arrange
+        final HttpMethod httpsMethod = HttpMethod.GET;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+                mockUrlConn.getErrorStream();
+                result = mockIs;
+                mockIs.read();
+                result = new IOException("This is a test exception");
+            }
+        };
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
+        conn.connect();
+
+        // Act
+        try
+        {
+            conn.readError();
+        }
+        catch (IOException e)
+        {
+            //expected exception, but not testing for it, so it can be ignored
+        }
+
+        // Assert
+        new Verifications()
+        {
+            {
+                mockIs.close();
+                times = 1;
             }
         };
     }

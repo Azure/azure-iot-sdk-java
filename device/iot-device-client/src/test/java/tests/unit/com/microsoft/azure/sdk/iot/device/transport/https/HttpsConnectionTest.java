@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.NoRouteToHostException;
+import java.net.SocketException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -29,7 +30,10 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
-/** Unit tests for HttpsConnection. */
+/** Unit tests for HttpsConnection.
+ * Lines: 89%
+ * Methods: 93%
+ */
 public class HttpsConnectionTest
 {
     @Mocked
@@ -482,6 +486,49 @@ public class HttpsConnectionTest
         assertThat(testResponse, is(expectedResponse));
     }
 
+    // Tests_SRS_HTTPSCONNECTION_11_019: [The function shall close the input stream after it has been completely read.]
+    @Test
+    public void readInputClosesStreamIfExceptionWhileReading(
+            @Mocked final InputStream mockIs) throws IOException, TransportException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+                mockUrlConn.getInputStream();
+                result = mockIs;
+                mockIs.read();
+                result = new TransportException("This is a test exception");
+            }
+        };
+        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        conn.connect();
+
+        //act
+        try
+        {
+            byte[] testResponse = conn.readInput();
+        }
+        catch (TransportException e)
+        {
+            //expected exception, but not testing for it, so it can be ignored
+        }
+
+        new Verifications()
+        {
+            {
+                mockIs.close();
+                times = 1;
+            }
+        };
+    }
+
     // Tests_SRS_HTTPSCONNECTION_11_012: [The function shall throw a TransportException if the input stream could not be accessed.]
     @Test(expected = TransportException.class)
     public void readInputFailsIfCannotAccessInputStream() throws IOException, TransportException
@@ -605,6 +652,49 @@ public class HttpsConnectionTest
 
         byte[] expectedError = { 1, 2, 3 };
         assertThat(testError, is(expectedError));
+    }
+
+    // Tests_SRS_HTTPSCONNECTION_11_020: [The function shall close the error stream after it has been completely read.]
+    @Test
+    public void readErrorAlwaysClosesStream(
+            @Mocked final InputStream mockIs) throws IOException, TransportException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+                mockUrlConn.getErrorStream();
+                result = mockIs;
+                mockIs.read();
+                result = new TransportException("This is a test exception");
+            }
+        };
+        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+        conn.connect();
+
+        //act
+        try
+        {
+            byte[] testError = conn.readError();
+        }
+        catch (TransportException e)
+        {
+            //expected exception, but not testing for it, so it can be ignored
+        }
+
+        new Verifications()
+        {
+            {
+                mockIs.close();
+                times = 1;
+            }
+        };
     }
 
     // Tests_SRS_HTTPSCONNECTION_11_013: [The function shall read from the error stream and return the response.]

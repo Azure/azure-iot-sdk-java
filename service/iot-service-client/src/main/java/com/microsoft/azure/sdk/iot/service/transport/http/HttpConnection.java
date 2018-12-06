@@ -200,12 +200,15 @@ public class HttpConnection
      */
     public byte[] readInput() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_014: [The function shall read from the input stream (response stream) and return the response.]
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_015: [The function shall throw an IOException if the input stream could not be accessed.]
-        InputStream inputStream = this.connection.getInputStream();
-        byte[] input = readInputStream(inputStream);
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_016: [The function shall close the input stream after it has been completely read.]
-        inputStream.close();
+        byte[] input;
+        try (InputStream inputStream = this.connection.getInputStream())
+        {
+            // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_014: [The function shall read from the input stream (response stream) and return the response.]
+            // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_015: [The function shall throw an IOException if the input stream could not be accessed.]
+            input = readInputStream(inputStream);
+
+            // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_016: [The function shall close the input stream after it has been completely read.]
+        }
 
         return input;
     }
@@ -220,17 +223,19 @@ public class HttpConnection
      */
     public byte[] readError() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_017: [The function shall read from the error stream and return the response.]
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_018: [The function shall throw an IOException if the error stream could not be accessed.]
-        InputStream errorStream = this.connection.getErrorStream();
-
         byte[] error = new byte[0];
-        // if there is no error reason, getErrorStream() returns null.
-        if (errorStream != null)
+        try (InputStream errorStream = this.connection.getErrorStream())
         {
-            error = readInputStream(errorStream);
+            // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_017: [The function shall read from the error stream and return the response.]
+            // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_018: [The function shall throw an IOException if the error stream could not be accessed.]
+
+            // if there is no error reason, getErrorStream() returns null.
+            if (errorStream != null)
+            {
+                error = readInputStream(errorStream);
+            }
+
             // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_019: [The function shall close the error stream after it has been completely read.]
-            errorStream.close();
         }
 
         return error;

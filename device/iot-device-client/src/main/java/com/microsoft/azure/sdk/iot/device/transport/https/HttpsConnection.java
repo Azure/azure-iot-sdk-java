@@ -47,8 +47,6 @@ public class HttpsConnection
      */
     private byte[] body;
 
-    private URL url;
-
     /**
      * Constructor. Opens a connection to the given URL. Can be HTTPS or HTTP
      *
@@ -59,8 +57,6 @@ public class HttpsConnection
      */
     public HttpsConnection(URL url, HttpsMethod method) throws TransportException
     {
-        this.url = url;
-
         // Codes_SRS_HTTPSCONNECTION_11_022: [If the URI given does not use the HTTPS or HTTP protocol, the constructor shall throw an IllegalArgumentException.]
         String protocol = url.getProtocol();
         if (!protocol.equalsIgnoreCase("HTTPS") && !protocol.equalsIgnoreCase("HTTP"))
@@ -133,7 +129,7 @@ public class HttpsConnection
             {
                 throw new IllegalArgumentException(
                         "Cannot change the request method from POST "
-                        + "or PUT when the request body is non-empty.");
+                                + "or PUT when the request body is non-empty.");
             }
         }
 
@@ -199,7 +195,7 @@ public class HttpsConnection
             {
                 throw new IllegalArgumentException(
                         "Cannot write a body to a request that "
-                        + "is not a POST or a PUT request.");
+                                + "is not a POST or a PUT request.");
             }
         }
         else
@@ -221,11 +217,14 @@ public class HttpsConnection
     {
         try
         {
-            // Codes_SRS_HTTPSCONNECTION_11_011: [The function shall read from the input stream (response stream) and return the response.]
-            InputStream inputStream = this.connection.getInputStream();
-            byte[] input = readInputStream(inputStream);
-            // Codes_SRS_HTTPSCONNECTION_11_019: [The function shall close the input stream after it has been completely read.]
-            inputStream.close();
+            byte[] input;
+            try (InputStream inputStream = this.connection.getInputStream())
+            {
+                // Codes_SRS_HTTPSCONNECTION_11_011: [The function shall read from the input stream (response stream) and return the response.]
+                input = readInputStream(inputStream);
+
+                // Codes_SRS_HTTPSCONNECTION_11_019: [The function shall close the input stream after it has been completely read.]
+            }
 
             return input;
         }
@@ -249,16 +248,19 @@ public class HttpsConnection
     {
         try
         {
-            // Codes_SRS_HTTPSCONNECTION_11_013: [The function shall read from the error stream and return the response.]
-            InputStream errorStream = this.connection.getErrorStream();
-
-            byte[] error = new byte[0];
-            // if there is no error reason, getErrorStream() returns null.
-            if (errorStream != null)
+            byte[] error;
+            try (InputStream errorStream = this.connection.getErrorStream())
             {
-                error = readInputStream(errorStream);
+                // Codes_SRS_HTTPSCONNECTION_11_013: [The function shall read from the error stream and return the response.]
+
+                error = new byte[0];
+                // if there is no error reason, getErrorStream() returns null.
+                if (errorStream != null)
+                {
+                    error = readInputStream(errorStream);
+                }
+
                 // Codes_SRS_HTTPSCONNECTION_11_020: [The function shall close the error stream after it has been completely read.]
-                errorStream.close();
             }
 
             return error;
