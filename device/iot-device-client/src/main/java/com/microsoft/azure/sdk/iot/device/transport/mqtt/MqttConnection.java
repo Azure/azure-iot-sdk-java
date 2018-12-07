@@ -28,7 +28,7 @@ public class MqttConnection
     private static final int MQTT_VERSION = 4;
     private static final boolean SET_CLEAN_SESSION = false;
     static final int QOS = 1;
-    static final int MAX_WAIT_TIME = 1000;
+    static final int MAX_SUBSCRIBE_ACK_WAIT_TIME = 15 * 1000;
 
     // paho mqtt only supports 10 messages in flight at the same time
     static final int MAX_IN_FLIGHT_COUNT = 10;
