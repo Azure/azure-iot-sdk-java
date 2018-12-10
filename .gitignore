@@ -223,4 +223,6 @@ vertx.log.lck
 # =========================
 
 *.properties
-iot-e2e-tests/android/gradle.properties
+**/gradlew*
+**/.gradle
+**/build

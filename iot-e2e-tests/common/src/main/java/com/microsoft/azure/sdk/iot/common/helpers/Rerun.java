@@ -3,7 +3,7 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.android.helper;
+package com.microsoft.azure.sdk.iot.common.helpers;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
