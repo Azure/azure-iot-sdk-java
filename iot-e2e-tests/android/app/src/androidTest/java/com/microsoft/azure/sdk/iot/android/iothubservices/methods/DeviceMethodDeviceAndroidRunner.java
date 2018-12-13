@@ -9,7 +9,6 @@ import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroupA;
-import com.microsoft.azure.sdk.iot.android.helper.RegressionTestSuite;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
@@ -32,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @TestGroupA
-@RegressionTestSuite
 @RunWith(Parameterized.class)
 public class DeviceMethodDeviceAndroidRunner extends DeviceMethodTests
 {

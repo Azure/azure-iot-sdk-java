@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.android.iothubservices.twin;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
-import com.microsoft.azure.sdk.iot.android.helper.RegressionTestSuite;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroupC;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin.GetTwinTests;
@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 
-@RegressionTestSuite
+@TestGroupC
 @RunWith(Parameterized.class)
 public class GetTwinDeviceAndroidRunner extends GetTwinTests
 {

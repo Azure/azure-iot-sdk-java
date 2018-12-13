@@ -9,6 +9,7 @@ import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroupA;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroupB;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.telemetry.ReceiveMessagesTests;
@@ -30,7 +31,7 @@ import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 
-@TestGroupA
+@TestGroupB
 @RunWith(Parameterized.class)
 public class ReceiveMessagesModuleAndroidRunner extends ReceiveMessagesTests
 {
