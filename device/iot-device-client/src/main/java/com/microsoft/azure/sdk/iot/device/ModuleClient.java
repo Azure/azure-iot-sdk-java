@@ -496,8 +496,7 @@ public class ModuleClient extends InternalClient
 
     private static void commonConstructorVerifications(IotHubClientProtocol protocol, DeviceClientConfig config)
     {
-        if (protocol != IotHubClientProtocol.MQTT && protocol != IotHubClientProtocol.AMQPS
-                && protocol != IotHubClientProtocol.MQTT_WS && protocol != IotHubClientProtocol.AMQPS_WS)
+        if (protocol == IotHubClientProtocol.HTTPS)
         {
             throw new UnsupportedOperationException("Only MQTT, MQTT_WS, AMQPS and AMQPS_WS are supported for ModuleClient.");
         }

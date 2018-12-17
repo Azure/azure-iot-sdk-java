@@ -14,6 +14,7 @@ import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Data;
+import org.apache.qpid.proton.amqp.messaging.MessageAnnotations;
 import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.engine.Delivery;
 import org.apache.qpid.proton.engine.Receiver;
@@ -29,13 +30,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.microsoft.azure.sdk.iot.device.MessageProperty.OUTPUT_NAME_PROPERTY;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.*;
 
 /**
 *  Unit tests for AmqpsDeviceTelemetryTest
 * 100% methods covered
-* 98% lines covered
+* 86% lines covered
 */
 public class AmqpsDeviceTelemetryTest
 {
@@ -89,8 +91,8 @@ public class AmqpsDeviceTelemetryTest
 
         //act
         AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
-        String SENDER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsDeviceTelemetry, "SENDER_LINK_ENDPOINT_PATH");
-        String RECEIVER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsDeviceTelemetry, "RECEIVER_LINK_ENDPOINT_PATH");
+        String SENDER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsDeviceTelemetry, "SENDER_LINK_ENDPOINT_PATH_DEVICES");
+        String RECEIVER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsDeviceTelemetry, "RECEIVER_LINK_ENDPOINT_PATH_DEVICES");
         String SENDER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceTelemetry, "SENDER_LINK_TAG_PREFIX");
         String RECEIVER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceTelemetry, "RECEIVER_LINK_TAG_PREFIX");
         String senderLinkEndpointPath = Deencapsulation.getField(amqpsDeviceTelemetry, "senderLinkEndpointPath");
@@ -371,9 +373,9 @@ public class AmqpsDeviceTelemetryTest
 
 
 
-    // Codes_SRS_AMQPSDEVICETELEMETRY_12_020: [The function shall call the super function.]
-    // Codes_SRS_AMQPSDEVICETELEMETRY_12_021: [The function shall set the MessageType to DEVICE_TELEMETRY if the super function returned not null.]
-    // Codes_SRS_AMQPSDEVICETELEMETRY_12_022: [The function shall return the super function return value.]
+    // Tests_SRS_AMQPSDEVICETELEMETRY_12_020: [The function shall call the super function.]
+    // Tests_SRS_AMQPSDEVICETELEMETRY_12_021: [The function shall set the MessageType to DEVICE_TELEMETRY if the super function returned not null.]
+    // Tests_SRS_AMQPSDEVICETELEMETRY_12_022: [The function shall return the super function return value.]
     @Test
     public void getMessageFromReceiverLinkSuccess() throws IOException
     {
@@ -419,7 +421,7 @@ public class AmqpsDeviceTelemetryTest
         };
     }
 
-    // Codes_SRS_AMQPSDEVICETELEMETRY_12_022: [The function shall return the super function return value.]
+    // Tests_SRS_AMQPSDEVICETELEMETRY_12_022: [The function shall return the super function return value.]
     @Test
     public void getMessageFromReceiverLinkSuperFailed() throws IOException
     {
@@ -463,6 +465,62 @@ public class AmqpsDeviceTelemetryTest
                 times = 0;
             }
         };
+    }
+
+    // Tests_SRS_AMQPSDEVICETELEMETRY_34_052: [If the amqp message contains an application property of
+    // "x-opt-input-name", this function shall assign its value to the IotHub message's input name.]
+    @Test
+    public void protonMessageToIoTHubMessageWithInputName(@Mocked final MessageImpl mockMessage, @Mocked final MessageAnnotations mockedAnnotations, @Mocked final Data mockData)
+    {
+        //arrange
+        final String expectedInputName = "some input name";
+        final Map<Symbol, Object> mockedAnnotationsMap = new HashMap<>();
+        mockedAnnotationsMap.put(Deencapsulation.newInstance(Symbol.class, Deencapsulation.getField(AmqpsDeviceTelemetry.class, "INPUT_NAME_PROPERTY_KEY")), expectedInputName);
+        new NonStrictExpectations()
+        {
+            {
+                mockMessage.getBody();
+                result = mockData;
+
+                mockMessage.getMessageAnnotations();
+                result = mockedAnnotations;
+
+                mockedAnnotations.getValue();
+                result = mockedAnnotationsMap;
+            }
+        };
+
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+
+        //act
+        Message message = Deencapsulation.invoke(amqpsDeviceTelemetry, "protonMessageToIoTHubMessage", mockMessage);
+
+        //assert
+        assertEquals(expectedInputName, message.getInputName());
+    }
+
+    // Tests_SRS_AMQPSDEVICETELEMETRY_34_051: [This function shall set the message's saved outputname in the application properties of the new proton message.]
+    @Test
+    public void IoTHubMessageToProtonMessageWithOutputName(@Mocked final Message mockMessage)
+    {
+        //arrange
+        final String expectedOutputName = "some output name";
+        new NonStrictExpectations()
+        {
+            {
+                mockMessage.getOutputName();
+                result = expectedOutputName;
+            }
+        };
+
+        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+
+        //act
+        MessageImpl message = Deencapsulation.invoke(amqpsDeviceTelemetry, "iotHubMessageToProtonMessage", mockMessage);
+
+        //assert
+        assertTrue(message.getApplicationProperties().getValue().containsKey(OUTPUT_NAME_PROPERTY));
+        assertEquals(expectedOutputName, message.getApplicationProperties().getValue().get(OUTPUT_NAME_PROPERTY));
     }
 }
 

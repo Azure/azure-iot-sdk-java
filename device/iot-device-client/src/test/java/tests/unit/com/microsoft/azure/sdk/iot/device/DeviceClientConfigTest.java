@@ -998,4 +998,24 @@ public class DeviceClientConfigTest
         assertTrue(actualMap.get(inputName).getKey().equals(mockedMessageCallback));
         assertTrue(actualMap.get(inputName).getValue().equals(context));
     }
+
+    // Tests_SRS_DEVICECLIENTCONFIG_34_058: [If the provided inputName is already saved in the message callbacks map, and the provided callback is null, this function
+    // shall remove the inputName from the message callbacks map.]
+    @Test
+    public void setMessageCallbackWithInputCanRemoveInput()
+    {
+        //arrange
+        final String inputName = "someInputName";
+        final Object context = new Object();
+        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
+        config.setMessageCallback(inputName, mockedMessageCallback, context);
+
+        //act
+        config.setMessageCallback(inputName, null, null);
+
+        //assert
+        Map<String, Pair<MessageCallback, Object>> actualMap = Deencapsulation.getField(config, "inputChannelMessageCallbacks");
+        assertNotNull(actualMap);
+        assertFalse(actualMap.containsKey(inputName));
+    }
 }

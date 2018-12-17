@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Unit tests for AmqpsDeviceAuthenticationCBSTest
  * 100% methods covered
- * 100% lines covered
+ * 92% lines covered
  */
 public class AmqpsDeviceAuthenticationCBSTest
 {
@@ -286,6 +286,7 @@ public class AmqpsDeviceAuthenticationCBSTest
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_027: [The function shall read the correlationId property and compare it to the given correlationId and if they are different return false.]
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_028: [The function shall read the application properties and if the status code property is not 200 return false.]
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_029: [The function shall return true If both the correlationID and status code matches.]
+    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_34_035: [If the correlationId and status code matches, this function will acknowledge the provided amqpsMessage.]
     @Test
     public void authenticationMessageReceivedSuccess() throws IOException
     {
@@ -321,6 +322,13 @@ public class AmqpsDeviceAuthenticationCBSTest
 
         //assert
         assertTrue(isAuthenticated);
+        new Verifications()
+        {
+            {
+                mockAmqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
+                times = 1;
+            }
+        };
     }
 
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_026: [The function shall return false if the amqpdMessage parameter is null or does not have Properties and Application properties.]

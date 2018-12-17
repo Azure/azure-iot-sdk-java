@@ -763,9 +763,9 @@ public class InternalClient
         }
 
         String gatewayHostName = connectionString.getGatewayHostName();
-        if (gatewayHostName != null && !gatewayHostName.isEmpty() && !(protocol == MQTT || protocol == MQTT_WS))
+        if (gatewayHostName != null && !gatewayHostName.isEmpty() && protocol == HTTPS)
         {
-            throw new UnsupportedOperationException("Communication with edgehub only supported by MQTT/MQTT_WS");
+            throw new UnsupportedOperationException("Communication with edgehub only supported by MQTT/MQTT_WS and AMQPS/AMQPS_WS");
         }
     }
 }

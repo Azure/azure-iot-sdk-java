@@ -327,8 +327,17 @@ public final class DeviceClientConfig
 
     public void setMessageCallback(String inputName, MessageCallback callback, Object context)
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_34_044: [The function shall map the provided inputName to the callback and context in the saved inputChannelMessageCallbacks map.]
-        this.inputChannelMessageCallbacks.put(inputName, new Pair<>(callback, context));
+        if (this.inputChannelMessageCallbacks.containsKey(inputName) && callback == null)
+        {
+            // Codes_SRS_DEVICECLIENTCONFIG_34_058: [If the provided inputName is already saved in the message callbacks map, and the provided callback is null, this function
+            // shall remove the inputName from the message callbacks map.]
+            this.inputChannelMessageCallbacks.remove(inputName);
+        }
+        else
+        {
+            // Codes_SRS_DEVICECLIENTCONFIG_34_044: [The function shall map the provided inputName to the callback and context in the saved inputChannelMessageCallbacks map.]
+            this.inputChannelMessageCallbacks.put(inputName, new Pair<>(callback, context));
+        }
     }
 
     /**

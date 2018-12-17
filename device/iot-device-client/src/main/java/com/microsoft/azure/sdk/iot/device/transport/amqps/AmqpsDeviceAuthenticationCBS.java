@@ -26,20 +26,20 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
     public static final String SENDER_LINK_ENDPOINT_PATH = "$cbs";
     public static final String RECEIVER_LINK_ENDPOINT_PATH = "$cbs";
 
-    private final String SENDER_LINK_TAG_PREFIX = "cbs-sender-";
-    private final String RECEIVER_LINK_TAG_PREFIX = "cbs-receiver-";
+    private static final String SENDER_LINK_TAG_PREFIX = "cbs-sender-";
+    private static final String RECEIVER_LINK_TAG_PREFIX = "cbs-receiver-";
 
-    private final String CBS_TO = "$cbs";
-    private final String CBS_REPLY = "cbs";
+    private static final String CBS_TO = "$cbs";
+    private static final String CBS_REPLY = "cbs";
 
-    private final String OPERATION_KEY = "operation";
-    private final String TYPE_KEY = "type";
-    private final String NAME_KEY = "name";
+    private static final String OPERATION_KEY = "operation";
+    private static final String TYPE_KEY = "type";
+    private static final String NAME_KEY = "name";
 
-    private final String OPERATION_VALUE = "put-token";
-    private final String TYPE_VALUE = "servicebus.windows.net:sastoken";
+    private static final String OPERATION_VALUE = "put-token";
+    private static final String TYPE_VALUE = "servicebus.windows.net:sastoken";
 
-    private final String DEVICES_PATH =  "/devices/";
+    private static final String DEVICES_PATH =  "/devices/";
 
     private long nextTag = 0;
 
@@ -176,6 +176,9 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
                         int propertyValue = (int) entry.getValue();
                         if (propertyValue == 200)
                         {
+                            // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_34_035: [If the correlationId and status code matches, this function will acknowledge the provided amqpsMessage.]
+                            amqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
+
                             // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_029: [The function shall return true If both the correlationID and status code matches.]
                             return true;
                         }

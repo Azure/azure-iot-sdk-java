@@ -78,14 +78,6 @@ public class AmqpsDeviceOperations
         this.senderLinkTag = uuidStr;
         this.receiverLinkTag = uuidStr;
 
-        // Codes_SRS_AMQPSDEVICEOPERATIONS_12_003: [The constructor shall initialize sender and receiver endpoint path members to empty string.]
-        this.senderLinkEndpointPath = "";
-        this.receiverLinkEndpointPath = "";
-
-        // Codes_SRS_AMQPSDEVICEOPERATIONS_12_004: [The constructor shall initialize sender and receiver link address members to empty string.]
-        this.senderLinkAddress = "";
-        this.receiverLinkAddress = "";
-
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_005: [The constructor shall initialize sender and receiver link objects to null.]
         this.senderLink = null;
         this.receiverLink = null;
@@ -505,12 +497,7 @@ public class AmqpsDeviceOperations
             for (Map.Entry<String, Object> entry : applicationProperties.entrySet())
             {
                 String propertyKey = entry.getKey();
-                if (propertyKey.equals(INPUT_NAME_PROPERTY_KEY))
-                {
-                    //Codes_SRS_AMQPSDEVICEOPERATION_34_052: [If the amqp message contains an application property of "x-opt-input-name", this function shall assign its value to the IotHub message's input name.]
-                    iotHubTransportMessage.setInputName(entry.getValue().toString());
-                }
-                else if (propertyKey.equalsIgnoreCase(MessageProperty.CONNECTION_DEVICE_ID))
+                if (propertyKey.equalsIgnoreCase(MessageProperty.CONNECTION_DEVICE_ID))
                 {
                     //Codes_SRS_AMQPSDEVICEOPERATION_34_053: [If the amqp message contains an application property for the connection device id, this function shall assign its value to the IotHub message's connection device id.]
                     iotHubTransportMessage.setConnectionDeviceId(entry.getValue().toString());

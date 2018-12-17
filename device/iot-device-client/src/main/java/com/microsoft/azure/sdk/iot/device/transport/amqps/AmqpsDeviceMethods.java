@@ -160,7 +160,7 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
     protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws TransportException
     {
         if ((amqpsMessage.getAmqpsMessageType() == MessageType.DEVICE_METHODS) &&
-            (this.deviceClientConfig.getDeviceId() == deviceClientConfig.getDeviceId()))
+            (this.deviceClientConfig.getDeviceId().equals(deviceClientConfig.getDeviceId())))
         {
             // Codes_SRS_AMQPSDEVICEMETHODS_12_016: [The function shall convert the amqpsMessage to IoTHubTransportMessage.]
             Message message = protonMessageToIoTHubMessage(amqpsMessage);

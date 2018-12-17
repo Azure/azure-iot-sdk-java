@@ -508,6 +508,9 @@ public class AmqpsDeviceTwinTest
                 result = messageContext;
                 mockAmqpsMessage.getBody();
                 result = null;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 
@@ -572,6 +575,9 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 
@@ -637,6 +643,9 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 
@@ -703,6 +712,9 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 
@@ -722,7 +734,7 @@ public class AmqpsDeviceTwinTest
         assertEquals(messageContext, actualMessageContext);
     }
 
-    // Tests_SRS_AMQPSDEVICETWIN_12_024: [THe function shall set the operation type to SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE if the proton correlation ID is null.]
+    // Tests_SRS_AMQPSDEVICETWIN_12_024: [The function shall set the operation type to SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE if the proton correlation ID is not present.]
     @Test
     public void convertFromProtonPropertiesCorrelationIdNull(
             @Mocked final Properties mockProperties,
@@ -761,6 +773,9 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 
@@ -819,6 +834,9 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 
@@ -885,6 +903,9 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 
@@ -952,6 +973,9 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 
@@ -1019,6 +1043,9 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 
@@ -1086,6 +1113,9 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 
@@ -1153,6 +1183,9 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 
@@ -1225,6 +1258,9 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 
@@ -1289,6 +1325,9 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 
@@ -1305,67 +1344,6 @@ public class AmqpsDeviceTwinTest
         assertEquals(bytes.length, actualMessage.getBytes().length);
         assertEquals(mockMessageCallback, actualMessageCallback);
         assertEquals(messageContext, actualMessageContext);
-    }
-
-    // Tests_SRS_AMQPSDEVICETWIN_12_026: [The function shall copy the Proton application properties to IotHubTransportMessage properties excluding the reserved property names.]
-    // Tests_SRS_AMQPSDEVICETELEMETRY_34_053: [If the amqp message contains an application property of
-    // "x-opt-input-name", this function shall assign its value to the IotHub message's input name.]
-    @Test
-    public void convertFromProtonApplicationWithInputName(
-            @Mocked final Map<String, String> mockMapStringString,
-            @Mocked final ApplicationProperties mockApplicationProperties,
-            @Mocked final Map.Entry<String, String> mockStringStringEntry,
-            @Mocked final DeviceClientConfig mockDeviceClientConfig
-    ) throws IOException
-    {
-        //arrange
-        String deviceId = "deviceId";
-        final byte[] bytes = new byte[] {1, 2};
-        final Object messageContext = "context";
-        final String inputNameValue = "someInputName";
-        final String inputNameKey = Deencapsulation.getField(AmqpsDeviceTelemetry.class, "INPUT_NAME_PROPERTY_KEY");
-
-        AmqpsMessage amqpsMessage = new AmqpsMessage();
-        Binary binary = new Binary(bytes);
-        Section section = new Data(binary);
-        amqpsMessage.setBody(section);
-        amqpsMessage.setAmqpsMessageType(MessageType.DEVICE_TWIN);
-        amqpsMessage.setMessageAnnotations(null);
-        amqpsMessage.setProperties(null);
-        amqpsMessage.setApplicationProperties(mockApplicationProperties);
-
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockApplicationProperties.getValue();
-                result = mockMapStringString;
-                mockMapStringString.entrySet();
-                result = mockStringStringEntry;
-                mockStringStringEntry.getKey();
-                result = inputNameKey;
-                mockStringStringEntry.getValue();
-                result = inputNameValue;
-
-                mockDeviceClientConfig.getDeviceTwinMessageCallback();
-                result = mockMessageCallback;
-                mockDeviceClientConfig.getDeviceTwinMessageContext();
-                result = messageContext;
-            }
-        };
-
-        //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
-
-        //assert
-        assertNotNull(actualMessage);
-        assertEquals(null, ((IotHubTransportMessage)actualMessage).getProperty(inputNameKey));
-        assertEquals(inputNameValue, actualMessage.getInputName());
     }
 
     // Tests_SRS_AMQPSDEVICETWIN_12_026: [The function shall copy the Proton application properties to IotHubTransportMessage properties excluding the reserved property names.]
@@ -1412,6 +1390,9 @@ public class AmqpsDeviceTwinTest
                 result = mockMessageCallback;
                 mockDeviceClientConfig.getDeviceTwinMessageContext();
                 result = messageContext;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = "some device";
             }
         };
 

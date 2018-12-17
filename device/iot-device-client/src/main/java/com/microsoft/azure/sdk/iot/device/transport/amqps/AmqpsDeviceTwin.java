@@ -46,6 +46,8 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
     private static final String MESSAGE_ANNOTATION_FIELD_VALUE_PUT = "PUT";
     private static final String MESSAGE_ANNOTATION_FIELD_VALUE_DELETE = "DELETE";
 
+    private static final String DEFAULT_STATUS_CODE = "200";
+
     private static final String MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_REPORTED = "/properties/reported";
     private static final String MESSAGE_ANNOTATION_FIELD_VALUE_NOTIFICATIONS_TWIN_PROPERTIES_DESIRED = "/notifications/twin/properties/desired";
     private static final String MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_DESIRED = "/properties/desired";
@@ -67,36 +69,6 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
 
         this.deviceClientConfig = deviceClientConfig;
 
-        String moduleId = this.deviceClientConfig.getModuleId();
-        if (moduleId != null && !moduleId.isEmpty())
-        {
-            // Codes_SRS_AMQPSDEVICETWIN_34_034: [If a moduleId is present, the constructor shall set the sender and receiver endpoint path to IoTHub specific values for module communication.]
-            this.senderLinkEndpointPath = SENDER_LINK_ENDPOINT_PATH_MODULES;
-            this.receiverLinkEndpointPath = RECEIVER_LINK_ENDPOINT_PATH_MODULES;
-
-            // Codes_SRS_AMQPSDEVICETWIN_34_035: [If a moduleId is present, the constructor shall concatenate a sender specific prefix including the moduleId to the sender link tag's current value.]
-            this.senderLinkTag = SENDER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "/" + moduleId + "-" + senderLinkTag;
-            this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "/" + moduleId + "-" + receiverLinkTag;
-
-            // Codes_SRS_AMQPSDEVICETWIN_34_036: [If a moduleId is present, the constructor shall insert the given deviceId and moduleId argument to the sender and receiver link address.]
-            this.senderLinkAddress = String.format(senderLinkEndpointPath, this.deviceClientConfig.getDeviceId(), moduleId);
-            this.receiverLinkAddress = String.format(receiverLinkEndpointPath, this.deviceClientConfig.getDeviceId(), moduleId);
-        }
-        else
-        {
-            // Codes_SRS_AMQPSDEVICETWIN_12_002: [The constructor shall set the sender and receiver endpoint path to IoTHub specific values.]
-            this.senderLinkEndpointPath = SENDER_LINK_ENDPOINT_PATH;
-            this.receiverLinkEndpointPath = RECEIVER_LINK_ENDPOINT_PATH;
-
-            // Codes_SRS_AMQPSDEVICETWIN_12_003: [The constructor shall concatenate a sender specific prefix to the sender link tag's current value.]
-            this.senderLinkTag = SENDER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "-" + senderLinkTag;
-            // Codes_SRS_AMQPSDEVICETWIN_12_004: [The constructor shall concatenate a receiver specific prefix to the receiver link tag's current value.]
-            this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX + this.deviceClientConfig.getDeviceId() + "-" + receiverLinkTag;
-
-            // Codes_SRS_AMQPSDEVICETWIN_12_005: [The constructor shall insert the given deviceId argument to the sender and receiver link address.]
-            this.senderLinkAddress = String.format(senderLinkEndpointPath, this.deviceClientConfig.getDeviceId());
-            this.receiverLinkAddress = String.format(receiverLinkEndpointPath, this.deviceClientConfig.getDeviceId());
-        }
         
         // Codes_SRS_AMQPSDEVICETWIN_12_006: [The constructor shall add the API version key to the amqpProperties.]
         this.amqpProperties.put(Symbol.getSymbol(API_VERSION_KEY), TransportUtils.IOTHUB_API_VERSION);
@@ -196,7 +168,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
     protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws TransportException
     {
         if ((amqpsMessage.getAmqpsMessageType() == MessageType.DEVICE_TWIN) &&
-            (this.deviceClientConfig.getDeviceId() == deviceClientConfig.getDeviceId()))
+            (this.deviceClientConfig.getDeviceId().equals(deviceClientConfig.getDeviceId())))
         {
             // Codes_SRS_AMQPSDEVICETWIN_12_016: [The function shall convert the amqpsMessage to IoTHubTransportMessage.]
             Message message = protonMessageToIoTHubMessage(amqpsMessage);
@@ -284,47 +256,46 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
         }
 
         Properties properties = protonMsg.getProperties();
-        if (properties != null)
+        if (properties != null && properties.getCorrelationId() != null)
         {
-            if (properties.getCorrelationId() != null)
-            {
-                // Codes_SRS_AMQPSDEVICETWIN_12_044: [The function shall set the IotHubTransportMessage correlationID to the proton correlationId.]
-                iotHubTransportMessage.setCorrelationId(properties.getCorrelationId().toString());
+            // Codes_SRS_AMQPSDEVICETWIN_12_044: [The function shall set the IotHubTransportMessage correlationID to the proton correlationId.]
+            iotHubTransportMessage.setCorrelationId(properties.getCorrelationId().toString());
 
-                // Codes_SRS_AMQPSDEVICETWIN_12_023: [The function shall find the proton correlation ID in the correlationIdList and if it is found, set the operation type to the related response.]
-                if (correlationIdList.containsKey(properties.getCorrelationId().toString()))
-                {
-                    DeviceOperations deviceOperations = correlationIdList.get(properties.getCorrelationId().toString());
-                    switch (deviceOperations)
-                    {
-                        case DEVICE_OPERATION_TWIN_GET_REQUEST:
-                            iotHubTransportMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_GET_RESPONSE);
-                            break;
-                        case DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST:
-                            iotHubTransportMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
-                            break;
-                        case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST:
-                            iotHubTransportMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
-                            break;
-                        case DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST:
-                            iotHubTransportMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
-                            break;
-                        default:
-                            TransportUtils.throwTransportExceptionWithIotHubServiceType(
-                                    "Invalid device operation type in protonMessageToIoTHubMessage!",
-                                    TransportException.IotHubService.TWIN);
-                    }
-                    // Codes_SRS_AMQPSDEVICETWIN_12_043: [The function shall remove the correlation from the correlationId list.]
-                    this.correlationIdList.remove(properties.getCorrelationId().toString());
-                }
-            }
-            else
+            // Codes_SRS_AMQPSDEVICETWIN_12_023: [The function shall find the proton correlation ID in the correlationIdList and if it is found, set the operation type to the related response.]
+            if (correlationIdList.containsKey(properties.getCorrelationId().toString()))
             {
-                // Codes_SRS_AMQPSDEVICETWIN_12_024: [THe function shall set the operation type to SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE if the proton correlation ID is null.]
-                if (iotHubTransportMessage.getDeviceOperationType() == DEVICE_OPERATION_UNKNOWN)
+                DeviceOperations deviceOperations = correlationIdList.get(properties.getCorrelationId().toString());
+                switch (deviceOperations)
                 {
-                    iotHubTransportMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
+                    case DEVICE_OPERATION_TWIN_GET_REQUEST:
+                        iotHubTransportMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_GET_RESPONSE);
+                        break;
+                    case DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST:
+                        iotHubTransportMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
+                        break;
+                    case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST:
+                        iotHubTransportMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
+                        break;
+                    case DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST:
+                        iotHubTransportMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
+                        break;
+                    default:
+                        TransportUtils.throwTransportExceptionWithIotHubServiceType(
+                                "Invalid device operation type in protonMessageToIoTHubMessage!",
+                                TransportException.IotHubService.TWIN);
                 }
+                // Codes_SRS_AMQPSDEVICETWIN_12_043: [The function shall remove the correlation from the correlationId list.]
+                this.correlationIdList.remove(properties.getCorrelationId().toString());
+            }
+        }
+        else if (iotHubTransportMessage.getDeviceOperationType() == DEVICE_OPERATION_UNKNOWN)
+        {
+            // Codes_SRS_AMQPSDEVICETWIN_12_024: [The function shall set the operation type to SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE if the proton correlation ID is not present.]
+            iotHubTransportMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
+
+            if (iotHubTransportMessage.getStatus() == null || iotHubTransportMessage.getStatus().isEmpty())
+            {
+                iotHubTransportMessage.setStatus(DEFAULT_STATUS_CODE);
             }
         }
 
