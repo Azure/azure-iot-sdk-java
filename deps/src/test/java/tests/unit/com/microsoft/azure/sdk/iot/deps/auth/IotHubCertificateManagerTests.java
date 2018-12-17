@@ -81,6 +81,51 @@ public class IotHubCertificateManagerTests
         }
     }
 
+    @Test (expected = IllegalArgumentException.class)
+    public void setValidPathThrowsIfFileIsTooLong() throws IOException
+    {
+        //arrange
+        File testCertFile = null;
+        try
+        {
+            IotHubCertificateManager testCertManager = Deencapsulation.newInstance(IotHubCertificateManager.class);
+            StringBuilder invalidCertString = new StringBuilder();
+            invalidCertString.append("-----BEGIN CERTIFICATE-----\r\n" +
+                    "SomeRandomCertValue\r\n" +
+                    "-----END CERTIFICATE-----\r\n");
+
+            long MAX_CERTIFICATE_LINES = Deencapsulation.getField(IotHubCertificateManager.class, "MAX_CERTIFICATE_LINES");
+
+            for (int i = 0; i < MAX_CERTIFICATE_LINES; i++)
+            {
+                invalidCertString.append("\r\n");
+            }
+
+            String validCertPath = "TestCertFile.crt";
+            testCertFile = new File(validCertPath);
+            testCertFile.setWritable(true);
+            if (!testCertFile.exists())
+            {
+                testCertFile.createNewFile();
+            }
+            try (FileWriter testFileWriter = new FileWriter(testCertFile))
+            {
+                testFileWriter.write(invalidCertString.toString());
+            }
+            testCertFile.setReadOnly();
+
+            //act
+            Deencapsulation.invoke(testCertManager, "setValidCertPath", validCertPath);
+        }
+        finally
+        {
+            if (testCertFile != null)
+            {
+                testCertFile.delete();
+            }
+        }
+    }
+
     //Tests_SRS_IOTHUBCERTIFICATEMANAGER_25_002: [**This method shall throw IllegalArgumentException if parameter is null.**]**
     @Test (expected = IllegalArgumentException.class)
     public void setValidPathThrowsIfNull() throws IOException

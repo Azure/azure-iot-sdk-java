@@ -11,6 +11,8 @@ import java.util.Collection;
 
 public class IotHubCertificateManager
 {
+    private static final long MAX_CERTIFICATE_LINES = 5000000;
+
     private static final String DEFAULT_CERT =
                     /*D-TRUST Root Class 3 CA 2 2009*/
                     "-----BEGIN CERTIFICATE-----\r\n" +
@@ -138,12 +140,19 @@ public class IotHubCertificateManager
         //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_005: [**This method shall throw FileNotFoundException if it could not be found or does not exist.**]**
         try (BufferedReader certReader = new BufferedReader(new FileReader(certPath)))
         {
+            long readLineCount = 0;
             String line;
             StringBuilder cert = new StringBuilder();
             while ((line = certReader.readLine()) != null)
             {
+                if (readLineCount > MAX_CERTIFICATE_LINES)
+                {
+                    throw new IllegalArgumentException("The provided certificate is too long");
+                }
+
                 cert.append(line);
                 cert.append("\r\n");
+                readLineCount++;
             }
 
             if (cert.length() == 0)
