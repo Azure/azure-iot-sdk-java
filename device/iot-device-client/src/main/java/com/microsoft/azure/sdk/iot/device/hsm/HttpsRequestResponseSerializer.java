@@ -24,6 +24,8 @@ public class HttpsRequestResponseSerializer
     private static final String HeaderSeparator = ":";
     private static final String VERSION = "1.1";
 
+    private static final long MAXIMUM_HEADER_COUNT = 500;
+
     /**
      * Serialize the provided request
      *
@@ -187,6 +189,11 @@ public class HttpsRequestResponseSerializer
         {
             headers.add(line);
             line = bufferedReader.readLine();
+
+            if (headers.size() > MAXIMUM_HEADER_COUNT)
+            {
+                throw new IOException("HSM provided too many http headers");
+            }
         }
 
         for(String header : headers)

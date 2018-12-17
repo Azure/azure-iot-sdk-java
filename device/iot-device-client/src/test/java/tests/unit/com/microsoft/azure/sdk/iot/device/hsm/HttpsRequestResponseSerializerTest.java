@@ -11,10 +11,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
-import mockit.Expectations;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -240,6 +237,29 @@ public class HttpsRequestResponseSerializerTest
         assertEquals(200, response.getStatus());
         assertEquals(new String(response.getBody()), "test");
         assertEquals(response.getHeaderFields(), expectedHeaders);
+    }
+
+    @Test (expected = IOException.class)
+    public void deserializeThrowsIfTooManyHttpHeadersReceived() throws IOException
+    {
+        //arrange
+        final byte[] expectedBodyWithNewLine = ("test\r\n").getBytes();
+
+        long MAX_HEADER_COUNT = Deencapsulation.getField(HttpsRequestResponseSerializer.class, "MAXIMUM_HEADER_COUNT");
+
+        StringBuilder stringToDeserialize = new StringBuilder();
+        stringToDeserialize.append("HTTP/1.1 203 OK\r\n");
+
+        for (int i = 0; i < MAX_HEADER_COUNT + 1; i++)
+        {
+            stringToDeserialize.append("header" + i + ":value" + i + "\r\n");
+        }
+
+        stringToDeserialize.append("\r\n");
+        stringToDeserialize.append(new String(expectedBodyWithNewLine));
+
+        //act
+        HttpsRequestResponseSerializer.deserializeResponse(new BufferedReader(new StringReader(stringToDeserialize.toString())));
     }
 
     // Tests_SRS_HTTPREQUESTRESPONSESERIALIZER_34_006: [If the buffered reader doesn't have at least one line, this function shall throw an IOException.]
