@@ -26,6 +26,7 @@
         <module>pnp-service-sample</module>
         <module>digitaltwin-service-samples/temperature-controller-service-sample</module>
         <module>digitaltwin-service-samples/thermostat-service-sample</module>
+        <module>device-deletion-sample</module>
     </modules>
     <dependencies>
         <dependency>
