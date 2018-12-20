@@ -44,6 +44,12 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test(timeout=DEFAULT_TEST_TIMEOUT)
+    public void invokeMethodJsonSucceed() throws Exception
+    {
+        super.invokeMethodJsonSucceed();
+    }
+
+    @Test(timeout=DEFAULT_TEST_TIMEOUT)
     public void invokeMethodInvokeParallelSucceed() throws Exception
     {
         // Arrange

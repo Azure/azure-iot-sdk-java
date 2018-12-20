@@ -3,6 +3,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import org.junit.Test;
 
@@ -94,6 +96,21 @@ public class DeviceMethodDataTest
         //assert
         String testResponse = testData.getResponseMessage();
         assertEquals(testResponse, "testMessage");
+
+    }
+
+    @Test
+    public void getJsonResponseMessageTest()
+    {
+        //arrange
+        JsonPrimitive primitiveValue = new JsonPrimitive("testMessage");
+        DeviceMethodData testData = new DeviceMethodData(0, primitiveValue);
+
+        //act
+        JsonElement testJsonResponseMessage = testData.getJsonResponseMessage();
+
+        //assert
+        assertEquals(testJsonResponseMessage, primitiveValue);
 
     }
 

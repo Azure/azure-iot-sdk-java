@@ -3,10 +3,13 @@
 
 package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
+import com.google.gson.JsonElement;
+
 public class DeviceMethodData
 {
     private int status;
     private String responseMessage;
+    private JsonElement jsonResponseMessage;
 
     public DeviceMethodData(int status, String responseMessage)
     {
@@ -15,6 +18,15 @@ public class DeviceMethodData
          */
         this.status = status;
         this.responseMessage = responseMessage;
+    }
+
+    public DeviceMethodData(int status, JsonElement jsonResponseMessage)
+    {
+        /*
+        **Codes_SRS_DEVICEMETHODDATA_25_001: [**The constructor shall save the status and response message provided by user.**]**
+         */
+        this.status = status;
+        this.jsonResponseMessage = jsonResponseMessage;
     }
 
     public int getStatus()
@@ -47,5 +59,10 @@ public class DeviceMethodData
         **Codes_SRS_DEVICEMETHODDATA_25_007: [**The method shall set the status.**]**
          */
         this.status = status;
+    }
+
+    public JsonElement getJsonResponseMessage()
+    {
+        return jsonResponseMessage;
     }
 }

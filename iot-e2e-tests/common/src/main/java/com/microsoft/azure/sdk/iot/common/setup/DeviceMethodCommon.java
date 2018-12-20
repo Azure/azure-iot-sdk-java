@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.common.setup;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -53,6 +55,7 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
     protected static final Long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(200);
     protected static final Long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toSeconds(5);
     protected static final String PAYLOAD_STRING = "This is a valid payload";
+    protected static final JsonElement PAYLOAD_JSON = new JsonPrimitive(PAYLOAD_STRING);
 
     protected static final int NUMBER_INVOKES_PARALLEL = 10;
     protected static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
@@ -389,6 +392,31 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
         else
         {
             result = methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+        }
+
+        deviceTestManger.waitIotHub(1, 10);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals((long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
+        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload());
+        Assert.assertEquals(0, deviceTestManger.getStatusError());
+    }
+
+    protected void invokeMethodJsonSucceed() throws Exception
+    {
+        // Arrange
+        DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
+
+        // Act
+        MethodResult result;
+        if (testInstance.identity instanceof Module)
+        {
+            result = methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module)testInstance.identity).getId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_JSON);
+        }
+        else
+        {
+            result = methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_JSON);
         }
 
         deviceTestManger.waitIotHub(1, 10);
