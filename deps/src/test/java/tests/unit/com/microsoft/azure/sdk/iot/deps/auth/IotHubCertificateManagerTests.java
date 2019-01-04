@@ -213,7 +213,7 @@ public class IotHubCertificateManagerTests
 
         //assert
         assertNotNull(testCerts);
-        assertEquals(testCerts.size(), 4);
+        assertEquals(testCerts.size(), 3);
     }
 
     //Tests_SRS_IOTHUBCERTIFICATEMANAGER_25_011: [*This method shall create a collection of all the certificates defined as valid using CertificateFactory instance for "X.509".**]**
@@ -351,7 +351,6 @@ public class IotHubCertificateManagerTests
                         "PIWmawomDeCTmGCufsYkl4phX5GOZpIJhzbNi5stPvZR1FDUWSi9g/LMKHtThm3Y\r\n" +
                         "Johw1+qRzT65ysCQblrGXnRl11z+o+I=\r\n" +
                         "-----END CERTIFICATE-----\r\n" +
-
                         "-----BEGIN CERTIFICATE-----\r\n" +
                         "MIIFdjCCA16gAwIBAgIQXmjWEXGUY1BWAGjzPsnFkTANBgkqhkiG9w0BAQUFADBV\r\n" +
                         "MQswCQYDVQQGEwJDTjEaMBgGA1UEChMRV29TaWduIENBIExpbWl0ZWQxKjAoBgNV\r\n" +
