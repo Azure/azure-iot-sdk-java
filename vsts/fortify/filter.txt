@@ -1,0 +1,111 @@
+Android Bad Practices
+Byte Array to String Conversion
+Call to notify()
+Call to Thread.run()
+Call to Thread.stop()
+Class Does Not Implement Cloneable
+Comparison of Boxed Primitive Types
+Comparison with NaN
+Erroneous Negative Value
+Erroneous String Compare
+Erroneous Zero Value
+Hidden Method
+Incorrect serialPersistentFields Modifier
+Invalid Call to Object.equals()
+Misleading Method Signature
+Non-Synchronized Method Overrides Synchronized Method
+null Argument to equals()
+String Comparison of Float
+Empty Try Block
+Dead Code
+Obsolete
+Poor Style
+Portability Flaw: Native SQL
+Race Condition: Class Initialization Cycle
+Redundant Null Check
+Unreleased Resource
+Access Specifier Manipulation
+ADF Bad Practices
+Android Class Loading Hijacking
+Command Injection
+Cross-Site Scripting
+Fragment Injection
+Hadoop Cluster Manipulation
+Hadoop Job Manipulation
+Insecure Sanitizer Policy
+Intent Manipulation
+LDAP Entry Poisoning
+LDAP Injection
+LDAP Manipulation
+Mail Command Injection
+Missing Form Field Validation
+NoSQL Injection
+OGNL Expression Injection
+Query String Injection
+Same-Origin Method Execution
+Session Puzzling: Spring
+Spring Beans Injection
+Spring Misconfiguration
+SQL Injection
+Struts 2
+Struts
+System Information Leak: Struts 2
+Unsafe JNI
+Unsafe JSNI
+XML Entity Expansion Injection
+XML External Entity Injection
+XML Injection
+XSLT Injection
+ADF Faces Bad Practices
+Android Bad Practices
+Castor Bad Practices
+Class Does Not Implement equals
+Erroneous finalize() Method
+Implement
+Multiple Stream Commits
+Negative Content-Length
+toString on Array
+EJB Bad Practices
+File Disclosure
+Immutable Classes
+J2EE Bad Practices
+Request Parameters Bound into Persisted Objects
+Missing Check against Null
+Missing Check for Null Parameter
+Object Model Violation
+Android Permission Check
+Boolean.getBoolean()
+Spring Remote Service
+Spring Web Service
+Poor Style
+Struts 2 Bad Practices
+Unchecked Return Value
+Call to sleep() in Lock
+Double-Checked Locking
+Insufficient Session Expiration
+JVM Termination
+Non-Serializable Object Stored in Session
+Threads
+App Download
+Singleton Member Field
+Static Database Connection
+ADF Bad Practices
+Android Bad Practices
+Hidden Field
+HTML5
+J2EE Bad Practices
+JavaScript Hijacking
+Sensitive Field Exposure
+Axis 2 Misconfiguration
+ClassLoader Manipulation
+Flex Misconfiguration
+J2EE Misconfiguration
+Struts Misconfiguration
+Weblogic Misconfiguration
+WebSphere Misconfiguration
+Throw Inside Finally
+Swallowed ThreadDeath
+Return Inside Finally
+Program Catches NullPointerException
+Empty Catch Block
+Poor Error Handling
