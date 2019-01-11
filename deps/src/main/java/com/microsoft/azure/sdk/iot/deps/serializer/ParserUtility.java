@@ -5,14 +5,19 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinMetadata;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
@@ -506,5 +511,64 @@ public class ParserUtility
         }
 
         return json;
+    }
+
+    public static Object resolveJsonElement(JsonElement jsonElement)
+    {
+        if (jsonElement == null || jsonElement.isJsonNull()) {
+            return null;
+        }
+        else if (jsonElement.isJsonPrimitive())
+        {
+            return getJsonPrimitiveValue(jsonElement.getAsJsonPrimitive());
+        }
+        else if (jsonElement.isJsonObject())
+        {
+            return getJsonObjectValue(jsonElement.getAsJsonObject());
+        }
+        else if (jsonElement.isJsonArray())
+        {
+            return getJsonArrayValue(jsonElement.getAsJsonArray());
+        }
+        else
+        {
+            // shouldn't be here
+            throw new IllegalArgumentException("Invalid DeviceMethodResponse payload: unknown payload type: " + jsonElement.getClass());
+        }
+    }
+
+    public static Object getJsonPrimitiveValue(JsonPrimitive jsonPrimitive)
+    {
+        if (jsonPrimitive.isNumber())
+        {
+            return jsonPrimitive.getAsNumber();
+        }
+        else if (jsonPrimitive.isBoolean())
+        {
+            return jsonPrimitive.getAsBoolean();
+        }
+        else {
+            return jsonPrimitive.getAsString();
+        }
+    }
+
+    public static Map<String, Object> getJsonObjectValue(JsonObject jsonObject)
+    {
+        Map<String, Object> map = new HashMap<>();
+        for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet())
+        {
+            map.put(entry.getKey(), resolveJsonElement(entry.getValue()));
+        }
+        return map;
+    }
+
+    public static List<Object> getJsonArrayValue(JsonArray jsonArray)
+    {
+        List<Object> list = new ArrayList<>();
+        for (JsonElement element : jsonArray.getAsJsonArray())
+        {
+            list.add(resolveJsonElement(element));
+        }
+        return list;
     }
 }

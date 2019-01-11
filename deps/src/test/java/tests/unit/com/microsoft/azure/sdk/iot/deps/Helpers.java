@@ -10,11 +10,18 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinMetadata;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test helpers.
@@ -309,7 +316,7 @@ public class Helpers
             }
             else
             {
-                assertEquals(actual, expected);
+                assertEquals(expected,actual);
             }
         }
     }
@@ -407,16 +414,26 @@ public class Helpers
     /**
      * Asserts when list contents are not equal
      * @param expected expected list to verify
-     * @param test  list to test
+     * @param actual  list to actual
      */
-    public static void assertListEquals(List expected, List test)
+    public static void assertListEquals(List expected, List actual)
     {
         assertNotNull(expected);
-        assertNotNull(test);
-        assertTrue(expected.size() == test.size());
-        for(Object o : expected)
+        assertNotNull(actual);
+        int size = expected.size();
+        assertEquals(size, actual.size());
+        for(int i = 0; i < size; i++)
         {
-            assertTrue(test.contains(o));
+            Object expectedObject = expected.get(i);
+            Object actualObject = actual.get(i);
+            if (expectedObject instanceof Number && actualObject instanceof Number)
+            {
+                assertEquals(((Number) expectedObject).doubleValue(), ((Number) actualObject).doubleValue(), 1e-10);
+            }
+            else
+            {
+                assertEquals(expectedObject, actualObject);
+            }
         }
     }
 
