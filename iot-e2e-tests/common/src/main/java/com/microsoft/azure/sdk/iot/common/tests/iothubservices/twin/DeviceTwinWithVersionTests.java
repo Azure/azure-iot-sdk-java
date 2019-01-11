@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceConnectionString;
 import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.MethodNameLoggingIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
@@ -38,7 +39,7 @@ import static org.junit.Assert.assertNotNull;
  * Test class containing all tests to be run on JVM and android pertaining to twin with version. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class DeviceTwinWithVersionTests extends MethodNameLoggingIntegrationTest
+public class DeviceTwinWithVersionTests extends IntegrationTest
 {
     private static final long BREATHE_TIME = 100; // 0.1 sec
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 1000; // 1 sec
@@ -83,14 +84,14 @@ public class DeviceTwinWithVersionTests extends MethodNameLoggingIntegrationTest
         Integer reportedPropertyVersion;
     }
 
-    private static void assertSetEquals(Set<Property> expected, Set<Pair> actual)
+    private void assertSetEquals(Set<Property> expected, Set<Pair> actual)
     {
-        assertEquals(expected.size(), actual.size());
+        assertEquals(buildExceptionMessage("Expected size " + expected.size() + " but was size " + actual.size(), testDevice.deviceClient), expected.size(), actual.size());
         for(Pair actualProperty: actual)
         {
             Property expectedProperty = fetchProperty(expected, actualProperty.getKey());
-            assertNotNull("Expected Set of Properties do no contain " + actualProperty.getKey(), expectedProperty);
-            assertEquals(expectedProperty.getValue(), actualProperty.getValue());
+            assertNotNull(buildExceptionMessage("Expected Set of Properties to not contain " + actualProperty.getKey(), testDevice.deviceClient), expectedProperty);
+            assertEquals(buildExceptionMessage("Expected value " + expectedProperty.getValue() + " but got " + actualProperty.getValue(), testDevice.deviceClient), expectedProperty.getValue(), actualProperty.getValue());
         }
     }
 
@@ -270,12 +271,12 @@ public class DeviceTwinWithVersionTests extends MethodNameLoggingIntegrationTest
                 throw new IOException(testDevice.exception);
             }
         }
-        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testDevice.reportedPropertyVersion, testDevice.deviceClient), 2, (int)testDevice.reportedPropertyVersion);
 
         // test service client
         DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
         sCDeviceTwin.getTwin(deviceOnServiceClient);
-        assertEquals(2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
         Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(PROPERTIES, reported);
     }
@@ -305,7 +306,7 @@ public class DeviceTwinWithVersionTests extends MethodNameLoggingIntegrationTest
                 throw new IOException(testDevice.exception);
             }
         }
-        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testDevice.reportedPropertyVersion, testDevice.deviceClient), 2, (int)testDevice.reportedPropertyVersion);
 
         // New values for the reported properties
         final Set<Property> newValues = new HashSet<Property>()
@@ -351,8 +352,7 @@ public class DeviceTwinWithVersionTests extends MethodNameLoggingIntegrationTest
         // test service client
         DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
         sCDeviceTwin.getTwin(deviceOnServiceClient);
-        assertEquals(3, (int)deviceOnServiceClient.getReportedPropertiesVersion());
-        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        assertEquals(buildExceptionMessage("Expected reported properties version 3 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testDevice.deviceClient), 3, (int)deviceOnServiceClient.getReportedPropertiesVersion());        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(newValues, reported);
     }
 
@@ -381,7 +381,7 @@ public class DeviceTwinWithVersionTests extends MethodNameLoggingIntegrationTest
                 throw new IOException(testDevice.exception);
             }
         }
-        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testDevice.reportedPropertyVersion, testDevice.deviceClient), 2, (int)testDevice.reportedPropertyVersion);
 
         // New values for the reported properties
         final Set<Property> newValues = new HashSet<Property>()
@@ -419,12 +419,12 @@ public class DeviceTwinWithVersionTests extends MethodNameLoggingIntegrationTest
                 throw new IOException(testDevice.exception);
             }
         }
-        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testDevice.reportedPropertyVersion, testDevice.deviceClient), 2, (int)testDevice.reportedPropertyVersion);
 
         // test service client
         DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
         sCDeviceTwin.getTwin(deviceOnServiceClient);
-        assertEquals(2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
         Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(PROPERTIES, reported);
     }
@@ -454,7 +454,7 @@ public class DeviceTwinWithVersionTests extends MethodNameLoggingIntegrationTest
                 throw new IOException(testDevice.exception);
             }
         }
-        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testDevice.reportedPropertyVersion, testDevice.deviceClient), 2, (int)testDevice.reportedPropertyVersion);
 
         // New values for the reported properties
         final Set<Property> newValues = new HashSet<Property>()
@@ -492,12 +492,12 @@ public class DeviceTwinWithVersionTests extends MethodNameLoggingIntegrationTest
                 throw new IOException(testDevice.exception);
             }
         }
-        assertEquals(2, (int)testDevice.reportedPropertyVersion);
+        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testDevice.reportedPropertyVersion, testDevice.deviceClient), 2, (int)testDevice.reportedPropertyVersion);
 
         // test service client
         DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
         sCDeviceTwin.getTwin(deviceOnServiceClient);
-        assertEquals(2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
         Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(PROPERTIES, reported);
     }

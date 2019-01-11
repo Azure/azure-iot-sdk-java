@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.IOException;
 import java.util.Collection;
 
 
@@ -20,7 +21,7 @@ public class ServiceClientJVMRunner extends ServiceClientTests
 {
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
     @Parameterized.Parameters(name = "{0}")
-    public static Collection inputsCommon()
+    public static Collection inputsCommon() throws IOException
     {
         iotHubConnectionString =
                 Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);

@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.common.setup;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
@@ -30,6 +31,7 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
@@ -40,7 +42,7 @@ import static org.junit.Assert.*;
  * Utility functions, setup and teardown for all device method integration tests. This class should not contain any tests,
  * but any children class should.
  */
-public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
+public class DeviceMethodCommon extends IntegrationTest
 {
     protected static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     protected static String iotHubConnectionString = "";
@@ -62,7 +64,7 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
     //How many milliseconds between retry
     protected static final Integer RETRY_MILLISECONDS = 100;
 
-    private List<IotHubConnectionStatus> actualStatusUpdates;
+    private List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates;
 
     protected DeviceMethodTestInstance testInstance;
     protected static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
@@ -227,7 +229,7 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
     @Before
     public void cleanToStart()
     {
-        actualStatusUpdates = new ArrayList<>();
+        actualStatusUpdates = new ArrayList<Pair<IotHubConnectionStatus, Throwable>>();
         setConnectionStatusCallBack(actualStatusUpdates);
 
         try
@@ -248,12 +250,12 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
         try
         {
             this.testInstance.deviceTestManager.start();
-            IotHubServicesCommon.confirmOpenStabilized(actualStatusUpdates, 120000);
+            IotHubServicesCommon.confirmOpenStabilized(actualStatusUpdates, 120000, this.testInstance.deviceTestManager.client);
         }
         catch (IOException | InterruptedException e)
         {
             e.printStackTrace();
-            fail(e.getMessage());
+            fail(buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + e.getMessage(), this.testInstance.deviceTestManager.client));
         }
         catch (UnsupportedOperationException e)
         {
@@ -361,14 +363,15 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
         registryManager.close();
     }
 
-    protected void setConnectionStatusCallBack(final List actualStatusUpdates)
+    protected void setConnectionStatusCallBack(final List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
     {
 
         IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = new IotHubConnectionStatusChangeCallback()
         {
             @Override
-            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
-                actualStatusUpdates.add(status);
+            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+            {
+                actualStatusUpdates.add(new Pair<>(status, throwable));
             }
         };
 

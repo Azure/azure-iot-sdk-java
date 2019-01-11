@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -21,6 +22,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -33,6 +35,8 @@ public class TwinTagsTests extends DeviceTwinCommon
     public TwinTagsTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+
+        System.out.println(clientType + " TwinTagsTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -84,17 +88,17 @@ public class TwinTagsTests extends DeviceTwinCommon
 
             for (Pair t : devicesUnderTest[i].sCDeviceForTwin.getTags())
             {
-                assertEquals(t.getKey(), TAG_KEY + i);
-                assertEquals(t.getValue(), TAG_VALUE_UPDATE + i);
+                assertEquals(buildExceptionMessage("unexpected tag key, expected " + TAG_KEY + i + " but was " + t.getKey(), internalClient), TAG_KEY + i, t.getKey());
+                assertEquals(buildExceptionMessage("Unexpected tag value, expected " + TAG_VALUE_UPDATE + i + " but was " + t.getValue(), internalClient), TAG_VALUE_UPDATE + i, t.getValue());
             }
 
             for (Pair dp : devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties())
             {
-                assertEquals(dp.getKey(), PROPERTY_KEY + i);
-                assertEquals(dp.getValue(), PROPERTY_VALUE_UPDATE + i);
+                assertEquals(buildExceptionMessage("Unexpected desired property key, expected " + PROPERTY_KEY + i + " but was " + dp.getKey(), internalClient), PROPERTY_KEY + i, dp.getKey());
+                assertEquals(buildExceptionMessage("Unexpected desired property value, expected " + PROPERTY_VALUE_UPDATE + i + " but was " + dp.getValue(), internalClient), PROPERTY_VALUE_UPDATE + i, dp.getValue());
             }
             Integer version = devicesUnderTest[i].sCDeviceForTwin.getDesiredPropertiesVersion();
-            assertNotNull(version);
+            assertNotNull(buildExceptionMessage("Version was null", internalClient), version);
         }
         removeMultipleDevices(MAX_DEVICES);
     }
@@ -123,8 +127,8 @@ public class TwinTagsTests extends DeviceTwinCommon
 
             for (Pair t : devicesUnderTest[i].sCDeviceForTwin.getTags())
             {
-                assertEquals(t.getKey(), TAG_KEY + i);
-                assertEquals(t.getValue(), TAG_VALUE + i);
+                assertEquals(buildExceptionMessage("unexpected tag key, expected " + TAG_KEY + i + " but was " + t.getKey(), internalClient), TAG_KEY + i, t.getKey());
+                assertEquals(buildExceptionMessage("Unexpected tag value, expected " + TAG_VALUE + i + " but was " + t.getValue(), internalClient), TAG_VALUE + i, t.getValue());
             }
         }
         removeMultipleDevices(MAX_DEVICES);
@@ -166,8 +170,8 @@ public class TwinTagsTests extends DeviceTwinCommon
 
             for (Pair t : devicesUnderTest[i].sCDeviceForTwin.getTags())
             {
-                assertEquals(t.getKey(), TAG_KEY + i);
-                assertEquals(t.getValue(), TAG_VALUE_UPDATE + i);
+                assertEquals(buildExceptionMessage("unexpected tag key, expected " + TAG_KEY + i + " but was " + t.getKey(), internalClient), TAG_KEY + i, t.getKey());
+                assertEquals(buildExceptionMessage("Unexpected tag value, expected " + TAG_VALUE + i + " but was " + t.getValue(), internalClient), TAG_VALUE_UPDATE + i, t.getValue());
             }
         }
 
@@ -190,7 +194,7 @@ public class TwinTagsTests extends DeviceTwinCommon
         {
             sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
 
-            assertEquals("Tags were not deleted by being set null", 0, devicesUnderTest[i].sCDeviceForTwin.getTags().size());
+            assertEquals(buildExceptionMessage("Tags were not deleted by being set null", internalClient), 0, devicesUnderTest[i].sCDeviceForTwin.getTags().size());
         }
 
         removeMultipleDevices(MAX_DEVICES);

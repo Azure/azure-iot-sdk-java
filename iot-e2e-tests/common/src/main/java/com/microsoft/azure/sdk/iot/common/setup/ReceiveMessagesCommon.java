@@ -23,6 +23,7 @@ import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
@@ -32,7 +33,7 @@ import static org.junit.Assert.fail;
  * Utility functions, setup and teardown for all C2D telemetry integration tests. This class should not contain any tests,
  * but any child class should.
  */
-public class ReceiveMessagesCommon extends MethodNameLoggingIntegrationTest
+public class ReceiveMessagesCommon extends IntegrationTest
 {
     protected static final long DEFAULT_TEST_TIMEOUT = 3 * 60 * 1000;
     protected static Map<String, String> messageProperties = new HashMap<>(3);
@@ -342,18 +343,18 @@ public class ReceiveMessagesCommon extends MethodNameLoggingIntegrationTest
 
                 if (System.currentTimeMillis() - startTime > RECEIVE_TIMEOUT)
                 {
-                    fail(testInstance.protocol + ", " + testInstance.authenticationType + ": Timed out waiting to receive message");
+                    Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Timed out waiting to receive message", testInstance.client));
                 }
             }
 
             if (!messageReceived.getResult())
             {
-                Assert.fail(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message over " + protocolName + " protocol failed. Received message was missing expected properties");
+                Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message over " + protocolName + " protocol failed. Received message was missing expected properties", testInstance.client));
             }
         }
         catch (InterruptedException e)
         {
-            Assert.fail(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message over " + protocolName + " protocol failed. Unexpected interrupted exception occurred");
+            Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message over " + protocolName + " protocol failed. Unexpected interrupted exception occurred", testInstance.client));
         }
     }
 
@@ -368,17 +369,15 @@ public class ReceiveMessagesCommon extends MethodNameLoggingIntegrationTest
             {
                 Thread.sleep(100);
 
-                System.out.println(messageIdListStoredOnReceive.size());
-
                 if (System.currentTimeMillis() - startTime > RECEIVE_TIMEOUT)
                 {
-                    Assert.fail(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving messages timed out.");
+                    Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving messages timed out.", testInstance.client));
                 }
             }
         }
         catch (InterruptedException e)
         {
-            Assert.fail(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message failed. Unexpected interrupted exception occurred.");
+            Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message failed. Unexpected interrupted exception occurred.", testInstance.client));
         }
     }
 }

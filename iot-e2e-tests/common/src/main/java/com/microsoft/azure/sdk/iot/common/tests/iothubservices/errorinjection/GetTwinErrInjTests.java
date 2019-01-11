@@ -33,6 +33,8 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     public GetTwinErrInjTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+
+        System.out.println(clientType + " GetTwinErrInjTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
@@ -250,7 +252,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     public void errorInjectionGetDeviceTwinFlow(Message errorInjectionMessage) throws Exception
     {
         // Arrange
-        final List<IotHubConnectionStatus> actualStatusUpdates = new ArrayList<>();
+        List<com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
         setConnectionStatusCallBack(actualStatusUpdates);
         testGetDeviceTwin();
 
@@ -264,7 +266,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
                 this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT, internalClient);
         for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
         {
             propertyState.callBackTriggered = false;

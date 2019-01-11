@@ -294,11 +294,9 @@ public class DeviceEmulator  implements Runnable
                 case OK:
                 case OK_EMPTY:
                     deviceStatus.statusOk++;
-                    System.out.println("status ok received");
                     break;
                 default:
                     deviceStatus.statusError++;
-                    System.out.println("status error received");
                     break;
             }
         }

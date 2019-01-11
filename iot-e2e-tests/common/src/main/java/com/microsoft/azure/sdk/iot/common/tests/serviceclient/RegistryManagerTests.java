@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.serviceclient;
 
+import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
@@ -17,19 +18,21 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static org.junit.Assert.*;
 
 /**
  * Test class containing all tests to be run on JVM and android pertaining to identity CRUD. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class RegistryManagerTests
+public class RegistryManagerTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
     private static String deviceId = "java-crud-e2e-test";
     private static String deviceForTest = "deviceForTest";
     private static String moduleId = "java-crud-module-e2e-test";
     private static String configId = "java-crud-adm-e2e-test";
+    private static String hostName;
     private static RegistryManager registryManager;
     private static final String primaryThumbprint =   "0000000000000000000000000000000000000000";
     private static final String secondaryThumbprint = "1111111111111111111111111111111111111111";
@@ -40,6 +43,7 @@ public class RegistryManagerTests
     {
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         deviceId = deviceId.concat("-" + UUID.randomUUID());
+        hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
     }
 
     @AfterClass
@@ -74,10 +78,10 @@ public class RegistryManagerTests
         registryManager.removeDevice(deviceId);
 
         // Assert
-        assertEquals(deviceId, deviceAdded.getDeviceId());
-        assertEquals(deviceId, deviceRetrieved.getDeviceId());
-        assertEquals(DeviceStatus.Disabled, deviceUpdated.getStatus());
-        assertTrue(deviceWasDeletedSuccessfully(registryManager, deviceId));
+        assertEquals(buildExceptionMessage("", hostName), deviceId, deviceAdded.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), deviceId, deviceRetrieved.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), DeviceStatus.Disabled, deviceUpdated.getStatus());
+        assertTrue(buildExceptionMessage("", hostName), deviceWasDeletedSuccessfully(registryManager, deviceId));
     }
 
     @Test
@@ -102,15 +106,15 @@ public class RegistryManagerTests
         registryManager.removeDevice(deviceId);
 
         // Assert
-        assertEquals(deviceId, deviceAdded.getDeviceId());
-        assertEquals(deviceId, deviceRetrieved.getDeviceId());
-        assertEquals(AuthenticationType.CERTIFICATE_AUTHORITY, deviceRetrieved.getAuthenticationType());
-        assertEquals(DeviceStatus.Disabled, deviceUpdated.getStatus());
-        assertNull(deviceAdded.getPrimaryThumbprint());
-        assertNull(deviceAdded.getSecondaryKey());
-        assertNull(deviceRetrieved.getPrimaryThumbprint());
-        assertNull(deviceRetrieved.getSecondaryThumbprint());
-        assertTrue(deviceWasDeletedSuccessfully(registryManager, deviceId));
+        assertEquals(buildExceptionMessage("", hostName), deviceId, deviceAdded.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), deviceId, deviceRetrieved.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), AuthenticationType.CERTIFICATE_AUTHORITY, deviceRetrieved.getAuthenticationType());
+        assertEquals(buildExceptionMessage("", hostName), DeviceStatus.Disabled, deviceUpdated.getStatus());
+        assertNull(buildExceptionMessage("", hostName), deviceAdded.getPrimaryThumbprint());
+        assertNull(buildExceptionMessage("", hostName), deviceAdded.getSecondaryKey());
+        assertNull(buildExceptionMessage("", hostName), deviceRetrieved.getPrimaryThumbprint());
+        assertNull(buildExceptionMessage("", hostName), deviceRetrieved.getSecondaryThumbprint());
+        assertTrue(buildExceptionMessage("", hostName), deviceWasDeletedSuccessfully(registryManager, deviceId));
     }
 
     @Test
@@ -136,19 +140,20 @@ public class RegistryManagerTests
         registryManager.removeDevice(deviceId);
 
         // Assert
-        assertEquals(deviceId, deviceAdded.getDeviceId());
-        assertEquals(deviceId, deviceRetrieved.getDeviceId());
-        assertEquals(AuthenticationType.SELF_SIGNED, deviceAdded.getAuthenticationType());
-        assertEquals(AuthenticationType.SELF_SIGNED, deviceRetrieved.getAuthenticationType());
-        assertEquals(primaryThumbprint, deviceAdded.getPrimaryThumbprint());
-        assertEquals(secondaryThumbprint, deviceAdded.getSecondaryThumbprint());
-        assertEquals(primaryThumbprint, deviceRetrieved.getPrimaryThumbprint());
-        assertEquals(secondaryThumbprint, deviceRetrieved.getSecondaryThumbprint());
-        assertEquals(primaryThumbprint2, deviceUpdated.getPrimaryThumbprint());
-        assertEquals(secondaryThumbprint2, deviceUpdated.getSecondaryThumbprint());
-        assertTrue(deviceWasDeletedSuccessfully(registryManager, deviceId));
+        assertEquals(buildExceptionMessage("", hostName), deviceId, deviceAdded.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), deviceId, deviceRetrieved.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), AuthenticationType.SELF_SIGNED, deviceAdded.getAuthenticationType());
+        assertEquals(buildExceptionMessage("", hostName), AuthenticationType.SELF_SIGNED, deviceRetrieved.getAuthenticationType());
+        assertEquals(buildExceptionMessage("", hostName), primaryThumbprint, deviceAdded.getPrimaryThumbprint());
+        assertEquals(buildExceptionMessage("", hostName), secondaryThumbprint, deviceAdded.getSecondaryThumbprint());
+        assertEquals(buildExceptionMessage("", hostName), primaryThumbprint, deviceRetrieved.getPrimaryThumbprint());
+        assertEquals(buildExceptionMessage("", hostName), secondaryThumbprint, deviceRetrieved.getSecondaryThumbprint());
+        assertEquals(buildExceptionMessage("", hostName), primaryThumbprint2, deviceUpdated.getPrimaryThumbprint());
+        assertEquals(buildExceptionMessage("", hostName), secondaryThumbprint2, deviceUpdated.getSecondaryThumbprint());
+        assertTrue(buildExceptionMessage("", hostName), deviceWasDeletedSuccessfully(registryManager, deviceId));
     }
 
+    //TODO what is this testing?
     @Test
     public void getDeviceStatisticsTest() throws Exception
     {
@@ -184,12 +189,12 @@ public class RegistryManagerTests
         registryManager.removeDevice(deviceForTest);
 
         // Assert
-        assertEquals(deviceForTest, moduleAdded.getDeviceId());
-        assertEquals(moduleId, moduleAdded.getId());
-        assertEquals(deviceForTest, moduleRetrieved.getDeviceId());
-        assertEquals(moduleId, moduleRetrieved.getId());
-        assertEquals(expectedSymmetricKey.getPrimaryKey(), moduleUpdated.getPrimaryKey());
-        assertTrue(moduleWasDeletedSuccessfully(registryManager, deviceForTest, moduleId));
+        assertEquals(buildExceptionMessage("", hostName), deviceForTest, moduleAdded.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), moduleId, moduleAdded.getId());
+        assertEquals(buildExceptionMessage("", hostName), deviceForTest, moduleRetrieved.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), moduleId, moduleRetrieved.getId());
+        assertEquals(buildExceptionMessage("", hostName), expectedSymmetricKey.getPrimaryKey(), moduleUpdated.getPrimaryKey());
+        assertTrue(buildExceptionMessage("", hostName), moduleWasDeletedSuccessfully(registryManager, deviceForTest, moduleId));
     }
 
     @Test
@@ -214,15 +219,15 @@ public class RegistryManagerTests
         registryManager.removeDevice(deviceForTest);
 
         // Assert
-        assertEquals(deviceForTest, moduleAdded.getDeviceId());
-        assertEquals(moduleId, moduleAdded.getId());
-        assertEquals(deviceForTest, moduleRetrieved.getDeviceId());
-        assertEquals(moduleId, moduleRetrieved.getId());
-        assertNull(moduleAdded.getPrimaryThumbprint());
-        assertNull(moduleAdded.getSecondaryThumbprint());
-        assertNull(moduleRetrieved.getPrimaryThumbprint());
-        assertNull(moduleRetrieved.getSecondaryThumbprint());
-        assertTrue(moduleWasDeletedSuccessfully(registryManager, deviceForTest, moduleId));
+        assertEquals(buildExceptionMessage("", hostName), deviceForTest, moduleAdded.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), moduleId, moduleAdded.getId());
+        assertEquals(buildExceptionMessage("", hostName), deviceForTest, moduleRetrieved.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), moduleId, moduleRetrieved.getId());
+        assertNull(buildExceptionMessage("", hostName), moduleAdded.getPrimaryThumbprint());
+        assertNull(buildExceptionMessage("", hostName), moduleAdded.getSecondaryThumbprint());
+        assertNull(buildExceptionMessage("", hostName), moduleRetrieved.getPrimaryThumbprint());
+        assertNull(buildExceptionMessage("", hostName), moduleRetrieved.getSecondaryThumbprint());
+        assertTrue(buildExceptionMessage("", hostName), moduleWasDeletedSuccessfully(registryManager, deviceForTest, moduleId));
     }
 
     @Test
@@ -251,19 +256,19 @@ public class RegistryManagerTests
         registryManager.removeModule(deviceForTest, moduleId);
 
         // Assert
-        assertEquals(deviceForTest, moduleAdded.getDeviceId());
-        assertEquals(moduleId, moduleAdded.getId());
-        assertEquals(deviceForTest, moduleRetrieved.getDeviceId());
-        assertEquals(moduleId, moduleRetrieved.getId());
-        assertEquals(AuthenticationType.SELF_SIGNED, moduleAdded.getAuthenticationType());
-        assertEquals(AuthenticationType.SELF_SIGNED, moduleRetrieved.getAuthenticationType());
-        assertEquals(primaryThumbprint, moduleAdded.getPrimaryThumbprint());
-        assertEquals(secondaryThumbprint, moduleAdded.getSecondaryThumbprint());
-        assertEquals(primaryThumbprint, moduleRetrieved.getPrimaryThumbprint());
-        assertEquals(secondaryThumbprint, moduleRetrieved.getSecondaryThumbprint());
-        assertEquals(primaryThumbprint2, moduleUpdated.getPrimaryThumbprint());
-        assertEquals(secondaryThumbprint2, moduleUpdated.getSecondaryThumbprint());
-        assertTrue(moduleWasDeletedSuccessfully(registryManager, deviceId, moduleId));
+        assertEquals(buildExceptionMessage("", hostName), deviceForTest, moduleAdded.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), moduleId, moduleAdded.getId());
+        assertEquals(buildExceptionMessage("", hostName), deviceForTest, moduleRetrieved.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), moduleId, moduleRetrieved.getId());
+        assertEquals(buildExceptionMessage("", hostName), AuthenticationType.SELF_SIGNED, moduleAdded.getAuthenticationType());
+        assertEquals(buildExceptionMessage("", hostName), AuthenticationType.SELF_SIGNED, moduleRetrieved.getAuthenticationType());
+        assertEquals(buildExceptionMessage("", hostName), primaryThumbprint, moduleAdded.getPrimaryThumbprint());
+        assertEquals(buildExceptionMessage("", hostName), secondaryThumbprint, moduleAdded.getSecondaryThumbprint());
+        assertEquals(buildExceptionMessage("", hostName), primaryThumbprint, moduleRetrieved.getPrimaryThumbprint());
+        assertEquals(buildExceptionMessage("", hostName), secondaryThumbprint, moduleRetrieved.getSecondaryThumbprint());
+        assertEquals(buildExceptionMessage("", hostName), primaryThumbprint2, moduleUpdated.getPrimaryThumbprint());
+        assertEquals(buildExceptionMessage("", hostName), secondaryThumbprint2, moduleUpdated.getSecondaryThumbprint());
+        assertTrue(buildExceptionMessage("", hostName), moduleWasDeletedSuccessfully(registryManager, deviceId, moduleId));
     }
 
     @Test
@@ -309,8 +314,8 @@ public class RegistryManagerTests
         registryManager.removeConfiguration(configId);
 
         // Assert
-        assertEquals(configId, configAdded.getId());
-        assertEquals(configId, configRetrieved.getId());
+        assertEquals(buildExceptionMessage("", hostName), configId, configAdded.getId());
+        assertEquals(buildExceptionMessage("", hostName), configId, configRetrieved.getId());
         String actualString = configRetrieved.getContent().getDeviceContent().get("properties.desired.chiller-water").toString();
         actualString = actualString.substring(1, actualString.length()-1);
         String[] keyValuePairs = actualString.split(",");
@@ -320,19 +325,19 @@ public class RegistryManagerTests
             String[] entry = pair.split("=");
             actualMap.put(entry[0].trim(), entry[1].trim());
         }
-        assertEquals("66.0", actualMap.get("temperature"));
-        assertEquals("28.0", actualMap.get("pressure"));
-        assertEquals("SELECT deviceId FROM devices WHERE properties.reported.chillerWaterSettings.status=\'pending\'",
+        assertEquals(buildExceptionMessage("", hostName), "66.0", actualMap.get("temperature"));
+        assertEquals(buildExceptionMessage("", hostName), "28.0", actualMap.get("pressure"));
+        assertEquals(buildExceptionMessage("", hostName), "SELECT deviceId FROM devices WHERE properties.reported.chillerWaterSettings.status=\'pending\'",
                 configRetrieved.getMetrics().getQueries().get("waterSettingsPending"));
-        assertEquals("properties.reported.chillerProperties.model=\'4000x\'",
+        assertEquals(buildExceptionMessage("", hostName), "properties.reported.chillerProperties.model=\'4000x\'",
                 configRetrieved.getTargetCondition());
-        assertEquals(new Integer(20), configRetrieved.getPriority());
-        assertEquals(configId, configUpdated.getId());
-        assertEquals(new Integer(1), configUpdated.getPriority());
-        assertTrue(configWasDeletedSuccessfully(registryManager, configId));
+        assertEquals(buildExceptionMessage("", hostName), new Integer(20), configRetrieved.getPriority());
+        assertEquals(buildExceptionMessage("", hostName), configId, configUpdated.getId());
+        assertEquals(buildExceptionMessage("", hostName), new Integer(1), configUpdated.getPriority());
+        assertTrue(buildExceptionMessage("", hostName), configWasDeletedSuccessfully(registryManager, configId));
     }
 
-    @Test(expected = IotHubBadFormatException.class)
+    @Test (expected = IotHubBadFormatException.class)
     public void apply_configuration_e2e() throws Exception
     {
         // Arrange

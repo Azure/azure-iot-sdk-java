@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -35,6 +36,8 @@ public class DeviceMethodTests extends DeviceMethodCommon
     public DeviceMethodTests(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceTestManager, protocol, authenticationType, clientType, identity, publicKeyCert, privateKey, x509Thumbprint);
+
+        System.out.println(clientType + " DeviceMethodTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
     }
 
     @Test(timeout=DEFAULT_TEST_TIMEOUT)
@@ -70,9 +73,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
         for (RunnableInvoke run:runs)
         {
             MethodResult result = run.getResult();
-            assertNotNull((run.getException() == null ? "Runnable returns null without exception information" : run.getException().getMessage()), result);
-            assertEquals((long)DeviceEmulator.METHOD_SUCCESS,(long)result.getStatus());
-            assertEquals(run.getExpectedPayload(), result.getPayload().toString());
+            assertNotNull(buildExceptionMessage(run.getException() == null ? "Runnable returns null without exception information" : run.getException().getMessage(), testInstance.deviceTestManager.client), result);
+            assertEquals(buildExceptionMessage("Expected SUCCESS but was " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS,(long)result.getStatus());
+            assertEquals(buildExceptionMessage("Expected payload " + run.getExpectedPayload() + " but got " + result.getPayload().toString(), testInstance.deviceTestManager.client), run.getExpectedPayload(), result.getPayload().toString());
         }
     }
 
@@ -96,10 +99,10 @@ public class DeviceMethodTests extends DeviceMethodCommon
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
-        assertNotNull(result);
-        assertEquals((long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload());
-        Assert.assertEquals(0, deviceTestManger.getStatusError());
+        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
+        assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
+        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING + " but got " + result.getPayload(), testInstance.deviceTestManager.client), DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload());
+        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
     @Test(timeout=DEFAULT_TEST_TIMEOUT)
@@ -121,10 +124,10 @@ public class DeviceMethodTests extends DeviceMethodCommon
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
-        assertNotNull(result);
-        assertEquals((long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":null", result.getPayload());
-        Assert.assertEquals(0, deviceTestManger.getStatusError());
+        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
+        assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
+        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_LOOPBACK + ":null" + " but got " + result.getPayload(), deviceTestManger.client), DeviceEmulator.METHOD_LOOPBACK + ":null", result.getPayload());
+        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
     @Test(timeout=DEFAULT_TEST_TIMEOUT)
@@ -146,10 +149,10 @@ public class DeviceMethodTests extends DeviceMethodCommon
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
-        assertNotNull(result);
-        assertEquals((long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
-        Assert.assertEquals(0, deviceTestManger.getStatusError());
+        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
+        assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
+        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(), testInstance.deviceTestManager.client), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
+        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
     @Test(timeout=DEFAULT_TEST_TIMEOUT)
@@ -171,10 +174,10 @@ public class DeviceMethodTests extends DeviceMethodCommon
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
-        assertNotNull(result);
-        assertEquals((long)DeviceEmulator.METHOD_THROWS, (long)result.getStatus());
-        assertEquals("java.lang.NumberFormatException: For input string: \"" + PAYLOAD_STRING + "\"", result.getPayload());
-        Assert.assertEquals(0, deviceTestManger.getStatusError());
+        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
+        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_THROWS + " but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_THROWS, (long)result.getStatus());
+        assertEquals(buildExceptionMessage("Expected NumberFormatException, but got " + result.getPayload(), testInstance.deviceTestManager.client), "java.lang.NumberFormatException: For input string: \"" + PAYLOAD_STRING + "\"", result.getPayload());
+        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
     @Test(timeout=DEFAULT_TEST_TIMEOUT)
@@ -196,10 +199,10 @@ public class DeviceMethodTests extends DeviceMethodCommon
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
-        assertNotNull(result);
-        assertEquals((long)DeviceEmulator.METHOD_NOT_DEFINED, (long)result.getStatus());
-        Assert.assertEquals("unknown:" + DeviceEmulator.METHOD_UNKNOWN, result.getPayload());
-        Assert.assertEquals(0, deviceTestManger.getStatusError());
+        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
+        assertEquals(buildExceptionMessage("Expected METHOD_NOT_DEFINED but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_NOT_DEFINED, (long)result.getStatus());
+        Assert.assertEquals(buildExceptionMessage("Expected " + "unknown:" + DeviceEmulator.METHOD_UNKNOWN + " but got " + result.getPayload(), testInstance.deviceTestManager.client), "unknown:" + DeviceEmulator.METHOD_UNKNOWN, result.getPayload());
+        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
     @Test(timeout=DEFAULT_TEST_TIMEOUT)
@@ -238,10 +241,10 @@ public class DeviceMethodTests extends DeviceMethodCommon
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
-        assertNotNull(result);
-        assertEquals((long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
-        Assert.assertEquals(0, deviceTestManger.getStatusError());
+        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
+        assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
+        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(), testInstance.deviceTestManager.client), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
+        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
     @Test(timeout=DEFAULT_TEST_TIMEOUT)
@@ -263,10 +266,10 @@ public class DeviceMethodTests extends DeviceMethodCommon
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
-        assertNotNull(result);
-        assertEquals((long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
-        Assert.assertEquals(0, deviceTestManger.getStatusError());
+        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
+        assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
+        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(), testInstance.deviceTestManager.client), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
+        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
     @Test(timeout=DEFAULT_TEST_TIMEOUT)
@@ -288,10 +291,10 @@ public class DeviceMethodTests extends DeviceMethodCommon
         deviceTestManger.waitIotHub(1, 10);
 
         // Assert
-        assertNotNull(result);
-        assertEquals((long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
-        Assert.assertEquals(0, deviceTestManger.getStatusError());
+        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
+        assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
+        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(), testInstance.deviceTestManager.client), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
+        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
     @Test(timeout=DEFAULT_TEST_TIMEOUT, expected = IotHubGatewayTimeoutException.class)
@@ -342,7 +345,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
                 deviceTestManger.restartDevice(registryManager.getDeviceConnectionString((Device) testInstance.identity), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
             }
 
-            throw new Exception("Reset identity do not affect the method invoke on the service");
+            Assert.fail(buildExceptionMessage("Reset identity do not affect the method invoke on the service", testInstance.deviceTestManager.client));
         }
         catch (IotHubNotFoundException expected)
         {

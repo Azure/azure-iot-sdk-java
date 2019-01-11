@@ -7,10 +7,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.MessageAndResult;
-import com.microsoft.azure.sdk.iot.common.helpers.Tools;
-import com.microsoft.azure.sdk.iot.common.helpers.X509Cert;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -43,7 +40,7 @@ import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
-public class ProvisioningClientJVMRunner
+public class ProvisioningClientJVMRunner extends IntegrationTest
 {
     private final IotHubClientProtocol [] iotHubClientProtocols = {IotHubClientProtocol.MQTT, IotHubClientProtocol.MQTT_WS, IotHubClientProtocol.AMQPS, IotHubClientProtocol.AMQPS_WS, IotHubClientProtocol.HTTPS};
     private final ProvisioningDeviceClientTransportProtocol [] provisioningDeviceClientTransportProtocols = {MQTT, MQTT_WS, AMQPS, AMQPS_WS, HTTPS};

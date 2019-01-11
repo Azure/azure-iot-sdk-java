@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static org.junit.Assert.*;
 
 /**
@@ -34,6 +35,8 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     public DesiredPropertiesTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+
+        System.out.println(clientType + " DesiredPropertiesTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -128,7 +131,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, false);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testSubscribeToDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -221,11 +224,11 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
             for (com.microsoft.azure.sdk.iot.service.devicetwin.Pair dp : devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties())
             {
-                assertEquals(dp.getKey(), PROPERTY_KEY + i);
-                assertEquals(dp.getValue(), PROPERTY_VALUE_UPDATE + i);
+                assertEquals(buildExceptionMessage("Unexpected desired property key, expected " + PROPERTY_KEY + i + " but was " + dp.getKey(), internalClient), PROPERTY_KEY + i, dp.getKey());
+                assertEquals(buildExceptionMessage("Unexpected desired property value, expected " + PROPERTY_VALUE_UPDATE + i + " but was " + dp.getValue(), internalClient), PROPERTY_VALUE_UPDATE + i, dp.getValue());
             }
             Integer version = devicesUnderTest[i].sCDeviceForTwin.getDesiredPropertiesVersion();
-            assertNotNull(version);
+            assertNotNull(buildExceptionMessage("Version was null", internalClient), version);
         }
 
         // Remove desired properties
@@ -247,7 +250,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         {
             sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
 
-            assertEquals("Desired properties were not deleted by setting to null", 0, devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties().size());
+            assertEquals(buildExceptionMessage("Desired properties were not deleted by setting to null", internalClient), 0, devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties().size());
         }
 
         removeMultipleDevices(MAX_DEVICES);

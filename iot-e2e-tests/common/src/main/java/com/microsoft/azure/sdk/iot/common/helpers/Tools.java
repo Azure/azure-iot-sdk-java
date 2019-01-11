@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -40,7 +41,6 @@ public class Tools
     {
         return possibleExceptionCause.isInstance(exceptionToSearch) || (exceptionToSearch != null && isCause(possibleExceptionCause, exceptionToSearch.getCause()));
     }
-
 
     /**
      * Uses the provided registry manager to delete all the devices and modules specified in the arguments
@@ -77,5 +77,10 @@ public class Tools
                 e.printStackTrace();
             }
         }
+    }
+
+    public static String getStackTraceFromThrowable(Throwable throwable)
+    {
+        return ExceptionUtils.getStackTrace(throwable);
     }
 }

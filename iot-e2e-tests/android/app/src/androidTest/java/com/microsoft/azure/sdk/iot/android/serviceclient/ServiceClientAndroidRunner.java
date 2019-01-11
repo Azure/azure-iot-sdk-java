@@ -13,6 +13,7 @@ import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.IOException;
 import java.util.Collection;
 
 @RunWith(Parameterized.class)
@@ -23,7 +24,7 @@ public class ServiceClientAndroidRunner extends ServiceClientTests
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
     @Parameterized.Parameters(name = "{0}")
-    public static Collection inputsCommon()
+    public static Collection inputsCommon() throws IOException
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         invalidCertificateServerConnectionString = BuildConfig.IotHubInvalidCertConnectionString;

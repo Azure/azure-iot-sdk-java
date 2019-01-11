@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static org.junit.Assert.*;
 
 /**
@@ -35,6 +36,8 @@ public class QueryTwinTests extends DeviceTwinCommon
     public QueryTwinTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+
+        System.out.println(clientType + " QueryTwinTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -203,8 +206,8 @@ public class QueryTwinTests extends DeviceTwinCommon
 
                 for (Pair dp : d.getDesiredProperties())
                 {
-                    assertEquals(dp.getKey(), queryProperty);
-                    assertEquals(dp.getValue(), queryPropertyValue);
+                    assertEquals(buildExceptionMessage("Unexpected desired property key, expected " + queryProperty + " but was " + dp.getKey(), internalClient), queryProperty, dp.getKey());
+                    assertEquals(buildExceptionMessage("Unexpected desired property value, expected " + queryPropertyValue + " but was " + dp.getValue(), internalClient), queryPropertyValue, dp.getValue());
                 }
             }
         }

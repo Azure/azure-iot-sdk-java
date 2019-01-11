@@ -5,7 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.serviceclient;
 
-import com.microsoft.azure.sdk.iot.common.helpers.MethodNameLoggingIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Test;
@@ -18,18 +19,20 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static org.junit.Assert.*;
 
 /**
  * Test class containing all tests to be run on JVM and android pertaining to C2D communication using the service client. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class ServiceClientTests extends MethodNameLoggingIntegrationTest
+public class ServiceClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
     protected static String invalidCertificateServerConnectionString = "";
     private static String deviceId = "java-service-client-e2e-test";
     private static String content = "abcdefghijklmnopqrstuvwxyz1234567890";
+    private static String hostName;
 
     public ServiceClientTests(IotHubServiceClientProtocol protocol)
     {
@@ -50,10 +53,11 @@ public class ServiceClientTests extends MethodNameLoggingIntegrationTest
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
     @Parameterized.Parameters(name = "{0}")
-    public static Collection inputsCommon()
+    public static Collection inputsCommon() throws IOException
     {
         String uuid = UUID.randomUUID().toString();
         deviceId = deviceId.concat("-" + uuid);
+        hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
 
 
         List inputs = Arrays.asList(
@@ -108,9 +112,9 @@ public class ServiceClientTests extends MethodNameLoggingIntegrationTest
         registryManager.removeDevice(deviceId);
 
         // Assert
-        assertEquals(deviceGetBefore.getDeviceId(), deviceGetAfter.getDeviceId());
-        assertEquals(0, deviceGetBefore.getCloudToDeviceMessageCount());
-        assertEquals(1, deviceGetAfter.getCloudToDeviceMessageCount());
+        assertEquals(buildExceptionMessage("", hostName), deviceGetBefore.getDeviceId(), deviceGetAfter.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), 0, deviceGetBefore.getCloudToDeviceMessageCount());
+        assertEquals(buildExceptionMessage("", hostName), 1, deviceGetAfter.getCloudToDeviceMessageCount());
 
         registryManager.close();
     }
@@ -133,10 +137,10 @@ public class ServiceClientTests extends MethodNameLoggingIntegrationTest
         }
         catch (Exception e)
         {
-            fail("Expected IOException, but received: " + e.getMessage());
+            fail(buildExceptionMessage("Expected IOException, but received: " + Tools.getStackTraceFromThrowable(e), hostName));
         }
 
-        assertTrue("Expected an exception due to service presenting invalid certificate", expectedExceptionWasCaught);
+        assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
     }
 
     @Test
@@ -159,10 +163,10 @@ public class ServiceClientTests extends MethodNameLoggingIntegrationTest
         }
         catch (Exception e)
         {
-            fail("Expected IOException, but received: " + e.getMessage());
+            fail(buildExceptionMessage("Expected IOException, but received: " + Tools.getStackTraceFromThrowable(e), hostName));
         }
 
-        assertTrue("Expected an exception due to service presenting invalid certificate", expectedExceptionWasCaught);
+        assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
     }
 
     @Test
@@ -185,9 +189,9 @@ public class ServiceClientTests extends MethodNameLoggingIntegrationTest
         }
         catch (Exception e)
         {
-            fail("Expected IOException, but received: " + e.getMessage());
+            fail(buildExceptionMessage("Expected IOException, but received: " + Tools.getStackTraceFromThrowable(e), hostName));
         }
 
-        assertTrue("Expected an exception due to service presenting invalid certificate", expectedExceptionWasCaught);
+        assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
     }
 }

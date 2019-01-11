@@ -10,7 +10,7 @@ import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
-public class MethodNameLoggingIntegrationTest
+public class IntegrationTest
 {
     @Rule
     public TestRule watcher = new TestWatcher()
@@ -18,6 +18,11 @@ public class MethodNameLoggingIntegrationTest
         protected void starting(Description description)
         {
             System.out.println("Starting test: " + description.getMethodName());
+        }
+
+        protected void finished(Description description)
+        {
+            System.out.println("Finished test: " + description.getMethodName());
         }
     };
 }

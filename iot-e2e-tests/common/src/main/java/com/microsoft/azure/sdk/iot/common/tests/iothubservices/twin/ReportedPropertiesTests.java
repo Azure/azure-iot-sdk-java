@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -28,6 +29,8 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
     public ReportedPropertiesTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+
+        System.out.println(clientType + " ReportedPropertiesTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -60,7 +63,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
                     {
                         fail(e.getMessage());
                     }
-                    assertEquals(deviceUnderTest.deviceTwinStatus, DeviceTwinCommon.STATUS.SUCCESS);
+                    assertEquals(buildExceptionMessage("Expected SUCCESS but twin status was " + deviceUnderTest.deviceTwinStatus, internalClient), DeviceTwinCommon.STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
                 }
             });
         }
@@ -74,7 +77,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST.intValue());
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testSendReportedPropertiesSequentially() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -141,7 +144,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
                     }
                     catch (IOException | InterruptedException e)
                     {
-                        fail(e.getMessage());
+                        fail(buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + e.getMessage(), internalClient));
                     }
                 }
             });
@@ -154,7 +157,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         }
 
         // assert
-        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+        assertEquals(buildExceptionMessage("Expected SUCCESS but twin status was " + deviceUnderTest.deviceTwinStatus, internalClient), DeviceTwinCommon.STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
 
         // verify if they are received by SC
         readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST.intValue());
