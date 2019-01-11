@@ -148,7 +148,7 @@ public class DeviceMethod
         }
 
         long  responseTimeout, connectTimeout;
-        
+
         if (responseTimeoutInSeconds == null)
         {
             responseTimeout  = DEFAULT_RESPONSE_TIMEOUT; // If timeout is not set, it defaults to 30 seconds
