@@ -264,7 +264,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
                 this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT, internalClient);
         for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
         {
             propertyState.callBackTriggered = false;

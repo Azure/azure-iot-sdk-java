@@ -12,10 +12,10 @@ import org.junit.Assert;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import static junit.framework.TestCase.assertTrue;
-import static junit.framework.TestCase.fail;
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 /*
  * This class contains common code for Junit and Android test cases
@@ -43,7 +43,7 @@ public class IotHubServicesCommon
             openClientWithRetry(client);
             if (statusUpdates != null)
             {
-                confirmOpenStabilized(statusUpdates, 120000);
+                confirmOpenStabilized(statusUpdates, 120000, client);
             }
 
             for (int i = 0; i < messagesToSend.size(); ++i)
@@ -68,7 +68,7 @@ public class IotHubServicesCommon
 
                         if (System.currentTimeMillis() - startTime > ERROR_INJECTION_MESSAGE_EFFECT_TIMEOUT)
                         {
-                            fail("Sending message over " + protocol + " protocol failed: Error injection message never caused connection to be lost");
+                            Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: Error injection message never caused connection to be lost", client));
                         }
                     }
                 }
@@ -97,14 +97,15 @@ public class IotHubServicesCommon
         client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback()
         {
             @Override
-            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
+            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+            {
                 actualStatusUpdates.add(status);
             }
         }, new Object());
 
         sendMessages(client, protocol, messagesToSend, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, interMessageDelay, actualStatusUpdates);
 
-        assertTrue(protocol + ", " + authType + ": Expected connection status update to occur: " + expectedStatus, actualStatusUpdates.contains(expectedStatus));
+        Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected connection status update to occur: " + expectedStatus, client), actualStatusUpdates.contains(expectedStatus));
     }
 
     /**
@@ -140,20 +141,20 @@ public class IotHubServicesCommon
                     Thread.sleep(retryMilliseconds);
                     if (System.currentTimeMillis() - startTime > timeoutMilliseconds)
                     {
-                        fail(protocol + ", " + authType + ": Sending message over " + protocol + " protocol failed: " +
+                        Assert.fail(buildExceptionMessage(protocol + ", " + authType + ": Sending message over " + protocol + " protocol failed: " +
                                 "never received connection status update for SAS_TOKEN_EXPIRED " +
-                                "or never received UNAUTHORIZED message callback");
+                                "or never received UNAUTHORIZED message callback", client));
                     }
                 }
 
                 if (messageSent.getCallbackStatusCode() != IotHubStatusCode.UNAUTHORIZED)
                 {
-                    fail(protocol + ", " + authType + ": Send messages expecting sas token expiration failed: expected UNAUTHORIZED message callback, but got " + messageSent.getCallbackStatusCode());
+                    Assert.fail(buildExceptionMessage(protocol + ", " + authType + ": Send messages expecting sas token expiration failed: expected UNAUTHORIZED message callback, but got " + messageSent.getCallbackStatusCode(), client));
                 }
             }
             catch (Exception e)
             {
-                Assert.fail(protocol + ", " + authType + ": Sending message over " + protocol + " protocol failed");
+                Assert.fail(buildExceptionMessage(protocol + ", " + authType + ": Sending message over " + protocol + " protocol failed", client));
             }
         }
     }
@@ -161,7 +162,7 @@ public class IotHubServicesCommon
     /*
      * method to send message over given DeviceClient
      */
-    public static void sendMessagesMultiplex(DeviceClient client,
+    public static void sendMessagesMultiplex(InternalClient client,
                                              IotHubClientProtocol protocol,
                                              final int NUM_MESSAGES_PER_CONNECTION,
                                              final long RETRY_MILLISECONDS,
@@ -184,18 +185,18 @@ public class IotHubServicesCommon
                     Thread.sleep(RETRY_MILLISECONDS);
                     if (System.currentTimeMillis() - startTime > SEND_TIMEOUT_MILLISECONDS)
                     {
-                        fail("Timed out waiting for message callback");
+                        Assert.fail(buildExceptionMessage("Timed out waiting for message callback", client));
                     }
                 }
 
                 if (messageSent.getCallbackStatusCode() != IotHubStatusCode.OK_EMPTY)
                 {
-                    Assert.fail("Sending message over " + protocol + " protocol failed: expected status code OK_EMPTY but received: " + messageSent.getCallbackStatusCode());
+                    Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: expected status code OK_EMPTY but received: " + messageSent.getCallbackStatusCode(), client));
                 }
             }
             catch (Exception e)
             {
-                Assert.fail("Sending message over " + protocol + " protocol failed: Exception encountered while sending messages: " + e.getMessage());
+                Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: Exception encountered while sending messages: " + e.getMessage(), client));
             }
         }
     }
@@ -221,7 +222,7 @@ public class IotHubServicesCommon
                 Thread.sleep(RETRY_MILLISECONDS);
                 if (System.currentTimeMillis() - startTime > SEND_TIMEOUT_MILLISECONDS)
                 {
-                    fail(protocol + ", " + authType + ": Timed out waiting for a message callback");
+                    Assert.fail(buildExceptionMessage(protocol + ", " + authType + ": Timed out waiting for a message callback", client));
                 }
             }
 
@@ -229,13 +230,13 @@ public class IotHubServicesCommon
 
             if (messageSentExpiredCallback.getCallbackStatusCode() != IotHubStatusCode.MESSAGE_EXPIRED)
             {
-                Assert.fail("Sending message over " + protocol + " protocol failed: expected status code MESSAGE_EXPIRED but received: " + messageSentExpiredCallback.getCallbackStatusCode());
+                Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: expected status code MESSAGE_EXPIRED but received: " + messageSentExpiredCallback.getCallbackStatusCode(), client));
             }
         }
         catch (Exception e)
         {
             client.closeNow();
-            Assert.fail("Sending expired message over " + protocol + " protocol failed: Exception encountered while sending message and waiting for MESSAGE_EXPIRED callback: " + e.getMessage());
+            Assert.fail(buildExceptionMessage("Sending expired message over " + protocol + " protocol failed: Exception encountered while sending message and waiting for MESSAGE_EXPIRED callback: " + e.getMessage(), client));
         }
     }
 
@@ -268,8 +269,8 @@ public class IotHubServicesCommon
             }
         }
 
-        assertTrue(protocol + ", " + authType + ": Expected notification about disconnected but retrying.", statusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING));
-        assertTrue(protocol + ", " + authType + ": Expected notification about disconnected.", statusUpdates.contains(IotHubConnectionStatus.DISCONNECTED));
+        Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected but retrying.", client), statusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING));
+        Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected.", client), statusUpdates.contains(IotHubConnectionStatus.DISCONNECTED));
 
         client.closeNow();
     }
@@ -288,19 +289,19 @@ public class IotHubServicesCommon
                 Thread.sleep(RETRY_MILLISECONDS);
                 if (System.currentTimeMillis() - startTime > SEND_TIMEOUT_MILLISECONDS)
                 {
-                    fail("Timed out waiting for a message callback");
+                    Assert.fail(buildExceptionMessage("Timed out waiting for a message callback", client));
                     break;
                 }
             }
 
             if (messageAndResult.statusCode != null && messageSent.getCallbackStatusCode() != messageAndResult.statusCode)
             {
-                Assert.fail("Sending message over " + protocol + " protocol failed: expected " + messageAndResult.statusCode + " but received " + messageSent.getCallbackStatusCode());
+                Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: expected " + messageAndResult.statusCode + " but received " + messageSent.getCallbackStatusCode(), client));
             }
         }
         catch (Exception e)
         {
-            Assert.fail("Sending message over " + protocol + " protocol failed: Exception encountered while sending and waiting on a message: " + e.getMessage());
+            Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: Exception encountered while sending and waiting on a message: " + e.getMessage(), client));
         }
     }
 
@@ -320,7 +321,6 @@ public class IotHubServicesCommon
 
     public static void openClientWithRetry(InternalClient client) throws InterruptedException
     {
-
         //Check again
         int count =0;
         boolean clientOpenSucceeded = false;
@@ -329,7 +329,7 @@ public class IotHubServicesCommon
         {
             if (System.currentTimeMillis() - startTime > OPEN_RETRY_TIMEOUT)
             {
-                Assert.fail("Timed out trying to open the client " + count);
+                Assert.fail(buildExceptionMessage("Timed out trying to open the client " + count, client));
             }
 
             try
@@ -350,7 +350,7 @@ public class IotHubServicesCommon
         System.out.println("Successfully opened connection!");
     }
 
-    public static void openTransportClientWithRetry(TransportClient client) throws InterruptedException
+    public static void openTransportClientWithRetry(TransportClient client, Collection<InternalClient> clients) throws InterruptedException
     {
         boolean clientOpenSucceeded = false;
         long startTime = System.currentTimeMillis();
@@ -358,7 +358,7 @@ public class IotHubServicesCommon
         {
             if (System.currentTimeMillis() - startTime > OPEN_RETRY_TIMEOUT)
             {
-                Assert.fail("Timed out trying to open the transport client");
+                Assert.fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Timed out trying to open the transport client", clients));
             }
 
             try
@@ -388,7 +388,7 @@ public class IotHubServicesCommon
         System.out.println("Successfully opened connection!");
     }
 
-    public static void waitForStabilizedConnection(List actualStatusUpdates, long timeout) throws InterruptedException
+    public static void waitForStabilizedConnection(List actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
     {
         System.out.println("Waiting for stabilized connection...");
 
@@ -404,7 +404,7 @@ public class IotHubServicesCommon
             // 2 minutes timeout waiting for error injection to occur
             if (timeElapsed > timeout)
             {
-                fail("Timed out waiting for error injection message to take effect");
+                Assert.fail(buildExceptionMessage("Timed out waiting for error injection message to take effect", client));
             }
         }
 
@@ -418,7 +418,7 @@ public class IotHubServicesCommon
             // 2 minutes timeout waiting for first connection to occur
             if (timeElapsed > 20000)
             {
-                fail("Timed out waiting for a first connection success");
+                Assert.fail(buildExceptionMessage("Timed out waiting for a first connection success", client));
             }
         }
 
@@ -432,7 +432,7 @@ public class IotHubServicesCommon
             // 2 minutes timeout waiting for connection to stabilized
             if (timeElapsed > timeout)
             {
-                fail("Timed out waiting for a stable connection after error injection");
+                Assert.fail(buildExceptionMessage("Timed out waiting for a stable connection after error injection", client));
             }
         }
 
@@ -442,7 +442,7 @@ public class IotHubServicesCommon
         }
     }
 
-    public static void confirmOpenStabilized(List actualStatusUpdates, long timeout) throws InterruptedException
+    public static void confirmOpenStabilized(List actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
     {
         long startTime = System.currentTimeMillis();
         long timeElapsed;
@@ -458,7 +458,7 @@ public class IotHubServicesCommon
 
                 if (timeElapsed > timeout)
                 {
-                    fail("Timed out waiting for a stable connection on first open");
+                    Assert.fail(buildExceptionMessage("Timed out waiting for a stable connection on first open", client));
                 }
             }
         }

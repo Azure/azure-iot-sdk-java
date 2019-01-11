@@ -29,6 +29,7 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
@@ -78,12 +79,12 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
 
     // States of SDK
     protected static RegistryManager registryManager;
-    protected static InternalClient internalClient;
+    protected InternalClient internalClient;
     protected static RawTwinQuery scRawTwinQueryClient;
     protected static DeviceTwin sCDeviceTwin;
-    protected static DeviceState deviceUnderTest = null;
+    protected DeviceState deviceUnderTest = null;
 
-    protected static DeviceState[] devicesUnderTest;
+    protected DeviceState[] devicesUnderTest;
 
     protected DeviceTwinTestInstance testInstance;
     protected static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
@@ -299,7 +300,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         }
     }
 
-    protected static void tearDownTwin(DeviceState deviceState) throws IOException
+    protected void tearDownTwin(DeviceState deviceState) throws IOException
     {
         // tear down twin on device client
         if (deviceState.sCDeviceForTwin != null)
@@ -457,7 +458,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         catch (InterruptedException e)
         {
             e.printStackTrace();
-            fail("Unexpected exception encountered");
+            fail(buildExceptionMessage("Unexpected exception encountered", internalClient));
         }
     }
 
@@ -477,7 +478,6 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
 
         registryManager = null;
         sCDeviceTwin = null;
-        internalClient = null;
     }
 
     protected void readReportedPropertiesAndVerify(DeviceState deviceState, String startsWithKey, String startsWithValue, int expectedReportedPropCount) throws IOException, IotHubException, InterruptedException
@@ -509,7 +509,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 }
             }
         }
-        assertEquals(expectedReportedPropCount, actualCount);
+        assertEquals(buildExceptionMessage("Expected " + expectedReportedPropCount + " but had " + actualCount, internalClient), expectedReportedPropCount, actualCount);
     }
 
     protected void waitAndVerifyTwinStatusBecomesSuccess() throws InterruptedException
@@ -526,7 +526,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 break;
             }
         }
-        assertEquals(STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
+        assertEquals(buildExceptionMessage("Expected SUCCESS but was " + deviceUnderTest.deviceTwinStatus, internalClient), STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
     }
 
     protected void sendReportedPropertiesAndVerify(int numOfProp) throws IOException, IotHubException, InterruptedException
@@ -559,11 +559,11 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                     break;
                 }
             }
-            assertTrue("Callback was not triggered for one or more properties", propertyState.callBackTriggered);
-            assertTrue(((String) propertyState.propertyNewValue).startsWith(propPrefix));
+            assertTrue(buildExceptionMessage("Callback was not triggered for one or more properties", internalClient), propertyState.callBackTriggered);
+            assertTrue(buildExceptionMessage("Missing the expected prefix, was " + propertyState.propertyNewValue, internalClient), ((String) propertyState.propertyNewValue).startsWith(propPrefix));
             if (withVersion)
             {
-                assertNotEquals("Version was not set in the callback", (int) propertyState.propertyNewVersion, -1);
+                assertNotEquals(buildExceptionMessage("Version was not set in the callback", internalClient), (int) propertyState.propertyNewVersion, -1);
             }
         }
     }

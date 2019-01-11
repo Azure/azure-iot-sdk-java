@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test class containing all non error injection tests to be run on JVM and android pertaining to receiving messages on a device/module. Class needs to be extended
@@ -141,14 +141,14 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
             }
             catch (ExecutionException e)
             {
-                Assert.fail("Exception : " + e.getMessage());
+                Assert.fail(buildExceptionMessage("Exception : " + e.getMessage(), testInstance.client));
             }
         }
 
         // Now wait for messages to be received in the device client
         waitForBackToBackC2DMessagesToBeReceived();
         testInstance.client.closeNow(); //close the device client connection
-        assertTrue(testInstance.protocol + ", " + testInstance.authenticationType + ": Received messages don't match up with sent messages", messageIdListStoredOnReceive.containsAll(messageIdListStoredOnC2DSend)); // check if the received list is same as the actual list that was created on sending the messages
+        Assert.assertTrue(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Received messages don't match up with sent messages", testInstance.client), messageIdListStoredOnReceive.containsAll(messageIdListStoredOnC2DSend)); // check if the received list is same as the actual list that was created on sending the messages
         messageIdListStoredOnReceive.clear();
     }
 }

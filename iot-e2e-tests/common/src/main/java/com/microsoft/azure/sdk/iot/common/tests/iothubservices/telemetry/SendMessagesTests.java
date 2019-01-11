@@ -5,27 +5,26 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.telemetry;
 
-import com.microsoft.azure.sdk.iot.common.helpers.EventCallback;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.Success;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.setup.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.common.helpers.SasTokenGenerator.generateSasTokenForIotDevice;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.*;
@@ -97,17 +96,19 @@ public class SendMessagesTests extends SendMessagesCommon
     @Test (timeout = DEFAULT_TEST_TIMEOUT)
     public void sendMessagesOverAmqpsMultithreaded() throws InterruptedException, IOException, IotHubException
     {
-        if (!(testInstance.protocol == AMQPS && testInstance.authenticationType == SAS))
+        if (!(testInstance.protocol == AMQPS && testInstance.authenticationType == SAS && testInstance.clientType.equals(ClientType.DEVICE_CLIENT)))
         {
-            //this test only applicable for AMQPS with SAS auth
+            //this test only applicable for AMQPS with SAS auth using device client
             return;
         }
 
         Device[] deviceListAmqps = new Device[MAX_DEVICE_PARALLEL];
+        Collection<String> deviceIds = new ArrayList<>();
         String uuid = UUID.randomUUID().toString();
         for (int i = 0; i < MAX_DEVICE_PARALLEL; i++)
         {
             String deviceIdAmqps = "java-device-client-e2e-test-amqps".concat(i + "-" + uuid);
+            deviceIds.add(deviceIdAmqps);
             deviceListAmqps[i] = Device.createFromId(deviceIdAmqps, null, null);
             registryManager.addDevice(deviceListAmqps[i]);
         }
@@ -139,7 +140,7 @@ public class SendMessagesTests extends SendMessagesCommon
 
         if(!succeed.get())
         {
-            Assert.fail("Sending message over AMQP protocol in parallel failed");
+            fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Sending message over AMQP protocol in parallel failed", deviceIds, "amqp", hostName, new ArrayList<>()));
         }
     }
 

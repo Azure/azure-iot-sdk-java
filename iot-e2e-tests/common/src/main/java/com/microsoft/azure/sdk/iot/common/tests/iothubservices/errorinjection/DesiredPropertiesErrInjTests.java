@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import java.util.*;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
@@ -238,9 +239,9 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
                 this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT, internalClient);
         deviceUnderTest.dCDeviceForTwin.propertyStateList.get(0).callBackTriggered = false;
-        assertEquals(1, deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size());
+        assertEquals(buildExceptionMessage("Expected desired properties to be size 1, but was size " + deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size(), internalClient), 1, deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size());
         Set<Pair> dp = new HashSet<>();
         Pair p = deviceUnderTest.sCDeviceForTwin.getDesiredProperties().iterator().next();
         p.setValue(PROPERTY_VALUE_UPDATE2 + UUID.randomUUID());

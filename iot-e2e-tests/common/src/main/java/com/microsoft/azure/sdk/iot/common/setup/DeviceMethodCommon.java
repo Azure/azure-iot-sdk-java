@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
@@ -248,12 +249,12 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
         try
         {
             this.testInstance.deviceTestManager.start();
-            IotHubServicesCommon.confirmOpenStabilized(actualStatusUpdates, 120000);
+            IotHubServicesCommon.confirmOpenStabilized(actualStatusUpdates, 120000, this.testInstance.deviceTestManager.client);
         }
         catch (IOException | InterruptedException e)
         {
             e.printStackTrace();
-            fail(e.getMessage());
+            fail(buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + e.getMessage(), this.testInstance.deviceTestManager.client));
         }
         catch (UnsupportedOperationException e)
         {

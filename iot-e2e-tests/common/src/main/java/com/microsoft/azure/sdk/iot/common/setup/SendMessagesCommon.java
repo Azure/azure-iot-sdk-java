@@ -189,6 +189,7 @@ public class SendMessagesCommon extends MethodNameLoggingIntegrationTest
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
+        public CorrelationDetailsLoggingAssert correlationDetailsLoggingAssert;
 
         public SendMessagesTestInstance(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
         {
@@ -200,6 +201,20 @@ public class SendMessagesCommon extends MethodNameLoggingIntegrationTest
             this.publicKeyCert = publicKeyCert;
             this.privateKey = privateKey;
             this.x509Thumbprint = x509Thumbprint;
+
+            String deviceId = "";
+            String moduleId = "";
+            if (identity instanceof Module)
+            {
+                deviceId = identity.getDeviceId();
+                moduleId = ((Module) identity).getId();
+            }
+            else if (identity instanceof Device)
+            {
+                deviceId = identity.getDeviceId();
+            }
+
+            this.correlationDetailsLoggingAssert = new CorrelationDetailsLoggingAssert(this.client.getConfig().getIotHubHostname(), deviceId, protocol.toString(), moduleId);
         }
     }
 

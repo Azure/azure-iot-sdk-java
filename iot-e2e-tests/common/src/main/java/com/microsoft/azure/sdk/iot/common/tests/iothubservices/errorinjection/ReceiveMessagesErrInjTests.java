@@ -21,6 +21,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.common.helpers.ErrorInjectionHelper.DefaultDelayInSec;
 import static com.microsoft.azure.sdk.iot.common.helpers.ErrorInjectionHelper.DefaultDurationInSec;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -272,7 +273,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         try
         {
             IotHubServicesCommon.openClientWithRetry(testInstance.client);
-            IotHubServicesCommon.confirmOpenStabilized(connectionStatusUpdates, 120000);
+            IotHubServicesCommon.confirmOpenStabilized(connectionStatusUpdates, 120000, testInstance.client);
 
             //error injection message is not guaranteed to be ack'd by service so it may be re-sent. By setting expiry time,
             // we ensure that error injection message isn't resent to service too many times. The message will still likely
@@ -282,7 +283,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 
             //wait to send the message because we want to ensure that the tcp connection drop happens beforehand and we
             // want the connection to be re-established before sending anything from service client
-            IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT);
+            IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT, testInstance.client);
 
             if (testInstance.client instanceof DeviceClient)
             {
@@ -302,6 +303,6 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             testInstance.client.closeNow();
         }
 
-        assertTrue(testInstance.protocol + ", " + testInstance.authenticationType + ": Error Injection message did not cause service to drop TCP connection", connectionStatusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING));
+        assertTrue(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Error Injection message did not cause service to drop TCP connection", testInstance.client), connectionStatusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING));
     }
 }

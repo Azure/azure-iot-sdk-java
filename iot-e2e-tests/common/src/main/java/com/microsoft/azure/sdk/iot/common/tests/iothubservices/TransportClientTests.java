@@ -5,10 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices;
 
-import com.microsoft.azure.sdk.iot.common.helpers.EventCallback;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.MethodNameLoggingIntegrationTest;
-import com.microsoft.azure.sdk.iot.common.helpers.Success;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -33,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon.openTransportClientWithRetry;
 import static com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon.sendMessagesMultiplex;
 import static com.microsoft.azure.sdk.iot.common.tests.iothubservices.TransportClientTests.STATUS.FAILURE;
@@ -42,7 +40,6 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
 import static junit.framework.TestCase.fail;
-import static org.junit.Assert.*;
 
 /**
  * Test class containing all tests to be run on JVM and android pertaining to multiplexing with the TransportClient class.
@@ -137,7 +134,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         serviceClient.open();
 
         fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
-        assertNotNull(fileUploadNotificationReceiver);
+        Assert.assertNotNull(fileUploadNotificationReceiver);
 
         // flush pending notifications before every test to prevent random test failures
         // because of notifications received from other failed test
@@ -152,7 +149,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     public static void tearDown() throws IOException, IotHubException, InterruptedException
     {
         // flush all the notifications caused by this test suite to avoid failures running on different test suite attempt
-        assertNotNull(fileUploadNotificationReceiver);
+        Assert.assertNotNull(fileUploadNotificationReceiver);
         fileUploadNotificationReceiver.open();
         fileUploadNotificationReceiver.receive(MAX_MILLISECS_TIMEOUT_FLUSH_NOTIFICATION);
         fileUploadNotificationReceiver.close();
@@ -196,14 +193,14 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     public void sendMessagesOverAmqps() throws URISyntaxException, IOException, InterruptedException
     {
         TransportClient transportClient = new TransportClient(AMQPS);
-        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
+        ArrayList<InternalClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        openTransportClientWithRetry(transportClient);
+        openTransportClientWithRetry(transportClient, clientArrayList);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
@@ -217,14 +214,14 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     public void sendMessagesOverAmqpsWs() throws URISyntaxException, IOException, InterruptedException
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
-        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
+        ArrayList<InternalClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        openTransportClientWithRetry(transportClient);
+        openTransportClientWithRetry(transportClient, clientArrayList);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
@@ -238,23 +235,23 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     public void receiveMessagesOverAmqpsIncludingProperties() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
-        final ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
+        final ArrayList<InternalClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        IotHubServicesCommon.openTransportClientWithRetry(transportClient);
+        IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
             Success messageReceived = new Success();
             com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
-            clientArrayList.get(i).setMessageCallback(callback, messageReceived);
+            ((DeviceClient)clientArrayList.get(i)).setMessageCallback(callback, messageReceived);
 
             sendMessageToDevice(deviceListAmqps[i].getDeviceId(), "AMQPS");
-            waitForMessageToBeReceived(messageReceived, "AMQPS");
+            waitForMessageToBeReceived(messageReceived, "AMQPS", clientArrayList.get(i));
 
             Thread.sleep(200);
         }
@@ -266,23 +263,23 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     public void receiveMessagesOverAmqpWSIncludingProperties() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
-        final ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
+        final ArrayList<InternalClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        IotHubServicesCommon.openTransportClientWithRetry(transportClient);
+        IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
             Success messageReceived = new Success();
             com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
-            clientArrayList.get(i).setMessageCallback(callback, messageReceived);
+            ((DeviceClient)clientArrayList.get(i)).setMessageCallback(callback, messageReceived);
 
             sendMessageToDevice(deviceListAmqps[i].getDeviceId(), "AMQPS_WS");
-            waitForMessageToBeReceived(messageReceived, "AMQPS_WS");
+            waitForMessageToBeReceived(messageReceived, "AMQPS_WS", clientArrayList.get(i));
 
             Thread.sleep(200);
         }
@@ -294,7 +291,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     public void sendMessagesOverAmqpsMultithreaded() throws InterruptedException, URISyntaxException, IOException
     {
         TransportClient transportClient = new TransportClient(AMQPS);
-        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
+        ArrayList<InternalClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
@@ -302,7 +299,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         }
         CountDownLatch cdl = new CountDownLatch(clientArrayList.size());
 
-        IotHubServicesCommon.openTransportClientWithRetry(transportClient);
+        IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
@@ -315,7 +312,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         if(!succeed.get())
         {
-            Assert.fail("Sending message over AMQP protocol in parallel failed");
+            Assert.fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Sending message over AMQP protocol in parallel failed", clientArrayList));
         }
 
         transportClient.closeNow();
@@ -325,7 +322,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     public void sendMessagesOverAmqpsWsMultithreaded() throws InterruptedException, URISyntaxException, IOException
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
-        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
+        ArrayList<InternalClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
@@ -334,7 +331,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         CountDownLatch cdl = new CountDownLatch(clientArrayList.size());
 
-        IotHubServicesCommon.openTransportClientWithRetry(transportClient);
+        IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
@@ -347,7 +344,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         if(!succeed.get())
         {
-            Assert.fail("Sending message over AMQP protocol in parallel failed");
+            Assert.fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Sending message over AMQP protocol in parallel failed", clientArrayList));
         }
 
         transportClient.closeNow();
@@ -359,14 +356,14 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         // arrange
         setUpFileUploadState();
         TransportClient transportClient = new TransportClient(AMQPS);
-        final ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
+        final ArrayList<InternalClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        IotHubServicesCommon.openTransportClientWithRetry(transportClient);
+        IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
@@ -384,10 +381,11 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
                     {
                         try
                         {
-                            clientArrayList.get(indexJ).uploadToBlobAsync(fileUploadState[indexI].blobName, fileUploadState[indexI].fileInputStream, fileUploadState[indexI].fileLength, new FileUploadCallback(), fileUploadState[indexI]);
-                        } catch (IOException e)
+                            ((DeviceClient)clientArrayList.get(indexJ)).uploadToBlobAsync(fileUploadState[indexI].blobName, fileUploadState[indexI].fileInputStream, fileUploadState[indexI].fileLength, new FileUploadCallback(), fileUploadState[indexI]);
+                        }
+                        catch (IOException e)
                         {
-                            Assert.fail(e.getMessage());
+                            Assert.fail(buildExceptionMessage(e.getMessage(), clientArrayList.get(indexJ)));
                         }
                     }
                 });
@@ -403,11 +401,11 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
                 // assert
                 FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-                assertNotNull(fileUploadNotification);
-                verifyNotification(fileUploadNotification, fileUploadState[i]);
-                assertTrue(fileUploadState[i].isCallBackTriggered);
-                assertEquals(fileUploadState[i].fileUploadStatus, SUCCESS);
-                assertEquals(messageStates[i].messageStatus, SUCCESS);
+                Assert.assertNotNull(buildExceptionMessage("file upload notification was null", clientArrayList.get(indexJ)), fileUploadNotification);
+                verifyNotification(fileUploadNotification, fileUploadState[i], clientArrayList.get(indexJ));
+                Assert.assertTrue(buildExceptionMessage("File upload callback was not triggered for file upload attempt " + i, clientArrayList.get(indexJ)), fileUploadState[i].isCallBackTriggered);
+                Assert.assertEquals(buildExceptionMessage("File upload status was not successful on attempt " + i + ", status was: " + fileUploadState[i].fileUploadStatus, clientArrayList.get(indexJ)), fileUploadState[i].fileUploadStatus, SUCCESS);
+                Assert.assertEquals(buildExceptionMessage("Message status was not successful on attempt " + i + ", status was: " + messageStates[i].messageStatus, clientArrayList.get(indexJ)), messageStates[i].messageStatus, SUCCESS);
             }
         }
 
@@ -419,7 +417,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
         {
-            assertEquals("File" + i + " has no notification", fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("File" + i + " has no notification", clientArrayList), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
         }
 
         transportClient.closeNow();
@@ -432,14 +430,14 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         // arrange
         setUpFileUploadState();
         TransportClient transportClient = new TransportClient(AMQPS_WS);
-        final ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
+        final ArrayList<InternalClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        IotHubServicesCommon.openTransportClientWithRetry(transportClient);
+        IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
@@ -457,10 +455,11 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
                     {
                         try
                         {
-                            clientArrayList.get(indexJ).uploadToBlobAsync(fileUploadState[indexI].blobName, fileUploadState[indexI].fileInputStream, fileUploadState[indexI].fileLength, new FileUploadCallback(), fileUploadState[indexI]);
-                        } catch (IOException e)
+                            ((DeviceClient)clientArrayList.get(indexJ)).uploadToBlobAsync(fileUploadState[indexI].blobName, fileUploadState[indexI].fileInputStream, fileUploadState[indexI].fileLength, new FileUploadCallback(), fileUploadState[indexI]);
+                        }
+                        catch (IOException e)
                         {
-                            Assert.fail(e.getMessage());
+                            Assert.fail(buildExceptionMessage(e.getMessage(), clientArrayList.get(indexJ)));
                         }
                     }
                 });
@@ -476,11 +475,12 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
                 // assert
                 FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-                assertNotNull(fileUploadNotification);
-                verifyNotification(fileUploadNotification, fileUploadState[i]);
-                assertTrue(fileUploadState[i].isCallBackTriggered);
-                assertEquals(fileUploadState[i].fileUploadStatus, SUCCESS);
-                assertEquals(messageStates[i].messageStatus, SUCCESS);
+                Assert.assertNotNull(buildExceptionMessage("File upload notification was null", clientArrayList.get(j)), fileUploadNotification);
+                verifyNotification(fileUploadNotification, fileUploadState[i], clientArrayList.get(indexJ));
+                Assert.assertTrue(buildExceptionMessage("file upload state callback was not triggered", clientArrayList.get(j)), fileUploadState[i].isCallBackTriggered);
+                Assert.assertEquals(buildExceptionMessage("File upload status was not successful on attempt " + i + ", status was: " + fileUploadState[i].fileUploadStatus, clientArrayList.get(indexJ)), fileUploadState[i].fileUploadStatus, SUCCESS);
+                Assert.assertEquals(buildExceptionMessage("Message status was not successful on attempt " + i + ", status was: " + messageStates[i].messageStatus, clientArrayList.get(indexJ)), messageStates[i].messageStatus, SUCCESS);
+
             }
         }
 
@@ -492,7 +492,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
         {
-            assertEquals("File" + i + " has no notification", fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("File" + i + " has no notification", clientArrayList), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
         }
 
         transportClient.closeNow();
@@ -503,18 +503,18 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     public void invokeMethodAMQPSSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
-        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
+        ArrayList<InternalClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        IotHubServicesCommon.openTransportClientWithRetry(transportClient);
+        IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
-            clientArrayList.get(i).subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+            ((DeviceClient)clientArrayList.get(i)).subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
 
             CountDownLatch countDownLatch = new CountDownLatch(1);
             RunnableInvoke runnableInvoke = new RunnableInvoke(methodServiceClient, deviceListAmqps[i].getDeviceId(), METHOD_NAME, METHOD_PAYLOAD, countDownLatch);
@@ -522,9 +522,9 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
             countDownLatch.await();
 
             MethodResult result = runnableInvoke.getResult();
-            assertNotNull((runnableInvoke.getException() == null ? "Runnable returns null without exception information" : runnableInvoke.getException().getMessage()), result);
-            assertEquals((long)METHOD_SUCCESS,(long)result.getStatus());
-            assertEquals(runnableInvoke.getExpectedPayload(), METHOD_NAME + ":" + result.getPayload().toString());
+            Assert.assertNotNull(buildExceptionMessage(runnableInvoke.getException() == null ? "Runnable returns null without exception information" : runnableInvoke.getException().getMessage(), clientArrayList.get(i)), result);
+            Assert.assertEquals(buildExceptionMessage("result was not success, but was: " + result.getStatus(), clientArrayList.get(i)), (long)METHOD_SUCCESS,(long)result.getStatus());
+            Assert.assertEquals(buildExceptionMessage("Received unexpected payload", clientArrayList.get(i)), runnableInvoke.getExpectedPayload(), METHOD_NAME + ":" + result.getPayload().toString());
         }
 
         transportClient.closeNow();
@@ -534,18 +534,18 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     public void invokeMethodAMQPSInvokeParallelSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
-        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
+        ArrayList<InternalClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        IotHubServicesCommon.openTransportClientWithRetry(transportClient);
+        IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
-            clientArrayList.get(i).subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+            ((DeviceClient)clientArrayList.get(i)).subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
         }
 
         List<RunnableInvoke> runs = new LinkedList<>();
@@ -560,12 +560,12 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_PER_CALL_MS * MAX_DEVICE_MULTIPLEX);
 
-        for (RunnableInvoke run:runs)
+        for (RunnableInvoke runnableInvoke:runs)
         {
-            MethodResult result = run.getResult();
-            assertNotNull((run.getException() == null ? "Runnable returns null without exception information" : run.getException().getMessage()), result);
-            assertEquals((long)METHOD_SUCCESS,(long)result.getStatus());
-            assertEquals(run.getExpectedPayload(), METHOD_NAME + ":" + result.getPayload().toString());
+            MethodResult result = runnableInvoke.getResult();
+            Assert.assertNotNull(CorrelationDetailsLoggingAssert.buildExceptionMessage(runnableInvoke.getException() == null ? "Runnable returns null without exception information" : runnableInvoke.getException().getMessage(), clientArrayList), result);
+            Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("result was not success, but was: " + result.getStatus(), clientArrayList), (long)METHOD_SUCCESS,(long)result.getStatus());
+            Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Received unexpected payload", clientArrayList), runnableInvoke.getExpectedPayload(), METHOD_NAME + ":" + result.getPayload().toString());
         }
 
         transportClient.closeNow();
@@ -575,18 +575,18 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     public void invokeMethodAMQPSWSSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
-        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
+        ArrayList<InternalClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        IotHubServicesCommon.openTransportClientWithRetry(transportClient);
+        IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
-            clientArrayList.get(i).subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+            ((DeviceClient)clientArrayList.get(i)).subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
 
             CountDownLatch countDownLatch = new CountDownLatch(1);
             RunnableInvoke runnableInvoke = new RunnableInvoke(methodServiceClient, deviceListAmqps[i].getDeviceId(), METHOD_NAME, METHOD_PAYLOAD, countDownLatch);
@@ -594,9 +594,9 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
             countDownLatch.await();
 
             MethodResult result = runnableInvoke.getResult();
-            assertNotNull((runnableInvoke.getException() == null ? "Runnable returns null without exception information" : runnableInvoke.getException().getMessage()), result);
-            assertEquals((long)METHOD_SUCCESS,(long)result.getStatus());
-            assertEquals(runnableInvoke.getExpectedPayload(), METHOD_NAME + ":" + result.getPayload().toString());
+            Assert.assertNotNull(buildExceptionMessage(runnableInvoke.getException() == null ? "Runnable returns null without exception information" : runnableInvoke.getException().getMessage(), clientArrayList.get(i)), result);
+            Assert.assertEquals(buildExceptionMessage("result was not success, but was: " + result.getStatus(), clientArrayList.get(i)), (long)METHOD_SUCCESS,(long)result.getStatus());
+            Assert.assertEquals(buildExceptionMessage("Received unexpected payload", clientArrayList.get(i)), runnableInvoke.getExpectedPayload(), METHOD_NAME + ":" + result.getPayload().toString());
         }
 
         transportClient.closeNow();
@@ -606,18 +606,18 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     public void invokeMethodAMQPSWSInvokeParallelSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
-        ArrayList<DeviceClient> clientArrayList = new ArrayList<>();
+        ArrayList<InternalClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
             clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
         }
 
-        IotHubServicesCommon.openTransportClientWithRetry(transportClient);
+        IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
 
         for (int i = 0; i < clientArrayList.size(); i++)
         {
-            clientArrayList.get(i).subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+            ((DeviceClient)clientArrayList.get(i)).subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
         }
 
         List<RunnableInvoke> runs = new LinkedList<>();
@@ -632,12 +632,12 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_PER_CALL_MS * MAX_DEVICE_MULTIPLEX);
 
-        for (RunnableInvoke run:runs)
+        for (RunnableInvoke runnableInvoke:runs)
         {
-            MethodResult result = run.getResult();
-            assertNotNull((run.getException() == null ? "Runnable returns null without exception information" : run.getException().getMessage()), result);
-            assertEquals((long)METHOD_SUCCESS,(long)result.getStatus());
-            assertEquals(run.getExpectedPayload(), METHOD_NAME + ":" + result.getPayload().toString());
+            MethodResult result = runnableInvoke.getResult();
+            Assert.assertNotNull(CorrelationDetailsLoggingAssert.buildExceptionMessage(runnableInvoke.getException() == null ? "Runnable returns null without exception information" : runnableInvoke.getException().getMessage(), clientArrayList), result);
+            Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("result was not success, but was: " + result.getStatus(), clientArrayList), (long)METHOD_SUCCESS,(long)result.getStatus());
+            Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Received unexpected payload", clientArrayList), runnableInvoke.getExpectedPayload(), METHOD_NAME + ":" + result.getPayload().toString());
         }
 
         transportClient.closeNow();
@@ -676,12 +676,12 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
 
             // assert
-            assertEquals(SUCCESS, devicesUnderTest.get(i).deviceTwinStatus);
+            Assert.assertEquals(buildExceptionMessage("Device twin status expected to be SUCCESS, but was: " + devicesUnderTest.get(i).deviceTwinStatus, devicesUnderTest.get(i).deviceClient), SUCCESS, devicesUnderTest.get(i).deviceTwinStatus);
             for (PropertyState propertyState : devicesUnderTest.get(i).dCDeviceForTwin.propertyStateList)
             {
-                assertTrue("One or more property callbacks were not triggered", propertyState.callBackTriggered);
-                assertTrue(((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
-                assertEquals(SUCCESS, devicesUnderTest.get(i).deviceTwinStatus);
+                Assert.assertTrue(buildExceptionMessage("One or more property callbacks were not triggered", devicesUnderTest.get(i).deviceClient), propertyState.callBackTriggered);
+                Assert.assertTrue(buildExceptionMessage("Property new value did not start with " + PROPERTY_VALUE_UPDATE, devicesUnderTest.get(i).deviceClient), ((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
+                Assert.assertEquals(buildExceptionMessage("Expected SUCCESS but device twin status was " + devicesUnderTest.get(i).deviceTwinStatus, devicesUnderTest.get(i).deviceClient), SUCCESS, devicesUnderTest.get(i).deviceTwinStatus);
             }
         }
 
@@ -701,12 +701,12 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
 
             // assert
-            assertEquals(devicesUnderTest.get(i).deviceTwinStatus, SUCCESS);
+            Assert.assertEquals(buildExceptionMessage("Expected status SUCCESS but was " + devicesUnderTest.get(i).deviceTwinStatus, devicesUnderTest.get(i).deviceClient), SUCCESS, devicesUnderTest.get(i).deviceTwinStatus);
 
             // verify if they are received by SC
             Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
             int actualReportedPropFound = readReportedProperties(devicesUnderTest.get(i), PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
-            assertEquals("Missing reported properties on the " + (i+1) + " device out of " + MAX_DEVICE_MULTIPLEX, MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
+            Assert.assertEquals(buildExceptionMessage("Missing reported properties on the " + (i+1) + " device out of " + MAX_DEVICE_MULTIPLEX,devicesUnderTest.get(i).deviceClient), MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
         }
 
         // send max_prop RP one at a time in parallel
@@ -727,9 +727,9 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
                     }
                     catch (IOException e)
                     {
-                        Assert.fail(e.getMessage());
+                        Assert.fail(buildExceptionMessage(e.getMessage(), devicesUnderTest.get(finalI).deviceClient));
                     }
-                    assertEquals(devicesUnderTest.get(finalI).deviceTwinStatus, SUCCESS);
+                    Assert.assertEquals(buildExceptionMessage("Expected SUCCESS but was " + devicesUnderTest.get(finalI).deviceTwinStatus, devicesUnderTest.get(finalI).deviceClient), SUCCESS, devicesUnderTest.get(finalI).deviceTwinStatus);
 
                     // testUpdateReportedPropertiesMultiThreaded
                     try
@@ -739,9 +739,9 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
                     }
                     catch (IOException e)
                     {
-                        Assert.fail(e.getMessage());
+                        Assert.fail(buildExceptionMessage(e.getMessage(), devicesUnderTest.get(finalI).deviceClient));
                     }
-                    assertEquals(devicesUnderTest.get(finalI).deviceTwinStatus, SUCCESS);
+                    Assert.assertEquals(buildExceptionMessage("Expected SUCCESS but was " + devicesUnderTest.get(finalI).deviceTwinStatus, devicesUnderTest.get(finalI).deviceClient), SUCCESS, devicesUnderTest.get(finalI).deviceTwinStatus);
                 }
             });
         }
@@ -756,9 +756,9 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         tearDownTwin(transportClient);
     }
     
-    private void verifyNotification(FileUploadNotification fileUploadNotification, FileUploadState fileUploadState) throws IOException
+    private void verifyNotification(FileUploadNotification fileUploadNotification, FileUploadState fileUploadState, InternalClient client) throws IOException
     {
-        assertTrue(fileUploadNotification.getBlobSizeInBytes() == fileUploadState.fileLength);
+        Assert.assertTrue(buildExceptionMessage("Wrong file upload notification length", client), fileUploadNotification.getBlobSizeInBytes() == fileUploadState.fileLength);
 
         URL u = new URL(fileUploadNotification.getBlobUri());
         try (InputStream inputStream = u.openStream())
@@ -768,11 +768,11 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
             byte[] actualBuf = new byte[(int)fileUploadState.fileLength];
             fileUploadState.fileInputStream.reset();
             int actualLen = (fileUploadState.fileLength == 0) ? (int) fileUploadState.fileLength : fileUploadState.fileInputStream.read(actualBuf, 0, (int) fileUploadState.fileLength);
-            assertEquals(testLen, actualLen);
-            assertTrue(Arrays.equals(testBuf, actualBuf));
+            Assert.assertEquals(buildExceptionMessage("Incorrect file length", client), testLen, actualLen);
+            Assert.assertTrue(buildExceptionMessage("Arrays are not equal", client), Arrays.equals(testBuf, actualBuf));
         }
 
-        assertTrue(fileUploadNotification.getBlobName().contains(fileUploadState.blobName));
+        Assert.assertTrue(buildExceptionMessage("Incorrect blob name", client), fileUploadNotification.getBlobName().contains(fileUploadState.blobName));
         fileUploadState.fileUploadNotificationReceived = SUCCESS;
     }
 
@@ -833,7 +833,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         serviceClient.send(deviceId, serviceMessage);
     }
 
-    private void waitForMessageToBeReceived(Success messageReceived, String protocolName)
+    private void waitForMessageToBeReceived(Success messageReceived, String protocolName, InternalClient client)
     {
         try
         {
@@ -850,12 +850,12 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
             if (!messageReceived.getResult())
             {
-                Assert.fail("Receiving message over " + protocolName + " protocol failed. Received message was missing one or more properties");
+                Assert.fail(buildExceptionMessage("Receiving message over " + protocolName + " protocol failed. Received message was missing one or more properties", client));
             }
         }
         catch (InterruptedException e)
         {
-            Assert.fail("Receiving message over " + protocolName + " protocol failed");
+            Assert.fail(buildExceptionMessage("Receiving message over " + protocolName + " protocol failed", client));
         }
     }
 
@@ -1001,7 +1001,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
     protected static class MultiplexRunnable implements Runnable
     {
-        private DeviceClient client;
+        private InternalClient client;
         private String messageString;
 
         private long numMessagesPerDevice;
@@ -1029,13 +1029,13 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         }
 
         private MultiplexRunnable(Device deviceAmqps,
-                                 DeviceClient deviceClient,
+                                 InternalClient client,
                                  long numMessagesPerConnection,
                                  long numKeys,
                                  long sendTimeout,
                                  CountDownLatch latch)
         {
-            this.client = deviceClient;
+            this.client = client;
             this.numMessagesPerDevice = numMessagesPerConnection;
             this.sendTimeout = sendTimeout;
             this.numKeys = numKeys;
@@ -1067,13 +1067,13 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
                     Thread.sleep(RETRY_MILLISECONDS);
                     if ((System.currentTimeMillis() - startTime) > sendTimeout)
                     {
-                        throw new Exception("Timed out waiting for OK_EMPTY response for sent message");
+                        fail(buildExceptionMessage("Timed out waiting for OK_EMPTY response for sent message", client));
                     }
                 }
 
                 if (messageSent.getCallbackStatusCode() != IotHubStatusCode.OK_EMPTY)
                 {
-                    throw new Exception("Unexpected iot hub status code! Expected OK_EMPTY but got " + messageSent.getCallbackStatusCode());
+                    fail(buildExceptionMessage("Unexpected iot hub status code! Expected OK_EMPTY but got " + messageSent.getCallbackStatusCode(), client));
                 }
             }
         }
@@ -1165,14 +1165,16 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         TransportClient transportClient = new TransportClient(IotHubClientProtocol.AMQPS);
 
+        ArrayList<InternalClient> clientArrayList = new ArrayList<>();
         for (int i = 0; i < MAX_DEVICES; i++)
         {
             DeviceState deviceState = devicesUnderTest.get(i);
             deviceState.deviceClient = new DeviceClient(deviceState.connectionString, transportClient);
             devicesUnderTest.get(i).dCDeviceForTwin = new DeviceExtension();
+            clientArrayList.add(deviceState.deviceClient);
         }
 
-        IotHubServicesCommon.openTransportClientWithRetry(transportClient);
+        IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
 
         for (int i = 0; i < MAX_DEVICES; i++)
         {

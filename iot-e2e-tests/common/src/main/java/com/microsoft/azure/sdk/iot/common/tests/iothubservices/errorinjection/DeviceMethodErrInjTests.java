@@ -263,7 +263,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
                 this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT, this.testInstance.deviceTestManager.client);
         invokeMethodSucceed();
     }
 }

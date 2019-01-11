@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -60,7 +61,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
                     {
                         fail(e.getMessage());
                     }
-                    assertEquals(deviceUnderTest.deviceTwinStatus, DeviceTwinCommon.STATUS.SUCCESS);
+                    assertEquals(buildExceptionMessage("Expected SUCCESS but twin status was " + deviceUnderTest.deviceTwinStatus, internalClient), DeviceTwinCommon.STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
                 }
             });
         }
@@ -141,7 +142,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
                     }
                     catch (IOException | InterruptedException e)
                     {
-                        fail(e.getMessage());
+                        fail(buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + e.getMessage(), internalClient));
                     }
                 }
             });
@@ -154,7 +155,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         }
 
         // assert
-        assertEquals(deviceUnderTest.deviceTwinStatus, STATUS.SUCCESS);
+        assertEquals(buildExceptionMessage("Expected SUCCESS but twin status was " + deviceUnderTest.deviceTwinStatus, internalClient), DeviceTwinCommon.STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
 
         // verify if they are received by SC
         readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST.intValue());
