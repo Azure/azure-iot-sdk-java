@@ -20,4 +20,7 @@ enum AttestationMechanismType
 
     @SerializedName("x509")
     X509,
+
+    @SerializedName("symmetricKey")
+    SYMMETRIC_KEY,
 }

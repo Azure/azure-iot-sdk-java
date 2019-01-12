@@ -25,7 +25,7 @@ import java.util.Date;
  *     {@link #attestation}.
  *
  * <p> To provision a device using EnrollmentGroup, it must contain a X509 chip with a signingCertificate for the
- *     {@link X509Attestation} mechanism.
+ *     {@link X509Attestation} mechanism, or use {@link SymmetricKeyAttestation} mechanism.
  *
  * <p> The content of this class will be serialized in a JSON format and sent as a body of the rest API to the
  *     provisioning service.
@@ -162,7 +162,7 @@ public class EnrollmentGroup extends Serializable
      * </pre>
      *
      * @param enrollmentGroupId the {@code String} with an unique id for this enrollment group.
-     * @param attestation the {@link Attestation} mechanism that shall be {@code signedCertificate} of {@link X509Attestation}.
+     * @param attestation the {@link Attestation} mechanism that shall be {@code signedCertificate} of {@link X509Attestation} or {@code symmetricKey} of {@link SymmetricKeyAttestation}
      * @throws IllegalArgumentException If one of the provided parameters is not correct.
      */
     public EnrollmentGroup(
@@ -348,7 +348,7 @@ public class EnrollmentGroup extends Serializable
      *     @see AttestationMechanism
      * </p>
      *
-     * @param attestationMechanism the {@code AttestationMechanism} with the new attestation mechanism. It can be `tpm` or `x509`.
+     * @param attestationMechanism the {@code AttestationMechanism} with the new attestation mechanism. It can be `tpm`, `x509` or 'symmetricKey'.
      * @throws IllegalArgumentException If the provided attestation mechanism is {@code null}.
      */
     protected final void setAttestation(AttestationMechanism attestationMechanism)
@@ -359,7 +359,7 @@ public class EnrollmentGroup extends Serializable
             throw new IllegalArgumentException("attestationMechanism cannot be null");
         }
 
-        /* SRS_ENROLLMENT_GROUP_21_042: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate.] */
+        /* SRS_ENROLLMENT_GROUP_21_042: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Keys.] */
         /* SRS_ENROLLMENT_GROUP_21_019: [The setAttestation shall store the provided attestation.] */
         try
         {
@@ -377,13 +377,16 @@ public class EnrollmentGroup extends Serializable
      * <p> Attestation mechanism is mandatory parameter that provides the mechanism
      *     type and the necessary certificates.
      *
-     * <p> EnrollmentGroup only accept {@link X509Attestation} with the RootCertificates. You can create it
-     *     providing the <b>.pem</b> content to {@link X509Attestation#createFromRootCertificates(String, String)}
+     * <p> EnrollmentGroup only accept {@link X509Attestation} with the RootCertificates, or {@link SymmetricKeyAttestation}
+     *     with Primary and Secondary Keys. You can create an {@link X509Attestation} by providing the <b>.pem</b> content to
+     *     {@link X509Attestation#createFromRootCertificates(String, String)}. You can create a {@link SymmetricKeyAttestation}
+     *     by providing the Primary and Secondary Keys in Base64 format.
      *
      * @see Attestation
      * @see X509Attestation
+     * @see SymmetricKeyAttestation
      *
-     * @param attestation the {@link Attestation} with the new attestation mechanism. It shall be {@link X509Attestation}.
+     * @param attestation the {@link Attestation} with the new attestation mechanism. It shall be {@link X509Attestation} or {@link SymmetricKeyAttestation}
      * @throws IllegalArgumentException If the provided attestation mechanism is {@code null} or invalid.
      */
     public void setAttestation(Attestation attestation)
@@ -393,15 +396,18 @@ public class EnrollmentGroup extends Serializable
         {
             throw new IllegalArgumentException("attestation cannot be null");
         }
-
-        /* SRS_ENROLLMENT_GROUP_21_040: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate.] */
-        if(!(attestation instanceof X509Attestation))
+        /* SRS_ENROLLMENT_GROUP_21_040: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or SymmetricKeyAttestation] */
+        else if(!(attestation instanceof X509Attestation) && !(attestation instanceof SymmetricKeyAttestation))
         {
-            throw new IllegalArgumentException("attestation for EnrollmentGroup shall be X509");
+            throw new IllegalArgumentException("attestation for EnrollmentGroup shall be X509 or SymmetricKey");
         }
-        if(((X509Attestation)attestation).getRootCertificatesFinal() == null)
+
+        if(attestation instanceof X509Attestation)
         {
-            throw new IllegalArgumentException("attestation for EnrollmentGroup shall be X509 signingCertificate");
+            if(((X509Attestation)attestation).getRootCertificatesFinal() == null)
+            {
+                throw new IllegalArgumentException("X509 attestation for EnrollmentGroup does not contains a valid certificate.");
+            }
         }
 
         /* SRS_ENROLLMENT_GROUP_21_041: [The setAttestation shall store the provided attestation using the AttestationMechanism object.] */

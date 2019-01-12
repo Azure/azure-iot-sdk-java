@@ -5,6 +5,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.*;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
+import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import mockit.*;
@@ -25,6 +26,10 @@ public class EnrollmentGroupTest
     private static final String VALID_IOTHUB_HOST_NAME = "foo.net";
     private static final String VALID_ETAG = "\\\"00000000-0000-0000-0000-00000000000\\\"";
     private static final String VALID_PARSED_ETAG = "\"00000000-0000-0000-0000-00000000000\"";
+    private static final String PRIMARY_KEY_TEXT = "validPrimaryKey";
+    private static final String SECONDARY_KEY_TEXT = "validSecondaryKey";
+    private static final String VALID_PRIMARY_KEY = Base64.encodeBase64StringLocal(PRIMARY_KEY_TEXT.getBytes());
+    private static final String VALID_SECONDARY_KEY = Base64.encodeBase64StringLocal(SECONDARY_KEY_TEXT.getBytes());
 
     //PEM encoded representation of the public key certificate
     private static final String PUBLIC_KEY_CERTIFICATE_STRING =
@@ -117,7 +122,7 @@ public class EnrollmentGroupTest
         }
     };
 
-    private static EnrollmentGroup makeStandardEnrollmentGroup()
+    private static EnrollmentGroup makeStandardX509EnrollmentGroup()
     {
         EnrollmentGroup enrollmentGroup = new EnrollmentGroup(
                 VALID_ENROLLMENT_GROUP_ID,
@@ -127,21 +132,53 @@ public class EnrollmentGroupTest
         return enrollmentGroup;
     }
 
-    private MockEnrollmentGroup makeMockedEnrollmentGroup()
+    private MockEnrollmentGroup makeMockedX509EnrollmentGroup()
     {
         return new MockEnrollmentGroup(
                 VALID_ENROLLMENT_GROUP_ID,
                 X509Attestation.createFromRootCertificates(PUBLIC_KEY_CERTIFICATE_STRING, null));
     }
 
+    private static EnrollmentGroup makeStandardSymmetricKeyEnrollmentGroup()
+    {
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup(
+                VALID_ENROLLMENT_GROUP_ID,
+                new SymmetricKeyAttestation(VALID_PRIMARY_KEY, VALID_SECONDARY_KEY));
+        enrollmentGroup.setIotHubHostName(VALID_IOTHUB_HOST_NAME);
+        enrollmentGroup.setProvisioningStatus(ProvisioningStatus.ENABLED);
+        return enrollmentGroup;
+    }
+
+    private MockEnrollmentGroup makeMockedSymmetricKeyEnrollmentGroup()
+    {
+        return new MockEnrollmentGroup(
+                VALID_ENROLLMENT_GROUP_ID,
+                new SymmetricKeyAttestation(VALID_PRIMARY_KEY, VALID_SECONDARY_KEY));
+    }
+
     /* SRS_ENROLLMENT_GROUP_21_001: [The constructor shall judge and store the provided parameters using the EnrollmentGroup setters.] */
     @Test
-    public void constructorWithParametersUsesSetters()
+    public void constructorWithX509ParametersUsesSetters()
     {
         // arrange
 
         // act
-        MockEnrollmentGroup enrollmentGroup = makeMockedEnrollmentGroup();
+        MockEnrollmentGroup enrollmentGroup = makeMockedX509EnrollmentGroup();
+
+        // assert
+        assertNotNull(enrollmentGroup);
+        assertEquals(VALID_ENROLLMENT_GROUP_ID, Deencapsulation.getField(enrollmentGroup, "enrollmentGroupId"));
+        assertNotNull(enrollmentGroup.mockedAttestation);
+    }
+
+    /* SRS_ENROLLMENT_GROUP_21_001: [The constructor shall judge and store the provided parameters using the EnrollmentGroup setters.] */
+    @Test
+    public void constructorWithSymmetricKeyParametersUsesSetters()
+    {
+        // arrange
+
+        // act
+        MockEnrollmentGroup enrollmentGroup = makeMockedSymmetricKeyEnrollmentGroup();
 
         // assert
         assertNotNull(enrollmentGroup);
@@ -190,7 +227,7 @@ public class EnrollmentGroupTest
 
     /* SRS_ENROLLMENT_GROUP_21_004: [The constructor shall deserialize the provided JSON for the enrollmentGroup class and subclasses.] */
     @Test
-    public void constructorWithJsonSucceed() throws ProvisioningServiceClientException
+    public void constructorWithJsonSucceedX509Attestation() throws ProvisioningServiceClientException
     {
         // arrange
         final String json = "{\n" +
@@ -247,6 +284,54 @@ public class EnrollmentGroupTest
         assertEquals(PUBLIC_KEY_CERTIFICATE_STRING, primary.getCertificate());
         X509CertificateInfo info = primary.getInfo();
         assertEquals(VALID_ENROLLMENT_GROUP_ID, info.getSha256Thumbprint());
+    }
+
+    /* SRS_ENROLLMENT_GROUP_21_004: [The constructor shall deserialize the provided JSON for the enrollmentGroup class and subclasses.] */
+    @Test
+    public void constructorWithJsonSucceedSymmetricKeyAttestation() throws ProvisioningServiceClientException
+    {
+        // arrange
+        final String json = "{\n" +
+                "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"symmetricKey\",\n" +
+                "    \"symmetricKey\": {\n" +
+                "      \"primaryKey\": \"" + VALID_PRIMARY_KEY + "\",\n" +
+                "      \"secondaryKey\": \"" + VALID_SECONDARY_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"initialTwin\" : {\n" +
+                "    \"properties\": {\n" +
+                "      \"desired\": {\n" +
+                "        \"prop1\": \"value1\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }," +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\"\n" +
+                "}";
+
+        // act
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup(json);
+
+        // assert
+        assertEquals(VALID_ENROLLMENT_GROUP_ID, enrollmentGroup.getEnrollmentGroupId());
+        assertEquals(VALID_IOTHUB_HOST_NAME, enrollmentGroup.getIotHubHostName());
+        assertEquals(ProvisioningStatus.ENABLED, enrollmentGroup.getProvisioningStatus());
+        Helpers.assertDateWithError(enrollmentGroup.getCreatedDateTimeUtc(), VALID_DATE_AS_STRING);
+        Helpers.assertDateWithError(enrollmentGroup.getLastUpdatedDateTimeUtc(), VALID_DATE_AS_STRING);
+        TwinState twinState = enrollmentGroup.getInitialTwin();
+        assertNotNull(twinState);
+        assertEquals("value1", twinState.getDesiredProperty().get("prop1"));
+        Attestation attestation = enrollmentGroup.getAttestation();
+        assertTrue("attestation is not Symmetric Key", (attestation instanceof SymmetricKeyAttestation));
+        SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation)attestation;
+        String primary = symmetricKeyAttestation.getPrimaryKey();
+        String secondary = symmetricKeyAttestation.getSecondaryKey();
+        assertEquals(VALID_PRIMARY_KEY, primary);
+        assertEquals(VALID_SECONDARY_KEY, secondary);
     }
 
     /* SRS_ENROLLMENT_GROUP_21_005: [The constructor shall judge and store the provided mandatory parameters `enrollmentGroupId` and `attestation` using the EnrollmentGroup setters.] */
@@ -526,10 +611,24 @@ public class EnrollmentGroupTest
 
     /* SRS_ENROLLMENT_GROUP_21_010: [The toJson shall return a String with the information in this class in a JSON format.] */
     @Test
-    public void toJsonSimpleEnrollment()
+    public void toJsonSimpleX509Enrollment()
     {
         // arrange
-        MockEnrollmentGroup enrollmentGroup = makeMockedEnrollmentGroup();
+        MockEnrollmentGroup enrollmentGroup = makeMockedX509EnrollmentGroup();
+
+        // act
+        String result = enrollmentGroup.toJson();
+
+        // assert
+        Helpers.assertJson(enrollmentGroup.mockedJsonElement.toString(), result);
+    }
+
+    /* SRS_ENROLLMENT_GROUP_21_010: [The toJson shall return a String with the information in this class in a JSON format.] */
+    @Test
+    public void toJsonSimpleSymmetricKeyEnrollment()
+    {
+        // arrange
+        MockEnrollmentGroup enrollmentGroup = makeMockedSymmetricKeyEnrollmentGroup();
 
         // act
         String result = enrollmentGroup.toJson();
@@ -540,10 +639,10 @@ public class EnrollmentGroupTest
 
     /* SRS_ENROLLMENT_GROUP_21_011: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
     @Test
-    public void toJsonElementSimpleEnrollment()
+    public void toJsonElementSimpleX509Enrollment()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         String json = "{\n" +
                 "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
@@ -568,12 +667,39 @@ public class EnrollmentGroupTest
         Helpers.assertJson(result.toString(), json);
     }
 
+    /* SRS_ENROLLMENT_GROUP_21_011: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
+    @Test
+    public void toJsonElementSimpleSymmetricKeyEnrollment()
+    {
+        // arrange
+        EnrollmentGroup enrollmentGroup = makeStandardSymmetricKeyEnrollmentGroup();
+
+        String json = "{\n" +
+                "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"symmetricKey\",\n" +
+                "    \"symmetricKey\": {\n" +
+                "      \"primaryKey\": \"" + VALID_PRIMARY_KEY + "\",\n" +
+                "      \"secondaryKey\": \"" + VALID_SECONDARY_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\"\n" +
+                "}";
+
+        // act
+        JsonElement result = enrollmentGroup.toJsonElement();
+
+        // assert
+        Helpers.assertJson(result.toString(), json);
+    }
+
     /* SRS_ENROLLMENT_GROUP_21_012: [If the initialTwin is not null, the toJsonElement shall include its content in the final JSON.] */
     @Test
     public void toJsonElementSimpleEnrollmentWithTwin()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
         enrollmentGroup.setInitialTwinFinal(new TwinState(
                 new TwinCollection() {{
                     put("tag1", "valueTag1");
@@ -624,7 +750,7 @@ public class EnrollmentGroupTest
     public void toStringSimpleEnrollmentWithTwin()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
         enrollmentGroup.setInitialTwinFinal(new TwinState(
                 new TwinCollection() {{
                     put("tag1", "valueTag1");
@@ -679,7 +805,7 @@ public class EnrollmentGroupTest
     /* SRS_ENROLLMENT_GROUP_21_032: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
     /* SRS_ENROLLMENT_GROUP_21_035: [The getEtag shall return a String with the stored etag.] */
     @Test
-    public void gettersSimpleEnrollment() throws ProvisioningServiceClientException
+    public void gettersSimpleX509Enrollment() throws ProvisioningServiceClientException
     {
         // arrange
         final String json = "{\n" +
@@ -725,12 +851,64 @@ public class EnrollmentGroupTest
         assertEquals(VALID_PARSED_ETAG, enrollmentGroup.getEtag());
     }
 
+    /* SRS_ENROLLMENT_GROUP_21_014: [The getEnrollmentGroupId shall return a String with the stored enrollmentGroupId.] */
+    /* SRS_ENROLLMENT_GROUP_21_017: [The getAttestation shall return a Attestation with the stored attestation.] */
+    /* SRS_ENROLLMENT_GROUP_21_020: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
+    /* SRS_ENROLLMENT_GROUP_21_023: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
+    /* SRS_ENROLLMENT_GROUP_21_026: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
+    /* SRS_ENROLLMENT_GROUP_21_029: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
+    /* SRS_ENROLLMENT_GROUP_21_032: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
+    /* SRS_ENROLLMENT_GROUP_21_035: [The getEtag shall return a String with the stored etag.] */
+    @Test
+    public void gettersSimpleSymmetricKeyEnrollment() throws ProvisioningServiceClientException
+    {
+        // arrange
+        final String json = "{\n" +
+                "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"symmetricKey\",\n" +
+                "    \"symmetricKey\": {\n" +
+                "      \"primaryKey\": \"" + VALID_PRIMARY_KEY + "\",\n" +
+                "      \"secondaryKey\": \"" + VALID_SECONDARY_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"initialTwin\" : {\n" +
+                "    \"tags\": {\n" +
+                "      \"tag1\": \"valueTag1\",\n" +
+                "      \"tag2\": \"valueTag2\"\n" +
+                "    },\n" +
+                "    \"properties\": {\n" +
+                "      \"desired\": {\n" +
+                "        \"prop1\": \"value1\",\n" +
+                "        \"prop2\": \"value2\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }," +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"etag\": \"" + VALID_ETAG + "\"\n" +
+                "}";
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup(json);
+
+        // act - assert
+        assertEquals(VALID_ENROLLMENT_GROUP_ID, enrollmentGroup.getEnrollmentGroupId());
+        assertNotNull(enrollmentGroup.getAttestation());
+        assertEquals(VALID_IOTHUB_HOST_NAME, enrollmentGroup.getIotHubHostName());
+        assertNotNull(enrollmentGroup.getInitialTwin());
+        assertEquals(ProvisioningStatus.ENABLED, enrollmentGroup.getProvisioningStatus());
+        Helpers.assertDateWithError(enrollmentGroup.getCreatedDateTimeUtc(), VALID_DATE_AS_STRING);
+        Helpers.assertDateWithError(enrollmentGroup.getLastUpdatedDateTimeUtc(), VALID_DATE_AS_STRING);
+        assertEquals(VALID_PARSED_ETAG, enrollmentGroup.getEtag());
+    }
+
     /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setEnrollmentGroupIdThrowsOnNull()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup, "setEnrollmentGroupId", new Class[] {String.class}, (String)null);
@@ -743,7 +921,7 @@ public class EnrollmentGroupTest
     public void setEnrollmentGroupIdThrowsOnEmpty()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup, "setEnrollmentGroupId", new Class[] {String.class}, "");
@@ -756,7 +934,7 @@ public class EnrollmentGroupTest
     public void setEnrollmentGroupIdThrowsOnNotUtf8()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup, "setEnrollmentGroupId", new Class[] {String.class}, "\u1234-invalid");
@@ -769,7 +947,7 @@ public class EnrollmentGroupTest
     public void setEnrollmentGroupIdThrowsOnInvalidChar()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup, "setEnrollmentGroupId", new Class[] {String.class}, "invalid&");
@@ -782,7 +960,7 @@ public class EnrollmentGroupTest
     public void setEnrollmentGroupIdSucceed()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
         final String newEnrollmentGroupId = "NewEnrollmentGroupId";
         assertNotEquals(newEnrollmentGroupId, Deencapsulation.getField(enrollmentGroup, "enrollmentGroupId"));
 
@@ -798,7 +976,7 @@ public class EnrollmentGroupTest
     public void setAttestationMechanismThrowsOnNull()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup, "setAttestation", new Class[]{AttestationMechanism.class}, (AttestationMechanism)null);
@@ -806,42 +984,42 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_042: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate.] */
+    /* SRS_ENROLLMENT_GROUP_21_042: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
     @Test (expected = IllegalArgumentException.class)
     public void setAttestationMechanismThrowsOnTpm(
             @Mocked final TpmAttestation mockedTpmAttestation,
-            @Mocked final AttestationMechanism mockedAttestationMechanismMechanism)
+            @Mocked final AttestationMechanism mockedAttestationMechanism)
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardSymmetricKeyEnrollmentGroup();
 
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockedAttestationMechanismMechanism, "getAttestation");
+                Deencapsulation.invoke(mockedAttestationMechanism, "getAttestation");
                 result = mockedTpmAttestation;
             }
         };
 
         // act
-        Deencapsulation.invoke(enrollmentGroup, "setAttestation", new Class[]{AttestationMechanism.class}, mockedAttestationMechanismMechanism);
+        Deencapsulation.invoke(enrollmentGroup, "setAttestation", new Class[]{AttestationMechanism.class}, mockedAttestationMechanism);
 
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_042: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate.] */
+    /* SRS_ENROLLMENT_GROUP_21_042: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
     @Test (expected = IllegalArgumentException.class)
-    public void setAttestationMechanismThrowsOnNoSigningCertificate(
+    public void setAttestationMechanismX509ThrowsOnNoSigningCertificate(
             @Mocked final X509Attestation mockedX509Attestation,
-            @Mocked final AttestationMechanism mockedAttestationMechanismMechanism)
+            @Mocked final AttestationMechanism mockedAttestationMechanism)
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockedAttestationMechanismMechanism, "getAttestation");
+                Deencapsulation.invoke(mockedAttestationMechanism, "getAttestation");
                 result = mockedX509Attestation;
                 mockedX509Attestation.getRootCertificatesFinal();
                 result = null;
@@ -849,26 +1027,26 @@ public class EnrollmentGroupTest
         };
 
         // act
-        Deencapsulation.invoke(enrollmentGroup, "setAttestation", new Class[]{AttestationMechanism.class}, mockedAttestationMechanismMechanism);
+        Deencapsulation.invoke(enrollmentGroup, "setAttestation", new Class[]{AttestationMechanism.class}, mockedAttestationMechanism);
 
         // assert
     }
 
     /* SRS_ENROLLMENT_GROUP_21_019: [The setAttestation shall store the provided attestation.] */
     @Test
-    public void setAttestationMechanismSucceed(
+    public void setAttestationMechanismX509Succeed(
             @Mocked final X509Attestation mockedX509Attestation,
             @Mocked final X509Certificates mockedX509Certificates,
-            @Mocked final AttestationMechanism mockedAttestationMechanismMechanism)
+            @Mocked final AttestationMechanism mockedAttestationMechanism)
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
-        assertNotEquals(mockedAttestationMechanismMechanism, Deencapsulation.getField(enrollmentGroup, "attestation"));
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
+        assertNotEquals(mockedAttestationMechanism, Deencapsulation.getField(enrollmentGroup, "attestation"));
 
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockedAttestationMechanismMechanism, "getAttestation");
+                Deencapsulation.invoke(mockedAttestationMechanism, "getAttestation");
                 result = mockedX509Attestation;
                 mockedX509Attestation.getRootCertificatesFinal();
                 result = mockedX509Certificates;
@@ -876,7 +1054,38 @@ public class EnrollmentGroupTest
         };
 
         // act
-        Deencapsulation.invoke(enrollmentGroup, "setAttestation", new Class[]{AttestationMechanism.class}, mockedAttestationMechanismMechanism);
+        Deencapsulation.invoke(enrollmentGroup, "setAttestation", new Class[]{AttestationMechanism.class}, mockedAttestationMechanism);
+
+        // assert
+        assertNotNull(Deencapsulation.getField(enrollmentGroup, "attestation"));
+    }
+
+    /* SRS_ENROLLMENT_GROUP_21_019: [The setAttestation shall store the provided attestation.] */
+    @Test
+    public void setAttestationMechanismSymmetricKeySucceed(
+            @Mocked final SymmetricKeyAttestation mockedSymmetricKeyAttestation,
+            @Mocked final String mockedPrimaryKey,
+            @Mocked final String mockedSecondaryKey,
+            @Mocked final AttestationMechanism mockedAttestationMechanism)
+    {
+        // arrange
+        EnrollmentGroup enrollmentGroup = makeStandardSymmetricKeyEnrollmentGroup();
+        assertNotEquals(mockedAttestationMechanism, Deencapsulation.getField(enrollmentGroup, "attestation"));
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockedAttestationMechanism, "getAttestation");
+                result = mockedSymmetricKeyAttestation;
+                mockedSymmetricKeyAttestation.getPrimaryKey();
+                result = mockedPrimaryKey;
+                mockedSymmetricKeyAttestation.getSecondaryKey();
+                result = mockedSecondaryKey;
+            }
+        };
+
+        // act
+        Deencapsulation.invoke(enrollmentGroup, "setAttestation", new Class[]{AttestationMechanism.class}, mockedAttestationMechanism);
 
         // assert
         assertNotNull(Deencapsulation.getField(enrollmentGroup, "attestation"));
@@ -887,7 +1096,7 @@ public class EnrollmentGroupTest
     public void setAttestationThrowsOnNull()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         enrollmentGroup.setAttestation(null);
@@ -895,14 +1104,14 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_040: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate.] */
+    /* SRS_ENROLLMENT_GROUP_21_040: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
     @Test (expected = IllegalArgumentException.class)
     public void setAttestationThrowsOnTpm(
             @Mocked final TpmAttestation mockedTpmAttestation,
-            @Mocked final AttestationMechanism mockedAttestationMechanismMechanism)
+            @Mocked final AttestationMechanism mockedAttestationMechanism)
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         enrollmentGroup.setAttestation(mockedTpmAttestation);
@@ -910,14 +1119,14 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_040: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate.] */
+    /* SRS_ENROLLMENT_GROUP_21_040: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
     @Test (expected = IllegalArgumentException.class)
-    public void setAttestationThrowsOnNoSigningCertificate(
+    public void setAttestationX509ThrowsOnNoSigningCertificate(
             @Mocked final X509Attestation mockedX509Attestation,
-            @Mocked final AttestationMechanism mockedAttestationMechanismMechanism)
+            @Mocked final AttestationMechanism mockedAttestationMechanism)
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         new NonStrictExpectations()
         {
@@ -935,13 +1144,13 @@ public class EnrollmentGroupTest
 
     /* SRS_ENROLLMENT_GROUP_21_041: [The setAttestation shall store the provided attestation using the AttestationMechanism object.] */
     @Test
-    public void setAttestationSucceed(
+    public void setAttestationX509Succeed(
             @Mocked final X509Attestation mockedX509Attestation,
             @Mocked final X509Certificates mockedX509Certificates,
-            @Mocked final AttestationMechanism mockedAttestationMechanismMechanism)
+            @Mocked final AttestationMechanism mockedAttestationMechanism)
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         new NonStrictExpectations()
         {
@@ -964,12 +1173,34 @@ public class EnrollmentGroupTest
         };
     }
 
+    /* SRS_ENROLLMENT_GROUP_21_041: [The setAttestation shall store the provided attestation using the AttestationMechanism object.] */
+    @Test
+    public void setAttestationSymmetricKeySucceed(
+            @Mocked final SymmetricKeyAttestation mockedSymmetricKeyAttestation,
+            @Mocked final AttestationMechanism mockedAttestationMechanism)
+    {
+        // arrange
+        EnrollmentGroup enrollmentGroup = makeStandardSymmetricKeyEnrollmentGroup();
+
+        // act
+        enrollmentGroup.setAttestation(mockedSymmetricKeyAttestation);
+
+        // assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.newInstance(AttestationMechanism.class, new Class[]{Attestation.class}, mockedSymmetricKeyAttestation);
+                times = 1;
+            }
+        };
+    }
+
     /* SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setIotHubHostNameThrowsOnNull()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         enrollmentGroup.setIotHubHostNameFinal(null);
@@ -982,7 +1213,7 @@ public class EnrollmentGroupTest
     public void setIotHubHostNameThrowsOnEmpty()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         enrollmentGroup.setIotHubHostNameFinal("");
@@ -995,7 +1226,7 @@ public class EnrollmentGroupTest
     public void setIotHubHostNameThrowsOnNotUTF8()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         enrollmentGroup.setIotHubHostNameFinal("NewHostName.\u1234a.b");
@@ -1008,7 +1239,7 @@ public class EnrollmentGroupTest
     public void setIotHubHostNameThrowsOnInvalidChar()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         enrollmentGroup.setIotHubHostNameFinal("NewHostName.&a.b");
@@ -1021,7 +1252,7 @@ public class EnrollmentGroupTest
     public void setIotHubHostNameThrowsOnIncompleteName()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         enrollmentGroup.setIotHubHostNameFinal("NewHostName");
@@ -1034,7 +1265,7 @@ public class EnrollmentGroupTest
     public void setIotHubHostNameSucceed()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
         final String newHostName = "NewHostName.azureDevice.net";
         assertNotEquals(newHostName, Deencapsulation.getField(enrollmentGroup, "iotHubHostName"));
 
@@ -1050,7 +1281,7 @@ public class EnrollmentGroupTest
     public void setInitialTwinThrowsOnNull()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         enrollmentGroup.setInitialTwinFinal(null);
@@ -1063,7 +1294,7 @@ public class EnrollmentGroupTest
     public void setInitialTwinSucceed(@Mocked final TwinState mockedTwinState)
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
         assertNotEquals(mockedTwinState, Deencapsulation.getField(enrollmentGroup, "initialTwin"));
 
         // act
@@ -1078,7 +1309,7 @@ public class EnrollmentGroupTest
     public void setProvisioningStatusThrowsOnNull()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         enrollmentGroup.setProvisioningStatusFinal(null);
@@ -1091,7 +1322,7 @@ public class EnrollmentGroupTest
     public void setProvisioningStatusSucceed()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
         assertNotEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(enrollmentGroup, "provisioningStatus"));
 
         // act
@@ -1106,7 +1337,7 @@ public class EnrollmentGroupTest
     public void setCreatedDateTimeUtcSucceed()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
         assertNull(Deencapsulation.getField(enrollmentGroup, "createdDateTimeUtcDate"));
 
         // act
@@ -1121,7 +1352,7 @@ public class EnrollmentGroupTest
     public void setCreatedDateTimeUtcThrowsOnNull()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup,"setCreatedDateTimeUtc", new Class[] {String.class}, (String)null);
@@ -1134,7 +1365,7 @@ public class EnrollmentGroupTest
     public void setCreatedDateTimeUtcThrowsOnEmpty()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup,"setCreatedDateTimeUtc", new Class[] {String.class}, (String)"");
@@ -1147,7 +1378,7 @@ public class EnrollmentGroupTest
     public void setCreatedDateTimeUtcThrowsOnInvalid()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup,"setCreatedDateTimeUtc", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
@@ -1160,7 +1391,7 @@ public class EnrollmentGroupTest
     public void setLastUpdatedDateTimeUtcSucceed()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
         assertNull(Deencapsulation.getField(enrollmentGroup, "lastUpdatedDateTimeUtcDate"));
 
         // act
@@ -1175,7 +1406,7 @@ public class EnrollmentGroupTest
     public void setLastUpdatedDateTimeUtcThrowsOnNull()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)null);
@@ -1188,7 +1419,7 @@ public class EnrollmentGroupTest
     public void setLastUpdatedDateTimeUtcThrowsOnEmpty()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)"");
@@ -1201,7 +1432,7 @@ public class EnrollmentGroupTest
     public void setLastUpdatedDateTimeUtcThrowsOnInvalid()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
@@ -1214,7 +1445,7 @@ public class EnrollmentGroupTest
     public void setEtagThrowsOnNull()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup, "setEtag", new Class[] {String.class}, (String)null);
@@ -1227,7 +1458,7 @@ public class EnrollmentGroupTest
     public void setEtagThrowsOnEmpty()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardSymmetricKeyEnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup, "setEtag", new Class[] {String.class}, (String)"");
@@ -1240,7 +1471,7 @@ public class EnrollmentGroupTest
     public void setEtagThrowsOnNotUTF8()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardSymmetricKeyEnrollmentGroup();
 
         // act
         Deencapsulation.invoke(enrollmentGroup, "setEtag", new Class[] {String.class}, (String)"\u1234InvalidEtag");
@@ -1253,7 +1484,7 @@ public class EnrollmentGroupTest
     public void setEtagSucceed()
     {
         // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardEnrollmentGroup();
+        EnrollmentGroup enrollmentGroup = makeStandardSymmetricKeyEnrollmentGroup();
         final String newEtag = "NewEtag";
         assertNotEquals(newEtag, Deencapsulation.getField(enrollmentGroup, "etag"));
 
