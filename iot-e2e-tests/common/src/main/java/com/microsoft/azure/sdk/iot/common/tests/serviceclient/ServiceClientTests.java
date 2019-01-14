@@ -34,6 +34,8 @@ public class ServiceClientTests extends IntegrationTest
     private static String content = "abcdefghijklmnopqrstuvwxyz1234567890";
     private static String hostName;
 
+    private static final long MAX_TEST_MILLISECONDS = 1 * 60 * 1000;
+
     public ServiceClientTests(IotHubServiceClientProtocol protocol)
     {
         this.testInstance = new ServiceClientITRunner(protocol);
@@ -71,7 +73,7 @@ public class ServiceClientTests extends IntegrationTest
         return inputs;
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void cloudToDeviceTelemetry() throws Exception
     {
         // Arrange
@@ -119,7 +121,7 @@ public class ServiceClientTests extends IntegrationTest
         registryManager.close();
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void serviceClientValidatesRemoteCertificateWhenSendingTelemetry() throws IOException
     {
         boolean expectedExceptionWasCaught = false;
@@ -143,7 +145,7 @@ public class ServiceClientTests extends IntegrationTest
         assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void serviceClientValidatesRemoteCertificateWhenGettingFeedbackReceiver() throws IOException
     {
         boolean expectedExceptionWasCaught = false;
@@ -169,7 +171,7 @@ public class ServiceClientTests extends IntegrationTest
         assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void serviceClientValidatesRemoteCertificateWhenGettingFileUploadFeedbackReceiver() throws IOException
     {
         boolean expectedExceptionWasCaught = false;

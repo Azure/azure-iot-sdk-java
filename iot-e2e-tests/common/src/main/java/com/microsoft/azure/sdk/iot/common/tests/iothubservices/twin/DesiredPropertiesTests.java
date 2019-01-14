@@ -39,13 +39,13 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         System.out.println(clientType + " DesiredPropertiesTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testSubscribeToDesiredProperties() throws IOException, InterruptedException, IotHubException
     {
         subscribeToDesiredPropertiesAndVerify(MAX_PROPERTIES_TO_TEST);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testSubscribeToDesiredPropertiesWithVersion() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -77,7 +77,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, true);
     }
 
-    @Test(timeout = 240000) //4 minutes
+    @Test
     public void testSubscribeToDesiredPropertiesMultiThreaded() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -121,7 +121,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
 
         executor.shutdown();
-        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(5 * 60 * 1000, TimeUnit.MILLISECONDS)) //5 minutes
         {
             executor.shutdownNow();
         }
@@ -162,7 +162,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, false);
     }
 
-    @Test (timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    @Test
     public void setDesiredPropertiesAtMaxDepthAllowed() throws IOException, IotHubException
     {
         sCDeviceTwin.getTwin(deviceUnderTest.sCDeviceForTwin);
@@ -188,7 +188,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         sCDeviceTwin.getTwin(deviceUnderTest.sCDeviceForTwin);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testUpdateDesiredProperties() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);

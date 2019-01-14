@@ -39,6 +39,8 @@ public class RegistryManagerTests extends IntegrationTest
     private static final String primaryThumbprint2 =   "2222222222222222222222222222222222222222";
     private static final String secondaryThumbprint2 = "3333333333333333333333333333333333333333";
 
+    private static final long MAX_TEST_MILLISECONDS = 1 * 60 * 1000;
+    
     public static void setUp() throws IOException
     {
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
@@ -56,7 +58,7 @@ public class RegistryManagerTests extends IntegrationTest
         }
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_device_e2e() throws Exception
     {
         // Arrange
@@ -84,7 +86,7 @@ public class RegistryManagerTests extends IntegrationTest
         assertTrue(buildExceptionMessage("", hostName), deviceWasDeletedSuccessfully(registryManager, deviceId));
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_device_e2e_X509_CA_signed() throws Exception
     {
         // Arrange
@@ -117,7 +119,7 @@ public class RegistryManagerTests extends IntegrationTest
         assertTrue(buildExceptionMessage("", hostName), deviceWasDeletedSuccessfully(registryManager, deviceId));
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_device_e2e_X509_self_signed() throws Exception
     {
         // Arrange
@@ -161,7 +163,7 @@ public class RegistryManagerTests extends IntegrationTest
         registryManager.getStatistics();
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_module_e2e() throws Exception
     {
         // Arrange
@@ -197,7 +199,7 @@ public class RegistryManagerTests extends IntegrationTest
         assertTrue(buildExceptionMessage("", hostName), moduleWasDeletedSuccessfully(registryManager, deviceForTest, moduleId));
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_module_e2e_X509_CA_signed() throws Exception
     {
         // Arrange
@@ -230,7 +232,7 @@ public class RegistryManagerTests extends IntegrationTest
         assertTrue(buildExceptionMessage("", hostName), moduleWasDeletedSuccessfully(registryManager, deviceForTest, moduleId));
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_module_e2e_X509_self_signed() throws Exception
     {
         // Arrange
@@ -271,7 +273,7 @@ public class RegistryManagerTests extends IntegrationTest
         assertTrue(buildExceptionMessage("", hostName), moduleWasDeletedSuccessfully(registryManager, deviceId, moduleId));
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_adm_configuration_e2e() throws Exception
     {
         // Arrange

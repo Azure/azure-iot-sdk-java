@@ -44,7 +44,7 @@ public class SendMessagesTests extends SendMessagesCommon
         System.out.println(clientType + " SendMessagesTest UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void sendMessages() throws IOException, InterruptedException
     {
 
@@ -57,7 +57,7 @@ public class SendMessagesTests extends SendMessagesCommon
         IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void tokenRenewalWorks() throws InterruptedException
     {
         if (testInstance.authenticationType != SAS)
@@ -96,7 +96,7 @@ public class SendMessagesTests extends SendMessagesCommon
         }
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void sendMessagesOverAmqpsMultithreaded() throws InterruptedException, IOException, IotHubException
     {
         if (!(testInstance.protocol == AMQPS && testInstance.authenticationType == SAS && testInstance.clientType.equals(ClientType.DEVICE_CLIENT)))
@@ -147,7 +147,7 @@ public class SendMessagesTests extends SendMessagesCommon
         }
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void tokenExpiredAfterOpenButBeforeSendHttp() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
     {
         if (testInstance.protocol != HTTPS || testInstance.authenticationType != SAS)
@@ -167,7 +167,7 @@ public class SendMessagesTests extends SendMessagesCommon
         client.closeNow();
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void expiredMessagesAreNotSent() throws IOException
     {
         IotHubServicesCommon.sendExpiredMessageExpectingMessageExpiredCallback(testInstance.client, testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.authenticationType);

@@ -61,7 +61,7 @@ public class TransportClientTests extends IntegrationTest
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION = 500; // .5 seconds
     private static final long RESPONSE_TIMEOUT_SECONDS = 200; // 200 seconds
     private static final long CONNECTION_TIMEOUT_SECONDS = 5; //5 seconds
-    private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = 2 * 60 * 1000; // 2 minutes
+    private static final long MULTITHREADED_WAIT_TIMEOUT_MS  = 5 * 60 * 1000; // 5 minutes
     private static final long MAX_MILLISECS_TIMEOUT_FLUSH_NOTIFICATION = 10 * 1000; // 10 secs
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_PER_CALL_MS = 1000; // 1 second
     private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION * 10; // 2 sec
@@ -191,7 +191,7 @@ public class TransportClientTests extends IntegrationTest
         }
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void sendMessagesOverAmqps() throws URISyntaxException, IOException, InterruptedException
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -212,7 +212,7 @@ public class TransportClientTests extends IntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void sendMessagesOverAmqpsWs() throws URISyntaxException, IOException, InterruptedException
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
@@ -233,7 +233,7 @@ public class TransportClientTests extends IntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void receiveMessagesOverAmqpsIncludingProperties() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -261,7 +261,7 @@ public class TransportClientTests extends IntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void receiveMessagesOverAmqpWSIncludingProperties() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -352,7 +352,7 @@ public class TransportClientTests extends IntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void uploadToBlobAsyncSingleFileAndTelemetryOnAMQP() throws Exception
     {
         // arrange
@@ -412,7 +412,7 @@ public class TransportClientTests extends IntegrationTest
         }
 
         executor.shutdown();
-        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS))
         {
             executor.shutdownNow();
         }
@@ -426,7 +426,7 @@ public class TransportClientTests extends IntegrationTest
         tearDownFileUploadState();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void uploadToBlobAsyncSingleFileAndTelemetryOnAMQPWS() throws Exception
     {
         // arrange
@@ -487,7 +487,7 @@ public class TransportClientTests extends IntegrationTest
         }
 
         executor.shutdown();
-        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS))
         {
             executor.shutdownNow();
         }
@@ -501,7 +501,7 @@ public class TransportClientTests extends IntegrationTest
         tearDownFileUploadState();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void invokeMethodAMQPSSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -532,7 +532,7 @@ public class TransportClientTests extends IntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void invokeMethodAMQPSInvokeParallelSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -573,7 +573,7 @@ public class TransportClientTests extends IntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void invokeMethodAMQPSWSSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
@@ -604,7 +604,7 @@ public class TransportClientTests extends IntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void invokeMethodAMQPSWSInvokeParallelSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
@@ -645,7 +645,7 @@ public class TransportClientTests extends IntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testTwin() throws IOException, InterruptedException, IotHubException, URISyntaxException
     {
         TransportClient transportClient = setUpTwin();
@@ -749,7 +749,7 @@ public class TransportClientTests extends IntegrationTest
         }
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
         executor.shutdown();
-        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(5 * 60 * 1000, TimeUnit.MILLISECONDS)) //5 minutes
         {
             executor.shutdownNow();
         }

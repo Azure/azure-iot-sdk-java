@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.common.helpers;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
+import org.junit.rules.Timeout;
 import org.junit.runner.Description;
 
 public class IntegrationTest
@@ -25,4 +26,10 @@ public class IntegrationTest
             System.out.println("Finished test: " + description.getMethodName());
         }
     };
+
+    public static final int E2E_TEST_TIMEOUT_MS = 15 * 60 * 1000;
+
+    //This timeout applies to all individual tests in classes that inherit from this class
+    @Rule
+    public Timeout timeout = new Timeout(E2E_TEST_TIMEOUT_MS);
 }

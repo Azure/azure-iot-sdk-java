@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 
+import com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert;
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceConnectionString;
 import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
@@ -34,6 +35,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * Test class containing all tests to be run on JVM and android pertaining to twin with version. Class needs to be extended
@@ -43,6 +45,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 {
     private static final long BREATHE_TIME = 100; // 0.1 sec
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 1000; // 1 sec
+    private static final long EXPECTED_PROPERTIES_MAX_WAIT_MS = 60 * 1000; //1 minute
     private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB + 50000; // 50 secs
     protected static String iotHubConnectionString = "";
 
@@ -243,7 +246,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         testDevice = null;
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testSendReportedPropertiesWithoutVersionSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
@@ -263,8 +266,14 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         }
 
         testDevice.deviceClient.getDeviceTwin();
+        long startTime = System.currentTimeMillis();
         while(!testDevice.expectedProperties.isEmpty())
         {
+            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+            {
+                fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+            }
+
             Thread.sleep(BREATHE_TIME);
             if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
             {
@@ -281,7 +290,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         assertSetEquals(PROPERTIES, reported);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testUpdateReportedPropertiesWithVersionSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
@@ -294,8 +303,14 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         testDevice.deviceClient.getDeviceTwin();
+        long startTime = System.currentTimeMillis();
         while(!testDevice.expectedProperties.isEmpty())
         {
+            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+            {
+                fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+            }
+
             Thread.sleep(BREATHE_TIME);
             if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
             {
@@ -339,8 +354,14 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
             testDevice.reportedPropertyVersion = null;
             testDevice.receivedProperties = new HashSet<>();
             testDevice.deviceClient.getDeviceTwin();
+            startTime = System.currentTimeMillis();
             while(!testDevice.expectedProperties.isEmpty())
             {
+                if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+                {
+                    fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+                }
+
                 Thread.sleep(BREATHE_TIME);
                 if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
                 {
@@ -356,7 +377,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         assertSetEquals(newValues, reported);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testUpdateReportedPropertiesWithLowerVersionFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
@@ -369,8 +390,14 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         testDevice.deviceClient.getDeviceTwin();
+        long startTime = System.currentTimeMillis();
         while(!testDevice.expectedProperties.isEmpty())
         {
+            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+            {
+                fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+            }
+
             Thread.sleep(BREATHE_TIME);
             if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
             {
@@ -411,8 +438,14 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         testDevice.reportedPropertyVersion = null;
         testDevice.receivedProperties = new HashSet<>();
         testDevice.deviceClient.getDeviceTwin();
+        startTime = System.currentTimeMillis();
         while(!testDevice.expectedProperties.isEmpty())
         {
+            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+            {
+                fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+            }
+
             Thread.sleep(BREATHE_TIME);
             if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
             {
@@ -429,7 +462,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         assertSetEquals(PROPERTIES, reported);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testUpdateReportedPropertiesWithHigherVersionFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
@@ -442,8 +475,14 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
         testDevice.deviceClient.getDeviceTwin();
+        long startTime = System.currentTimeMillis();
         while(!testDevice.expectedProperties.isEmpty())
         {
+            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+            {
+                fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+            }
+
             Thread.sleep(BREATHE_TIME);
             if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
             {
@@ -484,8 +523,14 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         testDevice.reportedPropertyVersion = null;
         testDevice.receivedProperties = new HashSet<>();
         testDevice.deviceClient.getDeviceTwin();
+        startTime = System.currentTimeMillis();
         while(!testDevice.expectedProperties.isEmpty())
         {
+            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+            {
+                fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+            }
+
             Thread.sleep(BREATHE_TIME);
             if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
             {

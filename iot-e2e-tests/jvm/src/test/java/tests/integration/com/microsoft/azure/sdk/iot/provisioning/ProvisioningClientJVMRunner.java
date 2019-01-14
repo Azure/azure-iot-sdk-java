@@ -66,7 +66,7 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
     private static final String TPM_SIMULATOR_IP_ADDRESS_ENV_NAME = "IOT_DPS_TPM_SIMULATOR_IP_ADDRESS"; // ip address of TPM simulator
     private static String tpmSimulatorIpAddress = "";
 
-    private static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 20 * 60 * 1000; // one registration could take up to 20 mins
+    private static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 2 * 60 * 1000; // one registration could take up to 2 mins
 
     private static final long TPM_CONNECTION_TIMEOUT = 1 * 60 * 1000;
 
@@ -89,7 +89,7 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
     private RegistryManager registryManager = null;
 
     private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
-    private static final int OVERALL_TEST_TIMEOUT = 10 * 60 * 1000; // 10 minutes
+    private static final int OVERALL_TEST_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection inputs()

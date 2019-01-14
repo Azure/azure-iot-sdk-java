@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.common.helpers.MessageAndResult;
 import com.microsoft.azure.sdk.iot.common.setup.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.NoRetry;
@@ -226,7 +227,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
-    public void sendMessagesWithThrottling() throws URISyntaxException, IOException, IotHubException, InterruptedException
+    public void sendMessagesWithThrottling() throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
         {
@@ -241,7 +242,6 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
 
     }
 
-    @Ignore
     @Test
     public void sendMessagesWithThrottlingNoRetry() throws URISyntaxException, IOException, IotHubException, InterruptedException
     {

@@ -39,7 +39,7 @@ public class TwinTagsTests extends DeviceTwinCommon
         System.out.println(clientType + " TwinTagsTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testGetTwinUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -103,7 +103,7 @@ public class TwinTagsTests extends DeviceTwinCommon
         removeMultipleDevices(MAX_DEVICES);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testAddTagUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -134,7 +134,7 @@ public class TwinTagsTests extends DeviceTwinCommon
         removeMultipleDevices(MAX_DEVICES);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testUpdateTagUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -200,7 +200,7 @@ public class TwinTagsTests extends DeviceTwinCommon
         removeMultipleDevices(MAX_DEVICES);
     }
 
-    @Test (timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    @Test
     public void setTagsAtMaxDepthAllowed() throws IOException, IotHubException
     {
         sCDeviceTwin.getTwin(deviceUnderTest.sCDeviceForTwin);

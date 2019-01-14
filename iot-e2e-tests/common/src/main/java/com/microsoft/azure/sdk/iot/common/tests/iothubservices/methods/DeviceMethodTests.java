@@ -40,13 +40,13 @@ public class DeviceMethodTests extends DeviceMethodCommon
         System.out.println(clientType + " DeviceMethodTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
     }
 
-    @Test(timeout=DEFAULT_TEST_TIMEOUT)
+    @Test
     public void invokeMethodSucceed() throws Exception
     {
         super.invokeMethodSucceed();
     }
 
-    @Test(timeout=DEFAULT_TEST_TIMEOUT)
+    @Test
     public void invokeMethodInvokeParallelSucceed() throws Exception
     {
         // Arrange
@@ -79,7 +79,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         }
     }
 
-    @Test(timeout=DEFAULT_TEST_TIMEOUT)
+    @Test
     public void invokeMethodStandardTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -105,7 +105,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
-    @Test(timeout=DEFAULT_TEST_TIMEOUT)
+    @Test
     public void invokeMethodNullPayloadSucceed() throws Exception
     {
         // Arrange
@@ -130,7 +130,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
-    @Test(timeout=DEFAULT_TEST_TIMEOUT)
+    @Test
     public void invokeMethodNumberSucceed() throws Exception
     {
         // Arrange
@@ -155,7 +155,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
-    @Test(timeout=DEFAULT_TEST_TIMEOUT)
+    @Test
     public void invokeMethodThrowsNumberFormatExceptionFailed() throws Exception
     {
         // Arrange
@@ -180,7 +180,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
-    @Test(timeout=DEFAULT_TEST_TIMEOUT)
+    @Test
     public void invokeMethodUnknownFailed() throws Exception
     {
         // Arrange
@@ -205,7 +205,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
-    @Test(timeout=DEFAULT_TEST_TIMEOUT)
+    @Test
     public void invokeMethodRecoverFromTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -247,7 +247,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
-    @Test(timeout=DEFAULT_TEST_TIMEOUT)
+    @Test
     public void invokeMethodDefaultResponseTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -272,7 +272,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
-    @Test(timeout=DEFAULT_TEST_TIMEOUT)
+    @Test
     public void invokeMethodDefaultConnectionTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -297,7 +297,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
-    @Test(timeout=DEFAULT_TEST_TIMEOUT, expected = IotHubGatewayTimeoutException.class)
+    @Test (expected = IotHubGatewayTimeoutException.class)
     public void invokeMethodResponseTimeoutFailed() throws Exception
     {
         // Arrange
@@ -312,7 +312,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         }
     }
 
-    @Test(timeout=DEFAULT_TEST_TIMEOUT, expected = IotHubNotFoundException.class)
+    @Test(expected = IotHubNotFoundException.class)
     public void invokeMethodUnknownDeviceFailed() throws Exception
     {
         if (testInstance.identity instanceof Module)
@@ -325,7 +325,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         }
     }
 
-    @Test(timeout=DEFAULT_TEST_TIMEOUT)
+    @Test
     public void invokeMethodResetDeviceFailed() throws Exception
     {
         // Arrange

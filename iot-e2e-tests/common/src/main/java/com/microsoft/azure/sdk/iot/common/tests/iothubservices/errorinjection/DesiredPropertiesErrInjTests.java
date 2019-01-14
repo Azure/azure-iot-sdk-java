@@ -38,7 +38,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
         System.out.println(clientType + " DesiredPropertiesErrInjTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
-    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    @Test
     public void subscribeToDesiredPropertiesRecoveredFromTcpConnectionDrop() throws Exception
     {
         this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
@@ -46,7 +46,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    @Test
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsConnectionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -59,7 +59,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    @Test
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsSessionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -72,7 +72,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    @Test
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsCBSReqLinkrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -91,7 +91,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    @Test
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -110,7 +110,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    @Test
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsD2CDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -123,7 +123,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    @Test
     public void subscribeToDesiredPropertiesRecoveredFromC2DDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -143,7 +143,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    @Test
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -163,7 +163,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    @Test
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -183,7 +183,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    @Test
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsMethodReqLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -203,7 +203,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
+    @Test
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsMethodRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
