@@ -36,6 +36,8 @@ public class RegistryManagerTests
     private static final String primaryThumbprint2 =   "2222222222222222222222222222222222222222";
     private static final String secondaryThumbprint2 = "3333333333333333333333333333333333333333";
 
+    private static final long MAX_TEST_MILLISECONDS = 1 * 60 * 1000;
+    
     public static void setUp() throws IOException
     {
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
@@ -52,7 +54,7 @@ public class RegistryManagerTests
         }
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_device_e2e() throws Exception
     {
         // Arrange
@@ -80,7 +82,7 @@ public class RegistryManagerTests
         assertTrue(deviceWasDeletedSuccessfully(registryManager, deviceId));
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_device_e2e_X509_CA_signed() throws Exception
     {
         // Arrange
@@ -113,7 +115,7 @@ public class RegistryManagerTests
         assertTrue(deviceWasDeletedSuccessfully(registryManager, deviceId));
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_device_e2e_X509_self_signed() throws Exception
     {
         // Arrange
@@ -149,14 +151,14 @@ public class RegistryManagerTests
         assertTrue(deviceWasDeletedSuccessfully(registryManager, deviceId));
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void getDeviceStatisticsTest() throws Exception
     {
         RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         registryManager.getStatistics();
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_module_e2e() throws Exception
     {
         // Arrange
@@ -192,7 +194,7 @@ public class RegistryManagerTests
         assertTrue(moduleWasDeletedSuccessfully(registryManager, deviceForTest, moduleId));
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_module_e2e_X509_CA_signed() throws Exception
     {
         // Arrange
@@ -225,7 +227,7 @@ public class RegistryManagerTests
         assertTrue(moduleWasDeletedSuccessfully(registryManager, deviceForTest, moduleId));
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_module_e2e_X509_self_signed() throws Exception
     {
         // Arrange
@@ -266,7 +268,7 @@ public class RegistryManagerTests
         assertTrue(moduleWasDeletedSuccessfully(registryManager, deviceId, moduleId));
     }
 
-    @Test
+    @Test (timeout=MAX_TEST_MILLISECONDS)
     public void crud_adm_configuration_e2e() throws Exception
     {
         // Arrange
@@ -332,7 +334,7 @@ public class RegistryManagerTests
         assertTrue(configWasDeletedSuccessfully(registryManager, configId));
     }
 
-    @Test(expected = IotHubBadFormatException.class)
+    @Test (timeout=MAX_TEST_MILLISECONDS, expected = IotHubBadFormatException.class)
     public void apply_configuration_e2e() throws Exception
     {
         // Arrange

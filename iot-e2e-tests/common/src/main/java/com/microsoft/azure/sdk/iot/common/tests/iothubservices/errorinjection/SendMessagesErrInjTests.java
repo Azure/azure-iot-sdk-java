@@ -42,7 +42,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         super(client, protocol, identity, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesWithTcpConnectionDrop() throws IOException, InterruptedException
     {
         if (testInstance.protocol == HTTPS || (testInstance.protocol == MQTT_WS && testInstance.authenticationType != SAS))
@@ -55,7 +55,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, TCP_CONNECTION_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesOverAmqpWithConnectionDrop() throws IOException, InterruptedException
     {
         if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)))
@@ -67,7 +67,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, AMQP_CONNECTION_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesOverAmqpWithSessionDrop() throws IOException, InterruptedException
     {
         if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)))
@@ -79,7 +79,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, AMQP_SESSION_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesOverAmqpWithCbsRequestLinkDrop() throws IOException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -97,7 +97,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, AMQP_CBS_REQUEST_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesOverAmqpWithCbsResponseLinkDrop() throws IOException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -115,7 +115,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, AMQP_CBS_RESPONSE_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesOverAmqpWithD2CLinkDrop() throws IOException, InterruptedException
     {
         if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)))
@@ -127,7 +127,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, AMQP_D2C_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesOverAmqpWithC2DLinkDrop() throws IOException, InterruptedException
     {
         if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)))
@@ -146,7 +146,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, AMQP_C2D_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesOverAmqpWithMethodReqLinkDrop() throws IOException, InterruptedException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -165,7 +165,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, AMQP_METHOD_REQ_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesOverAmqpWithMethodRespLinkDrop() throws IOException, InterruptedException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -184,7 +184,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, AMQP_METHOD_RESP_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesOverAmqpWithTwinReqLinkDrop() throws IOException, InterruptedException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -203,7 +203,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, AMQP_TWIN_REQ_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesOverAmqpWithTwinRespLinkDrop() throws IOException, InterruptedException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -222,7 +222,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, AMQP_TWIN_RESP_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesWithThrottling() throws URISyntaxException, IOException, IotHubException, InterruptedException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -239,7 +239,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Ignore
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesWithThrottlingNoRetry() throws URISyntaxException, IOException, IotHubException, InterruptedException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -255,7 +255,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
 
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesWithAuthenticationError() throws URISyntaxException, IOException, IotHubException, InterruptedException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -270,7 +270,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
                 false);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesWithQuotaExceeded() throws URISyntaxException, IOException, IotHubException, InterruptedException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -285,7 +285,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
                 false);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesOverAmqpWithGracefulShutdown() throws IOException, InterruptedException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -297,7 +297,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, AMQP_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesOverMqttWithGracefulShutdown() throws IOException, InterruptedException
     {
         if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS))
@@ -309,7 +309,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.client, testInstance.protocol, MQTT_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
     }
 
-    @Test
+    @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)
     public void sendMessagesWithTcpConnectionDropNotifiesUserIfRetryExpires() throws IOException, InterruptedException
     {
         if (testInstance.protocol == HTTPS || (testInstance.protocol == MQTT_WS && testInstance.authenticationType != SAS))

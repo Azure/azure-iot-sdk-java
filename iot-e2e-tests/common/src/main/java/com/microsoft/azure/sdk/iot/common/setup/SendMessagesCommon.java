@@ -51,6 +51,7 @@ public class SendMessagesCommon extends MethodNameLoggingIntegrationTest
     protected static final Integer RETRY_MILLISECONDS = 100;
 
     protected static final long DEFAULT_TEST_TIMEOUT = 1 * 60 * 1000;
+    protected static final long ERROR_INJECTION_EXECUTION_TIMEOUT = 2 * 60 * 1000; // 2 minutes
     protected static String iotHubConnectionString = "";
     protected static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 

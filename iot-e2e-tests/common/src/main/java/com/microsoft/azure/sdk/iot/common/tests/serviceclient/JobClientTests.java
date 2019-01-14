@@ -174,13 +174,14 @@ public class JobClientTests
             device.stop();
         }
 
-        if (registryManager != null){
+        if (registryManager != null)
+        {
             registryManager.close();
             registryManager = null;
         }
     }
 
-    @Test
+    @Test (timeout=TEST_TIMEOUT_MS)
     public void scheduleUpdateTwinSucceed() throws IOException, IotHubException, InterruptedException
     {
         // Arrange
@@ -267,7 +268,7 @@ public class JobClientTests
         }
     }
 
-    @Test
+    @Test (timeout=TEST_TIMEOUT_MS)
     public void scheduleDeviceMethodSucceed() throws IOException, IotHubException, InterruptedException
     {
         // Arrange
@@ -353,7 +354,7 @@ public class JobClientTests
         assertEquals(0, deviceTestManger.getStatusError());
     }
 
-    @Test
+    @Test (timeout=TEST_TIMEOUT_MS)
     public void mixScheduleInFutureSucceed() throws IOException, IotHubException, InterruptedException
     {
         // Arrange
@@ -475,7 +476,7 @@ public class JobClientTests
         assertEquals(0, deviceTestManger.getStatusError());
     }
 
-    @Test
+    @Test (timeout=TEST_TIMEOUT_MS)
     public void cancelScheduleDeviceMethodSucceed() throws IOException, IotHubException, InterruptedException
     {
         // Arrange
