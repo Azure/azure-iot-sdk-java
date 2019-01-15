@@ -54,7 +54,7 @@ public class SendMessagesTests extends SendMessagesCommon
         IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test (timeout = 4 * DEFAULT_TEST_TIMEOUT)
     public void tokenRenewalWorks() throws InterruptedException
     {
         if (testInstance.authenticationType != SAS)
