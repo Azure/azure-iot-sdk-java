@@ -89,7 +89,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
     private static final Integer MAX_FILES_TO_UPLOAD = 1;
 
-    private static ArrayList<String> clientConnectionStringArrayList = new ArrayList<>();
+    private static String[] clientConnectionStringArrayList = new String[MAX_DEVICE_MULTIPLEX];
 
     private static DeviceMethod methodServiceClient;
 
@@ -98,7 +98,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     private static final String METHOD_NAME = "methodName";
     private static final String METHOD_PAYLOAD = "This is a good payload";
 
-    private static ArrayList<DeviceState> devicesUnderTest = new ArrayList<>();
+    private static DeviceState[] devicesUnderTest = new DeviceState[MAX_DEVICE_MULTIPLEX];
     private static DeviceTwin sCDeviceTwin;
 
     private static final String PROPERTY_KEY = "Key";
@@ -120,7 +120,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
             deviceListAmqps[i] = Device.createFromId(deviceId, null, null);
             registryManager.addDevice(deviceListAmqps[i]);
-            clientConnectionStringArrayList.add(registryManager.getDeviceConnectionString(deviceListAmqps[i]));
+            clientConnectionStringArrayList[i] = registryManager.getDeviceConnectionString(deviceListAmqps[i]);
         }
 
         Thread.sleep(MAX_DEVICE_MULTIPLEX * REGISTRY_MANAGER_DEVICE_CREATION_DELAY_MILLISECONDS);
@@ -163,16 +163,12 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
             registryManager.close();
 
             registryManager = null;
-
-            clientConnectionStringArrayList.clear();
         }
 
         if (serviceClient != null)
         {
             serviceClient.close();
         }
-
-        clientConnectionStringArrayList.clear();
     }
 
     @After
@@ -197,7 +193,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
-            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
+            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList[i], transportClient));
         }
 
         openTransportClientWithRetry(transportClient, clientArrayList);
@@ -218,7 +214,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
-            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
+            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList[i], transportClient));
         }
 
         openTransportClientWithRetry(transportClient, clientArrayList);
@@ -239,7 +235,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
-            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
+            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList[i], transportClient));
         }
 
         IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
@@ -267,7 +263,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
-            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
+            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList[i], transportClient));
         }
 
         IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
@@ -295,7 +291,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
-            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
+            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList[i], transportClient));
         }
         CountDownLatch cdl = new CountDownLatch(clientArrayList.size());
 
@@ -326,7 +322,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
-            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
+            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList[i], transportClient));
         }
 
         CountDownLatch cdl = new CountDownLatch(clientArrayList.size());
@@ -360,7 +356,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
-            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
+            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList[i], transportClient));
         }
 
         IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
@@ -434,7 +430,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
-            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
+            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList[i], transportClient));
         }
 
         IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
@@ -507,7 +503,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
-            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
+            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList[i], transportClient));
         }
 
         IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
@@ -538,7 +534,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
-            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
+            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList[i], transportClient));
         }
 
         IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
@@ -579,7 +575,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
-            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
+            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList[i], transportClient));
         }
 
         IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
@@ -610,7 +606,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
-            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList.get(i), transportClient));
+            clientArrayList.add(new DeviceClient(clientConnectionStringArrayList[i], transportClient));
         }
 
         IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
@@ -658,12 +654,12 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
                 PropertyState propertyState = new PropertyState();
                 propertyState.callBackTriggered = false;
                 propertyState.property = new Property(PROPERTY_KEY + j, PROPERTY_VALUE);
-                devicesUnderTest.get(i).dCDeviceForTwin.propertyStateList.add(propertyState);
-                devicesUnderTest.get(i).dCDeviceForTwin.setDesiredPropertyCallback(propertyState.property, devicesUnderTest.get(i).dCDeviceForTwin, propertyState);
+                devicesUnderTest[i].dCDeviceForTwin.propertyStateList.add(propertyState);
+                devicesUnderTest[i].dCDeviceForTwin.setDesiredPropertyCallback(propertyState.property, devicesUnderTest[i].dCDeviceForTwin, propertyState);
             }
 
             // act
-            devicesUnderTest.get(i).deviceClient.subscribeToDesiredProperties(devicesUnderTest.get(i).dCDeviceForTwin.getDesiredProp());
+            devicesUnderTest[i].deviceClient.subscribeToDesiredProperties(devicesUnderTest[i].dCDeviceForTwin.getDesiredProp());
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
 
             Set<Pair> desiredProperties = new HashSet<>();
@@ -671,17 +667,17 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
             {
                 desiredProperties.add(new Pair(PROPERTY_KEY + j, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
             }
-            devicesUnderTest.get(i).sCDeviceForTwin.setDesiredProperties(desiredProperties);
-            sCDeviceTwin.updateTwin(devicesUnderTest.get(i).sCDeviceForTwin);
+            devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
+            sCDeviceTwin.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
 
             // assert
-            Assert.assertEquals(buildExceptionMessage("Device twin status expected to be SUCCESS, but was: " + devicesUnderTest.get(i).deviceTwinStatus, devicesUnderTest.get(i).deviceClient), SUCCESS, devicesUnderTest.get(i).deviceTwinStatus);
-            for (PropertyState propertyState : devicesUnderTest.get(i).dCDeviceForTwin.propertyStateList)
+            Assert.assertEquals(buildExceptionMessage("Device twin status expected to be SUCCESS, but was: " + devicesUnderTest[i].deviceTwinStatus, devicesUnderTest[i].deviceClient), SUCCESS, devicesUnderTest[i].deviceTwinStatus);
+            for (PropertyState propertyState : devicesUnderTest[i].dCDeviceForTwin.propertyStateList)
             {
-                Assert.assertTrue(buildExceptionMessage("One or more property callbacks were not triggered", devicesUnderTest.get(i).deviceClient), propertyState.callBackTriggered);
-                Assert.assertTrue(buildExceptionMessage("Property new value did not start with " + PROPERTY_VALUE_UPDATE, devicesUnderTest.get(i).deviceClient), ((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
-                Assert.assertEquals(buildExceptionMessage("Expected SUCCESS but device twin status was " + devicesUnderTest.get(i).deviceTwinStatus, devicesUnderTest.get(i).deviceClient), SUCCESS, devicesUnderTest.get(i).deviceTwinStatus);
+                Assert.assertTrue(buildExceptionMessage("One or more property callbacks were not triggered", devicesUnderTest[i].deviceClient), propertyState.callBackTriggered);
+                Assert.assertTrue(buildExceptionMessage("Property new value did not start with " + PROPERTY_VALUE_UPDATE, devicesUnderTest[i].deviceClient), ((String) propertyState.propertyNewValue).startsWith(PROPERTY_VALUE_UPDATE));
+                Assert.assertEquals(buildExceptionMessage("Expected SUCCESS but device twin status was " + devicesUnderTest[i].deviceTwinStatus, devicesUnderTest[i].deviceClient), SUCCESS, devicesUnderTest[i].deviceTwinStatus);
             }
         }
 
@@ -690,23 +686,23 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         {
             // act
             // send max_prop RP all at once
-            devicesUnderTest.get(i).dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
-            devicesUnderTest.get(i).deviceClient.sendReportedProperties(devicesUnderTest.get(i).dCDeviceForTwin.getReportedProp());
+            devicesUnderTest[i].dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
+            devicesUnderTest[i].deviceClient.sendReportedProperties(devicesUnderTest[i].dCDeviceForTwin.getReportedProp());
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
 
             // act
             // Update RP
-            devicesUnderTest.get(i).dCDeviceForTwin.updateAllExistingReportedProperties();
-            devicesUnderTest.get(i).deviceClient.sendReportedProperties(devicesUnderTest.get(i).dCDeviceForTwin.getReportedProp());
+            devicesUnderTest[i].dCDeviceForTwin.updateAllExistingReportedProperties();
+            devicesUnderTest[i].deviceClient.sendReportedProperties(devicesUnderTest[i].dCDeviceForTwin.getReportedProp());
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
 
             // assert
-            Assert.assertEquals(buildExceptionMessage("Expected status SUCCESS but was " + devicesUnderTest.get(i).deviceTwinStatus, devicesUnderTest.get(i).deviceClient), SUCCESS, devicesUnderTest.get(i).deviceTwinStatus);
+            Assert.assertEquals(buildExceptionMessage("Expected status SUCCESS but was " + devicesUnderTest[i].deviceTwinStatus, devicesUnderTest[i].deviceClient), SUCCESS, devicesUnderTest[i].deviceTwinStatus);
 
             // verify if they are received by SC
             Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
-            int actualReportedPropFound = readReportedProperties(devicesUnderTest.get(i), PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
-            Assert.assertEquals(buildExceptionMessage("Missing reported properties on the " + (i+1) + " device out of " + MAX_DEVICE_MULTIPLEX,devicesUnderTest.get(i).deviceClient), MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
+            int actualReportedPropFound = readReportedProperties(devicesUnderTest[i], PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
+            Assert.assertEquals(buildExceptionMessage("Missing reported properties on the " + (i+1) + " device out of " + MAX_DEVICE_MULTIPLEX,devicesUnderTest[i].deviceClient), MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
         }
 
         // send max_prop RP one at a time in parallel
@@ -722,26 +718,26 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
                     // testSendReportedPropertiesMultiThreaded
                     try
                     {
-                        devicesUnderTest.get(finalI).dCDeviceForTwin.createNewReportedProperties(1);
-                        devicesUnderTest.get(finalI).deviceClient.sendReportedProperties(devicesUnderTest.get(finalI).dCDeviceForTwin.getReportedProp());
+                        devicesUnderTest[finalI].dCDeviceForTwin.createNewReportedProperties(1);
+                        devicesUnderTest[finalI].deviceClient.sendReportedProperties(devicesUnderTest[finalI].dCDeviceForTwin.getReportedProp());
                     }
                     catch (IOException e)
                     {
-                        Assert.fail(buildExceptionMessage(e.getMessage(), devicesUnderTest.get(finalI).deviceClient));
+                        Assert.fail(buildExceptionMessage(e.getMessage(), devicesUnderTest[finalI].deviceClient));
                     }
-                    Assert.assertEquals(buildExceptionMessage("Expected SUCCESS but was " + devicesUnderTest.get(finalI).deviceTwinStatus, devicesUnderTest.get(finalI).deviceClient), SUCCESS, devicesUnderTest.get(finalI).deviceTwinStatus);
+                    Assert.assertEquals(buildExceptionMessage("Expected SUCCESS but was " + devicesUnderTest[finalI].deviceTwinStatus, devicesUnderTest[finalI].deviceClient), SUCCESS, devicesUnderTest[finalI].deviceTwinStatus);
 
                     // testUpdateReportedPropertiesMultiThreaded
                     try
                     {
-                        devicesUnderTest.get(finalI).dCDeviceForTwin.updateExistingReportedProperty(finalI);
-                        devicesUnderTest.get(finalI).deviceClient.sendReportedProperties(devicesUnderTest.get(finalI).dCDeviceForTwin.getReportedProp());
+                        devicesUnderTest[finalI].dCDeviceForTwin.updateExistingReportedProperty(finalI);
+                        devicesUnderTest[finalI].deviceClient.sendReportedProperties(devicesUnderTest[finalI].dCDeviceForTwin.getReportedProp());
                     }
                     catch (IOException e)
                     {
-                        Assert.fail(buildExceptionMessage(e.getMessage(), devicesUnderTest.get(finalI).deviceClient));
+                        Assert.fail(buildExceptionMessage(e.getMessage(), devicesUnderTest[finalI].deviceClient));
                     }
-                    Assert.assertEquals(buildExceptionMessage("Expected SUCCESS but was " + devicesUnderTest.get(finalI).deviceTwinStatus, devicesUnderTest.get(finalI).deviceClient), SUCCESS, devicesUnderTest.get(finalI).deviceTwinStatus);
+                    Assert.assertEquals(buildExceptionMessage("Expected SUCCESS but was " + devicesUnderTest[finalI].deviceTwinStatus, devicesUnderTest[finalI].deviceClient), SUCCESS, devicesUnderTest[finalI].deviceTwinStatus);
                 }
             });
         }
@@ -1158,7 +1154,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
             DeviceState deviceState = new DeviceState();
             deviceState.sCDeviceForRegistryManager = deviceListAmqps[i];
             deviceState.connectionString = registryManager.getDeviceConnectionString(deviceState.sCDeviceForRegistryManager);
-            devicesUnderTest.add(deviceState);
+            devicesUnderTest[i] = deviceState;
 
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
         }
@@ -1168,9 +1164,9 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         ArrayList<InternalClient> clientArrayList = new ArrayList<>();
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            DeviceState deviceState = devicesUnderTest.get(i);
+            DeviceState deviceState = devicesUnderTest[i];
             deviceState.deviceClient = new DeviceClient(deviceState.connectionString, transportClient);
-            devicesUnderTest.get(i).dCDeviceForTwin = new DeviceExtension();
+            devicesUnderTest[i].dCDeviceForTwin = new DeviceExtension();
             clientArrayList.add(deviceState.deviceClient);
         }
 
@@ -1178,10 +1174,10 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            devicesUnderTest.get(i).deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), devicesUnderTest.get(i), devicesUnderTest.get(i).dCDeviceForTwin, devicesUnderTest.get(i));
-            devicesUnderTest.get(i).deviceTwinStatus = SUCCESS;
-            devicesUnderTest.get(i).sCDeviceForTwin = new DeviceTwinDevice(devicesUnderTest.get(i).sCDeviceForRegistryManager.getDeviceId());
-            sCDeviceTwin.getTwin(devicesUnderTest.get(i).sCDeviceForTwin);
+            devicesUnderTest[i].deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), devicesUnderTest[i], devicesUnderTest[i].dCDeviceForTwin, devicesUnderTest[i]);
+            devicesUnderTest[i].deviceTwinStatus = SUCCESS;
+            devicesUnderTest[i].sCDeviceForTwin = new DeviceTwinDevice(devicesUnderTest[i].sCDeviceForRegistryManager.getDeviceId());
+            sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
         }
 
