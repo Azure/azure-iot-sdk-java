@@ -644,7 +644,16 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
     public void testTwin() throws IOException, InterruptedException, IotHubException, URISyntaxException
     {
-        TransportClient transportClient = setUpTwin();
+        TransportClient transportClient = null;
+        try
+        {
+            transportClient = setUpTwin();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            fail("Encountered exception during setUpTwin: " + e.getMessage());
+        }
 
         ExecutorService executor = Executors.newFixedThreadPool(MAX_PROPERTIES_TO_TEST);
 
@@ -751,7 +760,15 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         }
 
         System.out.println("Tearing down twin status...");
-        tearDownTwin(transportClient);
+        try
+        {
+            tearDownTwin(transportClient);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            fail("Encountered exception during tearDownTwin: " + e.getMessage());
+        }
     }
     
     private void verifyNotification(FileUploadNotification fileUploadNotification, FileUploadState fileUploadState, InternalClient client) throws IOException
