@@ -33,6 +33,8 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     public GetTwinErrInjTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+
+        System.out.print(clientType + " GetTwinErrInjTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)

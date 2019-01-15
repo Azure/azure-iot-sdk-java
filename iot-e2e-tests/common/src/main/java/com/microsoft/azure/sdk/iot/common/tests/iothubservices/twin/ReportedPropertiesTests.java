@@ -29,6 +29,8 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
     public ReportedPropertiesTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+
+        System.out.print(clientType + " ReportedPropertiesTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -75,7 +77,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST.intValue());
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testSendReportedPropertiesSequentially() throws IOException, InterruptedException, IotHubException
     {
         // arrange

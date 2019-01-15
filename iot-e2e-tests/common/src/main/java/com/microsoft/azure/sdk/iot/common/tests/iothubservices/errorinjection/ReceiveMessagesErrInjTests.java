@@ -37,6 +37,8 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     public ReceiveMessagesErrInjTests(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(client, protocol, identity, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+
+        System.out.print(clientType + " ReceiveMessagesErrInjTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
     }
 
     @Test (timeout = DEFAULT_TEST_TIMEOUT)

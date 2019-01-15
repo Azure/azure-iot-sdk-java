@@ -114,6 +114,8 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
 
         String uuid = UUID.randomUUID().toString();
 
+        System.out.print("TransportClientTests UUID: " + uuid);
+
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
         {
             String deviceId = "java-device-client-e2e-test-multiplexing".concat(i + "-" + uuid);

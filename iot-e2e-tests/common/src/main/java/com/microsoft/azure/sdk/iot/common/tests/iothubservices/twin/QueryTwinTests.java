@@ -36,6 +36,8 @@ public class QueryTwinTests extends DeviceTwinCommon
     public QueryTwinTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+
+        System.out.print(clientType + " QueryTwinTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)

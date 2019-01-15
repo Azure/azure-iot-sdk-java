@@ -35,6 +35,8 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     public DesiredPropertiesTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+
+        System.out.print(clientType + " DesiredPropertiesTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
@@ -129,7 +131,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, false);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testSubscribeToDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException
     {
         // arrange
