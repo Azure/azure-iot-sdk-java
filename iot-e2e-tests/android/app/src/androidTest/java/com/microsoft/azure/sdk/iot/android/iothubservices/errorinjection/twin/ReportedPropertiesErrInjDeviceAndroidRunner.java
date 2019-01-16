@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 
 import org.junit.AfterClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 
+@Ignore
 @TestGroupC
 @RunWith(Parameterized.class)
 public class ReportedPropertiesErrInjDeviceAndroidRunner extends ReportedPropertiesErrInjTests

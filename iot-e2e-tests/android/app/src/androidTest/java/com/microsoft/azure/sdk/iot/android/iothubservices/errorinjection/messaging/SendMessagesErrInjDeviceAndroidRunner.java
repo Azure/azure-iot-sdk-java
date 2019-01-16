@@ -21,6 +21,7 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import org.junit.AfterClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -30,6 +31,7 @@ import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 
+@Ignore
 @TestGroupA
 @RunWith(Parameterized.class)
 public class SendMessagesErrInjDeviceAndroidRunner extends SendMessagesErrInjTests
