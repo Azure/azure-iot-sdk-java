@@ -26,7 +26,7 @@ public class GetTwinTests extends DeviceTwinCommon
         System.out.println(clientType + " GetTwinTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException
     {
         super.testGetDeviceTwin();

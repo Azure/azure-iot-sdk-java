@@ -39,7 +39,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
         System.out.println(clientType + " ReceiveMessagesTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesOverIncludingProperties() throws Exception
     {
         if (testInstance.protocol == HTTPS)
@@ -82,7 +82,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
         testInstance.client.closeNow();
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveBackToBackUniqueC2DCommandsOverAmqpsUsingSendAsync() throws Exception
     {
 

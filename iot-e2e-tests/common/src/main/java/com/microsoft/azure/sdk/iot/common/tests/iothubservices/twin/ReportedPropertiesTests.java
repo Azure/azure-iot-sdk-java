@@ -33,13 +33,13 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         System.out.println(clientType + " ReportedPropertiesTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testSendReportedProperties() throws IOException, IotHubException, InterruptedException
     {
         sendReportedPropertiesAndVerify(MAX_PROPERTIES_TO_TEST);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testSendReportedPropertiesMultiThreaded() throws IOException, IotHubException, InterruptedException
     {
         // arrange
@@ -94,7 +94,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST.intValue());
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testUpdateReportedProperties() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -115,7 +115,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST.intValue());
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testUpdateReportedPropertiesMultiThreaded() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -163,7 +163,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST.intValue());
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testUpdateReportedPropertiesSequential() throws IOException, InterruptedException, IotHubException
     {
         // arrange

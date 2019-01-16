@@ -243,7 +243,7 @@ public class DeviceTwinWithVersionTests extends MethodNameLoggingIntegrationTest
         testDevice = null;
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testSendReportedPropertiesWithoutVersionSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
@@ -281,7 +281,7 @@ public class DeviceTwinWithVersionTests extends MethodNameLoggingIntegrationTest
         assertSetEquals(PROPERTIES, reported);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testUpdateReportedPropertiesWithVersionSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
@@ -356,7 +356,7 @@ public class DeviceTwinWithVersionTests extends MethodNameLoggingIntegrationTest
         assertSetEquals(newValues, reported);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testUpdateReportedPropertiesWithLowerVersionFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
@@ -429,7 +429,7 @@ public class DeviceTwinWithVersionTests extends MethodNameLoggingIntegrationTest
         assertSetEquals(PROPERTIES, reported);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testUpdateReportedPropertiesWithHigherVersionFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange

@@ -40,7 +40,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         System.out.println(clientType + " QueryTwinTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testRawQueryTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -74,7 +74,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         removeMultipleDevices(MAX_DEVICES);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testRawQueryMultipleInParallelTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -180,7 +180,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         removeMultipleDevices(MAX_DEVICES);
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testQueryTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -215,7 +215,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         removeMultipleDevices(MAX_DEVICES);
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testQueryTwinWithContinuationToken() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(PAGE_SIZE + 1);
@@ -281,7 +281,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         }
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void queryCollectionCanReturnEmptyQueryResults() {
         try
         {
@@ -300,7 +300,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         }
     }
 
-    @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testMultipleQueryTwinInParallel() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);

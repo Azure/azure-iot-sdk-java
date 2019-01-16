@@ -43,7 +43,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         System.out.println(clientType + " ReceiveMessagesErrInjTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesWithTCPConnectionDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol == HTTPS)
@@ -55,7 +55,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesWithAmqpsConnectionDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -67,7 +67,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesWithAmqpsSessionDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -79,7 +79,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesWithAmqpsCBSReqLinkDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -97,7 +97,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesWithAmqpsCBSRespLinkDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -115,7 +115,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesWithAmqpsD2CLinkDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -127,7 +127,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesWithAmqpsC2DLinkDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -145,7 +145,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesWithAmqpsMethodReqLinkDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -164,7 +164,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsMethodReqLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesWithAmqpsMethodRespLinkDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -183,7 +183,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesWithAmqpsTwinReqLinkDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -202,7 +202,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsTwinReqLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesWithAmqpsTwinRespLinkDrop() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -221,7 +221,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesWithGracefulShutdownAmqp() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -233,7 +233,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
-    @Test (timeout = DEFAULT_TEST_TIMEOUT)
+    @Test
     public void receiveMessagesWithGracefulShutdownMqtt() throws IOException, IotHubException, InterruptedException
     {
         if (testInstance.protocol != MQTT && testInstance.protocol != MQTT_WS)

@@ -187,7 +187,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         }
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void sendMessagesOverAmqps() throws URISyntaxException, IOException, InterruptedException
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -208,7 +208,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void sendMessagesOverAmqpsWs() throws URISyntaxException, IOException, InterruptedException
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
@@ -229,7 +229,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void receiveMessagesOverAmqpsIncludingProperties() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -257,7 +257,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void receiveMessagesOverAmqpWSIncludingProperties() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -348,7 +348,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void uploadToBlobAsyncSingleFileAndTelemetryOnAMQP() throws Exception
     {
         // arrange
@@ -422,7 +422,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         tearDownFileUploadState();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void uploadToBlobAsyncSingleFileAndTelemetryOnAMQPWS() throws Exception
     {
         // arrange
@@ -497,7 +497,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         tearDownFileUploadState();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void invokeMethodAMQPSSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -528,7 +528,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void invokeMethodAMQPSInvokeParallelSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -569,7 +569,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void invokeMethodAMQPSWSSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
@@ -600,7 +600,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void invokeMethodAMQPSWSInvokeParallelSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
@@ -641,7 +641,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         transportClient.closeNow();
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Test
     public void testTwin() throws IOException, InterruptedException, IotHubException, URISyntaxException
     {
         TransportClient transportClient = null;
