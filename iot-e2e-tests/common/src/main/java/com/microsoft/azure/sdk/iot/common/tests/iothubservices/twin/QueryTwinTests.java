@@ -172,7 +172,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         });
 
         executor.shutdown();
-        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(5 * 60 * 1000, TimeUnit.MILLISECONDS)) //5 minutes
         {
             executor.shutdownNow();
         }
@@ -416,7 +416,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         });
 
         executor.shutdown();
-        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(5 * 60 * 1000, TimeUnit.MILLISECONDS)) //5 minutes
         {
             executor.shutdownNow();
         }

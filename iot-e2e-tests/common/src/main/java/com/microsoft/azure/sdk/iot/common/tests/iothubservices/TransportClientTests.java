@@ -408,7 +408,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         }
 
         executor.shutdown();
-        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(5 * 60 * 1000, TimeUnit.MILLISECONDS)) //5 minutes
         {
             executor.shutdownNow();
         }
@@ -483,7 +483,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         }
 
         executor.shutdown();
-        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(5 * 60 * 1000, TimeUnit.MILLISECONDS)) //5 minutes
         {
             executor.shutdownNow();
         }
@@ -754,7 +754,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         }
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
         executor.shutdown();
-        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(5 * 60 * 1000, TimeUnit.MILLISECONDS)) //5 minutes
         {
             executor.shutdownNow();
         }
