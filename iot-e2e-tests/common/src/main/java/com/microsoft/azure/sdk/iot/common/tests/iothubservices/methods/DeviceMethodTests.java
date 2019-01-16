@@ -37,7 +37,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     {
         super(deviceTestManager, protocol, authenticationType, clientType, identity, publicKeyCert, privateKey, x509Thumbprint);
 
-        System.out.print(clientType + " DeviceMethodTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
+        System.out.println(clientType + " DeviceMethodTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
     }
 
     @Test(timeout=DEFAULT_TEST_TIMEOUT)

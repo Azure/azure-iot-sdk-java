@@ -34,7 +34,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
 
-        System.out.print(clientType + " GetTwinErrInjTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
+        System.out.println(clientType + " GetTwinErrInjTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
@@ -252,7 +252,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     public void errorInjectionGetDeviceTwinFlow(Message errorInjectionMessage) throws Exception
     {
         // Arrange
-        final List<IotHubConnectionStatus> actualStatusUpdates = new ArrayList<>();
+        List<com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
         setConnectionStatusCallBack(actualStatusUpdates);
         testGetDeviceTwin();
 

@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.common.helpers.Success;
 import com.microsoft.azure.sdk.iot.common.setup.ReceiveMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.Module;
@@ -20,6 +21,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.common.helpers.ErrorInjectionHelper.DefaultDelayInSec;
@@ -38,7 +40,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     {
         super(client, protocol, identity, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
 
-        System.out.print(clientType + " ReceiveMessagesErrInjTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
+        System.out.println(clientType + " ReceiveMessagesErrInjTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
     }
 
     @Test (timeout = DEFAULT_TEST_TIMEOUT)
@@ -245,13 +247,13 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 
     public void errorInjectionTestFlow(com.microsoft.azure.sdk.iot.device.Message errorInjectionMessage) throws IOException, IotHubException, InterruptedException
     {
-        final ArrayList<IotHubConnectionStatus> connectionStatusUpdates = new ArrayList<>();
+        List<Pair<IotHubConnectionStatus, Throwable>> connectionStatusUpdates = new ArrayList<>();
         testInstance.client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback()
         {
             @Override
             public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
             {
-                connectionStatusUpdates.add(status);
+                connectionStatusUpdates.add(new Pair<>(status, throwable));
             }
         }, null);
 
@@ -305,6 +307,6 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             testInstance.client.closeNow();
         }
 
-        assertTrue(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Error Injection message did not cause service to drop TCP connection", testInstance.client), connectionStatusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING));
+        assertTrue(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Error Injection message did not cause service to drop TCP connection", testInstance.client), IotHubServicesCommon.actualStatusUpdatesContainsStatus(connectionStatusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING));
     }
 }

@@ -36,7 +36,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
     {
         super(client, protocol, identity, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
 
-        System.out.print(clientType + " ReceiveMessagesTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
+        System.out.println(clientType + " ReceiveMessagesTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
     }
 
     @Test (timeout = DEFAULT_TEST_TIMEOUT)

@@ -36,7 +36,7 @@ public class TwinTagsTests extends DeviceTwinCommon
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
 
-        System.out.print(clientType + " TwinTagsTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
+        System.out.println(clientType + " TwinTagsTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)

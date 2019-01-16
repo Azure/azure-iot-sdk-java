@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.common.setup;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
@@ -63,7 +64,7 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
     //How many milliseconds between retry
     protected static final Integer RETRY_MILLISECONDS = 100;
 
-    private List<IotHubConnectionStatus> actualStatusUpdates;
+    private List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates;
 
     protected DeviceMethodTestInstance testInstance;
     protected static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
@@ -228,7 +229,7 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
     @Before
     public void cleanToStart()
     {
-        actualStatusUpdates = new ArrayList<>();
+        actualStatusUpdates = new ArrayList<Pair<IotHubConnectionStatus, Throwable>>();
         setConnectionStatusCallBack(actualStatusUpdates);
 
         try
@@ -362,14 +363,15 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
         registryManager.close();
     }
 
-    protected void setConnectionStatusCallBack(final List actualStatusUpdates)
+    protected void setConnectionStatusCallBack(final List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
     {
 
         IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = new IotHubConnectionStatusChangeCallback()
         {
             @Override
-            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
-                actualStatusUpdates.add(status);
+            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+            {
+                actualStatusUpdates.add(new Pair<>(status, throwable));
             }
         };
 

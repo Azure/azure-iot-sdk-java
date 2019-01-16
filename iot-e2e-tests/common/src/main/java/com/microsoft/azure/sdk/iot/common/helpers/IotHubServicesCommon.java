@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.common.helpers;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.Assert;
@@ -36,7 +37,7 @@ public class IotHubServicesCommon
                                     final long RETRY_MILLISECONDS,
                                     final long SEND_TIMEOUT_MILLISECONDS,
                                     long interMessageDelay,
-                                    List<IotHubConnectionStatus> statusUpdates) throws IOException, InterruptedException
+                                    List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException, InterruptedException
     {
         try
         {
@@ -62,7 +63,7 @@ public class IotHubServicesCommon
                 {
                     //wait until error injection message takes affect before sending the next message
                     long startTime = System.currentTimeMillis();
-                    while (!statusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING))
+                    while (!actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING))
                     {
                         Thread.sleep(300);
 
@@ -93,19 +94,19 @@ public class IotHubServicesCommon
                                                                          int interMessageDelay,
                                                                          AuthenticationType authType) throws IOException, InterruptedException
     {
-        final List<IotHubConnectionStatus> actualStatusUpdates = new ArrayList<>();
+        final List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
         client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback()
         {
             @Override
             public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
             {
-                actualStatusUpdates.add(status);
+                actualStatusUpdates.add(new Pair<>(status, throwable));
             }
         }, new Object());
 
         sendMessages(client, protocol, messagesToSend, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, interMessageDelay, actualStatusUpdates);
 
-        Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected connection status update to occur: " + expectedStatus, client), actualStatusUpdates.contains(expectedStatus));
+        Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected connection status update to occur: " + expectedStatus, client), actualStatusUpdatesContainsStatus(actualStatusUpdates, expectedStatus));
     }
 
     /**
@@ -245,12 +246,13 @@ public class IotHubServicesCommon
                                                                                   Message errorInjectionMessage,
                                                                                   AuthenticationType authType) throws IOException, InterruptedException
     {
-        final List<IotHubConnectionStatus> statusUpdates = new ArrayList<>();
+        final List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates = new ArrayList<>();
         client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback()
         {
             @Override
-            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
-                statusUpdates.add(status);
+            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+            {
+                statusUpdates.add(new Pair<>(status, throwable));
             }
         }, new Object());
 
@@ -259,7 +261,7 @@ public class IotHubServicesCommon
         client.sendEventAsync(errorInjectionMessage, new EventCallback(null), new Success());
 
         long startTime = System.currentTimeMillis();
-        while (!(statusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING) && statusUpdates.contains(IotHubConnectionStatus.DISCONNECTED)))
+        while (!(actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING) && actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED)))
         {
             Thread.sleep(500);
 
@@ -269,8 +271,8 @@ public class IotHubServicesCommon
             }
         }
 
-        Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected but retrying.", client), statusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING));
-        Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected.", client), statusUpdates.contains(IotHubConnectionStatus.DISCONNECTED));
+        Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected but retrying.", client), actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING));
+        Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected.", client), actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED));
 
         client.closeNow();
     }
@@ -388,7 +390,7 @@ public class IotHubServicesCommon
         System.out.println("Successfully opened connection!");
     }
 
-    public static void waitForStabilizedConnection(List actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
+    public static void waitForStabilizedConnection(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
     {
         System.out.println("Waiting for stabilized connection...");
 
@@ -396,7 +398,7 @@ public class IotHubServicesCommon
         long startTime = System.currentTimeMillis();
         long timeElapsed = 0;
 
-        while (!actualStatusUpdates.contains(IotHubConnectionStatus.DISCONNECTED_RETRYING))
+        while (!actualStatusUpdatesContainsStatus(actualStatusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING))
         {
             Thread.sleep(200);
             timeElapsed = System.currentTimeMillis() - startTime;
@@ -404,7 +406,14 @@ public class IotHubServicesCommon
             // 2 minutes timeout waiting for error injection to occur
             if (timeElapsed > timeout)
             {
-                Assert.fail(buildExceptionMessage("Timed out waiting for error injection message to take effect", client));
+                String statusString = "";
+                for (int i = 0; i < actualStatusUpdates.size(); i++)
+                {
+                    IotHubConnectionStatus status = actualStatusUpdates.get(i).getKey();
+                    Throwable cause = actualStatusUpdates.get(i).getValue();
+                    statusString += i + "th status update: " + status + ((cause == null) ? "" : " with throwable " + cause.getMessage() + " with cause " + cause.getMessage() + "\n");
+                }
+                Assert.fail(buildExceptionMessage("Timed out waiting for error injection message to take effect, full status update list: " + statusString, client));
             }
         }
 
@@ -423,7 +432,7 @@ public class IotHubServicesCommon
         }
 
         int numOfUpdates = 0;
-        while (numOfUpdates != actualStatusUpdates.size() || actualStatusUpdates.get(actualStatusUpdates.size()-1) != IotHubConnectionStatus.CONNECTED)
+        while (numOfUpdates != actualStatusUpdates.size() || actualStatusUpdates.get(actualStatusUpdates.size()-1).getKey() != IotHubConnectionStatus.CONNECTED)
         {
             numOfUpdates = actualStatusUpdates.size();
             Thread.sleep(6 * 1000);
@@ -438,11 +447,11 @@ public class IotHubServicesCommon
 
         for (int i=0; i<actualStatusUpdates.size(); i++)
         {
-            System.out.println("actualStatusUpdate"+ i +" =" + actualStatusUpdates.get(i));
+            System.out.println("actualStatusUpdate "+ i +" = " + actualStatusUpdates.get(i).getKey());
         }
     }
 
-    public static void confirmOpenStabilized(List actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
+    public static void confirmOpenStabilized(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
     {
         long startTime = System.currentTimeMillis();
         long timeElapsed;
@@ -450,7 +459,7 @@ public class IotHubServicesCommon
         int numOfUpdates = 0;
         if (actualStatusUpdates != null)
         {
-            while (numOfUpdates == 0 || numOfUpdates != actualStatusUpdates.size() || actualStatusUpdates.get(actualStatusUpdates.size() - 1) != IotHubConnectionStatus.CONNECTED)
+            while (numOfUpdates == 0 || numOfUpdates != actualStatusUpdates.size() || actualStatusUpdates.get(actualStatusUpdates.size() - 1).getKey() != IotHubConnectionStatus.CONNECTED)
             {
                 numOfUpdates = actualStatusUpdates.size();
                 Thread.sleep(6 * 1000);
@@ -462,5 +471,18 @@ public class IotHubServicesCommon
                 }
             }
         }
+    }
+
+    public static boolean actualStatusUpdatesContainsStatus(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, IotHubConnectionStatus status)
+    {
+        for (int i = 0; i < actualStatusUpdates.size(); i++)
+        {
+            if (actualStatusUpdates.get(i).getKey() == status)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

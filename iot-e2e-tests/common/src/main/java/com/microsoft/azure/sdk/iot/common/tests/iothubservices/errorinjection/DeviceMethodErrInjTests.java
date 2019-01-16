@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.common.helpers.ErrorInjectionHelper;
 import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.common.helpers.MessageAndResult;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceMethodCommon;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -35,7 +36,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     {
         super(deviceTestManager, protocol, authenticationType, clientType, identity, publicKeyCert, privateKey, x509Thumbprint);
 
-        System.out.print(clientType + " DeviceMethodErrInjTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
+        System.out.println(clientType + " DeviceMethodErrInjTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
     }
 
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
@@ -252,7 +253,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     public void errorInjectionTestFlow(Message errorInjectionMessage) throws Exception
     {
         // Arrange
-        final List<IotHubConnectionStatus> actualStatusUpdates = new ArrayList<>();
+        List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
         setConnectionStatusCallBack(actualStatusUpdates);
         invokeMethodSucceed();
 

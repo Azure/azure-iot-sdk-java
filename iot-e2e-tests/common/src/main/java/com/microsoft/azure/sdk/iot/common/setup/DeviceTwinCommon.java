@@ -597,14 +597,14 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, false);
     }
 
-    protected void setConnectionStatusCallBack(final List actualStatusUpdates)
+    protected void setConnectionStatusCallBack(final List<com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
     {
         IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = new IotHubConnectionStatusChangeCallback()
         {
             @Override
             public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
             {
-                actualStatusUpdates.add(status);
+                actualStatusUpdates.add(new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<>(status, throwable));
             }
         };
 

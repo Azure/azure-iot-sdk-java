@@ -30,7 +30,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
 
-        System.out.print(clientType + " ReportedPropertiesTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
+        System.out.println(clientType + " ReportedPropertiesTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)

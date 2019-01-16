@@ -42,7 +42,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     {
         super(client, protocol, identity, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
 
-        System.out.print(clientType + " SendMessagesErrInjTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
+        System.out.println(clientType + " SendMessagesErrInjTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
     }
 
     @Test (timeout=ERROR_INJECTION_EXECUTION_TIMEOUT)

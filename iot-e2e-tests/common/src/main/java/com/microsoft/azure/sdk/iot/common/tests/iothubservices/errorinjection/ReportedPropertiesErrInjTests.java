@@ -33,7 +33,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
 
-        System.out.print(clientType + " ReportedPropertiesErrInjTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
+        System.out.println(clientType + " ReportedPropertiesErrInjTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = ERROR_INJECTION_EXECUTION_TIMEOUT)
@@ -224,7 +224,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
     public void errorInjectionSendReportedPropertiesFlow(Message errorInjectionMessage) throws Exception
     {
         // Arrange
-        final List<IotHubConnectionStatus> actualStatusUpdates = new ArrayList<>();
+        List<com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
         setConnectionStatusCallBack(actualStatusUpdates);
         sendReportedPropertiesAndVerify(1);
 

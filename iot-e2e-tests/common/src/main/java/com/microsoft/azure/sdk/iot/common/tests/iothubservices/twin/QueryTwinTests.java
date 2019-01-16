@@ -37,7 +37,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
 
-        System.out.print(clientType + " QueryTwinTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
+        System.out.println(clientType + " QueryTwinTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test(timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
