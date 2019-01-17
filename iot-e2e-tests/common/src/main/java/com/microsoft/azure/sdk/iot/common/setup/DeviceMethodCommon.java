@@ -123,7 +123,7 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
                 else if (clientType == ClientType.MODULE_CLIENT)
                 {
                     //sas module client
-                    ModuleClient moduleClient = new ModuleClient(registryManager.getDeviceConnectionString(device) + ";ModuleId=" + module.getId(), protocol);
+                    ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol);
                     DeviceTestManager moduleClientSasTestManager = new DeviceTestManager(moduleClient);
                     deviceTestManagers.add(moduleClientSasTestManager);
                     inputs.add(makeSubArray(moduleClientSasTestManager, protocol, SAS, ClientType.MODULE_CLIENT, module, publicKeyCert, privateKey, x509Thumbprint));
@@ -142,7 +142,7 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
                     else if (clientType == ClientType.MODULE_CLIENT)
                     {
                         //x509 module client
-                        ModuleClient moduleClientX509 = new ModuleClient(registryManager.getDeviceConnectionString(deviceX509) + ";ModuleId=" + moduleX509.getId(), protocol, publicKeyCert, false, privateKey, false);
+                        ModuleClient moduleClientX509 = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol, publicKeyCert, false, privateKey, false);
                         DeviceTestManager moduleClientX509TestManager = new DeviceTestManager(moduleClientX509);
                         deviceTestManagers.add(moduleClientX509TestManager);
                         inputs.add(makeSubArray(moduleClientX509TestManager, protocol, SELF_SIGNED, ClientType.MODULE_CLIENT, moduleX509, publicKeyCert, privateKey, x509Thumbprint));
@@ -405,6 +405,6 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
 
     protected String getModuleConnectionString(Module module) throws IotHubException, IOException
     {
-        return registryManager.getDeviceConnectionString(registryManager.getDevice(module.getDeviceId())) + ";ModuleId=" + module.getId();
+        return DeviceConnectionString.get(iotHubConnectionString, registryManager.getDevice(module.getDeviceId()), module);
     }
 }

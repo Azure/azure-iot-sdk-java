@@ -247,7 +247,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 }
                 else
                 {
-                    internalClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager) + ";ModuleId=" + this.testInstance.moduleId + this.testInstance.uuid,
+                    internalClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager, deviceState.sCModuleForRegistryManager),
                             this.testInstance.protocol);
                 }
             }
@@ -264,7 +264,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
                 }
                 else
                 {
-                    internalClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager) + ";ModuleId=" + this.testInstance.moduleId,
+                    internalClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager, deviceState.sCModuleForRegistryManager),
                             this.testInstance.protocol,
                             testInstance.publicKeyCert,
                             false,
