@@ -30,7 +30,7 @@ public class DesiredPropertiesDeviceJVMRunner extends DesiredPropertiesTests
 {
     static Collection<BaseDevice> identities;
 
-    public DesiredPropertiesDeviceJVMRunner(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DesiredPropertiesDeviceJVMRunner(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }

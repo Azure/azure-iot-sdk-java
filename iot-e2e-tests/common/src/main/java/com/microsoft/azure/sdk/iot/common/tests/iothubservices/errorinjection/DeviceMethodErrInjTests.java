@@ -5,10 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.errorinjection;
 
-import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
-import com.microsoft.azure.sdk.iot.common.helpers.ErrorInjectionHelper;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.MessageAndResult;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceMethodCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -32,7 +29,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  */
 public class DeviceMethodErrInjTests extends DeviceMethodCommon
 {
-    public DeviceMethodErrInjTests(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DeviceMethodErrInjTests(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceTestManager, protocol, authenticationType, clientType, identity, publicKeyCert, privateKey, x509Thumbprint);
 

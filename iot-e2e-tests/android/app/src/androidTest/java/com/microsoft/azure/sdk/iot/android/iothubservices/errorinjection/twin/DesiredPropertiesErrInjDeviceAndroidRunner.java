@@ -40,7 +40,7 @@ public class DesiredPropertiesErrInjDeviceAndroidRunner extends DesiredPropertie
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public DesiredPropertiesErrInjDeviceAndroidRunner(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DesiredPropertiesErrInjDeviceAndroidRunner(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }

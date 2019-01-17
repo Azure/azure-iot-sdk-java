@@ -46,7 +46,7 @@ public class DeviceMethodErrInjDeviceAndroidRunner extends DeviceMethodErrInjTes
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public DeviceMethodErrInjDeviceAndroidRunner(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DeviceMethodErrInjDeviceAndroidRunner(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceTestManager, protocol, authenticationType, clientType, identity, publicKeyCert, privateKey, x509Thumbprint);
     }
