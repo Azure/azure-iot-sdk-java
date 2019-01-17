@@ -97,6 +97,9 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         internalClient.subscribeToDesiredProperties(deviceUnderTest.dCDeviceForTwin.getDesiredProp());
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
+        //Setting desired properties in different threads leads to a race condition
+        Object desiredPropertiesUpdateLock = new Object();
+
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             final int index = i;
@@ -109,9 +112,13 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
                     {
                         Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
                         desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + index, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
-                        //TODO need synch block here?
-                        deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
-                        sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
+                        synchronized (desiredPropertiesUpdateLock)
+                        {
+                            Set currentDesiredProperties = deviceUnderTest.sCDeviceForTwin.getDesiredProperties();
+                            desiredProperties.addAll(currentDesiredProperties);
+                            deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
+                            sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
+                        }
                     }
                     catch (IotHubException | IOException e)
                     {
