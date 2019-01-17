@@ -329,7 +329,6 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         testInstance.client.setRetryPolicy(new ExponentialBackoffWithJitter());
     }
 
-    //TODO this only tests DEVICE CLIENT, needs to accomodate module client as well
     private void errorInjectionTestFlowNoDisconnect(Message errorInjectionMessage, IotHubStatusCode expectedStatus, boolean noRetry) throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException
     {
         // Arrange
@@ -337,7 +336,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         // introduced by injected errors
         String uuid = UUID.randomUUID().toString();
         String deviceId = "java-device-client-e2e-test-send-messages".concat("-" + uuid);
-        String moduleId = "java-device-client-e2e-test-send-messages-module".concat("-" + uuid);
+        String moduleId = "java-module-client-e2e-test-send-messages".concat("-" + uuid);
 
         Device targetDevice;
         Module targetModule;
@@ -368,7 +367,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
                 targetModule.setThumbprint(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
                 registryManager.addDevice(targetDevice);
                 registryManager.addModule(targetModule);
-                client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice) + "ModuleId=" + targetModule.getId(), this.testInstance.protocol, testInstance.publicKeyCert, false, testInstance.privateKey, false);
+                client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice, targetModule), this.testInstance.protocol, testInstance.publicKeyCert, false, testInstance.privateKey, false);
             }
             else
             {
@@ -376,7 +375,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
                 targetModule = Module.createModule(deviceId, moduleId, AuthenticationType.SAS);
                 registryManager.addDevice(targetDevice);
                 registryManager.addModule(targetModule);
-                client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice) + "ModuleId=" + targetModule.getId(), this.testInstance.protocol);
+                client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice, targetModule), this.testInstance.protocol);
             }
         }
 
