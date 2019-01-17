@@ -22,8 +22,6 @@ public class GetTwinTests extends DeviceTwinCommon
     public GetTwinTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
-
-        System.out.println(clientType + " GetTwinTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test

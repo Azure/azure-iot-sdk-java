@@ -35,8 +35,6 @@ public class TwinTagsTests extends DeviceTwinCommon
     public TwinTagsTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
-
-        System.out.println(clientType + " TwinTagsTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test

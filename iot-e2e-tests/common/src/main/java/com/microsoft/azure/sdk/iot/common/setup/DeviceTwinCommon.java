@@ -20,6 +20,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.RawTwinQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -247,7 +248,7 @@ public class DeviceTwinCommon extends IntegrationTest
                 }
                 else
                 {
-                    internalClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager) + ";ModuleId=" + this.testInstance.moduleId,
+                    internalClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager) + ";ModuleId=" + this.testInstance.moduleId + this.testInstance.uuid,
                             this.testInstance.protocol);
                 }
             }
@@ -325,18 +326,18 @@ public class DeviceTwinCommon extends IntegrationTest
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         scRawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
 
-        String uuid = UUID.randomUUID().toString();
-        String deviceIdAmqps = "java-device-client-e2e-test-amqps".concat("-" + uuid);
-        String deviceIdAmqpsWs = "java-device-client-e2e-test-amqpsws".concat("-" + uuid);
-        String deviceIdMqtt = "java-device-client-e2e-test-mqtt".concat("-" + uuid);
-        String deviceIdMqttWs = "java-device-client-e2e-test-mqttws".concat("-" + uuid);
-        String deviceIdMqttX509 = "java-device-client-e2e-test-mqtt-X509".concat("-" + uuid);
-        String deviceIdAmqpsX509 = "java-device-client-e2e-test-amqps-X509".concat("-" + uuid);
+        //base names for devices and modules. Each test creates a device/module with this as the prefix, and a unique uuid as the suffix
+        String deviceIdAmqps = "java-device-client-e2e-test-amqps-";
+        String deviceIdAmqpsWs = "java-device-client-e2e-test-amqpsws-";
+        String deviceIdMqtt = "java-device-client-e2e-test-mqtt-";
+        String deviceIdMqttWs = "java-device-client-e2e-test-mqttws-";
+        String deviceIdMqttX509 = "java-device-client-e2e-test-mqtt-X509-";
+        String deviceIdAmqpsX509 = "java-device-client-e2e-test-amqps-X509-";
 
-        String moduleIdAmqps = "java-device-client-e2e-test-amqps-module".concat("-" + uuid);
-        String moduleIdAmqpsWs = "java-device-client-e2e-test-amqpsws-module".concat("-" + uuid);
-        String moduleIdMqtt = "java-device-client-e2e-test-mqtt-module".concat("-" + uuid);
-        String moduleIdMqttWs = "java-device-client-e2e-test-mqttws-module".concat("-" + uuid);
+        String moduleIdAmqps = "java-device-client-e2e-test-amqps-module-";
+        String moduleIdAmqpsWs = "java-device-client-e2e-test-amqpsws-module-";
+        String moduleIdMqtt = "java-device-client-e2e-test-mqtt-module-";
+        String moduleIdMqttWs = "java-device-client-e2e-test-mqttws-module-";
 
         List inputs;
         if (clientType == ClientType.DEVICE_CLIENT)
@@ -387,6 +388,7 @@ public class DeviceTwinCommon extends IntegrationTest
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
+        public String uuid;
 
         public DeviceTwinTestInstance(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
         {
@@ -420,27 +422,32 @@ public class DeviceTwinCommon extends IntegrationTest
     public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException
     {
         deviceUnderTest = new DeviceState();
+        this.testInstance.uuid = UUID.randomUUID().toString();
+
         if (this.testInstance.authenticationType == SAS)
         {
-            deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(this.testInstance.deviceId, null, null);
+            deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(this.testInstance.deviceId + this.testInstance.uuid, null, null);
 
             if (this.testInstance.moduleId != null)
             {
-                deviceUnderTest.sCModuleForRegistryManager = com.microsoft.azure.sdk.iot.service.Module.createFromId(this.testInstance.deviceId, this.testInstance.moduleId, null);
+                deviceUnderTest.sCModuleForRegistryManager = com.microsoft.azure.sdk.iot.service.Module.createFromId(this.testInstance.deviceId + this.testInstance.uuid, this.testInstance.moduleId + this.testInstance.uuid, null);
             }
         }
         else if (this.testInstance.authenticationType == SELF_SIGNED)
         {
-            deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createDevice(this.testInstance.deviceId, SELF_SIGNED);
+            deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createDevice(this.testInstance.deviceId + this.testInstance.uuid, SELF_SIGNED);
             deviceUnderTest.sCDeviceForRegistryManager.setThumbprint(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
         }
+
+
         deviceUnderTest.sCDeviceForRegistryManager = registryManager.addDevice(deviceUnderTest.sCDeviceForRegistryManager);
-        Thread.sleep(2000);
 
         if (deviceUnderTest.sCModuleForRegistryManager != null)
         {
             registryManager.addModule(deviceUnderTest.sCModuleForRegistryManager);
         }
+
+        Thread.sleep(2000);
 
         setUpTwin(deviceUnderTest);
     }
