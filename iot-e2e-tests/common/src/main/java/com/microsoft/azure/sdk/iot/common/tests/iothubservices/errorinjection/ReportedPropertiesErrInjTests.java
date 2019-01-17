@@ -33,8 +33,6 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
     public ReportedPropertiesErrInjTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
-
-        System.out.println(clientType + " ReportedPropertiesErrInjTests UUID: " + (moduleId != null && !moduleId.isEmpty() ? moduleId : deviceId));
     }
 
     @Test
