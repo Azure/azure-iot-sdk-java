@@ -5,12 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.errorinjection;
 
-import com.microsoft.azure.sdk.iot.common.helpers.DeviceConnectionString;
-import com.microsoft.azure.sdk.iot.common.helpers.ErrorInjectionHelper;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.MessageAndResult;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.setup.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.NoRetry;
@@ -38,7 +36,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  */
 public class SendMessagesErrInjTests extends SendMessagesCommon
 {
-    public SendMessagesErrInjTests(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public SendMessagesErrInjTests(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(client, protocol, identity, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
 
@@ -226,7 +224,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
-    public void sendMessagesWithThrottling() throws URISyntaxException, IOException, IotHubException, InterruptedException
+    public void sendMessagesWithThrottling() throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
         {
@@ -243,7 +241,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
 
     @Ignore
     @Test
-    public void sendMessagesWithThrottlingNoRetry() throws URISyntaxException, IOException, IotHubException, InterruptedException
+    public void sendMessagesWithThrottlingNoRetry() throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
         {
@@ -259,7 +257,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
-    public void sendMessagesWithAuthenticationError() throws URISyntaxException, IOException, IotHubException, InterruptedException
+    public void sendMessagesWithAuthenticationError() throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
         {
@@ -274,7 +272,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
-    public void sendMessagesWithQuotaExceeded() throws URISyntaxException, IOException, IotHubException, InterruptedException
+    public void sendMessagesWithQuotaExceeded() throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
         {
@@ -331,40 +329,67 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         testInstance.client.setRetryPolicy(new ExponentialBackoffWithJitter());
     }
 
-    private void errorInjectionTestFlowNoDisconnect(Message errorInjectionMessage, IotHubStatusCode expectedStatus, boolean noRetry) throws IOException, IotHubException, URISyntaxException, InterruptedException
+    //TODO this only tests DEVICE CLIENT, needs to accomodate module client as well
+    private void errorInjectionTestFlowNoDisconnect(Message errorInjectionMessage, IotHubStatusCode expectedStatus, boolean noRetry) throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException
     {
         // Arrange
         // This test case creates a device instead of re-using the one in this.testInstance due to state changes
         // introduced by injected errors
         String uuid = UUID.randomUUID().toString();
         String deviceId = "java-device-client-e2e-test-send-messages".concat("-" + uuid);
+        String moduleId = "java-device-client-e2e-test-send-messages-module".concat("-" + uuid);
 
-        Device target;
-        DeviceClient dc;
-        if (this.testInstance.authenticationType == SELF_SIGNED)
+        Device targetDevice;
+        Module targetModule;
+        InternalClient client;
+        if (this.testInstance.clientType == ClientType.DEVICE_CLIENT)
         {
-            target = Device.createDevice(deviceId, SELF_SIGNED);
-            target.setThumbprint(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
-            registryManager.addDevice(target);
-            dc = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, target), this.testInstance.protocol, testInstance.publicKeyCert, false, testInstance.privateKey, false);
+            if (this.testInstance.authenticationType == SELF_SIGNED)
+            {
+                targetDevice = Device.createDevice(deviceId, SELF_SIGNED);
+                targetDevice.setThumbprint(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
+                registryManager.addDevice(targetDevice);
+                client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice), this.testInstance.protocol, testInstance.publicKeyCert, false, testInstance.privateKey, false);
+            }
+            else
+            {
+                targetDevice = Device.createFromId(deviceId, null, null);
+                registryManager.addDevice(targetDevice);
+                client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice), this.testInstance.protocol);
+            }
         }
         else
         {
-            target = Device.createFromId(deviceId, null, null);
-            registryManager.addDevice(target);
-            dc = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, target), this.testInstance.protocol);
+            if (this.testInstance.authenticationType == SELF_SIGNED)
+            {
+                targetDevice = Device.createDevice(deviceId, SELF_SIGNED);
+                targetModule = Module.createModule(deviceId, moduleId, SELF_SIGNED);
+                targetDevice.setThumbprint(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
+                targetModule.setThumbprint(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
+                registryManager.addDevice(targetDevice);
+                registryManager.addModule(targetModule);
+                client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice) + "ModuleId=" + targetModule.getId(), this.testInstance.protocol, testInstance.publicKeyCert, false, testInstance.privateKey, false);
+            }
+            else
+            {
+                targetDevice = Device.createFromId(deviceId, null, null);
+                targetModule = Module.createModule(deviceId, moduleId, AuthenticationType.SAS);
+                registryManager.addDevice(targetDevice);
+                registryManager.addModule(targetModule);
+                client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice) + "ModuleId=" + targetModule.getId(), this.testInstance.protocol);
+            }
         }
 
         if (noRetry)
         {
-            dc.setRetryPolicy(new NoRetry());
+            client.setRetryPolicy(new NoRetry());
         }
-        IotHubServicesCommon.openClientWithRetry(dc);
+        IotHubServicesCommon.openClientWithRetry(client);
 
         // Act
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage,null);
         IotHubServicesCommon.sendMessageAndWaitForResponse(
-                dc,
+                client,
                 errorInjectionMsgAndRet,
                 RETRY_MILLISECONDS,
                 SEND_TIMEOUT_MILLISECONDS,
@@ -375,15 +400,15 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
 
         MessageAndResult normalMessageAndExpectedResult = new MessageAndResult(new Message("test message"), expectedStatus);
         IotHubServicesCommon.sendMessageAndWaitForResponse(
-                dc,
+                client,
                 normalMessageAndExpectedResult,
                 RETRY_MILLISECONDS,
                 SEND_TIMEOUT_MILLISECONDS,
                 this.testInstance.protocol);
 
-        dc.closeNow();
+        client.closeNow();
 
         //cleanup
-        registryManager.removeDevice(target.getDeviceId());
+        registryManager.removeDevice(targetDevice.getDeviceId());
     }
 }
