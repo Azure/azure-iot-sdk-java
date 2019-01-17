@@ -324,7 +324,7 @@ public class IotHubServicesCommon
     public static void openClientWithRetry(InternalClient client) throws InterruptedException
     {
         //Check again
-        int count =0;
+        int count = 0;
         boolean clientOpenSucceeded = false;
         long startTime = System.currentTimeMillis();
         while (!clientOpenSucceeded)
@@ -343,13 +343,10 @@ public class IotHubServicesCommon
             catch (IOException e)
             {
                 //ignore and try again
-                System.out.println("Encountered exception while opening device client, retrying...");
-                e.printStackTrace();
+                System.out.println("Encountered exception while opening device client, retrying...: " + Tools.getStackTraceFromThrowable(e));
                 Thread.sleep(400);
             }
         }
-
-        System.out.println("Successfully opened connection!");
     }
 
     public static void openTransportClientWithRetry(TransportClient client, Collection<InternalClient> clients) throws InterruptedException
@@ -371,8 +368,7 @@ public class IotHubServicesCommon
             catch (IOException e)
             {
                 //ignore and try again
-                System.out.println("Encountered exception while opening transport client, retrying...");
-                e.printStackTrace();
+                System.out.println("Encountered exception while opening transport client, retrying...: " + Tools.getStackTraceFromThrowable(e));
 
                 try
                 {
@@ -380,49 +376,33 @@ public class IotHubServicesCommon
                 }
                 catch (IOException ioException)
                 {
-                    System.out.println("Failed to close client");
-                    ioException.printStackTrace();
+                    System.out.println("Failed to close client: " + Tools.getStackTraceFromThrowable(ioException));
                 }
                 Thread.sleep(400);
             }
         }
-
-        System.out.println("Successfully opened connection!");
     }
 
     public static void waitForStabilizedConnection(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
     {
-        System.out.println("Waiting for stabilized connection...");
-
-        //wait to send the message because we want to ensure that the tcp connection drop happens before the message is received
+        //Wait until error injection takes effect
         long startTime = System.currentTimeMillis();
-        long timeElapsed = 0;
-
         while (!actualStatusUpdatesContainsStatus(actualStatusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING))
         {
             Thread.sleep(200);
-            timeElapsed = System.currentTimeMillis() - startTime;
-
-            // 2 minutes timeout waiting for error injection to occur
+            long timeElapsed = System.currentTimeMillis() - startTime;
             if (timeElapsed > timeout)
             {
-                String statusString = "";
-                for (int i = 0; i < actualStatusUpdates.size(); i++)
-                {
-                    IotHubConnectionStatus status = actualStatusUpdates.get(i).getKey();
-                    Throwable cause = actualStatusUpdates.get(i).getValue();
-                    statusString += i + "th status update: " + status + ((cause == null) ? "" : " with throwable " + cause.getMessage() + " with cause " + cause.getMessage() + "\n");
-                }
-                Assert.fail(buildExceptionMessage("Timed out waiting for error injection message to take effect, full status update list: " + statusString, client));
+                Assert.fail(buildExceptionMessage("Timed out waiting for error injection message to take effect", client));
             }
         }
 
+        //Wait for first connect
         while (actualStatusUpdates.size() == 0)
         {
-            System.out.println("Waiting for a first connection success");
             Thread.sleep(200);
 
-            timeElapsed = System.currentTimeMillis() - startTime;
+            long timeElapsed = System.currentTimeMillis() - startTime;
 
             // 2 minutes timeout waiting for first connection to occur
             if (timeElapsed > 20000)
@@ -431,24 +411,7 @@ public class IotHubServicesCommon
             }
         }
 
-        int numOfUpdates = 0;
-        while (numOfUpdates != actualStatusUpdates.size() || actualStatusUpdates.get(actualStatusUpdates.size()-1).getKey() != IotHubConnectionStatus.CONNECTED)
-        {
-            numOfUpdates = actualStatusUpdates.size();
-            Thread.sleep(6 * 1000);
-            timeElapsed = System.currentTimeMillis() - startTime;
-
-            // 2 minutes timeout waiting for connection to stabilized
-            if (timeElapsed > timeout)
-            {
-                Assert.fail(buildExceptionMessage("Timed out waiting for a stable connection after error injection", client));
-            }
-        }
-
-        for (int i=0; i<actualStatusUpdates.size(); i++)
-        {
-            System.out.println("actualStatusUpdate "+ i +" = " + actualStatusUpdates.get(i).getKey());
-        }
+        confirmOpenStabilized(actualStatusUpdates, timeout, client);
     }
 
     public static void confirmOpenStabilized(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
@@ -484,5 +447,18 @@ public class IotHubServicesCommon
         }
 
         return false;
+    }
+
+    public static String actualStatusUpdatesToString(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
+    {
+        String statusString = "";
+        for (int i = 0; i < actualStatusUpdates.size(); i++)
+        {
+            IotHubConnectionStatus status = actualStatusUpdates.get(i).getKey();
+            Throwable cause = actualStatusUpdates.get(i).getValue();
+            statusString += i + "th status update: " + status + ((cause == null) ? "" : " with throwable " + Tools.getStackTraceFromThrowable(cause) + "\n");
+        }
+
+        return statusString;
     }
 }

@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -604,6 +605,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     public void invokeMethodAMQPSWSInvokeParallelSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
+        transportClient.open();
         ArrayList<InternalClient> clientArrayList = new ArrayList<>();
 
         for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
@@ -645,19 +647,12 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
     public void testTwin() throws IOException, InterruptedException, IotHubException, URISyntaxException
     {
         TransportClient transportClient = null;
-        try
-        {
-            transportClient = setUpTwin();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            fail("Encountered exception during setUpTwin: " + e.getMessage());
-        }
+
+        transportClient = setUpTwin();
 
         ExecutorService executor = Executors.newFixedThreadPool(MAX_PROPERTIES_TO_TEST);
 
-        System.out.println("Testing subscribing to desired properties...");
+        //Testing subscribing to desired properties.
         for (int i = 0; i < MAX_DEVICES; i++)
         {
             for (int j = 0; j < MAX_PROPERTIES_TO_TEST; j++)
@@ -692,7 +687,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
             }
         }
 
-        System.out.println("Testing updating reported properties...");
+        //Testing updating reported properties
         for (int i = 0; i < MAX_DEVICES; i++)
         {
             // act
@@ -716,8 +711,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
             Assert.assertEquals(buildExceptionMessage("Missing reported properties on the " + (i+1) + " device out of " + MAX_DEVICE_MULTIPLEX,devicesUnderTest[i].deviceClient), MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
         }
 
-        // send max_prop RP one at a time in parallel
-        System.out.println("Testing sending reported properties...");
+        //Testing sending reported properties, send max_prop RP one at a time in parallel
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             final int finalI = i;
@@ -754,21 +748,13 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         }
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
         executor.shutdown();
-        if (!executor.awaitTermination(5 * 60 * 1000, TimeUnit.MILLISECONDS)) //5 minutes
+        if (!executor.awaitTermination(4 * 60 * 1000, TimeUnit.MILLISECONDS)) //4 minutes
         {
             executor.shutdownNow();
+            fail(buildExceptionMessage("Test threads did not finish before timeout", devicesUnderTest[0].deviceClient));
         }
 
-        System.out.println("Tearing down twin status...");
-        try
-        {
-            tearDownTwin(transportClient);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            fail("Encountered exception during tearDownTwin: " + e.getMessage());
-        }
+        tearDownTwin(transportClient);
     }
     
     private void verifyNotification(FileUploadNotification fileUploadNotification, FileUploadState fileUploadState, InternalClient client) throws IOException
@@ -1164,48 +1150,66 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         }
     }
 
-    private TransportClient setUpTwin() throws IOException, IotHubException, InterruptedException, URISyntaxException
+    private TransportClient setUpTwin()
     {
-        sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
-
-        for (int i = 0; i < MAX_DEVICES; i++)
+        try
         {
-            DeviceState deviceState = new DeviceState();
-            deviceState.sCDeviceForRegistryManager = deviceListAmqps[i];
-            deviceState.connectionString = registryManager.getDeviceConnectionString(deviceState.sCDeviceForRegistryManager);
-            devicesUnderTest[i] = deviceState;
+            sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
 
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
+            for (int i = 0; i < MAX_DEVICES; i++)
+            {
+                DeviceState deviceState = new DeviceState();
+                deviceState.sCDeviceForRegistryManager = deviceListAmqps[i];
+                deviceState.connectionString = registryManager.getDeviceConnectionString(deviceState.sCDeviceForRegistryManager);
+                devicesUnderTest[i] = deviceState;
+
+                Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
+            }
+
+            TransportClient transportClient = new TransportClient(IotHubClientProtocol.AMQPS);
+
+            ArrayList<InternalClient> clientArrayList = new ArrayList<>();
+            for (int i = 0; i < MAX_DEVICES; i++)
+            {
+                DeviceState deviceState = devicesUnderTest[i];
+                deviceState.deviceClient = new DeviceClient(deviceState.connectionString, transportClient);
+                devicesUnderTest[i].dCDeviceForTwin = new DeviceExtension();
+                clientArrayList.add(deviceState.deviceClient);
+            }
+
+            IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
+
+            for (int i = 0; i < MAX_DEVICES; i++)
+            {
+                devicesUnderTest[i].deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), devicesUnderTest[i], devicesUnderTest[i].dCDeviceForTwin, devicesUnderTest[i]);
+                devicesUnderTest[i].deviceTwinStatus = SUCCESS;
+                devicesUnderTest[i].sCDeviceForTwin = new DeviceTwinDevice(devicesUnderTest[i].sCDeviceForRegistryManager.getDeviceId());
+                sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
+                Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
+            }
+
+            return transportClient;
+        }
+        catch (Exception e)
+        {
+            fail("Encountered exception during setUpTwin: " + Tools.getStackTraceFromThrowable(e));
         }
 
-        TransportClient transportClient = new TransportClient(IotHubClientProtocol.AMQPS);
-
-        ArrayList<InternalClient> clientArrayList = new ArrayList<>();
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            DeviceState deviceState = devicesUnderTest[i];
-            deviceState.deviceClient = new DeviceClient(deviceState.connectionString, transportClient);
-            devicesUnderTest[i].dCDeviceForTwin = new DeviceExtension();
-            clientArrayList.add(deviceState.deviceClient);
-        }
-
-        IotHubServicesCommon.openTransportClientWithRetry(transportClient, clientArrayList);
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            devicesUnderTest[i].deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), devicesUnderTest[i], devicesUnderTest[i].dCDeviceForTwin, devicesUnderTest[i]);
-            devicesUnderTest[i].deviceTwinStatus = SUCCESS;
-            devicesUnderTest[i].sCDeviceForTwin = new DeviceTwinDevice(devicesUnderTest[i].sCDeviceForRegistryManager.getDeviceId());
-            sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
-        }
-
-        return transportClient;
+        return null; //should never execute
     }
 
-    private void tearDownTwin(TransportClient transportClient) throws IOException
+    private void tearDownTwin(TransportClient transportClient)
     {
-        transportClient.closeNow();
+        try
+        {
+            transportClient.closeNow();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            fail("Encountered exception during tearDownTwin: " + Tools.getStackTraceFromThrowable(e));
+        }
+
         sCDeviceTwin = null;
     }
 

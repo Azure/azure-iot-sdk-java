@@ -369,8 +369,6 @@ public class ReceiveMessagesCommon extends MethodNameLoggingIntegrationTest
             {
                 Thread.sleep(100);
 
-                System.out.println(messageIdListStoredOnReceive.size());
-
                 if (System.currentTimeMillis() - startTime > RECEIVE_TIMEOUT)
                 {
                     Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving messages timed out.", testInstance.client));
