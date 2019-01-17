@@ -142,7 +142,7 @@ public class DeviceMethodCommon extends MethodNameLoggingIntegrationTest
                     else if (clientType == ClientType.MODULE_CLIENT)
                     {
                         //x509 module client
-                        ModuleClient moduleClientX509 = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol, publicKeyCert, false, privateKey, false);
+                        ModuleClient moduleClientX509 = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, publicKeyCert, false, privateKey, false);
                         DeviceTestManager moduleClientX509TestManager = new DeviceTestManager(moduleClientX509);
                         deviceTestManagers.add(moduleClientX509TestManager);
                         inputs.add(makeSubArray(moduleClientX509TestManager, protocol, SELF_SIGNED, ClientType.MODULE_CLIENT, moduleX509, publicKeyCert, privateKey, x509Thumbprint));
