@@ -7,10 +7,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.MessageAndResult;
-import com.microsoft.azure.sdk.iot.common.helpers.Tools;
-import com.microsoft.azure.sdk.iot.common.helpers.X509Cert;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -43,7 +40,7 @@ import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
-public class ProvisioningClientJVMRunner
+public class ProvisioningClientJVMRunner extends MethodNameLoggingIntegrationTest
 {
     private final IotHubClientProtocol [] iotHubClientProtocols = {IotHubClientProtocol.MQTT, IotHubClientProtocol.MQTT_WS, IotHubClientProtocol.AMQPS, IotHubClientProtocol.AMQPS_WS, IotHubClientProtocol.HTTPS};
     private final ProvisioningDeviceClientTransportProtocol [] provisioningDeviceClientTransportProtocols = {MQTT, MQTT_WS, AMQPS, AMQPS_WS, HTTPS};
@@ -69,7 +66,7 @@ public class ProvisioningClientJVMRunner
     private static final String TPM_SIMULATOR_IP_ADDRESS_ENV_NAME = "IOT_DPS_TPM_SIMULATOR_IP_ADDRESS"; // ip address of TPM simulator
     private static String tpmSimulatorIpAddress = "";
 
-    private static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 20 * 60 * 1000; // one registration could take up to 20 mins
+    private static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 2 * 60 * 1000; // one registration could take up to 2 mins
 
     private static final long TPM_CONNECTION_TIMEOUT = 1 * 60 * 1000;
 
@@ -92,7 +89,7 @@ public class ProvisioningClientJVMRunner
     private RegistryManager registryManager = null;
 
     private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
-    private static final int OVERALL_TEST_TIMEOUT = 10 * 60 * 1000; // 10 minutes
+    private static final int OVERALL_TEST_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection inputs()
