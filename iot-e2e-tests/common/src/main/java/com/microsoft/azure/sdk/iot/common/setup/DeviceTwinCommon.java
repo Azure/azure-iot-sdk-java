@@ -248,7 +248,7 @@ public class DeviceTwinCommon extends IntegrationTest
                 }
                 else
                 {
-                    internalClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager) + ";ModuleId=" + this.testInstance.moduleId + this.testInstance.uuid,
+                    internalClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager, deviceState.sCModuleForRegistryManager),
                             this.testInstance.protocol);
                 }
             }
@@ -265,7 +265,7 @@ public class DeviceTwinCommon extends IntegrationTest
                 }
                 else
                 {
-                    internalClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager) + ";ModuleId=" + this.testInstance.moduleId,
+                    internalClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager, deviceState.sCModuleForRegistryManager),
                             this.testInstance.protocol,
                             testInstance.publicKeyCert,
                             false,
@@ -346,14 +346,14 @@ public class DeviceTwinCommon extends IntegrationTest
                     new Object[][]
                             {
                                     //sas token, device client
-                                    {deviceIdAmqps, null, AMQPS, SAS, "DeviceClient", publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdAmqpsWs, null, AMQPS_WS, SAS, "DeviceClient", publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqtt, null, MQTT, SAS, "DeviceClient", publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqttWs,  null, MQTT_WS, SAS, "DeviceClient", publicKeyCert, privateKey, x509Thumbprint},
+                                    {deviceIdAmqps, null, AMQPS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {deviceIdAmqpsWs, null, AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {deviceIdMqtt, null, MQTT, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {deviceIdMqttWs,  null, MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
 
                                     //x509, device client
-                                    {deviceIdAmqpsX509, null, AMQPS, SELF_SIGNED, "DeviceClient", publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqttX509, null, MQTT, SELF_SIGNED, "DeviceClient", publicKeyCert, privateKey, x509Thumbprint},
+                                    {deviceIdAmqpsX509, null, AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {deviceIdMqttX509, null, MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
                             }
             );
         }
@@ -363,10 +363,10 @@ public class DeviceTwinCommon extends IntegrationTest
                     new Object[][]
                             {
                                     //sas token, module client
-                                    {deviceIdAmqps, moduleIdAmqps, AMQPS, SAS, "ModuleClient", publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdAmqpsWs, moduleIdAmqpsWs, AMQPS_WS, SAS, "ModuleClient", publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqtt, moduleIdMqtt, MQTT, SAS, "ModuleClient", publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqttWs,  moduleIdMqttWs, MQTT_WS, SAS, "ModuleClient", publicKeyCert, privateKey, x509Thumbprint}
+                                    {deviceIdAmqps, moduleIdAmqps, AMQPS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {deviceIdAmqpsWs, moduleIdAmqpsWs, AMQPS_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {deviceIdMqtt, moduleIdMqtt, MQTT, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {deviceIdMqttWs,  moduleIdMqttWs, MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint}
                             }
             );
         }
@@ -374,7 +374,7 @@ public class DeviceTwinCommon extends IntegrationTest
         return inputs;
     }
 
-    public DeviceTwinCommon(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DeviceTwinCommon(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         this.testInstance = new DeviceTwinTestInstance(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
@@ -390,7 +390,7 @@ public class DeviceTwinCommon extends IntegrationTest
         public String x509Thumbprint;
         public String uuid;
 
-        public DeviceTwinTestInstance(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+        public DeviceTwinTestInstance(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
         {
             this.deviceId = deviceId;
             this.protocol = protocol;

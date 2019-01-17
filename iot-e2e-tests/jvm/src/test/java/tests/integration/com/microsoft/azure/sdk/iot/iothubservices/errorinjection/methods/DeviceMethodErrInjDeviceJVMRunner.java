@@ -28,7 +28,7 @@ public class DeviceMethodErrInjDeviceJVMRunner extends DeviceMethodErrInjTests
     static Collection<BaseDevice> identities;
     static ArrayList<DeviceTestManager> testManagers;
 
-    public DeviceMethodErrInjDeviceJVMRunner(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DeviceMethodErrInjDeviceJVMRunner(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceTestManager, protocol, authenticationType, clientType, identity, publicKeyCert, privateKey, x509Thumbprint);
     }

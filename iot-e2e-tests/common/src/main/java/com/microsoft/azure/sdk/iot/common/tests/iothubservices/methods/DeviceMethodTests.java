@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.methods;
 
+import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceEmulator;
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceMethodCommon;
@@ -33,7 +34,7 @@ import static org.junit.Assert.assertNotNull;
  */
 public class DeviceMethodTests extends DeviceMethodCommon
 {
-    public DeviceMethodTests(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DeviceMethodTests(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceTestManager, protocol, authenticationType, clientType, identity, publicKeyCert, privateKey, x509Thumbprint);
 

@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 
+import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -26,7 +27,7 @@ import static org.junit.Assert.fail;
  */
 public class ReportedPropertiesTests extends DeviceTwinCommon
 {
-    public ReportedPropertiesTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public ReportedPropertiesTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }

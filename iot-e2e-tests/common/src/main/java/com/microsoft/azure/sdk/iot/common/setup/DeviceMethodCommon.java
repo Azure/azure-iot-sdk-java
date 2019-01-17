@@ -118,15 +118,15 @@ public class DeviceMethodCommon extends IntegrationTest
                     DeviceClient deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(device), protocol);
                     DeviceTestManager deviceClientSasTestManager = new DeviceTestManager(deviceClient);
                     deviceTestManagers.add(deviceClientSasTestManager);
-                    inputs.add(makeSubArray(deviceClientSasTestManager, protocol, SAS, "DeviceClient", device, publicKeyCert, privateKey, x509Thumbprint));
+                    inputs.add(makeSubArray(deviceClientSasTestManager, protocol, SAS, ClientType.DEVICE_CLIENT, device, publicKeyCert, privateKey, x509Thumbprint));
                 }
                 else if (clientType == ClientType.MODULE_CLIENT)
                 {
                     //sas module client
-                    ModuleClient moduleClient = new ModuleClient(registryManager.getDeviceConnectionString(device) + ";ModuleId=" + module.getId(), protocol);
+                    ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol);
                     DeviceTestManager moduleClientSasTestManager = new DeviceTestManager(moduleClient);
                     deviceTestManagers.add(moduleClientSasTestManager);
-                    inputs.add(makeSubArray(moduleClientSasTestManager, protocol, SAS, "ModuleClient", module, publicKeyCert, privateKey, x509Thumbprint));
+                    inputs.add(makeSubArray(moduleClientSasTestManager, protocol, SAS, ClientType.MODULE_CLIENT, module, publicKeyCert, privateKey, x509Thumbprint));
                 }
 
                 if (protocol != MQTT_WS && protocol != AMQPS_WS)
@@ -137,15 +137,15 @@ public class DeviceMethodCommon extends IntegrationTest
                         DeviceClient deviceClientX509 = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, publicKeyCert, false, privateKey, false);
                         DeviceTestManager deviceClientX509TestManager = new DeviceTestManager(deviceClientX509);
                         deviceTestManagers.add(deviceClientX509TestManager);
-                        inputs.add(makeSubArray(deviceClientX509TestManager, protocol, SELF_SIGNED, "DeviceClient", deviceX509, publicKeyCert, privateKey, x509Thumbprint));
+                        inputs.add(makeSubArray(deviceClientX509TestManager, protocol, SELF_SIGNED, ClientType.DEVICE_CLIENT, deviceX509, publicKeyCert, privateKey, x509Thumbprint));
                     }
                     else if (clientType == ClientType.MODULE_CLIENT)
                     {
                         //x509 module client
-                        ModuleClient moduleClientX509 = new ModuleClient(registryManager.getDeviceConnectionString(deviceX509) + ";ModuleId=" + moduleX509.getId(), protocol, publicKeyCert, false, privateKey, false);
+                        ModuleClient moduleClientX509 = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, publicKeyCert, false, privateKey, false);
                         DeviceTestManager moduleClientX509TestManager = new DeviceTestManager(moduleClientX509);
                         deviceTestManagers.add(moduleClientX509TestManager);
-                        inputs.add(makeSubArray(moduleClientX509TestManager, protocol, SELF_SIGNED, "ModuleClient", moduleX509, publicKeyCert, privateKey, x509Thumbprint));
+                        inputs.add(makeSubArray(moduleClientX509TestManager, protocol, SELF_SIGNED, ClientType.MODULE_CLIENT, moduleX509, publicKeyCert, privateKey, x509Thumbprint));
                     }
                 }
             }
@@ -154,7 +154,7 @@ public class DeviceMethodCommon extends IntegrationTest
         return inputs;
     }
 
-    private static Object[] makeSubArray(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
+    private static Object[] makeSubArray(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         Object[] inputSubArray = new Object[8];
         inputSubArray[0] = deviceTestManager;
@@ -168,7 +168,7 @@ public class DeviceMethodCommon extends IntegrationTest
         return inputSubArray;
     }
 
-    protected DeviceMethodCommon(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
+    protected DeviceMethodCommon(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         this.testInstance = new DeviceMethodTestInstance(deviceTestManager, protocol, authenticationType, clientType, identity, publicKeyCert, privateKey, x509Thumbprint);
     }
@@ -178,13 +178,13 @@ public class DeviceMethodCommon extends IntegrationTest
         public DeviceTestManager deviceTestManager;
         public IotHubClientProtocol protocol;
         public AuthenticationType authenticationType;
-        public String clientType;
+        public ClientType clientType;
         public BaseDevice identity;
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
 
-        protected DeviceMethodTestInstance(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
+        protected DeviceMethodTestInstance(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
         {
             this.deviceTestManager = deviceTestManager;
             this.protocol = protocol;
@@ -405,6 +405,6 @@ public class DeviceMethodCommon extends IntegrationTest
 
     protected String getModuleConnectionString(Module module) throws IotHubException, IOException
     {
-        return registryManager.getDeviceConnectionString(registryManager.getDevice(module.getDeviceId())) + ";ModuleId=" + module.getId();
+        return DeviceConnectionString.get(iotHubConnectionString, registryManager.getDevice(module.getDeviceId()), module);
     }
 }

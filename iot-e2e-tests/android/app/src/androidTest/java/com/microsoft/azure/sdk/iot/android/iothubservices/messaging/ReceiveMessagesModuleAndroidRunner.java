@@ -43,7 +43,7 @@ public class ReceiveMessagesModuleAndroidRunner extends ReceiveMessagesTests
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public ReceiveMessagesModuleAndroidRunner(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public ReceiveMessagesModuleAndroidRunner(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(client, protocol, identity, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }

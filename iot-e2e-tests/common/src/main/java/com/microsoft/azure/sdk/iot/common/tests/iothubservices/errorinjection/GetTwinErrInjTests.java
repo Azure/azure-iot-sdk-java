@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.errorinjection;
 
+import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.ErrorInjectionHelper;
 import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.common.helpers.MessageAndResult;
@@ -30,7 +31,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  */
 public class GetTwinErrInjTests extends DeviceTwinCommon
 {
-    public GetTwinErrInjTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public GetTwinErrInjTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }

@@ -26,7 +26,7 @@ public class GetTwinErrInjModuleJVMRunner extends GetTwinErrInjTests
 {
     static Collection<BaseDevice> identities;
 
-    public GetTwinErrInjModuleJVMRunner(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, String clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public GetTwinErrInjModuleJVMRunner(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
