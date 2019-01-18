@@ -155,7 +155,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
 
     public class DeviceExtension extends Device
     {
-        public List<PropertyState> propertyStateList = new LinkedList<>();
+        public PropertyState[] propertyStateList = new PropertyState[MAX_PROPERTIES_TO_TEST];
 
         @Override
         public void PropertyCall(String propertyKey, Object propertyValue, Object context)
@@ -311,6 +311,11 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         if (deviceState.dCDeviceForTwin != null)
         {
             deviceState.dCDeviceForTwin.clean();
+
+            if (deviceState.dCDeviceForTwin.getDesiredProp() != null)
+            {
+                deviceState.dCDeviceForTwin.getDesiredProp().clear();
+            }
         }
         if (internalClient != null)
         {
@@ -583,7 +588,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
             PropertyState propertyState = new PropertyState();
             propertyState.callBackTriggered = false;
             propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
-            deviceUnderTest.dCDeviceForTwin.propertyStateList.add(propertyState);
+            deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             deviceUnderTest.dCDeviceForTwin.setDesiredPropertyCallback(propertyState.property, deviceUnderTest.dCDeviceForTwin, propertyState);
         }
 
@@ -626,7 +631,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         {
             PropertyState propertyState = new PropertyState();
             propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
-            deviceUnderTest.dCDeviceForTwin.propertyStateList.add(propertyState);
+            deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>(deviceUnderTest.dCOnProperty, propertyState));
         }
         internalClient.subscribeToTwinDesiredProperties(desiredPropertiesCB);

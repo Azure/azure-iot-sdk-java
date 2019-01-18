@@ -48,6 +48,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     public void testSubscribeToDesiredPropertiesWithVersion() throws IOException, InterruptedException, IotHubException
     {
         // arrange
+        deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
         Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
@@ -55,7 +56,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
             propertyState.callBackTriggered = false;
             propertyState.propertyNewVersion = -1;
             propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
-            deviceUnderTest.dCDeviceForTwin.propertyStateList.add(propertyState);
+            deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>(deviceUnderTest.dCOnProperty, propertyState));
         }
 
@@ -82,12 +83,13 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         // arrange
         ExecutorService executor = Executors.newFixedThreadPool(MAX_PROPERTIES_TO_TEST);
 
+        deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             PropertyState propertyState = new PropertyState();
             propertyState.callBackTriggered = false;
             propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
-            deviceUnderTest.dCDeviceForTwin.propertyStateList.add(propertyState);
+            deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             deviceUnderTest.dCDeviceForTwin.setDesiredPropertyCallback(propertyState.property, deviceUnderTest.dCDeviceForTwin, propertyState);
         }
 
@@ -142,12 +144,13 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     public void testSubscribeToDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException
     {
         // arrange
+        deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             PropertyState propertyState = new PropertyState();
             propertyState.callBackTriggered = false;
             propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
-            deviceUnderTest.dCDeviceForTwin.propertyStateList.add(propertyState);
+            deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             deviceUnderTest.dCDeviceForTwin.setDesiredPropertyCallback(propertyState.property, deviceUnderTest.dCDeviceForTwin, propertyState);
         }
 

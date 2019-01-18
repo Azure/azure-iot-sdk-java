@@ -241,7 +241,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
 
         // Assert
         IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT, internalClient);
-        deviceUnderTest.dCDeviceForTwin.propertyStateList.get(0).callBackTriggered = false;
+        deviceUnderTest.dCDeviceForTwin.propertyStateList[0].callBackTriggered = false;
         assertEquals(buildExceptionMessage("Expected desired properties to be size 1, but was size " + deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size(), internalClient), 1, deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size());
         Set<Pair> dp = new HashSet<>();
         Pair p = deviceUnderTest.sCDeviceForTwin.getDesiredProperties().iterator().next();
