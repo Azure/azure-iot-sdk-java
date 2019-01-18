@@ -560,9 +560,10 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         long startTime = System.currentTimeMillis();
         long timeElapsed = 0;
 
-        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
+        for (int i = 0; i < deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)
         {
-            while (!propertyState.callBackTriggered || !((String) propertyState.propertyNewValue).startsWith(propPrefix))
+            PropertyState propertyState = deviceUnderTest.dCDeviceForTwin.propertyStateList[i];
+            while (!propertyState.callBackTriggered || propertyState.propertyNewValue == null || !((String) propertyState.propertyNewValue).startsWith(propPrefix))
             {
                 Thread.sleep(PERIODIC_WAIT_TIME_FOR_VERIFICATION);
                 timeElapsed = System.currentTimeMillis() - startTime;
@@ -585,6 +586,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         // arrange
         deviceUnderTest.sCDeviceForTwin.clearDesiredProperties();
         deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
+        deviceUnderTest.dCDeviceForTwin.propertyStateList = new PropertyState[numOfProp];
         for (int i = 0; i < numOfProp; i++)
         {
             PropertyState propertyState = new PropertyState();
@@ -648,8 +650,9 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
         sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
-        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
+        for (int i = 0; i < deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)
         {
+            PropertyState propertyState = deviceUnderTest.dCDeviceForTwin.propertyStateList[i];
             propertyState.callBackTriggered = false;
             propertyState.propertyNewVersion = -1;
         }
