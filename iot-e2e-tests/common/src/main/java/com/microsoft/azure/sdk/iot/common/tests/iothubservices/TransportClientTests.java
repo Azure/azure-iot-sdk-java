@@ -655,6 +655,7 @@ public class TransportClientTests extends MethodNameLoggingIntegrationTest
         //Testing subscribing to desired properties.
         for (int i = 0; i < MAX_DEVICES; i++)
         {
+            devicesUnderTest[i].dCDeviceForTwin.getDesiredProp().clear();
             for (int j = 0; j < MAX_PROPERTIES_TO_TEST; j++)
             {
                 PropertyState propertyState = new PropertyState();

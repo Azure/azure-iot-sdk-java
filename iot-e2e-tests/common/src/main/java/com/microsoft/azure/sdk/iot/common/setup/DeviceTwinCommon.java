@@ -583,6 +583,7 @@ public class DeviceTwinCommon extends MethodNameLoggingIntegrationTest
     protected void subscribeToDesiredPropertiesAndVerify(int numOfProp) throws IOException, InterruptedException, IotHubException
     {
         // arrange
+        deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
         for (int i = 0; i < numOfProp; i++)
         {
             PropertyState propertyState = new PropertyState();
