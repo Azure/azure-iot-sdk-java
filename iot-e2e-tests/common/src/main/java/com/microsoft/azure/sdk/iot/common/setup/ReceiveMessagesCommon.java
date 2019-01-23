@@ -128,13 +128,13 @@ public class ReceiveMessagesCommon extends IntegrationTest
         deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
         moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
 
-        registryManager.addDevice(device);
-        registryManager.addDevice(deviceX509);
+        Tools.addDeviceWithRetry(registryManager, device);
+        Tools.addDeviceWithRetry(registryManager, deviceX509);
 
         if (clientType == ClientType.MODULE_CLIENT)
         {
-            registryManager.addModule(module);
-            registryManager.addModule(moduleX509);
+            Tools.addModuleWithRetry(registryManager, module);
+            Tools.addModuleWithRetry(registryManager, moduleX509);
         }
 
         Thread.sleep(2000);

@@ -216,8 +216,8 @@ public class DeviceTwinCommon extends IntegrationTest
             String id = "java-device-twin-e2e-test-" + this.testInstance.protocol.toString() + UUID.randomUUID().toString();
             devicesUnderTest[i].sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(id, null, null);
             devicesUnderTest[i].sCModuleForRegistryManager = com.microsoft.azure.sdk.iot.service.Module.createFromId(id, "module", null);
-            devicesUnderTest[i].sCDeviceForRegistryManager = registryManager.addDevice(devicesUnderTest[i].sCDeviceForRegistryManager);
-            devicesUnderTest[i].sCModuleForRegistryManager = registryManager.addModule(devicesUnderTest[i].sCModuleForRegistryManager);
+            devicesUnderTest[i].sCDeviceForRegistryManager = Tools.addDeviceWithRetry(registryManager, devicesUnderTest[i].sCDeviceForRegistryManager);
+            devicesUnderTest[i].sCModuleForRegistryManager = Tools.addModuleWithRetry(registryManager, devicesUnderTest[i].sCModuleForRegistryManager);
             Thread.sleep(2000);
             setUpTwin(devicesUnderTest[i]);
         }
@@ -445,11 +445,11 @@ public class DeviceTwinCommon extends IntegrationTest
         }
 
 
-        deviceUnderTest.sCDeviceForRegistryManager = registryManager.addDevice(deviceUnderTest.sCDeviceForRegistryManager);
+        deviceUnderTest.sCDeviceForRegistryManager = Tools.addDeviceWithRetry(registryManager, deviceUnderTest.sCDeviceForRegistryManager);
 
         if (deviceUnderTest.sCModuleForRegistryManager != null)
         {
-            registryManager.addModule(deviceUnderTest.sCModuleForRegistryManager);
+            Tools.addModuleWithRetry(registryManager, deviceUnderTest.sCModuleForRegistryManager);
         }
 
         Thread.sleep(2000);

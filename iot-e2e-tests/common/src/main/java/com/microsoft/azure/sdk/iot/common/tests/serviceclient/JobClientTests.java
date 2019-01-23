@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.common.tests.serviceclient;
 
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceEmulator;
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -121,7 +122,7 @@ public class JobClientTests
         String uuid = UUID.randomUUID().toString();
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            testDevice = registryManager.addDevice(Device.createFromId(DEVICE_ID_NAME.concat("-" + i + "-" + uuid), DeviceStatus.Enabled, null));
+            testDevice = Tools.addDeviceWithRetry(registryManager, Device.createFromId(DEVICE_ID_NAME.concat("-" + i + "-" + uuid), DeviceStatus.Enabled, null));
             DeviceTestManager testManager = new DeviceTestManager(new DeviceClient(registryManager.getDeviceConnectionString(testDevice), IotHubClientProtocol.AMQPS));
             testManager.start();
             devices.add(testManager);

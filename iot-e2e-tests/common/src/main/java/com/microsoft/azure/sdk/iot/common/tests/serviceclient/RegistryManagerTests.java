@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.common.tests.serviceclient;
 
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
@@ -66,7 +67,7 @@ public class RegistryManagerTests extends IntegrationTest
 
         //-Create-//
         Device deviceAdded = Device.createFromId(deviceId, DeviceStatus.Enabled, null);
-        registryManager.addDevice(deviceAdded);
+        Tools.addDeviceWithRetry(registryManager, deviceAdded);
 
         //-Read-//
         Device deviceRetrieved = registryManager.getDevice(deviceId);
@@ -94,7 +95,7 @@ public class RegistryManagerTests extends IntegrationTest
 
         //-Create-//
         Device deviceAdded = Device.createDevice(deviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
-        registryManager.addDevice(deviceAdded);
+        Tools.addDeviceWithRetry(registryManager, deviceAdded);
 
         //-Read-//
         Device deviceRetrieved = registryManager.getDevice(deviceId);
@@ -128,7 +129,7 @@ public class RegistryManagerTests extends IntegrationTest
         //-Create-//
         Device deviceAdded = Device.createDevice(deviceId, AuthenticationType.SELF_SIGNED);
         deviceAdded.setThumbprint(primaryThumbprint, secondaryThumbprint);
-        registryManager.addDevice(deviceAdded);
+        Tools.addDeviceWithRetry(registryManager, deviceAdded);
 
         //-Read-//
         Device deviceRetrieved = registryManager.getDevice(deviceId);
@@ -160,7 +161,7 @@ public class RegistryManagerTests extends IntegrationTest
     public void getDeviceStatisticsTest() throws Exception
     {
         RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-        registryManager.getStatistics();
+        Tools.getStatisticsWithRetry(registryManager);
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
@@ -171,12 +172,12 @@ public class RegistryManagerTests extends IntegrationTest
 
         deleteDeviceIfItExistsAlready(registryManager, deviceForTest);
         Device deviceSetup = Device.createFromId(deviceForTest, DeviceStatus.Enabled, null);
-        registryManager.addDevice(deviceSetup);
+        Tools.addDeviceWithRetry(registryManager, deviceSetup);
         deleteModuleIfItExistsAlready(registryManager, deviceForTest, moduleId);
 
         //-Create-//
         Module moduleAdded = Module.createFromId(deviceForTest, moduleId, null);
-        registryManager.addModule(moduleAdded);
+        Tools.addModuleWithRetry(registryManager, moduleAdded);
 
         //-Read-//
         Module moduleRetrieved = registryManager.getModule(deviceForTest, moduleId);
@@ -206,12 +207,12 @@ public class RegistryManagerTests extends IntegrationTest
         deleteDeviceIfItExistsAlready(registryManager, deviceForTest);
         deleteModuleIfItExistsAlready(registryManager, deviceForTest, moduleId);
         Device deviceSetup = Device.createFromId(deviceForTest, DeviceStatus.Enabled, null);
-        registryManager.addDevice(deviceSetup);
+        Tools.addDeviceWithRetry(registryManager, deviceSetup);
         deleteModuleIfItExistsAlready(registryManager, deviceForTest, moduleId);
 
         //-Create-//
         Module moduleAdded = Module.createModule(deviceForTest, moduleId, AuthenticationType.CERTIFICATE_AUTHORITY);
-        registryManager.addModule(moduleAdded);
+        Tools.addModuleWithRetry(registryManager, moduleAdded);
 
         //-Read-//
         Module moduleRetrieved = registryManager.getModule(deviceForTest, moduleId);
@@ -238,13 +239,13 @@ public class RegistryManagerTests extends IntegrationTest
         // Arrange
         deleteDeviceIfItExistsAlready(registryManager, deviceForTest);
         Device deviceSetup = Device.createFromId(deviceForTest, DeviceStatus.Enabled, null);
-        registryManager.addDevice(deviceSetup);
+        Tools.addDeviceWithRetry(registryManager, deviceSetup);
         deleteModuleIfItExistsAlready(registryManager, deviceForTest, moduleId);
 
         //-Create-//
         Module moduleAdded = Module.createModule(deviceForTest, moduleId, AuthenticationType.SELF_SIGNED);
         moduleAdded.setThumbprint(primaryThumbprint, secondaryThumbprint);
-        registryManager.addModule(moduleAdded);
+        Tools.addModuleWithRetry(registryManager, moduleAdded);
 
         //-Read-//
         Module moduleRetrieved = registryManager.getModule(deviceForTest, moduleId);
@@ -345,7 +346,7 @@ public class RegistryManagerTests extends IntegrationTest
         // Arrange
         deleteDeviceIfItExistsAlready(registryManager, deviceForTest);
         Device deviceSetup = Device.createFromId(deviceForTest, DeviceStatus.Enabled, null);
-        registryManager.addDevice(deviceSetup);
+        Tools.addDeviceWithRetry(registryManager, deviceSetup);
         final HashMap<String, Object> testDeviceContent = new HashMap<String, Object>()
         {
             {
@@ -367,11 +368,11 @@ public class RegistryManagerTests extends IntegrationTest
     }
 
 
-    private void deleteDeviceIfItExistsAlready(RegistryManager registryManager, String deviceId) throws IOException
+    private void deleteDeviceIfItExistsAlready(RegistryManager registryManager, String deviceId) throws IOException, InterruptedException
     {
         try
         {
-            registryManager.getDevice(deviceId);
+            Tools.getDeviceWithRetry(registryManager, deviceId);
 
             //if no exception yet, identity exists so it can be deleted
             try
@@ -388,11 +389,11 @@ public class RegistryManagerTests extends IntegrationTest
         }
     }
 
-    private void deleteModuleIfItExistsAlready(RegistryManager registryManager, String deviceId, String moduleId) throws IOException
+    private void deleteModuleIfItExistsAlready(RegistryManager registryManager, String deviceId, String moduleId) throws IOException, InterruptedException
     {
         try
         {
-            registryManager.getModule(deviceId, moduleId);
+            Tools.getModuleWithRetry(registryManager, deviceId, moduleId);
 
             //if no exception yet, identity exists so it can be deleted
             try

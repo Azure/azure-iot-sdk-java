@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAsser
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceConnectionString;
 import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
@@ -228,7 +229,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         testDevice.receivedProperties = new HashSet<>();
 
         deviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(testDevice.deviceId, null, null);
-        deviceForRegistryManager = registryManager.addDevice(deviceForRegistryManager);
+        deviceForRegistryManager = Tools.addDeviceWithRetry(registryManager, deviceForRegistryManager);
 
     }
 

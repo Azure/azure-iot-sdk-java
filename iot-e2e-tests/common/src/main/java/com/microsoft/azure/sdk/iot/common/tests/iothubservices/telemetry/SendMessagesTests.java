@@ -113,7 +113,7 @@ public class SendMessagesTests extends SendMessagesCommon
             String deviceIdAmqps = "java-device-client-e2e-test-amqps".concat(i + "-" + uuid);
             deviceIds.add(deviceIdAmqps);
             deviceListAmqps[i] = Device.createFromId(deviceIdAmqps, null, null);
-            registryManager.addDevice(deviceListAmqps[i]);
+            Tools.addDeviceWithRetry(registryManager, deviceListAmqps[i]);
         }
 
         List<Thread> threads = new ArrayList<>(deviceListAmqps.length);

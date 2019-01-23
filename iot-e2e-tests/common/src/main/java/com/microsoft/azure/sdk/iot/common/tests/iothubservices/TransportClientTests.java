@@ -122,7 +122,7 @@ public class TransportClientTests extends IntegrationTest
             String deviceId = "java-device-client-e2e-test-multiplexing".concat(i + "-" + uuid);
 
             deviceListAmqps[i] = Device.createFromId(deviceId, null, null);
-            registryManager.addDevice(deviceListAmqps[i]);
+            Tools.addDeviceWithRetry(registryManager, deviceListAmqps[i]);
             clientConnectionStringArrayList[i] = registryManager.getDeviceConnectionString(deviceListAmqps[i]);
         }
 

@@ -6,16 +6,22 @@
 package com.microsoft.azure.sdk.iot.common.helpers;
 
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
+import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Collection;
 
 public class Tools
 {
+    private static final long RETRY_TIMEOUT_ON_NETWORK_FAILURE = 60 * 1000;
+    private static final long WAIT_FOR_RETRY = 2000;
+
     public static String retrieveEnvironmentVariableValue(String environmentVariableName)
     {
         String environmentVariableValue = System.getenv().get(environmentVariableName);
@@ -77,6 +83,133 @@ public class Tools
                 e.printStackTrace();
             }
         }
+    }
+
+    public static Device addDeviceWithRetry(RegistryManager registryManager, Device device) throws IotHubException, IOException, InterruptedException
+    {
+        long startTime = System.currentTimeMillis();
+        Device ret = null;
+        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+        {
+            try
+            {
+                ret = registryManager.addDevice(device);
+                break;
+            }
+            catch (UnknownHostException | SocketException e)
+            {
+                System.out.println("Failed to add device " + device.getDeviceId());
+                e.printStackTrace();
+                Thread.sleep(WAIT_FOR_RETRY);
+                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+                {
+                    throw e;
+                }
+            }
+
+        }
+
+        return ret;
+    }
+
+    public static Module addModuleWithRetry(RegistryManager registryManager, Module module) throws IotHubException, IOException, InterruptedException
+    {
+        long startTime = System.currentTimeMillis();
+        Module ret = null;
+        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+        {
+            try
+            {
+                ret = registryManager.addModule(module);
+                break;
+            }
+            catch (UnknownHostException | SocketException e)
+            {
+                System.out.println("Failed to add module " + module.getId());
+                e.printStackTrace();
+                Thread.sleep(WAIT_FOR_RETRY);
+                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+                {
+                    throw e;
+                }
+            }
+        }
+        return ret;
+    }
+
+    public static void getStatisticsWithRetry(RegistryManager registryManager) throws IotHubException, IOException, InterruptedException
+    {
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+        {
+            try
+            {
+                registryManager.getStatistics();
+                break;
+            }
+            catch (UnknownHostException | SocketException e)
+            {
+                System.out.println("Failed to get statistics ");
+                e.printStackTrace();
+                Thread.sleep(WAIT_FOR_RETRY);
+                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+                {
+                    throw e;
+                }
+            }
+        }
+
+
+    }
+
+    public static Device getDeviceWithRetry(RegistryManager registryManager, String id) throws IotHubException, IOException, InterruptedException
+    {
+        long startTime = System.currentTimeMillis();
+        Device ret = null;
+        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+        {
+            try
+            {
+                ret = registryManager.getDevice(id);
+                break;
+            }
+            catch (UnknownHostException | SocketException e)
+            {
+                System.out.println("Failed to get device ");
+                e.printStackTrace();
+                Thread.sleep(WAIT_FOR_RETRY);
+                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+                {
+                    throw e;
+                }
+            }
+        }
+        return ret;
+    }
+
+    public static Module getModuleWithRetry(RegistryManager registryManager, String deviceid, String moduleid) throws IotHubException, IOException, InterruptedException
+    {
+        long startTime = System.currentTimeMillis();
+        Module ret = null;
+        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+        {
+            try
+            {
+                ret = registryManager.getModule(deviceid, moduleid);
+                break;
+            }
+            catch (UnknownHostException | SocketException e)
+            {
+                System.out.println("Failed to get module ");
+                e.printStackTrace();
+                Thread.sleep(WAIT_FOR_RETRY);
+                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+                {
+                    throw e;
+                }
+            }
+        }
+        return ret;
     }
 
     public static String getStackTraceFromThrowable(Throwable throwable)

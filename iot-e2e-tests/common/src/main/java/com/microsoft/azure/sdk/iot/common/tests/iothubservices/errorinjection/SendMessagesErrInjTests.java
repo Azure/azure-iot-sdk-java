@@ -350,13 +350,13 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
             {
                 targetDevice = Device.createDevice(deviceId, SELF_SIGNED);
                 targetDevice.setThumbprint(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
-                registryManager.addDevice(targetDevice);
+                Tools.addDeviceWithRetry(registryManager, targetDevice);
                 client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice), this.testInstance.protocol, testInstance.publicKeyCert, false, testInstance.privateKey, false);
             }
             else
             {
                 targetDevice = Device.createFromId(deviceId, null, null);
-                registryManager.addDevice(targetDevice);
+                Tools.addDeviceWithRetry(registryManager, targetDevice);
                 client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice), this.testInstance.protocol);
             }
         }
@@ -368,16 +368,16 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
                 targetModule = Module.createModule(deviceId, moduleId, SELF_SIGNED);
                 targetDevice.setThumbprint(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
                 targetModule.setThumbprint(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
-                registryManager.addDevice(targetDevice);
-                registryManager.addModule(targetModule);
+                Tools.addDeviceWithRetry(registryManager, targetDevice);
+                Tools.addModuleWithRetry(registryManager, targetModule);
                 client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice, targetModule), this.testInstance.protocol, testInstance.publicKeyCert, false, testInstance.privateKey, false);
             }
             else
             {
                 targetDevice = Device.createFromId(deviceId, null, null);
                 targetModule = Module.createModule(deviceId, moduleId, AuthenticationType.SAS);
-                registryManager.addDevice(targetDevice);
-                registryManager.addModule(targetModule);
+                Tools.addDeviceWithRetry(registryManager, targetDevice);
+                Tools.addModuleWithRetry(registryManager, targetModule);
                 client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice, targetModule), this.testInstance.protocol);
             }
         }

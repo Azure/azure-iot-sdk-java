@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.common.tests.iothubservices;
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceConnectionString;
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
@@ -152,12 +153,12 @@ public class FileUploadTests extends IntegrationTest
     {
         String deviceId = "java-file-upload-e2e-test".concat(UUID.randomUUID().toString());
         scDevice = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, null, null);
-        scDevice = registryManager.addDevice(scDevice);
+        scDevice = Tools.addDeviceWithRetry(registryManager, scDevice);
 
         String deviceIdX509 = "java-file-upload-e2e-test-x509".concat(UUID.randomUUID().toString());
         scDevicex509 = com.microsoft.azure.sdk.iot.service.Device.createDevice(deviceIdX509, AuthenticationType.SELF_SIGNED);
         scDevicex509.setThumbprint(x509Thumbprint, x509Thumbprint);
-        scDevicex509 = registryManager.addDevice(scDevicex509);
+        scDevicex509 = Tools.addDeviceWithRetry(registryManager, scDevicex509);
 
         // flush pending notifications before every test to prevent random test failures
         // because of notifications received from other failed test

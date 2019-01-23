@@ -97,13 +97,13 @@ public class DeviceMethodCommon extends IntegrationTest
         Collection<Object[]> inputs = new ArrayList<>();
 
         /* Add devices to the IoTHub */
-        device = registryManager.addDevice(device);
-        deviceX509 = registryManager.addDevice(deviceX509);
+        device = Tools.addDeviceWithRetry(registryManager, device);
+        deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
 
         if (clientType == ClientType.MODULE_CLIENT)
         {
-            module = registryManager.addModule(module);
-            moduleX509 = registryManager.addModule(moduleX509);
+            module = Tools.addModuleWithRetry(registryManager, module);
+            moduleX509 = Tools.addModuleWithRetry(registryManager, moduleX509);
         }
 
         Thread.sleep(2000);

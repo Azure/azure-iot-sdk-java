@@ -91,7 +91,7 @@ public class ServiceClientTests extends IntegrationTest
         }
 
         Device deviceAdded = Device.createFromId(deviceId, null, null);
-        registryManager.addDevice(deviceAdded);
+        Tools.addDeviceWithRetry(registryManager, deviceAdded);
 
         Device deviceGetBefore = registryManager.getDevice(deviceId);
 
