@@ -156,7 +156,7 @@ public class DeviceTwinCommon extends IntegrationTest
 
     public class DeviceExtension extends Device
     {
-        public List<PropertyState> propertyStateList = new LinkedList<>();
+        public PropertyState[] propertyStateList = new PropertyState[MAX_PROPERTIES_TO_TEST];
 
         @Override
         public void PropertyCall(String propertyKey, Object propertyValue, Object context)
@@ -312,6 +312,11 @@ public class DeviceTwinCommon extends IntegrationTest
         if (deviceState.dCDeviceForTwin != null)
         {
             deviceState.dCDeviceForTwin.clean();
+
+            if (deviceState.dCDeviceForTwin.getDesiredProp() != null)
+            {
+                deviceState.dCDeviceForTwin.getDesiredProp().clear();
+            }
         }
         if (internalClient != null)
         {
@@ -556,9 +561,10 @@ public class DeviceTwinCommon extends IntegrationTest
         long startTime = System.currentTimeMillis();
         long timeElapsed = 0;
 
-        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
+        for (int i = 0; i < deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)
         {
-            while (!propertyState.callBackTriggered || !((String) propertyState.propertyNewValue).startsWith(propPrefix))
+            PropertyState propertyState = deviceUnderTest.dCDeviceForTwin.propertyStateList[i];
+            while (!propertyState.callBackTriggered || propertyState.propertyNewValue == null || !((String) propertyState.propertyNewValue).startsWith(propPrefix))
             {
                 Thread.sleep(PERIODIC_WAIT_TIME_FOR_VERIFICATION);
                 timeElapsed = System.currentTimeMillis() - startTime;
@@ -579,12 +585,15 @@ public class DeviceTwinCommon extends IntegrationTest
     protected void subscribeToDesiredPropertiesAndVerify(int numOfProp) throws IOException, InterruptedException, IotHubException
     {
         // arrange
+        deviceUnderTest.sCDeviceForTwin.clearDesiredProperties();
+        deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
+        deviceUnderTest.dCDeviceForTwin.propertyStateList = new PropertyState[numOfProp];
         for (int i = 0; i < numOfProp; i++)
         {
             PropertyState propertyState = new PropertyState();
             propertyState.callBackTriggered = false;
             propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
-            deviceUnderTest.dCDeviceForTwin.propertyStateList.add(propertyState);
+            deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             deviceUnderTest.dCDeviceForTwin.setDesiredPropertyCallback(propertyState.property, deviceUnderTest.dCDeviceForTwin, propertyState);
         }
 
@@ -627,7 +636,7 @@ public class DeviceTwinCommon extends IntegrationTest
         {
             PropertyState propertyState = new PropertyState();
             propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
-            deviceUnderTest.dCDeviceForTwin.propertyStateList.add(propertyState);
+            deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>(deviceUnderTest.dCOnProperty, propertyState));
         }
         internalClient.subscribeToTwinDesiredProperties(desiredPropertiesCB);
@@ -642,8 +651,9 @@ public class DeviceTwinCommon extends IntegrationTest
         sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
-        for (PropertyState propertyState : deviceUnderTest.dCDeviceForTwin.propertyStateList)
+        for (int i = 0; i < deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)
         {
+            PropertyState propertyState = deviceUnderTest.dCDeviceForTwin.propertyStateList[i];
             propertyState.callBackTriggered = false;
             propertyState.propertyNewVersion = -1;
         }

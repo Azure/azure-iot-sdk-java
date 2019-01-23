@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Test;
 
@@ -48,6 +49,8 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     public void testSubscribeToDesiredPropertiesWithVersion() throws IOException, InterruptedException, IotHubException
     {
         // arrange
+        deviceUnderTest.sCDeviceForTwin.clearTwin();
+        deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
         Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
@@ -55,7 +58,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
             propertyState.callBackTriggered = false;
             propertyState.propertyNewVersion = -1;
             propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
-            deviceUnderTest.dCDeviceForTwin.propertyStateList.add(propertyState);
+            deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>(deviceUnderTest.dCOnProperty, propertyState));
         }
 
@@ -82,18 +85,23 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         // arrange
         ExecutorService executor = Executors.newFixedThreadPool(MAX_PROPERTIES_TO_TEST);
 
+        deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
+        deviceUnderTest.sCDeviceForTwin.clearTwin();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             PropertyState propertyState = new PropertyState();
             propertyState.callBackTriggered = false;
             propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
-            deviceUnderTest.dCDeviceForTwin.propertyStateList.add(propertyState);
+            deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             deviceUnderTest.dCDeviceForTwin.setDesiredPropertyCallback(propertyState.property, deviceUnderTest.dCDeviceForTwin, propertyState);
         }
 
         // act
         internalClient.subscribeToDesiredProperties(deviceUnderTest.dCDeviceForTwin.getDesiredProp());
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
+
+        //Setting desired properties in different threads leads to a race condition
+        Object desiredPropertiesUpdateLock = new Object();
 
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
@@ -107,9 +115,13 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
                     {
                         Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
                         desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + index, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
-                        //TODO need synch block here?
-                        deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
-                        sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
+                        synchronized (desiredPropertiesUpdateLock)
+                        {
+                            Set currentDesiredProperties = deviceUnderTest.sCDeviceForTwin.getDesiredProperties();
+                            desiredProperties.addAll(currentDesiredProperties);
+                            deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
+                            sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
+                        }
                     }
                     catch (IotHubException | IOException e)
                     {
@@ -121,7 +133,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
 
         executor.shutdown();
-        if (!executor.awaitTermination(5 * 60 * 1000, TimeUnit.MILLISECONDS)) //5 minutes
+        if (!executor.awaitTermination(1, TimeUnit.MINUTES))
         {
             executor.shutdownNow();
         }
@@ -135,12 +147,14 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     public void testSubscribeToDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException
     {
         // arrange
+        deviceUnderTest.sCDeviceForTwin.clearTwin();
+        deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             PropertyState propertyState = new PropertyState();
             propertyState.callBackTriggered = false;
             propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
-            deviceUnderTest.dCDeviceForTwin.propertyStateList.add(propertyState);
+            deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             deviceUnderTest.dCDeviceForTwin.setDesiredPropertyCallback(propertyState.property, deviceUnderTest.dCDeviceForTwin, propertyState);
         }
 
@@ -165,6 +179,9 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     @Test
     public void setDesiredPropertiesAtMaxDepthAllowed() throws IOException, IotHubException
     {
+        deviceUnderTest.sCDeviceForTwin.clearTwin();
+        deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
+
         sCDeviceTwin.getTwin(deviceUnderTest.sCDeviceForTwin);
 
         //Update twin Tags and Desired Properties
@@ -194,6 +211,8 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         addMultipleDevices(MAX_DEVICES);
 
         // Add desired properties for multiple devices
+        deviceUnderTest.sCDeviceForTwin.clearTwin();
+        deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
         for (int i = 0; i < MAX_DEVICES; i++)
         {
             Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
