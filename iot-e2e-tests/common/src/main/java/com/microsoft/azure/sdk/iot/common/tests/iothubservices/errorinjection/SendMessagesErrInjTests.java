@@ -242,7 +242,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
 
     @Ignore
     @Test
-    public void sendMessagesWithThrottlingNoRetry() throws URISyntaxException, IOException, IotHubException, InterruptedException
+    public void sendMessagesWithThrottlingNoRetry() throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
         {
