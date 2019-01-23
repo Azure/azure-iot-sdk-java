@@ -448,17 +448,4 @@ public class IotHubServicesCommon
 
         return false;
     }
-
-    public static String actualStatusUpdatesToString(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
-    {
-        String statusString = "";
-        for (int i = 0; i < actualStatusUpdates.size(); i++)
-        {
-            IotHubConnectionStatus status = actualStatusUpdates.get(i).getKey();
-            Throwable cause = actualStatusUpdates.get(i).getValue();
-            statusString += i + "th status update: " + status + ((cause == null) ? "" : " with throwable " + Tools.getStackTraceFromThrowable(cause) + "\n");
-        }
-
-        return statusString;
-    }
 }

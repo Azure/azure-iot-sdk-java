@@ -35,7 +35,6 @@ import static org.junit.Assert.fail;
  */
 public class ReceiveMessagesCommon extends IntegrationTest
 {
-    protected static final long DEFAULT_TEST_TIMEOUT = 3 * 60 * 1000;
     protected static Map<String, String> messageProperties = new HashMap<>(3);
 
     protected final static String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
@@ -46,7 +45,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
     protected static final List messageIdListStoredOnC2DSend = new ArrayList(); // store the message id list on sending C2D commands using service client
     protected static final List messageIdListStoredOnReceive = new ArrayList(); // store the message id list on receiving C2D commands using device client
 
-    protected static String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     protected static String iotHubConnectionString = "";
     protected static RegistryManager registryManager;
 

@@ -53,9 +53,6 @@ public class DeviceTwinCommon extends IntegrationTest
 
     protected static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = DELAY_BETWEEN_OPERATIONS * 10; // 2 sec
 
-    //Max time to wait before timing out test
-    protected static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = 180000; // 3 min
-
     // Max reported properties to be tested
     protected static final Integer MAX_PROPERTIES_TO_TEST = 5;
 
@@ -90,7 +87,6 @@ public class DeviceTwinCommon extends IntegrationTest
 
     protected DeviceTwinTestInstance testInstance;
     protected static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
-    protected static final long ERROR_INJECTION_EXECUTION_TIMEOUT = 2 * 60 * 1000; // 2 minute
 
     //How many milliseconds between retry
     protected static final Integer RETRY_MILLISECONDS = 100;

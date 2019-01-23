@@ -61,7 +61,6 @@ public class FileUploadTests extends IntegrationTest
     private static final String REMOTE_FILE_NAME = "File";
     private static final String REMOTE_FILE_NAME_EXT = ".txt";
 
-    private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     protected static String iotHubConnectionString = "";
 
     // States of SDK

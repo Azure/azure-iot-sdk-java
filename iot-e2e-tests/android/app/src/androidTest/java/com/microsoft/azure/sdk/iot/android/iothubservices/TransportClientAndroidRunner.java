@@ -10,6 +10,7 @@ import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.TransportClientTests;
+
 import org.junit.BeforeClass;
 import org.junit.Rule;
 

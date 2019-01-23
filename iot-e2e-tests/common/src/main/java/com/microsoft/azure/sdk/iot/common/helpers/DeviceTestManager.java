@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class DeviceTestManager
 {
-    private static final int OPEN_CONNECTION_TIMEOUT_IN_SECONDS = 10;
     private static final int STOP_DEVICE_TIMEOUT_IN_MILLISECONDS = 10000;
     private static final int SECOND_IN_MILLISECONDS = 1000;
 

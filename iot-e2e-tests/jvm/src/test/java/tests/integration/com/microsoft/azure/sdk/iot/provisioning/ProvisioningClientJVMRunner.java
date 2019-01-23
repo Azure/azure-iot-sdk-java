@@ -43,7 +43,6 @@ import static org.junit.Assert.*;
 public class ProvisioningClientJVMRunner extends IntegrationTest
 {
     private final IotHubClientProtocol [] iotHubClientProtocols = {IotHubClientProtocol.MQTT, IotHubClientProtocol.MQTT_WS, IotHubClientProtocol.AMQPS, IotHubClientProtocol.AMQPS_WS, IotHubClientProtocol.HTTPS};
-    private final ProvisioningDeviceClientTransportProtocol [] provisioningDeviceClientTransportProtocols = {MQTT, MQTT_WS, AMQPS, AMQPS_WS, HTTPS};
 
     private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     private static String iotHubConnectionString = "";
@@ -84,7 +83,6 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
     private static final String REGISTRATION_ID_X509_PREFIX = "java-x509-registration-id-";
     private static final String DEVICE_ID_X509_PREFIX = "java-x509-device-id-%s";
 
-    private ProvisioningDeviceClient provisioningDeviceClient = null;
     private ProvisioningServiceClient provisioningServiceClient = null;
     private RegistryManager registryManager = null;
 
@@ -160,7 +158,6 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
 
         provisioningServiceClient = null;
         registryManager = null;
-        provisioningDeviceClient = null;
     }
 
     static class ProvisioningStatus

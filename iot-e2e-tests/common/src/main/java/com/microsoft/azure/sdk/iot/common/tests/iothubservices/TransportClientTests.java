@@ -71,7 +71,6 @@ public class TransportClientTests extends IntegrationTest
     private static Device[] deviceListAmqps = new Device[MAX_DEVICE_MULTIPLEX];
     private static final AtomicBoolean succeed = new AtomicBoolean();
 
-    private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     protected static String iotHubConnectionString = "";
 
     private static Map<String, String> messageProperties = new HashMap<>(3);

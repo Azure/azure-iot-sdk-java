@@ -7,8 +7,8 @@ package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 
 import com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert;
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceConnectionString;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -34,9 +34,7 @@ import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggi
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Test class containing all tests to be run on JVM and android pertaining to twin with version. Class needs to be extended
@@ -47,7 +45,6 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     private static final long BREATHE_TIME = 100; // 0.1 sec
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 1000; // 1 sec
     private static final long EXPECTED_PROPERTIES_MAX_WAIT_MS = 60 * 1000; //1 minute
-    private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB + 50000; // 50 secs
     protected static String iotHubConnectionString = "";
 
     private static final String PROPERTY_KEY_1 = "Key1";

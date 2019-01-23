@@ -36,7 +36,8 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static junit.framework.TestCase.fail;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Utility functions, setup and teardown for all device method integration tests. This class should not contain any tests,
@@ -44,13 +45,10 @@ import static org.junit.Assert.*;
  */
 public class DeviceMethodCommon extends IntegrationTest
 {
-    protected static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     protected static String iotHubConnectionString = "";
 
     protected static DeviceMethod methodServiceClient;
     protected static RegistryManager registryManager;
-
-    protected static final long DEFAULT_TEST_TIMEOUT = 1 * 60 * 1000;
 
     protected static final Long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(200);
     protected static final Long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toSeconds(5);
@@ -68,7 +66,6 @@ public class DeviceMethodCommon extends IntegrationTest
 
     protected DeviceMethodTestInstance testInstance;
     protected static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
-    protected static final long ERROR_INJECTION_EXECUTION_TIMEOUT = 2* 60 * 1000; // 2 minute
 
     protected static Collection inputsCommon(ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, InterruptedException, ModuleClientException
     {

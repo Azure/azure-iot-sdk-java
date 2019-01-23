@@ -13,8 +13,6 @@ import org.junit.BeforeClass;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateEncodingException;
 
 public class FileUploadJVMRunner extends FileUploadTests
 {
