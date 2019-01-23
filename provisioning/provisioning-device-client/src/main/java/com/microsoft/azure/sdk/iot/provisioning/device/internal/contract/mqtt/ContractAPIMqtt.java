@@ -139,7 +139,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
         catch (IOException ex)
         {
             this.mqttConnection = null;
-            throw new ProvisioningDeviceConnectionException("Exception opening connection amqp", ex);
+            throw new ProvisioningDeviceConnectionException("Exception opening connection", ex);
         }
     }
 
