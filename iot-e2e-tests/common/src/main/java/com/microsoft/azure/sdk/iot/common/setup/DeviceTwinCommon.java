@@ -581,8 +581,18 @@ public class DeviceTwinCommon extends IntegrationTest
     protected void subscribeToDesiredPropertiesAndVerify(int numOfProp) throws IOException, InterruptedException, IotHubException
     {
         // arrange
-        deviceUnderTest.sCDeviceForTwin.clearDesiredProperties();
-        deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
+        if (deviceUnderTest != null)
+        {
+            if (deviceUnderTest.sCDeviceForTwin != null)
+            {
+                deviceUnderTest.sCDeviceForTwin.clearDesiredProperties();
+            }
+
+            if (deviceUnderTest.dCDeviceForTwin != null && deviceUnderTest.dCDeviceForTwin.getReportedProp() != null)
+            {
+                deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
+            }
+        }
         deviceUnderTest.dCDeviceForTwin.propertyStateList = new PropertyState[numOfProp];
         for (int i = 0; i < numOfProp; i++)
         {
