@@ -108,8 +108,8 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
         String deviceId = "java-device-client-e2e-test-receive-messages".concat("-" + uuid);
         String deviceIdX509 = "java-device-client-e2e-test-receive-messages-x509".concat("-" + uuid);
-        String moduleId = "java-module-client-e2e-test-send-messages".concat("-" + uuid);
-        String moduleIdX509 = "java-module-client-e2e-test-send-messages-X509".concat("-" + uuid);
+        String moduleId = "java-module-client-e2e-test-receive-messages".concat("-" + uuid);
+        String moduleIdX509 = "java-module-client-e2e-test-receive-messages-X509".concat("-" + uuid);
 
         device = Device.createFromId(deviceId, null, null);
         deviceX509 = Device.createDevice(deviceIdX509, SELF_SIGNED);
