@@ -276,12 +276,12 @@ public class MqttTest
         Mqtt mockMqtt1 = instantiateMqtt(true);
         MqttConnection actualInfoInstance1 = Deencapsulation.getField(mockMqtt1, "mqttConnection");
         Queue<Pair<String, byte[]>> actualQueue1 = Deencapsulation.getField(mockMqtt1, "allReceivedMessages");
-        Object actualLock1 = Deencapsulation.getField(mockMqtt1, "mqttLock");
+        Object actualLock1 = Deencapsulation.getField(mockMqtt1, "stateLock");
 
         Mqtt mockMqtt2 = instantiateMqtt(false);
         MqttConnection actualInfoInstance2 = Deencapsulation.getField(mockMqtt2, "mqttConnection");
         Queue<Pair<String, byte[]>> actualQueue2 = Deencapsulation.getField(mockMqtt2, "allReceivedMessages");
-        Object actualLock2 = Deencapsulation.getField(mockMqtt2, "mqttLock");
+        Object actualLock2 = Deencapsulation.getField(mockMqtt2, "stateLock");
 
         //assert
         assertEquals(actualInfoInstance1, actualInfoInstance2);
@@ -331,8 +331,8 @@ public class MqttTest
         Object actualInfoInstance2 = Deencapsulation.getField(mockMqtt2, "mqttConnection");
         Queue<Pair<String, byte[]>> actualQueue2 = Deencapsulation.getField(mockMqtt2, "allReceivedMessages");
 
-        Object actualLock1 = Deencapsulation.getField(mockMqtt1, "mqttLock");
-        Object actualLock2 = Deencapsulation.getField(mockMqtt2, "mqttLock");
+        Object actualLock1 = Deencapsulation.getField(mockMqtt1, "stateLock");
+        Object actualLock2 = Deencapsulation.getField(mockMqtt2, "stateLock");
 
         assertEquals(actualInfoInstance1, actualInfoInstance2);
         assertEquals(actualQueue1, actualQueue2);
@@ -1543,7 +1543,7 @@ public class MqttTest
         //arrange
         final Mqtt mockMqtt = instantiateMqtt(true);
         Deencapsulation.setField(mockMqtt, "mqttConnection", mockedMqttConnection);
-        Deencapsulation.setField(mockMqtt, "mqttLock", new Object());
+        Deencapsulation.setField(mockMqtt, "stateLock", new Object());
 
         final MqttException mqttException = new MqttException(new Throwable());
         new NonStrictExpectations()
