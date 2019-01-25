@@ -99,12 +99,12 @@ public class IotHubSSLContext
         if (isPath)
         {
             //Codes_SRS_IOTHUBSSLCONTEXT_34_025: [If the provided cert is a path, this function shall set the path of the default cert to the provided cert path.]
-            defaultCert.setValidCertPath(trustedCert);
+            defaultCert.setCertificatesPath(trustedCert);
         }
         else
         {
             //Codes_SRS_IOTHUBSSLCONTEXT_34_026: [If the provided cert is not a path, this function shall set the default cert to the provided cert.]
-            defaultCert.setValidCert(trustedCert);
+            defaultCert.setCertificates(trustedCert);
         }
 
         generateDefaultSSLContext(defaultCert);
@@ -134,12 +134,12 @@ public class IotHubSSLContext
         if (isPath)
         {
             //Codes_SRS_IOTHUBSSLCONTEXT_34_040: [If the provided cert is a path, this function shall set the path of the default cert to the provided cert path.]
-            defaultCert.setValidCertPath(cert);
+            defaultCert.setCertificatesPath(cert);
         }
         else
         {
             //Codes_SRS_IOTHUBSSLCONTEXT_34_041: [If the provided cert is not a path, this function shall set the default cert to the provided cert.]
-            defaultCert.setValidCert(cert);
+            defaultCert.setCertificates(cert);
         }
 
         // Codes_SRS_IOTHUBSSLCONTEXT_34_042: [This constructor shall generate a temporary password to protect the created keystore holding the private key.]

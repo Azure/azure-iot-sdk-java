@@ -11,8 +11,6 @@ import java.util.Collection;
 
 public class IotHubCertificateManager
 {
-    private static final long MAX_CERTIFICATE_LINES = 5000000;
-
     private static final String DEFAULT_CERT =
                     /*D-TRUST Root Class 3 CA 2 2009*/
                     "-----BEGIN CERTIFICATE-----\r\n" +
@@ -86,15 +84,22 @@ public class IotHubCertificateManager
                     "R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\r\n" +
                     "-----END CERTIFICATE-----\r\n";
 
-    private String validCert = null;
+    private Collection<? extends Certificate> certificates;
+    private CertificateFactory certificateFactory;
 
     /**
      * Certificate manager for IotHub creating default certificates
      */
-    IotHubCertificateManager()
+    IotHubCertificateManager() throws CertificateException, IOException
     {
-        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_001: [**The constructor shall set the valid certificate to be default certificate unless changed by user.**]**
-        this.validCert = DEFAULT_CERT;
+        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_34_001: [**This function shall get the x509 instance of the certificate factory.**]**
+        certificateFactory = CertificateFactory.getInstance("X.509");
+
+        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_34_002: [**This function shall generate the default certificates.**]**
+        try (InputStream inputStream = new ByteArrayInputStream(DEFAULT_CERT.getBytes()))
+        {
+            certificates = certificateFactory.generateCertificates(inputStream);
+        }
     }
 
     /**
@@ -105,19 +110,8 @@ public class IotHubCertificateManager
      */
     Collection<? extends Certificate> getCertificateCollection() throws CertificateException, IOException
     {
-        if (this.validCert == null)
-        {
-            //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_010: [**This method shall throw IOException if valid certificate was not defined.**]**
-            throw new IOException("Valid cert could not be found");
-        }
-
-        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_011: [*This method shall create a collection of all the certificates defined as valid using CertificateFactory instance for "X.509".**]**
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-
-        try (InputStream certStreamArray = new ByteArrayInputStream(this.validCert.getBytes()))
-        {
-            return certFactory.generateCertificates(certStreamArray);
-        }
+        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_34_003: [**This function shall return the saved certificates.**]**
+        return this.certificates;
     }
 
     /**
@@ -125,63 +119,51 @@ public class IotHubCertificateManager
      * @param certPath The valid path where a certificate could be loaded from.
      * @throws IOException If the certPath was null or could not be read or was empty.
      */
-    void setValidCertPath(String certPath) throws IOException
+    void setCertificatesPath(String certPath) throws IOException, CertificateException
     {
-        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_006: [*If a user attempted to set the certificate and for somereason could not succeed then this method shall not use default certificate by setting valid certificate as null.**]**
-        this.validCert = null;
-
-        if (certPath == null)
+        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_34_007: [**This method shall throw IllegalArgumentException if the cert path is null or empty.**]**
+        if (certPath == null || certPath.isEmpty())
         {
-            //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_002: [**This method shall throw IllegalArgumentException if parameter is null.**]**
-            throw new IllegalArgumentException("Cert path cannot be null");
+            throw new IllegalArgumentException("Cert path cannot be null or empty");
         }
 
-        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_003: [**This method shall attempt to read the contents of the certificate file from the path provided and save it as valid certificate.**]**
-        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_005: [**This method shall throw FileNotFoundException if it could not be found or does not exist.**]**
-        try (BufferedReader certReader = new BufferedReader(new FileReader(certPath)))
+        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_34_004: [**This function shall read the certificates from the provided
+        // path and save them into a certificate collection.**]**
+        try (FileInputStream fis = new FileInputStream(certPath))
         {
-            long readLineCount = 0;
-            String line;
-            StringBuilder cert = new StringBuilder();
-            while ((line = certReader.readLine()) != null)
-            {
-                if (readLineCount > MAX_CERTIFICATE_LINES)
-                {
-                    throw new IllegalArgumentException("The provided certificate is too long");
-                }
+            certificates = certificateFactory.generateCertificates(fis);
+        }
 
-                cert.append(line);
-                cert.append("\r\n");
-                readLineCount++;
-            }
-
-            if (cert.length() == 0)
-            {
-                //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_004: [**This method shall throw IllegalArgumentException if certificate contents were empty.**]**
-                throw new IllegalArgumentException("Cert cannot be Empty");
-            }
-
-            this.validCert = cert.toString();
+        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_34_008: [**If no certificates were parsed from the provided certificate file path, this function shall throw an IllegalArgumentException.**]**
+        if (certificates.isEmpty())
+        {
+            throw new IllegalArgumentException("Provided certificate path had no certificates");
         }
     }
 
     /**
      * Setter for the valid certificate to be used to communicate with IotHub
-     * @param cert valid certificate to be used to communicate with IotHub
+     * @param cert valid certificate to be used to communicate with IotHub. May be more than 1 certificate
      * @throws IllegalArgumentException If the cert string provided was null or empty
      */
-    void setValidCert(String cert) throws IllegalArgumentException
+    void setCertificates(String cert) throws IllegalArgumentException, IOException, CertificateException
     {
-        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_009: [*If a user attempted to set the certificate and for somereason could not succeed then this method shall not use default certificate by setting valid certificate as null.**]**
-        this.validCert = null;
-
-        if (cert == null || cert.length() == 0)
+        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_34_006: [**This method shall throw IllegalArgumentException if parameter is null or empty.**]**
+        if (cert == null || cert.isEmpty())
         {
-            //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_007: [**This method shall throw IllegalArgumentException if parameter is null.**]**
-            throw new IllegalArgumentException("Cert path cannot be null");
+            throw new IllegalArgumentException("Certificate cannot be null or empty");
         }
 
-        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_25_008: [*This method shall save the cert provided by the user a s valid cert to be used to communicate with IotHub.**]**
-        this.validCert = cert;
+        //Codes_SRS_IOTHUBCERTIFICATEMANAGER_34_005: [**This function shall read the certificates from the provided
+        // string and save them into a certificate collection.**]**
+        try (InputStream inputStream = new ByteArrayInputStream(cert.getBytes()))
+        {
+            certificates = certificateFactory.generateCertificates(inputStream);
+        }
+
+        if (certificates.isEmpty())
+        {
+            throw new IllegalArgumentException("Provided certificate string had no certificates");
+        }
     }
 }
