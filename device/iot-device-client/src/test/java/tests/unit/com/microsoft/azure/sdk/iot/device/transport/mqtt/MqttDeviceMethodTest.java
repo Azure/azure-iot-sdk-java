@@ -6,9 +6,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.mqtt;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttConnection;
@@ -19,6 +17,7 @@ import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -27,8 +26,13 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
-import static org.junit.Assert.*;
+import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST;
+import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_METHOD_SEND_RESPONSE;
+import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST;
+import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /* Unit tests for MqttDeviceMethod
  * Code coverage: 100% methods, 97% lines
@@ -38,13 +42,17 @@ public class MqttDeviceMethodTest
     @Mocked
     MqttConnection mockedMqttConnection;
 
-    private void baseConstructorExpectation()
+    private ConcurrentLinkedQueue<Pair<String, byte[]>> testAllReceivedMessages;
+
+    @Before
+    public void baseConstructorExpectation()
     {
+        testAllReceivedMessages = new ConcurrentLinkedQueue<>();
         new NonStrictExpectations()
         {
             {
                 Deencapsulation.invoke(mockedMqttConnection, "getAllReceivedMessages");
-                result = new ConcurrentLinkedQueue<>();
+                result = testAllReceivedMessages;
                 Deencapsulation.invoke(mockedMqttConnection, "getMqttLock");
                 result = new Object();
             }
@@ -285,7 +293,6 @@ public class MqttDeviceMethodTest
         MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection, "");
         Map<String, DeviceOperations> testRequestMap = new HashMap<>();
         testRequestMap.put("ReqId", DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
-        Deencapsulation.setField(testMethod, "requestMap", testRequestMap);
         testMethod.start();
 
         //act
@@ -304,11 +311,8 @@ public class MqttDeviceMethodTest
         //arrange
         String topic = "$iothub/methods/POST/testMethod/?$rid=10";
         byte[] actualPayload = "TestPayload".getBytes();
-        Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
         testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection, "");
-        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
-        Deencapsulation.setField(testMethod, "mqttLock", new Object());
         testMethod.start();
 
         //act
@@ -330,8 +334,6 @@ public class MqttDeviceMethodTest
         //arrange
         Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
         MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection, "");
-        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
-        Deencapsulation.setField(testMethod, "mqttLock", new Object());
         testMethod.start();
 
         //act
@@ -352,8 +354,6 @@ public class MqttDeviceMethodTest
         Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
         testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection, "");
-        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
-        Deencapsulation.setField(testMethod, "mqttLock", new Object());
         testMethod.start();
 
         //act
@@ -370,11 +370,8 @@ public class MqttDeviceMethodTest
         //arrange
         String topic = "$iothub/methods/POST/";
         byte[] actualPayload = "TestPayload".getBytes();
-        Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
         testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection, "");
-        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
-        Deencapsulation.setField(testMethod, "mqttLock", new Object());
         testMethod.start();
 
         //act
@@ -390,11 +387,8 @@ public class MqttDeviceMethodTest
         //arrange
         String topic = "$iothub/methods/POST/testMethod/";
         byte[] actualPayload = "TestPayload".getBytes();
-        Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
         testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection, "");
-        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
-        Deencapsulation.setField(testMethod, "mqttLock", new Object());
 
         testMethod.start();
 
@@ -408,13 +402,9 @@ public class MqttDeviceMethodTest
         //arrange
         String topic = "$iothub/methods/POST/testMethod/?$rid=10";
         byte[] actualPayload = "".getBytes();
-        Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
         testAllReceivedMessages.add(new MutablePair<>(topic, actualPayload));
         MqttDeviceMethod testMethod = new MqttDeviceMethod(mockedMqttConnection, "");
-        Deencapsulation.setField(testMethod, "mqttLock", new Object());
-        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
         testMethod.start();
-        Deencapsulation.setField(testMethod, "allReceivedMessages", testAllReceivedMessages);
 
         //act
         Message testMessage = testMethod.receive();

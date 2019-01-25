@@ -5,8 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.deps.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
-import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -23,8 +23,8 @@ public class MqttConnection implements MqttCallback
     private static final String WS_SSL_URL_FORMAT = "wss://%s:443";
     private static final String SSL_URL_FORMAT = "ssl://%s:8883";
 
-    private MqttAsyncClient mqttAsyncClient = null;
-    private MqttConnectOptions connectionOptions = null;
+    private MqttAsyncClient mqttAsyncClient;
+    private MqttConnectOptions connectionOptions;
 
     //mqtt connection options
     private static final int KEEP_ALIVE_INTERVAL = 230;
@@ -33,11 +33,6 @@ public class MqttConnection implements MqttCallback
     static final int MAX_WAIT_TIME = 1000;
 
     private MqttListener mqttListener;
-
-    private final ObjectLock openLock = new ObjectLock();
-
-    // paho mqtt only supports 10 messages in flight at the same time
-    static final int MAX_IN_FLIGHT_COUNT = 10;
 
     /**
      * Constructor to create MqttAsync Client with Paho
