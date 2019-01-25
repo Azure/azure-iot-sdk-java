@@ -12,7 +12,11 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -29,8 +33,9 @@ abstract public class Mqtt implements MqttCallback
     private MqttConnection mqttConnection;
     private MqttMessageListener messageListener;
     ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
-    Object mqttLock;
-    Object publishLock;
+    private final Object stateLock;
+    final Object incomingLock;
+    private final Object publishLock;
 
     private static Map<Integer, Message> unacknowledgedSentMessages = new ConcurrentHashMap<>();
 
@@ -85,7 +90,8 @@ abstract public class Mqtt implements MqttCallback
         //Codes_SRS_Mqtt_25_003: [The constructor shall retrieve lock, queue from the provided connection information and save the connection.]
         this.mqttConnection = mqttConnection;
         this.allReceivedMessages = mqttConnection.getAllReceivedMessages();
-        this.mqttLock = mqttConnection.getMqttLock();
+        this.stateLock = mqttConnection.getMqttLock();
+        this.incomingLock = new Object();
         this.publishLock = new Object();
         this.userSpecifiedSASTokenExpiredOnRetry = false;
         this.listener = listener;
@@ -100,7 +106,7 @@ abstract public class Mqtt implements MqttCallback
      */
     protected void connect() throws TransportException
     {
-        synchronized (this.mqttLock)
+        synchronized (this.stateLock)
         {
             try
             {
@@ -162,7 +168,7 @@ abstract public class Mqtt implements MqttCallback
      */
     protected void publish(String publishTopic, Message message) throws TransportException
     {
-        synchronized (this.mqttLock)
+        synchronized (this.publishLock)
         {
             try
             {
@@ -224,7 +230,7 @@ abstract public class Mqtt implements MqttCallback
                 {
                     //Codes_SRS_Mqtt_25_014: [The function shall publish message payload on the publishTopic specified to the IoT Hub given in the configuration.]
                     IMqttDeliveryToken publishToken = this.mqttConnection.getMqttAsyncClient().publish(publishTopic, mqttMessage);
-                    this.unacknowledgedSentMessages.put(publishToken.getMessageId(), message);
+                    unacknowledgedSentMessages.put(publishToken.getMessageId(), message);
                 }
             }
             catch (MqttException e)
@@ -248,7 +254,7 @@ abstract public class Mqtt implements MqttCallback
      */
     protected void subscribe(String topic) throws TransportException
     {
-        synchronized (this.mqttLock)
+        synchronized (this.stateLock)
         {
             try
             {
@@ -293,7 +299,7 @@ abstract public class Mqtt implements MqttCallback
      */
     public IotHubTransportMessage receive() throws TransportException
     {
-        synchronized (this.mqttLock)
+        synchronized (this.incomingLock)
         {
             if (this.mqttConnection == null)
             {
@@ -406,31 +412,28 @@ abstract public class Mqtt implements MqttCallback
     {
         synchronized (this.publishLock)
         {
-            if (this.listener != null)
+            if (this.listener != null&& unacknowledgedSentMessages.containsKey(iMqttDeliveryToken.getMessageId()))
             {
-                if (this.unacknowledgedSentMessages.containsKey(iMqttDeliveryToken.getMessageId()))
+                Message deliveredMessage = unacknowledgedSentMessages.remove(iMqttDeliveryToken.getMessageId());
+
+                if (deliveredMessage instanceof IotHubTransportMessage)
                 {
-                    Message deliveredMessage = this.unacknowledgedSentMessages.remove(iMqttDeliveryToken.getMessageId());
-
-                    if (deliveredMessage instanceof IotHubTransportMessage)
+                    DeviceOperations deviceOperation = ((IotHubTransportMessage) deliveredMessage).getDeviceOperationType();
+                    if (deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
+                            || deviceOperation == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
+                            || deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
                     {
-                        DeviceOperations deviceOperation = ((IotHubTransportMessage) deliveredMessage).getDeviceOperationType();
-                        if (deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
-                                || deviceOperation == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
-                                || deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
-                        {
-                            //Codes_SRS_Mqtt_34_056: [If the acknowledged message is of type
-                            // DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST, DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST,
-                            // or DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST, this function shall not notify the saved
-                            // listener that the message was sent.]
-                            //no need to alert the IotHubTransport layer about these messages as they are not tracked in the inProgressQueue
-                            return;
-                        }
+                        //Codes_SRS_Mqtt_34_056: [If the acknowledged message is of type
+                        // DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST, DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST,
+                        // or DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST, this function shall not notify the saved
+                        // listener that the message was sent.]
+                        //no need to alert the IotHubTransport layer about these messages as they are not tracked in the inProgressQueue
+                        return;
                     }
-
-                    //Codes_SRS_Mqtt_34_042: [If this object has a saved listener, that listener shall be notified of the successfully delivered message.]
-                    this.listener.onMessageSent(deliveredMessage, null);
                 }
+
+                //Codes_SRS_Mqtt_34_042: [If this object has a saved listener, that listener shall be notified of the successfully delivered message.]
+                this.listener.onMessageSent(deliveredMessage, null);
             }
         }
     }

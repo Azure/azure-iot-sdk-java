@@ -144,7 +144,7 @@ public class MqttDeviceMethod extends Mqtt
     @Override
     public IotHubTransportMessage receive() throws TransportException
     {
-        synchronized (this.mqttLock)
+        synchronized (this.incomingLock)
         {
             IotHubTransportMessage message = null;
 
