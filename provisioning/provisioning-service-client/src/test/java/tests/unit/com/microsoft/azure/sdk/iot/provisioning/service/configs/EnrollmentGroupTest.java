@@ -54,7 +54,7 @@ public class EnrollmentGroupTest
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "-----END EC PRIVATE KEY-----\n";
 
-    private static final Date VALID_DATE = new Date();
+    private static final Date VALID_DATE = new Date(System.currentTimeMillis()/1000 * 1000);
     private static final String VALID_DATE_AS_STRING = ParserUtility.dateTimeUtcToString(VALID_DATE);
 
     private final class MockEnrollmentGroup extends EnrollmentGroup
@@ -516,7 +516,7 @@ public class EnrollmentGroupTest
         MockEnrollmentGroup enrollmentGroup = new MockEnrollmentGroup(json);
 
         // assert
-        assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollmentGroup, "lastUpdatedDateTimeUtcDate").toString());
+        assertEquals(VALID_DATE, Deencapsulation.getField(enrollmentGroup, "lastUpdatedDateTimeUtcDate"));
     }
 
     /* SRS_ENROLLMENT_GROUP_21_008: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */

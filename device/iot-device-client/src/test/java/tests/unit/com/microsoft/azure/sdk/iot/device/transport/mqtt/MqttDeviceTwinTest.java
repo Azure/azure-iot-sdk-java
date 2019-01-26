@@ -646,7 +646,7 @@ public class MqttDeviceTwinTest
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
             Deencapsulation.setField(testTwin, "allReceivedMessages", testAllReceivedMessages);
-            Deencapsulation.setField(testTwin, "mqttLock", new Object());
+            Deencapsulation.setField(testTwin, "stateLock", new Object());
 
             //act
             receivedMessage = (IotHubTransportMessage) testTwin.receive();
@@ -676,7 +676,7 @@ public class MqttDeviceTwinTest
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
             Deencapsulation.setField(testTwin, "allReceivedMessages", testAllReceivedMessages);
-            Deencapsulation.setField(testTwin, "mqttLock", new Object());
+            Deencapsulation.setField(testTwin, "stateLock", new Object());
 
 
             Map<String, DeviceOperations> requestMap = new HashMap<>();
@@ -717,7 +717,7 @@ public class MqttDeviceTwinTest
             Map<String, DeviceOperations> requestMap = new HashMap<>();
             requestMap.put(mockReqId, DEVICE_OPERATION_TWIN_GET_REQUEST);
             Deencapsulation.setField(testTwin, "requestMap", requestMap);
-            Deencapsulation.setField(testTwin, "mqttLock", new Object());
+            Deencapsulation.setField(testTwin, "stateLock", new Object());
 
             //act
             receivedMessage = (IotHubTransportMessage) testTwin.receive();
@@ -828,7 +828,7 @@ public class MqttDeviceTwinTest
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
             Deencapsulation.setField(testTwin, "allReceivedMessages", testAllReceivedMessages);
-            Deencapsulation.setField(testTwin, "mqttLock", new Object());
+            Deencapsulation.setField(testTwin, "stateLock", new Object());
 
             Map<String, DeviceOperations> requestMap = new HashMap<>();
             requestMap.put(mockReqId, DEVICE_OPERATION_TWIN_GET_REQUEST);
@@ -883,7 +883,7 @@ public class MqttDeviceTwinTest
             Map<String, DeviceOperations> requestMap = new HashMap<>();
             requestMap.put(mockReqId, DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST);
             Deencapsulation.setField(testTwin, "requestMap", requestMap);
-            Deencapsulation.setField(testTwin, "mqttLock", new Object());
+            Deencapsulation.setField(testTwin, "stateLock", new Object());
 
             //act
             receivedMessage = (IotHubTransportMessage) testTwin.receive();
@@ -1003,10 +1003,10 @@ public class MqttDeviceTwinTest
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
             Deencapsulation.setField(testTwin, "allReceivedMessages", testAllReceivedMessages);
-            Deencapsulation.setField(testTwin, "mqttLock", new Object());
+            Deencapsulation.setField(testTwin, "stateLock", new Object());
 
             //act
-            receivedMessage = (IotHubTransportMessage) testTwin.receive();
+            receivedMessage = testTwin.receive();
         }
         finally
         {
@@ -1044,7 +1044,7 @@ public class MqttDeviceTwinTest
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
             Deencapsulation.setField(testTwin, "allReceivedMessages", testAllReceivedMessages);
-            Deencapsulation.setField(testTwin, "mqttLock", new Object());
+            Deencapsulation.setField(testTwin, "stateLock", new Object());
 
             //act
             receivedMessage = (IotHubTransportMessage) testTwin.receive();
@@ -1073,7 +1073,7 @@ public class MqttDeviceTwinTest
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             testAllReceivedMessages.add(new MutablePair<>(insertTopic, actualPayload));
             Deencapsulation.setField(testTwin, "allReceivedMessages", testAllReceivedMessages);
-            Deencapsulation.setField(testTwin, "mqttLock", new Object());
+            Deencapsulation.setField(testTwin, "stateLock", new Object());
 
             //act
             receivedMessage = (IotHubTransportMessage) testTwin.receive();
@@ -1099,10 +1099,11 @@ public class MqttDeviceTwinTest
             MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "");
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             Deencapsulation.setField(mockMqtt, "allReceivedMessages", testAllReceivedMessages);
-            Deencapsulation.setField(testTwin, "mqttLock", new Object());
+            Deencapsulation.setField(testTwin, "stateLock", new Object());
+            Deencapsulation.setField(testTwin, "incomingLock", new Object());
 
             //act
-            receivedMessage = (IotHubTransportMessage) testTwin.receive();
+            receivedMessage = testTwin.receive();
         }
         finally
         {

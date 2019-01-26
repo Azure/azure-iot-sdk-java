@@ -3,11 +3,23 @@
 
 package com.microsoft.azure.sdk.iot.deps.serializer;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import static com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility.getJsonObjectValue;
+import static com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility.resolveJsonElement;
 
 /**
  * Representation of a single Direct Method Access collection with a Json serializer and deserializer.
@@ -142,106 +154,127 @@ public class MethodParser
      */
     public synchronized void fromJson(String json) throws IllegalArgumentException
     {
-        MethodParser newMethodParser;
 
         if((json == null) || json.isEmpty())
         {
             /* Codes_SRS_METHODPARSER_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
-            throw new IllegalArgumentException("Invalid json");
+            throw new IllegalArgumentException("Invalid json.");
         }
 
-        /* Codes_SRS_METHODPARSER_21_007: [The json can contain values `null`, `"null"`, and `""`, which represents null, the string null, and empty string respectively.] */
-        Gson gson = new GsonBuilder().serializeNulls().create();
-
-        /* Codes_SRS_METHODPARSER_21_006: [The fromJson shall parse the json and fill the method collection.] */
-        if(json.contains(METHOD_NAME_TAG))
+        JsonParser jsonParser = new JsonParser();
+        try
         {
-            if(json.contains(STATUS_TAG))
-            {
-                /* Codes_SRS_METHODPARSER_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
-                throw new IllegalArgumentException("Invoke method name and Status reported in the same json");
-            }
-            /**
-             * Codes_SRS_METHODPARSER_21_009: [If the json contains the `methodName` identification, the fromJson shall parse the full method, and set the operation as `invoke`.]
-             *  Ex:
-             *  {
-             *      "methodName": "reboot",
-             *      "responseTimeoutInSeconds": 200,
-             *      "connectTimeoutInSeconds": 5,
-             *      "payload":
-             *      {
-             *          "input1": "someInput",
-             *          "input2": "anotherInput"
-             *      }
-             *  }
-             */
-            try
-            {
-                newMethodParser = gson.fromJson(json, MethodParser.class);
-            }
-            catch (JsonSyntaxException malformed)
-            {
-                /* Codes_SRS_METHODPARSER_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
-                throw new IllegalArgumentException("Malformed json:" + malformed);
-            }
-
-            this.name = newMethodParser.name;
-            this.responseTimeout = newMethodParser.responseTimeout;
-            this.connectTimeout = newMethodParser.connectTimeout;
-            this.status = null;
-            this.payload = newMethodParser.payload;
-            this.operation = Operation.invoke;
-        }
-        else if(json.contains(STATUS_TAG))
-        {
-            /**
-             * Codes_SRS_METHODPARSER_21_011: [If the json contains the `status` identification, the fromJson shall parse both status and payload, and set the operation as `response`.]
-             *  Ex:
-             *  {
-             *      "status": 201,
-             *      "payload": {"AnyValidPayload" : "" }
-             *  }
-             */
-            try
-            {
-                newMethodParser = gson.fromJson(json, MethodParser.class);
-            }
-            catch (JsonSyntaxException malformed)
-            {
-                /* Codes_SRS_METHODPARSER_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
-                throw new IllegalArgumentException("Malformed json:" + malformed);
-            }
-            this.name = null;
-            this.responseTimeout = null;
-            this.connectTimeout = null;
-            this.status = newMethodParser.status;
-            this.payload = newMethodParser.payload;
-            this.operation = Operation.response;
-        }
-        else
-        {
-            try
+            JsonElement jsonElement = jsonParser.parse(json);
+            if (jsonElement instanceof JsonPrimitive || jsonElement instanceof JsonArray)
             {
                 /**
-                 * Codes_SRS_METHODPARSER_21_010: [If the json contains any payload without `methodName` or `status` identification, the fromJson shall parse only the payload, and set the operation as `payload`]
+                 *  Basic JSON String or Array
                  *  Ex:
-                 *  {
-                 *      "input1": "someInput",
-                 *      "input2": "anotherInput"
-                 *  }
+                 *      "this is payload."
+                 *      1
+                 *      true
+                 *      2.0e10
+                 *      2.6
                  */
-                this.name = null;
-                this.responseTimeout = null;
-                this.connectTimeout = null;
-                this.status = null;
-                this.payload = gson.fromJson(json, Object.class);
                 this.operation = Operation.payload;
+                this.payload = resolveJsonElement(jsonElement);
             }
-            catch (JsonSyntaxException malformed)
+            else if (jsonElement instanceof JsonObject)
             {
-                /* Codes_SRS_METHODPARSER_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
-                throw new IllegalArgumentException("Malformed json:" + malformed);
+                JsonObject jsonObject = (JsonObject) jsonElement;
+                JsonElement statusTagNode = jsonObject.get(STATUS_TAG);
+                JsonElement methodNameNode = jsonObject.get(METHOD_NAME_TAG);
+                if (methodNameNode == null)
+                {
+                    if (statusTagNode == null)
+                    {
+                        /**
+                         * Codes_SRS_METHODPARSER_21_010: [If the json contains any payload without `methodName` or `status` identification, the fromJson shall parse only the payload, and set the operation as `payload`]
+                         *  Ex:
+                         *  {
+                         *      "input1": "someInput",
+                         *      "input2": "anotherInput"
+                         *  }
+                         */
+                        operation = Operation.payload;
+                        payload = getJsonObjectValue(jsonObject);
+                    }
+                    else
+                    {
+                        /**
+                         * Codes_SRS_METHODPARSER_21_011: [If the json contains the `status` identification, the fromJson shall parse both status and payload, and set the operation as `response`.]
+                         *  Ex:
+                         *  {
+                         *      "status": 201,
+                         *      "payload": {"AnyValidPayload" : "" }
+                         *  }
+                         */
+                        operation = Operation.response;
+                        if (statusTagNode.isJsonPrimitive())
+                        {
+                            status = statusTagNode.getAsInt();
+                        }
+                        JsonElement payloadNode = jsonObject.get(PAYLOAD_TAG);
+                        if (payloadNode != null)
+                        {
+                            payload = resolveJsonElement(payloadNode);
+                        }
+                    }
+                }
+                else
+                {
+                    if (statusTagNode == null)
+                    {
+                        /**
+                         * Codes_SRS_METHODPARSER_21_009: [If the json contains the `methodName` identification, the fromJson shall parse the full method, and set the operation as `invoke`.]
+                         *  Ex:
+                         *  {
+                         *      "methodName": "reboot",
+                         *      "responseTimeoutInSeconds": 200,
+                         *      "connectTimeoutInSeconds": 5,
+                         *      "payload":
+                         *      {
+                         *          "input1": "someInput",
+                         *          "input2": "anotherInput"
+                         *      }
+                         *  }
+                         */
+                        operation = Operation.invoke;
+                        name = methodNameNode.getAsString();
+                        JsonElement responseTimeoutNode = jsonObject.get(RESPONSE_TIMEOUT_IN_SECONDS_TAG);
+                        if (responseTimeoutNode != null)
+                        {
+                            responseTimeout = responseTimeoutNode.getAsLong();
+
+                        }
+                        JsonElement connetionTimeoutNode = jsonObject.get(CONNECT_TIMEOUT_IN_SECONDS_TAG);
+                        if (connetionTimeoutNode != null)
+                        {
+                            connectTimeout = connetionTimeoutNode.getAsLong();
+                        }
+                        JsonElement payloadNode = jsonObject.get(PAYLOAD_TAG);
+                        if (payloadNode != null)
+                        {
+                            payload = resolveJsonElement(payloadNode);
+                        }
+                    }
+                    else
+                    {
+                        /* Codes_SRS_METHODPARSER_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
+                        throw new IllegalArgumentException("Invoke method name and Status reported in the same json");
+                    }
+                }
             }
+            else
+            {
+                // JSON null, since string is not empty, it shouldn't reach here
+                throw new IllegalArgumentException("Invalid json.");
+            }
+        }
+        catch (Exception ex)
+        {
+            /* Codes_SRS_METHODPARSER_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
+            throw new IllegalArgumentException("Malformed json.", ex);
         }
     }
 
@@ -271,7 +304,11 @@ public class MethodParser
     public Object getPayload()
     {
         /* Codes_SRS_METHODPARSER_21_013: [The getPayload shall return an Object with the Payload in the parsed json.] */
-        return this.payload;
+        if (payload instanceof JsonElement && ((JsonElement) payload).isJsonPrimitive() && ((JsonPrimitive) payload).isString())
+        {
+            return ((JsonPrimitive) payload).getAsString();
+        }
+        return payload;
     }
 
     /**
@@ -284,6 +321,50 @@ public class MethodParser
     {
         /* Codes_SRS_METHODPARSER_21_014: [The toJson shall create a String with the full information in the method collection using json format, by using the toJsonElement.] */
         return toJsonElement().toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    private JsonElement jsonizePayload(Object payload)
+    {
+        if (payload == null)
+        {
+            return new JsonNull();
+        }
+        else if (payload instanceof JsonElement)
+        {
+            return (JsonElement) payload;
+        }
+        else if (payload instanceof Map)
+        {
+            JsonObject jsonObject = new JsonObject();
+            Set<Entry<String, Object>> entrySet = ((Map) payload).entrySet();
+            for (Entry<String, Object> entry : entrySet)
+            {
+                jsonObject.add(entry.getKey(), jsonizePayload(entry.getValue()));
+            }
+            return jsonObject;
+        }
+        else
+        {
+            JsonParser parser = new JsonParser();
+            try
+            {
+                String json = payload.toString();
+                JsonElement jsonElement = parser.parse(json);
+                if (jsonElement.isJsonNull())
+                {
+                    return new JsonPrimitive(json);
+                }
+                else
+                {
+                    return jsonElement;
+                }
+            }
+            catch (JsonSyntaxException e)
+            {
+                return new Gson().toJsonTree(payload);
+            }
+        }
     }
 
     /**
@@ -303,86 +384,68 @@ public class MethodParser
         /* Codes_SRS_METHODPARSER_21_019: [If the payload is null, the toJsonElement shall include `payload` with value `null`.] */
         /* Codes_SRS_METHODPARSER_21_024: [The class toJsonElement include status as `status` in the json.] */
         /* Codes_SRS_METHODPARSER_21_025: [If the status is null, the toJsonElement shall include `status` as `null`.] */
-        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
-        JsonObject jsonProperty = new JsonObject();
-
-        switch(operation)
+        if (operation == Operation.invoke)
         {
-            case invoke:
-                /**
-                 *  Codes_SRS_METHODPARSER_21_026: [If the method operation is `invoke`, the toJsonElement shall include the full method information in the json.]
-                 *  Ex:
-                 *  {
-                 *      "methodName": "reboot",
-                 *      "responseTimeoutInSeconds": 200,
-                 *      "connectTimeoutInSeconds": 5,
-                 *      "payload":
-                 *      {
-                 *          "input1": "someInput",
-                 *          "input2": "anotherInput"
-                 *      }
-                 *  }
-                 */
-                if ((name == null) || name.isEmpty())
-                {
-                    throw new IllegalArgumentException("cannot invoke method with null name");
-                }
-                jsonProperty.addProperty(METHOD_NAME_TAG, name);
-                if(responseTimeout != null)
-                {
-                    jsonProperty.addProperty(RESPONSE_TIMEOUT_IN_SECONDS_TAG, responseTimeout);
-                }
-                if(connectTimeout != null)
-                {
-                    jsonProperty.addProperty(CONNECT_TIMEOUT_IN_SECONDS_TAG, connectTimeout);
-                }
-                if(payload instanceof Map)
-                {
-                    jsonProperty.add(PAYLOAD_TAG, ParserUtility.mapToJsonElement((Map<String, Object>) payload));
-                }
-                else
-                {
-                    jsonProperty.add(PAYLOAD_TAG, gson.toJsonTree(payload));
-                }
-                return jsonProperty;
-
-            case response:
-                /** Codes_SRS_METHODPARSER_21_027: [If the method operation is `response`, the toJsonElement shall parse both status and payload.]
-                 *  Ex:
-                 *  {
-                 *      "status": 201,
-                 *      "payload": {"AnyValidPayload" : "" }
-                 *  }
-                 */
-                jsonProperty.addProperty(STATUS_TAG, status);
-                if(payload instanceof Map)
-                {
-                    jsonProperty.add(PAYLOAD_TAG, ParserUtility.mapToJsonElement((Map<String, Object>) payload));
-                }
-                else
-                {
-                    jsonProperty.add(PAYLOAD_TAG, gson.toJsonTree(payload));
-                }
-                return jsonProperty;
-
-            case payload:
-                /**
-                 * Codes_SRS_METHODPARSER_21_028: [If the method operation is `payload`, the toJsonElement shall parse only the payload.]
-                 *  Ex:
-                 *  {
-                 *      "input1": "someInput",
-                 *      "input2": "anotherInput"
-                 *  }
-                 */
-                if (payload instanceof Map)
-                {
-                    return ParserUtility.mapToJsonElement((Map<String, Object>) payload);
-                }
-                return gson.toJsonTree(payload);
-
-            default:
-                /* Codes_SRS_METHODPARSER_21_036: [If the method operation is `none`, the toJsonElement shall throw IllegalArgumentException.] */
-                throw new IllegalArgumentException("There is no content to parser");
+            /**
+             *  Codes_SRS_METHODPARSER_21_026: [If the method operation is `invoke`, the toJsonElement shall include the full method information in the json.]
+             *  Ex:
+             *  {
+             *      "methodName": "reboot",
+             *      "responseTimeoutInSeconds": 200,
+             *      "connectTimeoutInSeconds": 5,
+             *      "payload":
+             *      {
+             *          "input1": "someInput",
+             *          "input2": "anotherInput"
+             *      }
+             *  }
+             */
+            if ((name == null) || name.isEmpty())
+            {
+                throw new IllegalArgumentException("cannot invoke method with null name");
+            }
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty(METHOD_NAME_TAG, name);
+            if (responseTimeout != null)
+            {
+                jsonObject.addProperty(RESPONSE_TIMEOUT_IN_SECONDS_TAG, responseTimeout);
+            }
+            if (connectTimeout != null)
+            {
+                jsonObject.addProperty(CONNECT_TIMEOUT_IN_SECONDS_TAG, connectTimeout);
+            }
+            jsonObject.add(PAYLOAD_TAG, jsonizePayload(payload));
+            return jsonObject;
+        }
+        else if (operation == Operation.response)
+        {
+            /** Codes_SRS_METHODPARSER_21_027: [If the method operation is `response`, the toJsonElement shall parse both status and payload.]
+             *  Ex:
+             *  {
+             *      "status": 201,
+             *      "payload": {"AnyValidPayload" : "" }
+             *  }
+             */
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty(STATUS_TAG, status);
+            jsonObject.add(PAYLOAD_TAG, jsonizePayload(payload));
+            return jsonObject;
+        }
+        else if (operation == Operation.payload)
+        {
+            /**
+             * Codes_SRS_METHODPARSER_21_028: [If the method operation is `payload`, the toJsonElement shall parse only the payload.]
+             *  Ex:
+             *  {
+             *      "input1": "someInput",
+             *      "input2": "anotherInput"
+             *  }
+             */
+            return jsonizePayload(payload);
+        } else
+        {
+            /* Codes_SRS_METHODPARSER_21_036: [If the method operation is `none`, the toJsonElement shall throw IllegalArgumentException.] */
+            throw new IllegalArgumentException("There is no content to parser");
         }
     }
 
