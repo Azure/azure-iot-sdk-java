@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportConnection;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import org.apache.qpid.proton.InterruptException;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
@@ -211,6 +212,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
                 if (this.savedException != null)
                 {
+                    amqpsSessionManager.closeNow();
+                    executorServicesCleanup();
                     // Codes_SRS_AMQPSIOTHUBCONNECTION_34_062: [If, after attempting to open the connection, this
                     // object has a saved exception, this function shall throw that saved exception.]
                     throw this.savedException;
@@ -218,6 +221,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
                 if (!this.amqpsSessionManager.isAuthenticationOpened() || !this.amqpsSessionManager.areAllLinksOpen() || this.state != IotHubConnectionStatus.CONNECTED)
                 {
+                    amqpsSessionManager.closeNow();
+                    executorServicesCleanup();
                     // Codes_SRS_AMQPSIOTHUBCONNECTION_12_074: [If authentication has not succeeded after calling
                     // authenticate() and openLinks(), or if all links are not open yet,
                     // this function shall throw a retryable transport exception.]
@@ -228,6 +233,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
             catch (InterruptedException e)
             {
+                amqpsSessionManager.closeNow();
                 executorServicesCleanup();
                 logger.LogError(e);
                 throw new TransportException("Waited too long for the connection to open.");
@@ -235,7 +241,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         this.listener.onConnectionEstablished(this.connectionId);
-
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
@@ -793,7 +798,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
      */
     private class ReactorRunner implements Callable
     {
-        private static final String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
+        private static final String THREAD_NAME = "azure-iot-sdk-IotHub-ReactorRunner";
         private final IotHubReactor iotHubReactor;
         private final IotHubListener listener;
         private String connectionId;

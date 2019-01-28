@@ -559,6 +559,8 @@ public class AmqpsIotHubConnectionTest {
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "areAllLinksOpen");
                 result = true;
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "closeNow");
             }
         };
 
@@ -601,6 +603,8 @@ public class AmqpsIotHubConnectionTest {
                 result = true;
 
                 mockAmqpsSessionManager.openDeviceOperationLinks();
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "closeNow");
             }
         };
 
@@ -2291,6 +2295,8 @@ public class AmqpsIotHubConnectionTest {
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = false;
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "closeNow");
             }
         };
 
@@ -2332,6 +2338,8 @@ public class AmqpsIotHubConnectionTest {
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "areAllLinksOpen");
                 result = false;
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "closeNow");
             }
         };
 
