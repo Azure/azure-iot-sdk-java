@@ -240,9 +240,11 @@ public class SendMessagesCommon extends IntegrationTest
                     this.openConnection();
                     this.sendMessages();
                     this.closeConnection();
-                } catch (Exception e)
+                }
+                catch (Exception | AssertionError x)
                 {
                     succeed.set(false);
+                    System.out.print("testDevice thread: " + x.getMessage());
                 }
             }
             latch.countDown();
@@ -295,7 +297,7 @@ public class SendMessagesCommon extends IntegrationTest
                         Thread.sleep(RETRY_MILLISECONDS);
                         if (System.currentTimeMillis() - startTime > sendTimeout)
                         {
-                            fail("Timed out waiting for event callback");
+                            Assert.fail("Timed out waiting for event callback");
                         }
                     }
 
