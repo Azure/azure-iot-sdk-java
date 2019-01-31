@@ -211,7 +211,7 @@ public final class DeviceClientConfig
                     connectionString.getGatewayHostName(),
                     connectionString.getDeviceId(),
                     connectionString.getModuleId(),
-                    ((SecurityProviderSymmetricKey) securityProvider).getSymmetricKey().toString(),
+                    new String(((SecurityProviderSymmetricKey) securityProvider).getSymmetricKey()),
                     null);
         }
         else if (securityProvider instanceof SecurityProviderX509)

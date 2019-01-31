@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -197,10 +198,8 @@ public class WebSocketUpgrade
     {
         byte[] key = new byte[16];
 
-        for (int i = 0; i < 16; i++)
-        {
-            key[i] = (byte) (int) (Math.random() * 256);
-        }
+        SecureRandom secureRandom = new SecureRandom();
+        secureRandom.nextBytes(key);
 
         return Base64.encodeBase64StringLocal(key).trim();
     }

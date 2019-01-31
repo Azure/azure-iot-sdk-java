@@ -277,7 +277,7 @@ public class MqttDeviceTwin extends Mqtt
     {
         synchronized (this.incomingLock)
         {
-            IotHubTransportMessage messsage = null;
+            IotHubTransportMessage message = null;
 
             // Codes_SRS_MQTTDEVICETWIN_25_035: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
             Pair<String, byte[]> messagePair = peekMessage();
@@ -302,15 +302,15 @@ public class MqttDeviceTwin extends Mqtt
                             if (data != null && data.length > 0)
                             {
                                 //Codes_SRS_MQTTDEVICETWIN_25_044: [If the topic is of type response then this method shall set data and operation type as DEVICE_OPERATION_TWIN_GET_RESPONSE if data is not null]
-                                messsage = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
-                                messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
+                                message = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
+                                message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                             }
                             else
                             {
                                 // Case for $iothub/twin/res/{status}/?$rid={request id}
                                 //Codes_SRS_MQTTDEVICETWIN_25_045: [If the topic is of type response then this method shall set empty data and operation type as DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE if data is null or empty]
-                                messsage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN); // empty body
-                                messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
+                                message = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN); // empty body
+                                message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
 
                             }
 
@@ -318,7 +318,7 @@ public class MqttDeviceTwin extends Mqtt
                             if (topicTokens.length > STATUS_TOKEN)
                             {
                                 //Codes_SRS_MQTTDEVICETWIN_25_038: [If the topic is of type response topic then this method shall parse further for status and set it for the message by calling setStatus for the message]
-                                messsage.setStatus(getStatus(topicTokens[STATUS_TOKEN]));
+                                message.setStatus(getStatus(topicTokens[STATUS_TOKEN]));
                             }
                             else
                             {
@@ -329,19 +329,19 @@ public class MqttDeviceTwin extends Mqtt
                             {
                                 //Codes_SRS_MQTTDEVICETWIN_25_040: [If the topic is of type response topic then this method shall parse further to look for request id which if found is set by calling setRequestId]
                                 String requestId = getRequestId(topicTokens[REQID_TOKEN]);
-                                messsage.setRequestId(requestId);
+                                message.setRequestId(requestId);
                                 if (requestMap.containsKey(requestId))
                                 {
                                     switch (requestMap.remove(requestId))
                                     {
                                         case DEVICE_OPERATION_TWIN_GET_REQUEST:
-                                            messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_RESPONSE);
+                                            message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_RESPONSE);
                                             break;
                                         case DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST:
-                                            messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
+                                            message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
                                             break;
                                         default:
-                                            messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
+                                            message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                                     }
                                 }
                                 else
@@ -353,7 +353,7 @@ public class MqttDeviceTwin extends Mqtt
                             if (topicTokens.length > VERSION_TOKEN)
                             {
                                 //Codes_SRS_MQTTDEVICETWIN_25_041: [If the topic is of type response topic then this method shall parse further to look for version which if found is set by calling setVersion]
-                                messsage.setVersion(getVersion(topicTokens[VERSION_TOKEN]));
+                                message.setVersion(getVersion(topicTokens[VERSION_TOKEN]));
                             }
                         }
                         else if (topic.length() > PATCH.length() && topic.startsWith(PATCH))
@@ -363,8 +363,8 @@ public class MqttDeviceTwin extends Mqtt
                                 if (data != null)
                                 {
                                     //Codes_SRS_MQTTDEVICETWIN_25_046: [If the topic is of type patch for desired properties then this method shall set the data and operation type as DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE if data is not null or empty]
-                                    messsage = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
-                                    messsage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
+                                    message = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
+                                    message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
                                 }
                                 else
                                 {
@@ -378,11 +378,17 @@ public class MqttDeviceTwin extends Mqtt
                                 String[] topicTokens = topic.split(Pattern.quote("/"));
                                 if (topicTokens.length > PATCH_VERSION_TOKEN)
                                 {
-                                    //Codes_SRS_MQTTDEVICETWIN_25_042: [If the topic is of type patch for desired properties then this method shall parse further to look for version which if found is set by calling setVersion]
-                                    messsage.setVersion(getVersion(topicTokens[PATCH_VERSION_TOKEN]));
+                                    if (message != null)
+                                    {
+                                        //Codes_SRS_MQTTDEVICETWIN_25_042: [If the topic is of type patch for desired properties then this method shall parse further to look for version which if found is set by calling setVersion]
+                                        message.setVersion(getVersion(topicTokens[PATCH_VERSION_TOKEN]));
+                                    }
                                 }
 
-                                logger.LogInfo("Message received on DT " + messsage.getDeviceOperationType());
+                                if (message != null)
+                                {
+                                    logger.LogInfo("Message received on DT " + message.getDeviceOperationType());
+                                }
                             }
                             else
                             {
@@ -400,7 +406,7 @@ public class MqttDeviceTwin extends Mqtt
             }
 
             // Codes_SRS_MQTTDEVICETWIN_34_034: [If the call peekMessage returns null or empty string then this method shall do nothing and return null]
-            return messsage;
+            return message;
         }
     }
 
