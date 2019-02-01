@@ -811,7 +811,7 @@ public class DeviceClientConfigTest
         new Verifications()
         {
             {
-                new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, null, expectedDeviceId, expectedModuleId, mockSecurityProviderSymKey.getSymmetricKey().toString(), null);
+                new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, null, expectedDeviceId, expectedModuleId, new String(mockSecurityProviderSymKey.getSymmetricKey()), null);
                 times = 1;
             }
         };
