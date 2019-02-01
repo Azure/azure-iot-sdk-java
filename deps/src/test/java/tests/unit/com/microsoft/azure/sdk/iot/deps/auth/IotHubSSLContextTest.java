@@ -243,7 +243,7 @@ public class IotHubSSLContextTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedCertificateManager, "setValidCertPath", new Class[] {String.class}, defaultCertPath);
+                Deencapsulation.invoke(mockedCertificateManager, "setCertificatesPath", new Class[] {String.class}, defaultCertPath);
                 times = 1;
 
             }
@@ -271,7 +271,7 @@ public class IotHubSSLContextTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedCertificateManager, "setValidCert", new Class[] {String.class}, defaultCert);
+                Deencapsulation.invoke(mockedCertificateManager, "setCertificates", new Class[] {String.class}, defaultCert);
                 times = 1;
             }
         };
@@ -343,7 +343,7 @@ public class IotHubSSLContextTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedCertificateManager, "setValidCert", new Class[] {String.class}, iotHubTrustedCert);
+                Deencapsulation.invoke(mockedCertificateManager, "setCertificates", new Class[] {String.class}, iotHubTrustedCert);
                 times = 1;
 
                 SSLContext.getInstance("TLSv1.2");
@@ -418,7 +418,7 @@ public class IotHubSSLContextTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedCertificateManager, "setValidCertPath", new Class[] {String.class}, iotHubTrustedCertPath);
+                Deencapsulation.invoke(mockedCertificateManager, "setCertificatesPath", new Class[] {String.class}, iotHubTrustedCertPath);
                 times = 1;
 
                 SSLContext.getInstance("TLSv1.2");
