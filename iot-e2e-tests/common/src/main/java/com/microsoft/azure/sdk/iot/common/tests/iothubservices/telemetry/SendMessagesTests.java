@@ -57,8 +57,12 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
-    public void tokenRenewalWorks() throws InterruptedException
+    public void tokenRenewalWorks() throws InterruptedException, IOException
     {
+        final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 60;
+        final long DEFAULT_SAS_TOKEN_EXPIRY_TIME = 3600;
+        final long WAIT_BUFFER_FOR_TOKEN_TO_EXPIRE = 15;
+
         if (testInstance.authenticationType != SAS)
         {
             //this scenario is not applicable for x509 auth
@@ -69,30 +73,31 @@ public class SendMessagesTests extends SendMessagesCommon
         testInstance.client.setOption("SetSASTokenExpiryTime", SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
         IotHubServicesCommon.openClientWithRetry(testInstance.client);
 
-        for (int messageAttempt = 0; messageAttempt < NUM_MESSAGES_PER_CONNECTION; messageAttempt++)
+        //wait until old sas token has expired, this should force the config to generate a new one from the device key
+        Thread.sleep((SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL + WAIT_BUFFER_FOR_TOKEN_TO_EXPIRE) * 1000);
+
+        Success messageSent = new Success();
+        EventCallback callback = new EventCallback(IotHubStatusCode.OK_EMPTY);
+        testInstance.client.sendEventAsync(new Message("some message body"), callback, messageSent);
+
+        long startTime = System.currentTimeMillis();
+        while(!messageSent.wasCallbackFired())
         {
-            //wait until old sas token has expired, this should force the config to generate a new one from the device key
-            Thread.sleep(SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL * 1000);
-
-            Success messageSent = new Success();
-            EventCallback callback = new EventCallback(IotHubStatusCode.OK_EMPTY);
-            testInstance.client.sendEventAsync(new Message("some message body"), callback, messageSent);
-
-            long startTime = System.currentTimeMillis();
-            while(!messageSent.wasCallbackFired())
+            Thread.sleep(RETRY_MILLISECONDS);
+            if (System.currentTimeMillis() - startTime > SEND_TIMEOUT_MILLISECONDS)
             {
-                Thread.sleep(RETRY_MILLISECONDS);
-                if (System.currentTimeMillis() - startTime > SEND_TIMEOUT_MILLISECONDS)
-                {
-                    fail("Timed out waiting for successful message callback");
-                }
-            }
-
-            if (messageSent.getCallbackStatusCode() != IotHubStatusCode.OK_EMPTY)
-            {
-                fail("Sending messages over " + testInstance.protocol + " failed: expected OK_EMPTY message callback but received " + messageSent.getCallbackStatusCode());
+                fail("Timed out waiting for successful message callback");
             }
         }
+
+        if (messageSent.getCallbackStatusCode() != IotHubStatusCode.OK_EMPTY)
+        {
+            fail("Sending messages over " + testInstance.protocol + " failed: expected OK_EMPTY message callback but received " + messageSent.getCallbackStatusCode());
+        }
+
+        // resetting the device's option to default
+        testInstance.client.close();
+        testInstance.client.setOption("SetSASTokenExpiryTime", DEFAULT_SAS_TOKEN_EXPIRY_TIME);
     }
 
     @Test
@@ -149,6 +154,9 @@ public class SendMessagesTests extends SendMessagesCommon
     @Test
     public void tokenExpiredAfterOpenButBeforeSendHttp() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
     {
+        final long SECONDS_FOR_SAS_TOKEN_TO_LIVE = 3;
+        final long MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE = 5000;
+
         if (testInstance.protocol != HTTPS || testInstance.authenticationType != SAS)
         {
             //This scenario only applies to HTTP since MQTT and AMQP allow expired sas tokens for 30 minutes after open

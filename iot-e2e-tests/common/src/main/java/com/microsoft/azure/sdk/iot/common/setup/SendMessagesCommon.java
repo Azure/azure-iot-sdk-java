@@ -55,11 +55,6 @@ public class SendMessagesCommon extends IntegrationTest
 
     protected static String hostName;
 
-    //Some tests below involve creating a short-lived sas token to test how expired tokens are handled
-    protected static final long SECONDS_FOR_SAS_TOKEN_TO_LIVE = 3;
-    protected static final long MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE = 5000;
-    protected static final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 1;
-
     //The messages to be sent in these tests. Some contain error injection messages surrounded by normal messages
     protected static final List<MessageAndResult> NORMAL_MESSAGES_TO_SEND = new ArrayList<>();
     protected static final List<MessageAndResult> TCP_CONNECTION_DROP_MESSAGES_TO_SEND = new ArrayList<>();
