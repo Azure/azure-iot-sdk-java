@@ -51,7 +51,7 @@ public class DeviceTwinCommon extends IntegrationTest
     protected static final long DELAY_BETWEEN_OPERATIONS = 200; // 0.2 sec
     public static final long MULTITHREADED_WAIT_TIMEOUT_MS  = 5 * 60 * 1000; // 5 minutes
 
-    protected static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = DELAY_BETWEEN_OPERATIONS * 10; // 2 sec
+    protected static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = 5000; // 5 sec
 
     // Max reported properties to be tested
     protected static final Integer MAX_PROPERTIES_TO_TEST = 5;
