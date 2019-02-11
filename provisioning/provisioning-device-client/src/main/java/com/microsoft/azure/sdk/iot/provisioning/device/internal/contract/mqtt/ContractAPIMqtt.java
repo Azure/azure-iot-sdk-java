@@ -127,19 +127,29 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
             throw new ProvisioningDeviceConnectionException(new IllegalArgumentException("sslContext cannot be null"));
         }
 
-        try
+        if (requestData.isX509() || (requestData.getSasToken() != null && !requestData.getSasToken().isEmpty()))
         {
-            String username = String.format(MQTT_USERNAME_FMT, this.idScope, registrationId, SDKUtils.getServiceApiVersion(), SDKUtils.getServiceApiVersion());
+            try
+            {
+                String username = String.format(MQTT_USERNAME_FMT, this.idScope, registrationId, SDKUtils.getServiceApiVersion(), SDKUtils.getServiceApiVersion());
+                String password = null;
 
-            this.mqttConnection = new MqttConnection(this.hostname, registrationId, username, null, sslContext, this, this.useWebSockets);
-            this.mqttConnection.connect();
+                if (requestData.getSasToken() != null && !requestData.getSasToken().isEmpty())
+                {
+                    password = requestData.getSasToken();
+                }
 
-            this.mqttConnection.subscribe(MQTT_PROVISIONING_TOPIC_NAME, MqttQos.DELIVER_AT_LEAST_ONCE);
-        }
-        catch (IOException ex)
-        {
-            this.mqttConnection = null;
-            throw new ProvisioningDeviceConnectionException("Exception opening connection", ex);
+                this.mqttConnection = new MqttConnection(this.hostname, registrationId, username, password, sslContext, this, this.useWebSockets);
+                this.mqttConnection.connect();
+
+                this.mqttConnection.subscribe(MQTT_PROVISIONING_TOPIC_NAME, MqttQos.DELIVER_AT_LEAST_ONCE);
+            }
+            catch (IOException ex)
+            {
+                this.mqttConnection = null;
+                throw new ProvisioningDeviceConnectionException("Exception opening connection", ex);
+            }
+
         }
     }
 
@@ -177,6 +187,20 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
         if (responseCallback == null)
         {
             throw new ProvisioningDeviceClientException("responseCallback cannot be null");
+        }
+
+        if (!requestData.isX509())
+        {
+            if (requestData.getSasToken() == null || requestData.getSasToken().isEmpty())
+            {
+                //SRS_ContractAPIAmqp_34_021: [If the requestData is not x509, but the provided requestData does not contain a sas token, this function shall
+                // throw a ProvisioningDeviceConnectionException.]
+                throw new ProvisioningDeviceConnectionException(new IllegalArgumentException("RequestData's sas token cannot be null or empty"));
+            }
+
+            //SRS_ContractAPIAmqp_34_020: [If the requestData is not x509, this function shall assume SymmetricKey authentication, and shall open the connection with
+            // the provided request data containing a sas token.]
+            open(requestData);
         }
 
         if (this.mqttConnection == null || !this.mqttConnection.isMqttConnected())

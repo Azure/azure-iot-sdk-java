@@ -454,7 +454,7 @@ public class AmqpsProvisioningSaslHandlerTest
         AmqpsProvisioningSaslHandler handler = Deencapsulation.newInstance(AmqpsProvisioningSaslHandler.class, idScope, registrationId, endorsementKey, storageRootKey, mockedResponseCallback, new Object());
 
         //act
-        Deencapsulation.invoke(handler, "setSasToken", sasToken);
+        handler.setSasToken(sasToken);
 
         //assert
         String actualSasToken = Deencapsulation.getField(handler, "sasToken");

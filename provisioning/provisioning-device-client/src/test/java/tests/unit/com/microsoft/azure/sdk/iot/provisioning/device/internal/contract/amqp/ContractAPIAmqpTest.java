@@ -11,15 +11,13 @@ import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpDeviceOperations;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.SaslHandler;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.AmqpsProvisioningSymmetricKeySaslHandler;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.ProvisioningAmqpOperations;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.ContractAPIAmqp;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
@@ -36,8 +34,8 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 /*
- * Unit tests for ContractAPIHttp
- * Code coverage : 100% methods, 88% lines
+ * Unit tests for ContractAPIAmqp
+ * Code coverage : 50% methods, 28% lines
  */
 @RunWith(JMockit.class)
 public class ContractAPIAmqpTest
@@ -79,6 +77,9 @@ public class ContractAPIAmqpTest
 
     @Mocked
     byte[] mockedByteArray = new byte[10];
+
+    @Mocked
+    AmqpsProvisioningSymmetricKeySaslHandler mockedAmqpsProvisioningSymmetricKeySaslHandler;
 
     private ContractAPIAmqp createContractClass() throws ProvisioningDeviceClientException
     {
@@ -172,8 +173,6 @@ public class ContractAPIAmqpTest
         {
             {
                 mockedProvisioningDeviceClientConfig.getIdScope();
-                result =
-
                 result = null;
             }
         };
@@ -381,6 +380,62 @@ public class ContractAPIAmqpTest
         new Verifications()
         {
             {
+                mockedProvisionAmqpConnection.sendRegisterMessage((ResponseCallback)any, (Object)any);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_ContractAPIAmqp_34_020: [If the request is not x509, but the sasl handler is null, this function shall assume SymmetricKey authentication
+    // and it shall open the connection with the request's sas token.]
+    @Test
+    public void authenticateWithProvisioningServiceSucceedsSymmetricKey() throws Exception
+    {
+        //arrange
+        final String expectedSasToken = "asdf";
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.isX509();
+                result = false;
+                mockedRequestData.getSasToken();
+                result = expectedSasToken;
+                Deencapsulation.newInstance(AmqpsProvisioningSymmetricKeySaslHandler.class, new Class[] {String.class, String.class, String.class}, TEST_SCOPE_ID, TEST_REGISTRATION_ID, expectedSasToken);
+                result = mockedAmqpsProvisioningSymmetricKeySaslHandler;
+            }
+        };
+        ContractAPIAmqp contractAPIAmqp = createContractClass();
+
+        contractAPIAmqp.open(mockedRequestData);
+        new NonStrictExpectations()
+        {
+            {
+                mockedProvisionAmqpConnection.isAmqpConnected();
+                result = true;
+            }
+        };
+
+        new NonStrictExpectations()
+        {
+            {
+                mockSendLock.wait(anyLong);
+            }
+        };
+
+        //act
+        contractAPIAmqp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedProvisionAmqpConnection.open(TEST_REGISTRATION_ID, mockedSslContext, mockedAmqpsProvisioningSymmetricKeySaslHandler, anyBoolean);
+                times = 1;
+
                 mockedProvisionAmqpConnection.sendRegisterMessage((ResponseCallback)any, (Object)any);
                 times = 1;
             }
@@ -706,7 +761,7 @@ public class ContractAPIAmqpTest
         };
     }
 
-    //Tesst_SRS_ContractAPIAmqp_34_006: [If requestData is null, this function shall throw a ProvisioningDeviceConnectionException.]
+    //Test_SRS_ContractAPIAmqp_34_006: [If requestData is null, this function shall throw a ProvisioningDeviceConnectionException.]
     @Test (expected = ProvisioningDeviceConnectionException.class)
     public void openThrowsForNullRequestData() throws ProvisioningDeviceClientException
     {
