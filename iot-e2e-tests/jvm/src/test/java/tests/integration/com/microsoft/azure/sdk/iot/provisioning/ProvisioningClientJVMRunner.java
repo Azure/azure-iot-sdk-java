@@ -16,12 +16,16 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMEmulator;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderX509Cert;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.After;
 import org.junit.Before;
@@ -30,8 +34,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
@@ -42,6 +53,19 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class ProvisioningClientJVMRunner extends IntegrationTest
 {
+    private enum AttestationType
+    {
+        X509,
+        TPM,
+        SYMMETRIC_KEY
+    };
+
+    private enum EnrollmentType
+    {
+        INDIVIDUAL,
+        GROUP
+    };
+
     private final IotHubClientProtocol [] iotHubClientProtocols = {IotHubClientProtocol.MQTT, IotHubClientProtocol.MQTT_WS, IotHubClientProtocol.AMQPS, IotHubClientProtocol.AMQPS_WS, IotHubClientProtocol.HTTPS};
 
     private static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
@@ -78,6 +102,8 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
     //How many milliseconds between retry
     private static final Integer IOTHUB_RETRY_MILLISECONDS = 100;
 
+    private static final String HMAC_SHA256 = "HmacSHA256";
+
     private static final String REGISTRATION_ID_TPM_PREFIX = "java-tpm-registration-id-";
     private static final String DEVICE_ID_TPM_PREFIX = "java-tpm-device-id-";
     private static final String REGISTRATION_ID_X509_PREFIX = "java-x509-registration-id-";
@@ -89,24 +115,38 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
     private static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
     private static final int OVERALL_TEST_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
-    @Parameterized.Parameters(name = "{0}")
+    @Parameterized.Parameters(name = "{0} using {1}")
     public static Collection inputs()
     {
         return Arrays.asList(
                 new Object[][]
                 {
-                    {HTTPS},
-                    {MQTT},
-                    {MQTT_WS},
-                    {AMQPS},
-                    {AMQPS_WS},
+                        {HTTPS, AttestationType.SYMMETRIC_KEY},
+                        //{HTTPS, AttestationType.TPM}, disabled: missing test infrastructure on VSTS
+                        {HTTPS, AttestationType.X509},
+
+                        {MQTT, AttestationType.SYMMETRIC_KEY},
+                        //{MQTT, AttestationType.TPM}, NOT SUPPORTED BY SERVICE
+                        {MQTT, AttestationType.X509},
+
+                        {MQTT_WS, AttestationType.SYMMETRIC_KEY},
+                        //{MQTT_WS, AttestationType.TPM}, NOT SUPPORTED BY SERVICE
+                        {MQTT_WS, AttestationType.X509},
+
+                        {AMQPS, AttestationType.SYMMETRIC_KEY},
+                        //{AMQPS, AttestationType.TPM}, //disabled: missing test infrastructure on VSTS
+                        {AMQPS, AttestationType.X509},
+
+                        {AMQPS_WS, AttestationType.SYMMETRIC_KEY},
+                        //{AMQPS_WS, AttestationType.TPM}, //disabled: missing test infrastructure on VSTS
+                        {AMQPS_WS, AttestationType.X509},
                 }
         );
     }
 
-    public ProvisioningClientJVMRunner(ProvisioningDeviceClientTransportProtocol protocol)
+    public ProvisioningClientJVMRunner(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
     {
-        this.testInstance = new ProvisioningClientITRunner(protocol);
+        this.testInstance = new ProvisioningClientITRunner(protocol, attestationType);
     }
 
     private ProvisioningClientITRunner testInstance;
@@ -114,10 +154,19 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
     private class ProvisioningClientITRunner
     {
         private ProvisioningDeviceClientTransportProtocol protocol;
+        private AttestationType attestationType;
+        private String groupId;
+        private IndividualEnrollment individualEnrollment;
+        private EnrollmentGroup enrollmentGroup;
+        private String registrationId;
+        private String provisionedDeviceId;
 
-        public ProvisioningClientITRunner(ProvisioningDeviceClientTransportProtocol protocol)
+        public ProvisioningClientITRunner(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
         {
             this.protocol = protocol;
+            this.attestationType = attestationType;
+            this.groupId = "";// by default, assume individual enrollment which has no group id
+            this.registrationId = "java-provisioning-test-" + this.attestationType.toString().toLowerCase().replace("_", "-") + "-" + UUID.randomUUID().toString();
         }
     }
 
@@ -242,107 +291,100 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
         return null;
     }
 
-    private IndividualEnrollment createIndividualEnrollmentTPM(String endorsementKey, String registrationId, String deviceId, TwinState twinState) throws ProvisioningServiceClientException
+    private SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException, InterruptedException
     {
-        System.out.println("Creating Individual Enrollment For TPM with Registration ID " + registrationId);
-        Attestation attestation = new TpmAttestation(endorsementKey);
-        IndividualEnrollment individualEnrollment =
-                new IndividualEnrollment(
-                        registrationId,
-                        attestation);
+        SecurityProvider securityProvider = null;
+        TwinCollection tags = new TwinCollection();
+        final String TEST_KEY_TAG = "testTag";
+        final String TEST_VALUE_TAG = "testValue";
+        tags.put(TEST_KEY_TAG, TEST_VALUE_TAG);
 
-        individualEnrollment.setDeviceIdFinal(deviceId);
-        if (twinState != null)
+        final String TEST_KEY_DP = "testDP";
+        final String TEST_VALUE_DP = "testDPValue";
+        TwinCollection desiredProperties = new TwinCollection();
+        desiredProperties.put(TEST_KEY_DP, TEST_VALUE_DP);
+
+        TwinState twinState = new TwinState(tags, desiredProperties);
+
+        if (enrollmentType == EnrollmentType.GROUP)
         {
-            individualEnrollment.setInitialTwin(twinState);
+            if (testInstance.attestationType == AttestationType.TPM)
+            {
+                throw new UnsupportedOperationException("Group enrollments cannot use tpm attestation");
+            }
+            else if (testInstance.attestationType == AttestationType.X509)
+            {
+                throw new UnsupportedOperationException("Test code hasn't been written to test Group x509 enrollments yet");
+            }
+            else if (testInstance.attestationType == AttestationType.SYMMETRIC_KEY)
+            {
+                testInstance.groupId = "java-provisioning-test-group-id-" + testInstance.attestationType.toString().toLowerCase().replace("_", "-") + "-" + UUID.randomUUID().toString();
+
+                testInstance.enrollmentGroup = new EnrollmentGroup(testInstance.groupId, new SymmetricKeyAttestation(null, null));
+                testInstance.enrollmentGroup.setInitialTwinFinal(twinState);
+
+                testInstance.enrollmentGroup = provisioningServiceClient.createOrUpdateEnrollmentGroup(testInstance.enrollmentGroup);
+                Attestation attestation = testInstance.enrollmentGroup.getAttestation();
+                assertTrue(attestation instanceof SymmetricKeyAttestation);
+
+                assertNotNull(testInstance.enrollmentGroup.getInitialTwin());
+                assertEquals(TEST_VALUE_TAG, testInstance.enrollmentGroup.getInitialTwin().getTags().get(TEST_KEY_TAG));
+                assertEquals(TEST_VALUE_DP, testInstance.enrollmentGroup.getInitialTwin().getDesiredProperty().get(TEST_KEY_DP));
+
+                SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation) attestation;
+                byte[] derivedPrimaryKey = ComputeDerivedSymmetricKey(symmetricKeyAttestation.getPrimaryKey(), testInstance.registrationId);
+                securityProvider = new SecurityProviderSymmetricKey(derivedPrimaryKey, testInstance.registrationId);
+            }
+        }
+        else if (enrollmentType == EnrollmentType.INDIVIDUAL)
+        {
+            testInstance.provisionedDeviceId = "Some-Provisioned-Device-" + testInstance.attestationType + "-" +UUID.randomUUID().toString();
+            if (testInstance.attestationType == AttestationType.TPM)
+            {
+                securityProvider = connectToTpmEmulator();
+                Attestation attestation = new TpmAttestation(new String(Base64.encodeBase64Local(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
+                testInstance.individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
+                testInstance.individualEnrollment.setDeviceIdFinal(testInstance.provisionedDeviceId);
+                testInstance.individualEnrollment.setInitialTwin(twinState);
+                testInstance.individualEnrollment =  provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
+            }
+            else if (testInstance.attestationType == AttestationType.X509)
+            {
+                X509Cert certs = new X509Cert(0, false, testInstance.registrationId, null);
+                final String leafPublicPem =  certs.getPublicCertLeafPem();
+                String leafPrivateKey = certs.getPrivateKeyLeafPem();
+                Collection<String> signerCertificates = new LinkedList<>();
+                Attestation attestation = X509Attestation.createFromClientCertificates(leafPublicPem);
+                testInstance.individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
+                testInstance.individualEnrollment.setDeviceIdFinal(testInstance.provisionedDeviceId);
+                testInstance.individualEnrollment.setInitialTwin(twinState);
+                testInstance.individualEnrollment = provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
+                securityProvider = new SecurityProviderX509Cert(leafPublicPem, leafPrivateKey, signerCertificates);
+            }
+            else if (testInstance.attestationType == AttestationType.SYMMETRIC_KEY)
+            {
+                Attestation attestation = new SymmetricKeyAttestation(null, null);
+                testInstance.individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
+                testInstance.individualEnrollment.setDeviceIdFinal(testInstance.provisionedDeviceId);
+                testInstance.individualEnrollment =  provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
+                testInstance.individualEnrollment.setInitialTwin(twinState);
+                assertTrue(testInstance.individualEnrollment.getAttestation() instanceof  SymmetricKeyAttestation);
+                SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation) testInstance.individualEnrollment.getAttestation();
+                securityProvider = new SecurityProviderSymmetricKey(symmetricKeyAttestation.getPrimaryKey().getBytes(), testInstance.registrationId);
+            }
+
+            assertEquals(testInstance.provisionedDeviceId, testInstance.individualEnrollment.getDeviceId());
+            assertNotNull(testInstance.individualEnrollment.getInitialTwin());
+            assertEquals(TEST_VALUE_TAG, testInstance.individualEnrollment.getInitialTwin().getTags().get(TEST_KEY_TAG));
+            assertEquals(TEST_VALUE_DP, testInstance.individualEnrollment.getInitialTwin().getDesiredProperty().get(TEST_KEY_DP));
         }
 
-        IndividualEnrollment individualEnrollmentResult =  provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
-        assertNotNull(individualEnrollmentResult);
-        assertNotNull(individualEnrollmentResult.getRegistrationId()); // Registration ID
-        assertEquals(registrationId, individualEnrollmentResult.getRegistrationId()); // Registration ID
-        assertNotNull((individualEnrollmentResult.getAttestation())); // Endorsement key
-        assertNotNull(((TpmAttestation)individualEnrollmentResult.getAttestation()).getEndorsementKey()); // Endorsement key
-        assertEquals(endorsementKey, ((TpmAttestation)individualEnrollmentResult.getAttestation()).getEndorsementKey()); // Endorsement key
-        assertNotNull(individualEnrollmentResult.getEtag()); //
-        assertNotNull(individualEnrollmentResult.getCreatedDateTimeUtc()); //
-        assertNotNull(individualEnrollmentResult.getLastUpdatedDateTimeUtc()); //
-        assertNotNull(individualEnrollmentResult.getDeviceId()); // expected identity ID
-        assertEquals(deviceId, individualEnrollmentResult.getDeviceId()); // expected identity ID
-        if (twinState == null)
-        {
-            assertNull(individualEnrollmentResult.getInitialTwin()); // expected null
-        }
-        else
-        {
-            assertNotNull(individualEnrollmentResult.getInitialTwin()); // expected not null
-        }
-        System.out.println("Successfully created Individual Enrollment for TPM");
-        return individualEnrollmentResult;
+        return securityProvider;
     }
 
-    private IndividualEnrollment createIndividualEnrollmentX509(String clientCertPem, String registrationId, String deviceId, TwinState twinState) throws ProvisioningServiceClientException
+    private SecurityProviderTPMEmulator connectToTpmEmulator() throws InterruptedException
     {
-        System.out.println("Creating Individual Enrollment for X509 with Registration ID " + registrationId);
-        Attestation attestation = X509Attestation.createFromClientCertificates(clientCertPem);
-        IndividualEnrollment individualEnrollment =
-                new IndividualEnrollment(
-                        registrationId,
-                        attestation);
-
-        individualEnrollment.setDeviceIdFinal(deviceId);
-        if (twinState != null)
-        {
-            individualEnrollment.setInitialTwin(twinState);
-        }
-
-        IndividualEnrollment individualEnrollmentResult =  provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
-        assertNotNull(individualEnrollmentResult);
-        assertNotNull(individualEnrollmentResult.getRegistrationId()); // Registration ID
-        assertEquals(registrationId, individualEnrollmentResult.getRegistrationId()); // Registration ID
-        assertNotNull((individualEnrollmentResult.getAttestation())); // ?
-        assertNotNull(((X509Attestation)individualEnrollmentResult.getAttestation()).getPrimaryX509CertificateInfo()); // Client Cert Info
-        assertNotNull(individualEnrollmentResult.getEtag()); //
-        assertNotNull(individualEnrollmentResult.getCreatedDateTimeUtc()); //
-        assertNotNull(individualEnrollmentResult.getLastUpdatedDateTimeUtc()); //
-        assertNotNull(individualEnrollmentResult.getDeviceId()); // expected identity ID
-        assertEquals(deviceId, individualEnrollmentResult.getDeviceId()); // expected identity ID
-        if (twinState == null)
-        {
-            assertNull(individualEnrollmentResult.getInitialTwin()); // expected null
-        }
-        else
-        {
-            assertNotNull(individualEnrollmentResult.getInitialTwin()); // expected not null
-        }
-        System.out.println("Successfully created Individual Enrollment for X509");
-        return individualEnrollmentResult;
-    }
-
-    private void deleteEnrollment(String registrationId) throws ProvisioningServiceClientException
-    {
-        provisioningServiceClient.deleteIndividualEnrollment(registrationId);
-    }
-
-    private void deleteDeviceFromIotHub(String deviceId) throws IotHubException, IOException
-    {
-        registryManager.removeDevice(deviceId);
-    }
-
-    // disable this test due to stability issue off TPM simulator on linux.
-    @Ignore
-    @Test (timeout = OVERALL_TEST_TIMEOUT)
-    public void individualEnrollmentTPMSimulator() throws Exception
-    {
-        if (testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS)
-        {
-            // MQTT and MQTT_WS are not supported for TPM from service
-            return;
-        }
-
-        String registrationId = REGISTRATION_ID_TPM_PREFIX + UUID.randomUUID().toString();
-
-        SecurityProvider securityProviderTPMEmulator = null;
+        SecurityProviderTPMEmulator securityProviderTPMEmulator = null;
         long startTime = System.currentTimeMillis();
         while (securityProviderTPMEmulator == null)
         {
@@ -353,7 +395,8 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
                     fail("Timed out trying to reach TPM emulator");
                 }
 
-                securityProviderTPMEmulator = new SecurityProviderTPMEmulator(registrationId, tpmSimulatorIpAddress);
+                securityProviderTPMEmulator = new SecurityProviderTPMEmulator(testInstance.registrationId, tpmSimulatorIpAddress);
+                return securityProviderTPMEmulator;
             }
             catch (Exception e)
             {
@@ -365,103 +408,33 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
             }
         }
 
+        return null;
+    }
 
-        String deviceID = DEVICE_ID_TPM_PREFIX + UUID.randomUUID().toString();
-
-        // setup service client with a unique registration id
-        assertEquals(registrationId, securityProviderTPMEmulator.getRegistrationId());
-
-        //
-        TwinCollection tags = new TwinCollection();
-        final String TEST_KEY_TAG = "testTag";
-        final String TEST_VALUE_TAG = "testValue";
-        tags.put(TEST_KEY_TAG, TEST_VALUE_TAG);
-
-        final String TEST_KEY_DP = "testDP";
-        final String TEST_VALUE_DP = "testDPValue";
-        TwinCollection desiredProperties = new TwinCollection();
-        desiredProperties.put(TEST_KEY_DP, TEST_VALUE_DP);
-
-        TwinState twinState = new TwinState(tags, desiredProperties);
-        IndividualEnrollment individualEnrollmentResult = createIndividualEnrollmentTPM(new String(Base64.encodeBase64Local(((SecurityProviderTPMEmulator) securityProviderTPMEmulator).getEndorsementKey())),
-                                      registrationId, deviceID, twinState);
-
-        assertNotNull(individualEnrollmentResult.getInitialTwin());
-        assertEquals(TEST_VALUE_TAG, individualEnrollmentResult.getInitialTwin().getTags().get(TEST_KEY_TAG));
-        assertEquals(TEST_VALUE_DP, individualEnrollmentResult.getInitialTwin().getDesiredProperty().get(TEST_KEY_DP));
-
-        // Register identity
-        ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, securityProviderTPMEmulator, provisioningServiceGlobalEndpoint);
-        waitForRegistrationCallback(provisioningStatus);
-        provisioningStatus.provisioningDeviceClient.closeNow();
-
-        assertEquals(deviceID, provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
-
-        // Tests will not pass if the linked iothub to provisioning service and iothub setup to send/receive messages isn't same.
-        assertEquals("Iothub Linked to provisioning service and IotHub in connection String are not same", getHostName(iotHubConnectionString),
-                     provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
-
-        // send messages over all protocols
-        for (IotHubClientProtocol iotHubClientProtocol: iotHubClientProtocols)
-        {
-            DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri(),
-                                                                                provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId(),
-                                                                                securityProviderTPMEmulator, iotHubClientProtocol);
-            IotHubServicesCommon.sendMessages(deviceClient, iotHubClientProtocol, messagesToSendAndResultsExpected, IOTHUB_RETRY_MILLISECONDS, IOTHUB_MAX_SEND_TIMEOUT, 200, null);
-
-            System.out.println("Send Messages over " + iotHubClientProtocol + " for TPM registration over " + testInstance.protocol + " succeeded");
-        }
-
-        // delete enrollment
-        deleteEnrollment(registrationId);
-        deleteDeviceFromIotHub(deviceID);
-        ((SecurityProviderTPMEmulator) securityProviderTPMEmulator).shutDown();
-        System.out.println("Running TPM registration over " + testInstance.protocol + " succeeded");
+    private static byte[] ComputeDerivedSymmetricKey(String masterKey, String registrationId) throws InvalidKeyException, NoSuchAlgorithmException
+    {
+        byte[] masterKeyBytes = Base64.decodeBase64Local(masterKey.getBytes(StandardCharsets.UTF_8));
+        SecretKeySpec secretKey = new SecretKeySpec(masterKeyBytes, HMAC_SHA256);
+        Mac hMacSha256 = Mac.getInstance(HMAC_SHA256);
+        hMacSha256.init(secretKey);
+        return Base64.encodeBase64Local(hMacSha256.doFinal(registrationId.getBytes()));
     }
 
     @Test (timeout = OVERALL_TEST_TIMEOUT)
-    public void individualEnrollmentX509() throws Exception
+    public void IndividualEnrollmentProvisioningFlow() throws Exception
     {
-        String registrationId = REGISTRATION_ID_X509_PREFIX + UUID.randomUUID().toString();
-        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(registrationId);
-        final String leafPublicPem =  certificateGenerator.getPublicCertificate();
-        String leafPrivateKey = certificateGenerator.getPrivateKey();
-        Collection<String> signerCertificates = new LinkedList<>();
-        SecurityProvider securityProviderX509 = new SecurityProviderX509Cert(leafPublicPem, leafPrivateKey, signerCertificates);
-
-        // Create a identity with Zero Root, Zero Intermediate and 1 leaf
-        String deviceID = String.format(DEVICE_ID_X509_PREFIX, "R0-I0-L1") + UUID.randomUUID().toString();
-
-        // setup service client with a unique registration id
-        assertEquals(registrationId, securityProviderX509.getRegistrationId());
-
-        //
-        TwinCollection tags = new TwinCollection();
-        final String TEST_KEY_TAG = "testTag";
-        final String TEST_VALUE_TAG = "testValue";
-        tags.put(TEST_KEY_TAG, TEST_VALUE_TAG);
-
-        final String TEST_KEY_DP = "testDP";
-        final String TEST_VALUE_DP = "testDPValue";
-        TwinCollection desiredProperties = new TwinCollection();
-        desiredProperties.put(TEST_KEY_DP, TEST_VALUE_DP);
-
-        TwinState twinState = new TwinState(tags, desiredProperties);
-        IndividualEnrollment individualEnrollmentResult = createIndividualEnrollmentX509(leafPublicPem, registrationId, deviceID, twinState);
-
-        assertNotNull(individualEnrollmentResult.getInitialTwin());
-        assertEquals(TEST_VALUE_TAG, individualEnrollmentResult.getInitialTwin().getTags().get(TEST_KEY_TAG));
-        assertEquals(TEST_VALUE_DP, individualEnrollmentResult.getInitialTwin().getDesiredProperty().get(TEST_KEY_DP));
+        SecurityProvider securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL);
 
         // Register identity
-        ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, securityProviderX509, provisioningServiceGlobalEndpoint);
+        ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, securityProvider, provisioningServiceGlobalEndpoint);
         waitForRegistrationCallback(provisioningStatus);
         provisioningStatus.provisioningDeviceClient.closeNow();
 
-        assertEquals(deviceID, provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
+        assertEquals(testInstance.provisionedDeviceId, provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
+
         // Tests will not pass if the linked iothub to provisioning service and iothub setup to send/receive messages isn't same.
         assertEquals("Iothub Linked to provisioning service and IotHub in connection String are not same", getHostName(iotHubConnectionString),
-                     provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
+                provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
 
         // send messages over all protocols
         for (IotHubClientProtocol iotHubClientProtocol: iotHubClientProtocols)
@@ -473,59 +446,84 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
             }
 
             DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri(),
-                                                                                provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId(),
-                                                                                securityProviderX509, iotHubClientProtocol);
+                    provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId(),
+                    securityProvider, iotHubClientProtocol);
             IotHubServicesCommon.sendMessages(deviceClient, iotHubClientProtocol, messagesToSendAndResultsExpected, IOTHUB_RETRY_MILLISECONDS, IOTHUB_MAX_SEND_TIMEOUT, 200, null);
-
-            System.out.println("Send Messages over " + iotHubClientProtocol + " for X509 registration over " + testInstance.protocol + " succeeded");
         }
 
         // delete enrollment
-        deleteEnrollment(registrationId);
-        deleteDeviceFromIotHub(deviceID);
-        System.out.println("Running X509 registration over " + testInstance.protocol + " succeeded");
+        provisioningServiceClient.deleteIndividualEnrollment(testInstance.registrationId);
+        registryManager.removeDevice(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
+    }
 
+    @Test (timeout = OVERALL_TEST_TIMEOUT)
+    public void EnrollmentGroupProvisioningFlow() throws Exception
+    {
+        if (testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
+        {
+            //tpm doesn't support group, and x509 group test has not been implemented yet
+            return;
+        }
+
+        SecurityProvider securityProvider = getSecurityProviderInstance(EnrollmentType.GROUP);
+
+        // Register identity
+        ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, securityProvider, provisioningServiceGlobalEndpoint);
+        waitForRegistrationCallback(provisioningStatus);
+        provisioningStatus.provisioningDeviceClient.closeNow();
+
+        assertEquals(testInstance.registrationId, provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
+
+        // Tests will not pass if the linked iothub to provisioning service and iothub setup to send/receive messages isn't same.
+        assertEquals("Iothub Linked to provisioning service and IotHub in connection String are not same", getHostName(iotHubConnectionString),
+                provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
+
+        // send messages over all protocols
+        for (IotHubClientProtocol iotHubClientProtocol: iotHubClientProtocols)
+        {
+            if (iotHubClientProtocol == IotHubClientProtocol.MQTT_WS || iotHubClientProtocol == IotHubClientProtocol.AMQPS_WS)
+            {
+                // MQTT_WS/AMQP_WS does not support X509 because of a bug on service
+                continue;
+            }
+
+            DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri(),
+                    provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId(),
+                    securityProvider, iotHubClientProtocol);
+            IotHubServicesCommon.sendMessages(deviceClient, iotHubClientProtocol, messagesToSendAndResultsExpected, IOTHUB_RETRY_MILLISECONDS, IOTHUB_MAX_SEND_TIMEOUT, 200, null);
+        }
+
+        // delete enrollment
+        provisioningServiceClient.deleteEnrollmentGroup(testInstance.groupId);
+        registryManager.removeDevice(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
     }
 
     @Test (timeout = OVERALL_TEST_TIMEOUT)
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
+        enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.INDIVIDUAL);
+    }
+
+    @Test (timeout = OVERALL_TEST_TIMEOUT)
+    public void groupEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
+    {
+        enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.GROUP);
+    }
+
+    public void enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType enrollmentType) throws Exception
+    {
+        if (enrollmentType == EnrollmentType.GROUP && testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
+        {
+            return; // test code not written for the x509 group scenario, and group enrollment does not support tpm attestation
+        }
+
         boolean expectedExceptionEncountered = false;
-        String registrationId = REGISTRATION_ID_X509_PREFIX + UUID.randomUUID().toString();
-        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(registrationId);
-        final String leafPublicPem =  certificateGenerator.getPublicCertificate();
-        String leafPrivateKey = certificateGenerator.getPrivateKey();
-        Collection<String> signerCertificates = new LinkedList<>();
-        SecurityProvider securityProviderX509 = new SecurityProviderX509Cert(leafPublicPem, leafPrivateKey, signerCertificates);
-
-        // Create a identity with Zero Root, Zero Intermediate and 1 leaf
-        String deviceID = String.format(DEVICE_ID_X509_PREFIX, "R0-I0-L1") + UUID.randomUUID().toString();
-
-        // setup service client with a unique registration id
-        assertEquals(registrationId, securityProviderX509.getRegistrationId());
-
-        //
-        TwinCollection tags = new TwinCollection();
-        final String TEST_KEY_TAG = "testTag";
-        final String TEST_VALUE_TAG = "testValue";
-        tags.put(TEST_KEY_TAG, TEST_VALUE_TAG);
-
-        final String TEST_KEY_DP = "testDP";
-        final String TEST_VALUE_DP = "testDPValue";
-        TwinCollection desiredProperties = new TwinCollection();
-        desiredProperties.put(TEST_KEY_DP, TEST_VALUE_DP);
-
-        TwinState twinState = new TwinState(tags, desiredProperties);
-        IndividualEnrollment individualEnrollmentResult = createIndividualEnrollmentX509(leafPublicPem, registrationId, deviceID, twinState);
-
-        assertNotNull(individualEnrollmentResult.getInitialTwin());
-        assertEquals(TEST_VALUE_TAG, individualEnrollmentResult.getInitialTwin().getTags().get(TEST_KEY_TAG));
-        assertEquals(TEST_VALUE_DP, individualEnrollmentResult.getInitialTwin().getDesiredProperty().get(TEST_KEY_DP));
+        SecurityProvider securityProvider = getSecurityProviderInstance(enrollmentType);
 
         // Register identity
         try
         {
-            ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, securityProviderX509, provisioningServiceGlobalEndpointWithInvalidCert);
+            ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, securityProvider, provisioningServiceGlobalEndpointWithInvalidCert);
             waitForRegistrationCallback(provisioningStatus);
         }
         catch (Exception e)

@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp;
 
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.SaslHandler;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
@@ -11,6 +12,8 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceTransportException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -21,7 +24,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
     private boolean useWebSockets;
 
     private String idScope;
-    private AmqpsProvisioningSaslHandler amqpSaslHandler;
+    private SaslHandler amqpSaslHandler;
 
     /**
      * This constructor creates an instance of DpsAPIAmqps class and initializes member variables
@@ -151,10 +154,12 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
             throw new ProvisioningDeviceClientException("responseCallback cannot be null");
         }
 
-        //AMQP does not have to be connected yet if doing TPM auth, but does if doing x509 auth
-        if (this.amqpSaslHandler == null && !this.provisioningAmqpOperations.isAmqpConnected())
+        if (!requestData.isX509() && this.amqpSaslHandler == null)
         {
-            throw new ProvisioningDeviceConnectionException("Amqp is not connected");
+            //SRS_ContractAPIAmqp_34_020: [If the request is not x509, but the sasl handler is null, this function shall assume SymmetricKey authentication
+            // and it shall open the connection with the request's sas token.]
+            this.amqpSaslHandler = new AmqpsProvisioningSymmetricKeySaslHandler(this.idScope, requestData.getRegistrationId(), requestData.getSasToken());
+            this.provisioningAmqpOperations.open(requestData.getRegistrationId(), requestData.getSslContext(), this.amqpSaslHandler, this.useWebSockets);
         }
 
         //if using TPM auth, amqpSaslHandler will not be null and will need the sas token
