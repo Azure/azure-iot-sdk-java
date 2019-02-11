@@ -8,18 +8,19 @@
 package tests.unit.com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.mqtt;
 
 import com.microsoft.azure.sdk.iot.deps.transport.mqtt.MqttConnection;
+import com.microsoft.azure.sdk.iot.deps.transport.mqtt.MqttListener;
 import com.microsoft.azure.sdk.iot.deps.transport.mqtt.MqttMessage;
 import com.microsoft.azure.sdk.iot.deps.transport.mqtt.MqttQos;
 import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.mqtt.ContractAPIMqtt;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
@@ -34,7 +35,7 @@ import java.util.Map;
 
 /*
  * Unit tests for ContractAPIMqtt
- * Code coverage : 100% methods, 100% lines
+ * Code coverage : 80% methods, 85% lines
  */
 @RunWith(JMockit.class)
 public class ContractAPIMqttTest
@@ -202,15 +203,13 @@ public class ContractAPIMqttTest
         //arrange
         ContractAPIMqtt contractAPIMqtt = createContractClass();
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 mockedRequestData.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedRequestData.getSslContext();
                 result = mockedSslContext;
-                mockedRequestData.isX509();
-                result = true;
             }
         };
 
@@ -340,6 +339,8 @@ public class ContractAPIMqttTest
                 result = TEST_REGISTRATION_ID;
                 mockedRequestData.getSslContext();
                 result = mockedSslContext;
+                mockedRequestData.isX509();
+                result = true;
             }
         };
         contractAPIMqtt.open(mockedRequestData);
@@ -370,16 +371,14 @@ public class ContractAPIMqttTest
                 result = TEST_REGISTRATION_ID;
                 mockedRequestData.getSslContext();
                 result = mockedSslContext;
+                mockedRequestData.isX509();
+                result = true;
+                mockedMqttConnection.isMqttConnected();
+                result = true;
+
             }
         };
         contractAPIMqtt.open(mockedRequestData);
-        new NonStrictExpectations()
-        {
-            {
-                mockedMqttConnection.isMqttConnected();
-                result = true;
-            }
-        };
 
         //act
         contractAPIMqtt.close();
@@ -420,7 +419,6 @@ public class ContractAPIMqttTest
     {
         //arrange
         ContractAPIMqtt contractAPIMqtt = createContractClass();
-        openContractAPI(contractAPIMqtt);
 
         new NonStrictExpectations()
         {
@@ -428,11 +426,19 @@ public class ContractAPIMqttTest
                 mockedMqttConnection.isMqttConnected();
                 result = true;
 
+                mockedMqttConnection.isMqttConnected();
+                result = true;
+
                 mockedMqttConnection.publishMessage(anyString, (MqttQos) any, null);
 
                 mockedObjectLock.waitLock(anyInt);
+
+                mockedRequestData.isX509();
+                result = true;
             }
         };
+
+        openContractAPI(contractAPIMqtt);
         contractAPIMqtt.messageReceived(mockedMqttMessage);
 
         //act
@@ -442,6 +448,99 @@ public class ContractAPIMqttTest
         new Verifications()
         {
             {
+                mockedMqttConnection.publishMessage(anyString, (MqttQos)any, null);
+                times = 1;
+            }
+        };
+    }
+
+    //SRS_ContractAPIAmqp_34_021: [If the requestData is not x509, but the provided requestData does not contain a sas token, this function shall
+    // throw a ProvisioningDeviceConnectionException.]
+    @Test (expected = ProvisioningDeviceConnectionException.class)
+    public void authenticateWithProvisioningServiceThrowsIfNotX509AndNoSasToken() throws ProvisioningDeviceClientException, IOException, InterruptedException
+    {
+        //arrange
+        ContractAPIMqtt contractAPIMqtt = createContractClass();
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedMqttConnection.isMqttConnected();
+                result = true;
+
+                mockedMqttConnection.isMqttConnected();
+                result = true;
+
+                mockedMqttConnection.publishMessage(anyString, (MqttQos) any, null);
+
+                mockedObjectLock.waitLock(anyInt);
+
+                mockedRequestData.isX509();
+                result = false;
+
+                mockedRequestData.getSasToken();
+                result = "";
+            }
+        };
+
+        openContractAPI(contractAPIMqtt);
+        contractAPIMqtt.messageReceived(mockedMqttMessage);
+
+        //act
+        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedMqttConnection.publishMessage(anyString, (MqttQos)any, null);
+                times = 1;
+            }
+        };
+    }
+
+    //SRS_ContractAPIAmqp_34_020: [If the requestData is not x509, this function shall assume SymmetricKey authentication, and shall open the connection with
+    // the provided request data containing a sas token.]
+    @Test
+    public void authenticateWithProvisioningServiceSuccessWithSymmetricKey() throws ProvisioningDeviceClientException, IOException, InterruptedException
+    {
+        //arrange
+        final String expectedSasToken = "asdf";
+        ContractAPIMqtt contractAPIMqtt = createContractClass();
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedMqttConnection.isMqttConnected();
+                result = true;
+
+                mockedMqttConnection.isMqttConnected();
+                result = true;
+
+                mockedMqttConnection.publishMessage(anyString, (MqttQos) any, null);
+
+                mockedObjectLock.waitLock(anyInt);
+
+                mockedRequestData.isX509();
+                result = false;
+
+                mockedRequestData.getSasToken();
+                result = expectedSasToken;
+            }
+        };
+
+        openContractAPI(contractAPIMqtt);
+        contractAPIMqtt.messageReceived(mockedMqttMessage);
+
+        //act
+        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedMqttConnection.connect();
+                mockedMqttConnection.subscribe(anyString, MqttQos.DELIVER_AT_LEAST_ONCE);
                 mockedMqttConnection.publishMessage(anyString, (MqttQos)any, null);
                 times = 1;
             }
@@ -571,19 +670,25 @@ public class ContractAPIMqttTest
         //arrange
         ContractAPIMqtt contractAPIMqtt = createContractClass();
 
-        openContractAPI(contractAPIMqtt);
-
         new NonStrictExpectations()
         {
             {
                 mockedMqttConnection.isMqttConnected();
                 result = true;
 
+                mockedMqttConnection.isMqttConnected();
+                result = true;
+
                 mockedMqttConnection.publishMessage(anyString, (MqttQos) any, null);
 
                 mockedObjectLock.waitLock(anyInt);
+
+                mockedRequestData.isX509();
+                result = true;
             }
         };
+
+        openContractAPI(contractAPIMqtt);
 
         contractAPIMqtt.messageReceived(mockedMqttMessage);
 

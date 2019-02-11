@@ -237,12 +237,24 @@ public class AmqpsProvisioningSaslHandler implements SaslHandler
         }
     }
 
+    @Override
+    public String plainUsername()
+    {
+        throw new UnsupportedOperationException("TPM sasl does not use plain mechanism for authentication");
+    }
+
+    @Override
+    public String plainPassword()
+    {
+        throw new UnsupportedOperationException("TPM sasl does not use plain mechanism for authentication");
+    }
+
     /**
      * Sets the value of this object's saved sas token. Should only be called when that sas token was generated using the
      * nonce retrieved from the Device Provisioning service.
      * @param sasToken The SAS token to be used when finishing Sasl negotiation.
      */
-    void setSasToken(String sasToken)
+    public void setSasToken(String sasToken)
     {
         // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_008: [This function shall save the provided sas token.]
         this.sasToken = sasToken;
