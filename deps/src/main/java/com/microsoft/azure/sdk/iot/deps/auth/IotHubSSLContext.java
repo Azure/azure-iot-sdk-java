@@ -5,26 +5,14 @@
 
 package com.microsoft.azure.sdk.iot.deps.auth;
 
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMKeyPair;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemReader;
-
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringReader;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
@@ -294,16 +282,10 @@ public class IotHubSSLContext
 
     private static Key parsePrivateKey(String privateKeyString) throws CertificateException
     {
-        try
-        {
+        try {
             // Codes_SRS_IOTHUBSSLCONTEXT_34_031: [This function shall return a Private Key instance created by the provided PEM formatted privateKeyString.]
-            Security.addProvider(new BouncyCastleProvider());
-            PEMParser privateKeyParser = new PEMParser(new StringReader(privateKeyString));
-            Object possiblePrivateKey = privateKeyParser.readObject();
-            return IotHubSSLContext.getPrivateKey(possiblePrivateKey);
-        }
-        catch (Exception e)
-        {
+            return new PrivateKeyReader(privateKeyString).getPrivateKey();
+        } catch (Exception e) {
             // Codes_SRS_IOTHUBSSLCONTEXT_34_032: [If any exception is encountered while attempting to create the private key instance, this function shall throw a CertificateException.]
             throw new CertificateException(e);
         }
@@ -311,69 +293,12 @@ public class IotHubSSLContext
 
     private static Collection<X509Certificate> parsePublicKeyCertificate(String publicKeyCertificateString) throws CertificateException
     {
-        try
-        {
-            Collection<X509Certificate> certChain = new ArrayList<>();
-
-            // Codes_SRS_IOTHUBSSLCONTEXT_34_033: [This function shall return the X509Certificate cert chain specified by the PEM formatted publicKeyCertificateString.]
-            Security.addProvider(new BouncyCastleProvider());
-
-            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-            final PemReader publicKeyCertificateReader = new PemReader(new StringReader(publicKeyCertificateString));
-
-            try
-            {
-                PemObject possiblePublicKeyCertificate;
-                while (((possiblePublicKeyCertificate = publicKeyCertificateReader.readPemObject()) != null))
-                {
-                    byte[] content = possiblePublicKeyCertificate.getContent();
-                    if (content.length > 0)
-                    {
-                        final ByteArrayInputStream bais = new ByteArrayInputStream(content);
-
-                        while (bais.available() > 0)
-                        {
-                            final Certificate cert = certFactory.generateCertificate(bais);
-                            if (cert instanceof X509Certificate)
-                            {
-                                certChain.add((X509Certificate) cert);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-            finally
-            {
-                publicKeyCertificateReader.close();
-            }
-
-            return certChain;
-        }
-        catch (Exception e)
-        {
-            // Codes_SRS_IOTHUBSSLCONTEXT_34_034: [If any exception is encountered while attempting to create the public key certificate instance, this function shall throw a CertificateException.]
+        try {
+         // Codes_SRS_IOTHUBSSLCONTEXT_34_033: [This function shall return the X509Certificate cert chain specified by the PEM formatted publicKeyCertificateString.]
+            return new CertificateReader(publicKeyCertificateString).getCertificates();
+        } catch (Exception e) {
+         // Codes_SRS_IOTHUBSSLCONTEXT_34_034: [If any exception is encountered while attempting to create the public key certificate instance, this function shall throw a CertificateException.]
             throw new CertificateException(e);
-        }
-    }
-
-    private static Key getPrivateKey(Object possiblePrivateKey) throws IOException
-    {
-        if (possiblePrivateKey instanceof PEMKeyPair)
-        {
-            return new JcaPEMKeyConverter().getKeyPair((PEMKeyPair) possiblePrivateKey)
-                    .getPrivate();
-        }
-        else if (possiblePrivateKey instanceof PrivateKeyInfo)
-        {
-            return new JcaPEMKeyConverter().getPrivateKey((PrivateKeyInfo) possiblePrivateKey);
-        }
-        else
-        {
-            throw new IOException("Unable to parse private key, type unknown");
         }
     }
 }
