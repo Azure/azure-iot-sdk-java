@@ -46,7 +46,7 @@ import static org.junit.Assert.*;
 public class DeviceTwinCommon extends IntegrationTest
 {
     // Max time to wait to see it on Hub
-    protected static final long PERIODIC_WAIT_TIME_FOR_VERIFICATION = 100; // 0.1 sec
+    protected static final long PERIODIC_WAIT_TIME_FOR_VERIFICATION = 1000; // 1 sec
     protected static final long MAX_WAIT_TIME_FOR_VERIFICATION = 180000; // 180 sec
     protected static final long DELAY_BETWEEN_OPERATIONS = 200; // 0.2 sec
     public static final long MULTITHREADED_WAIT_TIMEOUT_MS  = 5 * 60 * 1000; // 5 minutes
