@@ -11,7 +11,6 @@ import java.util.Collection;
 
 public class CertificateReader {
 
-    // Private key file using PKCS #8 encoding
     private static final String BEGIN_MARKER = "-----BEGIN CERTIFICATE";
     private static final String END_MARKER = "-----END CERTIFICATE";
 
@@ -47,7 +46,7 @@ public class CertificateReader {
                             (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(certBytes));
                     result.add(certificate);
                 } catch (CertificateException e) {
-                    throw new IOException("Invalid PKCS#8 PEM file: " + e.getMessage());
+                    throw new IOException("Invalid cert file: " + e.getMessage());
                 }
             }
         }
