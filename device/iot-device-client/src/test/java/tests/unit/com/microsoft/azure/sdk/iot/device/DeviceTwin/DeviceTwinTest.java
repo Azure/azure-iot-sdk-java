@@ -3,6 +3,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.device.*;
@@ -1135,7 +1136,7 @@ public class DeviceTwinTest
 
     @Test
     public void getDeviceTwinResponseWithPropertiesWithMetadataCallsTwinPropertyCallBack(
-            @Mocked final Property mockedProperty)
+            @Mocked final Property mockedProperty, @Mocked final ParserUtility mockedParserUtility, @Mocked final Date mockedData)
     {
         // arrange
         final String reportedProp1 = "ReportedProp1";
@@ -1173,6 +1174,14 @@ public class DeviceTwinTest
                         "}\n" +
                     "}\n" +
                 "}";
+
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(ParserUtility.class, "getDateTimeUtc", new Class[] {String.class}, "2016-06-01T21:22:43.123Z");
+                result = lastUpdatedDate;
+            }
+        };
 
         DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericTwinPropertyCB, null);
