@@ -318,7 +318,7 @@ public class IotHubTransport implements IotHubListener
         //Codes_SRS_IOTHUBTRANSPORT_34_024: [This function shall close the connection.]
         if (this.iotHubTransportConnection != null)
         {
-            this.iotHubTransportConnection.close(false);
+            this.iotHubTransportConnection.close();
         }
 
         //Codes_SRS_IOTHUBTRANSPORT_34_025: [This function shall invoke updateStatus with status DISCONNECTED and the
@@ -619,38 +619,38 @@ public class IotHubTransport implements IotHubListener
      */
     private void openConnection() throws TransportException
     {
-        switch (defaultConfig.getProtocol())
+        scheduledExecutorService = Executors.newScheduledThreadPool(POOL_SIZE);
+
+        if (this.iotHubTransportConnection == null)
         {
-            case HTTPS:
-                //Codes_SRS_IOTHUBTRANSPORT_34_035: [If the default config's protocol is HTTPS, this function shall set
-                // this object's iotHubTransportConnection to a new HttpsIotHubConnection object.]
-                this.iotHubTransportConnection = new HttpsIotHubConnection(defaultConfig);
-                break;
-            case MQTT:
-            case MQTT_WS:
-                //Codes_SRS_IOTHUBTRANSPORT_34_036: [If the default config's protocol is MQTT or MQTT_WS, this function
-                // shall set this object's iotHubTransportConnection to a new MqttIotHubConnection object.]
-                this.iotHubTransportConnection = new MqttIotHubConnection(defaultConfig);
-                break;
-            case AMQPS:
-            case AMQPS_WS:
-                if (scheduledExecutorService == null)
-                {
-                    scheduledExecutorService = Executors.newScheduledThreadPool(POOL_SIZE);
-                }
-                //Codes_SRS_IOTHUBTRANSPORT_34_037: [If the default config's protocol is AMQPS or AMQPS_WS, this
-                // function shall set this object's iotHubTransportConnection to a new AmqpsIotHubConnection object.]
-                this.iotHubTransportConnection = new AmqpsIotHubConnection(defaultConfig, scheduledExecutorService);
-                break;
-            default:
-                throw new TransportException("Protocol not supported");
+            switch (defaultConfig.getProtocol()) {
+                case HTTPS:
+                    //Codes_SRS_IOTHUBTRANSPORT_34_035: [If the default config's protocol is HTTPS, this function shall set
+                    // this object's iotHubTransportConnection to a new HttpsIotHubConnection object.]
+                    this.iotHubTransportConnection = new HttpsIotHubConnection(defaultConfig);
+                    break;
+                case MQTT:
+                case MQTT_WS:
+                    //Codes_SRS_IOTHUBTRANSPORT_34_036: [If the default config's protocol is MQTT or MQTT_WS, this function
+                    // shall set this object's iotHubTransportConnection to a new MqttIotHubConnection object.]
+                    this.iotHubTransportConnection = new MqttIotHubConnection(defaultConfig);
+                    break;
+                case AMQPS:
+                case AMQPS_WS:
+                    //Codes_SRS_IOTHUBTRANSPORT_34_037: [If the default config's protocol is AMQPS or AMQPS_WS, this
+                    // function shall set this object's iotHubTransportConnection to a new AmqpsIotHubConnection object.]
+                    this.iotHubTransportConnection = new AmqpsIotHubConnection(defaultConfig);
+                    break;
+                default:
+                    throw new TransportException("Protocol not supported");
+            }
         }
 
         //Codes_SRS_IOTHUBTRANSPORT_34_038: [This function shall set this object as the listener of the iotHubTransportConnection object.]
         this.iotHubTransportConnection.setListener(this);
 
         //Codes_SRS_IOTHUBTRANSPORT_34_039: [This function shall open the iotHubTransportConnection object with the saved list of configs.]
-        this.iotHubTransportConnection.open(this.deviceClientConfigs);
+        this.iotHubTransportConnection.open(this.deviceClientConfigs, scheduledExecutorService);
 
         //Codes_SRS_IOTHUBTRANSPORT_34_040: [This function shall invoke the method updateStatus with status CONNECTED,
         // reason CONNECTION_OK, and a null throwable.]
@@ -767,7 +767,7 @@ public class IotHubTransport implements IotHubListener
         try
         {
             //Codes_SRS_IOTHUBTRANSPORT_34_061: [This function shall close the saved connection, and then invoke openConnection and return null.]
-            this.iotHubTransportConnection.close(true);
+            this.iotHubTransportConnection.close();
             this.openConnection();
         }
         catch (TransportException newTransportException)

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -56,7 +57,8 @@ public class HttpsIotHubConnectionTest
     ResponseMessage mockResponseMessage;
     @Mocked
     IotHubTransportMessage mockedTransportMessage;
-
+    @Mocked
+    ScheduledExecutorService mockedScheduledExecutorService;
 
     private static final String testSasToken = "SharedAccessSignature sr=test&sig=test&se=0";
 
@@ -1994,7 +1996,7 @@ public class HttpsIotHubConnectionTest
     public void openAndCloseDoNothing() throws IOException, TransportException
     {
         HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
-        connection.open(null);
-        connection.close(false);
+        connection.open(null, mockedScheduledExecutorService);
+        connection.close();
     }
 }

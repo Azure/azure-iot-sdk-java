@@ -153,7 +153,7 @@ public class AmqpsIotHubConnectionTest {
     Source mockSource;
 
     @Mocked
-    CountDownLatch mockOpenLatch;
+    CountDownLatch mockLatch;
 
     @Mocked
     CountDownLatch mockCloseLatch;
@@ -223,7 +223,7 @@ public class AmqpsIotHubConnectionTest {
     @Test(expected = IllegalArgumentException.class)
     public void constructorThrowsIllegalArgumentExceptionIfConfigIsNull() throws TransportException
     {
-        new AmqpsIotHubConnection(null, mockScheduledExecutorService);
+        new AmqpsIotHubConnection(null);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -238,7 +238,7 @@ public class AmqpsIotHubConnectionTest {
                 result = null;
             }
         };
-        new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -255,7 +255,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         //act
-        new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -272,7 +272,7 @@ public class AmqpsIotHubConnectionTest {
                 result = null;
             }
         };
-        new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -289,7 +289,7 @@ public class AmqpsIotHubConnectionTest {
                 result = "";
             }
         };
-        new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -308,7 +308,7 @@ public class AmqpsIotHubConnectionTest {
                 result = null;
             }
         };
-        new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_001: [The constructor shall throw IllegalArgumentException if
@@ -326,7 +326,7 @@ public class AmqpsIotHubConnectionTest {
                 result = "";
             }
         };
-        new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        new AmqpsIotHubConnection(mockConfig);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_002: [The constructor shall save the configuration into private member variables.]
@@ -349,7 +349,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         DeviceClientConfig actualConfig = Deencapsulation.getField(connection, "deviceClientConfig");
         String actualHostName = Deencapsulation.getField(connection, "hostName");
@@ -385,10 +385,10 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         //act
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockScheduledExecutorService);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_001: [The constructor shall initialize the AmqpsSessionManager member variable with the given config.]
@@ -408,13 +408,11 @@ public class AmqpsIotHubConnectionTest {
                 result = hubName;
                 mockConfig.isUseWebsocket();
                 result = true;
-                new AmqpsSessionManager(mockConfig, (ScheduledExecutorService)any);
-                result = mockAmqpsSessionManager;
             }
         };
 
         // act
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
 
         // assert
@@ -443,19 +441,11 @@ public class AmqpsIotHubConnectionTest {
         };
 
         // act
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         // assert
         String actualHostName = Deencapsulation.getField(connection, "hostName");
         assertEquals(hostName + ":" + amqpPort, actualHostName);
-
-        new Verifications()
-        {
-            {
-                new AmqpsSessionManager(mockConfig, (ScheduledExecutorService)any);
-                times = 1;
-            }
-        };
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_007: [If the AMQPS connection is already open, the function shall do nothing.]
@@ -464,12 +454,12 @@ public class AmqpsIotHubConnectionTest {
     {
         baseExpectations();
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
 
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
 
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockScheduledExecutorService);
 
         new Verifications()
         {
@@ -486,7 +476,7 @@ public class AmqpsIotHubConnectionTest {
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         // act
         connection.addDeviceOperationSession(null);
@@ -509,7 +499,8 @@ public class AmqpsIotHubConnectionTest {
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         // act
         connection.addDeviceOperationSession(mockConfig);
@@ -533,16 +524,24 @@ public class AmqpsIotHubConnectionTest {
     {
         // arrange
         baseExpectations();
+        final CountDownLatch closeLatch = new CountDownLatch(1);
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
-        Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
-        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
-        new StrictExpectations()
+        new Expectations()
         {
             {
-                mockOpenLatch.await(anyLong, TimeUnit.MILLISECONDS);
+                new CountDownLatch(anyInt);
+                result = closeLatch;
+
+                new CountDownLatch(anyInt);
+                result = mockLatch;
+
+                new AmqpsSessionManager(mockConfig, (ScheduledExecutorService)any);
+                result = mockAmqpsSessionManager;
+
+                mockLatch.await(anyLong, TimeUnit.MILLISECONDS);
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
@@ -565,7 +564,7 @@ public class AmqpsIotHubConnectionTest {
         // act
         try
         {
-            connection.open(mockedQueue);
+            connection.open(mockedQueue, mockScheduledExecutorService);
         }
         catch (TransportException e)
         {
@@ -581,16 +580,24 @@ public class AmqpsIotHubConnectionTest {
         // arrange
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "savedException", new AmqpConnectionForcedException());
         connection.setListener(mockedIotHubListener);
-        Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
-        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
+        final CountDownLatch closeLatch = new CountDownLatch(1);
 
-        new StrictExpectations()
+        new Expectations()
         {
             {
-                mockOpenLatch.await(anyLong, TimeUnit.MILLISECONDS);
+                new CountDownLatch(anyInt);
+                result = closeLatch;
+
+                new CountDownLatch(anyInt);
+                result = mockLatch;
+
+                new AmqpsSessionManager(mockConfig, (ScheduledExecutorService)any);
+                result = mockAmqpsSessionManager;
+
+                mockLatch.await(anyLong, TimeUnit.MILLISECONDS);
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
@@ -601,11 +608,14 @@ public class AmqpsIotHubConnectionTest {
                 result = true;
 
                 mockAmqpsSessionManager.openDeviceOperationLinks();
+
+                Deencapsulation.getField(connection, "savedException");
+                result = new AmqpConnectionForcedException();
             }
         };
 
         // act
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockScheduledExecutorService);
     }
 
 
@@ -616,7 +626,7 @@ public class AmqpsIotHubConnectionTest {
         // arrange
         baseExpectations();
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "reactor", null);
 
         new NonStrictExpectations()
@@ -628,7 +638,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         // act
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockScheduledExecutorService);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
@@ -637,23 +647,33 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
+        final CountDownLatch closeLatch = new CountDownLatch(1);
 
         new NonStrictExpectations()
         {
             {
+                new CountDownLatch(anyInt);
+                result = closeLatch;
+
+                new CountDownLatch(anyInt);
+                result = mockLatch;
+
+                new AmqpsSessionManager(mockConfig, (ScheduledExecutorService)any);
+                result = mockAmqpsSessionManager;
+
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
             }
         };
 
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
-        Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
+        Deencapsulation.setField(connection, "openLatch", mockLatch);
 
         //act
         try
         {
-            connection.open(mockedQueue);
+            connection.open(mockedQueue, mockScheduledExecutorService);
         }
         catch (TransportException e)
         {
@@ -666,7 +686,7 @@ public class AmqpsIotHubConnectionTest {
             {
                 new IotHubReactor((Reactor)any);
                 times = 1;
-                mockOpenLatch.await(anyLong, TimeUnit.MILLISECONDS);
+                mockLatch.await(anyLong, TimeUnit.MILLISECONDS);
                 times = 1;
             }
         };
@@ -679,24 +699,34 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
+        final CountDownLatch closeLatch = new CountDownLatch(1);
 
         new NonStrictExpectations()
         {
             {
-                mockOpenLatch.await(anyLong, TimeUnit.MILLISECONDS);
+                new CountDownLatch(anyInt);
+                result = closeLatch;
+
+                new CountDownLatch(anyInt);
+                result = mockLatch;
+
+                new AmqpsSessionManager(mockConfig, (ScheduledExecutorService)any);
+                result = mockAmqpsSessionManager;
+
+                mockLatch.await(anyLong, TimeUnit.MILLISECONDS);
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
             }
         };
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
-        Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
+        Deencapsulation.setField(connection, "openLatch", mockLatch);
 
         //act
         try
         {
-            connection.open(mockedQueue);
+            connection.open(mockedQueue, mockScheduledExecutorService);
         }
         catch (TransportException e)
         {
@@ -707,7 +737,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockOpenLatch.await(anyLong, TimeUnit.MILLISECONDS);
+                mockLatch.await(anyLong, TimeUnit.MILLISECONDS);
                 times = 1;
             }
         };
@@ -719,7 +749,8 @@ public class AmqpsIotHubConnectionTest {
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         new NonStrictExpectations()
         {
@@ -752,7 +783,8 @@ public class AmqpsIotHubConnectionTest {
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         new NonStrictExpectations()
         {
@@ -766,6 +798,7 @@ public class AmqpsIotHubConnectionTest {
         connection.authenticate();
 
         // assert
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
         Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         new Verifications()
@@ -785,7 +818,8 @@ public class AmqpsIotHubConnectionTest {
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         new NonStrictExpectations()
         {
@@ -818,7 +852,8 @@ public class AmqpsIotHubConnectionTest {
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         new NonStrictExpectations()
         {
@@ -851,7 +886,7 @@ public class AmqpsIotHubConnectionTest {
     {
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         this.setLatches(connection);
 
         new NonStrictExpectations()
@@ -862,7 +897,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        connection.close(false);
+        connection.close();
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to DISCONNECTED.]
@@ -883,19 +918,20 @@ public class AmqpsIotHubConnectionTest {
 
         new MockUp<AmqpsIotHubConnection>() {
             @Mock
-            void open(Queue<DeviceClientConfig> deviceClientConfigs)
+            void open(Queue<DeviceClientConfig> deviceClientConfigs, ScheduledExecutorService scheduledExecutorService)
             {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Deencapsulation.setField(connection, "connection", mockConnection);
         Deencapsulation.setField(connection, "executorService", mockExecutorService);
         Deencapsulation.setField(connection, "scheduledExecutorService", mockScheduledExecutorService);
+        Deencapsulation.setField(connection, "closeLatch", mockLatch);
 
-        connection.close(false);
+        connection.close();
 
         IotHubConnectionStatus actualState = Deencapsulation.getField(connection, "state");
         assertEquals(IotHubConnectionStatus.DISCONNECTED, actualState);
@@ -927,13 +963,14 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Deencapsulation.setField(connection, "connection", mockConnection);
         Deencapsulation.setField(connection, "executorService", mockExecutorService);
+        Deencapsulation.setField(connection, "closeLatch", mockLatch);
 
-        connection.close(false);
+        connection.close();
 
         IotHubConnectionStatus actualState = Deencapsulation.getField(connection, "state");
         assertEquals(IotHubConnectionStatus.DISCONNECTED, actualState);
@@ -962,7 +999,7 @@ public class AmqpsIotHubConnectionTest {
     {
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.DISCONNECTED);
         Deencapsulation.setField(connection, "linkCredit", 100);
@@ -980,7 +1017,7 @@ public class AmqpsIotHubConnectionTest {
     {
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Deencapsulation.setField(connection, "linkCredit", -1);
@@ -1013,7 +1050,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Deencapsulation.setField(connection, "linkCredit", 100);
@@ -1049,7 +1086,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         connection.onReactorInit(mockEvent);
 
@@ -1081,7 +1118,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         connection.onReactorInit(mockEvent);
 
@@ -1112,7 +1149,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         this.setLatches(connection);
         Deencapsulation.setField(connection, "reactor", mockReactor);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.DISCONNECTED);
@@ -1139,7 +1176,7 @@ public class AmqpsIotHubConnectionTest {
                 mockCloseLatch.countDown();
                 times = 1;
 
-                mockOpenLatch.countDown();
+                mockLatch.countDown();
                 times = 1;
             }
         };
@@ -1160,7 +1197,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         this.setLatches(connection);
         Deencapsulation.setField(connection, "reactor", mockReactor);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.DISCONNECTED);
@@ -1208,7 +1245,8 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
         connection.onConnectionInit(mockEvent);
 
         new Verifications()
@@ -1251,8 +1289,9 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "useWebSockets", false);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         connection.onConnectionBound(mockEvent);
 
@@ -1292,8 +1331,8 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
-
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
         Deencapsulation.setField(connection, "useWebSockets", true);
 
         connection.onConnectionBound(mockEvent);
@@ -1313,7 +1352,7 @@ public class AmqpsIotHubConnectionTest {
     {
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
 
         connection.onConnectionUnbound(mockEvent);
@@ -1344,7 +1383,8 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
         connection.setListener(mockedIotHubListener);
         connection.onDelivery(mockEvent);
 
@@ -1367,8 +1407,9 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         final String receiverLinkName = "receiver";
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "inProgressMessages", mockInProgressMessages);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         new NonStrictExpectations()
         {
@@ -1435,8 +1476,9 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         final String receiverLinkName = "receiver";
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "inProgressMessages", mockInProgressMessages);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         new NonStrictExpectations()
         {
@@ -1519,8 +1561,9 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         final String receiverLinkName = "receiver";
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "inProgressMessages", mockInProgressMessages);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         new NonStrictExpectations()
         {
@@ -1596,8 +1639,9 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         final String receiverLinkName = "receiver";
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "inProgressMessages", mockInProgressMessages);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         new NonStrictExpectations()
         {
@@ -1670,8 +1714,9 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         final String receiverLinkName = "receiver";
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "inProgressMessages", mockInProgressMessages);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         new NonStrictExpectations()
         {
@@ -1744,8 +1789,9 @@ public class AmqpsIotHubConnectionTest {
         baseExpectations();
         final String receiverLinkName = "receiver";
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "inProgressMessages", mockInProgressMessages);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         new NonStrictExpectations()
         {
@@ -1817,7 +1863,8 @@ public class AmqpsIotHubConnectionTest {
     {
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         connection.onLinkInit(mockEvent);
 
@@ -1848,7 +1895,8 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         connection.onLinkInit(mockEvent);
 
@@ -1873,7 +1921,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.onLinkFlow(mockEvent);
 
         Integer expectedLinkCredit = 100;
@@ -1908,8 +1956,9 @@ public class AmqpsIotHubConnectionTest {
             }
         };
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         this.setLatches(connection);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         //act
         connection.onLinkRemoteOpen(mockEvent);
@@ -1923,7 +1972,7 @@ public class AmqpsIotHubConnectionTest {
             {
                 Deencapsulation.invoke(mockAmqpsSessionManager, "onLinkRemoteOpen", mockEvent);
                 times = 1;
-                mockOpenLatch.countDown();
+                mockLatch.countDown();
                 times = 1;
             }
         };
@@ -1935,7 +1984,7 @@ public class AmqpsIotHubConnectionTest {
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         
         // act
         connection.setListener(mockedIotHubListener);
@@ -1951,7 +2000,7 @@ public class AmqpsIotHubConnectionTest {
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         // act
         connection.setListener(null);
@@ -1963,7 +2012,8 @@ public class AmqpsIotHubConnectionTest {
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         // act
         Deencapsulation.invoke(connection, "convertToProton", mockIoTMessage);
@@ -1984,7 +2034,7 @@ public class AmqpsIotHubConnectionTest {
     {
         // arrange
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
 
         // act
@@ -2014,7 +2064,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         Deencapsulation.setField(connection, "scheduledExecutorService", mockScheduledExecutorService);
         new NonStrictExpectations()
@@ -2052,7 +2102,7 @@ public class AmqpsIotHubConnectionTest {
             }
         };
         baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         new Expectations()
         {
@@ -2082,7 +2132,7 @@ public class AmqpsIotHubConnectionTest {
         //arrange
         final int expectedErrorCode = 401;
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
         final Map<String, Object> applicationPropertiesMap = new HashMap<>();
@@ -2121,7 +2171,7 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Map<com.microsoft.azure.sdk.iot.device.Message, AmqpsMessage> sendAckMessages = new ConcurrentHashMap<>();
         sendAckMessages.put(mockedTransportMessage, mockAmqpsMessage);
@@ -2152,7 +2202,7 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Map<com.microsoft.azure.sdk.iot.device.Message, AmqpsMessage> sendAckMessages = new ConcurrentHashMap<>();
         sendAckMessages.put(mockedTransportMessage, mockAmqpsMessage);
@@ -2181,7 +2231,7 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Map<com.microsoft.azure.sdk.iot.device.Message, AmqpsMessage> sendAckMessages = new ConcurrentHashMap<>();
         sendAckMessages.put(mockedTransportMessage, mockAmqpsMessage);
@@ -2210,7 +2260,7 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
 
         //act
@@ -2237,7 +2287,7 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.DISCONNECTED);
 
         //act
@@ -2267,17 +2317,23 @@ public class AmqpsIotHubConnectionTest {
         // arrange
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
-        Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
-        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
-        Deencapsulation.setField(connection, "executorService", mockExecutorService);
-        Deencapsulation.setField(connection, "reactor", mockReactor);
+        final CountDownLatch closeLatch = new CountDownLatch(1);
 
-        new StrictExpectations(connection)
+        new Expectations()
         {
             {
-                mockOpenLatch.await(anyLong, TimeUnit.MILLISECONDS);
+                new CountDownLatch(anyInt);
+                result = closeLatch;
+
+                new CountDownLatch(anyInt);
+                result = mockLatch;
+
+                new AmqpsSessionManager(mockConfig, (ScheduledExecutorService)any);
+                result = mockAmqpsSessionManager;
+
+                mockLatch.await(anyLong, TimeUnit.MILLISECONDS);
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
@@ -2290,12 +2346,12 @@ public class AmqpsIotHubConnectionTest {
                 mockAmqpsSessionManager.openDeviceOperationLinks();
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
-                result = false;
+                result = true;
             }
         };
 
         // act
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockScheduledExecutorService);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_074: [If authentication has not succeeded after calling
@@ -2307,15 +2363,23 @@ public class AmqpsIotHubConnectionTest {
         // arrange
         baseExpectations();
 
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
-        Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
-        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
+        final CountDownLatch closeLatch = new CountDownLatch(1);
 
-        new StrictExpectations()
+        new Expectations()
         {
             {
-                mockOpenLatch.await(anyLong, TimeUnit.MILLISECONDS);
+                new CountDownLatch(anyInt);
+                result = closeLatch;
+
+                new CountDownLatch(anyInt);
+                result = mockLatch;
+
+                new AmqpsSessionManager(mockConfig, (ScheduledExecutorService)any);
+                result = mockAmqpsSessionManager;
+
+                mockLatch.await(anyLong, TimeUnit.MILLISECONDS);
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
@@ -2336,7 +2400,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         // act
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockScheduledExecutorService);
     }
 
     // Tests_SRS_AMQPSTRANSPORT_34_076: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
@@ -2345,7 +2409,9 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
+
         new NonStrictExpectations()
         {
             {
@@ -2366,9 +2432,10 @@ public class AmqpsIotHubConnectionTest {
         //arrange
         baseExpectations();
         final int expectedHash = 40;
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Deencapsulation.setField(connection, "linkCredit", 20);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
         new NonStrictExpectations()
         {
             {
@@ -2411,9 +2478,11 @@ public class AmqpsIotHubConnectionTest {
         //arrange
         baseExpectations();
         final int expectedHash = -1;
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Deencapsulation.setField(connection, "linkCredit", 20);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
+
         new NonStrictExpectations()
         {
             {
@@ -2473,7 +2542,7 @@ public class AmqpsIotHubConnectionTest {
         //arrange
         String expectedConnectionId = "1234";
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "connectionId", expectedConnectionId);
 
         //act
@@ -2489,7 +2558,7 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         final String expectedError = AmqpConnectionFramingErrorException.errorCode;
         final String expectedErrorDescription = "sender error description";
         new NonStrictExpectations()
@@ -2542,7 +2611,7 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         final String expectedError = AmqpConnectionFramingErrorException.errorCode;
         final String expectedErrorDescription = "sender error description";
         new NonStrictExpectations()
@@ -2595,7 +2664,7 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         final String expectedError = AmqpConnectionFramingErrorException.errorCode;
         final String expectedErrorDescription = "sender error description";
         new NonStrictExpectations()
@@ -2648,7 +2717,7 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         final String expectedError = AmqpConnectionFramingErrorException.errorCode;
         final String expectedErrorDescription = "sender error description";
         new NonStrictExpectations()
@@ -2701,7 +2770,7 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         final String expectedError = AmqpConnectionFramingErrorException.errorCode;
         final String expectedErrorDescription = "sender error description";
         new NonStrictExpectations()
@@ -2754,7 +2823,7 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         final String expectedError = AmqpConnectionFramingErrorException.errorCode;
         final String expectedErrorDescription = "sender error description";
         new NonStrictExpectations()
@@ -2807,7 +2876,7 @@ public class AmqpsIotHubConnectionTest {
     {
         //arrange
         baseExpectations();
-        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, mockScheduledExecutorService);
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         new NonStrictExpectations()
         {
             {
@@ -2853,15 +2922,13 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceId;
                 mockConfig.isUseWebsocket();
                 result = false;
-                new AmqpsSessionManager(mockConfig, (ScheduledExecutorService)any);
-                result = mockAmqpsSessionManager;
             }
         };
     }
 
     private void setLatches(AmqpsIotHubConnection connection)
     {
-        Deencapsulation.setField(connection, "openLatch", mockOpenLatch);
+        Deencapsulation.setField(connection, "openLatch", mockLatch);
         Deencapsulation.setField(connection, "closeLatch", mockCloseLatch);
     }
 }
