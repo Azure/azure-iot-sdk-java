@@ -86,8 +86,7 @@ public class ModuleGlue
             ConnectResponse cr = new ConnectResponse();
             cr.setConnectionId(connectionId);
             handler.handle(Future.succeededFuture(cr));
-        }
-        catch (ModuleClientException | InterruptedException e)
+        } catch (ModuleClientException | InterruptedException e)
         {
             handler.handle(Future.failedFuture(e));
         }
@@ -135,8 +134,7 @@ public class ModuleGlue
             ConnectResponse cr = new ConnectResponse();
             cr.setConnectionId(connectionId);
             handler.handle(Future.succeededFuture(cr));
-        }
-        catch (InterruptedException | ModuleClientException | URISyntaxException e)
+        } catch (InterruptedException | ModuleClientException | URISyntaxException e)
         {
             handler.handle(Future.failedFuture(e));
         }
@@ -162,8 +160,7 @@ public class ModuleGlue
             {
                 MethodResult result = client.invokeMethod(deviceId, request);
                 handler.handle(Future.succeededFuture(makeMethodResultThatEncodesCorrectly(result)));
-            }
-            catch (ModuleClientException e)
+            } catch (ModuleClientException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
@@ -182,8 +179,7 @@ public class ModuleGlue
             {
                 client.closeNow();
                 this._map.remove(connectionId);
-            }
-            catch (IOException e)
+            } catch (IOException e)
             {
                 // ignore it, but keep it as an open connection so we can close it again later.
                 System.out.printf("Exception on close: %s%n", e.toString());
@@ -359,8 +355,7 @@ public class ModuleGlue
                         try
                         {
                             client.subscribeToTwinDesiredProperties(null);
-                        }
-                        catch (IOException e)
+                        } catch (IOException e)
                         {
                             this._deviceTwinStatusCallback.setHandler(null);
                             handler.handle(Future.failedFuture(e));
@@ -372,8 +367,7 @@ public class ModuleGlue
                 });
                 System.out.println("calling startTwin");
                 client.startTwin(this._deviceTwinStatusCallback, null, this._deviceTwinPropertyCallback, null);
-            }
-            catch (IOException e)
+            } catch (IOException e)
             {
                 handler.handle(Future.failedFuture((e)));
             }
@@ -445,8 +439,7 @@ public class ModuleGlue
                 {
                     this._handler.handle(Future.succeededFuture(result));
                 }
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 System.out.printf("Ignoring exception %s%n", e.toString());
 
@@ -491,24 +484,24 @@ public class ModuleGlue
         public DeviceMethodData call(String methodName, Object methodData, Object context)
         {
             System.out.printf("method %s called%n", methodName);
-            System.out.printf("methodData: %s%n", methodData.toString());
             if (methodName.equals(this._methodName))
             {
                 String methodDataString;
                 try
                 {
                     methodDataString = Json.mapper.readValue(new String((byte[]) methodData), String.class);
-                }
-                catch (IOException e)
+                } catch (IOException e)
                 {
                     this._handler.handle(Future.failedFuture(e));
                     this.reset();
                     return new DeviceMethodData(500, "exception parsing methodData");
                 }
+                System.out.printf("methodData: %s%n", methodDataString);
 
-                if (methodDataString.equals(this._requestBody))
+                if (methodDataString.equals(this._requestBody) ||
+                    Json.encode(methodDataString).equals(this._requestBody))
                 {
-                    System.out.printf("Method data looks corrent.  Returning result: %s%n", _responseBody);
+                    System.out.printf("Method data looks correct.  Returning result: %s%n", _responseBody);
                     this._handler.handle(Future.succeededFuture());
                     this.reset();
                     return new DeviceMethodData(this._statusCode, this._responseBody);
@@ -529,6 +522,7 @@ public class ModuleGlue
             }
         }
     }
+
     DeviceMethodCallbackImpl _methodCallback = new DeviceMethodCallbackImpl();
 
     public void enableMethods(String connectionId, Handler<AsyncResult<Void>> handler)
@@ -545,8 +539,7 @@ public class ModuleGlue
             try
             {
                 client.subscribeToMethod(this._methodCallback, null, callback, null);
-            }
-            catch (IOException e)
+            } catch (IOException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
@@ -564,7 +557,7 @@ public class ModuleGlue
         else
         {
             _methodCallback._handler = handler;
-            _methodCallback._requestBody = (String)(((LinkedHashMap)requestAndResponse.getRequestPayload()).get("payload"));
+            _methodCallback._requestBody = (String) (((LinkedHashMap) requestAndResponse.getRequestPayload()).get("payload"));
             _methodCallback._responseBody = Json.encode(requestAndResponse.getResponsePayload());
             _methodCallback._statusCode = requestAndResponse.getStatusCode();
             _methodCallback._client = client;
@@ -594,7 +587,7 @@ public class ModuleGlue
         }
         else
         {
-            JsonObject params = (JsonObject)methodInvokeParameters;
+            JsonObject params = (JsonObject) methodInvokeParameters;
             String methodName = params.getString("methodName");
             String payload = params.getString("payload");
             int responseTimeout = params.getInteger("responseTimeoutInSeconds", 0);
@@ -604,8 +597,7 @@ public class ModuleGlue
             {
                 MethodResult result = client.invokeMethod(deviceId, moduleId, request);
                 handler.handle(Future.succeededFuture(makeMethodResultThatEncodesCorrectly(result)));
-            }
-            catch (ModuleClientException e)
+            } catch (ModuleClientException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
@@ -635,7 +627,7 @@ public class ModuleGlue
             this._deviceTwinPropertyCallback.setHandler(res -> {
                 if (res.succeeded())
                 {
-                    JsonObject obj = (JsonObject)res.result();
+                    JsonObject obj = (JsonObject) res.result();
                     Object desiredProps = obj.getJsonObject("properties").getJsonObject("desired");
                     handler.handle(Future.succeededFuture(desiredProps));
                 }
@@ -663,8 +655,7 @@ public class ModuleGlue
             try
             {
                 client.getTwin();
-            }
-            catch(IOException e)
+            } catch (IOException e)
             {
                 this._deviceTwinPropertyCallback.setHandler(null);
                 handler.handle(Future.failedFuture(e));
@@ -695,13 +686,12 @@ public class ModuleGlue
         }
         else
         {
-            Set<Property> propSet = objectToPropSet((JsonObject)props);
+            Set<Property> propSet = objectToPropSet((JsonObject) props);
             this._deviceTwinStatusCallback.setHandler(handler);
             try
             {
                 client.sendReportedProperties(propSet);
-            }
-            catch(IOException e)
+            } catch (IOException e)
             {
                 this._deviceTwinStatusCallback.setHandler(null);
                 handler.handle(Future.failedFuture(e));
@@ -741,8 +731,7 @@ public class ModuleGlue
                 count++;
                 client.open();
                 clientOpenSucceeded = true;
-            }
-            catch (IOException e)
+            } catch (IOException e)
             {
                 //ignore and try again
                 System.out.println("Encountered exception while opening device client, retrying...");
