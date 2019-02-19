@@ -13,21 +13,14 @@ import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.methods.DeviceMethodTests;
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-
 import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -51,22 +44,16 @@ public class DeviceMethodModuleAndroidRunner extends DeviceMethodTests
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
     @Parameterized.Parameters(name = "{1}_{2}_{3}")
-    public static Collection inputsCommons() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, InterruptedException, ModuleClientException
+    public static Collection inputsCommons() throws Exception
     {
-        String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
-        String publicKeyCertBase64Encoded = BuildConfig.IotHubPublicCertBase64;
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
-        String x509Thumbprint = BuildConfig.IotHubThumbprint;
-        String privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
-        String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
-
-        Collection inputs = inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
+        Collection inputs = inputsCommon(ClientType.MODULE_CLIENT);
         Object[] inputsArray = inputs.toArray();
 
         testManagers = new ArrayList<>();
         for (int i = 0; i < inputsArray.length; i++)
         {
-            Object[] inputCollection = (Object[])inputsArray[i];
+            Object[] inputCollection = (Object[]) inputsArray[i];
             testManagers.add((DeviceTestManager) inputCollection[0]);
         }
 

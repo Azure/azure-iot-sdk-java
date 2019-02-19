@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.androidthings.serviceclient;
 
 import com.microsoft.azure.sdk.iot.androidthings.BuildConfig;
 import com.microsoft.azure.sdk.iot.common.tests.serviceclient.RegistryManagerTests;
+
 import org.junit.BeforeClass;
 
 import java.io.IOException;

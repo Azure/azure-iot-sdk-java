@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.androidthings.iothubservices;
 import com.microsoft.azure.sdk.iot.androidthings.BuildConfig;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.TransportClientTests;
+
 import org.junit.BeforeClass;
 import org.junit.Rule;
 

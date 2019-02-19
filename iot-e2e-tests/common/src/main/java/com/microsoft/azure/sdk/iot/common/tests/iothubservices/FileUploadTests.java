@@ -5,9 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices;
 
-import com.microsoft.azure.sdk.iot.common.helpers.DeviceConnectionString;
-import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -134,14 +132,15 @@ public class FileUploadTests extends IntegrationTest
         }
     }
 
-    public static void setUp(String publicK, String privateK, String thumbprint) throws IOException
+    public static void setUp() throws Exception
     {
+        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
 
-        publicKeyCertificate = publicK;
-        privateKeyCertificate = privateK;
-        x509Thumbprint = thumbprint;
+        publicKeyCertificate = certificateGenerator.getPublicCertificate();
+        privateKeyCertificate = certificateGenerator.getPrivateKey();
+        x509Thumbprint = certificateGenerator.getX509Thumbprint();
         
         fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
         assertNotNull(fileUploadNotificationReceiver);

@@ -20,14 +20,18 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.RawTwinQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
 import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
@@ -321,7 +325,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    protected static Collection inputsCommon(ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
+    protected static Collection inputsCommon(ClientType clientType) throws IOException, CertificateException, NoSuchAlgorithmException, OperatorCreationException, SignatureException, NoSuchProviderException, InvalidKeyException
     {
         sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
@@ -340,6 +344,11 @@ public class DeviceTwinCommon extends IntegrationTest
         String moduleIdMqtt = "java-device-client-e2e-test-mqtt-module-";
         String moduleIdMqttWs = "java-device-client-e2e-test-mqttws-module-";
 
+        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
+        String publicCertificate = certificateGenerator.getPublicCertificate();
+        String privateKey = certificateGenerator.getPrivateKey();
+        String thumbprint = certificateGenerator.getX509Thumbprint();
+
         List inputs;
         if (clientType == ClientType.DEVICE_CLIENT)
         {
@@ -347,14 +356,14 @@ public class DeviceTwinCommon extends IntegrationTest
                     new Object[][]
                             {
                                     //sas token, device client
-                                    {deviceIdAmqps, null, AMQPS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdAmqpsWs, null, AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqtt, null, MQTT, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqttWs,  null, MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {deviceIdAmqps, null, AMQPS, SAS, ClientType.DEVICE_CLIENT, publicCertificate, privateKey, thumbprint},
+                                    {deviceIdAmqpsWs, null, AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, publicCertificate, privateKey, thumbprint},
+                                    {deviceIdMqtt, null, MQTT, SAS, ClientType.DEVICE_CLIENT, publicCertificate, privateKey, thumbprint},
+                                    {deviceIdMqttWs,  null, MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicCertificate, privateKey, thumbprint},
 
                                     //x509, device client
-                                    {deviceIdAmqpsX509, null, AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqttX509, null, MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {deviceIdAmqpsX509, null, AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicCertificate, privateKey, thumbprint},
+                                    {deviceIdMqttX509, null, MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicCertificate, privateKey, thumbprint},
                             }
             );
         }
@@ -364,10 +373,10 @@ public class DeviceTwinCommon extends IntegrationTest
                     new Object[][]
                             {
                                     //sas token, module client
-                                    {deviceIdAmqps, moduleIdAmqps, AMQPS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdAmqpsWs, moduleIdAmqpsWs, AMQPS_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqtt, moduleIdMqtt, MQTT, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqttWs,  moduleIdMqttWs, MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint}
+                                    {deviceIdAmqps, moduleIdAmqps, AMQPS, SAS, ClientType.MODULE_CLIENT, publicCertificate, privateKey, thumbprint},
+                                    {deviceIdAmqpsWs, moduleIdAmqpsWs, AMQPS_WS, SAS, ClientType.MODULE_CLIENT, publicCertificate, privateKey, thumbprint},
+                                    {deviceIdMqtt, moduleIdMqtt, MQTT, SAS, ClientType.MODULE_CLIENT, publicCertificate, privateKey, thumbprint},
+                                    {deviceIdMqttWs,  moduleIdMqttWs, MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicCertificate, privateKey, thumbprint}
                             }
             );
         }

@@ -19,6 +19,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import junit.framework.TestCase;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -67,7 +68,7 @@ public class DeviceMethodCommon extends IntegrationTest
     protected DeviceMethodTestInstance testInstance;
     protected static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
 
-    protected static Collection inputsCommon(ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, InterruptedException, ModuleClientException
+    protected static Collection inputsCommon(ClientType clientType) throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, InterruptedException, ModuleClientException, OperatorCreationException
     {
         methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
@@ -86,10 +87,15 @@ public class DeviceMethodCommon extends IntegrationTest
         Device device = Device.createFromId(deviceId, null, null);
         Module module = Module.createFromId(deviceId, moduleId, null);
 
+        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
+        String publicCertificate = certificateGenerator.getPublicCertificate();
+        String privateKey = certificateGenerator.getPrivateKey();
+        String thumbprint = certificateGenerator.getX509Thumbprint();
+
         Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
-        deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+        deviceX509.setThumbprintFinal(thumbprint, thumbprint);
         Module moduleX509 = Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
-        moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+        moduleX509.setThumbprintFinal(thumbprint, thumbprint);
 
         Collection<Object[]> inputs = new ArrayList<>();
 
@@ -115,7 +121,7 @@ public class DeviceMethodCommon extends IntegrationTest
                     DeviceClient deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(device), protocol);
                     DeviceTestManager deviceClientSasTestManager = new DeviceTestManager(deviceClient);
                     deviceTestManagers.add(deviceClientSasTestManager);
-                    inputs.add(makeSubArray(deviceClientSasTestManager, protocol, SAS, ClientType.DEVICE_CLIENT, device, publicKeyCert, privateKey, x509Thumbprint));
+                    inputs.add(makeSubArray(deviceClientSasTestManager, protocol, SAS, ClientType.DEVICE_CLIENT, device, publicCertificate, privateKey, thumbprint));
                 }
                 else if (clientType == ClientType.MODULE_CLIENT)
                 {
@@ -123,7 +129,7 @@ public class DeviceMethodCommon extends IntegrationTest
                     ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol);
                     DeviceTestManager moduleClientSasTestManager = new DeviceTestManager(moduleClient);
                     deviceTestManagers.add(moduleClientSasTestManager);
-                    inputs.add(makeSubArray(moduleClientSasTestManager, protocol, SAS, ClientType.MODULE_CLIENT, module, publicKeyCert, privateKey, x509Thumbprint));
+                    inputs.add(makeSubArray(moduleClientSasTestManager, protocol, SAS, ClientType.MODULE_CLIENT, module, publicCertificate, privateKey, thumbprint));
                 }
 
                 if (protocol != MQTT_WS && protocol != AMQPS_WS)
@@ -131,18 +137,18 @@ public class DeviceMethodCommon extends IntegrationTest
                     if (clientType == ClientType.DEVICE_CLIENT)
                     {
                         //x509 device client
-                        DeviceClient deviceClientX509 = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, publicKeyCert, false, privateKey, false);
+                        DeviceClient deviceClientX509 = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, publicCertificate, false, privateKey, false);
                         DeviceTestManager deviceClientX509TestManager = new DeviceTestManager(deviceClientX509);
                         deviceTestManagers.add(deviceClientX509TestManager);
-                        inputs.add(makeSubArray(deviceClientX509TestManager, protocol, SELF_SIGNED, ClientType.DEVICE_CLIENT, deviceX509, publicKeyCert, privateKey, x509Thumbprint));
+                        inputs.add(makeSubArray(deviceClientX509TestManager, protocol, SELF_SIGNED, ClientType.DEVICE_CLIENT, deviceX509, publicCertificate, privateKey, thumbprint));
                     }
                     else if (clientType == ClientType.MODULE_CLIENT)
                     {
                         //x509 module client
-                        ModuleClient moduleClientX509 = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, publicKeyCert, false, privateKey, false);
+                        ModuleClient moduleClientX509 = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, publicCertificate, false, privateKey, false);
                         DeviceTestManager moduleClientX509TestManager = new DeviceTestManager(moduleClientX509);
                         deviceTestManagers.add(moduleClientX509TestManager);
-                        inputs.add(makeSubArray(moduleClientX509TestManager, protocol, SELF_SIGNED, ClientType.MODULE_CLIENT, moduleX509, publicKeyCert, privateKey, x509Thumbprint));
+                        inputs.add(makeSubArray(moduleClientX509TestManager, protocol, SELF_SIGNED, ClientType.MODULE_CLIENT, moduleX509, publicCertificate, privateKey, thumbprint));
                     }
                 }
             }

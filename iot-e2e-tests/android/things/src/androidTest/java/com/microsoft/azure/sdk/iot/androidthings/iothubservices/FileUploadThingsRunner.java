@@ -8,14 +8,19 @@ package com.microsoft.azure.sdk.iot.androidthings.iothubservices;
 import com.microsoft.azure.sdk.iot.androidthings.BuildConfig;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.FileUploadTests;
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 
+import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
 
 public class FileUploadThingsRunner extends FileUploadTests
 {
@@ -23,15 +28,10 @@ public class FileUploadThingsRunner extends FileUploadTests
     public Rerun count = new Rerun(3);
 
     @BeforeClass
-    public static void setup() throws IOException
+    public static void setup() throws Exception
     {
-        String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
-        String publicKeyCertBase64Encoded = BuildConfig.IotHubPublicCertBase64;
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
-        String x509Thumbprint = BuildConfig.IotHubThumbprint;
-        String privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
-        String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
-        FileUploadTests.setUp(publicKeyCert, privateKey, x509Thumbprint);
+        FileUploadTests.setUp();
     }
 
     @Ignore
