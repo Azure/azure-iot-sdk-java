@@ -36,24 +36,38 @@ public class X509CertificateGenerator
      * Constructor that generates a new self signed x509 certificate. Public certificate, private key, thumbprint, and the complete
      * certificate can be accessed by getters. No common name is given to the certificate.
      */
-    public X509CertificateGenerator() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, SignatureException, NoSuchProviderException, InvalidKeyException
+    public X509CertificateGenerator()
     {
-        this.generateCertificate();
+        try
+        {
+            this.generateCertificate();
+        }
+        catch (Exception e)
+        {
+            System.out.println(Tools.getStackTraceFromThrowable(e));
+        }
     }
 
     /**
      * Constructor that generates a new self signed x509 certificate. Public certificate, private key, thumbprint, and the complete
      * certificate can be accessed by getters. The created certificate will have the provided common name.
      */
-    public X509CertificateGenerator(String commonName) throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, SignatureException, NoSuchProviderException, InvalidKeyException
+    public X509CertificateGenerator(String commonName)
     {
-        this.generateCertificate(commonName);
+        try
+        {
+            this.generateCertificate(commonName);
+        }
+        catch (Exception e)
+        {
+            System.out.println(Tools.getStackTraceFromThrowable(e));
+        }
     }
 
     /**
      * generate a new certificate
      */
-    public void generateCertificate() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, SignatureException, NoSuchProviderException, InvalidKeyException
+    private void generateCertificate() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, SignatureException, NoSuchProviderException, InvalidKeyException
     {
         generateCertificate(null);
     }
@@ -61,7 +75,7 @@ public class X509CertificateGenerator
     /**
      * generate a new certificate using the provided common name
      */
-    public void generateCertificate(String commonName) throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, SignatureException, NoSuchProviderException, InvalidKeyException
+    private void generateCertificate(String commonName) throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, SignatureException, NoSuchProviderException, InvalidKeyException
     {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(1024, new SecureRandom());

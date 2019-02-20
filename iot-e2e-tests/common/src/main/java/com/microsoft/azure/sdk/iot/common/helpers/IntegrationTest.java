@@ -27,7 +27,7 @@ public class IntegrationTest
         }
     };
 
-    public static final int E2E_TEST_TIMEOUT_MS = 15 * 60 * 1000;
+    public static final int E2E_TEST_TIMEOUT_MS = 4 * 60 * 1000;
 
     //This timeout applies to all individual tests in classes that inherit from this class
     @Rule
