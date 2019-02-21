@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin.DeviceTwinWithVersionTests;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import org.junit.Rule;
+import org.junit.After;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -34,5 +35,11 @@ public class DeviceTwinWithVersionAndroidRunner extends DeviceTwinWithVersionTes
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         return inputsCommon();
+    }
+
+    @After
+    public void labelSnapshot()
+    {
+        reportHelper.label("Stopping App");
     }
 }

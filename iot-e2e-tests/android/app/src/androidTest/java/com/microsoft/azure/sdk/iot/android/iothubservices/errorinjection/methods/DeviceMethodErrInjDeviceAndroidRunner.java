@@ -17,6 +17,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -66,6 +67,12 @@ public class DeviceMethodErrInjDeviceAndroidRunner extends DeviceMethodErrInjTes
     public static void cleanUpResources()
     {
         tearDown(identities, testManagers);
+    }
+
+    @After
+    public void labelSnapshot()
+    {
+        reportHelper.label("Stopping App");
     }
 }
 

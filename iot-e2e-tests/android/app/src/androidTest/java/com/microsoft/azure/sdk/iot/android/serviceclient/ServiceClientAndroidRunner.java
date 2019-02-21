@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.After;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -35,5 +36,11 @@ public class ServiceClientAndroidRunner extends ServiceClientTests
     public ServiceClientAndroidRunner(IotHubServiceClientProtocol protocol)
     {
         super(protocol);
+    }
+
+    @After
+    public void labelSnapshot()
+    {
+        reportHelper.label("Stopping App");
     }
 }

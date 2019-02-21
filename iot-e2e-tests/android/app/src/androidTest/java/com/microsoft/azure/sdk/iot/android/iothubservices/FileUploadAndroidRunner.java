@@ -15,6 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.After;
 
 @TestGroupB
 public class FileUploadAndroidRunner extends FileUploadTests
@@ -37,5 +38,11 @@ public class FileUploadAndroidRunner extends FileUploadTests
     @Test
     public void uploadToBlobAsyncSingleFileZeroLength()
     {
+    }
+
+    @After
+    public void labelSnapshot()
+    {
+        reportHelper.label("Stopping App");
     }
 }

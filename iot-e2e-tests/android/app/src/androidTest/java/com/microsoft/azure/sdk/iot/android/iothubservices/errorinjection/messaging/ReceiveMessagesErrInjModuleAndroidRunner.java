@@ -19,6 +19,7 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
+import org.junit.After;
 import org.junit.runners.Parameterized;
 
 import java.util.Collection;
@@ -54,5 +55,11 @@ public class ReceiveMessagesErrInjModuleAndroidRunner extends ReceiveMessagesErr
     public static void cleanUpResources()
     {
         tearDown(identities);
+    }
+
+    @After
+    public void labelSnapshot()
+    {
+        reportHelper.label("Stopping App");
     }
 }
