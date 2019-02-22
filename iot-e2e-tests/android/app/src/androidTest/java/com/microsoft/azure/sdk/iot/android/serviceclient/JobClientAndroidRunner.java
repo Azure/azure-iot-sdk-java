@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Rule;
+import org.junit.After;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -29,5 +30,11 @@ public class JobClientAndroidRunner extends JobClientTests
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         JobClientTests.setUp();
+    }
+
+    @After
+    public void labelSnapshot()
+    {
+        reportHelper.label("Stopping App");
     }
 }
