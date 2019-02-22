@@ -160,10 +160,10 @@ public class SaslListenerImplTest
                 mockedSaslHandler.getInitPayload(chosenMechanism);
                 result = initPayload;
 
-                mockedSaslHandler.plainUsername();
+                mockedSaslHandler.getPlainUsername();
                 result = expectedUsername;
 
-                mockedSaslHandler.plainPassword();
+                mockedSaslHandler.getPlainPassword();
                 result = expectedPass;
             }
         };
