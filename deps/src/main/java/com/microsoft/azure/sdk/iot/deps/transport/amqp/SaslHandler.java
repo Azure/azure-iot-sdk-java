@@ -66,9 +66,9 @@ public interface SaslHandler
      */
     void handleOutcome(SaslOutcome outcome) throws Exception;
 
-    String plainUsername();
+    String getPlainUsername();
 
-    String plainPassword();
+    String getPlainPassword();
 
     void setSasToken(String sasToken);
 

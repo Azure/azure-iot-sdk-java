@@ -10,6 +10,8 @@ public class SaslListenerImpl implements SaslListener
     private SaslHandler saslHandler;
     private Exception savedException;
 
+    private static final String PLAIN = "PLAIN";
+
     /**
      * Sasl listener implementation that defers mechanism selection, init message payloads, and challenge handling to
      * the provided saslHandler
@@ -42,16 +44,16 @@ public class SaslListenerImpl implements SaslListener
                 chosenMechanism = this.saslHandler.chooseSaslMechanism(mechanisms);
                 sasl.setMechanisms(chosenMechanism);
 
-                if (chosenMechanism.equalsIgnoreCase("PLAIN"))
+                if (PLAIN.equalsIgnoreCase(chosenMechanism))
                 {
                     //Codes_SRS_SASLLISTENERIMPL_34_015: [If the chosen mechanism is PLAIN, this function shall call sasl.plain(...) with the inputs given by the saslhandler.]
-                    sasl.plain(this.saslHandler.plainUsername(), this.saslHandler.plainPassword());
+                    sasl.plain(this.saslHandler.getPlainUsername(), this.saslHandler.getPlainPassword());
                 }
 
                 // Codes_SRS_SASLLISTENERIMPL_34_003: [This function shall ask the saved saslHandler object to create the init payload for the chosen sasl mechanism and then send that payload if the init payload is larger than 0 bytes.]
                 byte[] initMessage = this.saslHandler.getInitPayload(chosenMechanism);
 
-                if (initMessage.length > 0)
+                if (initMessage != null && initMessage.length > 0)
                 {
                     sasl.send(initMessage, 0, initMessage.length);
                 }

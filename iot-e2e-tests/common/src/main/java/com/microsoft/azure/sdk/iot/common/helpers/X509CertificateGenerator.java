@@ -21,12 +21,25 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.fail;
 
 /**
  * Utility class for generating self signed certificates, and computing their thumprints
  */
 public class X509CertificateGenerator
 {
+    // subject name is the same as the issuer string because it is self signed.
+    private static final String ISSUER_STRING = "C=US, O=Microsoft, L=Redmond, OU=Azure";
+    private static final String SIGNATURE_ALGORITHM = "SHA1WithRSA";
+    private static final String KEY_PAIR_ALGORITHM = "RSA";
+
+    private final static String PRIVATE_KEY_HEADER = "-----BEGIN PRIVATE KEY-----\n";
+    private final static String PRIVATE_KEY_FOOTER = "\n-----END PRIVATE KEY-----\n";
+    private final static String PUBLIC_CERT_HEADER = "-----BEGIN CERTIFICATE-----\n";
+    private final static String PUBLIC_CERT_FOOTER = "\n-----END CERTIFICATE-----\n";
+
     private String x509Thumbprint;
     private X509Certificate x509Certificate;
     private String publicCertificate;
@@ -44,7 +57,7 @@ public class X509CertificateGenerator
         }
         catch (Exception e)
         {
-            System.out.println(Tools.getStackTraceFromThrowable(e));
+            throw new AssertionError("Failed to generate certificate for tests", e);
         }
     }
 
@@ -65,6 +78,48 @@ public class X509CertificateGenerator
     }
 
     /**
+     * Create a new self signed x509 certificate without specifying a common name
+     */
+    private static X509Certificate createX509CertificateFromKeyPair(KeyPair keyPair) throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, SignatureException, NoSuchProviderException, InvalidKeyException
+    {
+        return createX509CertificateFromKeyPair(keyPair, null);
+    }
+
+    /**
+     * Create a new self signed x509 certificate with the specified common name
+     */
+    private static X509Certificate createX509CertificateFromKeyPair(KeyPair keyPair, String commonName) throws OperatorCreationException, CertificateException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException
+    {
+        StringBuilder issuerStringBuilder = new StringBuilder(ISSUER_STRING);
+        if (commonName != null && !commonName.isEmpty())
+        {
+            issuerStringBuilder.append(", CN=" + commonName);
+        }
+
+        X500Name issuer = new X500Name(issuerStringBuilder.toString());
+        BigInteger serial = BigInteger.ONE;
+        Date notBefore = new Date();
+        Date notAfter = new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1)); //1 hour lifetime
+        X500Name subject = new X500Name(issuerStringBuilder.toString());
+        PublicKey publicKey = keyPair.getPublic();
+        JcaX509v3CertificateBuilder v3Bldr = new JcaX509v3CertificateBuilder(issuer, serial, notBefore, notAfter, subject, publicKey);
+        X509CertificateHolder certHldr = v3Bldr.build(new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).build(keyPair.getPrivate()));
+        X509Certificate cert = new JcaX509CertificateConverter().getCertificate(certHldr);
+        cert.checkValidity(new Date());
+        cert.verify(keyPair.getPublic());
+        return cert;
+    }
+
+    private static String getPrivateKeyPem(PrivateKey privateKey)
+    {
+        return PRIVATE_KEY_HEADER + Base64.encodeBase64StringLocal(privateKey.getEncoded()) + PRIVATE_KEY_FOOTER;
+    }
+
+    private static String getPublicCertificatePem(X509Certificate certificate) throws CertificateEncodingException {
+        return PUBLIC_CERT_HEADER + Base64.encodeBase64StringLocal(certificate.getEncoded()) + PUBLIC_CERT_FOOTER;
+    }
+
+    /**
      * generate a new certificate
      */
     private void generateCertificate() throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, SignatureException, NoSuchProviderException, InvalidKeyException
@@ -77,7 +132,7 @@ public class X509CertificateGenerator
      */
     private void generateCertificate(String commonName) throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, SignatureException, NoSuchProviderException, InvalidKeyException
     {
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(KEY_PAIR_ALGORITHM);
         keyGen.initialize(1024, new SecureRandom());
         KeyPair keypair = keyGen.generateKeyPair();
         this.x509Certificate = createX509CertificateFromKeyPair(keypair, commonName);
@@ -116,63 +171,5 @@ public class X509CertificateGenerator
     public String getPrivateKey()
     {
         return privateKey;
-    }
-
-    /**
-     * Create a new self signed x509 certificate without specifying a common name
-     */
-    private static X509Certificate createX509CertificateFromKeyPair(KeyPair keyPair) throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, SignatureException, NoSuchProviderException, InvalidKeyException
-    {
-        return createX509CertificateFromKeyPair(keyPair, null);
-    }
-
-    /**
-     * Create a new self signed x509 certificate with the specified common name
-     */
-    private static X509Certificate createX509CertificateFromKeyPair(KeyPair keyPair, String commonName)
-            throws OperatorCreationException, CertificateException, InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchProviderException, SignatureException
-    {
-        String issuerString = "C=US, O=Microsoft, L=Redmond, OU=Azure";
-        // subjects name - the same as we are self signed.
-        String subjectString = "C=US, O=Microsoft, L=Redmond, OU=Azure";
-
-        if (commonName != null && !commonName.isEmpty())
-        {
-            issuerString += ", CN=" +commonName;
-            subjectString += ", CN=" +commonName;
-        }
-
-        X500Name issuer = new X500Name( issuerString );
-        BigInteger serial = BigInteger.ONE;
-        Date notBefore = new Date();
-        Date notAfter = new Date( System.currentTimeMillis() + ( 60*60*1000 ) );
-        X500Name subject = new X500Name( subjectString );
-        PublicKey publicKey = keyPair.getPublic();
-        JcaX509v3CertificateBuilder v3Bldr = new JcaX509v3CertificateBuilder(issuer,
-                serial,
-                notBefore,
-                notAfter,
-                subject,
-                publicKey);
-        X509CertificateHolder certHldr = v3Bldr
-                .build( new JcaContentSignerBuilder( "SHA1WithRSA" ).build( keyPair.getPrivate() ) );
-        X509Certificate cert = new JcaX509CertificateConverter().getCertificate( certHldr );
-        cert.checkValidity(new Date());
-        cert.verify(keyPair.getPublic());
-        return cert;
-    }
-
-    private static String getPrivateKeyPem(PrivateKey privateKey)
-    {
-        return "-----BEGIN PRIVATE KEY-----\n" +
-                Base64.encodeBase64StringLocal(privateKey.getEncoded()) +
-                "\n-----END PRIVATE KEY-----\n";
-    }
-
-    private static String getPublicCertificatePem(X509Certificate certificate) throws CertificateEncodingException {
-        return "-----BEGIN CERTIFICATE-----\n" +
-                Base64.encodeBase64StringLocal(certificate.getEncoded()) +
-                "\n-----END CERTIFICATE-----\n";
     }
 }

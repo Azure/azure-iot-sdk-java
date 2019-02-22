@@ -132,14 +132,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
             try
             {
                 String username = String.format(MQTT_USERNAME_FMT, this.idScope, registrationId, SDKUtils.getServiceApiVersion(), SDKUtils.getServiceApiVersion());
-                String password = null;
-
-                if (requestData.getSasToken() != null && !requestData.getSasToken().isEmpty())
-                {
-                    password = requestData.getSasToken();
-                }
-
-                this.mqttConnection = new MqttConnection(this.hostname, registrationId, username, password, sslContext, this, this.useWebSockets);
+                this.mqttConnection = new MqttConnection(this.hostname, registrationId, username, requestData.getSasToken(), sslContext, this, this.useWebSockets);
                 this.mqttConnection.connect();
 
                 this.mqttConnection.subscribe(MQTT_PROVISIONING_TOPIC_NAME, MqttQos.DELIVER_AT_LEAST_ONCE);
@@ -149,7 +142,6 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
                 this.mqttConnection = null;
                 throw new ProvisioningDeviceConnectionException("Exception opening connection", ex);
             }
-
         }
     }
 

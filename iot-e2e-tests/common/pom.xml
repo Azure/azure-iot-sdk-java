@@ -44,6 +44,30 @@
             <artifactId>iot-service-client</artifactId>
             <version>1.16.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
+            <artifactId>provisioning-device-client</artifactId>
+            <version>1.4.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
+            <artifactId>provisioning-service-client</artifactId>
+            <version>1.3.5</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
+            <artifactId>tpm-provider-emulator</artifactId>
+            <version>1.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
+            <artifactId>x509-provider</artifactId>
+            <version>1.1.2</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

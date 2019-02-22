@@ -19,6 +19,8 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
 {
     private final static String PLAIN_MECHANISM = "PLAIN";
     private final static String USERNAME_FORMAT = "%s/registrations/%s";
+    private final static byte[] EMPTY_BYTE_ARRAY = new byte[0];
+
     private String idScope;
     private String registrationId;
     private String sasToken;
@@ -44,7 +46,7 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
             throw new IllegalArgumentException("RegistrationId cannot be null or empty");
         }
 
-        if (sasToken == null || sasToken.length() == 0)
+        if (sasToken == null || sasToken.isEmpty())
         {
             // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_002: [If any of the arguments are null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("sasToken cannot be null or empty");
@@ -63,20 +65,17 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
      */
     public String chooseSaslMechanism(String[] mechanisms) throws ProvisioningDeviceSecurityException
     {
-        boolean plainMechanismOfferedByService = false;
         for (String mechanism : mechanisms)
         {
-            plainMechanismOfferedByService |= mechanism.equals(PLAIN_MECHANISM);
+            if (PLAIN_MECHANISM.equals(mechanism))
+            {
+                // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_005: [This function shall return "PLAIN".]
+                return PLAIN_MECHANISM;
+            }
         }
 
-        if (!plainMechanismOfferedByService)
-        {
-            // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_004: [If the provided mechanisms array does not contain "PLAIN" then this function shall throw a ProvisioningDeviceSecurityException.]
-            throw new ProvisioningDeviceSecurityException("Service endpoint does not support TPM authentication");
-        }
-
-        // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_005: [This function shall return "PLAIN".]
-        return PLAIN_MECHANISM;
+        // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_004: [If the provided mechanisms array does not contain "PLAIN" then this function shall throw a ProvisioningDeviceSecurityException.]
+        throw new ProvisioningDeviceSecurityException("Service endpoint does not support TPM authentication");
     }
 
     /**
@@ -87,7 +86,7 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
     public byte[] getInitPayload(String chosenMechanism)
     {
         // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_007: [This function shall return an empty byte array".]
-        return new byte[0];
+        return EMPTY_BYTE_ARRAY;
     }
 
     /**
@@ -132,14 +131,14 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
     }
 
     @Override
-    public String plainUsername()
+    public String getPlainUsername()
     {
         // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_023: [This function shall return <idScope>/registrations/<registrationId>.]
         return String.format(USERNAME_FORMAT, this.idScope, registrationId);
     }
 
     @Override
-    public String plainPassword()
+    public String getPlainPassword()
     {
         // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_023: [This function shall return the saved sas token.]
         return this.sasToken;
