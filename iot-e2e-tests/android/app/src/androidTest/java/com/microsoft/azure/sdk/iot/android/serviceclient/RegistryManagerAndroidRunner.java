@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.common.tests.serviceclient.RegistryManagerTes
 
 import org.junit.BeforeClass;
 import org.junit.Rule;
+import org.junit.After;
 
 import java.io.IOException;
 
@@ -25,5 +26,11 @@ public class RegistryManagerAndroidRunner extends RegistryManagerTests
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         RegistryManagerTests.setUp();
+    }
+
+    @After
+    public void labelSnapshot()
+    {
+        reportHelper.label("Stopping App");
     }
 }
