@@ -22,6 +22,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+import static org.junit.Assert.fail;
+
 /**
  * Utility class for generating self signed certificates, and computing their thumprints
  */
@@ -44,7 +46,7 @@ public class X509CertificateGenerator
         }
         catch (Exception e)
         {
-            System.out.println(Tools.getStackTraceFromThrowable(e));
+            throw new AssertionError("Failed to generate certificate for tests", e);
         }
     }
 
