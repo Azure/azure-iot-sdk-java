@@ -423,9 +423,9 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
     public void individualEnrollmentX509() throws Exception
     {
         String registrationId = REGISTRATION_ID_X509_PREFIX + UUID.randomUUID().toString();
-        X509Cert certs = new X509Cert(0, false, registrationId, null);
-        final String leafPublicPem =  certs.getPublicCertLeafPem();
-        String leafPrivateKey = certs.getPrivateKeyLeafPem();
+        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(registrationId);
+        final String leafPublicPem =  certificateGenerator.getPublicCertificate();
+        String leafPrivateKey = certificateGenerator.getPrivateKey();
         Collection<String> signerCertificates = new LinkedList<>();
         SecurityProvider securityProviderX509 = new SecurityProviderX509Cert(leafPublicPem, leafPrivateKey, signerCertificates);
 
@@ -492,9 +492,9 @@ public class ProvisioningClientJVMRunner extends IntegrationTest
     {
         boolean expectedExceptionEncountered = false;
         String registrationId = REGISTRATION_ID_X509_PREFIX + UUID.randomUUID().toString();
-        X509Cert certs = new X509Cert(0, false, registrationId, null);
-        final String leafPublicPem =  certs.getPublicCertLeafPem();
-        String leafPrivateKey = certs.getPrivateKeyLeafPem();
+        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(registrationId);
+        final String leafPublicPem =  certificateGenerator.getPublicCertificate();
+        String leafPrivateKey = certificateGenerator.getPrivateKey();
         Collection<String> signerCertificates = new LinkedList<>();
         SecurityProvider securityProviderX509 = new SecurityProviderX509Cert(leafPublicPem, leafPrivateKey, signerCertificates);
 
