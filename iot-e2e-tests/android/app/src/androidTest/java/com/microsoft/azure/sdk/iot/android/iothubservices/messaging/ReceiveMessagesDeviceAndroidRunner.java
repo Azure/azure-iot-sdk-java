@@ -21,6 +21,7 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -69,5 +70,11 @@ public class ReceiveMessagesDeviceAndroidRunner extends ReceiveMessagesTests
     public static void cleanUpResources()
     {
         tearDown(identities);
+    }
+
+    @After
+    public void labelSnapshot()
+    {
+        reportHelper.label("Stopping App");
     }
 }

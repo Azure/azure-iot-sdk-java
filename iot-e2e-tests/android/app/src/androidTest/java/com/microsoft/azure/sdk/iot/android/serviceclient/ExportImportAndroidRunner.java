@@ -14,6 +14,7 @@ import com.microsoft.azure.storage.StorageException;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Rule;
+import org.junit.After;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -31,5 +32,11 @@ public class ExportImportAndroidRunner extends ExportImportTests
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         storageAccountConnectionString = BuildConfig.StorageAccountConnectionString;
         ExportImportTests.setUp();
+    }
+
+    @After
+    public void labelSnapshot()
+    {
+        reportHelper.label("Stopping App");
     }
 }

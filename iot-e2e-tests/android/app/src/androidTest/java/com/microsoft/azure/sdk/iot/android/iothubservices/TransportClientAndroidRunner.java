@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.common.tests.iothubservices.TransportClientTe
 
 import org.junit.BeforeClass;
 import org.junit.Rule;
+import org.junit.After;
 
 public class TransportClientAndroidRunner extends TransportClientTests
 {
@@ -27,5 +28,11 @@ public class TransportClientAndroidRunner extends TransportClientTests
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         setUpCommon();
+    }
+
+    @After
+    public void labelSnapshot()
+    {
+        reportHelper.label("Stopping App");
     }
 }
