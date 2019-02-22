@@ -5,9 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices;
 
-import com.microsoft.azure.sdk.iot.common.helpers.DeviceConnectionString;
-import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -132,6 +130,12 @@ public class FileUploadTests extends IntegrationTest
                 }
             }
         }
+    }
+
+    public static void setUp() throws IOException
+    {
+        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
+        setUp(certificateGenerator.getPublicCertificate(), certificateGenerator.getPrivateKey(), certificateGenerator.getX509Thumbprint());
     }
 
     public static void setUp(String publicK, String privateK, String thumbprint) throws IOException

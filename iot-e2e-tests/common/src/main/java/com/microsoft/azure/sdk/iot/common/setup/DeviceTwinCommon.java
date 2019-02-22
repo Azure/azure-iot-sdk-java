@@ -321,6 +321,12 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
+    protected static Collection inputsCommon(ClientType clientType) throws IOException
+    {
+        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
+        return inputsCommon(clientType, certificateGenerator.getPublicCertificate(), certificateGenerator.getPrivateKey(), certificateGenerator.getX509Thumbprint());
+    }
+
     protected static Collection inputsCommon(ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
     {
         sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
