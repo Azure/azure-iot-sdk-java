@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -511,7 +512,7 @@ public class MqttMessagingTest
     //Tests_SRS_MqttMessaging_34_026: [This method shall append each custom property's name and value to the publishTopic before publishing.]
     //Tests_SRS_MqttMessaging_34_032: [If the message has a OutputName, this method shall append that to publishTopic before publishing using the key name `$.on`.]
     //Tests_SRS_MqttMessaging_34_032: [If the message has a content type, this method shall append that to publishTopic before publishing using the key name `$.ct`.]
-    //Tests_SRS_MqttMessaging_34_032: [If the message has a content encoding, this method shall append that to publishTopic before publishing using the key name `$.ce`.]
+    //Tests_SRS_MqttMessaging_34_034: [If the message has a creation time utc, this method shall append that to publishTopic before publishing using the key name `$.ctime`.]
     @Test
     public void sendShallIncludeAllSystemPropertiesAndAllCustomPropertiesInPublishTopic(@Mocked final Mqtt mockMqtt) throws TransportException, UnsupportedEncodingException
     {
@@ -528,6 +529,8 @@ public class MqttMessagingTest
         final String contentType = "application/json";
         final String contentTypeEncoded = URLEncoder.encode(contentType, StandardCharsets.UTF_8.name());
         final String contentEncoding = "utf-8";
+        final String creationTimeUtc = "2008-10-01T17:04:32.0000000";
+        final String creationTimeUtcEncoded = URLEncoder.encode(creationTimeUtc, StandardCharsets.UTF_8.name());
         final MessageProperty[] messageProperties = new MessageProperty[]
                 {
                         new MessageProperty(propertyName1, propertyValue1),
@@ -554,12 +557,16 @@ public class MqttMessagingTest
                 result = messageProperties;
                 mockedMessage.getOutputName();
                 result = outputName;
+                mockedMessage.getCreationTimeUTC();
+                result = new Date(1234);
+                mockedMessage.getCreationTimeUTCString();
+                result = creationTimeUtc;
             }
         };
 
         MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
         final String publishTopicWithAllSystemAndCustomProperties = String.format(
-                "devices/%s/messages/events/$.mid=%s&$.cid=%s&$.uid=%s&$.to=%s&$.on=%s&$.ce=%s&$.ct=%s&%s=%s&%s=%s", CLIENT_ID, messageId, correlationId, userId, to, outputName, contentEncoding, contentTypeEncoded, propertyName1, propertyValue1, propertyName2, propertyValue2);
+                "devices/%s/messages/events/$.mid=%s&$.cid=%s&$.uid=%s&$.to=%s&$.on=%s&$.ce=%s&$.ct=%s&$.ctime=%s&%s=%s&%s=%s", CLIENT_ID, messageId, correlationId, userId, to, outputName, contentEncoding, contentTypeEncoded, creationTimeUtcEncoded, propertyName1, propertyValue1, propertyName2, propertyValue2);
 
         // act
         testMqttMessaging.send(mockedMessage);

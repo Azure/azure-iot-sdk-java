@@ -961,6 +961,7 @@ public class AmqpsDeviceOperationsTest
     //Tests_SRS_AMQPSDEVICEOPERATION_34_016: [The function shall copy the correlationId, messageId, content type and content encoding properties to the Proton message properties.]
     //Tests_SRS_AMQPSDEVICEOPERATION_34_017: [The function shall copy the user properties to Proton message application properties excluding the reserved property names.]
     //Tests_SRS_AMQPSDEVICEOPERATION_34_051: [This function shall set the message's saved outputname in the application properties of the new proton message.]
+    //Tests_SRS_AMQPSDEVICEOPERATION_34_055: [This function shall set the message's saved creationTimeUTC in the application properties of the new proton message.]
     @Test
     public void convertToProtonSuccess(
             @Mocked final Message mockMessage,
@@ -975,6 +976,7 @@ public class AmqpsDeviceOperationsTest
         final String contentEncoding = "some content encoding";
         final String connectionDeviceId = "some connection device id";
         final String connectionModuleId = "some connection module id";
+        final String creationTimeUTCString = "1969-12-31T16:00:00.0000000";
         final MessageProperty[] iotHubMessageProperties = new MessageProperty[]
                 {
                         new MessageProperty("key1", "value1"),
@@ -1013,6 +1015,14 @@ public class AmqpsDeviceOperationsTest
                 times = 2;
                 mockMessage.getProperties();
                 result = iotHubMessageProperties;
+
+                mockMessage.getCreationTimeUTC();
+                result = new Date(0);
+                times = 1;
+
+                mockMessage.getCreationTimeUTCString();
+                result = "1969-12-31T16:00:00.0000000";
+                times = 1;
 
                 new ApplicationProperties(userProperties);
             }

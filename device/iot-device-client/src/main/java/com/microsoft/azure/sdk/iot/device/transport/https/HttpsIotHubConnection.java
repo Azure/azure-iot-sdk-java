@@ -111,6 +111,12 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                 request.setHeaderField(MessageProperty.IOTHUB_CONTENT_TYPE, message.getContentType());
             }
 
+            if (message.getCreationTimeUTC() != null)
+            {
+                // Codes_SRS_HTTPSIOTHUBCONNECTION_34_075: [If the provided message has a creation time utc, this function shall set the request header to include that value with the key "iothub-contenttype".]
+                request.setHeaderField(MessageProperty.IOTHUB_CREATION_TIME_UTC, message.getCreationTimeUTCString());
+            }
+
             Map<String, String> systemProperties = httpsMessage.getSystemProperties();
             for (String systemProperty : systemProperties.keySet())
             {
