@@ -14,6 +14,8 @@ import org.junit.Test;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -185,7 +187,7 @@ public class MessageTest
 
         Message msg = new Message(body);
         String testValue= msg.getProperty(name);
-		String expectedValue = null; // expected is null since test-name property doesn't exist
+        String expectedValue = null; // expected is null since test-name property doesn't exist
         assertThat(testValue, is(expectedValue));
     }
 
@@ -314,6 +316,8 @@ public class MessageTest
     // Tests_SRS_MESSAGE_34_060: [The function shall save the provided content type.]
     // Tests_SRS_MESSAGE_34_061: [The function shall return the message's content encoding.]
     // Tests_SRS_MESSAGE_34_062: [The function shall save the provided content encoding.]
+    // Tests_SRS_MESSAGE_34_065: [The function shall save the provided creationTimeUTC.]
+    // Tests_SRS_MESSAGE_34_063: [The function shall return the saved creationTimeUTC.]
     @Test
     public void testPropertyGettersAndSetters()
     {
@@ -332,6 +336,7 @@ public class MessageTest
         final String outputName = "outputName";
         final String contentType = "json";
         final String contentEncoding = "utf-8";
+        final Date date = new Date(0);
         final String sharedAccessToken = null;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
@@ -353,6 +358,7 @@ public class MessageTest
         msg.setInputName(inputName);
         msg.setContentEncoding(contentEncoding);
         msg.setContentType(contentType);
+        msg.setCreationTimeUTC(date);
 
         //assert
         assertEquals(type, msg.getMessageType());
@@ -366,8 +372,28 @@ public class MessageTest
         assertEquals(outputName, msg.getOutputName());
         assertEquals(contentEncoding, msg.getContentEncoding());
         assertEquals(contentType, msg.getContentType());
+        assertEquals(date, msg.getCreationTimeUTC());
 
         assertNull(msg.getTo());
         assertNull(msg.getDeliveryAcknowledgement());
+    }
+
+    // Tests_SRS_MESSAGE_34_064: [The function shall return the saved creationTimeUTC as a string in the format "yyyy-MM-dd_HH:mm:ss.SSSSSSS".]
+    @Test
+    public void creationTimeUTCFormatWorks()
+    {
+        //arrange
+        final Date testTime = new Date();
+        final String DATE_TIME_FORMAT = Deencapsulation.getField(Message.class, "DATE_TIME_FORMAT");
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_TIME_FORMAT);
+        String expectedCreationTimeUtcString = sdf.format(testTime).replace("_", "T");
+        Message message = new Message();
+        message.setCreationTimeUTC(testTime);
+
+        //act
+        String creationTimeUtcString = message.getCreationTimeUTCString();
+
+        //assert
+        assertEquals(expectedCreationTimeUtcString, creationTimeUtcString);
     }
 }

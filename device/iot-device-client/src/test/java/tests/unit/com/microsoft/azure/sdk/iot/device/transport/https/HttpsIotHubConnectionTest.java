@@ -21,6 +21,7 @@ import org.junit.Test;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -354,6 +355,43 @@ public class HttpsIotHubConnectionTest
             {
                 mockRequest.setHeaderField(MessageProperty.IOTHUB_CONTENT_TYPE, contentType);
                 mockRequest.setHeaderField(MessageProperty.IOTHUB_CONTENT_ENCODING, contentEncoding);
+            }
+        };
+    }
+
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_34_075: [If the provided message has a creation time utc, this function shall set the request header to include that value with the key "iothub-contenttype".]
+    @Test
+    public void sendEventSetsCreationTimeUtcIfPresent(@Mocked final IotHubEventUri mockUri) throws TransportException
+    {
+        final String expectedCreationTimeUTCString = "1969-12-31T16:00:00.0000000";
+        new NonStrictExpectations()
+        {
+            {
+                new IotHubEventUri((String)any, (String)any, null);
+                result = mockUri;
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
+                result = mockRequest;
+                mockUri.getPath();
+                result = "some path";
+                mockedMessage.getCreationTimeUTC();
+                result = new Date(0);
+                mockedMessage.getCreationTimeUTCString();
+                result = expectedCreationTimeUTCString;
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.setListener(mockedListener);
+
+        //act
+        conn.sendMessage(mockedMessage);
+
+        new Verifications()
+        {
+            {
+                mockRequest.setHeaderField(MessageProperty.IOTHUB_CREATION_TIME_UTC, expectedCreationTimeUTCString);
             }
         };
     }

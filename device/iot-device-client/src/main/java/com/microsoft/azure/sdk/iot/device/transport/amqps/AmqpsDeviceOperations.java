@@ -574,6 +574,12 @@ public class AmqpsDeviceOperations
             userProperties.put(MessageProperty.CONNECTION_MODULE_ID, message.getConnectionModuleId());
         }
 
+        if (message.getCreationTimeUTC() != null)
+        {
+            //Codes_SRS_AMQPSDEVICEOPERATION_34_055: [This function shall set the message's saved creationTimeUTC in the application properties of the new proton message.]
+            userProperties.put(MessageProperty.IOTHUB_CREATION_TIME_UTC, message.getCreationTimeUTCString());
+        }
+
         ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
         outgoingMessage.setApplicationProperties(applicationProperties);
 
