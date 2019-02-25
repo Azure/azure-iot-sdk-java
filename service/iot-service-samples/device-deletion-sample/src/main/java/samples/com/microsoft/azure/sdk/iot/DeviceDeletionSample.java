@@ -5,6 +5,11 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.EnrollmentGroup;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.IndividualEnrollment;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.QueryResult;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.QuerySpecification;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
@@ -19,19 +24,33 @@ public class DeviceDeletionSample
     /**
      * A simple sample for deleting all devices from an iothub
      */
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws IOException, InterruptedException
     {
-        if (args.length != 1)
+        if (args.length != 1 && args.length != 2)
         {
             System.out.format(
-                    "Expected 2 or 3 arguments but received: %d.\n"
-                            + "The program should be called with the following args: \n"
-                            + "1. [Device connection string] - String containing Hostname & Device Key in the following formats: HostName=<hostname>;SharedAccessKeyName=<your shared access key's name>;SharedAccessKey=<Your iot hub's shared access key>\n",
+                    "Expected 1 or 2 arguments but received: %d.\n"
+                            + "1.) Iot hub connection string to hub, this sample will delete all devices registered in this hub"
+                            + "2.) (optional) DPS connection string, this sample will delete all enrollment groups and individual enrollments",
                     args.length);
             return;
         }
 
-        String connString = args[0];
+        String iotHubConnString = args[0];
+        if (!(iotHubConnString == null || iotHubConnString.isEmpty() || iotHubConnString.equals(" ")))
+        {
+            cleanupIotHub(iotHubConnString);
+        }
+
+        if (args.length > 1 && args[1] != null && !args[1].isEmpty())
+        {
+            String dpsConnString = args[1];
+            cleanupDPS(dpsConnString);
+        }
+    }
+
+    private static void cleanupIotHub(String connString) throws IOException
+    {
         RegistryManager registryManager = null;
         try
         {
@@ -97,5 +116,88 @@ public class DeviceDeletionSample
         System.out.println("Deleted " + deletedDeviceCount + " out of the total " + deviceIdsToRemove.size() + " devices");
 
         registryManager.close();
+    }
+
+    private static void cleanupDPS(String connString) throws InterruptedException
+    {
+        ProvisioningServiceClient provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(connString);
+        QuerySpecification querySpecificationForAllEnrollments = new QuerySpecification("SELECT * FROM enrollments");
+
+        deleteEnrollmentGroups(provisioningServiceClient, querySpecificationForAllEnrollments);
+        deleteIndividualEnrollments(provisioningServiceClient, querySpecificationForAllEnrollments);
+    }
+
+    private static void deleteIndividualEnrollments(ProvisioningServiceClient provisioningServiceClient, QuerySpecification querySpecificationForAllEnrollments) throws InterruptedException
+    {
+        com.microsoft.azure.sdk.iot.provisioning.service.Query individualEnrollmentQuery = provisioningServiceClient.createIndividualEnrollmentQuery(querySpecificationForAllEnrollments);
+        while (individualEnrollmentQuery.hasNext())
+        {
+            try
+            {
+                QueryResult result = individualEnrollmentQuery.next();
+                Object[] results = result.getItems();
+                IndividualEnrollment[] individualEnrollments = (IndividualEnrollment[]) results;
+
+                for (int i = 0; i < individualEnrollments.length; i++)
+                {
+                    try
+                    {
+                        System.out.println("Deleting individual enrollment with registration id: " + individualEnrollments[i].getRegistrationId());
+                        provisioningServiceClient.deleteIndividualEnrollment(individualEnrollments[i]);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+
+                        //likely a throttling exception, just wait a bit
+                        Thread.sleep(400);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+
+                //likely a throttling exception, just wait a bit
+                Thread.sleep(1000);
+            }
+        }
+    }
+
+    private static void deleteEnrollmentGroups(ProvisioningServiceClient provisioningServiceClient, QuerySpecification querySpecificationForAllEnrollments) throws InterruptedException
+    {
+        com.microsoft.azure.sdk.iot.provisioning.service.Query enrollmentGroupQuery = provisioningServiceClient.createEnrollmentGroupQuery(querySpecificationForAllEnrollments, 1000);
+        while (enrollmentGroupQuery.hasNext())
+        {
+            try
+            {
+                QueryResult result = enrollmentGroupQuery.next();
+                Object[] results = result.getItems();
+                EnrollmentGroup[] enrollmentGroups = (EnrollmentGroup[]) results;
+
+                for (int i = 0; i < enrollmentGroups.length; i++)
+                {
+                    try
+                    {
+                        System.out.println("Deleting individual enrollment with group id: " + enrollmentGroups[i].getEnrollmentGroupId());
+                        provisioningServiceClient.deleteEnrollmentGroup(enrollmentGroups[i]);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+
+                        //likely a throttling exception, just wait a bit
+                        Thread.sleep(400);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Thread.sleep(1000);
+
+                //likely a throttling exception, just wait a bit
+                e.printStackTrace();
+            }
+        }
     }
 }
