@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -18,6 +19,7 @@ public class Message
 
     public static final Charset DEFAULT_IOTHUB_MESSAGE_CHARSET = StandardCharsets.UTF_8;
 
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd_HH:mm:ss.SSSSSSS";
 
     // ----- Data Fields -----
 
@@ -136,6 +138,8 @@ public class Message
      */
     private String contentType;
     private String contentEncoding;
+
+    private Date creationTimeUTC;
 
     /**
      * Stream that will provide the bytes for the body of the
@@ -604,5 +608,38 @@ public class Message
     {
         // Codes_SRS_MESSAGE_34_062: [The function shall save the provided content encoding.]
         this.contentEncoding = contentEncoding;
+    }
+
+    public Date getCreationTimeUTC()
+    {
+        // Codes_SRS_MESSAGE_34_063: [The function shall return the saved creationTimeUTC.]
+        return this.creationTimeUTC;
+    }
+
+    /**
+     * Returns the iot hub accepted format for the creation time utc
+     *
+     * ex:
+     * oct 1st, 2018 yields
+     * 2008-10-01T17:04:32.0000000
+     *
+     * @return the iot hub accepted format for the creation time utc
+     */
+    public String getCreationTimeUTCString()
+    {
+        if (this.creationTimeUTC == null)
+        {
+            return null;
+        }
+
+        // Codes_SRS_MESSAGE_34_064: [The function shall return the saved creationTimeUTC as a string in the format "yyyy-MM-dd_HH:mm:ss.SSSSSSS".]
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_TIME_FORMAT);
+        return sdf.format(this.creationTimeUTC).replace("_", "T");
+    }
+
+    public final void setCreationTimeUTC(Date creationTimeUTC)
+    {
+        // Codes_SRS_MESSAGE_34_065: [The function shall save the provided creationTimeUTC.]
+        this.creationTimeUTC = creationTimeUTC;
     }
 }
