@@ -150,8 +150,10 @@ public class DeviceDeletionSample
                         e.printStackTrace();
 
                         //likely a throttling exception, just wait a bit
-                        Thread.sleep(400);
+                        Thread.sleep(2000);
                     }
+
+                    Thread.sleep(100);
                 }
             }
             catch (Exception e)
@@ -159,7 +161,7 @@ public class DeviceDeletionSample
                 e.printStackTrace();
 
                 //likely a throttling exception, just wait a bit
-                Thread.sleep(1000);
+                Thread.sleep(4000);
             }
         }
     }
