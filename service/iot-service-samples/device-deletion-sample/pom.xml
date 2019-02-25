@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.samples.service</groupId>
     <artifactId>device-deletion-sample</artifactId>
-    <version>1.15.2</version>
+    <version>1.16.0</version>
     <name>device-deletion-sample</name>
     <developers>
         <developer>
@@ -13,7 +13,7 @@
     <parent>
         <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
         <artifactId>iot-service-samples</artifactId>
-        <version>1.15.2</version>
+        <version>1.16.0</version>
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -81,6 +81,11 @@
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure-storage</artifactId>
             <version>4.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
+            <artifactId>provisioning-service-client</artifactId>
+            <version>1.3.5</version>
         </dependency>
     </dependencies>
 </project>
