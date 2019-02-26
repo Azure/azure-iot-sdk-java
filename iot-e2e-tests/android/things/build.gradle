@@ -1,17 +1,17 @@
 apply plugin: 'com.android.application'
 
 //***********************************************************************************************//
-def IOTHUB_E2E_X509_PRIVATE_KEY_BASE64 = project.hasProperty('IotHubPrivateKeyBase64') ? '"'+project.property('IotHubPrivateKeyBase64')+'"' : '"Define IotHub Private Key"'
-def IOTHUB_E2E_X509_CERT_BASE64 = project.hasProperty('IotHubPublicCertBase64') ? '"'+project.property('IotHubPublicCertBase64')+'"': '"Define IotHub Public Cert"'
-def IOTHUB_CONNECTION_STRING_ENV_VAR_NAME = project.hasProperty('IotHubConnectionString') ? '"'+project.property('IotHubConnectionString')+'"' : '"Define IotHub Connection"'
-def IOTHUB_E2E_X509_THUMBPRINT = project.hasProperty('IotHubThumbprint') ? '"'+project.property('IotHubThumbprint')+'"': '"Define IotHub Cert Thumbprint"'
-def IOTHUB_CONN_STRING_INVALIDCERT = project.hasProperty('IotHubInvalidCertConnectionString') ? '"'+project.property('IotHubInvalidCertConnectionString')+'"': '"Define IotHub Invalid Cert Connection"'
-def STORAGE_ACCOUNT_CONNECTION_STRING = project.hasProperty('StorageAccountConnectionString') ? '"'+project.property('StorageAccountConnectionString')+'"': '"Define Storage Account Connection String"'
-def IOT_DPS_CONNECTION_STRING = project.hasProperty('DeviceProvisioningServiceConnectionString') ? '"'+project.property('DeviceProvisioningServiceConnectionString')+'"': '"Define DeviceProvisioningServiceConnectionString"'
-def DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT = project.hasProperty('DeviceProvisioningServiceGlobalEndpoint') ? '"'+project.property('DeviceProvisioningServiceGlobalEndpoint')+'"': '"Define DeviceProvisioningServiceGlobalEndpoint"'
-def INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT = project.hasProperty('InvalidDeviceProvisioningServiceGlobalEndpoint') ? '"'+project.property('InvalidDeviceProvisioningServiceGlobalEndpoint')+'"': '"Define InvalidDeviceProvisioningServiceGlobalEndpoint"'
-def INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING = project.hasProperty('InvalidDeviceProvisioningServiceConnectionString') ? '"'+project.property('InvalidDeviceProvisioningServiceConnectionString')+'"': '"Define InvalidDeviceProvisioningServiceConnectionString"'
-def DEVICE_PROVISIONING_SERVICE_ID_SCOPE = project.hasProperty('DeviceProvisioningServiceIdScope') ? '"'+project.property('DeviceProvisioningServiceIdScope')+'"': '"Define DeviceProvisioningServiceIdScope"'
+def IOTHUB_E2E_X509_PRIVATE_KEY_BASE64 = project.hasProperty('IotHubPrivateKeyBase64') ? '"'+project.property('IotHubPrivateKeyBase64')+'"' : '""'
+def IOTHUB_E2E_X509_CERT_BASE64 = project.hasProperty('IotHubPublicCertBase64') ? '"'+project.property('IotHubPublicCertBase64')+'"': '""'
+def IOTHUB_CONNECTION_STRING_ENV_VAR_NAME = project.hasProperty('IotHubConnectionString') ? '"'+project.property('IotHubConnectionString')+'"' : '""'
+def IOTHUB_E2E_X509_THUMBPRINT = project.hasProperty('IotHubThumbprint') ? '"'+project.property('IotHubThumbprint')+'"': '""'
+def IOTHUB_CONN_STRING_INVALIDCERT = project.hasProperty('IotHubInvalidCertConnectionString') ? '"'+project.property('IotHubInvalidCertConnectionString')+'"': '""'
+def STORAGE_ACCOUNT_CONNECTION_STRING = project.hasProperty('StorageAccountConnectionString') ? '"'+project.property('StorageAccountConnectionString')+'"': '""'
+def IOT_DPS_CONNECTION_STRING = project.hasProperty('DeviceProvisioningServiceConnectionString') ? '"'+project.property('DeviceProvisioningServiceConnectionString')+'"': '""'
+def DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT = project.hasProperty('DeviceProvisioningServiceGlobalEndpoint') ? '"'+project.property('DeviceProvisioningServiceGlobalEndpoint')+'"': '""'
+def INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT = project.hasProperty('InvalidDeviceProvisioningServiceGlobalEndpoint') ? '"'+project.property('InvalidDeviceProvisioningServiceGlobalEndpoint')+'"': '""'
+def INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING = project.hasProperty('InvalidDeviceProvisioningServiceConnectionString') ? '"'+project.property('InvalidDeviceProvisioningServiceConnectionString')+'"': '""'
+def DEVICE_PROVISIONING_SERVICE_ID_SCOPE = project.hasProperty('DeviceProvisioningServiceIdScope') ? '"'+project.property('DeviceProvisioningServiceIdScope')+'"': '""'
 
 def STRING='String'
 //***********************************************************************************************//
