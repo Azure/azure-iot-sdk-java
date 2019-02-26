@@ -238,13 +238,13 @@ public class AmqpsProvisioningSaslHandler implements SaslHandler
     }
 
     @Override
-    public String plainUsername()
+    public String getPlainUsername()
     {
         throw new UnsupportedOperationException("TPM sasl does not use plain mechanism for authentication");
     }
 
     @Override
-    public String plainPassword()
+    public String getPlainPassword()
     {
         throw new UnsupportedOperationException("TPM sasl does not use plain mechanism for authentication");
     }

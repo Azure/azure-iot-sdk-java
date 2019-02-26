@@ -217,7 +217,7 @@ public class AmqpsProvisioningSymmetricKeySaslHandlerTest
         String expectedUsername = idScope + "/registrations/" + registrationId;
 
         //act
-        String actualUsername = handler.plainUsername();
+        String actualUsername = handler.getPlainUsername();
 
         //assert
         assertEquals(expectedUsername, actualUsername);
@@ -232,7 +232,7 @@ public class AmqpsProvisioningSymmetricKeySaslHandlerTest
         String expectedPassword = sasToken;
 
         //act
-        String actualPassword = handler.plainPassword();
+        String actualPassword = handler.getPlainPassword();
 
         //assert
         assertEquals(expectedPassword, actualPassword);
