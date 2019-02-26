@@ -21,7 +21,6 @@ import org.junit.After;
 
 import java.io.IOException;
 
-@TestGroupB
 public class FileUploadAndroidRunner extends FileUploadTests
 {
     @Rule
