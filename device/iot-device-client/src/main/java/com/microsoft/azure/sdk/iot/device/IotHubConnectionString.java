@@ -69,12 +69,12 @@ public class IotHubConnectionString
         for (String attr : connStringAttrs)
         {
             /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_011: [The constructor shall save the IoT Hub hostName as the value of 'hostName' in the connection string.] */
-            if (attr.startsWith(HOSTNAME_ATTRIBUTE))
+            if (attr.toLowerCase().startsWith(HOSTNAME_ATTRIBUTE.toLowerCase()))
             {
                 this.hostName = attr.substring(HOSTNAME_ATTRIBUTE.length());
             }
             /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_013: [The constructor shall save the device ID as the UTF-8 URL-decoded value of 'deviceId' in the connection string.] */
-            else if (attr.startsWith(DEVICE_ID_ATTRIBUTE))
+            else if (attr.toLowerCase().startsWith(DEVICE_ID_ATTRIBUTE.toLowerCase()))
             {
                 String urlEncodedDeviceId = attr.substring(DEVICE_ID_ATTRIBUTE.length());
                 try
@@ -88,12 +88,12 @@ public class IotHubConnectionString
                 }
             }
             /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_014: [The constructor shall save the device key as the value of 'sharedAccessKey' in the connection string.] */
-            else if (attr.startsWith(SHARED_ACCESS_KEY_ATTRIBUTE))
+            else if (attr.toLowerCase().startsWith(SHARED_ACCESS_KEY_ATTRIBUTE.toLowerCase()))
             {
                 this.sharedAccessKey = attr.substring(SHARED_ACCESS_KEY_ATTRIBUTE.length());
             }
             /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_015: [The constructor shall save the shared access token as the value of 'sharedAccessToken' in the connection string.] */
-            else if (attr.startsWith(SHARED_ACCESS_TOKEN_ATTRIBUTE))
+            else if (attr.toLowerCase().startsWith(SHARED_ACCESS_TOKEN_ATTRIBUTE.toLowerCase()))
             {
                 this.sharedAccessToken = attr.substring(SHARED_ACCESS_TOKEN_ATTRIBUTE.length());
 
@@ -103,12 +103,12 @@ public class IotHubConnectionString
                     throw new SecurityException("Your SAS Token has expired");
                 }
             }
-            else if (attr.startsWith(MODULE_ID_ATTRIBUTE))
+            else if (attr.toLowerCase().startsWith(MODULE_ID_ATTRIBUTE.toLowerCase()))
             {
                 // Codes_SRS_IOTHUB_CONNECTIONSTRING_34_040: [The constructor shall save the module id as the value of 'ModuleId' in the connection string.]
                 this.moduleId = attr.substring(MODULE_ID_ATTRIBUTE.length());
             }
-            else if (attr.startsWith(GATEWAY_HOST_NAME_ATTRIBUTE))
+            else if (attr.toLowerCase().startsWith(GATEWAY_HOST_NAME_ATTRIBUTE.toLowerCase()))
             {
                 // Codes_SRS_IOTHUB_CONNECTIONSTRING_34_041: [The constructor shall save the gateway host name as the value of 'GatewayHostName' in the connection string.]
                 this.gatewayHostName = attr.substring(GATEWAY_HOST_NAME_ATTRIBUTE.length());
