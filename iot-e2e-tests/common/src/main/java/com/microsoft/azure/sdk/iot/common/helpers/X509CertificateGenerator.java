@@ -32,7 +32,6 @@ public class X509CertificateGenerator
 {
     // subject name is the same as the issuer string because it is self signed.
     private static final String ISSUER_STRING = "C=US, O=Microsoft, L=Redmond, OU=Azure";
-    private static final String SUBJECT_STRING = ISSUER_STRING;
     private static final String SIGNATURE_ALGORITHM = "SHA1WithRSA";
     private static final String KEY_PAIR_ALGORITHM = "RSA";
 
@@ -92,18 +91,16 @@ public class X509CertificateGenerator
     private static X509Certificate createX509CertificateFromKeyPair(KeyPair keyPair, String commonName) throws OperatorCreationException, CertificateException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException
     {
         StringBuilder issuerStringBuilder = new StringBuilder(ISSUER_STRING);
-        StringBuilder subjectStringBuilder = new StringBuilder(SUBJECT_STRING);
         if (commonName != null && !commonName.isEmpty())
         {
             issuerStringBuilder.append(", CN=" + commonName);
-            subjectStringBuilder.append(", CN=" + commonName);
         }
 
         X500Name issuer = new X500Name(issuerStringBuilder.toString());
         BigInteger serial = BigInteger.ONE;
         Date notBefore = new Date();
         Date notAfter = new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1)); //1 hour lifetime
-        X500Name subject = new X500Name(subjectStringBuilder.toString());
+        X500Name subject = new X500Name(issuerStringBuilder.toString());
         PublicKey publicKey = keyPair.getPublic();
         JcaX509v3CertificateBuilder v3Bldr = new JcaX509v3CertificateBuilder(issuer, serial, notBefore, notAfter, subject, publicKey);
         X509CertificateHolder certHldr = v3Bldr.build(new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).build(keyPair.getPrivate()));
