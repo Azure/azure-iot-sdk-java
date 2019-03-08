@@ -106,12 +106,15 @@ public class IotHubTransport implements IotHubListener
         }
 
         // remove from in progress queue and add to callback queue
-        IotHubTransportPacket packet;
+        IotHubTransportPacket packet = null;
         synchronized (this.inProgressMessagesLock)
         {
-            //Codes_SRS_IOTHUBTRANSPORT_34_004: [This function shall retrieve a packet from the inProgressPackets
-            // queue with the message id from the provided message if there is one.]
-            packet = inProgressPackets.remove(message.getMessageId());
+            if (message != null)
+            {
+                //Codes_SRS_IOTHUBTRANSPORT_34_004: [This function shall retrieve a packet from the inProgressPackets
+                // queue with the message id from the provided message if there is one.]
+                packet = inProgressPackets.remove(message.getMessageId());
+            }
         }
 
         if (packet != null)
@@ -143,9 +146,9 @@ public class IotHubTransport implements IotHubListener
                 }
             }
         }
-        else
+        else if (message != null)
         {
-            logger.LogError("Message with message id %s was delivered to IoTHub, but was never sent, " +
+            logger.LogError("Message with message id %s was delivered to IoTHub, was no longer in progress, " +
                     "method name is %s ", message.getMessageId(), logger.getMethodName());
         }
     }

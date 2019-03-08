@@ -168,77 +168,77 @@ abstract public class Mqtt implements MqttCallback
      */
     protected void publish(String publishTopic, Message message) throws TransportException
     {
-        synchronized (this.publishLock)
+        try
         {
-            try
+            if (this.mqttConnection.getMqttAsyncClient() == null)
             {
+                TransportException transportException = new TransportException("Need to open first!");
+                transportException.setRetryable(true);
+                throw transportException;
+            }
+
+            if (this.userSpecifiedSASTokenExpiredOnRetry)
+            {
+                //Codes_SRS_Mqtt_99_049: [If the user supplied SAS token has expired, the function shall throw a TransportException.]
+                throw new TransportException("Cannot publish when user supplied SAS token has expired");
+            }
+
+            if (!this.mqttConnection.getMqttAsyncClient().isConnected())
+            {
+                //Codes_SRS_Mqtt_25_012: [If the MQTT connection is closed, the function shall throw a TransportException.]
+                TransportException transportException = new TransportException("Cannot publish when mqtt client is disconnected");
+                transportException.setRetryable(true);
+                throw transportException;
+            }
+
+            if (message == null || publishTopic == null || publishTopic.length() == 0 || message.getBytes() == null)
+            {
+                //Codes_SRS_Mqtt_25_013: [If the either publishTopic is null or empty or if payload is null, the function shall throw an IllegalArgumentException.]
+                throw new IllegalArgumentException("Cannot publish on null or empty publish topic");
+            }
+
+            byte[] payload = message.getBytes();
+
+            while (this.mqttConnection.getMqttAsyncClient().getPendingDeliveryTokens().length >= MqttConnection.MAX_IN_FLIGHT_COUNT)
+            {
+                //Codes_SRS_Mqtt_25_048: [publish shall check for pending publish tokens by calling getPendingDeliveryTokens. And if there are pending tokens publish shall sleep until the number of pending tokens are less than 10 as per paho limitations]
+                Thread.sleep(10);
+
                 if (this.mqttConnection.getMqttAsyncClient() == null)
                 {
-                    TransportException transportException = new TransportException("Need to open first!");
+                    TransportException transportException = new TransportException("Connection was lost while waiting for mqtt deliveries to finish");
                     transportException.setRetryable(true);
                     throw transportException;
-                }
-
-                if (this.userSpecifiedSASTokenExpiredOnRetry)
-                {
-                    //Codes_SRS_Mqtt_99_049: [If the user supplied SAS token has expired, the function shall throw a TransportException.]
-                    throw new TransportException("Cannot publish when user supplied SAS token has expired");
                 }
 
                 if (!this.mqttConnection.getMqttAsyncClient().isConnected())
                 {
-                    //Codes_SRS_Mqtt_25_012: [If the MQTT connection is closed, the function shall throw a TransportException.]
-                    TransportException transportException = new TransportException("Cannot publish when mqtt client is disconnected");
+                    //Codes_SRS_Mqtt_25_012: [If the MQTT connection is closed, the function shall throw a ProtocolException.]
+                    TransportException transportException = new TransportException("Cannot publish when mqtt client is holding 10 tokens and is disconnected");
                     transportException.setRetryable(true);
                     throw transportException;
                 }
+            }
 
-                if (message == null || publishTopic == null || publishTopic.length() == 0 || message.getBytes() == null)
-                {
-                    //Codes_SRS_Mqtt_25_013: [If the either publishTopic is null or empty or if payload is null, the function shall throw an IllegalArgumentException.]
-                    throw new IllegalArgumentException("Cannot publish on null or empty publish topic");
-                }
+            MqttMessage mqttMessage = (payload.length == 0) ? new MqttMessage() : new MqttMessage(payload);
 
-                byte[] payload = message.getBytes();
+            mqttMessage.setQos(MqttConnection.QOS);
 
-                while (this.mqttConnection.getMqttAsyncClient().getPendingDeliveryTokens().length >= MqttConnection.MAX_IN_FLIGHT_COUNT)
-                {
-                    //Codes_SRS_Mqtt_25_048: [publish shall check for pending publish tokens by calling getPendingDeliveryTokens. And if there are pending tokens publish shall sleep until the number of pending tokens are less than 10 as per paho limitations]
-                    Thread.sleep(10);
-
-                    if (this.mqttConnection.getMqttAsyncClient() == null)
-                    {
-                        TransportException transportException = new TransportException("Connection was lost while waiting for mqtt deliveries to finish");
-                        transportException.setRetryable(true);
-                        throw transportException;
-                    }
-
-                    if (!this.mqttConnection.getMqttAsyncClient().isConnected())
-                    {
-                        //Codes_SRS_Mqtt_25_012: [If the MQTT connection is closed, the function shall throw a ProtocolException.]
-                        TransportException transportException = new TransportException("Cannot publish when mqtt client is holding 10 tokens and is disconnected");
-                        transportException.setRetryable(true);
-                        throw transportException;
-                    }
-                }
-
-                MqttMessage mqttMessage = (payload.length == 0) ? new MqttMessage() : new MqttMessage(payload);
-
-                mqttMessage.setQos(MqttConnection.QOS);
-
+            synchronized (this.publishLock)
+            {
                 //Codes_SRS_Mqtt_25_014: [The function shall publish message payload on the publishTopic specified to the IoT Hub given in the configuration.]
                 IMqttDeliveryToken publishToken = this.mqttConnection.getMqttAsyncClient().publish(publishTopic, mqttMessage);
                 unacknowledgedSentMessages.put(publishToken.getMessageId(), message);
             }
-            catch (MqttException e)
-            {
-                //Codes_SRS_Mqtt_25_047: [If the Mqtt Client Async throws MqttException, the function shall throw a ProtocolException with the message.]
-                throw PahoExceptionTranslator.convertToMqttException(e, "Unable to publish message on topic : " + publishTopic);
-            }
-            catch (InterruptedException e)
-            {
-                throw new TransportException("Interrupted, Unable to publish message on topic : " + publishTopic, e);
-            }
+        }
+        catch (MqttException e)
+        {
+            //Codes_SRS_Mqtt_25_047: [If the Mqtt Client Async throws MqttException, the function shall throw a ProtocolException with the message.]
+            throw PahoExceptionTranslator.convertToMqttException(e, "Unable to publish message on topic : " + publishTopic);
+        }
+        catch (InterruptedException e)
+        {
+            throw new TransportException("Interrupted, Unable to publish message on topic : " + publishTopic, e);
         }
     }
 
@@ -407,32 +407,33 @@ abstract public class Mqtt implements MqttCallback
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
     {
+        Message deliveredMessage = null;
         synchronized (this.publishLock)
         {
-            if (this.listener != null&& unacknowledgedSentMessages.containsKey(iMqttDeliveryToken.getMessageId()))
+            if (this.listener != null && unacknowledgedSentMessages.containsKey(iMqttDeliveryToken.getMessageId()))
             {
-                Message deliveredMessage = unacknowledgedSentMessages.remove(iMqttDeliveryToken.getMessageId());
-
-                if (deliveredMessage instanceof IotHubTransportMessage)
-                {
-                    DeviceOperations deviceOperation = ((IotHubTransportMessage) deliveredMessage).getDeviceOperationType();
-                    if (deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
-                            || deviceOperation == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
-                            || deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
-                    {
-                        //Codes_SRS_Mqtt_34_056: [If the acknowledged message is of type
-                        // DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST, DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST,
-                        // or DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST, this function shall not notify the saved
-                        // listener that the message was sent.]
-                        //no need to alert the IotHubTransport layer about these messages as they are not tracked in the inProgressQueue
-                        return;
-                    }
-                }
-
-                //Codes_SRS_Mqtt_34_042: [If this object has a saved listener, that listener shall be notified of the successfully delivered message.]
-                this.listener.onMessageSent(deliveredMessage, null);
+                deliveredMessage = unacknowledgedSentMessages.remove(iMqttDeliveryToken.getMessageId());
             }
         }
+
+        if (deliveredMessage instanceof IotHubTransportMessage)
+        {
+            DeviceOperations deviceOperation = ((IotHubTransportMessage) deliveredMessage).getDeviceOperationType();
+            if (deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
+                    || deviceOperation == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
+                    || deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
+            {
+                //Codes_SRS_Mqtt_34_056: [If the acknowledged message is of type
+                // DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST, DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST,
+                // or DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST, this function shall not notify the saved
+                // listener that the message was sent.]
+                //no need to alert the IotHubTransport layer about these messages as they are not tracked in the inProgressQueue
+                return;
+            }
+        }
+
+        //Codes_SRS_Mqtt_34_042: [If this object has a saved listener, that listener shall be notified of the successfully delivered message.]
+        this.listener.onMessageSent(deliveredMessage, null);
     }
 
     public Pair<String, byte[]> peekMessage()
