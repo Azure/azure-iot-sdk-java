@@ -217,12 +217,24 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                     throw this.savedException;
                 }
 
-                if (!this.amqpsSessionManager.isAuthenticationOpened() || !this.amqpsSessionManager.areAllLinksOpen() || this.state != IotHubConnectionStatus.CONNECTED)
+                if (!this.amqpsSessionManager.isAuthenticationOpened())
                 {
                     // Codes_SRS_AMQPSIOTHUBCONNECTION_12_074: [If authentication has not succeeded after calling
                     // authenticate() and openLinks(), or if all links are not open yet,
                     // this function shall throw a retryable transport exception.]
-                    TransportException transportException = new TransportException("Timed out waiting to connect to service");
+                    this.close();
+                    TransportException transportException = new TransportException("Timed out waiting for authentication links to open from service");
+                    transportException.setRetryable(true);
+                    throw transportException;
+                }
+
+                if (!this.amqpsSessionManager.areAllLinksOpen())
+                {
+                    // Codes_SRS_AMQPSIOTHUBCONNECTION_12_074: [If authentication has not succeeded after calling
+                    // authenticate() and openLinks(), or if all links are not open yet,
+                    // this function shall throw a retryable transport exception.]
+                    this.close();
+                    TransportException transportException = new TransportException("Timed out waiting for worker links to open from service");
                     transportException.setRetryable(true);
                     throw transportException;
                 }
@@ -236,6 +248,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         this.listener.onConnectionEstablished(this.connectionId);
+
+        this.state = IotHubConnectionStatus.CONNECTED;
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
@@ -331,6 +345,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         this.executorServicesCleanup();
 
+        this.state = IotHubConnectionStatus.DISCONNECTED;
+
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
@@ -375,9 +391,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private void closeAsync()
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
-
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to DISCONNECTED.]
-        this.state = IotHubConnectionStatus.DISCONNECTED;
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall closeNow the AmqpsSessionManager and the AMQP connection.]
         if (this.amqpsSessionManager != null)
@@ -715,8 +728,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         // Codes_SRS_AMQPSIOTHUBCONNECTION_12_052: [The function shall call AmqpsSessionManager.onLinkRemoteOpen with the given link.]
         if (this.amqpsSessionManager.onLinkRemoteOpen(event))
         {
-            this.state = IotHubConnectionStatus.CONNECTED;
-
             // Codes_SRS_AMQPSIOTHUBCONNECTION_21_051 [The open latch shall be notified when that the connection has been established.]
             openLatch.countDown();
         }
@@ -734,7 +745,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public void onLinkRemoteClose(Event event)
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
-        
+
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
         //Codes_SRS_AMQPSIOTHUBCONNECTION_34_061 [If the provided event object's transport holds a remote error condition object, this function shall report the associated TransportException to this object's listeners.]

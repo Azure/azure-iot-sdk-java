@@ -663,6 +663,9 @@ public class AmqpsIotHubConnectionTest {
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "areAllLinksOpen");
+                result = true;
             }
         };
 
@@ -716,6 +719,9 @@ public class AmqpsIotHubConnectionTest {
                 mockLatch.await(anyLong, TimeUnit.MILLISECONDS);
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
+                result = true;
+
+                Deencapsulation.invoke(mockAmqpsSessionManager, "areAllLinksOpen");
                 result = true;
             }
         };
@@ -1940,7 +1946,6 @@ public class AmqpsIotHubConnectionTest {
         };
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_041: [The connection state shall be considered CONNECTED when the sender link is open remotely.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_21_051: [The open latch shall be notified when that the connection has been established.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_052: [The function shall call AmqpsSessionManager.onLinkRemoteOpen with the given link.]
     @Test
@@ -1964,9 +1969,6 @@ public class AmqpsIotHubConnectionTest {
         connection.onLinkRemoteOpen(mockEvent);
 
         //assert
-        IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
-        IotHubConnectionStatus actualState = Deencapsulation.getField(connection, "state");
-        assertEquals(expectedState, actualState);
         new Verifications()
         {
             {
