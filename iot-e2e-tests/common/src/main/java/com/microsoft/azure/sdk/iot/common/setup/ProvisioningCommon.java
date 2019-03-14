@@ -113,9 +113,9 @@ public class ProvisioningCommon extends IntegrationTest
     public static final int MAX_TWIN_PROPAGATION_WAIT_SECONDS = 60;
 
     @Parameterized.Parameters(name = "{0} using {1}")
-    public static Collection inputs(boolean includeTpmTests) throws Exception
+    public static Collection inputs(boolean a, boolean b, boolean c) throws Exception
     {
-        if (includeTpmTests)
+        if (a && b && c)
         {
             return Arrays.asList(
                     new Object[][]
@@ -141,25 +141,52 @@ public class ProvisioningCommon extends IntegrationTest
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.X509}
                             }
             );
+
+        }
+        else if (a)
+        {
+            return Arrays.asList(
+                    new Object[][]
+                            {
+                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.SYMMETRIC_KEY},
+                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.TPM},
+                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.X509},
+                            }
+            );
+        }
+        else if (b)
+        {
+            return Arrays.asList(
+                    new Object[][]
+                            {
+                                    {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.SYMMETRIC_KEY},
+                                    {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.X509},
+
+                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY},
+                            }
+            );
+        }
+        else if (c)
+        {
+            return Arrays.asList(
+                    new Object[][]
+                            {
+                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.X509},
+
+                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.SYMMETRIC_KEY},
+                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.TPM},
+                            }
+            );
         }
         else
         {
             return Arrays.asList(
                     new Object[][]
                             {
-                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.X509},
-
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.X509},
-
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.X509},
-
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.SYMMETRIC_KEY},
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.X509},
 
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.SYMMETRIC_KEY},
+                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.TPM},
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.X509}
                             }
             );

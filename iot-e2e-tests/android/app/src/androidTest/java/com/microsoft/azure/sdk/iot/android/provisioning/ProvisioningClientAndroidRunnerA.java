@@ -20,6 +20,7 @@ import org.junit.runners.Parameterized;
 
 import java.util.Collection;
 
+@TestGroupA
 @RunWith(Parameterized.class)
 public class ProvisioningClientAndroidRunner extends ProvisioningTests
 {

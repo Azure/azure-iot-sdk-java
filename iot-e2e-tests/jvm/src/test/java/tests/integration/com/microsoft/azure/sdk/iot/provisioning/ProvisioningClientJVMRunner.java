@@ -38,6 +38,6 @@ public class ProvisioningClientJVMRunner extends ProvisioningTests
         provisioningServiceGlobalEndpointWithInvalidCert = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME);
         provisioningServiceWithInvalidCertConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME);
 
-        return ProvisioningCommon.inputs(true);
+        return ProvisioningCommon.inputs(true, true, true);
     }
 }
