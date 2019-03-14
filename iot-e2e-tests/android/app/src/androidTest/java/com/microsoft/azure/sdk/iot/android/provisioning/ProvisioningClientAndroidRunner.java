@@ -43,8 +43,11 @@ public class ProvisioningClientAndroidRunner extends ProvisioningTests
         tpmSimulatorIpAddress = ""; //TPM tests lack infrastructure in app center to be used
         provisioningServiceGlobalEndpointWithInvalidCert = BuildConfig.InvalidDeviceProvisioningServiceGlobalEndpoint;
         provisioningServiceWithInvalidCertConnectionString = BuildConfig.InvalidDeviceProvisioningServiceConnectionString;
+        farAwayIotHubConnectionString = BuildConfig.FarAwayIotHubConnectionString;
+        customAllocationWebhookUrl = BuildConfig.CustomAllocationWebhookUrl;
 
-        return ProvisioningCommon.inputs();
+
+        return ProvisioningCommon.inputs(false); //tpm tests can't be run on Android until infrastructure is setup
     }
 
     @After

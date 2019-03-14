@@ -42,6 +42,6 @@ public class ProvisioningClientThingsRunner extends ProvisioningTests
         provisioningServiceGlobalEndpointWithInvalidCert = BuildConfig.InvalidDeviceProvisioningServiceGlobalEndpoint;
         provisioningServiceWithInvalidCertConnectionString = BuildConfig.InvalidDeviceProvisioningServiceConnectionString;
 
-        return ProvisioningCommon.inputs();
+        return ProvisioningCommon.inputs(false);
     }
 }

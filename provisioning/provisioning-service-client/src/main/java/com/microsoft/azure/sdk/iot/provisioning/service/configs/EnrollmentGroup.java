@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningS
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Representation of a single Device Provisioning Service enrollment group with a JSON serializer and deserializer.
@@ -138,6 +139,30 @@ public class EnrollmentGroup extends Serializable
     @SerializedName(ETAG_TAG)
     private String etag;
 
+    // the reprovisioning policy
+    private static final String REPROVISION_POLICY_TAG = "reprovisionPolicy";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(REPROVISION_POLICY_TAG)
+    private ReprovisionPolicy reprovisionPolicy;
+
+    // the custom allocation definition
+    private static final String CUSTOM_ALLOCATION_DEFINITION_TAG = "customAllocationDefinition";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(CUSTOM_ALLOCATION_DEFINITION_TAG)
+    private CustomAllocationDefinition customAllocationDefinition;
+
+    // the allocation policy of the resource. overrides the tenant level allocation policy
+    private static final String ALLOCATION_POLICY_TAG = "allocationPolicy";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(ALLOCATION_POLICY_TAG)
+    private AllocationPolicy allocationPolicy;
+
+    // the list of names of IoT hubs the device in this resource can be allocated to. Must be a subset of tenant level list of IoT hubs
+    private static final String IOT_HUBS_TAG = "iotHubs";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(IOT_HUBS_TAG)
+    private List<String> iotHubs;
+
     /**
      * CONSTRUCTOR
      *
@@ -263,6 +288,18 @@ public class EnrollmentGroup extends Serializable
         {
             this.setEtagFinal(result.etag);
         }
+
+        /* SRS_ENROLLMENT_GROUP_34_043: [This function shall set the iothubs list to the value from the json.] */
+        this.setIotHubs(result.getIotHubs());
+
+        /* SRS_ENROLLMENT_GROUP_34_044: [This function shall set the allocation policy to the value from the json.] */
+        this.setAllocationPolicy(result.getAllocationPolicy());
+
+        /* SRS_ENROLLMENT_GROUP_34_045: [This function shall set the custom allocation definition to the value from the json.] */
+        this.setCustomAllocationDefinition(result.getCustomAllocationDefinition());
+
+        /* SRS_ENROLLMENT_GROUP_34_046: [This function shall set the reprovision policy to the value from the json.] */
+        this.setReprovisionPolicy(result.getReprovisionPolicy());
     }
 
     /**
@@ -691,6 +728,94 @@ public class EnrollmentGroup extends Serializable
 
         /* SRS_ENROLLMENT_GROUP_21_037: [The setEtag shall store the provided etag.] */
         this.etag = etag;
+    }
+
+    /**
+     * Getter for the reprovision policy.
+     *
+     * @return The {@code ReprovisionPolicy} with the reprovisionPolicy content.
+     */
+    public ReprovisionPolicy getReprovisionPolicy()
+    {
+        /* SRS_ENROLLMENT_GROUP_34_047: [This function shall get the reprovision policy.] */
+        return this.reprovisionPolicy;
+    }
+
+    /**
+     * Setter for the reprovision policy.
+     *
+     * @param reprovisionPolicy the {@code ReprovisionPolicy} with the behavior when a device is re-provisioned to an IoT hub.
+     */
+    public void setReprovisionPolicy(ReprovisionPolicy reprovisionPolicy)
+    {
+        /* SRS_ENROLLMENT_GROUP_34_048: [This function shall set the reprovision policy.] */
+        this.reprovisionPolicy = reprovisionPolicy;
+    }
+
+    /**
+     * Getter for the allocation policy.
+     *
+     * @return The {@code AllocationPolicy} with the allocationPolicy content.
+     */
+    public AllocationPolicy getAllocationPolicy()
+    {
+        /* SRS_ENROLLMENT_GROUP_34_049: [This function shall get the allocation policy.] */
+        return this.allocationPolicy;
+    }
+
+    /**
+     * Setter for the allocation policy.
+     *
+     * @param allocationPolicy the {@code AllocationPolicy} with the allocation policy of this resource. Overrides the tenant level allocation policy.
+     */
+    public void setAllocationPolicy(AllocationPolicy allocationPolicy)
+    {
+        /* SRS_ENROLLMENT_GROUP_34_050: [This function shall set the allocation policy.] */
+        this.allocationPolicy = allocationPolicy;
+    }
+
+    /**
+     * Getter for the list of IoTHub names that the device can be allocated to..
+     *
+     * @return The {@code AllocationPolicy} with the allocationPolicy content.
+     */
+    public List<String> getIotHubs()
+    {
+        /* SRS_ENROLLMENT_GROUP_34_051: [This function shall get the iothubs list.] */
+        return this.iotHubs;
+    }
+
+    /**
+     * Setter for the list of IotHubs available for allocation.
+     *
+     * @param iotHubs the {@code List<String>} of names of IoT hubs the device(s) in this resource can be allocated to. Must be a subset of tenant level list of IoT hubs
+     */
+    public void setIotHubs(List<String> iotHubs)
+    {
+        /* SRS_ENROLLMENT_GROUP_34_052: [This function shall set the iothubs list.] */
+        this.iotHubs = iotHubs;
+    }
+
+    /**
+     * Getter for the custom allocation definition policy.
+     *
+     * @return The {@code CustomAllocationDefinition} policy.
+     */
+    public CustomAllocationDefinition getCustomAllocationDefinition()
+    {
+        /* SRS_ENROLLMENT_GROUP_34_053: [This function shall get the custom allocation definition.] */
+        return this.customAllocationDefinition;
+    }
+
+    /**
+     * Setter for the custom allocation definition policy.
+     *
+     * @param customAllocationDefinition the {@code CustomAllocationDefinition} with the custom allocation policy of this resource.
+     */
+    public void setCustomAllocationDefinition(CustomAllocationDefinition customAllocationDefinition)
+    {
+        /* SRS_ENROLLMENT_GROUP_34_054: [This function shall set the custom allocation definition.] */
+        this.customAllocationDefinition = customAllocationDefinition;
     }
 
     /**
