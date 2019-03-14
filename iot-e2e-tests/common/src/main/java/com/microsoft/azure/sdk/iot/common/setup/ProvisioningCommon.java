@@ -149,7 +149,6 @@ public class ProvisioningCommon extends IntegrationTest
                     new Object[][]
                             {
                                     {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.TPM},
                                     {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.X509},
                             }
             );
@@ -174,7 +173,6 @@ public class ProvisioningCommon extends IntegrationTest
                                     {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.X509},
 
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.TPM},
                             }
             );
         }
@@ -184,9 +182,7 @@ public class ProvisioningCommon extends IntegrationTest
                     new Object[][]
                             {
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.X509},
-
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.TPM},
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.X509}
                             }
             );
