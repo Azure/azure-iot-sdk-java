@@ -60,7 +60,7 @@ public class ProvisioningTests extends ProvisioningCommon
         assertTrue("Iothub Linked to provisioning service and IotHub in connection String are not same", deviceProvisionedIntoExpectedHub);
 
         // send messages over all protocols
-        assertProvisionedDeviceWorks(provisioningStatus);
+        assertProvisionedDeviceWorks(provisioningStatus, provisionedHubUri);
 
         // delete enrollment
         cleanUpReprovisionedDeviceAndEnrollment(provisionedHubUri.equalsIgnoreCase(getHostName(farAwayIotHubConnectionString)), provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId(), EnrollmentType.INDIVIDUAL);
@@ -88,19 +88,19 @@ public class ProvisioningTests extends ProvisioningCommon
         assertTrue("Iothub Linked to provisioning service and IotHub in connection String are not same", deviceProvisionedIntoExpectedHub);
 
         // send messages over all protocols
-        assertProvisionedDeviceWorks(provisioningStatus);
+        assertProvisionedDeviceWorks(provisioningStatus, provisionedHubUri);
 
         // delete enrollment
         cleanUpReprovisionedDeviceAndEnrollment(provisionedHubUri.equalsIgnoreCase(getHostName(farAwayIotHubConnectionString)), provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId(), EnrollmentType.GROUP);
     }
 
-    //@Test
+    @Test
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.INDIVIDUAL);
     }
 
-    //@Test
+    @Test
     public void groupEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.GROUP);
@@ -330,7 +330,7 @@ public class ProvisioningTests extends ProvisioningCommon
         assertTrue("Expected an exception to be thrown due to invalid server certificates", expectedExceptionEncountered);
     }
 
-    private void assertProvisionedDeviceWorks(ProvisioningStatus provisioningStatus) throws IOException, URISyntaxException, InterruptedException
+    private void assertProvisionedDeviceWorks(ProvisioningStatus provisioningStatus, String iothubUri) throws IOException, URISyntaxException, InterruptedException
     {
         for (IotHubClientProtocol iotHubClientProtocol: iotHubClientProtocols)
         {
@@ -340,7 +340,7 @@ public class ProvisioningTests extends ProvisioningCommon
                 continue;
             }
 
-            DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri(),
+            DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(iothubUri,
                     provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId(),
                     testInstance.securityProvider, iotHubClientProtocol);
             deviceClient.closeNow();
