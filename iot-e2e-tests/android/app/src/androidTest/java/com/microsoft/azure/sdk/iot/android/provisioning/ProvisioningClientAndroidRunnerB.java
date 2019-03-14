@@ -22,12 +22,12 @@ import java.util.Collection;
 
 @TestGroupB
 @RunWith(Parameterized.class)
-public class ProvisioningClientAndroidRunner extends ProvisioningTests
+public class ProvisioningClientAndroidRunnerB extends ProvisioningTests
 {
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public ProvisioningClientAndroidRunner(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
+    public ProvisioningClientAndroidRunnerB(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
     {
         super(protocol, attestationType);
     }
@@ -47,7 +47,7 @@ public class ProvisioningClientAndroidRunner extends ProvisioningTests
         customAllocationWebhookUrl = BuildConfig.CustomAllocationWebhookUrl;
 
 
-        return ProvisioningCommon.inputs(false); //tpm tests can't be run on Android until infrastructure is setup
+        return ProvisioningCommon.inputs(false, true, false); //tpm tests can't be run on Android until infrastructure is setup
     }
 
     @After
