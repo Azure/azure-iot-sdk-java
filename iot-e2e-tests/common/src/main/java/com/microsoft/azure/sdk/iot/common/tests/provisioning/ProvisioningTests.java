@@ -94,13 +94,13 @@ public class ProvisioningTests extends ProvisioningCommon
         cleanUpReprovisionedDeviceAndEnrollment(provisionedHubUri.equalsIgnoreCase(getHostName(farAwayIotHubConnectionString)), provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId(), EnrollmentType.GROUP);
     }
 
-    @Test
+    //@Test
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.INDIVIDUAL);
     }
 
-    @Test
+    //@Test
     public void groupEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.GROUP);
