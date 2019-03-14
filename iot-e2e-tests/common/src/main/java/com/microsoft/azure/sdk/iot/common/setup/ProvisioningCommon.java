@@ -301,8 +301,6 @@ public class ProvisioningCommon extends IntegrationTest
             }
             System.out.println("Waiting for Provisioning Service to register");
 
-            Thread.sleep(2000);
-
             if (System.currentTimeMillis() - startTime > MAX_TIME_TO_WAIT_FOR_REGISTRATION)
             {
                 fail("Timed out waiting for registration to succeed");
@@ -326,9 +324,6 @@ public class ProvisioningCommon extends IntegrationTest
 
         waitForRegistrationCallback(provisioningStatus);
         provisioningStatus.provisioningDeviceClient.closeNow();
-
-        Thread.sleep(DEVICE_REGISTRATION_PROPAGATION_DELAY_MILLIS);
-
 
         return provisioningStatus;
     }
@@ -436,9 +431,6 @@ public class ProvisioningCommon extends IntegrationTest
             assertEquals(TEST_VALUE_TAG, testInstance.individualEnrollment.getInitialTwin().getTags().get(TEST_KEY_TAG));
             assertEquals(TEST_VALUE_DP, testInstance.individualEnrollment.getInitialTwin().getDesiredProperty().get(TEST_KEY_DP));
         }
-
-        //allow service extra time before security provider can be used
-        Thread.sleep(ENROLLMENT_PROPAGATION_DELAY_MS);
 
         return securityProvider;
     }

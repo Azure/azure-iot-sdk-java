@@ -50,7 +50,6 @@ public class ProvisioningTests extends ProvisioningCommon
     public void individualEnrollmentProvisioningFlow() throws Exception
     {
         testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL);
-        Thread.sleep(ENROLLMENT_PROPAGATION_DELAY_MS);
         ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint);
 
         assertEquals(testInstance.provisionedDeviceId, provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
@@ -76,7 +75,6 @@ public class ProvisioningTests extends ProvisioningCommon
         }
 
         testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.GROUP);
-        Thread.sleep(ENROLLMENT_PROPAGATION_DELAY_MS);
 
         ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint);
 
@@ -215,7 +213,6 @@ public class ProvisioningTests extends ProvisioningCommon
         customAllocationDefinition.setWebhookUrl(customAllocationWebhookUrl);
 
         testInstance.securityProvider = getSecurityProviderInstance(enrollmentType, AllocationPolicy.CUSTOM, null, customAllocationDefinition, possibleStartingHubHostNames);
-        Thread.sleep(ENROLLMENT_PROPAGATION_DELAY_MS);
 
         ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint);
 
