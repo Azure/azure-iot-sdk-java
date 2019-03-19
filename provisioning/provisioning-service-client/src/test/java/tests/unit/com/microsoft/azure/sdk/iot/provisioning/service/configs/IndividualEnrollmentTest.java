@@ -12,7 +12,10 @@ import mockit.*;
 import org.junit.Test;
 import tests.unit.com.microsoft.azure.sdk.iot.provisioning.service.Helpers;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -1330,5 +1333,263 @@ public class IndividualEnrollmentTest
 
         // assert
         assertNotNull(individualEnrollment);
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_34_069: [This function shall set the reprovision policy to the value from the json.] */
+    @Test
+    public void constructorWithJsonSetsReprovisioningPolicy()
+    {
+        // arrange
+        final String json = "{\n" +
+                "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
+                "  \"reprovisionPolicy\": {\n" +
+                "    \"updateHubAssignment\": \"true\",\n" +
+                "    \"migrateDeviceData\": \"true\"\n" +
+                "  },\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"tpm\",\n" +
+                "    \"tpm\": {\n" +
+                "      \"endorsementKey\": \"" + VALID_ENDORSEMENT_KEY + "\",\n" +
+                "      \"storageRootKey\": \"" + VALID_STORAGE_ROOT_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"etag\": \"" + VALID_ETAG + "\"\n" +
+                "}";
+
+        // act
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment(json);
+
+        // assert
+        assertNotNull(individualEnrollment.getReprovisionPolicy());
+        assertTrue(individualEnrollment.getReprovisionPolicy().getMigrateDeviceData());
+        assertTrue(individualEnrollment.getReprovisionPolicy().getUpdateHubAssignment());
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_34_068: [This function shall set the custom allocation definition to the value from the json.] */
+    @Test
+    public void constructorWithJsonSetsCustomAllocationDefinition()
+    {
+        // arrange
+        String expectedWebhookUrl = "https://www.microsoft.com";
+        String expectedApiVersion = "2018-11-01";
+        final String json = "{\n" +
+                "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
+                "  \"customAllocationDefinition\": {\n" +
+                "    \"webhookUrl\": \"" + expectedWebhookUrl + "\",\n" +
+                "    \"apiVersion\": \"" + expectedApiVersion + "\"\n" +
+                "  },\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"tpm\",\n" +
+                "    \"tpm\": {\n" +
+                "      \"endorsementKey\": \"" + VALID_ENDORSEMENT_KEY + "\",\n" +
+                "      \"storageRootKey\": \"" + VALID_STORAGE_ROOT_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"etag\": \"" + VALID_ETAG + "\"\n" +
+                "}";
+
+        // act
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment(json);
+
+        // assert
+        assertNotNull(individualEnrollment.getCustomAllocationDefinition());
+        assertEquals(expectedApiVersion, individualEnrollment.getCustomAllocationDefinition().getApiVersion());
+        assertEquals(expectedWebhookUrl, individualEnrollment.getCustomAllocationDefinition().getWebhookUrl());
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_34_067: [This function shall set the allocation policy to the value from the json.] */
+    @Test
+    public void constructorWithJsonSetsAllocationPolicy()
+    {
+        // arrange
+        AllocationPolicy expectedAllocationPolicy = AllocationPolicy.GEOLATENCY;
+        final String json = "{\n" +
+                "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
+                "  \"allocationPolicy\": \"" + expectedAllocationPolicy.toString() + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"tpm\",\n" +
+                "    \"tpm\": {\n" +
+                "      \"endorsementKey\": \"" + VALID_ENDORSEMENT_KEY + "\",\n" +
+                "      \"storageRootKey\": \"" + VALID_STORAGE_ROOT_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"etag\": \"" + VALID_ETAG + "\"\n" +
+                "}";
+
+        // act
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment(json);
+
+        // assert
+        assertNotNull(individualEnrollment.getAllocationPolicy());
+        assertEquals(expectedAllocationPolicy, individualEnrollment.getAllocationPolicy());
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_34_066: [This function shall set the iothubs list to the value from the json.] */
+    @Test
+    public void constructorWithJsonSetsIotHubs()
+    {
+        // arrange
+        final String expectedIotHub1 = "some-iot-hub.azure-devices.net";
+        final String expectedIotHub2 = "some-other-iot-hub.azure-devices.net";
+        final String json = "{\n" +
+                "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"tpm\",\n" +
+                "    \"tpm\": {\n" +
+                "      \"endorsementKey\": \"" + VALID_ENDORSEMENT_KEY + "\",\n" +
+                "      \"storageRootKey\": \"" + VALID_STORAGE_ROOT_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"iotHubs\": [\"" + expectedIotHub1 + "\", \"" + expectedIotHub2 + "\"],\n" +
+                "  \"etag\": \"" + VALID_ETAG + "\"\n" +
+                "}";
+
+        // act
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment(json);
+
+        // assert
+        assertNotNull(individualEnrollment.getIotHubs());
+        assertTrue(individualEnrollment.getIotHubs().contains(expectedIotHub1));
+        assertTrue(individualEnrollment.getIotHubs().contains(expectedIotHub2));
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_34_060: [This function shall set the allocation policy.] */
+    @Test
+    public void setAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        AllocationPolicy expectedAllocationPolicy = AllocationPolicy.CUSTOM;
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment("1234", mockedAttestation);
+
+        //act
+        individualEnrollment.setAllocationPolicy(expectedAllocationPolicy);
+
+        //assert
+        assertEquals(expectedAllocationPolicy, individualEnrollment.getAllocationPolicy());
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_34_059: [This function shall get the allocation policy.] */
+    @Test
+    public void getAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        AllocationPolicy expectedAllocationPolicy = AllocationPolicy.CUSTOM;
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment("1234", mockedAttestation);
+        Deencapsulation.setField(individualEnrollment, "allocationPolicy", expectedAllocationPolicy);
+
+        //act
+        AllocationPolicy actualAllocationPolicy = individualEnrollment.getAllocationPolicy();
+
+        //assert
+        assertEquals(expectedAllocationPolicy, actualAllocationPolicy);
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_34_064: [This function shall set the custom allocation definition.] */
+    @Test
+    public void setCustomAllocationDefinitionWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        CustomAllocationDefinition expectedCustomAllocationDefinition = new CustomAllocationDefinition();
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment("1234", mockedAttestation);
+
+        //act
+        individualEnrollment.setCustomAllocationDefinition(expectedCustomAllocationDefinition);
+
+        //assert
+        assertEquals(expectedCustomAllocationDefinition, individualEnrollment.getCustomAllocationDefinition());
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_34_063: [This function shall get the custom allocation definition.] */
+    @Test
+    public void getCustomAllocationDefinitionWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        CustomAllocationDefinition expectedCustomAllocationDefinition = new CustomAllocationDefinition();
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment("1234", mockedAttestation);
+        Deencapsulation.setField(individualEnrollment, "customAllocationDefinition", expectedCustomAllocationDefinition);
+
+        //act
+        CustomAllocationDefinition actualCustomAllocationDefinition = individualEnrollment.getCustomAllocationDefinition();
+
+        //assert
+        assertEquals(expectedCustomAllocationDefinition, actualCustomAllocationDefinition);
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_34_058: [This function shall set the reprovision policy.] */
+    @Test
+    public void setReprovisionPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        ReprovisionPolicy expectedReprovisionPolicy = new ReprovisionPolicy();
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment("1234", mockedAttestation);
+
+        //act
+        individualEnrollment.setReprovisionPolicy(expectedReprovisionPolicy);
+
+        //assert
+        assertEquals(expectedReprovisionPolicy, individualEnrollment.getReprovisionPolicy());
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_34_057: [This function shall get the reprovision policy.] */
+    @Test
+    public void getReprovisionPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        ReprovisionPolicy expectedReprovisionPolicy = new ReprovisionPolicy();
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment("1234", mockedAttestation);
+        Deencapsulation.setField(individualEnrollment, "reprovisionPolicy", expectedReprovisionPolicy);
+
+        //act
+        ReprovisionPolicy actualReprovisionPolicy = individualEnrollment.getReprovisionPolicy();
+
+        //assert
+        assertEquals(expectedReprovisionPolicy, actualReprovisionPolicy);
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_34_062: [This function shall set the iothubs list.] */
+    @Test
+    public void setIotHubsWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        List<String> expectedIotHubs = new ArrayList<>();
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment("1234", mockedAttestation);
+
+        //act
+        individualEnrollment.setIotHubs(expectedIotHubs);
+
+        //assert
+        assertEquals(expectedIotHubs, individualEnrollment.getIotHubs());
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_34_061: [This function shall get the iothubs list.] */
+    @Test
+    public void getIotHubsWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        List<String> expectedIotHubs = new ArrayList<>();
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment("1234", mockedAttestation);
+        Deencapsulation.setField(individualEnrollment, "iotHubs", expectedIotHubs);
+
+        //act
+        Collection<String> actualIotHubs = individualEnrollment.getIotHubs();
+
+        //assert
+        assertEquals(expectedIotHubs, actualIotHubs);
     }
 }
