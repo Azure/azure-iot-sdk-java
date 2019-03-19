@@ -19,6 +19,7 @@ import java.util.Arrays;
 
 public class SecurityProviderTPMEmulator extends SecurityProviderTpm
 {
+    private static final int TPM_PORT = 2321;
     private static final String REGEX_FOR_VALID_REGISTRATION_ID = "^[a-z0-9-]{1,128}$";
     private static final TPM_HANDLE SRK_PERSISTENT_HANDLE = TPM_HANDLE.persistent(0x00000001);
     private static final TPM_HANDLE EK_PERSISTENT_HANDLE = TPM_HANDLE.persistent(0x00010001);
@@ -135,7 +136,7 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
 
         //SRS_SecurityProviderTPMEmulator_25_005: [ The constructor shall save the registration Id if it was provided. ]
         this.registrationId = registrationId;
-        tpm = TpmFactory.remoteTpmSimulator(inetAddress.getHostName());
+        tpm = TpmFactory.remoteTpm(inetAddress.getHostName(), TPM_PORT);
         clearPersistent(tpm, EK_PERSISTENT_HANDLE, "EK");
         clearPersistent(tpm, SRK_PERSISTENT_HANDLE, "SRK");
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
@@ -401,7 +402,7 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
 
         //SRS_SecurityProviderTPMEmulator_25_026: [ This method shall Encrypt Decrypt the symmetric Key. ]
         //TODO : Use software encryption/decryption using AES instead of TPM command to support international markets.
-        EncryptDecrypt2Response edResp = tpm.EncryptDecrypt2(hSymKey, encUriData.buffer, (byte)1, TPM_ALG_ID.CFB, iv);
+        EncryptDecryptResponse edResp = tpm.EncryptDecrypt(hSymKey, (byte)1, TPM_ALG_ID.CFB, iv, encUriData.buffer);
 
         if (edResp == null)
         {

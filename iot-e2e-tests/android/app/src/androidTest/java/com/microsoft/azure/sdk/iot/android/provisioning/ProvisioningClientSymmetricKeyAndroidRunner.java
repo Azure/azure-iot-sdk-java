@@ -3,15 +3,18 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.androidthings.provisioning;
+package com.microsoft.azure.sdk.iot.android.provisioning;
 
-import com.microsoft.azure.sdk.iot.androidthings.BuildConfig;
-import com.microsoft.azure.sdk.iot.androidthings.helper.TestGroupA;
-import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
+import com.microsoft.appcenter.espresso.Factory;
+import com.microsoft.appcenter.espresso.ReportHelper;
+import com.microsoft.azure.sdk.iot.android.BuildConfig;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroupA;
 import com.microsoft.azure.sdk.iot.common.setup.ProvisioningCommon;
 import com.microsoft.azure.sdk.iot.common.tests.provisioning.ProvisioningTests;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
+import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -20,12 +23,15 @@ import java.util.Collection;
 
 @TestGroupA
 @RunWith(Parameterized.class)
-public class ProvisioningClientThingsRunner extends ProvisioningTests
+public class ProvisioningClientSymmetricKeyAndroidRunner extends ProvisioningTests
 {
     @Rule
     public Rerun count = new Rerun(3);
+    
+    @Rule
+    public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public ProvisioningClientThingsRunner(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
+    public ProvisioningClientSymmetricKeyAndroidRunner(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
     {
         super(protocol, attestationType);
     }
@@ -38,10 +44,18 @@ public class ProvisioningClientThingsRunner extends ProvisioningTests
         provisioningServiceConnectionString = BuildConfig.DeviceProvisioningServiceConnectionString;
         provisioningServiceGlobalEndpoint = BuildConfig.DeviceProvisioningServiceGlobalEndpoint;
         provisioningServiceIdScope = BuildConfig.DeviceProvisioningServiceIdScope;
-        tpmSimulatorIpAddress = ""; //TPM tests lack infrastructure to be used currently, could add later
         provisioningServiceGlobalEndpointWithInvalidCert = BuildConfig.InvalidDeviceProvisioningServiceGlobalEndpoint;
         provisioningServiceWithInvalidCertConnectionString = BuildConfig.InvalidDeviceProvisioningServiceConnectionString;
+        farAwayIotHubConnectionString = BuildConfig.FarAwayIotHubConnectionString;
+        customAllocationWebhookUrl = BuildConfig.CustomAllocationWebhookUrl;
 
-        return ProvisioningCommon.inputs();
+
+        return ProvisioningCommon.inputs(AttestationType.SYMMETRIC_KEY);
+    }
+
+    @After
+    public void labelSnapshot()
+    {
+        reportHelper.label("Stopping App");
     }
 }

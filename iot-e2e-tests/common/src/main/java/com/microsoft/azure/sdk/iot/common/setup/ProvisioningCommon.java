@@ -5,12 +5,12 @@
 
 package com.microsoft.azure.sdk.iot.common.setup;
 
+import com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert;
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
-import com.microsoft.azure.sdk.iot.common.helpers.MessageAndResult;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.helpers.X509CertificateGenerator;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -23,6 +23,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClien
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import junit.framework.AssertionFailedError;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runners.Parameterized;
@@ -30,12 +31,14 @@ import org.junit.runners.Parameterized;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
+import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup;
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
@@ -55,10 +58,14 @@ public class ProvisioningCommon extends IntegrationTest
         GROUP
     }
 
-    public final IotHubClientProtocol [] iotHubClientProtocols = {IotHubClientProtocol.MQTT, IotHubClientProtocol.MQTT_WS, IotHubClientProtocol.AMQPS, IotHubClientProtocol.AMQPS_WS, IotHubClientProtocol.HTTPS};
-
     public static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     public static String iotHubConnectionString = "";
+
+    public static final String FAR_AWAY_IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "FAR_AWAY_IOTHUB_CONNECTION_STRING";
+    public static String farAwayIotHubConnectionString = "";
+
+    public static final String CUSTOM_ALLOCATION_WEBHOOK_URL_VAR_NAME = "CUSTOM_ALLOCATION_POLICY_WEBHOOK";
+    public static String customAllocationWebhookUrl = "";
 
     public static final String DPS_CONNECTION_STRING_ENV_VAR_NAME = "IOT_DPS_CONNECTION_STRING";
     public static String provisioningServiceConnectionString = "";
@@ -78,56 +85,54 @@ public class ProvisioningCommon extends IntegrationTest
     public static final String TPM_SIMULATOR_IP_ADDRESS_ENV_NAME = "IOT_DPS_TPM_SIMULATOR_IP_ADDRESS"; // ip address of TPM simulator
     public static String tpmSimulatorIpAddress = "";
 
-    public static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 2 * 60 * 1000; // one registration could take up to 2 mins
-
-    public static final long TPM_CONNECTION_TIMEOUT = 1 * 60 * 1000;
-
-    public static final Integer IOTHUB_NUM_OF_MESSAGES_TO_SEND = 3; // milli secs of time to wait
-    public final List<MessageAndResult> messagesToSendAndResultsExpected = new ArrayList<>();
+    public static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 30 * 1000;
 
     public static final String HMAC_SHA256 = "HmacSHA256";
+
+    protected static final String CUSTOM_ALLOCATION_WEBHOOK_API_VERSION = "2018-11-01";
 
     public ProvisioningServiceClient provisioningServiceClient = null;
     public RegistryManager registryManager = null;
 
-    // How much to wait until a message makes it to the server, in milliseconds
-    public static final Integer IOTHUB_MAX_SEND_TIMEOUT = 120000; // milli secs of time to wait
-
-    //How many milliseconds between retry
-    public static final Integer IOTHUB_RETRY_MILLISECONDS = 100;
-
     public static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
-    //Android tests need buffer between enrollment creation and device registration
-    public static final int ENROLLMENT_PROPAGATION_DELAY_MS = 5000;
+    //sending reported properties for twin operations takes some time to get the appropriate callback
+    public static final int MAX_TWIN_PROPAGATION_WAIT_SECONDS = 60;
 
     @Parameterized.Parameters(name = "{0} using {1}")
-    public static Collection inputs() throws Exception
+    public static Collection inputs(AttestationType attestationType) throws Exception
     {
-        return Arrays.asList(
-                new Object[][]
-                        {
-                                {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.SYMMETRIC_KEY},
-                                //{ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.TPM}, disabled: missing test infrastructure on VSTS
-                                {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.X509},
+        if (attestationType == AttestationType.SYMMETRIC_KEY || attestationType == AttestationType.X509)
+        {
+            return Arrays.asList(
+                    new Object[][]
+                            {
+                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, attestationType},
+                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, attestationType},
+                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, attestationType},
+                                    {ProvisioningDeviceClientTransportProtocol.MQTT, attestationType},
+                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, attestationType}
+                            });
+        }
+        else if (attestationType == AttestationType.TPM)
+        {
+            return Arrays.asList(
+                    new Object[][]
+                            {
+                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, attestationType},
+                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, attestationType},
+                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, attestationType}
 
-                                {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.SYMMETRIC_KEY},
-                                //{ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.TPM}, NOT SUPPORTED BY SERVICE
-                                {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.X509},
+                                    //MQTT/MQTT_WS does not support tpm attestation
+                                    //{ProvisioningDeviceClientTransportProtocol.MQTT, attestationType},
+                                    //{ProvisioningDeviceClientTransportProtocol.MQTT_WS, attestationType},
+                            });
+        }
+        else
+        {
+            throw new IllegalArgumentException("Unknown attestation type provided");
+        }
 
-                                {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY},
-                                //{ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.TPM}, NOT SUPPORTED BY SERVICE
-                                {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.X509},
-
-                                {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.SYMMETRIC_KEY},
-                                //{ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.TPM}, //disabled: missing test infrastructure on VSTS
-                                {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.X509},
-
-                                {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.SYMMETRIC_KEY},
-                                //{ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.TPM}, //disabled: missing test infrastructure on VSTS
-                                {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.X509}
-                        }
-        );
     }
 
     public ProvisioningCommon(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
@@ -146,6 +151,8 @@ public class ProvisioningCommon extends IntegrationTest
         public EnrollmentGroup enrollmentGroup;
         public String registrationId;
         public String provisionedDeviceId;
+        public SecurityProvider securityProvider;
+        public String provisionedIotHubUri;
 
         public ProvisioningTestInstance(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
         {
@@ -163,11 +170,6 @@ public class ProvisioningCommon extends IntegrationTest
                 ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-
-        for (int i = 0; i < IOTHUB_NUM_OF_MESSAGES_TO_SEND; i++)
-        {
-            messagesToSendAndResultsExpected.add(new MessageAndResult(new Message("Java client e2e test message"), IotHubStatusCode.OK_EMPTY));
-        }
     }
 
     @After
@@ -186,6 +188,20 @@ public class ProvisioningCommon extends IntegrationTest
         registryManager.close();
         provisioningServiceClient = null;
         registryManager = null;
+
+        if (testInstance.securityProvider != null && testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
+        {
+            try
+            {
+                //TPM security provider MUST be shutdown between tests
+                ((SecurityProviderTPMEmulator) testInstance.securityProvider).shutDown();
+            }
+            catch (SecurityProviderException e)
+            {
+                e.printStackTrace();
+                fail("Failed to shutdown the tpm security provider emulator");
+            }
+        }
     }
 
     public class ProvisioningStatus
@@ -224,11 +240,12 @@ public class ProvisioningCommon extends IntegrationTest
             {
                 provisioningStatus.exception.printStackTrace();
                 System.out.println("Registration error, bailing out");
-                throw new Exception(provisioningStatus.exception);
+                throw new ProvisioningDeviceClientException(provisioningStatus.exception);
             }
-            System.out.println("Waiting for Provisioning Service to register");
 
-            Thread.sleep(2000);
+            Thread.sleep(1000);
+
+            System.out.println("Waiting for Provisioning Service to register");
 
             if (System.currentTimeMillis() - startTime > MAX_TIME_TO_WAIT_FOR_REGISTRATION)
             {
@@ -237,21 +254,103 @@ public class ProvisioningCommon extends IntegrationTest
         }
 
         assertEquals(PROVISIONING_DEVICE_STATUS_ASSIGNED, provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus());
-        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
-        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
+        testInstance.provisionedDeviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
+        testInstance.provisionedIotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
+        assertNotNull(testInstance.provisionedDeviceId);
+        assertFalse(testInstance.provisionedDeviceId.isEmpty());
+        assertNotNull(testInstance.provisionedIotHubUri);
+        assertFalse(testInstance.provisionedIotHubUri.isEmpty());
     }
 
-    public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint) throws ProvisioningDeviceClientException
+    public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, String... expectedIotHubsToProvisionTo) throws Exception
     {
-        ProvisioningStatus provisioningStatus = new ProvisioningStatus();
+        ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>();
+        for (String iothubToProvisionTo : expectedIotHubsToProvisionTo)
+        {
+            expectedHubsToProvisionTo.add(iothubToProvisionTo);
+        }
+        return registerDevice(protocol, securityProvider, globalEndpoint, withRetry, expectedHubsToProvisionTo);
+    }
 
-        ProvisioningDeviceClient provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, provisioningServiceIdScope,
-                protocol,
-                securityProvider);
-        provisioningStatus.provisioningDeviceClient = provisioningDeviceClient;
-        provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus);
+    public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, List<String> expectedIotHubsToProvisionTo) throws Exception
+    {
+        ProvisioningStatus provisioningStatus = null;
+        long startTime = System.currentTimeMillis();
+        long timeoutInMillis = 180*1000; //3 minutes
+        boolean deviceRegisteredSuccessfully = false;
+        Thread.sleep(10*1000);
+        do
+        {
+            try
+            {
+                provisioningStatus = new ProvisioningStatus();
+                provisioningStatus.provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, provisioningServiceIdScope,
+                        protocol,
+                        securityProvider);
+
+                provisioningStatus.provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus);
+                waitForRegistrationCallback(provisioningStatus);
+
+                String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
+                String provisionedHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
+
+                assertTrue(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                assertFalse(deviceId.isEmpty());
+                assertFalse(provisionedHubUri.isEmpty());
+
+                assertProvisionedIntoCorrectHub(expectedIotHubsToProvisionTo, provisionedHubUri);
+                assertProvisionedDeviceWorks(provisionedHubUri, deviceId);
+                deviceRegisteredSuccessfully = true;
+            }
+            catch (Exception | AssertionFailedError e)
+            {
+                if (withRetry)
+                {
+                    if (((System.currentTimeMillis() - startTime) < timeoutInMillis))
+                    {
+                        fail(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Timed out waiting for device to register successfully", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId));
+                    }
+                    
+                    System.out.println("Encountered an exception while registering device, trying again: " + Tools.getStackTraceFromThrowable(e));
+                    Thread.sleep(10*1000);
+                }
+                else
+                {
+                    throw e;
+                }
+            }
+            finally
+            {
+                if (provisioningStatus != null && provisioningStatus.provisioningDeviceClient != null)
+                {
+                    provisioningStatus.provisioningDeviceClient.closeNow();
+                }
+            }
+        }
+        while (withRetry && !deviceRegisteredSuccessfully);
 
         return provisioningStatus;
+    }
+
+    private void assertProvisionedIntoCorrectHub(List<String> iothubsToFinishAt, String actualReprovisionedHub)
+    {
+            assertTrue(buildExceptionMessageDpsIndividualOrGroup("Device was not provisioned into an expected hub: " + actualReprovisionedHub, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId),
+                    iothubsToFinishAt.contains(actualReprovisionedHub));
+    }
+
+    private void assertProvisionedDeviceWorks(String iothubUri, String deviceId) throws IOException, URISyntaxException
+    {
+        for (IotHubClientProtocol iotHubClientProtocol: IotHubClientProtocol.values())
+        {
+            if (iotHubClientProtocol == IotHubClientProtocol.MQTT_WS || iotHubClientProtocol == IotHubClientProtocol.AMQPS_WS)
+            {
+                // MQTT_WS/AMQP_WS does not support X509 because of a bug on service
+                continue;
+            }
+
+            DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(iothubUri, deviceId, testInstance.securityProvider, iotHubClientProtocol);
+            deviceClient.closeNow();
+        }
     }
 
     //Parses connection String to retrieve iothub hostname
@@ -271,6 +370,11 @@ public class ProvisioningCommon extends IntegrationTest
     }
 
     public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException, InterruptedException
+    {
+        return getSecurityProviderInstance(enrollmentType, null, null, null, null);
+    }
+
+    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException, InterruptedException
     {
         SecurityProvider securityProvider = null;
         TwinCollection tags = new TwinCollection();
@@ -301,7 +405,10 @@ public class ProvisioningCommon extends IntegrationTest
 
                 testInstance.enrollmentGroup = new EnrollmentGroup(testInstance.groupId, new SymmetricKeyAttestation(null, null));
                 testInstance.enrollmentGroup.setInitialTwinFinal(twinState);
-
+                testInstance.enrollmentGroup.setAllocationPolicy(allocationPolicy);
+                testInstance.enrollmentGroup.setReprovisionPolicy(reprovisionPolicy);
+                testInstance.enrollmentGroup.setCustomAllocationDefinition(customAllocationDefinition);
+                testInstance.enrollmentGroup.setIotHubs(iothubs);
                 testInstance.enrollmentGroup = provisioningServiceClient.createOrUpdateEnrollmentGroup(testInstance.enrollmentGroup);
                 Attestation attestation = testInstance.enrollmentGroup.getAttestation();
                 assertTrue(attestation instanceof SymmetricKeyAttestation);
@@ -320,12 +427,9 @@ public class ProvisioningCommon extends IntegrationTest
             testInstance.provisionedDeviceId = "Some-Provisioned-Device-" + testInstance.attestationType + "-" +UUID.randomUUID().toString();
             if (testInstance.attestationType == AttestationType.TPM)
             {
-                securityProvider = connectToTpmEmulator();
+                securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId);
                 Attestation attestation = new TpmAttestation(new String(com.microsoft.azure.sdk.iot.deps.util.Base64.encodeBase64Local(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
-                testInstance.individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
-                testInstance.individualEnrollment.setDeviceIdFinal(testInstance.provisionedDeviceId);
-                testInstance.individualEnrollment.setInitialTwin(twinState);
-                testInstance.individualEnrollment =  provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
+                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState);
             }
             else if (testInstance.attestationType == AttestationType.X509)
             {
@@ -335,19 +439,13 @@ public class ProvisioningCommon extends IntegrationTest
 
                 Collection<String> signerCertificates = new LinkedList<>();
                 Attestation attestation = X509Attestation.createFromClientCertificates(leafPublicPem);
-                testInstance.individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
-                testInstance.individualEnrollment.setDeviceIdFinal(testInstance.provisionedDeviceId);
-                testInstance.individualEnrollment.setInitialTwin(twinState);
-                testInstance.individualEnrollment = provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
+                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState);
                 securityProvider = new SecurityProviderX509Cert(leafPublicPem, leafPrivateKey, signerCertificates);
             }
             else if (testInstance.attestationType == AttestationType.SYMMETRIC_KEY)
             {
                 Attestation attestation = new SymmetricKeyAttestation(null, null);
-                testInstance.individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
-                testInstance.individualEnrollment.setDeviceIdFinal(testInstance.provisionedDeviceId);
-                testInstance.individualEnrollment =  provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
-                testInstance.individualEnrollment.setInitialTwin(twinState);
+                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState);
                 assertTrue(testInstance.individualEnrollment.getAttestation() instanceof  SymmetricKeyAttestation);
                 SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation) testInstance.individualEnrollment.getAttestation();
                 securityProvider = new SecurityProviderSymmetricKey(symmetricKeyAttestation.getPrimaryKey().getBytes(), testInstance.registrationId);
@@ -362,33 +460,16 @@ public class ProvisioningCommon extends IntegrationTest
         return securityProvider;
     }
 
-    public SecurityProviderTPMEmulator connectToTpmEmulator() throws InterruptedException
+    private void createTestIndividualEnrollment(Attestation attestation, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, TwinState twinState) throws ProvisioningServiceClientException
     {
-        SecurityProviderTPMEmulator securityProviderTPMEmulator = null;
-        long startTime = System.currentTimeMillis();
-        while (securityProviderTPMEmulator == null)
-        {
-            try
-            {
-                if (System.currentTimeMillis() - startTime > TPM_CONNECTION_TIMEOUT)
-                {
-                    fail("Timed out trying to reach TPM emulator");
-                }
-
-                securityProviderTPMEmulator = new SecurityProviderTPMEmulator(testInstance.registrationId, tpmSimulatorIpAddress);
-                return securityProviderTPMEmulator;
-            }
-            catch (Exception e)
-            {
-                System.out.println("Encountered exception while connecting to TPM, trying again: \n");
-                e.printStackTrace();
-
-                //2 second buffer before attempting to connect again
-                Thread.sleep(2000);
-            }
-        }
-
-        return null;
+        testInstance.individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
+        testInstance.individualEnrollment.setDeviceIdFinal(testInstance.provisionedDeviceId);
+        testInstance.individualEnrollment.setAllocationPolicy(allocationPolicy);
+        testInstance.individualEnrollment.setReprovisionPolicy(reprovisionPolicy);
+        testInstance.individualEnrollment.setCustomAllocationDefinition(customAllocationDefinition);
+        testInstance.individualEnrollment.setIotHubs(iothubs);
+        testInstance.individualEnrollment.setInitialTwin(twinState);
+        testInstance.individualEnrollment = provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
     }
 
     public static byte[] ComputeDerivedSymmetricKey(String masterKey, String registrationId) throws InvalidKeyException, NoSuchAlgorithmException

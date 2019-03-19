@@ -13,6 +13,8 @@ def DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT = project.hasProperty('DevicePro
 def INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT = project.hasProperty('InvalidDeviceProvisioningServiceGlobalEndpoint') ? '"'+project.property('InvalidDeviceProvisioningServiceGlobalEndpoint')+'"': '""'
 def INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING = project.hasProperty('InvalidDeviceProvisioningServiceConnectionString') ? '"'+project.property('InvalidDeviceProvisioningServiceConnectionString')+'"': '""'
 def DEVICE_PROVISIONING_SERVICE_ID_SCOPE = project.hasProperty('DeviceProvisioningServiceIdScope') ? '"'+project.property('DeviceProvisioningServiceIdScope')+'"': '""'
+def CUSTOM_ALLOCATION_WEBHOOK_URL = project.hasProperty('CustomAllocationWebhookUrl') ? '"'+project.property('CustomAllocationWebhookUrl')+'"': '""'
+def FAR_AWAY_IOT_HUB_CONNECTION_STRING = project.hasProperty('FarAwayIotHubConnectionString') ? '"'+project.property('FarAwayIotHubConnectionString')+'"': '""'
 
 def STRING='String'
 //***********************************************************************************************//
@@ -43,6 +45,8 @@ android {
             buildConfigField STRING, 'InvalidDeviceProvisioningServiceGlobalEndpoint', INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT
             buildConfigField STRING, 'InvalidDeviceProvisioningServiceConnectionString', INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING
             buildConfigField STRING, 'DeviceProvisioningServiceIdScope', DEVICE_PROVISIONING_SERVICE_ID_SCOPE
+            buildConfigField STRING, 'CustomAllocationWebhookUrl', CUSTOM_ALLOCATION_WEBHOOK_URL
+            buildConfigField STRING, 'FarAwayIotHubConnectionString', FAR_AWAY_IOT_HUB_CONNECTION_STRING
         }
     }
     buildTypes {
